@@ -1,0 +1,340 @@
+# showpy (먼저 읽기)
+
+버전 4.3
+
+예전 이름은 "렌파이 UI 플러그인 묶음"이었습니다.
+
+렌파이 기본 템플릿의 `screens.rpy`를 고치지 않고, 폴더를 `game/` 안에 넣는 것만으로 화면을 바꾸는 플러그인 4개입니다.
+
+- 렌파이 8.5.3에서 만들고 테스트했습니다.
+- 런처로 막 만든 새 프로젝트(한국어, 1280×720)에 4개를 모두 넣고 Lint와 실행을 확인했습니다.
+- 필요한 것만 골라 넣어도 됩니다. 서로 없어도 동작합니다.
+
+| 폴더 | 하는 일 | 넣었을 때 기본 상태 |
+|---|---|---|
+| `ui_kit` | 타이틀 메뉴 자유 배치(게임 중 ESC 메뉴도 같은 모양), 선택지 자유 배치, 커서·클릭 대기 표시·대사 소리·텍스트 속도·퀵메뉴, 대사 한 줄마다 스타일·이름 위치·속도·등장 효과 바꾸기, **`movies/` 영상 자동 등록·`bg` 맨 뒤·show/hide/scene 줄의 위치와 전환, images/movies 폴더에서 그림 고르기** + **게임을 실행한 채로 고치는 편집기**(개발 모드에서 Shift+M. 대사·선택지·이미지 줄은 원고에 바로 저장). 커서·클릭 대기 표시는 24fps에 그림 12장까지 | 타이틀: 왼쪽에 조금씩 기울어진 예시 배치 · 선택지: 렌파이 기본과 같은 모양(서서히 나타남) · 커서 등: 꺼짐 · 대사 스타일: 켜짐 · 이미지·영상: 켜짐 (`bg` 맨 뒤, `movies/` 영상 등록) |
+| `screen_fx` | 화면 전체에 씌우는 효과. 화면 = **기본 효과**(없음 / ASCII / 레트로 터미널 / 게임보이) 위에 **VHS 덮개**(켬 / 끔, 휘어짐 같은 왜곡 정도는 값으로)를 겹친 것. 스크립트에서 `$ screen_fx.use("ascii")`나 대사 괄호 `(fx="ascii")`로 **다른 효과로 바꾸면 선택취소(`clear()`)까지 유지**되고, 바꿀 때 **TV가 꺼졌다 켜지는 전환**이 들어감. 덮개는 `(fx_overlay=False)`, 휘어짐은 `(fx_warp=3.0)`. 효과마다 **글자 빼기**(대사·이름 / 선택지 / 메뉴·화면 중 골라서 효과에서 뺌). 타이틀 일렁임. `ui_kit`이 있으면 편집기에 "화면 효과"·"타이틀 일렁임" 탭, 대사 탭에 "화면 효과", "덮개(VHS)", "덮개 휘어짐" 줄이 생김 | 기본 효과 없음 + VHS 덮개 켬(= 화면 전체에 VHS), 타이틀 일렁임 켜짐. ASCII·레트로 터미널·게임보이는 `use()`로 켤 때만 (레트로 터미널을 쓰는 동안은 덮개 꺼짐) |
+| `hotkeys` | 단축키 추가·기본 단축키 해제, 조작방법 화면 설명 | 변경 없음 |
+| `splash` | 게임을 켰을 때 타이틀 전에 나오는 페이지(로고, 경고, 조작 방법). 바탕에 색·이미지·webm 영상, 영상이 끝나면 넘어가기, 처음 한 번만, "다음부터 보지 않기", 타이틀에서 다시 보기 | 켜짐 (예시 페이지 3개: 만든 사람 이름 → 경고 → 조작 방법) |
+
+- `ui_kit`은 예전의 `title_menu`, `choice_menu`, `custom_ui`, `say_style` 네 플러그인을 합친 것입니다.
+- `screen_fx`는 예전의 `watermorph`, `vhs_crt` 두 플러그인을 합친 것입니다.
+- 합친 기능들은 각자 설정 파일의 스위치(`enabled`)로 따로 끌 수 있고, 끄면 렌파이 기본(효과 없음)과 똑같이 보입니다.
+- `screen_fx`는 넣자마자 VHS 덮개가 화면 전체에 켜집니다. 처음에는 깨끗한 화면으로 보고 싶다면 `screen_fx/screen_fx_config.rpy`의 `screen_fx.overlay`를 `False`로(평소엔 깨끗하고 `use()`나 `fx_overlay=True`로 켤 때만 효과), 타이틀 일렁임은 `screen_fx/watermorph_config.rpy`의 `watermorph.enabled`를 `False`로 바꾸세요.
+
+## 4.3에서 바뀐 점
+
+묶음 이름을 **showpy**로 정하고 [PyKaki](https://github.com/halftomatodev/pykaki)와 연결했습니다.
+
+### `ui_kit` 3.2: 지금 대사 앞에 그림과 소리 넣기, PyKaki 원고
+
+- 이미지/영상 탭의 [그림/영상/소리 고르기]에서 그림, 영상, 음악, 효과음을 지금 대사 앞에 넣습니다.
+- PyKaki가 만든 원고에서는 위치를 `ui_kit/stage_layout.rpy`에 저장하고, 그림과 소리 줄은 PyKaki가 받아 적으며, 대사와 선택지는 저장하지 않습니다.
+- 일반 원고는 예전과 똑같이 저장합니다.
+- 사용법: `docs/CUSTOM_GUIDE.md` "PyKaki와 함께 쓰기".
+
+### 옮기기
+
+- 폴더를 바꿔 넣고 `.rpyc`를 지웁니다. 원고를 고칠 것은 없습니다.
+- 새 파일 `game/showpy_inbox.json`은 PyKaki 연결 때만 생기고 배포판에는 들어가지 않습니다.
+
+## 4.2에서 바뀐 점
+
+### `ui_kit` 3.1: 게임 중 ESC 메뉴를 타이틀 메뉴 모양으로
+
+- 게임 중에 ESC나 오른쪽 클릭을 누르면, 게임 화면이 어둡게 깔리고 그 위에 **타이틀 메뉴와 같은 모양의 메뉴**가 뜹니다. (렌파이 기본은 저장 화면이 바로 열림)
+- 항목: 돌아가기 / 저장하기 / 불러오기 / 환경설정 / 대사록 / 메인 메뉴 / 종료하기. 글꼴, 크기, 색, 선택됐을 때 모양, 등장 연출, 소리는 타이틀 메뉴 설정(`tmenu.default` 등)을 같이 씁니다.
+- 자리는 ESC 메뉴를 연 채로 Shift+M → "타이틀 메뉴" 탭에서 옮기고 Ctrl+S (`tmenu.pause_layout`으로 따로 저장).
+
+  ```renpy
+  ## ui_kit/title_menu_config.rpy
+  define tmenu.pause = True                 # False면 렌파이 기본 (ESC → 저장 화면)
+  define tmenu.pause_dim = "#000000b3"      # 뒤 화면 어둡게 (마지막 두 자리 = 진하기)
+  define tmenu.pause_items = None           # 항목 바꾸기 (쓰는 법은 tmenu.items와 같음)
+  ```
+
+- 설명: `ui_kit/README.md` "3.1에서 바뀐 점", 5-5.
+
+### `screen_fx` 4.2: 마우스 커서도 화면 효과 안에
+
+- UI Kit의 소프트웨어 커서가 화면 효과를 받습니다. 어디에 그릴지를 **셰이더처럼 원고의 구간마다** 고릅니다.
+
+  | 값 | 뜻 |
+  |---|---|
+  | `"effect"` | 기본 효과와 덮개를 다 받음 (기본). ASCII면 커서도 글자로, 게임보이면 4색 점으로 |
+  | `"overlay"` | 덮개(VHS)만 받음 |
+  | `"top"` | 효과 안 받음 (4.1까지와 같음) |
+
+  ```renpy
+  define screen_fx.cursor = "effect"                # screen_fx_config.rpy: 평소 값
+  $ screen_fx.set_cursor("top")                     # 이 줄부터 (다시 바꿀 때까지, 세이브에 저장)
+  $ screen_fx.use("ascii", cursor="overlay")        # 효과를 바꾸면서 같이
+  e "커서는 깨끗하게." (fx_cursor="top")             # 대사 괄호
+  ```
+
+- 편집기: 대사 탭과 "줄에 넣기" 페이지에 **"커서:" 줄** ([그대로] [설정값] [효과까지] [덮개 밑] [효과 안 받음]).
+- 커서가 화면과 같이 휘어서, 가장자리에서 보이는 자리와 눌리는 자리가 거의 맞습니다. 편집기를 연 동안에는 늘 맨 위에 그립니다.
+- 설명: `screen_fx/README.md` "4.2에서 바뀐 점", 5-3.
+
+### 4.1에서 옮기기
+
+1. `game/ui_kit`, `game/screen_fx` 안의 `engine/`, `editor/` 폴더를 **`.rpyc`까지** 지우고 새것을 넣습니다. 두 폴더의 `README.md`도 새것으로.
+2. 설정 파일(`*_config.rpy`), `*_layout.rpy`, 세이브는 그대로 씁니다.
+   - ESC 메뉴는 설정을 안 적어도 켜집니다. 예전처럼 하려면 `title_menu_config.rpy`에 `define tmenu.pause = False`.
+   - 커서는 설정을 안 적으면 효과까지 받습니다. 4.1처럼 하려면 `screen_fx_config.rpy`에 `define screen_fx.cursor = "top"`.
+   - 새 설정 파일의 "게임 중 ESC 메뉴"(`title_menu_config.rpy`), "마우스 커서"(`screen_fx_config.rpy`) 부분을 옮겨 오면 설명과 예시가 같이 들어갑니다.
+3. `hotkeys`, `splash`는 4.1과 같습니다.
+4. 런처에서 Lint를 실행합니다.
+
+- 4.2는 4.1을 넣어 둔 시험 프로젝트에서 바꿔 넣고 Lint와 실행으로 확인했습니다. 확인한 것: 스플래시와 타이틀, 게임 중 커서가 VHS 덮개 밑에 그려지는지, 레트로 터미널과 ASCII에서 커서가 효과를 받는지, 글자 빼기 장면, 대사 탭 "커서" 줄로 `fx_cursor="overlay"` 저장과 덮개 밑 동작, "줄에 넣기"로 `$ screen_fx.set_cursor("top")` 넣기, 편집기를 열면 커서가 맨 위로 오는지, ESC 메뉴(뒤 화면 어둡게, 저장 화면, ESC로 닫기), ESC 메뉴에서 타이틀 메뉴 탭으로 자리 옮기고 저장(`tmenu.pause_layout`).
+
+## 4.1에서 바뀐 점
+
+편집기로 할 수 있는 일이 늘었습니다. 설정 파일은 커서·클릭 대기 표시 값 이름만 바뀌었습니다. 옮기는 방법은 아래 "4.0에서 옮기기".
+
+### `screen_fx` 4.1: 대사가 아닌 줄에서 효과 바꾸기 ("줄에 넣기")
+
+- 지금까지 편집기로는 **대사 줄**에서만 효과를 바꿀 수 있었습니다(괄호 `fx="…"`). 이제 `scene`, `show`, `with`, `$ …` 같은 **아무 줄이나 골라서** 그 줄 바로 위에 효과 줄을 넣습니다.
+- Shift+M → "화면 효과" 탭 → "효과:"에서 **[줄에 넣기]**. 또는 효과 페이지의 **"이 줄부터 이 효과"** 버튼.
+  - 줄 고르기: `[` `]`로 한 줄씩, 줄 번호 입력, [지금 줄로], L로 근처 줄 목록.
+  - 고르기: 화면 효과, 덮개(VHS) 그대로/켬/끔, 덮개 휘어짐, 전환. Ctrl+S로 원고에 들어갑니다.
+
+  ```renpy
+  ## 88번째 줄 scene fx_bg를 고르고 [ASCII] → 덮개 [끔] → 전환 [서서히] → Ctrl+S
+  label start:
+      $ screen_fx.use("ascii", overlay=False, transition="fade")   # ← 편집기가 넣은 줄
+      scene fx_bg
+  ```
+
+- 같은 줄에 다시 저장하면 앞에 넣은 효과 줄을 바꿔 쓰고(쌓이지 않음), [이 줄 위의 효과 줄 지우기]로 지웁니다.
+- 설명: `screen_fx/README.md` "4.1에서 바뀐 점", 9-4.
+
+### `ui_kit` 3.0: 그림 고르기, 커서와 클릭 대기 표시
+
+- **이미지/영상 탭 "그림/영상 고르기"**: `game/images`의 그림(작은 미리보기)과 `game/movies`의 영상 중에서 고릅니다.
+  - [이 줄의 그림 바꾸기]: 고른 show / scene / hide 줄의 이미지 이름만 바꿈.
+  - [아래에 show 넣기] / [아래에 scene 넣기]: 고른 줄 바로 아래에 새 줄.
+
+  ```renpy
+  ## 저장 전                ## [room] → 이 줄의 그림 바꾸기, [hand] → 아래에 show 넣기 → Ctrl+S
+      scene fx_bg                scene room
+                                 show hand
+  ```
+
+- **커서/대사 소리 탭: 커서와 클릭 대기 표시를 24fps로.**
+  - 초당 24프레임 고정. 그림 한 장을 **1프레임**(초당 24장) 또는 **2프레임**(초당 12장, 기본) 보여줄지 고릅니다.
+  - **칸 12개**에 그림을 하나씩 골라 넣습니다(고르면 다음 칸으로). "이 폴더 통째로 넣기"(이름 순, 12장까지), "이 칸 비우기".
+  - 커서는 **소프트웨어 커서**(렌파이가 직접 그려서 24fps가 정확)가 기본. 예전 방식(운영체제 커서, 최대 20fps)은 `cursor_mode = "hardware"`.
+
+  ```renpy
+  ## ui_kit/custom_ui_config.rpy
+  define custom_ui.cursor_hold = 2              # 예전 cursor_fps 대신. 1 또는 2
+  define custom_ui.cursor_mode = "software"     # "hardware" = 예전 방식
+  define custom_ui.ctc_hold = 2                 # 예전 ctc_delay 대신. 1 또는 2
+  ```
+
+- 원고 쓰기 도구(`ui_kit/engine/script_edit.rpy`)에 **고른 줄 위나 아래에 새 줄 넣기**, **이미지 이름 바꾸기**가 생겼습니다. `screen_fx` 4.1의 "줄에 넣기"가 이걸 써서, 두 폴더를 같이 바꿔야 합니다.
+- 설명: `ui_kit/README.md` "3.0에서 바뀐 점", 4-6, 7장.
+
+### 4.0에서 옮기기
+
+1. `game/ui_kit`, `game/screen_fx` 안의 `engine/`, `editor/` 폴더를 **`.rpyc`까지** 지우고 새것을 넣습니다. 두 폴더의 `README.md`도 새것으로.
+2. 설정 파일(`*_config.rpy`), `*_layout.rpy`, 세이브는 그대로 씁니다.
+   - `ui_kit/custom_ui_config.rpy`의 `cursor_fps`, `ctc_delay`는 더 쓰지 않습니다(남아 있어도 오류 없음). 그대로 두면 **2프레임마다(초당 12장), 소프트웨어 커서**로 동작합니다. 새 파일에서 위의 세 줄을 옮겨 오면 설명이 같이 들어갑니다.
+   - 예전처럼 운영체제 커서로 쓰려면 `define custom_ui.cursor_mode = "hardware"`.
+3. `hotkeys`, `splash`는 4.0과 같습니다.
+4. 런처에서 Lint를 실행합니다.
+
+- 4.1은 4.0을 넣어 둔 시험 프로젝트에서 바꿔 넣고 Lint와 실행으로 확인했습니다. 확인한 것: "줄에 넣기"로 `scene` 줄 위에 효과 줄 2개를 넣기, 같은 줄에 다시 저장해서 바꿔 쓰기, 지우기, 들여쓰기. 그림 고르기로 `scene fx_bg` → `scene room`, 그 아래 `show hand` 넣기. 커서와 클릭 대기 표시 칸 12개, 1/2프레임마다, 소프트웨어 커서 움직임, 대사 뒤 클릭 대기 표시.
+
+## 4.0에서 바뀐 점
+
+`screen_fx`의 효과 구성이 바뀌어서(예전 설정 일부와 흑백이 없어짐) 4.0입니다. 옮기는 방법은 아래 "3.0에서 옮기기".
+
+### `screen_fx` 4.0: 기본 효과 + VHS 덮개
+
+- 화면은 **셰이더 두 개를 겹쳐** 그립니다.
+
+  ```
+  [게임 화면] → 기본 효과 (없음 / ASCII / 레트로 터미널 / 게임보이) → 덮개 (VHS, 켬 / 끔) → 눈에 보이는 화면
+  ```
+
+- **VHS는 덮개 전용**이 됐습니다. 기본 효과 목록에서 빠지고, 켬 / 끔만 고릅니다.
+  - 배포 설정이 "기본 효과 VHS, 덮개 끔"에서 **"기본 효과 없음, 덮개 켬"**으로 바뀌었습니다. 보이는 모습은 같습니다.
+  - 효과마다 덮개를 기본으로 켤지 정합니다: `ascii.overlay = True`, `gameboy.overlay = True`, **`retro_term.overlay = False`**(자체 곡면 CRT와 두 번 휘지 않게).
+
+  ```renpy
+  $ screen_fx.use("ascii", overlay=False)      # ASCII만 (덮개 끔)
+  $ screen_fx.set_overlay(True)                # 효과는 그대로, 덮개만 켬
+  e "덮개 없이." (fx="ascii", fx_overlay=False)
+  ```
+
+- **덮개 왜곡 정도**: VHS 설정의 휘어짐(`warp_amount`), 화면 밀림(`distort_intensity`), 색 번짐(`aberration`) 등을 설정 파일, 편집기 막대, `vhs_crt.set()`으로 바꾸고, 새로 **`screen_fx.set_warp()`와 대사 괄호 `fx_warp=`**가 생겼습니다.
+
+  ```renpy
+  $ screen_fx.set_warp(3.0, duration=1.0)      # 1초 동안 가장자리를 크게 휘게
+  e "화면이 휜다." (fx_warp=3.0)               # "default"면 설정값으로
+  ```
+
+- **흑백(`mono`) 효과를 지웠습니다.** 새 효과를 만들 때 쓰던 견본은 `screen_fx/README.md` 12-1에 코드 전체로 들어 있습니다(그대로 넣으면 흑백도 다시 쓸 수 있음).
+- 예전 원고의 `use("vhs_crt")`, `fx="vhs_crt"`, `screen_fx.base = "vhs_crt"`는 "효과 없음 + 덮개 켬"으로, `overlay="vhs_crt"`는 켬, `overlay=None`은 끔으로 읽습니다.
+- 설명: `screen_fx/README.md` "4.0에서 바뀐 점", 3장, 5장(덮개), 12장(견본).
+
+### `ui_kit` 2.9: 편집기
+
+- **대사 탭**: "화면 효과" 줄에서 VHS, 흑백이 빠지고, **"덮개(VHS)" 줄(그대로 / 켬 / 끔)**과 **"덮개 휘어짐" 줄**이 생겼습니다. 두 줄은 효과를 바꾸지 않는 대사에서도 고를 수 있습니다.
+- **"화면 효과" 탭**: 효과 페이지에 **"이 대사부터 이 효과"** 버튼(대사 탭에 넘겨주고 Ctrl+S로 원고에 저장), "게임의 지금 장면" 안내, 효과마다 덮개 켬/끔 줄.
+  - 이 탭은 효과의 **설정값**을 고치는 곳이라, 여기서 저장해도 지금 장면의 효과는 바뀌지 않습니다. 장면에 쓰려면 이 버튼이나 대사 탭을 쓰세요.
+- 원고에 저장하면 "고친 줄은 그 앞 대사(저장 지점)부터 다시 나옵니다" 안내가 나옵니다. (렌파이는 고친 줄을 같은 줄로 알아보지 못함)
+- 패널 위의 버튼이나 막대 위에서 휠을 굴리면 스크롤 대신 탭의 휠 기능(대사 글자 크기 등)이 걸리던 것을 고쳤습니다.
+- 설명: `ui_kit/README.md` "2.9에서 바뀐 점", 4-3.
+
+### 3.0에서 옮기기
+
+1. 고쳐 둔 설정 파일(`*_config.rpy`)과 편집기가 만든 `*_layout.rpy`를 따로 복사해 둡니다.
+2. `game/ui_kit`, `game/screen_fx` 폴더를 **`.rpyc`까지** 지우고 새 폴더를 넣습니다. (`screen_fx/engine/mono.rpy`, `mono_config.rpy`, `mono_layout.rpy`가 남지 않게)
+3. 복사해 둔 파일을 덮어씁니다. 단, **`screen_fx/screen_fx_config.rpy`는 새 파일을 쓰고 고쳤던 값만 옮기세요.** 예전 파일의 `define screen_fx.overlay = None`이 남아 있으면 덮개가 꺼져서 VHS가 안 보입니다(`True`로).
+4. 원고에서 흑백을 쓰던 줄(`use("mono")`, `fx="mono"`, `mono.set()` …)을 바꾸거나 지웁니다. 다른 효과를 덮개로 쓴 줄(`overlay="ascii"` 등)은 `True`로 바꿉니다.
+5. `hotkeys`, `splash`는 3.0과 같습니다. 세이브는 그대로 쓸 수 있습니다(흑백 장면에서 저장한 세이브는 기본 효과로 열림).
+6. 런처에서 Lint를 실행합니다.
+
+- 4.0은 3.0을 넣어 둔 시험 프로젝트에서 바꿔 넣고 Lint와 실행으로 확인했습니다. 확인한 것: 타이틀과 대사의 VHS 덮개, 게임보이 + 덮개, 레트로 터미널에서 덮개가 꺼지는지, `fx_warp=3.0`, `fx="ascii", fx_overlay=True`, `fx_overlay=False`, 선택취소, 예전 이름 `use("vhs_crt")`, 대사 탭의 덮개/휘어짐 줄, 화면 효과 탭의 "이 대사부터 이 효과", 패널 휠 스크롤.
+
+## 3.0에서 바뀐 점
+
+### `ui_kit` 2.8: 배경(bg)은 위치 고정
+
+- 편집기 이미지/영상 탭에서 **배경을 눌러도 끌기, 방향키로 움직이지 않습니다.** 위치 버튼 대신 "배경(bg)이라 고정"이 나오고, 줄은 골라지므로 **전환 효과는 고칠 수 있습니다.**
+- 예전에 옮겨서 원고에 위치가 적힌 배경은 **"기본 위치로 되돌리기"** 버튼으로 위치만 지웁니다.
+- 배경으로 볼 태그를 **목록**으로 적습니다. 목록의 태그는 모두 맨 뒤에 그리고, 편집기에서 위치를 고정합니다.
+
+  ```renpy
+  ## ui_kit/stage_config.rpy
+  define stage.bg_tag = [ "bg" ]              # 기본
+  define stage.bg_tag = [ "bg", "fx_bg" ]     # scene fx_bg 도 배경으로
+  ```
+
+  태그는 그림 이름의 첫 단어입니다(`scene bg room` → `bg`, `scene fx_bg` → `fx_bg`). 2.7까지처럼 `"bg"` 글자 하나로 적어도 됩니다.
+- 설명은 `ui_kit/README.md` "2.8에서 바뀐 점", 4-6, 13-2.
+
+### `screen_fx` 3.4: 편집 중에도 화면 효과 보기
+
+- 3.3까지는 편집기를 열면 "화면 효과" 탭이 아닌 탭에서 효과를 잠시 껐습니다. 이제는 **효과를 켠 채로 편집**하고, 편집기 패널과 안내 글자는 효과 밖이라 그 위에 깨끗하게 보입니다.
+- 편집 중에 **V** 키로 켜고 끕니다(`ui_kit` 2.8의 키). 대사 탭의 "화면 효과 보기(V)" 버튼도 같은 값입니다.
+- 처음부터 끄고 편집하려면 `screen_fx/screen_fx_config.rpy`에 `define screen_fx.editor_preview = False`.
+- VHS·CRT처럼 화면을 휘는 효과는 가장자리에서 눈에 보이는 자리와 눌리는 자리가 조금 어긋납니다. 정확히 끌어 놓을 때는 V로 잠깐 끄세요.
+- 설명은 `screen_fx/README.md` "3.4에서 바뀐 점", 9-3.
+
+### 2.9에서 옮기기
+
+- `ui_kit`: `editor/`, `engine/` 폴더를 `.rpyc`까지 지우고 새것을 넣습니다. 고쳐 둔 `stage_config.rpy`는 그대로 써도 됩니다.
+- `screen_fx`: `engine/` 폴더를 `.rpyc`까지 지우고 새것을 넣습니다. 고쳐 둔 `screen_fx_config.rpy`는 그대로 써도 되고(기본값 `True`로 동작), 값을 바꾸려면 `define screen_fx.editor_preview = …` 줄을 더합니다.
+- `hotkeys`, `splash`는 2.9와 같습니다. 다른 설정 파일, `*_layout.rpy`, 세이브는 그대로 씁니다.
+- 3.0은 2.9를 넣어 둔 시험 프로젝트에서 바꿔 넣고 Lint와 실행을 확인했습니다. 확인한 것: 배경 끌기와 방향키가 막히는지, "기본 위치로 되돌리기", 타이틀 메뉴 탭과 이미지/영상 탭에서 효과를 켠 채 편집하기, V로 끄고 켜기.
+
+## 2.9에서 바뀐 점
+
+- **`ui_kit` 2.7: 편집기 패널 스크롤.** 대사 탭처럼 줄이 많아서 패널이 화면보다 길어지면, 아래쪽(탭 내용, 단축키 안내)이 잘리지 않고 스크롤됩니다.
+  - 패널 위에서 **마우스 휠**, 또는 오른쪽의 분홍 **스크롤바**를 끕니다. (스크롤바는 끄는 동안 막대만 움직이고, 손을 떼면 내용이 따라옵니다)
+  - 탭 버튼과 저장/복사/닫기/접기 줄은 늘 위에 보입니다. 패널 밖에서 굴리는 휠은 전처럼 회전, 글자 크기입니다.
+  - 내용이 짧으면 스크롤바는 숨고 패널도 2.8과 똑같이 보입니다.
+  - 설명은 `ui_kit/README.md` "2.7에서 바뀐 점"과 4-4, 4-7.
+- 바뀐 파일은 `ui_kit/editor/editor.rpy`, `ui_kit/engine/ui_kit.rpy`(버전 번호), `ui_kit/README.md` 셋뿐입니다. `screen_fx`, `hotkeys`, `splash`는 2.8과 같습니다.
+- **2.8에서 옮기기**: `ui_kit/editor/` 폴더와 `ui_kit/engine/ui_kit.rpy`를 새것으로 바꾸고, 그 폴더의 `.rpyc`도 지우세요. 설정 파일(`*_config.rpy`), 편집기 저장 파일(`*_layout.rpy`), 세이브는 그대로 씁니다.
+- 2.9는 2.8을 넣어 둔 시험 프로젝트에서 바꿔 넣고 Lint와 실행(편집기 열기, 휠 스크롤, 스크롤바 끌기, 짧은 탭에서 스크롤바 숨김)을 확인했습니다.
+
+## 2.8에서 바뀐 점
+
+2.7은 두 갈래로 따로 만들어졌습니다(`ui_kit` 쪽: 이미지·영상 배치 / `screen_fx` 쪽: 게임보이 효과). 2.8은 둘을 합친 것입니다. 어느 2.7을 쓰고 있었든 2.8로 바꾸면 됩니다.
+
+### `ui_kit` 2.6 (이미지·영상 배치, 패널)
+
+- **`ui_kit` 2.6: 이미지·영상 배치.** 설정은 `ui_kit/stage_config.rpy`, 설명은 `ui_kit/README.md` 13장과 4-6.
+  - `game/movies/`의 `.webm`을 파일 이름으로 바로 씁니다(`show rain`). 이름이 `mask_`로 시작하면 투명 영상(side_mask)으로 읽고 이름에서는 뺍니다(`movies/mask_ghost.webm` → `show ghost`). 그림은 렌파이가 원래 `images/`를 자동 등록합니다.
+  - `bg` 태그는 항상 맨 뒤.
+  - 편집기 **"이미지/영상" 탭**: 화면의 그림을 누르고 끌어서 위치, 버튼으로 위치·전환 효과·방향·시간. show와 hide 둘 다. 같은 원고 파일의 show·hide·scene 줄을 **줄 번호**와 함께 목록으로 보고 고르며(`[` `]`, 줄 번호 입력, "그 줄로 가기"), Ctrl+S로 그 줄의 at·with 절만 원고에 저장합니다.
+- **편집기 패널이 화면을 덜 가리게** (모든 탭): 제목을 끌어서 옮기기, X로 접기, Space를 누르는 동안 숨기기, 고른 것이 패널 아래에 있으면 다른 구석으로 자동으로 비키기(B). 패널 위에 "지금 줄: script.rpy 42번째 줄".
+
+### `screen_fx` 3.3 (게임보이)
+
+- **`screen_fx` 3.3: 게임보이(`gameboy`) 효과 추가.** 화면을 큰 점으로 나누고 4색(또는 2색)으로만 칠합니다.
+  - 표현 방식은 **디더링**(`"dither"`: 색 사이 밝기를 점 무늬로 섞음, 4×4 / 8×8 무늬)과 **픽셀화**(`"pixel"`: 무늬 없이 딱 끊음) 중에 고릅니다.
+  - 점 크기, 4가지 색, 밝기·대비·감마, LCD 느낌(점 사이 틈, 점 그림자, 얼룩).
+  - 프리셋 `dmg`(올리브 초록, 기본), `green`, `pocket`(회색), `light`(청록 백라이트), `bw`, `blood`(공포용 붉은색), `1bit`(2색), `clean`(질감 없음).
+  - 글자는 기본으로 **4색만 입히고 점으로 쪼개지 않아서** 대사가 읽힙니다(`text_pixel = False`). 글자까지 점으로 쪼개려면 `True`.
+  - `$ screen_fx.use("gameboy")`, 대사 괄호 `(fx="gameboy")`, `$ gameboy.set(mode="pixel")`. 설정은 `screen_fx/gameboy_config.rpy`, 설명은 `screen_fx/README.md` 8장.
+- `screen_fx` README의 장 번호가 하나씩 밀렸습니다(편집기 9장, 새 효과 넣기 12장, 문제 해결 14장, 라이선스 15장).
+
+### 합치면서 고친 것
+
+- 2.8은 런처로 만든 새 프로젝트에 4개를 모두 넣고 **렌파이를 실제로 실행해서** Lint, 이미지/영상 탭(위치 고르기, show·hide 전환, Ctrl+S로 원고 저장과 다시 불러오기), 패널 접기, `movies/` 영상(일반·`mask_` 투명) 재생, 화면 효과 탭과 게임보이를 확인했습니다.
+- Lint 경고 고침: `stage.rpy`의 init 순서가 허용 범위(-999~999)를 넘던 것.
+- 이미지/영상 탭: Ctrl+S로 저장해서 다시 불러온 직후, 고른 줄이 렌파이 안쪽 파일(`renpy/common/00gltest.rpy`의 `scene black`)로 잡히던 것. 이제 게임 원고의 줄만 고릅니다.
+- 편집기 글자 중 기본 한글 글꼴에 없는 글자(`≡`, `·`)가 네모로 나오던 것을 `=`, `,`, `/`로 바꿈.
+- `splash`, `hotkeys`는 그대로입니다. 2.6·2.7의 설정 파일과 세이브는 그대로 쓸 수 있습니다. 폴더를 통째로 바꿀 때 내가 고친 `*_config.rpy`, `*_layout.rpy`만 옮겨 오세요.
+
+## 2.6에서 바뀐 점
+
+- **`screen_fx` 3.2: 글자 빼기.** 효과마다 `"say"`(대사·이름), `"choice"`(선택지), `"screens"`(메뉴·화면) 중 효과를 씌우지 않을 글자를 골라서 뺍니다. 기본은 글자까지 전부(ASCII만 글자 전부 빼기). `define mono.exclude = ("say",)`, `$ screen_fx.use("mono", exclude=("say",))`, 대사 괄호 `(fx_exclude=("say",))`.
+  - 그래서 대사창은 `sfx_say`, 선택지는 `sfx_choice` 층에 뜹니다. 렌파이 기본처럼 두려면 `define screen_fx.split_text_layers = False`.
+  - 2.5의 `target = "screen"`/`"scene"`, `fx_target=`도 그대로 됩니다.
+- **레트로 터미널(`retro_term`) 효과 추가.** 형광체 색·바탕색, 빛 번짐, 주사선·픽셀 격자·RGB 서브픽셀, 깜빡임, 지나가는 밝은 줄, 노이즈. **자체 곡면 CRT(둥근 화면 테두리 포함)와 자체 VHS**를 따로 켜고 끔. 프리셋 `green`, `blue`, `amber`, `white`, `flat`, `broken`. `$ screen_fx.use("retro_term")`.
+- `ui_kit` 2.5: 편집기 대사 탭과 "화면 효과" 탭에 글자 빼기 버튼. `splash`, `hotkeys`는 그대로.
+- 2.5의 설정 파일과 세이브는 그대로 쓸 수 있습니다.
+
+## 2.5에서 바뀐 점
+
+- **`screen_fx` 3.1: ASCII 효과 추가.** 화면을 글자 칸으로 나눠 밝기에 맞는 글자로 다시 그립니다(글자 하나 = 픽셀 하나). 칸 크기·가로세로 비율·선명하게(8의 배수), 글자 목록, 색(한 가지 색·원래 색·16색), 프리셋(`terminal`, `amber`, `dungeon`, `blocks`, `big`, `glow`). 글꼴은 플러그인에 들어 있는 Neo둥근모(SIL OFL 1.1). `$ screen_fx.use("ascii")` / `(fx="ascii")`.
+- **덮개**: 고른 효과 위에 VHS를 한 번 더 씌웁니다. **기본은 꺼짐.** `$ screen_fx.use("ascii", overlay="vhs_crt")`, `(fx_overlay="vhs_crt")`, `$ screen_fx.set_overlay(None)`.
+- **적용 대상**: 효과마다 `"screen"`(화면 전체) 또는 `"scene"`(장면만: 배경·캐릭터만, 대사·이름·선택지는 원래대로). ASCII는 기본이 장면만. `use(…, target="screen")`, `(fx_target="screen")`으로 이번만 바꿀 수 있음.
+- 스크린에 넣은 그림은 `add "map.png" at screen_fx.scene`으로 "장면만" 효과를 받습니다. 타이틀 배경(`ui_kit` 2.4)과 스플래시의 배경·로고(`splash` 1.1)에는 자동으로 씌워집니다.
+- `ui_kit` 2.4: 대사 탭에 "덮개"·"대상" 줄. `splash` 1.1: 배경·로고에 장면 효과. `hotkeys`는 그대로.
+- 3.0·2.4의 설정 파일과 세이브는 그대로 쓸 수 있습니다. 새 설정은 적지 않으면 예전과 똑같이 동작합니다.
+
+## 2.4에서 바뀐 점
+
+- **`screen_fx` 3.0: 화면 효과 바꾸기.** 평소에는 VHS가 켜져 있고, `$ screen_fx.use("mono")` 또는 대사 괄호 `(fx="mono")`로 바꾸면 `$ screen_fx.clear()`(선택취소)까지 그 효과가 유지됩니다. 지금 효과는 세이브·되감기에 저장됩니다.
+- **TV 꺼짐·켜짐 전환**(기본), 서서히, 바로. 시간·섬광·지직거림·소리를 `screen_fx/screen_fx_config.rpy`와 편집기에서 고칩니다.
+- **흑백(`mono`) 효과 추가.** 새 셰이더를 넣을 때 복사해서 쓰는 견본입니다(`screen_fx/README.md` 12장).
+- `ui_kit` 2.3: 대사 탭에 "화면 효과" 줄(이 대사부터 켤 효과·선택취소·전환 → 원고에 바로 저장). 편집기의 "VHS 효과" 탭은 "화면 효과" 탭으로 바뀜.
+- 예전 `vhs_crt_config.rpy`, `vhs_crt_layout.rpy`, `watermorph_config.rpy`와 `vhs_crt.set()` 등은 그대로 쓸 수 있습니다. `splash`, `hotkeys`는 2.3과 같습니다.
+
+## 2.3에서 바뀐 점
+
+- **`splash` 플러그인 추가.** 타이틀 화면 앞에 로고·경고·조작 방법 페이지를 넣습니다. `splash/README.md`.
+- `screen_fx` 2.1: `splash`의 페이지들을 VHS 범위(`vhs_crt.scope`)에서 타이틀 쪽으로 칩니다. `"game"`이면 스플래시에는 효과가 걸리지 않습니다.
+- `ui_kit`, `hotkeys`는 2.2와 같습니다.
+
+## 2.2에서 바뀐 점
+
+- 편집기에서 대사·선택지를 고치고 Ctrl+S를 누르면 **원고(.rpy)의 그 줄 괄호에 바로 저장**됩니다. 고치기 전 원본은 프로젝트 폴더의 `ui_kit_backup/`에 남습니다.
+- 대사 탭에서 이름 위치·모양, 나오는 속도, 등장 효과를 고를 수 있습니다.
+- 대사·선택지 탭의 "캐릭터 기본값", "모든 선택지 기본값"은 없어졌습니다. 모두에 적용할 값은 설정 파일에서 고칩니다.
+- 자세한 내용은 `ui_kit/README.md`의 "2.2에서 바뀐 점"과 4장.
+
+## 설치
+
+1. 쓰고 싶은 폴더를 프로젝트의 `game/` 폴더 안에 복사합니다. 예전 버전이 있으면 먼저 그 폴더를 `.rpyc`까지 지웁니다. **같은 플러그인을 두 벌 넣으면** "given a default a second time" 같은 오류가 납니다.
+2. 각 폴더의 `*_config.rpy`를 고칩니다. 엔진 파일은 고치지 않습니다.
+3. 런처에서 Lint를 실행합니다.
+
+자세한 설정은 각 폴더의 `README.md`에 있습니다. `README.md`는 게임을 배포용으로 빌드할 때 자동으로 빠집니다.
+
+예전 플러그인을 쓰던 프로젝트라면 `ui_kit/README.md`와 `screen_fx/README.md`의 "옮기기"를 따라 하세요. 예전 폴더는 `.rpyc`까지 지우고, 설정 파일은 그대로 옮겨 쓸 수 있습니다.
+
+## 제거
+
+폴더를 `.rpyc` 파일까지 통째로 지우면 렌파이 기본으로 돌아갑니다. `.rpyc`가 남아 있으면 지운 코드가 계속 실행됩니다.
+
+## 주의
+
+- `ui_kit`은 렌파이 기본 스크린 `main_menu`, `navigation`, `choice`를, `hotkeys`는 `keyboard_help`를 대신 정의합니다. 다른 플러그인이나 직접 고친 코드가 같은 스크린을 또 정의하면 나중에 실행되는 쪽이 이깁니다.
+- `splash`는 렌파이의 `splashscreen` 레이블로 이어집니다. 스크립트에 이미 `label splashscreen:`이 있으면 그 안에 `call splash_play`를 넣으세요. 스플래시는 게임을 처음 켤 때만 나오고 Shift+R로는 다시 나오지 않습니다(`splash.preview()`로 확인).
+- `screen_fx`의 VHS 효과는 다른 CRT 셰이더와 같이 쓰면 효과가 두 번 겹칩니다.
+- `screen_fx`는 대사창을 `sfx_say`, 선택지를 `sfx_choice` 층에 띄웁니다(`config.say_layer`, `config.choice_layer`). 다른 코드가 대사창 층을 `"screens"`로 정해 두고 찾는다면 `screen_fx/screen_fx_config.rpy`의 `screen_fx.split_text_layers`를 `False`로.
+- `screen_fx`는 대사 괄호의 `fx=`(`fx_transition`, `fx_overlay`, `fx_exclude`)를 받기 위해 `config.say_arguments_callback`을 씁니다. 다른 코드가 이미 걸어 둔 함수는 이어서 불러 줍니다. `screen_fx` 폴더를 지우면 `fx=`를 적은 대사에서 오류가 나니 그 괄호도 지우세요.
+- `ui_kit` 편집기는 화면 효과가 닿지 않는 맨 위 층에 그려집니다. 효과 탭이 아닌 다른 탭을 쓰는 동안에는 `screen_fx` 효과가 잠시 꺼집니다.
+- 투명한 webm 영상은 렌파이의 side_mask 방식(왼쪽 절반 색, 오른쪽 절반 투명도)을 씁니다. 만드는 방법은 `ui_kit/README.md`에 있습니다.
+- VHS 셰이더 원본은 CC0입니다(크레딧은 선택). ASCII 셰이더는 MIT 라이선스 셰이더의 아이디어를, 레트로 터미널은 cool-retro-term(GPL)의 모습을, 게임보이는 Retro dither(CC0)의 디더링 무늬와 Gameboy Classic Shader(GPL)의 LCD 모습을 참고해 코드를 새로 썼습니다(크레딧은 `screen_fx/README.md` 15장).
+- `screen_fx/fonts/neodgm.ttf`(Neo둥근모)는 SIL OFL 1.1입니다. 게임에 넣어 배포·판매할 수 있고, 배포할 때 `neodgm_OFL.txt`를 같이 두세요.
+- 각 폴더의 라이선스는 정해서 README에 적어 두세요.
