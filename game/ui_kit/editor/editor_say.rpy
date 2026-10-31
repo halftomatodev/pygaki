@@ -20,6 +20,9 @@
 ## 원고에 바로 쓸 수 없는 줄(여러 줄에 걸친 대사 등)은 Ctrl+C로 복사해서
 ## 붙여넣으세요.
 ##
+## PyKaki가 만든 원고에서는 위치(대사, 이름)만 고칩니다. 저장하면 원고와
+## showpy_inbox.json에 같이 적습니다. 글자 모양, 속도, 효과는 PyKaki에서 고칩니다.
+##
 ## 캐릭터의 기본 모양은 say_style_config.rpy 등의 캐릭터 정의에서 고칩니다.
 ################################################################################
 
@@ -79,6 +82,15 @@ init -8 python in ui_editor:
         def k(self, name):
             """지금 대상의 짧은 이름. k("x") → "x" 또는 "name_x"."""
             return self.KEYS[self.target][name]
+
+        ## PyKaki 원고에서 저장하는 값
+        PK_KEYS = ("x", "y", "name_x", "name_y")
+
+        def pk(self):
+            """지금 줄이 PyKaki 원고인지. 그러면 위치만 고칩니다."""
+            se = self.se()
+            last = self.line() if self.ss() is not None else None
+            return bool(se is not None and last is not None and se.is_pykaki(last.filename))
 
         ## ── 지금 화면의 대사 ──
 
@@ -419,7 +431,10 @@ init -8 python in ui_editor:
         def nudge(self, what, amount):
             if what != "size" or not self._check_target():
                 return
-            cur = self.cur(self.k("size")) or store.gui.text_size
+            if self.pk():
+                msg("PyKaki 원고입니다. 글자 크기는 PyKaki에서 고치세요.")
+                return
+            cur =self.cur(self.k("size")) or store.gui.text_size
             self._set(**{ self.k("size") : int(max(4, int(cur) + amount)) })
 
         def wheel(self, sign, shift):
@@ -709,6 +724,8 @@ init -8 python in ui_editor:
         ## ── 글꼴·색 ──
 
         def style_keys(self):
+            if self.pk():
+                return ()
             return (self.k("font"), self.k("color"))
 
         def value_label(self, key):
@@ -760,6 +777,9 @@ init -8 python in ui_editor:
                 if node is None:
                     continue
                 e = se.Edit(key[0], key[1], se.SAY, self._arguments(key), expect=node.what)
+                if se.is_pykaki(key[0]):
+                    REMOVE = ss.REMOVE
+                    e.pk_pos = { k : v for k, v in self._combined(key).items() if k in self.PK_KEYS and not (isinstance(v, str) and v == REMOVE) }
                 e.key = key
                 rv.append(e)
             return rv
@@ -801,7 +821,10 @@ init -8 python in ui_editor:
             rv.append("{} x {:.0f}   y {:.0f}   (대사 창 기준{})   크기 {}".format(
                 what, x, y, where, self.cur(self.k("size")) or "-"))
 
-            rv.append("속도 ×{:g}   효과 {}".format(self.speed(), self.effect_label()))
+            if self.pk():
+                rv.append("PyKaki 원고입니다. 여기서는 위치만 고치고, 글자 모양, 속도, 효과는 PyKaki에서 고칩니다.")
+            else:
+                rv.append("속도 ×{:g}   효과 {}".format(self.speed(), self.effect_label()))
 
             fxi = self.fx_info()
             if fxi:
@@ -826,6 +849,11 @@ init -8 python in ui_editor:
             return rv
 
         def help_lines(self):
+            if self.pk():
+                return [
+                    "마우스: 드래그하면 고르는 것(대사/이름)이 움직임 (Shift: 한 방향)",
+                    "Tab 대사/이름 바꾸기 | 방향키 이동 (Shift: 10배) | R 다시 보기 | Backspace 이 줄 되돌리기",
+                    ]
             return [
                 "마우스: 드래그하면 고르는 것(대사/이름)이 움직임 (Shift: 한 방향) | 휠 글자 크기",
                 "Tab 대사/이름 바꾸기 | 방향키 이동 (Shift: 10배) | S/W 글자 크기 | R 다시 보기 | Backspace 이 줄 되돌리기",
@@ -862,92 +890,93 @@ screen ui_editor_say_panel(tab):
 
     use ui_editor_style_row(tab, tab.style_keys())
 
-    hbox:
-        spacing 4
-        box_wrap True
-        box_wrap_spacing 4
-        xmaximum 632
-        text "속도:" style "ui_editor_text" yalign 0.5
-        for _v in tab.SPEEDS:
-            textbutton ("×{:g}".format(_v)) style "ui_editor_button" text_size 13 action Function(tab.set_speed, _v) selected (abs(tab.speed() - _v) < 0.001)
-
-    hbox:
-        spacing 4
-        box_wrap True
-        box_wrap_spacing 4
-        xmaximum 632
-        text "효과:" style "ui_editor_text" yalign 0.5
-        for _name, _label in tab.EFFECTS:
-            textbutton _label style "ui_editor_button" text_size 13 action Function(tab.set_effect, _name) selected (tab.effect() == _name)
-
-    if tab.sfx() is not None:
+    if not tab.pk():
         hbox:
             spacing 4
             box_wrap True
             box_wrap_spacing 4
             xmaximum 632
-            text "화면 효과:" style "ui_editor_text" yalign 0.5
-            textbutton "그대로" style "ui_editor_button" text_size 13 action Function(tab.set_fx, None) selected (tab.fx_line() is None)
-            for _n, _l in tab.fx_choices():
-                textbutton (("선택취소 → " + _l) if _n == "default" else _l) style "ui_editor_button" text_size 13 action Function(tab.set_fx, _n) selected (tab.fx_line() == _n)
+            text "속도:" style "ui_editor_text" yalign 0.5
+            for _v in tab.SPEEDS:
+                textbutton ("×{:g}".format(_v)) style "ui_editor_button" text_size 13 action Function(tab.set_speed, _v) selected (abs(tab.speed() - _v) < 0.001)
 
         hbox:
             spacing 4
             box_wrap True
             box_wrap_spacing 4
             xmaximum 632
-            if tab.fx_line() is not None:
-                text "전환:" style "ui_editor_text" yalign 0.5
-                for _t, _tl in tab.FX_TRANSITIONS:
-                    textbutton _tl style "ui_editor_button" text_size 13 action Function(tab.set_fx_transition, _t) selected (tab.fx_transition_value() == _t)
-                textbutton "전환 미리 보기" style "ui_editor_button" text_size 13 action Function(tab.preview_fx)
-            textbutton ("화면 효과 보기(V): " + ("켬" if tab.fx_preview_on() else "끔")) style "ui_editor_button" text_size 13 action Function(tab.toggle_fx_preview) selected tab.fx_preview_on()
+            text "효과:" style "ui_editor_text" yalign 0.5
+            for _name, _label in tab.EFFECTS:
+                textbutton _label style "ui_editor_button" text_size 13 action Function(tab.set_effect, _name) selected (tab.effect() == _name)
 
-        ## 덮개(VHS)와 휘어짐은 효과를 바꾸지 않는 줄에서도 고를 수 있음
-        hbox:
-            spacing 4
-            box_wrap True
-            box_wrap_spacing 4
-            xmaximum 632
-            text "덮개(VHS):" style "ui_editor_text" yalign 0.5
-            $ _ov = tab.fx_overlay_value()
-            for _v, _vl in tab.overlay_choices():
-                textbutton _vl style "ui_editor_button" text_size 13 action Function(tab.set_fx_overlay, _v) selected (_ov == _v and type(_ov) == type(_v))
-        if tab.has_warp():
+        if tab.sfx() is not None:
             hbox:
                 spacing 4
                 box_wrap True
                 box_wrap_spacing 4
                 xmaximum 632
-                text "덮개 휘어짐:" style "ui_editor_text" yalign 0.5
-                $ _wv = tab.fx_warp_value()
-                textbutton "그대로" style "ui_editor_button" text_size 13 action Function(tab.set_fx_warp, tab.FOLLOW) selected (_wv == tab.FOLLOW)
-                textbutton "설정값" style "ui_editor_button" text_size 13 action Function(tab.set_fx_warp, "default") selected (_wv == "default")
-                for _w, _wl in tab.WARPS:
-                    textbutton _wl style "ui_editor_button" text_size 13 action Function(tab.set_fx_warp, _w) selected (_wv == _w)
-        if tab.has_cursor():
+                text "화면 효과:" style "ui_editor_text" yalign 0.5
+                textbutton "그대로" style "ui_editor_button" text_size 13 action Function(tab.set_fx, None) selected (tab.fx_line() is None)
+                for _n, _l in tab.fx_choices():
+                    textbutton (("선택취소 → " + _l) if _n == "default" else _l) style "ui_editor_button" text_size 13 action Function(tab.set_fx, _n) selected (tab.fx_line() == _n)
+
             hbox:
                 spacing 4
                 box_wrap True
                 box_wrap_spacing 4
                 xmaximum 632
-                text "커서:" style "ui_editor_text" yalign 0.5
-                $ _cv = tab.fx_cursor_value()
-                for _c, _cl in tab.cursor_choices():
-                    textbutton _cl style "ui_editor_button" text_size 13 action Function(tab.set_fx_cursor, _c) selected (_cv == _c)
+                if tab.fx_line() is not None:
+                    text "전환:" style "ui_editor_text" yalign 0.5
+                    for _t, _tl in tab.FX_TRANSITIONS:
+                        textbutton _tl style "ui_editor_button" text_size 13 action Function(tab.set_fx_transition, _t) selected (tab.fx_transition_value() == _t)
+                    textbutton "전환 미리 보기" style "ui_editor_button" text_size 13 action Function(tab.preview_fx)
+                textbutton ("화면 효과 보기(V): " + ("켬" if tab.fx_preview_on() else "끔")) style "ui_editor_button" text_size 13 action Function(tab.toggle_fx_preview) selected tab.fx_preview_on()
 
-        if tab.fx_line() is not None:
-            if tab.has_exclude():
+            ## 덮개(VHS)와 휘어짐은 효과를 바꾸지 않는 줄에서도 고를 수 있음
+            hbox:
+                spacing 4
+                box_wrap True
+                box_wrap_spacing 4
+                xmaximum 632
+                text "덮개(VHS):" style "ui_editor_text" yalign 0.5
+                $ _ov = tab.fx_overlay_value()
+                for _v, _vl in tab.overlay_choices():
+                    textbutton _vl style "ui_editor_button" text_size 13 action Function(tab.set_fx_overlay, _v) selected (_ov == _v and type(_ov) == type(_v))
+            if tab.has_warp():
                 hbox:
                     spacing 4
                     box_wrap True
                     box_wrap_spacing 4
                     xmaximum 632
-                    text "글자 빼기:" style "ui_editor_text" yalign 0.5
-                    textbutton "효과 설정대로" style "ui_editor_button" text_size 13 action Function(tab.follow_exclude) selected (tab.fx_exclude_value() == tab.FOLLOW)
-                    $ _eff = tab.fx_exclude_effective()
-                    for _g, _gl in tab.text_groups():
-                        textbutton _gl style "ui_editor_button" text_size 13 action Function(tab.toggle_exclude, _g) selected (_g in _eff)
+                    text "덮개 휘어짐:" style "ui_editor_text" yalign 0.5
+                    $ _wv = tab.fx_warp_value()
+                    textbutton "그대로" style "ui_editor_button" text_size 13 action Function(tab.set_fx_warp, tab.FOLLOW) selected (_wv == tab.FOLLOW)
+                    textbutton "설정값" style "ui_editor_button" text_size 13 action Function(tab.set_fx_warp, "default") selected (_wv == "default")
+                    for _w, _wl in tab.WARPS:
+                        textbutton _wl style "ui_editor_button" text_size 13 action Function(tab.set_fx_warp, _w) selected (_wv == _w)
+            if tab.has_cursor():
+                hbox:
+                    spacing 4
+                    box_wrap True
+                    box_wrap_spacing 4
+                    xmaximum 632
+                    text "커서:" style "ui_editor_text" yalign 0.5
+                    $ _cv = tab.fx_cursor_value()
+                    for _c, _cl in tab.cursor_choices():
+                        textbutton _cl style "ui_editor_button" text_size 13 action Function(tab.set_fx_cursor, _c) selected (_cv == _c)
+
+            if tab.fx_line() is not None:
+                if tab.has_exclude():
+                    hbox:
+                        spacing 4
+                        box_wrap True
+                        box_wrap_spacing 4
+                        xmaximum 632
+                        text "글자 빼기:" style "ui_editor_text" yalign 0.5
+                        textbutton "효과 설정대로" style "ui_editor_button" text_size 13 action Function(tab.follow_exclude) selected (tab.fx_exclude_value() == tab.FOLLOW)
+                        $ _eff = tab.fx_exclude_effective()
+                        for _g, _gl in tab.text_groups():
+                            textbutton _gl style "ui_editor_button" text_size 13 action Function(tab.toggle_exclude, _g) selected (_g in _eff)
 
     hbox:
         spacing 6
