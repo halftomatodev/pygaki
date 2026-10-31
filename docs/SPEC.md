@@ -2,7 +2,7 @@
 
 코드를 고치는 사람과 AI가 읽는 문서입니다. 사용법은 [CUSTOM_GUIDE.md](CUSTOM_GUIDE.md)에 있습니다.
 
-- 묶음 버전 4.3 (`ui_kit` 3.2, `screen_fx` 4.2, `hotkeys` 1.0, `splash` 1.1)
+- 묶음 버전 4.4 (`ui_kit` 3.3, `screen_fx` 4.2, `hotkeys` 1.0, `splash` 1.1)
 - 렌파이 8.5.3 기준
 - 작업 규칙: [DEV_RULES.md](DEV_RULES.md)
 - PyKaki 연결 형식: [LINK.md](LINK.md)
@@ -22,7 +22,7 @@
 
 | 폴더 | 버전 | 하는 일 |
 |---|---|---|
-| `game/ui_kit` | 3.2 | 타이틀 메뉴, ESC 메뉴, 선택지, 커서, 클릭 대기 표시, 대사 소리, 대사 스타일, 그림과 영상 배치(`stage`), 편집기(개발 모드 Shift+M), 원고 쓰기 도구(`script_edit`) |
+| `game/ui_kit` | 3.3 | 타이틀 메뉴, ESC 메뉴, 선택지, 커서, 클릭 대기 표시, 대사 소리, 대사 스타일, 그림과 영상 배치(`stage`), 편집기(개발 모드 Shift+M), 원고 쓰기 도구(`script_edit`) |
 | `game/screen_fx` | 4.2 | 기본 효과(없음, ASCII, 레트로 터미널, 게임보이) + VHS 덮개, TV 전환, 글자 빼기, 커서 자리, 타이틀 일렁임 |
 | `game/hotkeys` | 1.0 | 단축키, 조작방법 화면 |
 | `game/splash` | 1.1 | 타이틀 전 로고, 경고, 조작 방법 페이지 |
@@ -62,7 +62,8 @@ PyKaki가 내보내는 문법이기도 합니다.
 | `fx_exclude` | `()` `("say",)` `("say", "choice", "screens")` | 효과에서 뺄 글자 |
 | `x` `y` `pos` | 숫자 | 대사 위치 |
 | `size` `font` `color` `outline` `spacing` `bold` `italic` `kerning` `width` `align` | | 글자 모양 |
-| `speed` | 배율 | 나오는 속도 |
+| `speed` | 배율 | 나오는 속도. 플레이어 설정에 곱함 (설정이 "즉시"면 효과 없음) |
+| `cps` | 숫자 | 나오는 속도, 1초에 나오는 글자 수. 플레이어 설정과 상관없음 |
 | `effect` | `"dissolve"` `"typewriter"` `"slowalpha"` `"flip"` `"zoom"` `"jitter"` `"wave"` | 등장 효과 |
 | `name_x` `name_y` `name_font` `name_size` `name_color` | | 이름 |
 
@@ -99,14 +100,16 @@ hide ghost with stage.ease("outright", 1.2)
 | 타이틀 메뉴, 커서/대사 소리, 화면 효과 값, 타이틀 일렁임 | `*_layout.rpy` | 같음 |
 | 이미지/영상의 위치 | 원고의 그 줄 `at` | `ui_kit/stage_layout.rpy` |
 | 이미지/영상의 전환, 그림 바꾸기, 줄 넣기, 소리 넣기 | 원고 | 원고 + `showpy_inbox.json` |
-| 대사, 선택지, 화면 효과 줄에 넣기 | 원고 | **저장 안 함.** 이유를 보여 줌. 대사 복사(Ctrl+C)는 됨 |
+| 대사 위치 (대사, 이름) | 원고 | 원고 + `showpy_inbox.json` |
+| 대사 글자 모양, 속도, 효과, 선택지, 화면 효과 줄에 넣기 | 원고 | **저장 안 함.** 대사 탭은 칸을 숨기고, 나머지는 이유를 보여 줌 |
 
-## 6. PyKaki 원고 처리 (3.2)
+## 6. PyKaki 원고 처리 (3.3)
 
 - 알아보기: `script_edit.is_pykaki(filename)`. 파일 앞 5줄의 표시 문구.
 - 저장: `script_edit.apply`가 파일을 읽은 뒤 `_pk_prepare`로 거릅니다.
   - `show`, `hide`, `scene` 줄 고치기: 쓴 뒤 `replace` 기록을 남깁니다.
   - 줄 넣기: 줄이 모두 `show`, `scene`, `hide`, `play`, `stop`이면 줄 앞에 `# @l:새id`를 함께 쓰고 `insert` 기록을 남깁니다. 앞에 넣을 때는 기준 줄의 표시 위에 넣어서 표시와 줄이 떨어지지 않게 합니다.
+  - 대사의 `x`, `y`, `name_x`, `name_y`: `SayTab.script_edits`가 `e.pk_pos`를 붙이면 괄호에 쓴 뒤 `say_pos` 기록을 남깁니다.
   - 나머지: `e.reason`에 이유를 담아 실패로 돌려줍니다.
 - 위치: `StageTab`이 `pk_pos_edits`를 모아 `layout_file`로 `stage_layout.rpy`를 씁니다. 저장 범위는 `pos_scope` ("box" 이 상자에서만, "all" 어디서나).
 - 지금 상자: `stage._label_reached`가 `config.label_callbacks`에서 label 끝부분을 `stage.cur_box`(세이브에 저장됨)에 넣습니다.

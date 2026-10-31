@@ -38,6 +38,9 @@ init -10 python in say_style:
         ## 플레이어가 환경설정에서 고른 텍스트 속도에 곱해집니다.
         "speed": "what_slow_cps_multiplier",
 
+        ## 대사 나오는 속도 (1초에 몇 글자. 플레이어의 텍스트 속도 설정과 상관없이 이 값으로)
+        "cps": "what_slow_cps",
+
         ## 대사 등장 효과 (렌파이 텍스트 셰이더: "dissolve", "typewriter", "wave" ...)
         "effect": "what_textshader",
 

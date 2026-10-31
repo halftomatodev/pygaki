@@ -2,6 +2,15 @@
 
 버전별 자세한 설명은 [docs/READ_ME_FIRST.md](docs/READ_ME_FIRST.md)와 폴더별 `README.md`에 있습니다.
 
+## 4.4 (2026-10-31)
+
+대사 편집을 PyKaki로 모았습니다. PyKaki도 같이 새로 고침해야 합니다.
+
+`ui_kit` 3.3:
+- 대사 괄호에 글자/초 속도 `cps`를 추가했습니다. 기존 `speed` 배율은 텍스트 속도가 "즉시"인 프로젝트에서 효과가 없습니다.
+- PyKaki 원고의 대사 탭은 위치만 고칩니다. 저장하면 `showpy_inbox.json`에 `say_pos` 기록을 남겨서 PyKaki에 좌표가 보이고, 다시 내보내도 남습니다.
+- 일반 원고는 예전과 똑같이 저장합니다.
+
 ## 4.3 (2026-10-31)
 
 묶음 이름을 **showpy**로 정하고, [PyKaki](https://github.com/halftomatodev/pykaki)와 연결했습니다.

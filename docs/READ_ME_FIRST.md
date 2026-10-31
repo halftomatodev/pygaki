@@ -1,6 +1,6 @@
 # showpy (먼저 읽기)
 
-버전 4.3
+버전 4.4
 
 예전 이름은 "렌파이 UI 플러그인 묶음"이었습니다.
 
@@ -21,6 +21,20 @@
 - `screen_fx`는 예전의 `watermorph`, `vhs_crt` 두 플러그인을 합친 것입니다.
 - 합친 기능들은 각자 설정 파일의 스위치(`enabled`)로 따로 끌 수 있고, 끄면 렌파이 기본(효과 없음)과 똑같이 보입니다.
 - `screen_fx`는 넣자마자 VHS 덮개가 화면 전체에 켜집니다. 처음에는 깨끗한 화면으로 보고 싶다면 `screen_fx/screen_fx_config.rpy`의 `screen_fx.overlay`를 `False`로(평소엔 깨끗하고 `use()`나 `fx_overlay=True`로 켤 때만 효과), 타이틀 일렁임은 `screen_fx/watermorph_config.rpy`의 `watermorph.enabled`를 `False`로 바꾸세요.
+
+## 4.4에서 바뀐 점
+
+대사 편집을 PyKaki로 모았습니다. 일반 원고는 예전과 똑같습니다.
+
+### `ui_kit` 3.3
+
+- 대사 괄호에 1초에 나올 글자 수 `cps`를 적을 수 있습니다. 텍스트 속도가 "즉시"여도 동작합니다.
+  ```renpy
+  e "천천히 말했다." (cps=12)
+  ```
+- PyKaki 원고의 대사 탭은 위치만 고칩니다. 좌표는 PyKaki에 받아 적혀 보이고, 글자 모양, 속도, 등장 효과는 PyKaki에서 고칩니다.
+
+옮기기: `ui_kit` 폴더를 바꿔 넣고 `.rpyc`를 지웁니다. PyKaki도 같이 새로 고침합니다. 예전 PyKaki는 위치 기록을 읽지 못하고 버립니다.
 
 ## 4.3에서 바뀐 점
 
