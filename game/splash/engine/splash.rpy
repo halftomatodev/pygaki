@@ -1,0 +1,839 @@
+################################################################################
+## Splash — 엔진
+##
+## 이 파일은 고칠 필요가 없습니다. 설정은 splash_config.rpy에서 하세요.
+##
+## 버전 1.1 · Ren'Py 8.5.3에서 제작·테스트
+## 설치·설정 방법: 플러그인 폴더의 README.md
+##
+## 게임을 켰을 때 타이틀 화면 전에 나오는 페이지(로고, 경고, 조작 방법 등)를
+## 설정 파일에 적은 순서대로 보여 줍니다.
+##
+## 렌파이의 splashscreen 레이블을 이 플러그인의 splash_play 레이블로 이어 줍니다.
+## (config.label_overrides 사용. 스크립트에 이미 splashscreen 레이블이 있으면
+##  건드리지 않으니, 그 레이블 안에서 call splash_play 를 하면 됩니다)
+##
+## 이 플러그인이 만드는 이름 (전부 splash로 시작):
+##   store.splash              설정과 함수가 들어 있는 이름공간
+##   label splash_play         페이지를 순서대로 보여 줌
+##   label splash_show_page    페이지 하나만 보여 줌 (splash.ShowPage가 씀)
+##   label splash_preview      개발 중 처음부터 다시 보기 (splash.preview()가 씀)
+##   screen splash_page        페이지 하나를 그리는 스크린
+##   persistent.splash_seen    한 번 본 페이지
+##   persistent.splash_hidden  플레이어가 "다음부터 보지 않기"를 고른 페이지
+################################################################################
+
+init offset = 1
+
+init -10 python in splash:
+
+    import os
+    import time
+
+    import store
+    from store import Action, DictEquality, Movie, Solid, Text, Transform, python_object
+
+    VERSION = "1.1"
+
+    def scene_fx():
+        """screen_fx 플러그인의 '장면만' 효과를 페이지의 바탕·로고 그림에도 씌우는 트랜스폼.
+        screen_fx가 없으면 None (아무것도 안 씌움)."""
+        sfx = getattr(store, "screen_fx", None)
+        return getattr(sfx, "scene", None)
+
+    ## 설정 파일에서 값을 주지 않았을 때 쓰는 기본값.
+    DEFAULTS = dict(
+        enabled=True,
+        pages=[ ],
+        default={ },
+        start_delay=0.3,
+        gap=0.3,
+        end_transition=None,
+        min_time_once=True,
+        developer_skip=False,
+        music_fadeout=1.0,
+        movie_wait=5.0,
+        )
+
+    ## 페이지에 바로 적는 값. 여기 없는 이름은 아래 PREFIXES로 시작하는
+    ## 글자 스타일 속성이어야 합니다.
+    RESERVED = {
+        "id", "show_if", "once", "skippable",
+        "color", "background", "background_side_mask", "background_loop",
+        "image", "image_side_mask", "image_size", "image_zoom", "image_loop", "image_pos",
+        "title", "body", "keys", "prompt", "dont_show_again",
+        "duration", "min_time", "fade_in", "fade_out",
+        "sound", "music",
+        "xalign", "yalign", "spacing", "width",
+        "key_width", "key_gap", "keys_spacing", "keys_xalign",
+        }
+
+    ## 앞에 붙여서 그 글자의 스타일을 정하는 이름.
+    ##   title_  제목      body_  본문      key_  조작 방법의 키      desc_  그 설명
+    ##   prompt_ "클릭하면 계속" 안내      option_  "다음부터 보지 않기" 버튼
+    PREFIXES = ("title_", "body_", "key_", "desc_", "prompt_", "option_")
+
+    ## 버튼 자체의 위치로 쓰는 option_ 값 (나머지 option_ 값은 버튼 글자 스타일)
+    BUTTON_POSITION = {
+        "xalign", "yalign", "align", "xpos", "ypos", "pos",
+        "xanchor", "yanchor", "anchor", "xoffset", "yoffset", "offset",
+        }
+
+    MOVIE_EXTS = (".webm", ".ogv", ".mkv", ".mp4", ".avi", ".mpg", ".mpeg", ".mov")
+
+    ## 엔진 기본 모양. 설정 파일의 splash.default가 이 위에 얹힙니다.
+    BASE = {
+        "color": "#000000",
+        "fade_in": 0.6,
+        "fade_out": 0.6,
+        "duration": None,
+        "min_time": 0.5,
+        "skippable": True,
+        "once": False,
+        "xalign": 0.5,
+        "yalign": 0.45,
+        "spacing": 28,
+        "width": 960,
+        "key_width": 300,
+        "key_gap": 32,
+        "keys_spacing": 12,
+        "keys_xalign": 0.5,
+        "background_side_mask": False,
+        "background_loop": True,
+        "image_side_mask": True,
+        "image_loop": True,
+        "image_zoom": 1.0,
+
+        "title_size": 44,
+        "title_color": "#ffffff",
+        "title_xalign": 0.5,
+        "title_text_align": 0.5,
+        "body_size": 24,
+        "body_color": "#d8d8d8",
+        "body_xalign": 0.5,
+        "body_text_align": 0.5,
+        "body_line_spacing": 6,
+        "key_size": 22,
+        "key_color": "#ffffff",
+        "key_text_align": 1.0,
+        "desc_size": 22,
+        "desc_color": "#bbbbbb",
+        "prompt_size": 20,
+        "prompt_color": "#ffffffaa",
+        "prompt_xalign": 0.5,
+        "prompt_yalign": 0.95,
+        "option_size": 18,
+        "option_color": "#ffffffaa",
+        "option_hover_color": "#ffffff",
+        "option_xalign": 0.96,
+        "option_yalign": 0.95,
+        }
+
+    def cfg(name):
+        """설정값을 돌려줍니다. 설정 파일에 없으면 기본값."""
+        g = globals()
+        if name in g:
+            return g[name]
+        return DEFAULTS[name]
+
+    ## ── 런타임 상태 (세이브·롤백에 들어가지 않는 일반 파이썬 객체) ──
+
+    class _State(python_object):
+        def __init__(self):
+            self.running = False        # 타이틀 전 페이지를 보여 주는 중
+            self.music = False          # 이 플러그인이 음악을 틀었음
+
+    state = _State()
+
+    def running():
+        """타이틀 전 페이지를 보여 주는 중이면 True. (screen_fx가 범위를 정할 때 씀)"""
+        return state.running
+
+    ## ── 한 번 본 페이지 · 다음부터 보지 않기 ──
+
+    def _pset(name):
+        s = getattr(store.persistent, name, None)
+        if s is None:
+            s = set()
+            setattr(store.persistent, name, s)
+        return s
+
+    def seen_pages():
+        return _pset("splash_seen")
+
+    def hidden_pages():
+        return _pset("splash_hidden")
+
+    def reset():
+        """한 번 본 기록과 "다음부터 보지 않기"를 모두 지웁니다."""
+        store.persistent.splash_seen = set()
+        store.persistent.splash_hidden = set()
+        store.renpy.save_persistent()
+
+    class Reset(Action, DictEquality):
+        """환경설정 등에 넣는 버튼:  textbutton _("처음 안내 다시 보기") action splash.Reset()"""
+        def __call__(self):
+            reset()
+            store.renpy.restart_interaction()
+
+    ## ── 값 검사 ──
+
+    def _is_movie(v):
+        return isinstance(v, str) and v.lower().endswith(MOVIE_EXTS)
+
+    def _is_color(v):
+        return isinstance(v, str) and v.startswith("#")
+
+    def _looks_like_file(v):
+        return "/" in v or "." in os.path.basename(v)
+
+    def _page_name(index, raw):
+        if isinstance(raw, dict) and raw.get("id"):
+            return "'{}'".format(raw["id"])
+        return "{}번째".format(index + 1)
+
+    def _check_file(where, key, v, out, what="파일"):
+        """파일이 있는지, 이름 대소문자가 같은지 확인합니다.
+        (윈도우에서는 대소문자가 달라도 열리지만 맥·안드로이드·웹에서는 못 엽니다)"""
+        if not store.renpy.loadable(v):
+            out.append("{} '{}': 찾을 수 없는 {}입니다: {} (game 폴더 기준 경로)".format(where, key, what, v))
+            return
+
+        want = v.replace("\\", "/")
+        files = store.renpy.list_files()
+        if want in files:
+            return
+
+        low = want.lower()
+        for f in files:
+            if f.lower() == low:
+                out.append("{} '{}': 파일 이름 대소문자가 다릅니다. 적은 이름 {} / 실제 파일 {}".format(where, key, v, f))
+                return
+
+    def _check_media(where, key, v, out):
+        if v is None or not isinstance(v, str):
+            return
+
+        if _is_color(v):
+            try:
+                store.Color(v)
+            except Exception:
+                out.append("{} '{}': 색 '{}'을(를) 읽을 수 없습니다. 예: \"#000000\"".format(where, key, v))
+            return
+
+        if _looks_like_file(v):
+            _check_file(where, key, v, out)
+            return
+
+        if not store.renpy.has_image(v, exact=True):
+            out.append("{} '{}': '{}'라는 이미지가 없습니다.".format(where, key, v))
+
+    def _check_style(where, key, out):
+        import renpy.style
+
+        for pre in PREFIXES:
+            if key.startswith(pre):
+                name = key[len(pre):]
+                if pre == "option_" and name in BUTTON_POSITION:
+                    return
+                if name not in renpy.style.prefixed_all_properties:
+                    out.append("{} '{}': '{}'은(는) 글자 스타일 속성이 아닙니다.".format(where, key, name))
+                return
+
+        out.append("{}: '{}'은(는) 알 수 없는 설정입니다.".format(where, key))
+
+    def check():
+        """설정 파일의 문제를 찾아 목록으로 돌려줍니다. (없으면 빈 목록)"""
+
+        out = [ ]
+        ids = set()
+
+        pages = cfg("pages")
+        if not isinstance(pages, (list, tuple)):
+            return [ "splash.pages는 [ { … }, { … } ] 모양의 목록이어야 합니다." ]
+
+        for key in cfg("default"):
+            if key not in RESERVED:
+                _check_style("splash.default", key, out)
+
+        for i, raw in enumerate(pages):
+            where = "splash.pages {} 페이지".format(_page_name(i, raw))
+
+            if not isinstance(raw, dict):
+                out.append("{}: {{ … }} 덩어리여야 합니다.".format(where))
+                continue
+
+            pid = raw.get("id")
+            if not pid:
+                out.append("{}: 'id'가 없습니다. 예: \"id\": \"warning\"".format(where))
+            elif pid in ids:
+                out.append("{}: 'id'가 다른 페이지와 겹칩니다.".format(where))
+            ids.add(pid)
+
+            for key in raw:
+                if key not in RESERVED:
+                    _check_style(where, key, out)
+
+            d = dict(BASE)
+            d.update(cfg("default"))
+            d.update(raw)
+
+            for key in ("color", "background", "image"):
+                _check_media(where, key, d.get(key), out)
+
+            for key, v in d.items():
+                if key.endswith("_font") and isinstance(v, str):
+                    _check_file(where, key, v, out, "글꼴 파일")
+
+            for key in ("sound", "music"):
+                v = d.get(key)
+                if isinstance(v, str):
+                    _check_file(where, key, v, out)
+
+            dur = d.get("duration")
+
+            if dur == "movie":
+                if not (_is_movie(d.get("image")) or _is_movie(d.get("background"))):
+                    out.append("{}: \"duration\": \"movie\"는 'background'나 'image'가 영상일 때만 쓸 수 있습니다.".format(where))
+            elif dur is not None and not isinstance(dur, (int, float)):
+                out.append("{}: 'duration'은 초(숫자), None(클릭할 때까지), \"movie\"(영상이 끝날 때까지) 중 하나입니다.".format(where))
+
+            if dur is None and not d.get("skippable", True):
+                out.append("{}: \"skippable\": False면 'duration'을 정해야 합니다. (안 그러면 넘어갈 방법이 없음)".format(where))
+
+            keys = d.get("keys")
+            if keys is not None and keys != "auto":
+                ok = isinstance(keys, (list, tuple)) and all(
+                    isinstance(k, (list, tuple)) and len(k) == 2 for k in keys)
+                if not ok:
+                    out.append("{} 'keys': [ (\"키\", \"설명\"), … ] 모양이거나 \"auto\"여야 합니다.".format(where))
+
+        return out
+
+    def _raise_problems():
+        problems = check()
+        if problems:
+            raise Exception("[splash] 설정을 확인해 주세요.\n" + "\n".join(problems))
+
+    def _lint():
+        for p in check():
+            print("splash: " + p)
+
+    ## ── 페이지 해석 ──
+
+    class Page(python_object):
+        """설정 한 덩어리(dict)를 화면에 쓰기 좋게 풀어놓은 것."""
+
+    def _cond(c):
+        if c is None:
+            return True
+        if callable(c):
+            return bool(c())
+        return bool(eval(c, vars(store)))
+
+    def _keys_auto():
+        """조작 방법 목록 "auto": hotkeys 플러그인 설정, 없으면 렌파이 기본 설명."""
+        hk = getattr(store, "hotkeys", None)
+        f = getattr(hk, "help_lines", None)
+        if callable(f):
+            return list(f())
+
+        _ = store._
+        return [
+            (_("엔터(Enter)"), _("대사 진행 및 UI (선택지 포함) 선택.")),
+            (_("스페이스(Space)"), _("대사를 진행하되 선택지는 선택하지 않음.")),
+            (_("화살표 키"), _("UI 이동.")),
+            (_("이스케이프(Esc)"), _("게임 메뉴 불러옴.")),
+            (_("컨트롤(Ctrl)"), _("누르고 있는 동안 대사를 스킵.")),
+            (_("탭(Tab)"), _("대사 스킵 토글.")),
+            (_("페이지 업(Page Up)"), _("이전 대사로 롤백.")),
+            (_("페이지 다운(Page Down)"), _("이후 대사로 롤포워드.")),
+            ("H", _("UI를 숨김.")),
+            ("S", _("스크린샷 저장.")),
+            ]
+
+    def resolve(raw):
+        d = dict(BASE)
+        d.update(cfg("default"))
+        d.update(raw)
+
+        p = Page()
+        p.id = d.get("id")
+        p.raw = raw
+        p.show_if = d.get("show_if")
+        p.once = bool(d.get("once"))
+        p.skippable = bool(d.get("skippable", True))
+
+        p.color = d.get("color") or "#000000"
+        p.background = d.get("background")
+        p.background_side_mask = d.get("background_side_mask")
+        p.background_loop = d.get("background_loop")
+        p.image = d.get("image")
+        p.image_side_mask = d.get("image_side_mask")
+        p.image_size = d.get("image_size")
+        p.image_zoom = float(d.get("image_zoom") or 1.0)
+        p.image_loop = d.get("image_loop")
+        p.image_pos = d.get("image_pos")
+
+        p.title = d.get("title")
+        p.body = d.get("body")
+        p.keys = d.get("keys")
+        p.prompt = d.get("prompt")
+        p.dont_show_again = d.get("dont_show_again")
+
+        p.duration = d.get("duration")
+        p.min_time = float(d.get("min_time") or 0.0)
+        p.fade_in = float(d.get("fade_in") or 0.0)
+        p.fade_out = float(d.get("fade_out") or 0.0)
+        p.sound = d.get("sound")
+        p.music = d.get("music")
+
+        p.xalign = d.get("xalign")
+        p.yalign = d.get("yalign")
+        p.spacing = d.get("spacing")
+        p.width = d.get("width")
+        p.key_width = d.get("key_width")
+        p.key_gap = d.get("key_gap")
+        p.keys_spacing = d.get("keys_spacing")
+        p.keys_xalign = d.get("keys_xalign")
+
+        ## 글자 스타일 (앞말로 나눔)
+        props = { pre[:-1]: { } for pre in PREFIXES }
+
+        for k, v in d.items():
+            if k in RESERVED:
+                continue
+            for pre in PREFIXES:
+                if k.startswith(pre):
+                    props[pre[:-1]][k[len(pre):]] = v
+                    break
+
+        p.title_props = props["title"]
+        p.body_props = props["body"]
+        p.body_props.setdefault("xmaximum", p.width)
+        p.title_props.setdefault("xmaximum", p.width)
+
+        p.key_props = props["key"]
+        p.key_props.setdefault("min_width", p.key_width)
+        p.desc_props = props["desc"]
+        p.desc_props.setdefault("xmaximum", max(100, p.width - p.key_width - p.key_gap))
+
+        p.prompt_props = props["prompt"]
+
+        ## "다음부터 보지 않기" 버튼: 위치는 버튼에, 나머지는 버튼 글자에
+        p.option_button = { }
+        p.option_text = { }
+        for k, v in props["option"].items():
+            if k in BUTTON_POSITION:
+                p.option_button[k] = v
+            else:
+                p.option_text[k] = v
+
+        ## 체크 상자 색은 글자 색을 따름
+        p.option_box = p.option_text.get("color", "#ffffff")
+        p.option_box_hover = p.option_text.get("hover_color", p.option_box)
+
+        return p
+
+    def all_pages():
+        return [ resolve(raw) for raw in cfg("pages") ]
+
+    def find_page(page_id):
+        for p in all_pages():
+            if p.id == page_id:
+                return p
+        raise Exception("[splash] '{}'라는 id의 페이지가 splash.pages에 없습니다.".format(page_id))
+
+    def should_show(p):
+        if p.id in hidden_pages():
+            return False
+        if p.once and p.id in seen_pages():
+            return False
+        return _cond(p.show_if)
+
+    ## ── 화면 요소 만들기 ──
+
+    def _media(v, side_mask, loop, size):
+        """색 · 이미지 · 영상 경로를 화면에 넣을 수 있는 것으로."""
+        if v is None:
+            return None
+        if not isinstance(v, str):
+            return store.renpy.displayable(v)
+        if _is_color(v):
+            return Solid(v)
+        if _is_movie(v):
+            kw = dict(play=v, side_mask=bool(side_mask), loop=bool(loop))
+            if size is not None:
+                kw["size"] = tuple(size)
+            return Movie(**kw)
+        return store.renpy.displayable(v)
+
+    class PageRun(python_object):
+        """페이지를 한 번 보여 주는 동안의 상태. 스크린 splash_page가 씁니다."""
+
+        def __init__(self, page, skip_min=False):
+            self.page = page
+            self.leaving = False
+            self.ready = False
+            self.min_time = 0.0 if skip_min else page.min_time
+
+            watch_movie = (page.duration == "movie")
+
+            screen = (store.config.screen_width, store.config.screen_height)
+
+            ## 배경 (영상은 화면 크기에 맞춤)
+            self.bg = _media(
+                page.background,
+                page.background_side_mask,
+                False if (watch_movie and not _is_movie(page.image)) else page.background_loop,
+                screen,
+                )
+
+            ## 가운데 그림·영상
+            img = _media(
+                page.image,
+                page.image_side_mask,
+                False if watch_movie and _is_movie(page.image) else page.image_loop,
+                page.image_size,
+                )
+            if img is not None and page.image_zoom != 1.0:
+                img = Transform(img, zoom=page.image_zoom)
+            self.image = img
+
+            ## 끝날 때까지 지켜볼 영상
+            self.watch = None
+            if watch_movie:
+                if _is_movie(page.image):
+                    self.watch = img.child if isinstance(img, Transform) else img
+                elif _is_movie(page.background):
+                    self.watch = self.bg
+            self.movie_seen = False
+            self.t0 = None
+            self.left_at = None
+
+            ## 글자
+            self.title = Text(page.title, style="splash_title", **page.title_props) if page.title else None
+            self.body = Text(page.body, style="splash_body", **page.body_props) if page.body else None
+            self.prompt = Text(page.prompt, style="splash_prompt", **page.prompt_props) if page.prompt else None
+
+            keys = page.keys
+            if keys == "auto":
+                keys = _keys_auto()
+            self.keys = [
+                (Text(k, style="splash_key", **page.key_props), Text(v, style="splash_desc", **page.desc_props))
+                for k, v in (keys or [ ])
+                ]
+
+        ## 스크린에서 부르는 동작
+        ## (screen의 timer는 화면이 갱신될 때 처음부터 다시 셀 수 있어서,
+        ##  시간은 모두 페이지가 나타난 시각에서 직접 잽니다)
+
+        def click(self):
+            if self.ready and self.page.skippable:
+                self.leave()
+
+        def leave(self):
+            if not self.leaving:
+                self.leaving = True
+                self.left_at = time.time()
+                store.renpy.restart_interaction()
+
+        def tick(self):
+            """0.05초마다 불림. 다음 페이지로 갈 때가 되면 True를 돌려줍니다."""
+            now = time.time()
+            p = self.page
+
+            if self.t0 is None:
+                self.t0 = now
+
+            shown = now - self.t0 - p.fade_in      # 다 나타난 뒤 지난 시간
+
+            if self.leaving:
+                if now - self.left_at >= p.fade_out:
+                    return True
+                return None
+
+            if not self.ready and shown >= self.min_time:
+                self.ready = True
+                store.renpy.restart_interaction()
+
+            if isinstance(p.duration, (int, float)) and shown >= p.duration:
+                self.leave()
+
+            elif self.watch is not None:
+                self._check_movie(now)
+
+            return None
+
+        def _check_movie(self, now):
+            """영상이 끝났는지 확인합니다."""
+            m = self.watch
+            playing = None
+            ch = getattr(m, "channel", None)
+
+            ## 화면에 나오기 전에는 채널 이름이 아직 정해지지 않음
+            if ch and not (getattr(m, "dynamic_channel", False) and ch == "movie"):
+                playing = store.renpy.music.get_playing(channel=ch)
+
+            if playing:
+                self.movie_seen = True
+            elif self.movie_seen:
+                self.leave()
+            elif now - self.t0 > cfg("movie_wait"):
+                ## 영상이 시작되지 않음 (코덱 문제 등) → 멈춰 있지 않고 넘어감
+                self.leave()
+
+    ## ── 순서대로 보여 주기 ──
+
+    def _same_file(a, b):
+        if not a or not b:
+            return False
+        a = a.replace("\\", "/").lower()
+        b = b.replace("\\", "/").lower()
+        return a == b or a.split("/")[-1] == b.split("/")[-1]
+
+    def _end_music():
+        """스플래시가 튼 음악을 타이틀 음악으로 넘기거나 서서히 끕니다."""
+        if not state.music:
+            return
+        state.music = False
+
+        cur = store.renpy.music.get_playing("music")
+        if not cur:
+            return
+
+        mmm = store.config.main_menu_music
+        if mmm and _same_file(cur, mmm):
+            return      # 타이틀 음악과 같으면 끊기지 않고 이어짐
+
+        t = cfg("music_fadeout")
+        store.renpy.music.stop("music", fadeout=t)
+        if t > 0:
+            store.renpy.pause(t, hard=True)
+
+    def show(p, skip_min=False, play_audio=True):
+        """페이지 하나를 보여 주고, 끝나면 돌아옵니다."""
+
+        if play_audio:
+            if p.sound:
+                store.renpy.sound.play(p.sound)
+            if p.music:
+                store.renpy.music.play(p.music, loop=True, if_changed=True, fadein=p.fade_in)
+                state.music = True
+
+        store.renpy.call_screen("splash_page", run=PageRun(p, skip_min))
+
+    def run(preview=False):
+        """splash.pages를 순서대로 보여 줍니다. (splashscreen에서 자동으로 불림)
+        preview=True면 꺼져 있거나 이미 본 페이지도 모두 보여 주고, 본 기록을 남기지 않습니다."""
+
+        if not preview:
+            if not cfg("enabled"):
+                return
+            if store.config.developer and cfg("developer_skip"):
+                return
+
+        _raise_problems()
+
+        pages = [ p for p in all_pages() if preview or should_show(p) ]
+        if not pages:
+            return
+
+        state.running = True
+
+        try:
+            if cfg("start_delay") > 0:
+                store.renpy.pause(cfg("start_delay"))
+
+            for n, p in enumerate(pages):
+
+                if n and cfg("gap") > 0:
+                    store.renpy.pause(cfg("gap"))
+
+                seen = p.id in seen_pages()
+                show(p, skip_min=(seen and cfg("min_time_once") and not preview))
+
+                if not preview:
+                    seen_pages().add(p.id)
+
+            _end_music()
+
+        finally:
+            state.running = False
+            state.music = False
+            store.renpy.save_persistent()
+
+    def preview():
+        """개발 중에 처음부터 다시 보기. 콘솔(Shift+O)에서 splash.preview()"""
+        store.renpy.call_in_new_context("splash_preview")
+
+    ## ── 타이틀 메뉴 등에서 페이지 하나만 다시 보기 ──
+
+    class ShowPage(Action, DictEquality):
+        """
+        textbutton _("조작 방법") action splash.ShowPage("controls")
+        타이틀 메뉴 항목이면  "action": splash.ShowPage("controls")
+        페이지의 소리는 나오지만 음악은 바꾸지 않고, 본 기록도 남기지 않습니다.
+        """
+
+        def __init__(self, page_id):
+            self.page_id = page_id
+
+        def __call__(self):
+            store.renpy.call_in_new_context("splash_show_page", self.page_id)
+            store.renpy.restart_interaction()
+
+
+init 990 python in splash:
+    ## 설정 파일을 다 읽은 뒤 실행됩니다.
+
+    ## 스크립트에 splashscreen 레이블이 없을 때만 이 플러그인으로 이어 줌
+    if cfg("enabled") and not store.renpy.has_label("splashscreen"):
+        store.config.label_overrides["splashscreen"] = "splash_play"
+
+    ## 마지막 페이지에서 타이틀로 넘어갈 때의 전환 (options.rpy 등에서 이미 정했으면 그쪽 우선)
+    if cfg("enabled") and cfg("end_transition") is not None and store.config.end_splash_transition is None:
+        store.config.end_splash_transition = cfg("end_transition")
+
+    store.config.lint_hooks.append(_lint)
+
+    ## 배포판을 만들 때 이 플러그인 폴더의 설명서(.md)는 빼고 묶습니다.
+    _ROOT = os.path.dirname(os.path.dirname(store.renpy.get_filename_line()[0].replace("\\", "/")))
+    store.build.classify(_ROOT + "/**.md", None)
+
+
+## 한 번 본 페이지, 플레이어가 "다음부터 보지 않기"를 고른 페이지
+default persistent.splash_seen = set()
+default persistent.splash_hidden = set()
+
+
+## ── 레이블 ───────────────────────────────────────────────────────────────────
+
+## 게임을 켰을 때 (splashscreen으로 이어짐). 직접 부를 때는 call splash_play
+label splash_play:
+    $ splash.run()
+    return
+
+## 개발 중 다시 보기 (splash.preview()가 새 컨텍스트에서 부름)
+label splash_preview:
+    $ splash.run(preview=True)
+    return
+
+## 페이지 하나만 (splash.ShowPage가 새 컨텍스트에서 부름)
+label splash_show_page(page_id):
+    $ splash.show(splash.find_page(page_id), skip_min=True, play_audio=False)
+    return
+
+
+## ── 스타일 · 애니메이션 ──────────────────────────────────────────────────────
+
+style splash_title is default
+style splash_body is default
+style splash_key is default
+style splash_desc is default
+style splash_prompt is default
+style splash_option is default
+style splash_option_button is default
+
+## 페이지가 나타나고 사라질 때
+transform splash_fade(t_in, t_out):
+    on appear, show:
+        alpha 0.0
+        linear t_in alpha 1.0
+    on hide:
+        linear t_out alpha 0.0
+
+## 체크 상자 테두리: 마우스를 올리면 밝게
+transform splash_option_box:
+    alpha 0.7
+    on hover:
+        linear 0.1 alpha 1.0
+    on idle:
+        linear 0.1 alpha 0.7
+
+## "클릭하면 계속" 안내: 서서히 나타난 뒤 깜빡임
+transform splash_prompt_blink:
+    alpha 0.0
+    linear 0.4 alpha 1.0
+    block:
+        linear 1.0 alpha 0.35
+        linear 1.0 alpha 1.0
+        repeat
+
+
+## ── 스크린 ───────────────────────────────────────────────────────────────────
+
+screen splash_page(run):
+
+    modal True
+
+    $ _p = run.page
+
+    ## 클릭 · 엔터 · 스페이스 · 게임패드 A
+    key "dismiss" action Function(run.click, _update_screens=False)
+
+    ## 시간 재기: 넘길 수 있게 되는 때, 정한 시간, 영상 끝, 사라지는 연출 끝
+    timer 0.05 repeat True action Function(run.tick, _update_screens=False)
+
+    showif not run.leaving:
+
+        fixed at splash_fade(_p.fade_in, _p.fade_out):
+
+            add Solid(_p.color)
+
+            if run.bg is not None:
+                add run.bg align (0.5, 0.5) at splash.scene_fx()
+
+            if run.image is not None and _p.image_pos is not None:
+                add run.image pos _p.image_pos anchor (0.5, 0.5) at splash.scene_fx()
+
+            vbox:
+                xalign _p.xalign
+                yalign _p.yalign
+                xmaximum _p.width
+                spacing _p.spacing
+
+                if run.image is not None and _p.image_pos is None:
+                    add run.image xalign 0.5 at splash.scene_fx()
+
+                if run.title is not None:
+                    add run.title
+
+                if run.body is not None:
+                    add run.body
+
+                if run.keys:
+                    vbox:
+                        xalign _p.keys_xalign
+                        spacing _p.keys_spacing
+
+                        for _k, _d in run.keys:
+                            hbox:
+                                spacing _p.key_gap
+                                add _k
+                                add _d
+
+            if run.prompt is not None and run.ready and _p.skippable:
+                add run.prompt at splash_prompt_blink
+
+            if _p.dont_show_again:
+                $ _on = _p.id in persistent.splash_hidden
+
+                button:
+                    style "splash_option_button"
+                    properties _p.option_button
+                    action ToggleSetMembership(persistent.splash_hidden, _p.id)
+
+                    has hbox
+                    spacing 10
+
+                    ## 체크 상자 (렌파이 기본 GUI 그림 없이 그림)
+                    fixed:
+                        xysize (18, 18)
+                        yalign 0.5
+                        add Solid(_p.option_box) at splash_option_box
+                        add Solid("#000000cc") xysize (14, 14) align (0.5, 0.5)
+                        if _on:
+                            add Solid(_p.option_box) xysize (8, 8) align (0.5, 0.5)
+
+                    text _p.dont_show_again style "splash_option" properties _p.option_text
