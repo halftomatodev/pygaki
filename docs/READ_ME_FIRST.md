@@ -337,4 +337,4 @@
 - 투명한 webm 영상은 렌파이의 side_mask 방식(왼쪽 절반 색, 오른쪽 절반 투명도)을 씁니다. 만드는 방법은 `ui_kit/README.md`에 있습니다.
 - VHS 셰이더 원본은 CC0입니다(크레딧은 선택). ASCII 셰이더는 MIT 라이선스 셰이더의 아이디어를, 레트로 터미널은 cool-retro-term(GPL)의 모습을, 게임보이는 Retro dither(CC0)의 디더링 무늬와 Gameboy Classic Shader(GPL)의 LCD 모습을 참고해 코드를 새로 썼습니다(크레딧은 `screen_fx/README.md` 15장).
 - `screen_fx/fonts/neodgm.ttf`(Neo둥근모)는 SIL OFL 1.1입니다. 게임에 넣어 배포·판매할 수 있고, 배포할 때 `neodgm_OFL.txt`를 같이 두세요.
-- 각 폴더의 라이선스는 정해서 README에 적어 두세요.
+- showpy는 MIT 라이선스입니다. 글꼴처럼 라이선스가 다른 파일은 저장소의 `THIRD_PARTY.md`를 보세요.
