@@ -675,15 +675,15 @@ init -19 python in script_edit:
 
     ## ── PyKaki가 만든 원고 (3.2) ─────────────────────────────────────────────
     ## 이 원고는 PyKaki에서 다시 내보내면 덮어써집니다. 그래서
-    ##   - 대사 글자와 모양, 선택지, 화면 효과 줄은 저장하지 않습니다. (PyKaki에서 고침)
-    ##   - 그림, 영상, 소리 줄과 대사 위치는 원고에 쓰고, showpy_inbox.json에도 적어 둡니다.
+    ##   - 대사 글자와 모양, 선택지는 저장하지 않습니다. (PyKaki에서 고침)
+    ##   - 그림, 영상, 소리 줄과 대사의 위치, 화면 효과는 원고에 쓰고, showpy_inbox.json에도 적어 둡니다.
     ##     PyKaki가 그 파일을 받아 적으므로 다시 내보내도 사라지지 않습니다.
     ## 형식은 문서 docs/LINK.md에 있습니다.
 
     PYKAKI_MARK = "# PyKaki가 만든 파일이에요."
     INBOX_FILE = "showpy_inbox.json"
     MEDIA_HEADS = ("show", "scene", "hide", "play", "stop")
-    _PK_BLOCK = "PyKaki가 만든 원고라 저장하지 않았습니다. 대사 글자와 모양, 선택지, 화면 효과는 PyKaki에서 고치세요."
+    _PK_BLOCK = "PyKaki가 만든 원고라 저장하지 않았습니다. 대사 글자와 모양, 선택지는 PyKaki에서, 줄마다 바꾸는 화면 효과는 대사 탭에서 고치세요."
     _PK_OLD = "이 줄의 표시가 없습니다. PyKaki에서 showpy 연결을 켜고 다시 내보내세요."
 
     _pk_cache = { }     # 실제 경로 -> (수정 시각, PyKaki 원고인지)
@@ -750,8 +750,8 @@ init -19 python in script_edit:
                 if e.pk_line is None:
                     e.reason = _PK_OLD
                     continue
-            elif e.kind == SAY and getattr(e, "pk_pos", None):
-                ## 대사는 위치만 저장합니다. (editor_say.rpy가 pk_pos를 붙임)
+            elif e.kind == SAY and (getattr(e, "pk_pos", None) or getattr(e, "pk_fx", None)):
+                ## 대사는 위치와 화면 효과만 저장합니다. (editor_say.rpy가 pk_pos, pk_fx를 붙임)
                 e.pk_line = _pk_mark(lines, n, "# @l:")
                 if e.pk_line is None:
                     e.reason = _PK_OLD
@@ -956,7 +956,10 @@ init -19 python in script_edit:
                     elif e.kind in IMAGE_KINDS:
                         ops.append(dict(id=_pk_id(), op="replace", line=e.pk_line, code=e.after.strip()))
                     elif e.kind == SAY:
-                        ops.append(dict(id=_pk_id(), op="say_pos", line=e.pk_line, pos=e.pk_pos))
+                        if e.pk_pos:
+                            ops.append(dict(id=_pk_id(), op="say_pos", line=e.pk_line, pos=e.pk_pos))
+                        if e.pk_fx:
+                            ops.append(dict(id=_pk_id(), op="say_fx", line=e.pk_line, sayFx=e.pk_fx))
                 try:
                     _inbox_add(path, ops)
                 except Exception as ex:

@@ -2,6 +2,16 @@
 
 버전별 자세한 설명은 [docs/READ_ME_FIRST.md](docs/READ_ME_FIRST.md)와 폴더별 `README.md`에 있습니다.
 
+## 4.5 (2026-10-31)
+
+줄마다 바꾸는 화면 효과를 렌파이 편집기로 옮겼습니다. PyKaki도 같이 새로 고침해야 합니다.
+
+`ui_kit` 3.4:
+- PyKaki 원고의 대사 탭에서 화면 효과를 고쳐 저장합니다. `showpy_inbox.json`에 `say_fx` 기록을 남겨서 다시 내보내도 남습니다.
+- 일반 원고는 예전과 똑같이 저장합니다.
+
+PyKaki가 `label start:`를 내보내지 않고 `config.label_overrides`로 `start`를 첫 상자에 잇습니다. 이제 `script.rpy`를 지우지 않아도 됩니다.
+
 ## 4.4 (2026-10-31)
 
 대사 편집을 PyKaki로 모았습니다. PyKaki도 같이 새로 고침해야 합니다.

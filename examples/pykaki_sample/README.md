@@ -5,9 +5,8 @@
 ## 렌파이에서 보기
 
 1. 렌파이 런처에서 새 프로젝트를 만듭니다. (1280x720)
-2. 그 프로젝트의 `game/script.rpy`를 지웁니다.
-3. 이 폴더 `game` 안의 파일과, 저장소 `game` 안의 `ui_kit`, `screen_fx`, `hotkeys`, `splash`를 프로젝트의 `game`에 넣습니다.
-4. 실행합니다.
+2. 이 폴더 `game` 안의 파일과, 저장소 `game` 안의 `ui_kit`, `screen_fx`, `hotkeys`, `splash`를 프로젝트의 `game`에 넣습니다.
+3. 실행합니다.
 
 ## PyKaki에서 열기
 

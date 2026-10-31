@@ -3,8 +3,8 @@
 
 define mina = Character("미나", color="#ff8fb1", image="mina")
 
-label start:
-    jump ward
+init python:
+    config.label_overrides["start"] = "ward"
 
 # ── 빈 병동 ──
 # @node:n1 도입
