@@ -27,7 +27,7 @@
 | `pygaki/PyKaki/PyKaki.exe` | PyKaki 데스크톱 앱 |
 | `pygaki/읽어주세요.txt` | 쓰는 법 |
 
-템플릿에 넣는 플러그인은 `make_bundle.py`의 `PLUGINS`에서 고쳐요.
+템플릿에 넣는 플러그인은 `make_bundle.py`의 `PLUGINS`에서 고쳐요. 템플릿에서만 다르게 두는 설정은 `TEMPLATE_SETTINGS`에 있어요. 지금은 **VHS 덮개가 처음에는 꺼져 있어요**(`screen_fx.overlay = False`). 켜려면 새 프로젝트의 `game/screen_fx/screen_fx_config.rpy`에서 `True`로 바꿔요.
 
 ## 렌파이를 올릴 때
 
