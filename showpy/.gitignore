@@ -1,0 +1,11 @@
+*.rpyc
+*.rpymc
+*_layout.rpy
+showpy_inbox.json
+ui_kit_backup/
+__pycache__/
+*.bak
+errors.txt
+traceback.txt
+log.txt
+lint.txt

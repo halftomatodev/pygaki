@@ -1,0 +1,323 @@
+{
+  "format": "renpy-flow",
+  "version": 1,
+  "project": {
+    "title": "샘플: 빈 병동",
+    "startNode": "n1"
+  },
+  "characters": [
+    {
+      "id": "mina",
+      "name": "미나",
+      "color": "#ff8fb1"
+    }
+  ],
+  "variables": [],
+  "labels": [
+    {
+      "id": "g1",
+      "name": "ward",
+      "title": "빈 병동",
+      "color": "#dbeafe",
+      "entry": "n1"
+    },
+    {
+      "id": "g2",
+      "name": "ending_run",
+      "title": "도망 엔딩",
+      "color": "#dcfce7",
+      "entry": "n6"
+    },
+    {
+      "id": "g3",
+      "name": "listen",
+      "title": "소리 듣기 (call)",
+      "color": "#fef3c7",
+      "entry": "n7"
+    }
+  ],
+  "layout": {
+    "direction": "TB"
+  },
+  "settings": {
+    "escapeBrackets": true,
+    "allowTextTags": true,
+    "escapePercent": true,
+    "renpyLink": true
+  },
+  "nodes": [
+    {
+      "id": "n1",
+      "group": "g1",
+      "title": "도입",
+      "pos": {
+        "x": 0,
+        "y": 0
+      },
+      "lines": [
+        {
+          "id": "l1",
+          "type": "scene",
+          "text": "",
+          "image": "hall",
+          "trans": "fade"
+        },
+        {
+          "id": "l2",
+          "type": "music",
+          "text": "",
+          "file": "hum.wav"
+        },
+        {
+          "id": "l3",
+          "type": "narration",
+          "text": "불 꺼진 병동. 복도 끝에서 소리가 났다."
+        },
+        {
+          "id": "l4",
+          "type": "show",
+          "text": "",
+          "kind": "char",
+          "who": "mina",
+          "attr": "normal",
+          "trans": "dissolve"
+        },
+        {
+          "id": "l5",
+          "type": "say",
+          "who": "mina",
+          "text": "여기 아무도 없는 거 맞지?"
+        }
+      ],
+      "exit": {
+        "type": "next",
+        "target": "n2"
+      }
+    },
+    {
+      "id": "n2",
+      "group": "g1",
+      "title": "노크",
+      "pos": {
+        "x": 0,
+        "y": 240
+      },
+      "lines": [
+        {
+          "id": "l6",
+          "type": "note",
+          "text": "이 상자는 앞 상자에서만 이어져서 label이 생기지 않음"
+        },
+        {
+          "id": "l7",
+          "type": "sound",
+          "text": "",
+          "file": "knock.wav"
+        },
+        {
+          "id": "l8",
+          "type": "narration",
+          "text": "똑, 똑."
+        },
+        {
+          "id": "l9",
+          "type": "say",
+          "who": "mina",
+          "attr": "scared",
+          "text": "방금 그 소리 들었어?",
+          "fx": {
+            "warp": "3"
+          }
+        }
+      ],
+      "exit": {
+        "type": "next",
+        "target": "n3"
+      }
+    },
+    {
+      "id": "n3",
+      "group": "g1",
+      "title": "고민",
+      "pos": {
+        "x": 0,
+        "y": 480
+      },
+      "lines": [
+        {
+          "id": "l10",
+          "type": "say",
+          "who": "mina",
+          "attr": "scared",
+          "text": "어떻게 할까?"
+        }
+      ],
+      "exit": {
+        "type": "menu",
+        "choices": [
+          {
+            "id": "c1",
+            "text": "문을 연다",
+            "target": "n4",
+            "mode": "jump",
+            "condition": null,
+            "actions": []
+          },
+          {
+            "id": "c2",
+            "text": "도망친다",
+            "target": "n6",
+            "mode": "jump",
+            "condition": null,
+            "actions": []
+          },
+          {
+            "id": "c3",
+            "text": "귀를 기울인다",
+            "target": "n5",
+            "mode": "jump",
+            "condition": null,
+            "actions": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "n4",
+      "group": "g1",
+      "title": "문을 연다",
+      "pos": {
+        "x": -320,
+        "y": 720
+      },
+      "lines": [
+        {
+          "id": "l11",
+          "type": "fx",
+          "text": "",
+          "fx": {
+            "fx": "ascii",
+            "overlay": "on"
+          }
+        },
+        {
+          "id": "l12",
+          "type": "scene",
+          "text": "",
+          "image": "room",
+          "trans": "dissolve"
+        },
+        {
+          "id": "l13",
+          "type": "show",
+          "text": "",
+          "kind": "etc",
+          "image": "ghost",
+          "trans": "dissolve"
+        },
+        {
+          "id": "l14",
+          "type": "narration",
+          "text": "방 안의 것이 천천히 고개를 들었다."
+        },
+        {
+          "id": "l15",
+          "type": "hide",
+          "text": "",
+          "kind": "etc",
+          "image": "ghost",
+          "trans": "fade"
+        },
+        {
+          "id": "l16",
+          "type": "fx",
+          "text": "",
+          "fx": {
+            "fx": "default"
+          }
+        },
+        {
+          "id": "l17",
+          "type": "narration",
+          "text": "[끝] 문 뒤의 것 {b}엔딩{/b}."
+        }
+      ],
+      "exit": {
+        "type": "return"
+      }
+    },
+    {
+      "id": "n5",
+      "group": "g1",
+      "title": "귀를 기울인다",
+      "pos": {
+        "x": 320,
+        "y": 720
+      },
+      "lines": [
+        {
+          "id": "l18",
+          "type": "narration",
+          "text": "문에 귀를 댔다."
+        }
+      ],
+      "exit": {
+        "type": "call",
+        "target": "n7",
+        "then": "n3"
+      }
+    },
+    {
+      "id": "n6",
+      "group": "g2",
+      "title": "달린다",
+      "pos": {
+        "x": 0,
+        "y": 960
+      },
+      "lines": [
+        {
+          "id": "l19",
+          "type": "hide",
+          "text": "",
+          "kind": "char",
+          "who": "mina",
+          "trans": "dissolve"
+        },
+        {
+          "id": "l20",
+          "type": "music",
+          "text": "",
+          "stop": true
+        },
+        {
+          "id": "l21",
+          "type": "narration",
+          "text": "돌아보지 않고 달렸다. 100% 맞는 선택이었을까."
+        }
+      ],
+      "exit": {
+        "type": "return"
+      }
+    },
+    {
+      "id": "n7",
+      "group": "g3",
+      "title": "숨소리",
+      "pos": {
+        "x": 320,
+        "y": 960
+      },
+      "lines": [
+        {
+          "id": "l22",
+          "type": "narration",
+          "text": "문 너머에서 누군가 같이 숨을 쉬고 있었다."
+        }
+      ],
+      "exit": {
+        "type": "return"
+      }
+    }
+  ]
+}
