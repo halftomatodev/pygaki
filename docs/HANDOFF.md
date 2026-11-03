@@ -36,7 +36,7 @@
 | `showpy/game/ui_kit/engine/text_effects.glsl` | 등장 효과 셰이더 **하나뿐**. 렌파이와 PyKaki가 같이 씀 | 파일 맨 위 "적는 법" |
 | `docs/LINK.md` | 두 프로그램이 맞추는 형식 (내보낸 .rpy 표시, `showpy_inbox.json`, `stage_layout.rpy`, `pykaki_preview.json`, 셰이더) | 형식을 바꿀 때 |
 | `bundle/` | `make_bundle.py`(묶기), `launcher/pygaki_launcher.rpy`(런처 버튼) | `bundle/README.md` |
-| `.github/workflows/` | `deploy.yml` 웹 Pages 배포, `app.yml` 앱 확인(리눅스 Electron) + 윈도우 `PyKaki.exe` 빌드 | |
+| `.github/workflows/` | `deploy.yml` 웹 Pages 배포, `app.yml` 앱 확인(리눅스 Electron) + 윈도우 `PyKaki.exe` 빌드, `release.yml` 태그를 올리면 묶음·덧붙임 zip을 Releases 초안으로 | |
 
 ## 2. 쓰는 법 (사용자 입장)
 
@@ -65,11 +65,13 @@ cd pykaki/app && npm ci && npm start
 cd /f/SHOWPY/renpy-8.5.3-sdk && ./lib/py3-windows-x86_64/python.exe renpy.py <프로젝트 폴더> lint
 ```
 
-묶음 만들기 (40초쯤, `bundle/out/`은 git에 안 올라감. 다시 만들 때는 그 폴더를 먼저 지움):
+배포 파일 만들기 (2분쯤, `bundle/out/`은 git에 안 올라감. 다시 만들 때는 그 폴더를 먼저 지움). 묶음(SDK 포함)과 덧붙임(SDK 폴더에 넣기만) 두 가지가 생김:
 
 ```bash
-python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app 'F:\SHOWPY\PyKaki-win' --zip
+python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app 'F:\SHOWPY\PyKaki-win' --zip --tag v1.0
 ```
+
+보통은 태그를 올리면(`git tag v1.0 && git push origin v1.0`) Actions "배포 파일"이 만들어 Releases에 초안으로 올림. 자세히는 `bundle/README.md`.
 
 ### 고칠 때 지킬 순서
 
@@ -122,7 +124,8 @@ python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app 'F:\SHOWPY\
 
 ## 6. 다음에 할 만한 것
 
-- 묶음 배포: `--zip`으로 만든 zip을 GitHub Releases에 올릴지 정하기 (아직 올린 적 없음). 앱은 서명이 없어서 윈도우가 처음에 경고할 수 있음
+- 배포: `release.yml`(태그 → Releases 초안)을 만들었지만 아직 Actions에서 돌려 본 적 없음. 윈도우 러너에서 `gui_images`(템플릿 그림 만들기)가 되는지가 걸리는 곳. 앱은 서명이 없어서 윈도우가 처음에 경고함(읽어주세요에 [추가 정보] → [실행] 안내)
+- 덧붙임 zip을 진짜 런처 화면에서 켜 보기(로컬에서는 SDK 복사본에 풀어 런처 Lint, 템플릿 프로젝트 Lint까지만 함)
 - 화면 전체 글리치: VHS 덮개 보강, 화면 블록 글리치, 화면 데이터모싱 흉내
 - 참고자료 `F:\Dropbox\1_DEV\renpydev\assets\참고자료\uRHAHdq1xFNfW-Wc.mp4` 아직 안 봄
 - 렌파이 견본 영상(`pykaki/public/effects/*.webm`)은 그대로 둠. 다시 만들 때 `pykaki/tools/record_effect_clips.py`
