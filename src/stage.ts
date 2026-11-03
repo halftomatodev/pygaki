@@ -44,14 +44,14 @@ export const EFFECTS: [string, string][] = [
   ['', '효과 없음'], ['dissolve', '서서히'], ['typewriter', '타자기'], ['slowalpha', '흐리게 대기'], ['flip', '뒤집히며'], ['zoom', '커지며'], ['jitter', '떨림'], ['wave', '물결'],
   // showpy가 등록하는 효과 (ui_kit/engine/text_effects.rpy). showpy가 없는 게임에서는 내보내지 않는다
   ['scatter', '흩어졌다 모이기'], ['drop', '떨어지기'], ['spin', '회전하며'], ['shuffle', '무작위 순서'], ['flash', '색 번쩍'], ['slam', '크게 찍히기'], ['typecursor', '커서 타자기'],
-  ['echo', '색 잔상'], ['glitch', '글리치'], ['glow', '빛 번짐'], ['blurin', '흐렸다 또렷해지기'], ['wipe', '위에서 그려지기'], ['blockglitch', '블록 글리치'],
+  ['echo', '색 잔상'], ['glitch', '글리치'], ['glow', '빛 번짐'], ['blurin', '흐렸다 또렷해지기'], ['wipe', '위에서 그려지기'], ['blockglitch', '블록 글리치'], ['melt', '녹아내림'], ['mosh', '데이터모싱'], ['liquid', '일렁임'],
 ];
 // 렌파이에 들어 있는 효과. 나머지는 showpy가 있어야 한다
 export const RENPY_EFFECTS = ['dissolve', 'typewriter', 'slowalpha', 'flip', 'zoom', 'jitter', 'wave'];
 
-// 글자가 하나씩 나올 때만 보이는 효과. 글자/초를 비워도 효과가 보이게 기본값을 쓴다 (물결, 떨림, 빛 번짐은 한 번에 나와도 보여서 뺀다)
+// 글자가 하나씩 나올 때만 보이는 효과. 글자/초를 비워도 효과가 보이게 기본값을 쓴다 (물결, 떨림, 빛 번짐, 일렁임은 한 번에 나와도 보여서 뺀다)
 export const DEFAULT_CPS = 30;
-const TYPED_EFFECTS = ['dissolve', 'typewriter', 'slowalpha', 'flip', 'zoom', 'scatter', 'drop', 'spin', 'shuffle', 'flash', 'slam', 'typecursor', 'echo', 'glitch', 'blurin', 'wipe', 'blockglitch'];
+const TYPED_EFFECTS = ['dissolve', 'typewriter', 'slowalpha', 'flip', 'zoom', 'scatter', 'drop', 'spin', 'shuffle', 'flash', 'slam', 'typecursor', 'echo', 'glitch', 'blurin', 'wipe', 'blockglitch', 'melt', 'mosh'];
 export const lineCps = (s?: SayStyle) => s?.cps ?? (s?.effect && TYPED_EFFECTS.includes(s.effect) ? DEFAULT_CPS : undefined);
 
 // showpy가 없는 게임에서는 렌파이 원래 이름으로 내보낸다. 그러면 플러그인 없이도 오류가 나지 않는다
