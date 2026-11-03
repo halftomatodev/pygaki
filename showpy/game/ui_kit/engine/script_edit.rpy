@@ -678,7 +678,7 @@ init -19 python in script_edit:
     ##   - 대사 글자와 모양, 선택지는 저장하지 않습니다. (PyKaki에서 고침)
     ##   - 그림, 영상, 소리 줄과 대사의 위치, 화면 효과는 원고에 쓰고, showpy_inbox.json에도 적어 둡니다.
     ##     PyKaki가 그 파일을 받아 적으므로 다시 내보내도 사라지지 않습니다.
-    ## 형식은 문서 docs/LINK.md에 있습니다.
+    ## 형식은 pygaki 저장소의 문서 docs/LINK.md에 있습니다.
 
     PYKAKI_MARK = "# PyKaki가 만든 파일이에요."
     INBOX_FILE = "showpy_inbox.json"

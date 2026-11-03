@@ -20,7 +20,7 @@ import tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 PYKAKI = os.path.dirname(HERE)
 SDK = os.environ.get("RENPY_SDK", r"<렌파이 SDK>")
-SHOWPY = os.environ.get("SHOWPY_DIR", r"<예전 showpy 저장소>")
+SHOWPY = os.environ.get("SHOWPY_DIR", os.path.join(os.path.dirname(PYKAKI), "showpy"))
 BASE = os.environ.get("BASE_GAME", r"<렌파이 프로젝트 폴더>\pykaki_sample\game")
 OUT = os.path.join(PYKAKI, "public", "effects")
 
@@ -55,11 +55,11 @@ label before_main_menu:
 
 
 def effects_from_pykaki():
-    """PyKaki 셰이더 파일(src/fx/*.glsl)의 효과 목록과, 글자/초 기본값을 쓰는 효과(@cps)."""
+    """셰이더 파일(PyKaki 렌파이 내장 효과, showpy text_effects.glsl)의 효과 목록과, 글자/초 기본값을 쓰는 효과(@cps)."""
     names, typed = [], set()
-    for fn in ("renpy_textshaders.glsl", "text_effects.glsl"):
+    for path in (os.path.join(PYKAKI, "src", "fx", "renpy_textshaders.glsl"), os.path.join(SHOWPY, "game", "ui_kit", "engine", "text_effects.glsl")):
         cur = None
-        for line in open(os.path.join(PYKAKI, "src", "fx", fn), encoding="utf-8"):
+        for line in open(path, encoding="utf-8"):
             m = re.match(r"@effect (\w+)", line)
             if m:
                 cur = m.group(1)

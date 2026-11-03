@@ -1,6 +1,6 @@
 # showpy와 PyKaki 연결 약속
 
-두 프로그램이 서로 맞춰야 하는 형식을 적은 문서입니다. **이 파일은 showpy 저장소와 PyKaki 저장소에 똑같이 들어 있습니다.** 한쪽을 고치면 다른 쪽도 같이 고칩니다.
+두 프로그램이 서로 맞춰야 하는 형식을 적은 문서입니다. 두 프로그램은 pygaki 저장소의 `showpy/`, `pykaki/` 폴더에 같이 들어 있고, 이 문서는 저장소 맨 위 `docs/`에 하나만 있습니다.
 
 ## 1. 역할
 
@@ -155,7 +155,7 @@ PyKaki가 쓰고 showpy가 읽기만 합니다. PyKaki 글자 효과 칸의 [렌
 
 ## 8. 등장 효과 셰이더 (`text_effects.glsl`)
 
-등장 효과의 셰이더 코드는 showpy `game/ui_kit/engine/text_effects.glsl` 하나에 있습니다. **이 파일이 원본**이고, PyKaki `src/fx/text_effects.glsl`은 사본입니다(PyKaki에서 `npm run sync-shaders`로 복사. `SHOWPY_DIR`로 showpy 폴더를 정함).
+등장 효과의 셰이더 코드는 `showpy/game/ui_kit/engine/text_effects.glsl` 하나에 있습니다. PyKaki는 사본 없이 이 파일을 바로 가져다 빌드합니다(`pykaki/src/fx/textShaders.ts`의 `?raw` 가져오기).
 
 | 누가 | 어떻게 쓰나 |
 |---|---|

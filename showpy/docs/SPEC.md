@@ -5,7 +5,7 @@
 - 묶음 버전 4.13 (`ui_kit` 3.12, `screen_fx` 4.2, `hotkeys` 1.0, `splash` 1.1)
 - 렌파이 8.5.3 기준
 - 작업 규칙: [DEV_RULES.md](DEV_RULES.md)
-- PyKaki 연결 형식: [LINK.md](LINK.md)
+- PyKaki 연결 형식: [LINK.md](../../docs/LINK.md)
 - PyKaki 명세: https://github.com/halftomatodev/pykaki/blob/main/docs/SPEC.md
 
 ## 1. 목적

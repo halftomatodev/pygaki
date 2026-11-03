@@ -121,7 +121,7 @@
     - 모든 상자에 `label 그룹.상자id:`를 쓴다. 첫 상자는 `label 그룹:` 바로 아래에 이어 쓴다.
     - 줄마다 앞에 `# @l:줄id`, 나가는 부분 앞에 `# @end:상자id`를 쓴다.
     - 대사 괄호(`fx=`, `size=` 등)와 `fx` 줄을 내보낸다. 끄면 `fx` 줄은 주석이 되고 경고가 뜬다. 괄호 순서는 화면 효과, 글자 모양, 위치다.
-    - 형식은 [LINK.md](LINK.md).
+    - 형식은 [LINK.md](../../docs/LINK.md).
 
 ## 6. 자동 정렬 (`src/layout.ts`)
 
@@ -141,10 +141,10 @@
   - 무한 반복은 5000단계에서 멈춘다.
 - 종료 사유: `end`(return), `broken`(연결 없음), `missing`(없는 상자), `loop`.
 - 텍스트 태그를 흉내 낸다: `{b} {i} {u} {s} {color=} {size=} {font=} {alpha=} {k=} {cps=} {p} {w} {nw} {fast} {a=}`, `{{`. 글자를 하나씩 내보내고(`parseTagged`, `SayBox`), 클릭하면 다음 멈춤까지 다 보여 준 뒤에 넘어간다.
-- **게임 화면**: 게임 해상도로 그린 뒤 틀에 맞춰 줄인다(`GameFrame`). 크기와 대사창 값은 연결한 폴더에서 읽고(`readLook`, [LINK.md](LINK.md) 6장), 없으면 1280x720 기본값이다. 파일이 없는 그림은 이름 표시로 대신한다. 폴더가 없어도 플레이된다.
+- **게임 화면**: 게임 해상도로 그린 뒤 틀에 맞춰 줄인다(`GameFrame`). 크기와 대사창 값은 연결한 폴더에서 읽고(`readLook`, [LINK.md](../../docs/LINK.md) 6장), 없으면 1280x720 기본값이다. 파일이 없는 그림은 이름 표시로 대신한다. 폴더가 없어도 플레이된다.
 - **전환**: `dissolve`, `fade`, `stage.move/ease/zoom`을 CSS로 흉내 내고, 전환 시간만큼 다음 글자를 기다린다.
 - **등장 효과**: 렌파이 텍스트 셰이더 7개와 showpy가 등록한 20개를 **WebGL로, showpy와 같은 셰이더 코드로** 그린다(`src/fx/`).
-  - 셰이더 원본은 showpy `game/ui_kit/engine/text_effects.glsl`이고, `src/fx/text_effects.glsl`은 사본(`npm run sync-shaders`로 복사, 직접 고치지 않음). 렌파이 내장 7개는 `src/fx/renpy_textshaders.glsl`(렌파이 8.5.3 `00textshader_ren.py`를 옮김, MIT). 형식은 [LINK.md](LINK.md) 8장. 효과 목록 `EFFECTS`, `RENPY_EFFECTS`, 글자/초 기본값을 쓰는 효과(`@cps`)도 이 파일에서 온다.
+  - 셰이더는 `showpy/game/ui_kit/engine/text_effects.glsl` 하나이고, 빌드할 때 `?raw`로 그대로 가져온다. 렌파이 내장 7개는 `src/fx/renpy_textshaders.glsl`(렌파이 8.5.3 `00textshader_ren.py`를 옮김, MIT). 형식은 [LINK.md](../../docs/LINK.md) 8장. 효과 목록 `EFFECTS`, `RENPY_EFFECTS`, 글자/초 기본값을 쓰는 효과(`@cps`)도 이 파일에서 온다.
   - `textShaders.ts`: 파일 읽기(`parseShaders`, showpy `tfx_parse`와 같은 규칙), 효과 문자열(`"scatter:u__distance=200"`, `"a|b"`) 읽기(`parseTextShader`, 렌파이 `parse_textshader`), 렌파이처럼 셰이더 조각 합치기(`shaderSource`: `renpy.geometry` `renpy.texture` `textshader.이름`을 이름순으로, 쓰는 변수만 이름순으로, `vertex_N`/`fragment_N`은 우선순위순, `u__` `l__` `v__` `a__`는 `u_textshader_이름_…`으로 바꿈). 색 값은 투명도를 곱한 vec4.
   - `FxCanvas.tsx`: 화면의 글자(`span.ch`, `.fx-gl`이면 숨김)에서 자리를 재서, 렌파이처럼 글자를 그림으로 만들고(외곽선 겹은 따로) 글자마다 조각(줄 높이 × 글자 폭, 줄 왼쪽과 오른쪽 빈 곳은 가짜 글자, 그림 폭은 가장 긴 줄)을 만든다. 중심(`a_text_center`)은 글자 밑줄 자리. 글자 i의 `a_text_min_time`은 `useReveal`이 i번째 글자까지 내보낸 때라 렌파이처럼 한 글자 앞서 나오고, `{w}`에서 멈춘 동안 뒤 글자는 안 나온다. `u_text_slow_time`, `u_text_slow_duration`(1/cps), `u_text_to_drawable`(화면 배율 × devicePixelRatio), `u_text_main`, `u_text_depth`, `u_time`, `u_random`, `tex0`, `res0`를 렌파이와 같은 뜻으로 넘긴다. 클릭으로 한 번에 보이면 렌파이처럼 다 끝난 시간으로 그린다. 캔버스는 글 칸 둘레로 글자 크기 × 3만큼 넓다.
   - `echo`처럼 `@outline`이 있는 효과는 외곽선 겹(`u_text_main` 0)을 글자 뒤에 먼저 그린다.
@@ -171,7 +171,7 @@
 - **편집 탭 줄 모양**: 줄마다 2칸 격자. 왼쪽 칸(136px)에 손잡이·줄 종류·✕와 대사 속성, 오른쪽 칸에 글(또는 연출 입력칸)을 두고 사이에 세로 선을 긋는다.
 - **글자 효과 칸** (`LineLook`, 연결과 상관없이): 글 칸에는 글만 둔다. 오른쪽 편집 탭 위쪽에 붙어 있고(`.look-panel`, sticky), 지금 쓰는 줄(`store.activeLine`, 상자 안 편집과 편집 탭이 같이 씀)을 따라간다. 그 줄이 대사가 아니면 상자의 첫 대사 줄을 보여 준다. 집중 모드에서는 패널과 함께 숨는다. 글자 모양, 속도, 등장 효과가 들어 있고, 받아 적은 좌표와 화면 효과는 보여 주기만 한다. 맨 위 미리보기(`LinePreview`)는 플레이 화면과 같은 코드(`useReveal`, `Glyphs`, `FxCanvas`)로 글자만 그린다. 글자는 칸에 들어가는 가장 큰 크기(11~60px)로 맞추고, 효과나 글자/초를 바꾸면 다시 재생한다.
 - **렌파이 견본** (`EffectClip`): 효과를 고르면 미리보기 아래에 `public/effects/<효과>.webm`을 반복 재생한다. 렌파이에서 예시 대사를 재생하며 찍은 2.4초 영상이다. `tools/record_effect_clips.py`가 효과 목록을 `stage.ts`에서 읽어 렌파이 SDK와 ffmpeg로 만든다. 효과를 새로 넣으면 다시 돌린다.
-- **렌파이에서 보기** (폴더를 연결했을 때): 켜 두면 줄이나 값을 바꿀 때마다 0.3초 뒤 `game/pykaki_preview.json`을 쓴다(`writePreview`). 개발 모드로 켜 둔 게임이 화면 위에 그 줄을 진짜 효과로 다시 보여 준다. 형식은 [LINK.md](LINK.md) 7장. 켰는지는 `localStorage["pykaki-live-preview"]`. 스위치를 켜고 끌 때는 클릭 안이라 폴더 권한을 물어보고, 그 뒤 자동으로 쓰다가 권한이 없으면(`'denied'`) 스위치 옆에 안내와 [권한 허용], 쓰기가 실패하면(`'error'`) [다시 쓰기]를 보여 준다.
+- **렌파이에서 보기** (폴더를 연결했을 때): 켜 두면 줄이나 값을 바꿀 때마다 0.3초 뒤 `game/pykaki_preview.json`을 쓴다(`writePreview`). 개발 모드로 켜 둔 게임이 화면 위에 그 줄을 진짜 효과로 다시 보여 준다. 형식은 [LINK.md](../../docs/LINK.md) 7장. 켰는지는 `localStorage["pykaki-live-preview"]`. 스위치를 켜고 끌 때는 클릭 안이라 폴더 권한을 물어보고, 그 뒤 자동으로 쓰다가 권한이 없으면(`'denied'`) 스위치 옆에 안내와 [권한 허용], 쓰기가 실패하면(`'error'`) [다시 쓰기]를 보여 준다.
 - **글자/초 기본값** (`lineCps`, `DEFAULT_CPS` 30): 글자가 하나씩 나와야 보이는 효과(`wave`, `jitter`, `glow`, `liquid`, `vhs`를 뺀 모든 효과)에서 `cps`가 비면 30으로 재생하고 내보낸다. 효과가 없거나 `wave`, `jitter`이면 비운 채로 두고 게임 설정을 따른다.
 - **Ctrl+Enter**: 같은 화자로 새 줄을 만든다. `flushSync`로 즉시 그려서 바로 이어 쳐도 글자가 새 줄에 들어간다.
 - **빈 곳 더블클릭**: 새 상자를 만든다. label 프레임 안이면 그 label에 넣는다.
@@ -218,7 +218,7 @@
 
 ## 9-0. showpy 연결 (`src/gameFolder.ts`, `src/inbox.ts`)
 
-전체 형식은 [LINK.md](LINK.md). `.rpy`를 되읽는 역가져오기는 없다.
+전체 형식은 [LINK.md](../../docs/LINK.md). `.rpy`를 되읽는 역가져오기는 없다.
 
 - 연결 버튼 `linkProject` (왼쪽 패널): 폴더 고르기, 렌파이 프로젝트인지 확인(`gui.rpy`/`options.rpy`), `ui_kit`이 있으면 `renpyLink` 켜고 없으면 끄기, 이미 다른 `script_flow.rpy`가 있으면 묻기, 첫 내보내기까지 한 번에 한다.
 - 폴더: `showDirectoryPicker`로 `game` 폴더 핸들을 받아 IndexedDB `kv.gameDir`에 둔다. 프로젝트 폴더를 고르면 안의 `game`을 쓴다. 권한은 사용자 동작이 있을 때 다시 얻는다.
@@ -276,4 +276,4 @@
   - 선택지 조건 → `"텍스트" if 조건:`
   - 조건 분기 상자 → `if/elif/else` + `jump`
   - 플레이에서 변수 보기와 바꾸기
-- **확인됨**: 내보낸 `.rpy`가 렌파이 8.5.3에서 실행된다(로컬 label 포함). 연결 쪽 확인 상태는 [LINK.md](LINK.md) 6장.
+- **확인됨**: 내보낸 `.rpy`가 렌파이 8.5.3에서 실행된다(로컬 label 포함). 연결 쪽 확인 상태는 [LINK.md](../../docs/LINK.md) 9장.
