@@ -29,6 +29,13 @@ SHOWPY_GAME = os.path.join(ROOT, "showpy", "game")
 ## 템플릿에 넣을 showpy 플러그인. 빼고 싶은 것은 여기서 지운다
 PLUGINS = ["ui_kit", "screen_fx", "hotkeys", "splash"]
 
+## 템플릿에서만 바꾸는 설정 (파일, 원래 줄, 바꿀 줄). showpy 원본은 그대로 둔다
+TEMPLATE_SETTINGS = [
+    ## VHS 덮개는 처음에는 끔. 켜려면 새 프로젝트의 screen_fx/screen_fx_config.rpy에서 True로
+    ("screen_fx/screen_fx_config.rpy", "define screen_fx.overlay = True",
+     "define screen_fx.overlay = False    # pygaki 템플릿: 처음에는 끔. 켜려면 True"),
+]
+
 ## 복사하지 않는 것 (컴파일 결과, 개인 배치, 시험 찌꺼기)
 SKIP = shutil.ignore_patterns("*.rpyc", "*.rpymc", "*_layout.rpy", "showpy_inbox.json", "pykaki_preview.json",
                               "cache", "saves", "__pycache__", "*.bak", "errors.txt", "traceback.txt", "log.txt", "lint.txt")
@@ -41,6 +48,8 @@ README = """pygaki ({version})
    (런처가 영어면 preferences → Language → 한국어)
 2. 런처 아래쪽의 [showpy 새 프로젝트]로 프로젝트를 만듭니다. showpy가 처음부터 들어 있습니다.
    (런처의 원래 [Create New Project]에서 템플릿 "showpy"를 골라도 같습니다)
+   VHS 덮개는 처음에는 꺼져 있습니다. 켜려면 game/screen_fx/screen_fx_config.rpy의
+   define screen_fx.overlay = False 를 True로 바꿉니다.
 3. 왼쪽 목록에서 프로젝트를 고르고 [PyKaki로 대본 쓰기]를 누르면 PyKaki가 그 프로젝트로 열립니다.
    - 대본은 프로젝트 폴더 맨 위의 "프로젝트이름.flow.json"에 자동 저장됩니다.
    - Ctrl+E로 game/script_flow.rpy에 내보내면 렌파이가 바로 다시 불러옵니다.
@@ -100,6 +109,13 @@ def main():
         if not os.path.isdir(src):
             sys.exit("showpy 플러그인이 없어요: " + src)
         shutil.copytree(src, os.path.join(tdir, "game", name), ignore=SKIP)
+    for rel, old, new in TEMPLATE_SETTINGS:
+        fn = os.path.join(tdir, "game", rel)
+        text = open(fn, encoding="utf-8").read()
+        if text.count(old) != 1:
+            sys.exit("템플릿 설정을 바꾸지 못했어요 ({} 에서 '{}'를 못 찾음). TEMPLATE_SETTINGS를 고쳐 주세요.".format(rel, old))
+        with open(fn, "w", encoding="utf-8") as f:
+            f.write(text.replace(old, new))
     with open(os.path.join(tdir, "project.json"), "w", encoding="utf-8") as f:
         json.dump({"type": "template"}, f)
 
