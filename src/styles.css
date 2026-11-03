@@ -425,6 +425,27 @@ pre.rpy { background: #17191f; color: #d4d6dd; padding: 12px; border-radius: 8px
   60% { transform: translateX(calc(var(--r2) * .06em)); clip-path: none; text-shadow: calc(var(--r2) * .06em) .06em color-mix(in srgb, currentColor 50%, transparent); }
   80% { transform: none; text-shadow: none; }
 }
+/* VHS 지직거림: 주사선, 빨강/파랑 어긋남, 가로 흔들림, 순간적인 색조 바뀜이 계속된다 */
+.fx-vhs { animation: fx-vhs 1.7s steps(1) infinite; }
+.fx-vhs .ch {
+  background: repeating-linear-gradient(to bottom, var(--txt) 0 .045em, color-mix(in srgb, var(--txt) 50%, #000) .045em .09em);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  /* 글자 안을 배경으로 칠하면 text-shadow가 글자 위에 그려져서, 그림자는 글자 뒤에 깔리는 drop-shadow로 */
+  filter: drop-shadow(.06em 0 rgba(255, 40, 80, .7)) drop-shadow(-.06em 0 rgba(40, 120, 255, .6));
+}
+.fx-vhs .ch.on:nth-child(3n + 1) { display: inline-block; white-space: pre; animation: fx-vhs-tear 1.3s steps(1) infinite; animation-delay: calc(var(--r4) * -1.3s); }
+@keyframes fx-vhs {
+  0% { transform: none; filter: none; }
+  12% { transform: translateX(.06em); filter: sepia(1) saturate(3); }
+  20% { transform: none; filter: none; }
+  44% { transform: translateX(-.05em); }
+  50% { transform: none; filter: grayscale(1); }
+  58% { filter: none; }
+  76% { filter: sepia(1) saturate(4) hue-rotate(170deg); }
+  84% { filter: none; transform: translateX(.03em); }
+  90% { transform: none; }
+}
+@keyframes fx-vhs-tear { 0% { translate: 0; } 40% { translate: .25em 0; clip-path: inset(30% 0 40% 0); } 48% { translate: 0; clip-path: none; } 80% { translate: -.18em 0; clip-path: inset(55% 0 10% 0); } 86% { translate: 0; clip-path: none; } }
 /* 일렁임: 물에 비친 것처럼 출렁인다 (App.tsx의 SVG 물결 필터) */
 .fx-liquid { filter: url(#pk-liquid); }
 /* 빛 번짐: 글자 주변이 흐리게 빛난다 */
