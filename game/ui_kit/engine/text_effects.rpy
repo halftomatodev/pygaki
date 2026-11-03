@@ -27,6 +27,9 @@
 ##   mosh        데이터모싱 흉내: 네모 칸이 한쪽으로 끌리며 번졌다가 돌아옴 (u__hold로 계속)
 ##   liquid      일렁임: 물에 비친 것처럼 계속 출렁임 (한 번에 나와도 보임)
 ##   vhs         지직거리는 VHS: 주사선, 띠 찢김, 색 어긋남, 색조 바뀜, 노이즈가 계속 (한 번에 나와도 보임)
+##   rise        떠오르기: 글자마다 다른 깊이에서 떠올라 제자리로
+##   lean        기울며 들어오기: 크게 기운 채 옆에서 들어와 바로 섬
+##   stretch     늘어나며 들어오기: 세로로 늘어났다가 원래 비율로 (u__x, u__y로 방향)
 ##
 ## 값은 콜론으로 바꿀 수 있습니다. (렌파이 텍스트 셰이더 문법)
 ##     effect="scatter:u__distance=200"      더 멀리서 모임
@@ -794,4 +797,88 @@ init -10 python in say_style:
         u__tint=0.35,
         u__noise=0.35,
         u__rate=12.0,
+        )
+
+    ## ── 떠오르기, 기울며 들어오기, 늘어나며 들어오기 (3.10) ─────────────────
+    ##   rise     떠오르기: 글자마다 다른 깊이에서 떠올라 제자리에 맞춰짐
+    ##   lean     기울며 들어오기: 크게 기운 채 옆에서 들어와 바로 섬
+    ##   stretch  늘어나며 들어오기: 세로로 길게 늘어났다가 원래 비율로
+    ##            (effect="stretch:u__x=2.5:u__y=1.0"이면 가로로 늘어남)
+
+    store.renpy.register_textshader(
+        "rise",
+        include_default=False,
+        adjust_function=_tfx_adjust,
+        variables="""
+        uniform float u__duration;
+        uniform float u__depth;
+        uniform float u_text_slow_duration;
+        uniform float u_text_slow_time;
+        uniform float u_text_to_drawable;
+        attribute float a_text_min_time;
+        attribute float a_text_index;
+        varying float v_tfx_rise;
+        """,
+        vertex_30=_TFX_T + """
+        float l__e = 1.0 - pow(1.0 - l__t, 3.0);
+        float l__d = 0.4 + 0.8 * {};
+        gl_Position.y += u__depth * l__d * u_text_to_drawable * (1.0 - l__e);
+        v_tfx_rise = l__t;
+        """.format(_tfx_rand(5.0)),
+        fragment_350=_TFX_ALPHA.format("clamp(v_tfx_rise * 2.0, 0.0, 1.0)"),
+        u__duration=10.0,
+        u__depth=40.0,
+        )
+
+    store.renpy.register_textshader(
+        "lean",
+        include_default=False,
+        adjust_function=_tfx_adjust,
+        variables="""
+        uniform float u__duration;
+        uniform float u__angle;
+        uniform float u__slide;
+        uniform float u_text_slow_duration;
+        uniform float u_text_slow_time;
+        uniform float u_text_to_drawable;
+        attribute float a_text_min_time;
+        attribute vec2 a_text_center;
+        varying float v_tfx_lean;
+        """,
+        vertex_30=_TFX_T + """
+        float l__e = 1.0 - pow(1.0 - l__t, 3.0);
+        float l__k = tan(radians(u__angle)) * (1.0 - l__e);
+        gl_Position.x += (a_text_center.y - gl_Position.y) * l__k - u__slide * u_text_to_drawable * (1.0 - l__e);
+        v_tfx_lean = l__t;
+        """,
+        fragment_350=_TFX_ALPHA.format("clamp(v_tfx_lean * 3.0, 0.0, 1.0)"),
+        u__duration=8.0,
+        u__angle=35.0,
+        u__slide=20.0,
+        )
+
+    store.renpy.register_textshader(
+        "stretch",
+        include_default=False,
+        adjust_function=_tfx_adjust,
+        variables="""
+        uniform float u__duration;
+        uniform float u__x;
+        uniform float u__y;
+        uniform float u_text_slow_duration;
+        uniform float u_text_slow_time;
+        attribute float a_text_min_time;
+        attribute vec2 a_text_center;
+        varying float v_tfx_stretch;
+        """,
+        vertex_30=_TFX_T + """
+        float l__e = 1.0 - pow(1.0 - l__t, 3.0);
+        vec2 l__s = mix(vec2(u__x, u__y), vec2(1.0), l__e);
+        gl_Position.xy = a_text_center + (gl_Position.xy - a_text_center) * l__s;
+        v_tfx_stretch = l__t;
+        """,
+        fragment_350=_TFX_ALPHA.format("clamp(v_tfx_stretch * 3.0, 0.0, 1.0)"),
+        u__duration=8.0,
+        u__x=0.6,
+        u__y=2.6,
         )

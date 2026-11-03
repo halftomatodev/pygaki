@@ -2,6 +2,11 @@
 
 버전별 자세한 설명은 [docs/READ_ME_FIRST.md](docs/READ_ME_FIRST.md)와 폴더별 `README.md`에 있습니다.
 
+## 4.11 (2026-11-03)
+
+`ui_kit` 3.10:
+- 등장 효과 `rise`(떠오르기), `lean`(기울며 들어오기), `stretch`(늘어나며 들어오기)를 추가했습니다.
+
 ## 4.10 (2026-11-03)
 
 `ui_kit` 3.9:

@@ -81,6 +81,9 @@ init -8 python in ui_editor:
             ("mosh", "데이터모싱"),
             ("liquid", "일렁임"),
             ("vhs", "VHS 지직거림"),
+            ("rise", "떠오르기"),
+            ("lean", "기울며 들어오기"),
+            ("stretch", "늘어나며 들어오기"),
             )
 
         def __init__(self):
