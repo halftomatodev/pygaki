@@ -14,6 +14,7 @@
 | 무엇 | 자리 |
 |---|---|
 | 저장소 | https://github.com/halftomatodev/pygaki (`main`) |
+| 배포 파일 (묶음, 덧붙임 zip) | https://github.com/halftomatodev/pygaki/releases (v1.0) |
 | 웹 버전 PyKaki | https://halftomatodev.github.io/pygaki/ (`main`에 push하면 자동 배포) |
 | 공개용 사용 안내 (구글 문서, showpy 4.13 기준) | https://docs.google.com/document/d/10kmDFgiQ9JpbgIY6Q7vejf3EjMC06rCJCxjVSeukdes/edit |
 | 로컬 저장소 | `F:\SHOWPY\pygaki` (Dropbox 밖) |
@@ -124,7 +125,7 @@ python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app 'F:\SHOWPY\
 
 ## 6. 다음에 할 만한 것
 
-- 배포: `release.yml`을 손으로 돌려 성공함(2026-11-04, 템플릿 그림 만들기·Lint 통과, Artifacts `pygaki-dev`에 두 zip). 아직 태그를 올려 Releases에 낸 적은 없음. 앱은 서명이 없어서 윈도우가 처음에 경고함(읽어주세요에 [추가 정보] → [실행] 안내)
+- 배포: `release.yml`을 손으로 돌려 성공함(2026-11-04, 템플릿 그림 만들기·Lint 통과, Artifacts `pygaki-dev`에 두 zip). v1.0을 Releases에 공개함(2026-11-04). 다음 판은 태그만 올리고 초안을 보고 공개. 앱은 서명이 없어서 윈도우가 처음에 경고함(읽어주세요에 [추가 정보] → [실행] 안내)
 - Actions 경고: Node.js 20 액션(`checkout@v4` 등)이 곧 막힘. 새 판으로 올리기
 - 덧붙임 zip을 진짜 런처 화면에서 켜 보기(로컬에서는 SDK 복사본에 풀어 런처 Lint, 템플릿 프로젝트 Lint까지만 함)
 - 화면 전체 글리치: VHS 덮개 보강, 화면 블록 글리치, 화면 데이터모싱 흉내
