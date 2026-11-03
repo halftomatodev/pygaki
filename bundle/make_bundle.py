@@ -4,9 +4,14 @@
 렌파이를 새 버전으로 올릴 때도 새 SDK로 이 스크립트를 다시 돌리면 된다.
 
     python bundle/make_bundle.py
-    python bundle/make_bundle.py --sdk <렌파이 SDK> --app pykaki\\app\\out\\win-unpacked --zip
+    python bundle/make_bundle.py --sdk <렌파이 SDK> --app pykaki\\app\\out\\win-unpacked --zip --tag v1.0
 
-만들어지는 것 (기본: bundle/out/pygaki-renpy-<버전>):
+두 가지를 만든다 (기본: bundle/out/):
+    pygaki[-태그]-renpy-<버전>/   묶음. 풀고 renpy.exe를 켜기만 하면 된다 (렌파이 SDK 포함)
+    pygaki[-태그]-addon/          덧붙임. 이미 있는 렌파이 SDK 폴더(renpy.exe가 있는 곳)에 풀어 넣기만 하면 된다
+                                  (아래에서 SDK 그대로인 것만 빠지고, pygaki_넣는법.txt가 더해짐)
+
+묶음 안:
     renpy.exe, launcher/ ...          렌파이 SDK 그대로
     launcher/game/pygaki_launcher.rpy  런처 첫 화면의 [PyKaki로 대본 쓰기] [showpy 새 프로젝트]
     showpy/                            새 프로젝트 템플릿 (런처처럼 만든 1280x720 한국어 기본 프로젝트 + showpy 플러그인, project.json "template")
@@ -62,9 +67,33 @@ README = """pygaki ({version})
    편집기에서 넣은 그림, 소리 줄은 PyKaki 대본에 바로 받아 적힙니다.
 
 PyKaki만 따로 켜려면 pygaki\\PyKaki\\PyKaki.exe (프로젝트 폴더를 고르는 창이 뜹니다).
+처음 켤 때 윈도우가 "PC 보호" 창을 띄우면 [추가 정보] → [실행]을 누릅니다 (앱에 서명이 없어서 그렇습니다).
+
+새 버전: https://github.com/halftomatodev/pygaki/releases
 
 라이선스: 렌파이는 MIT (renpy\\LICENSE.txt 등 SDK 안의 파일), showpy와 PyKaki는 MIT.
 """
+
+ADDON_README = """pygaki 덧붙임 ({version}) 넣는 법
+
+이미 렌파이 SDK가 있으면 이것만 받아 넣으면 됩니다. (렌파이 {renpy}로 만듦. 렌파이 8이면 대개 됩니다)
+렌파이가 없으면 렌파이까지 들어 있는 pygaki-...-renpy-....zip을 받으세요.
+
+1. 렌파이 SDK 폴더(renpy.exe가 있는 폴더)를 엽니다.
+2. 이 zip 안의 launcher, showpy, pygaki 세 폴더를 그 폴더에 그대로 끌어 넣습니다.
+   "같은 이름의 폴더가 있다"고 물으면 [바꾸기]나 [합치기]를 고릅니다.
+   렌파이의 원래 파일은 바뀌지 않고 파일만 더해집니다:
+   launcher\\game\\pygaki_launcher.rpy, showpy\\, pygaki\\
+3. 런처가 켜져 있었으면 껐다 켭니다. 첫 화면 아래쪽에 [PyKaki로 대본 쓰기] [showpy 새 프로젝트]가 생깁니다.
+
+쓰는 법은 pygaki\\읽어주세요.txt를 보세요. 이 파일은 같이 넣어도 되고 지워도 됩니다.
+
+빼려면: launcher\\game\\pygaki_launcher.rpy(와 pygaki_launcher.rpyc), showpy, pygaki 폴더를 지웁니다.
+렌파이를 새 버전으로 올리면 새 SDK 폴더에 세 폴더를 다시 넣습니다.
+"""
+
+## 덧붙임에 들어가는 것 (SDK 폴더 기준). 나머지는 SDK 그대로
+ADDON_PARTS = [os.path.join("launcher", "game", "pygaki_launcher.rpy"), "showpy", "pygaki"]
 
 
 def version_of(path, pattern, default="?"):
@@ -113,8 +142,9 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--sdk", default=os.environ.get("RENPY_SDK", r"<렌파이 SDK>"))
     ap.add_argument("--app", default=os.path.join(ROOT, "pykaki", "app", "out", "win-unpacked"))
-    ap.add_argument("--out", default=None)
+    ap.add_argument("--out", default=os.path.join(HERE, "out"), help="만들 자리 (묶음과 덧붙임 폴더가 여기 생김)")
     ap.add_argument("--zip", action="store_true", help="폴더를 zip으로도 묶는다")
+    ap.add_argument("--tag", default="", help="이름에 붙일 판 (예: v1.0)")
     a = ap.parse_args()
 
     sdk = os.path.abspath(a.sdk)
@@ -130,17 +160,21 @@ def main():
 
     renpy_ver = version_of(os.path.join(sdk, "renpy", "vc_version.py"), r"version\s*=\s*u?['\"](\d+\.\d+\.\d+)", os.path.basename(sdk))
     showpy_ver = version_of(os.path.join(SHOWPY_GAME, "ui_kit", "engine", "ui_kit.rpy"), r'VERSION = "([\d.]+)"')
-    out = os.path.abspath(a.out or os.path.join(HERE, "out", "pygaki-renpy-" + renpy_ver))
-    if os.path.exists(out):
-        sys.exit("이미 있어요. 지우고 다시 돌려 주세요: " + out)
+    outdir = os.path.abspath(a.out)
+    prefix = "pygaki" + ("-" + a.tag if a.tag else "")
+    out = os.path.join(outdir, prefix + "-renpy-" + renpy_ver)
+    addon = os.path.join(outdir, prefix + "-addon")
+    for d in (out, addon):
+        if os.path.exists(d):
+            sys.exit("이미 있어요. 지우고 다시 돌려 주세요: " + d)
 
-    print("1/5 렌파이 SDK 복사 ...")
-    shutil.copytree(sdk, out, ignore=shutil.ignore_patterns("tmp", "__pycache__"))
+    print("1/6 렌파이 SDK 복사 ...")
+    shutil.copytree(sdk, out, ignore=shutil.ignore_patterns("tmp", "__pycache__", "log.txt", "errors.txt", "traceback.txt"))
 
-    print("2/5 런처 버튼 넣기 ...")
+    print("2/6 런처 버튼 넣기 ...")
     shutil.copy(os.path.join(HERE, "launcher", "pygaki_launcher.rpy"), os.path.join(out, "launcher", "game"))
 
-    print("3/5 showpy 템플릿 만들기 ...")
+    print("3/6 showpy 템플릿 만들기 ...")
     tdir = os.path.join(out, "showpy")
     make_base_project(out, tdir)
     for name in PLUGINS:
@@ -158,20 +192,40 @@ def main():
     with open(os.path.join(tdir, "project.json"), "w", encoding="utf-8") as f:
         json.dump({"type": "template"}, f)
 
-    print("4/5 PyKaki 앱 넣기 ...")
+    print("4/6 PyKaki 앱 넣기 ...")
     shutil.copytree(app, os.path.join(out, "pygaki", "PyKaki"))
     with open(os.path.join(out, "pygaki", "읽어주세요.txt"), "w", encoding="utf-8-sig") as f:
-        f.write(README.format(version=os.path.basename(out), renpy=renpy_ver, showpy=showpy_ver).replace("\n", "\r\n"))
+        f.write(README.format(version=prefix, renpy=renpy_ver, showpy=showpy_ver).replace("\n", "\r\n"))
     for lic in ("LICENSE",):
         shutil.copy(os.path.join(ROOT, lic), os.path.join(out, "pygaki", "LICENSE-pygaki.txt"))
 
+    ## 템플릿을 만들 때 렌파이가 SDK 폴더에 남긴 것
+    shutil.rmtree(os.path.join(out, "tmp"), ignore_errors=True)
+    for fn in ("log.txt", "errors.txt", "traceback.txt"):
+        if os.path.exists(os.path.join(out, fn)):
+            os.remove(os.path.join(out, fn))
+
+    print("5/6 덧붙임 만들기 ...")
+    for rel in ADDON_PARTS:
+        src, dst = os.path.join(out, rel), os.path.join(addon, rel)
+        os.makedirs(os.path.dirname(dst), exist_ok=True)
+        if os.path.isdir(src):
+            shutil.copytree(src, dst)
+        else:
+            shutil.copy(src, dst)
+    with open(os.path.join(addon, "pygaki_넣는법.txt"), "w", encoding="utf-8-sig") as f:
+        f.write(ADDON_README.format(version=prefix, renpy=renpy_ver).replace("\n", "\r\n"))
+
     if a.zip:
-        print("5/5 zip 만들기 ...")
-        z = shutil.make_archive(out, "zip", os.path.dirname(out), os.path.basename(out))
-        print("zip:", z)
+        print("6/6 zip 만들기 ...")
+        ## 묶음 zip은 폴더째, 덧붙임 zip은 안의 것만 (열면 바로 launcher, showpy, pygaki가 보이게)
+        print("zip:", shutil.make_archive(out, "zip", outdir, os.path.basename(out)))
+        print("zip:", shutil.make_archive(addon, "zip", addon))
     else:
-        print("5/5 zip은 건너뜀 (--zip)")
-    print("다 됐어요:", out)
+        print("6/6 zip은 건너뜀 (--zip)")
+    print("다 됐어요:")
+    print("  묶음  ", out)
+    print("  덧붙임", addon)
 
 
 if __name__ == "__main__":
