@@ -4,9 +4,10 @@ import { create } from 'zustand';
 import { kvGet, kvSet, snapAdd } from './persist';
 import { applyInbox, type InboxOp } from './inbox';
 import { useStore } from './store';
+import { gameDir, isDesktop, projectInfo } from './desktop';
 
 const w = window as any;
-export const hasDirPicker = typeof w.showDirectoryPicker === 'function';
+export const hasDirPicker = typeof w.showDirectoryPicker === 'function' || isDesktop;
 export const INBOX_FILE = 'showpy_inbox.json';
 export const RPY_FILE = 'script_flow.rpy';
 export const PREVIEW_FILE = 'pykaki_preview.json'; // 렌파이 실시간 미리보기 (showpy ui_kit/editor/editor_preview.rpy가 읽음)
@@ -271,6 +272,15 @@ export async function disconnectFolder() {
 
 // 앱을 다시 열 때: 연결은 기억하지만, 권한은 사용자가 한 번 눌러야 다시 생긴다
 export async function restoreFolder() {
+  // 데스크톱 앱: 연 렌파이 프로젝트의 game 폴더가 곧 연결한 폴더
+  if (isDesktop) {
+    dir = gameDir();
+    const { name } = await projectInfo();
+    useGameFolder.getState().set({ name });
+    await scanFolder();
+    useGameFolder.getState().set({ name });
+    return;
+  }
   if (!hasDirPicker) return;
   try {
     dir = (await kvGet('gameDir')) ?? null;

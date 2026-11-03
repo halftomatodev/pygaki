@@ -3,6 +3,7 @@ import { useStore } from './store';
 import { createEmpty, normalizeProject } from './sample';
 import { generateRpy } from './exportRpy';
 import { snapAdd, snapAuto } from './persist';
+import { isDesktop } from './desktop';
 import { connectFolder, disconnectFolder, folderAllowed, folderReady, hasDirPicker, looksLikeGame, pullInbox, readRpyFromFolder, RPY_FILE, scanFolder, useGameFolder, writeRpyToFolder } from './gameFolder';
 
 const w = window as any;
@@ -11,6 +12,19 @@ let jsonHandle: any = null;
 let rpyHandle: any = null;
 
 export const hasRpyTarget = () => !!rpyHandle;
+
+// 데스크톱 앱: 대본은 프로젝트 폴더의 .flow.json 하나에 저장한다 (main.tsx가 열 때 정함)
+export const setProjectFile = (handle: any) => (jsonHandle = handle);
+
+// 알림 없이 지금 대본을 그 파일에 쓴다 (데스크톱 앱의 자동 저장)
+export async function saveQuiet() {
+  if (!jsonHandle) return false;
+  const s = useStore.getState();
+  const project = s.project;
+  await writeTo(jsonHandle, JSON.stringify(project, null, 2));
+  if (useStore.getState().project === project) useStore.setState({ dirty: false, fileName: jsonHandle.name });
+  return true;
+}
 
 function download(name: string, text: string) {
   const a = document.createElement('a');
@@ -33,7 +47,10 @@ export async function saveProject(as = false) {
   const text = JSON.stringify(s.project, null, 2);
   const name = s.fileName ?? `${s.project.project.title || 'script'}.flow.json`;
   try {
-    if (hasFS) {
+    if (isDesktop && jsonHandle && !as) {
+      await writeTo(jsonHandle, text);
+      useStore.setState({ dirty: false, fileName: jsonHandle.name });
+    } else if (hasFS) {
       if (!jsonHandle || as)
         jsonHandle = await w.showSaveFilePicker({
           suggestedName: name,
@@ -82,6 +99,12 @@ export async function openProject() {
     const p = normalizeProject(JSON.parse(await file.text()));
     const s = useStore.getState();
     await snapAdd('열기 전 자동 백업', s.project).catch(() => {});
+    // 데스크톱 앱: 연 파일의 내용을 이 프로젝트의 대본으로 가져온다 (저장은 계속 프로젝트 폴더의 파일에)
+    if (isDesktop && jsonHandle) {
+      s.load(p, { fileName: jsonHandle.name, dirty: true });
+      s.say(`${file.name}의 내용을 이 프로젝트 대본으로 가져왔어요`);
+      return;
+    }
     jsonHandle = handle;
     s.load(p, { fileName: file.name, dirty: false });
   } catch (e: any) {
@@ -90,9 +113,12 @@ export async function openProject() {
 }
 
 export async function newProject() {
-  if (!confirmDiscard()) return;
+  if (isDesktop) {
+    if (!confirm('이 프로젝트의 대본을 비우고 새로 시작할까요?\n(지금 대본은 버전 목록에 자동 백업돼요)')) return;
+  } else if (!confirmDiscard()) return;
   const s = useStore.getState();
   await snapAdd('새로 만들기 전 자동 백업', s.project).catch(() => {});
+  if (isDesktop) return s.load(createEmpty(), { fileName: jsonHandle?.name ?? null, dirty: true });
   jsonHandle = null;
   s.load(createEmpty(), { fileName: null, dirty: false });
 }

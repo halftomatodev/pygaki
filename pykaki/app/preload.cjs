@@ -1,0 +1,17 @@
+// 웹 화면에 파일 기능을 건넨다 (window.pygaki). 경로는 프로젝트 폴더 기준, '/'로 나눈다.
+const { contextBridge, ipcRenderer } = require('electron');
+
+contextBridge.exposeInMainWorld('pygaki', {
+  info: () => ipcRenderer.invoke('pygaki:info'),
+  list: (rel) => ipcRenderer.invoke('pygaki:list', rel),
+  stat: (rel) => ipcRenderer.invoke('pygaki:stat', rel),
+  read: (rel) => ipcRenderer.invoke('pygaki:read', rel),
+  write: (rel, data) => ipcRenderer.invoke('pygaki:write', rel, data),
+  openFolder: (rel) => ipcRenderer.invoke('pygaki:openFolder', rel),
+  choose: () => ipcRenderer.invoke('pygaki:choose'),
+  onChange: (fn) => {
+    const h = (_e, rel) => fn(rel);
+    ipcRenderer.on('pygaki:changed', h);
+    return () => ipcRenderer.removeListener('pygaki:changed', h);
+  },
+});

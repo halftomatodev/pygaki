@@ -7,6 +7,8 @@
 | `pykaki/` | 대본 에디터 (웹 버전 + 데스크톱 앱) | [pykaki/CLAUDE.md](pykaki/CLAUDE.md), [pykaki/docs/SPEC.md](pykaki/docs/SPEC.md) |
 | `showpy/` | 렌파이 플러그인 (`game/ui_kit` 등) | [showpy/docs/DEV_RULES.md](showpy/docs/DEV_RULES.md), [showpy/docs/SPEC.md](showpy/docs/SPEC.md) |
 | `docs/LINK.md` | 두 프로그램이 맞추는 형식 (하나만 있음) | 형식을 바꿀 때 |
+| `pykaki/app/` | PyKaki 데스크톱 앱 (Electron). 화면은 웹 빌드 그대로 | [pykaki/docs/SPEC.md](pykaki/docs/SPEC.md) 데스크톱 앱 |
+| `bundle/` | 렌파이 SDK + showpy 템플릿 + 런처 버튼 + 앱 묶기 | [bundle/README.md](bundle/README.md) |
 
 ## 꼭 지킬 것
 
@@ -23,4 +25,7 @@
 cd pykaki && npm run dev     # 웹 버전 개발 서버 http://localhost:5173
 cd pykaki && npx tsc --noEmit
 cd pykaki && npm run build   # pykaki/dist/index.html 한 파일
+cd pykaki/app && npm ci && npm start   # 데스크톱 앱 (웹 빌드를 복사해서 켬)
 ```
+
+- 데스크톱 앱 확인: GitHub Actions "PyKaki 앱"이 리눅스에서 진짜 Electron으로 켜 보고(`pykaki/app/smoke.cjs`), 윈도우 `PyKaki.exe` 폴더를 만든다.

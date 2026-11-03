@@ -1,0 +1,26 @@
+{
+  "name": "pykaki-desktop",
+  "productName": "PyKaki",
+  "version": "0.1.0",
+  "description": "렌파이 대본 에디터 PyKaki 데스크톱 앱",
+  "author": "halftomato",
+  "license": "MIT",
+  "private": true,
+  "main": "main.cjs",
+  "scripts": {
+    "web": "node copy_web.cjs",
+    "start": "npm run web && electron .",
+    "dist": "npm run web && electron-builder --win dir"
+  },
+  "devDependencies": {
+    "electron": "33.2.1",
+    "electron-builder": "25.1.8"
+  },
+  "build": {
+    "appId": "dev.halftomato.pykaki",
+    "productName": "PyKaki",
+    "directories": { "output": "out" },
+    "files": ["main.cjs", "preload.cjs", "web/index.html", "package.json"],
+    "win": { "target": "dir", "executableName": "PyKaki" }
+  }
+}
