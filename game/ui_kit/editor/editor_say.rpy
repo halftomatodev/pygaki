@@ -71,6 +71,11 @@ init -8 python in ui_editor:
             ("flash", "색 번쩍"),
             ("slam", "크게 찍히기"),
             ("typecursor", "커서 타자기"),
+            ("echo", "색 잔상"),
+            ("glitch", "글리치"),
+            ("glow", "빛 번짐"),
+            ("blurin", "흐렸다 또렷"),
+            ("wipe", "위에서 그려지기"),
             )
 
         def __init__(self):

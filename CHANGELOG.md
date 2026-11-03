@@ -2,6 +2,12 @@
 
 버전별 자세한 설명은 [docs/READ_ME_FIRST.md](docs/READ_ME_FIRST.md)와 폴더별 `README.md`에 있습니다.
 
+## 4.7 (2026-11-03)
+
+`ui_kit` 3.6:
+- 등장 효과 5개를 더 등록했습니다: `echo`(색 잔상), `glitch`, `glow`, `blurin`, `wipe`.
+- `echo`는 외곽선 겹으로 복사본을 그립니다. 대사에 외곽선을 적지 않으면 `say_style`이 파랑, 노랑 두 겹을 넣습니다.
+
 ## 4.6 (2026-11-03)
 
 `ui_kit` 3.5:

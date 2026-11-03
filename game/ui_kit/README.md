@@ -13,7 +13,27 @@
 그리고 이 기능들을 **게임을 실행한 채로 마우스로 고치는 편집기**가 들어 있습니다. (개발 모드에서 Shift+M)
 대사, 선택지, show·hide·scene 줄은 편집기에서 고친 값이 **원고(.rpy)의 그 줄에 바로 저장**됩니다.
 
-버전 3.5 · 렌파이 8.5.3 기준으로 만들었습니다.
+버전 3.6 · 렌파이 8.5.3 기준으로 만들었습니다.
+
+### 3.6에서 바뀐 점
+
+- **등장 효과 5개 추가** (`engine/text_effects.rpy`):
+
+  | 이름 | 모습 |
+  |---|---|
+  | `echo` | 색 잔상: 파랑, 노랑 복사본이 한 박자 늦게 위에서 따라와 겹침 |
+  | `glitch` | 글리치: 글자가 가로로 잘려 어긋나고 색이 갈라졌다가 바로 섬 |
+  | `glow` | 빛 번짐: 글자 주변이 흐리게 빛남. 한 번에 나와도 보임 |
+  | `blurin` | 흐렸다 또렷해지기: 번진 글자가 선명해지며 나타남 |
+  | `wipe` | 위에서 그려지기: 글자가 위에서부터 드러남 |
+
+  ```renpy
+  e "따라온다." (cps=30, effect="echo")
+  e "빛난다." (effect="glow:u__color=#9fd8ff")
+  e "큰 글자도 끝까지." (size=80, cps=20, effect="wipe:u__span=80")
+  ```
+  `echo`의 복사본은 글자 외곽선 겹으로 그립니다. 대사에 `outlines`를 따로 적지 않으면 파랑, 노랑 두 겹을 넣습니다.
+- 옮기기: 폴더를 바꿔 넣고 `.rpyc`를 지우면 됩니다. PyKaki도 같이 새로 고침합니다.
 
 ### 3.5에서 바뀐 점
 
@@ -789,7 +809,7 @@ e "어디 갔었어?" (name_x=820, name_y=-60, speed=0.5, effect="jitter")
 | `align` | 줄 정렬 (0.0 왼쪽 ~ 1.0 오른쪽) | `align=0.5` |
 | `speed` | 나오는 속도 배율 (플레이어 텍스트 속도에 곱함. 0.5 = 절반 속도). 텍스트 속도가 "즉시"면 효과가 없음 | `speed=0.5` |
 | `cps` | 나오는 속도, 1초에 나오는 글자 수. 플레이어 텍스트 속도와 상관없이 이 값 | `cps=20` |
-| `effect` | 등장 효과: `"dissolve"` 서서히, `"typewriter"` 타자기, `"slowalpha"` 흐리게 대기, `"flip"` 뒤집히며, `"zoom"` 커지며, `"jitter"` 떨림, `"wave"` 물결. showpy 효과(3.5): `"scatter"` 흩어졌다 모이기, `"drop"` 떨어지기, `"spin"` 회전하며, `"shuffle"` 무작위 순서, `"flash"` 색 번쩍, `"slam"` 크게 찍히기, `"typecursor"` 커서 타자기 | `effect="wave"` |
+| `effect` | 등장 효과: `"dissolve"` 서서히, `"typewriter"` 타자기, `"slowalpha"` 흐리게 대기, `"flip"` 뒤집히며, `"zoom"` 커지며, `"jitter"` 떨림, `"wave"` 물결. showpy 효과(3.5~3.6): `"scatter"` 흩어졌다 모이기, `"drop"` 떨어지기, `"spin"` 회전하며, `"shuffle"` 무작위 순서, `"flash"` 색 번쩍, `"slam"` 크게 찍히기, `"typecursor"` 커서 타자기, `"echo"` 색 잔상, `"glitch"` 글리치, `"glow"` 빛 번짐, `"blurin"` 흐렸다 또렷해지기, `"wipe"` 위에서 그려지기 | `effect="wave"` |
 | `name_x`, `name_y` | 이름 상자 위치 (대사 창 왼쪽 위 기준. 이름 배경 그림째 움직임) | `name_x=820, name_y=-60` |
 | `name_font`, `name_size`, `name_color` | 이름 글꼴, 크기, 색 | `name_size=34` |
 | `fx` | (`screen_fx`가 있을 때) 이 대사부터 켤 화면 효과. `"default"` = 선택취소. 다음에 바꿀 때까지 이어짐 | `fx="ascii"` |

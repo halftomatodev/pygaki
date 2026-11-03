@@ -137,6 +137,11 @@ init -10 python in say_style:
         else:
             kwargs = { k : v for k, v in kwargs.items() if k not in a }
 
+        ## 색 잔상(echo)은 외곽선 겹으로 복사본을 그립니다. 외곽선을 따로 적지 않았으면 넣어 줍니다.
+        ts = kwargs.get("what_textshader")
+        if isinstance(ts, str) and ts.split(":")[0] == "echo" and "what_outlines" not in kwargs:
+            kwargs["what_outlines"] = list(ECHO_OUTLINES)
+
         ## 이름 상자 위치(name_x, name_y)는 screens.rpy의 이 줄이 있어야 동작합니다.
         if any(k.startswith("namebox_") for k in kwargs) and "namebox" not in store.config.character_id_prefixes:
             raise Exception(

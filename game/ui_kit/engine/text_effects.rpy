@@ -16,6 +16,11 @@
 ##   flash       색 번쩍: 노란색으로 켜졌다가 원래 색으로
 ##   slam        크게 찍히기: 크게 나타나 줄어들며 쾅, 잠깐 흔들림
 ##   typecursor  커서 타자기: 하나씩 나오고 다음 글자 자리에 밑줄
+##   echo        색 잔상: 파랑, 노랑 복사본이 한 박자 늦게 따라와 겹침
+##   glitch      글리치: 가로로 잘려 어긋나고 색이 갈라졌다가 섬
+##   glow        빛 번짐: 글자 주변이 흐리게 빛남 (한 번에 나와도 보임)
+##   blurin      흐렸다 또렷해지기
+##   wipe        위에서 아래로 그려지기 (글자가 크면 effect="wipe:u__span=80")
 ##
 ## 값은 콜론으로 바꿀 수 있습니다. (렌파이 텍스트 셰이더 문법)
 ##     effect="scatter:u__distance=200"      더 멀리서 모임
@@ -263,4 +268,211 @@ init -10 python in say_style:
         u__color="#ffffff",
         u__offset=4.0,
         u__thick=3.0,
+        )
+
+    ## ── 시험이 필요했던 효과 (3.6) ──────────────────────────────────────────
+    ##   echo     색 잔상: 노랑, 파랑 복사본이 한 박자 늦게 따라와 겹친다
+    ##            (복사본은 글자 외곽선 겹으로 그린다. 외곽선을 따로 적지 않으면 say_style이 넣는다)
+    ##   glitch   글리치: 글자가 가로로 잘려 어긋나고 색이 갈라졌다가 바로 선다
+    ##   glow     빛 번짐: 글자 주변이 흐리게 빛난다
+    ##   blurin   흐렸다 또렷해지기: 번진 글자가 선명해지며 나타난다
+    ##   wipe     위에서 아래로 그려지기: 글자가 위에서부터 드러난다
+
+    ## 색 잔상의 복사본 (외곽선 굵기 0, 색, 가로, 세로)
+    ECHO_OUTLINES = [ (0, "#2a4cff", 0, 0), (0, "#ffc400", 0, 0) ]
+
+    def _tfx_adjust_echo(ts, u__duration, u__lag, **kwargs):
+        ts.extra_slow_duration = u__duration + u__lag * 2
+
+    store.renpy.register_textshader(
+        "echo",
+        include_default=False,
+        adjust_function=_tfx_adjust_echo,
+        variables="""
+        uniform float u__duration;
+        uniform float u__lag;
+        uniform float u__rise;
+        uniform float u_text_slow_duration;
+        uniform float u_text_slow_time;
+        uniform float u_text_to_drawable;
+        uniform float u_text_depth;
+        uniform float u_text_main;
+        attribute float a_text_min_time;
+        varying float v_tfx_echo;
+        """,
+        vertex_30="""
+        float l__lag = u_text_main > 0.5 ? 0.0 : u_text_depth * u__lag;
+        float l__dur = u__duration * u_text_slow_duration;
+        float l__t;
+        if (l__dur > 0.0) {
+            l__t = clamp((u_text_slow_time - a_text_min_time - l__lag * u_text_slow_duration) / l__dur, 0.0, 1.0);
+        } else {
+            l__t = a_text_min_time <= u_text_slow_time ? 1.0 : 0.0;
+        }
+        float l__e = 1.0 - pow(1.0 - l__t, 3.0);
+        gl_Position.y -= u__rise * u_text_to_drawable * (1.0 - l__e);
+        if (u_text_main > 0.5) {
+            v_tfx_echo = clamp(l__t * 3.0, 0.0, 1.0);
+        } else {
+            v_tfx_echo = clamp(l__t * 4.0, 0.0, 1.0) * (1.0 - l__t);
+        }
+        """,
+        fragment_350=_TFX_ALPHA.format("v_tfx_echo"),
+        u__duration=10.0,
+        u__lag=2.0,
+        u__rise=30.0,
+        )
+
+    store.renpy.register_textshader(
+        "glitch",
+        include_default=False,
+        adjust_function=_tfx_adjust,
+        variables="""
+        uniform float u__duration;
+        uniform float u__shift;
+        uniform float u__split;
+        uniform float u__band;
+        uniform float u_text_slow_duration;
+        uniform float u_text_slow_time;
+        uniform float u_text_to_drawable;
+        uniform float u_text_main;
+        uniform sampler2D tex0;
+        uniform vec2 res0;
+        attribute float a_text_min_time;
+        varying vec2 v_tex_coord;
+        varying float v_tfx_glitch;
+        """,
+        vertex_30=_TFX_T + """
+        v_tfx_glitch = l__t;
+        """,
+        fragment_340="""
+        float l__amt = 1.0 - v_tfx_glitch;
+        if (v_tfx_glitch > 0.0 && l__amt > 0.0 && u_text_main > 0.5) {
+            float l__band = floor(gl_FragCoord.y / (u__band * u_text_to_drawable));
+            float l__tick = floor(u_text_slow_time * 24.0);
+            float l__r = fract(sin(l__band * 12.9898 + l__tick * 78.233) * 43758.5453);
+            float l__dx = (l__r > 0.55 ? (l__r - 0.775) * 2.0 * u__shift : 0.0) * l__amt * u_text_to_drawable;
+            vec2 l__o = vec2(l__dx, 0.0) / res0;
+            vec2 l__s = vec2(u__split * l__amt * u_text_to_drawable, 0.0) / res0;
+            vec4 l__c = texture2D(tex0, v_tex_coord + l__o);
+            float l__ar = texture2D(tex0, v_tex_coord + l__o + l__s).a;
+            float l__ab = texture2D(tex0, v_tex_coord + l__o - l__s).a;
+            gl_FragColor = vec4(max(l__c.r, l__ar), l__c.g, max(l__c.b, l__ab), max(l__c.a, max(l__ar, l__ab)));
+        }
+        """,
+        fragment_350=_TFX_ALPHA.format("(v_tfx_glitch > 0.0 ? 1.0 : 0.0)"),
+        u__duration=10.0,
+        u__shift=14.0,
+        u__split=3.0,
+        u__band=5.0,
+        )
+
+    store.renpy.register_textshader(
+        "glow",
+        include_default=False,
+        adjust_function=_tfx_adjust,
+        variables="""
+        uniform float u__duration;
+        uniform float u__radius;
+        uniform float u__strength;
+        uniform vec4 u__color;
+        uniform float u_text_slow_duration;
+        uniform float u_text_slow_time;
+        uniform float u_text_to_drawable;
+        uniform float u_text_main;
+        uniform sampler2D tex0;
+        uniform vec2 res0;
+        attribute float a_text_min_time;
+        varying vec2 v_tex_coord;
+        varying float v_tfx_glow;
+        """,
+        vertex_30=_TFX_T + """
+        v_tfx_glow = l__t;
+        """,
+        fragment_340="""
+        if (u_text_main > 0.5) {
+            float l__h = 0.0;
+            for (int l__i = 0; l__i < 12; l__i++) {
+                float l__ang = float(l__i) * 0.5236;
+                vec2 l__d = vec2(cos(l__ang), sin(l__ang)) * u__radius * u_text_to_drawable / res0;
+                l__h += texture2D(tex0, v_tex_coord + l__d).a + texture2D(tex0, v_tex_coord + l__d * 0.5).a;
+            }
+            l__h = clamp(l__h / 24.0 * u__strength, 0.0, 1.0);
+            vec4 l__g = vec4(u__color.rgb, 1.0) * u__color.a * l__h;
+            gl_FragColor = gl_FragColor + l__g * (1.0 - gl_FragColor.a);
+        }
+        """,
+        fragment_350=_TFX_ALPHA.format("clamp(v_tfx_glow * 2.0, 0.0, 1.0)"),
+        u__duration=10.0,
+        u__radius=8.0,
+        u__strength=1.6,
+        u__color="#ffffff",
+        )
+
+    store.renpy.register_textshader(
+        "blurin",
+        include_default=False,
+        adjust_function=_tfx_adjust,
+        variables="""
+        uniform float u__duration;
+        uniform float u__radius;
+        uniform float u_text_slow_duration;
+        uniform float u_text_slow_time;
+        uniform float u_text_to_drawable;
+        uniform float u_text_main;
+        uniform sampler2D tex0;
+        uniform vec2 res0;
+        attribute float a_text_min_time;
+        varying vec2 v_tex_coord;
+        varying float v_tfx_blur;
+        """,
+        vertex_30=_TFX_T + """
+        v_tfx_blur = l__t;
+        """,
+        fragment_340="""
+        float l__e = 1.0 - pow(1.0 - v_tfx_blur, 2.0);
+        float l__r = u__radius * (1.0 - l__e) * u_text_to_drawable;
+        if (l__r > 0.01) {
+            vec4 l__sum = vec4(0.0);
+            for (int l__x = -2; l__x <= 2; l__x++) {
+                for (int l__y = -2; l__y <= 2; l__y++) {
+                    l__sum += texture2D(tex0, v_tex_coord + vec2(float(l__x), float(l__y)) * l__r * 0.5 / res0);
+                }
+            }
+            gl_FragColor = l__sum / 25.0;
+        }
+        """,
+        fragment_350=_TFX_ALPHA.format("clamp(v_tfx_blur * 2.0, 0.0, 1.0)"),
+        u__duration=12.0,
+        u__radius=8.0,
+        )
+
+    store.renpy.register_textshader(
+        "wipe",
+        include_default=False,
+        adjust_function=_tfx_adjust,
+        variables="""
+        uniform float u__duration;
+        uniform float u__span;
+        uniform float u_text_slow_duration;
+        uniform float u_text_slow_time;
+        uniform float u_text_to_drawable;
+        attribute float a_text_min_time;
+        attribute vec2 a_text_center;
+        varying float v_tfx_wipe;
+        varying float v_tfx_wipe_y;
+        """,
+        vertex_10="""
+        v_tfx_wipe_y = (gl_Position.y - a_text_center.y) / u_text_to_drawable;
+        """,
+        vertex_30=_TFX_T + """
+        v_tfx_wipe = l__t;
+        """,
+        fragment_350="""
+        float l__edge = mix(-u__span, u__span * 0.35, v_tfx_wipe);
+        float l__show = v_tfx_wipe >= 1.0 ? 1.0 : clamp((l__edge - v_tfx_wipe_y) / 3.0, 0.0, 1.0);
+        gl_FragColor = gl_FragColor * l__show * (v_tfx_wipe > 0.0 ? 1.0 : 0.0);
+        """,
+        u__duration=8.0,
+        u__span=40.0,
         )
