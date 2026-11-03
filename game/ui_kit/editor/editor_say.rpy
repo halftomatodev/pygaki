@@ -80,6 +80,7 @@ init -8 python in ui_editor:
             ("melt", "녹아내림"),
             ("mosh", "데이터모싱"),
             ("liquid", "일렁임"),
+            ("vhs", "VHS 지직거림"),
             )
 
         def __init__(self):
