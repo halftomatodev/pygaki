@@ -356,7 +356,7 @@ pre.rpy { background: #17191f; color: #d4d6dd; padding: 12px; border-radius: 8px
 .fx-dissolve .ch.on { opacity: 1; transition: opacity .3s linear; }
 .fx-slowalpha .ch { visibility: visible; opacity: .2; }
 .fx-slowalpha .ch.on { opacity: 1; transition: opacity .15s linear; }
-.fx-flip .ch, .fx-zoom .ch, .fx-jitter .ch, .fx-wave .ch, .fx-scatter .ch, .fx-drop .ch, .fx-spin .ch, .fx-slam .ch { display: inline-block; white-space: pre; }
+.fx-flip .ch, .fx-zoom .ch, .fx-jitter .ch, .fx-wave .ch, .fx-scatter .ch, .fx-drop .ch, .fx-spin .ch, .fx-slam .ch, .fx-echo .ch, .fx-glitch .ch, .fx-wipe .ch { display: inline-block; white-space: pre; }
 .fx-flip .ch { transform: rotateY(90deg); }
 .fx-flip .ch.on { transform: none; transition: transform .25s ease-out; }
 .fx-zoom .ch { transform: scale(0); }
@@ -380,6 +380,29 @@ pre.rpy { background: #17191f; color: #d4d6dd; padding: 12px; border-radius: 8px
 @keyframes fx-slam { from { transform: scale(3); } }
 @keyframes fx-shake { 0% { translate: .2em -.15em; } 15% { translate: -.17em .12em; } 30% { translate: .13em .1em; } 45% { translate: -.1em -.08em; } 60% { translate: .07em .05em; } 75% { translate: -.04em .03em; } 90% { translate: 0 0; } }
 .fx-typecursor .ch.next { visibility: visible; color: transparent; text-decoration: underline #fff; text-decoration-thickness: .1em; text-underline-offset: .13em; }
+/* 색 잔상: 파랑, 노랑 복사본이 한 박자 늦게 위에서 따라와 겹친다 (렌파이는 외곽선 겹으로 그림) */
+.fx-echo .ch.on { animation: fx-rise calc(var(--cd) * 10) cubic-bezier(.33, 1, .68, 1) backwards, fx-fade calc(var(--cd) * 3.3) linear backwards, fx-echo calc(var(--cd) * 14) linear backwards; }
+@keyframes fx-rise { from { transform: translateY(-1em); } }
+@keyframes fx-echo { 0% { text-shadow: 0 -.5em rgba(42, 76, 255, 0), 0 -.8em rgba(255, 196, 0, 0); } 20% { text-shadow: 0 -.45em rgba(42, 76, 255, .9), 0 -.75em rgba(255, 196, 0, .9); } 100% { text-shadow: 0 0 rgba(42, 76, 255, 0), 0 0 rgba(255, 196, 0, 0); } }
+/* 글리치: 잘린 듯 어긋나고 색이 갈라졌다가 선다 */
+.fx-glitch .ch.on { animation: fx-glitch calc(var(--cd) * 10) steps(1) backwards; }
+@keyframes fx-glitch {
+  0% { transform: translateX(.18em); clip-path: inset(0 0 55% 0); text-shadow: .08em 0 #f0f, -.08em 0 #0ff; }
+  15% { transform: translateX(-.14em); clip-path: inset(35% 0 0 0); text-shadow: -.07em 0 #f0f, .07em 0 #0ff; }
+  30% { transform: translateX(.1em); clip-path: inset(15% 0 20% 0); text-shadow: .05em 0 #f0f, -.05em 0 #0ff; }
+  45% { transform: translateX(-.06em); clip-path: none; text-shadow: -.04em 0 #f0f, .04em 0 #0ff; }
+  65% { transform: translateX(.03em); text-shadow: .02em 0 #f0f, -.02em 0 #0ff; }
+  85% { transform: none; text-shadow: none; }
+}
+/* 빛 번짐: 글자 주변이 흐리게 빛난다 */
+.fx-glow .ch { text-shadow: 0 0 .2em rgba(255, 255, 255, .9), 0 0 .45em rgba(255, 255, 255, .55); }
+.fx-glow .ch.on { animation: fx-fade calc(var(--cd) * 5) linear backwards; }
+/* 흐렸다 또렷해지기 */
+.fx-blurin .ch.on { animation: fx-blurin calc(var(--cd) * 12) cubic-bezier(.5, 1, .89, 1) backwards, fx-fade calc(var(--cd) * 6) linear backwards; }
+@keyframes fx-blurin { from { filter: blur(.25em); } }
+/* 위에서 아래로 그려지기 */
+.fx-wipe .ch.on { animation: fx-wipe calc(var(--cd) * 8) linear backwards; }
+@keyframes fx-wipe { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
 /* 클릭으로 한 번에 보이면 렌파이처럼 효과 없이 */
 .fast .ch.on { animation: none !important; transition: none !important; }
 .ctrl { display: flex; gap: 2px; margin-top: 8px; flex-wrap: wrap; }
