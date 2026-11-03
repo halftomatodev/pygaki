@@ -23,7 +23,7 @@
 |---|---|
 | `renpy.exe`, `launcher/`, `renpy/` ... | 렌파이 SDK 그대로 |
 | `launcher/game/pygaki_launcher.rpy` | 런처 첫 화면 아래쪽 버튼: [PyKaki로 대본 쓰기], [showpy 새 프로젝트] ([launcher/pygaki_launcher.rpy](launcher/pygaki_launcher.rpy)) |
-| `showpy/` | 새 프로젝트 템플릿. SDK의 기본 틀(`gui/game`) + showpy 플러그인(`ui_kit`, `screen_fx`, `hotkeys`, `splash`), `project.json`의 `"type": "template"` |
+| `showpy/` | 새 프로젝트 템플릿. 런처의 [새 프로젝트 만들기]와 같은 방법으로 만든 1280x720 한국어 기본 프로젝트(그림까지 다 만듦) + showpy 플러그인(`ui_kit`, `screen_fx`, `hotkeys`, `splash`), `project.json`의 `"type": "template"` |
 | `pygaki/PyKaki/PyKaki.exe` | PyKaki 데스크톱 앱 |
 | `pygaki/읽어주세요.txt` | 쓰는 법 |
 
