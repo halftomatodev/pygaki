@@ -356,7 +356,7 @@ pre.rpy { background: #17191f; color: #d4d6dd; padding: 12px; border-radius: 8px
 .fx-dissolve .ch.on { opacity: 1; transition: opacity .3s linear; }
 .fx-slowalpha .ch { visibility: visible; opacity: .2; }
 .fx-slowalpha .ch.on { opacity: 1; transition: opacity .15s linear; }
-.fx-flip .ch, .fx-zoom .ch, .fx-jitter .ch, .fx-wave .ch, .fx-scatter .ch, .fx-drop .ch, .fx-spin .ch, .fx-slam .ch, .fx-echo .ch, .fx-glitch .ch, .fx-wipe .ch, .fx-blockglitch .ch, .fx-melt .ch, .fx-mosh .ch { display: inline-block; white-space: pre; }
+.fx-flip .ch, .fx-zoom .ch, .fx-jitter .ch, .fx-wave .ch, .fx-scatter .ch, .fx-drop .ch, .fx-spin .ch, .fx-slam .ch, .fx-echo .ch, .fx-glitch .ch, .fx-wipe .ch, .fx-blockglitch .ch, .fx-melt .ch, .fx-mosh .ch, .fx-rise .ch, .fx-lean .ch, .fx-stretch .ch { display: inline-block; white-space: pre; }
 .svg-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 .fx-flip .ch { transform: rotateY(90deg); }
 .fx-flip .ch.on { transform: none; transition: transform .25s ease-out; }
@@ -425,6 +425,13 @@ pre.rpy { background: #17191f; color: #d4d6dd; padding: 12px; border-radius: 8px
   60% { transform: translateX(calc(var(--r2) * .06em)); clip-path: none; text-shadow: calc(var(--r2) * .06em) .06em color-mix(in srgb, currentColor 50%, transparent); }
   80% { transform: none; text-shadow: none; }
 }
+/* 떠오르기, 기울며 들어오기, 늘어나며 들어오기 (기준점은 렌파이처럼 글자 밑줄 자리 근처) */
+.fx-rise .ch.on { animation: fx-rise-in calc(var(--cd) * 10) cubic-bezier(.33, 1, .68, 1) backwards, fx-fade calc(var(--cd) * 5) linear backwards; }
+@keyframes fx-rise-in { from { transform: translateY(calc((.4 + var(--r4) * .8) * 1em)); } }
+.fx-lean .ch.on { transform-origin: 50% 80%; animation: fx-lean calc(var(--cd) * 8) cubic-bezier(.33, 1, .68, 1) backwards, fx-fade calc(var(--cd) * 2.7) linear backwards; }
+@keyframes fx-lean { from { transform: translateX(-.5em) skewX(-35deg); } }
+.fx-stretch .ch.on { transform-origin: 50% 80%; animation: fx-stretch calc(var(--cd) * 8) cubic-bezier(.33, 1, .68, 1) backwards, fx-fade calc(var(--cd) * 2.7) linear backwards; }
+@keyframes fx-stretch { from { transform: scale(.6, 2.6); } }
 /* VHS 지직거림: 주사선, 빨강/파랑 어긋남, 가로 흔들림, 순간적인 색조 바뀜이 계속된다 */
 .fx-vhs { animation: fx-vhs 1.7s steps(1) infinite; }
 .fx-vhs .ch {
