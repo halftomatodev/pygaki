@@ -6,6 +6,7 @@
 
 `ui_kit` 3.11:
 - PyKaki 실시간 미리보기: 개발 모드에서 `game/pykaki_preview.json`이 바뀌면 화면 위에 미리보기 창을 띄워 그 줄을 진짜 효과로 다시 보여줍니다(`editor/editor_preview.rpy`). PyKaki 미리보기와 렌파이의 차이를 바로 확인하려는 것입니다.
+- 고침: 게임을 켤 때 `pykaki_preview.json`이 없으면 PyKaki가 처음 쓴 파일을 "켤 때 있던 파일"로 보고 띄우지 않던 것.
 
 ## 4.11 (2026-11-03)
 

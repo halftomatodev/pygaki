@@ -73,6 +73,8 @@ init -8 python in ui_editor:
         try:
             mt = os.path.getmtime(_preview_path())
         except Exception:
+            ## 켤 때 파일이 없었으면, PyKaki가 처음 쓴 파일부터 보여줍니다.
+            preview.started = True
             return
         if mt == preview.mtime:
             return
