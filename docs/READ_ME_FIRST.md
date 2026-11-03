@@ -1,6 +1,6 @@
 # showpy (먼저 읽기)
 
-버전 4.8
+버전 4.9
 
 예전 이름은 "렌파이 UI 플러그인 묶음"이었습니다.
 
@@ -21,6 +21,18 @@
 - `screen_fx`는 예전의 `watermorph`, `vhs_crt` 두 플러그인을 합친 것입니다.
 - 합친 기능들은 각자 설정 파일의 스위치(`enabled`)로 따로 끌 수 있고, 끄면 렌파이 기본(효과 없음)과 똑같이 보입니다.
 - `screen_fx`는 넣자마자 VHS 덮개가 화면 전체에 켜집니다. 처음에는 깨끗한 화면으로 보고 싶다면 `screen_fx/screen_fx_config.rpy`의 `screen_fx.overlay`를 `False`로(평소엔 깨끗하고 `use()`나 `fx_overlay=True`로 켤 때만 효과), 타이틀 일렁임은 `screen_fx/watermorph_config.rpy`의 `watermorph.enabled`를 `False`로 바꾸세요.
+
+## 4.9에서 바뀐 점
+
+### `ui_kit` 3.8: 녹아내림, 데이터모싱 흉내, 일렁임
+
+등장 효과 `melt`(녹아내림), `mosh`(데이터모싱 흉내), `liquid`(일렁임)를 넣었습니다. `melt`, `mosh`는 `u__hold`를 주면 다 나온 뒤에도 계속 녹거나 번집니다.
+
+```renpy
+e "녹는다." (cps=30, effect="melt")
+```
+
+옮기기: `ui_kit` 폴더를 바꿔 넣고 `.rpyc`를 지웁니다. PyKaki도 같이 새로 고침합니다.
 
 ## 4.8에서 바뀐 점
 

@@ -23,6 +23,9 @@
 ##   wipe        위에서 아래로 그려지기 (글자가 크면 effect="wipe:u__span=80")
 ##   blockglitch 블록 글리치: 네모 칸마다 밀리거나 늘어나거나 색이 바뀌었다가 섬
 ##               (effect="blockglitch:u__hold=0.3"이면 다 나온 뒤에도 계속 깨짐)
+##   melt        녹아내림: 흘러내린 색이 모여 글자가 됨 (u__hold로 계속 녹기)
+##   mosh        데이터모싱 흉내: 네모 칸이 한쪽으로 끌리며 번졌다가 돌아옴 (u__hold로 계속)
+##   liquid      일렁임: 물에 비친 것처럼 계속 출렁임 (한 번에 나와도 보임)
 ##
 ## 값은 콜론으로 바꿀 수 있습니다. (렌파이 텍스트 셰이더 문법)
 ##     effect="scatter:u__distance=200"      더 멀리서 모임
@@ -551,4 +554,157 @@ init -10 python in say_style:
         u__shift=10.0,
         u__rate=14.0,
         u__hold=0.0,
+        )
+
+    ## ── 녹아내림, 데이터모싱 흉내, 일렁임 (3.8) ──────────────────────────────
+    ##   melt    녹아내림: 세로 줄마다 다른 길이로 색이 흘러내렸다가 모여 글자가 된다
+    ##   mosh    데이터모싱 흉내: 네모 칸이 제각각 한쪽으로 끌리며 번졌다가 돌아온다
+    ##   liquid  일렁임: 물에 비친 것처럼 계속 출렁인다 (한 번에 나와도 보임)
+    ## melt, mosh는 u__hold를 주면 다 나온 뒤에도 계속 녹거나 번진다.
+    ## 렌파이는 글자마다 줄 높이만큼의 칸에만 그려서, 아래 줄까지 길게 흐르지는 않는다.
+
+    def _tfx_adjust_hold(ts, u__duration, u__hold, **kwargs):
+        ts.extra_slow_duration = u__duration
+        if u__hold > 0.0:
+            ts.redraw = 0.0
+
+    ## 흘러내린 방향(l__dir, 텍스처 좌표)으로 여러 점을 보고 가장 진한 색을 고른다. 끌린 자국이 생긴다
+    _TFX_STREAK = """
+            vec4 l__best = texture2D(tex0, l__uv);
+            for (int l__k = 1; l__k <= 10; l__k++) {
+                vec4 l__s = texture2D(tex0, l__uv - l__dir * float(l__k) / 10.0);
+                l__best = l__s.a > l__best.a ? mix(l__s, l__best, float(l__k) / 14.0) : l__best;
+            }
+            gl_FragColor = l__best;
+    """
+
+    store.renpy.register_textshader(
+        "melt",
+        include_default=False,
+        adjust_function=_tfx_adjust_hold,
+        variables="""
+        uniform float u__duration;
+        uniform float u__length;
+        uniform float u__width;
+        uniform float u__hold;
+        uniform float u_text_slow_duration;
+        uniform float u_text_slow_time;
+        uniform float u_text_to_drawable;
+        uniform float u_text_main;
+        uniform float u_time;
+        uniform sampler2D tex0;
+        uniform vec2 res0;
+        attribute float a_text_min_time;
+        varying vec2 v_tex_coord;
+        varying float v_tfx_melt;
+        """,
+        vertex_30=_TFX_T + """
+        v_tfx_melt = l__t;
+        """,
+        fragment_340="""
+        if (v_tfx_melt > 0.0 && u_text_main > 0.5) {
+            float l__e = 1.0 - pow(1.0 - v_tfx_melt, 2.0);
+            float l__x = gl_FragCoord.x / (u__width * u_text_to_drawable);
+            float l__i = floor(l__x);
+            float l__a = fract(sin(l__i * 12.9898) * 43758.5453);
+            float l__b = fract(sin((l__i + 1.0) * 12.9898) * 43758.5453);
+            float l__n = mix(l__a, l__b, smoothstep(0.0, 1.0, fract(l__x)));
+            float l__wave = 0.5 + 0.5 * sin(u_time * 1.7 + l__i * 2.3);
+            float l__amt = max(1.0 - l__e, u__hold * l__wave);
+            float l__drip = u__length * u_text_to_drawable * l__n * l__n * l__amt;
+            vec2 l__uv = v_tex_coord;
+            vec2 l__dir = vec2(0.0, l__drip) / res0;
+            """ + _TFX_STREAK + """
+        }
+        """,
+        fragment_350=_TFX_ALPHA.format("(v_tfx_melt > 0.0 ? 1.0 : 0.0)"),
+        u__duration=14.0,
+        u__length=28.0,
+        u__width=3.0,
+        u__hold=0.0,
+        )
+
+    store.renpy.register_textshader(
+        "mosh",
+        include_default=False,
+        adjust_function=_tfx_adjust_hold,
+        variables="""
+        uniform float u__duration;
+        uniform float u__block;
+        uniform float u__length;
+        uniform float u__rate;
+        uniform float u__hold;
+        uniform float u_text_slow_duration;
+        uniform float u_text_slow_time;
+        uniform float u_text_to_drawable;
+        uniform float u_text_main;
+        uniform float u_time;
+        uniform sampler2D tex0;
+        uniform vec2 res0;
+        attribute float a_text_min_time;
+        varying vec2 v_tex_coord;
+        varying float v_tfx_mosh;
+        """,
+        vertex_30=_TFX_T + """
+        v_tfx_mosh = l__t;
+        """,
+        fragment_340="""
+        float l__amt = max(1.0 - v_tfx_mosh, u__hold);
+        if (v_tfx_mosh > 0.0 && l__amt > 0.0 && u_text_main > 0.5) {
+            vec2 l__cell = floor(gl_FragCoord.xy / (u__block * u_text_to_drawable));
+            float l__tick = floor(u_time * u__rate);
+            float l__r1 = fract(sin(dot(l__cell + l__tick, vec2(12.9898, 78.233))) * 43758.5453);
+            float l__r2 = fract(sin(dot(l__cell + l__tick, vec2(39.346, 11.135))) * 43758.5453);
+            float l__r3 = fract(sin(dot(l__cell + l__tick, vec2(73.156, 52.235))) * 43758.5453);
+            vec2 l__uv = v_tex_coord;
+            vec2 l__dir = vec2(0.0);
+            if (l__r1 > 1.0 - 0.6 * l__amt) {
+                // 칸마다 흐르는 방향. 아래쪽으로 조금 더 흐르게
+                vec2 l__v = normalize(vec2(l__r2 - 0.5, l__r3 - 0.2) + 0.001);
+                l__dir = l__v * u__length * u_text_to_drawable * l__amt / res0;
+                l__uv -= l__dir * 0.5;
+            }
+            """ + _TFX_STREAK + """
+        }
+        """,
+        fragment_350=_TFX_ALPHA.format("(v_tfx_mosh > 0.0 ? 1.0 : 0.0)"),
+        u__duration=14.0,
+        u__block=16.0,
+        u__length=24.0,
+        u__rate=5.0,
+        u__hold=0.0,
+        )
+
+    store.renpy.register_textshader(
+        "liquid",
+        include_default=False,
+        redraw=0.0,
+        variables="""
+        uniform float u__amplitude;
+        uniform float u__wavelength;
+        uniform float u__speed;
+        uniform float u_text_to_drawable;
+        uniform float u_text_main;
+        uniform float u_time;
+        uniform float u_text_slow_time;
+        uniform sampler2D tex0;
+        uniform vec2 res0;
+        attribute float a_text_min_time;
+        varying vec2 v_tex_coord;
+        varying float v_tfx_liquid_min;
+        """,
+        vertex_30="""
+        v_tfx_liquid_min = a_text_min_time;
+        """,
+        fragment_340="""
+        if (u_text_main > 0.5) {
+            vec2 l__p = gl_FragCoord.xy / (u__wavelength * u_text_to_drawable);
+            vec2 l__o = vec2(sin(l__p.y * 6.2832 + u_time * u__speed), cos(l__p.x * 6.2832 + u_time * u__speed * 1.3));
+            gl_FragColor = texture2D(tex0, v_tex_coord + l__o * u__amplitude * u_text_to_drawable / res0);
+        }
+        """,
+        fragment_350=_TFX_ALPHA.format("(v_tfx_liquid_min <= u_text_slow_time ? 1.0 : 0.0)"),
+        u__amplitude=2.0,
+        u__wavelength=24.0,
+        u__speed=2.5,
         )

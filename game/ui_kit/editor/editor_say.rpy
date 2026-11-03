@@ -77,6 +77,9 @@ init -8 python in ui_editor:
             ("blurin", "흐렸다 또렷"),
             ("wipe", "위에서 그려지기"),
             ("blockglitch", "블록 글리치"),
+            ("melt", "녹아내림"),
+            ("mosh", "데이터모싱"),
+            ("liquid", "일렁임"),
             )
 
         def __init__(self):

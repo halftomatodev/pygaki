@@ -1,10 +1,10 @@
-# showpy 커스텀 가이드 (4.8)
+# showpy 커스텀 가이드 (4.9)
 
-2026-10-31 · 버전 4.8 (4.8에서 바뀐 것: 블록 글리치 등장 효과)
+2026-10-31 · 버전 4.9 (4.9에서 바뀐 것: 녹아내림, 데이터모싱 흉내, 일렁임 등장 효과)
 
 ## 이 문서 보는 법
 
-showpy 4.8을 받은 사람이 **어떤 파일의 어떤 값을 고치면 무엇이 바뀌는지** 찾아보는 문서입니다. 설정 이름의 전체 설명은 각 폴더의 `README.md`에 있고, 이 문서는 "하고 싶은 일"에서 출발합니다. 글을 PyKaki에서 쓰려면 "PyKaki와 함께 쓰기"부터 보세요.
+showpy 4.9를 받은 사람이 **어떤 파일의 어떤 값을 고치면 무엇이 바뀌는지** 찾아보는 문서입니다. 설정 이름의 전체 설명은 각 폴더의 `README.md`에 있고, 이 문서는 "하고 싶은 일"에서 출발합니다. 글을 PyKaki에서 쓰려면 "PyKaki와 함께 쓰기"부터 보세요.
 
 | 폴더 | 하는 일 | 고치는 파일 |
 | --- | --- | --- |
@@ -778,7 +778,7 @@ define n2 = Character(kind=t, what_xpos=400, what_ypos=210)   # 위치 프리셋
 | `width` | `what_xmaximum` | 한 줄 최대 너비 |
 | `align` | `what_text_align` | 줄 정렬 0.0 ~ 1.0 |
 | `speed` | `what_slow_cps_multiplier` | 나오는 속도 배율 (플레이어 텍스트 속도에 곱함. 0.5 = 절반) |
-| `effect` | `what_textshader` | 등장 효과: `"dissolve"` 서서히, `"typewriter"` 타자기, `"slowalpha"` 흐리게 대기, `"flip"` 뒤집히며, `"zoom"` 커지며, `"jitter"` 떨림, `"wave"` 물결. showpy 효과: `"scatter"` 흩어졌다 모이기, `"drop"` 떨어지기, `"spin"` 회전하며, `"shuffle"` 무작위 순서, `"flash"` 색 번쩍, `"slam"` 크게 찍히기, `"typecursor"` 커서 타자기, `"echo"` 색 잔상, `"glitch"` 글리치, `"glow"` 빛 번짐, `"blurin"` 흐렸다 또렷해지기, `"wipe"` 위에서 그려지기, `"blockglitch"` 블록 글리치 |
+| `effect` | `what_textshader` | 등장 효과: `"dissolve"` 서서히, `"typewriter"` 타자기, `"slowalpha"` 흐리게 대기, `"flip"` 뒤집히며, `"zoom"` 커지며, `"jitter"` 떨림, `"wave"` 물결. showpy 효과: `"scatter"` 흩어졌다 모이기, `"drop"` 떨어지기, `"spin"` 회전하며, `"shuffle"` 무작위 순서, `"flash"` 색 번쩍, `"slam"` 크게 찍히기, `"typecursor"` 커서 타자기, `"echo"` 색 잔상, `"glitch"` 글리치, `"glow"` 빛 번짐, `"blurin"` 흐렸다 또렷해지기, `"wipe"` 위에서 그려지기, `"blockglitch"` 블록 글리치, `"melt"` 녹아내림, `"mosh"` 데이터모싱 흉내, `"liquid"` 일렁임 |
 | `name_x`, `name_y` | `namebox_xpos`, `namebox_ypos` | 이름 상자 위치 (대사 창 왼쪽 위 기준, 이름 배경째 움직임) |
 | `name_font`, `name_size`, `name_color` | `who_font`, `who_size`, `who_color` | 이름 글꼴, 크기, 색 |
 

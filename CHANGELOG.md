@@ -2,6 +2,11 @@
 
 버전별 자세한 설명은 [docs/READ_ME_FIRST.md](docs/READ_ME_FIRST.md)와 폴더별 `README.md`에 있습니다.
 
+## 4.9 (2026-11-03)
+
+`ui_kit` 3.8:
+- 등장 효과 `melt`(녹아내림), `mosh`(데이터모싱 흉내), `liquid`(일렁임)를 추가했습니다. `melt`, `mosh`는 `u__hold`로 다 나온 뒤에도 계속 움직이게 할 수 있습니다.
+
 ## 4.8 (2026-11-03)
 
 `ui_kit` 3.7:
