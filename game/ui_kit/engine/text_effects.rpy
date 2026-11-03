@@ -26,6 +26,7 @@
 ##   melt        녹아내림: 흘러내린 색이 모여 글자가 됨 (u__hold로 계속 녹기)
 ##   mosh        데이터모싱 흉내: 네모 칸이 한쪽으로 끌리며 번졌다가 돌아옴 (u__hold로 계속)
 ##   liquid      일렁임: 물에 비친 것처럼 계속 출렁임 (한 번에 나와도 보임)
+##   vhs         지직거리는 VHS: 주사선, 띠 찢김, 색 어긋남, 색조 바뀜, 노이즈가 계속 (한 번에 나와도 보임)
 ##
 ## 값은 콜론으로 바꿀 수 있습니다. (렌파이 텍스트 셰이더 문법)
 ##     effect="scatter:u__distance=200"      더 멀리서 모임
@@ -707,4 +708,90 @@ init -10 python in say_style:
         u__amplitude=2.0,
         u__wavelength=24.0,
         u__speed=2.5,
+        )
+
+    ## ── VHS 노이즈 (3.9) ────────────────────────────────────────────────────
+    ##   vhs     지직거리는 VHS 화면: 주사선, 가로 띠 찢김, 빨강/파랑 어긋남,
+    ##           순간적인 색조 바뀜(노랑, 빨강, 파랑, 초록, 흑백), 지글거리는 노이즈.
+    ##           다 나온 뒤에도 계속 지직거린다. 한 번에 나와도 보인다.
+    ##     effect="vhs:u__tear=0.6"      띠 찢김을 더 자주 (기본 0.3)
+    ##     effect="vhs:u__tint=0.0"      색조 바뀜 끄기 (기본 0.35)
+
+    store.renpy.register_textshader(
+        "vhs",
+        include_default=False,
+        redraw=0.0,
+        variables="""
+        uniform float u__band;
+        uniform float u__tear;
+        uniform float u__shift;
+        uniform float u__split;
+        uniform float u__scan;
+        uniform float u__tint;
+        uniform float u__noise;
+        uniform float u__rate;
+        uniform float u_text_slow_time;
+        uniform float u_text_to_drawable;
+        uniform float u_text_main;
+        uniform float u_time;
+        uniform sampler2D tex0;
+        uniform vec2 res0;
+        attribute float a_text_min_time;
+        varying vec2 v_tex_coord;
+        varying float v_tfx_vhs_min;
+        """,
+        vertex_30="""
+        v_tfx_vhs_min = a_text_min_time;
+        """,
+        fragment_340="""
+        if (u_text_main > 0.5) {
+            float l__td = u_text_to_drawable;
+            float l__tick = floor(u_time * u__rate);
+
+            // 가로 띠 찢김: 띠마다 가끔 옆으로 크게 밀린다
+            float l__band = floor(gl_FragCoord.y / (u__band * l__td));
+            float l__rb = fract(sin(l__band * 12.9898 + l__tick * 78.233) * 43758.5453);
+            float l__dx = l__rb > 1.0 - u__tear ? (fract(l__rb * 91.7) - 0.5) * 2.0 * u__shift : 0.0;
+            // 화면 전체가 살짝 흔들림
+            l__dx += (fract(sin(l__tick * 3.71) * 43758.5453) - 0.5) * 1.5;
+            vec2 l__uv = v_tex_coord + vec2(l__dx * l__td, 0.0) / res0;
+
+            // 빨강, 파랑 어긋남 (박자마다 세기가 바뀜)
+            float l__sp = u__split * (0.5 + fract(sin(l__tick * 7.13) * 43758.5453)) * l__td;
+            vec4 l__c = texture2D(tex0, l__uv);
+            float l__ar = texture2D(tex0, l__uv + vec2(l__sp, 0.0) / res0).a;
+            float l__ab = texture2D(tex0, l__uv - vec2(l__sp, 0.0) / res0).a;
+            float l__a = max(l__c.a, max(l__ar, l__ab));
+            vec3 l__rgb = vec3(max(l__c.r, l__ar * 0.95), l__c.g, max(l__c.b, l__ab * 0.95));
+
+            // 순간적인 색조 바뀜
+            float l__rt = fract(sin(l__tick * 5.17) * 43758.5453);
+            if (l__rt < u__tint) {
+                float l__pick = floor(fract(l__rt * 37.3) * 5.0);
+                vec3 l__tone = l__pick < 1.0 ? vec3(1.0, 0.85, 0.35) : l__pick < 2.0 ? vec3(1.0, 0.4, 0.4) : l__pick < 3.0 ? vec3(0.45, 0.6, 1.0) : l__pick < 4.0 ? vec3(0.55, 1.0, 0.45) : vec3(0.75);
+                float l__g = dot(l__rgb, vec3(0.3, 0.59, 0.11));
+                l__rgb = l__pick < 4.0 ? mix(l__rgb, l__g * l__tone * 1.3, 0.7) : vec3(l__g);
+            }
+
+            // 주사선: 가로 두 줄마다 한 줄을 어둡게
+            float l__line = mod(floor(gl_FragCoord.y / l__td), 2.0);
+            l__rgb *= 1.0 - u__scan * l__line;
+
+            // 지글거리는 노이즈와 밝기 떨림
+            float l__n = fract(sin(dot(floor(gl_FragCoord.xy / l__td) + l__tick, vec2(12.9898, 78.233))) * 43758.5453);
+            l__rgb += (l__n - 0.5) * u__noise * l__a;
+            l__rgb *= 0.9 + 0.2 * fract(sin(l__tick * 9.31) * 43758.5453);
+
+            gl_FragColor = vec4(clamp(l__rgb, 0.0, 1.0) * l__a, l__a);
+        }
+        """,
+        fragment_350=_TFX_ALPHA.format("(v_tfx_vhs_min <= u_text_slow_time ? 1.0 : 0.0)"),
+        u__band=6.0,
+        u__tear=0.3,
+        u__shift=8.0,
+        u__split=2.0,
+        u__scan=0.45,
+        u__tint=0.35,
+        u__noise=0.35,
+        u__rate=12.0,
         )
