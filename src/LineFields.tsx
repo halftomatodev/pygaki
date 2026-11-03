@@ -1,10 +1,10 @@
 // 상자 안 편집과 오른쪽 편집 탭이 함께 쓰는 줄 입력 부품
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useStore } from './store';
 import * as ops from './ops';
 import type { ImageKind, Line, LineFx, SayStyle } from './types';
 import { EFFECTS, FX_BASE, FX_CURSOR, FX_OVERLAY, FX_TRANS, FX_WARP, POSITIONS, STAGE_LABEL, STAGE_TYPES, TRANSITIONS, fxArgs, lineCps, stageCode } from './stage';
-import { useGameFolder } from './gameFolder';
+import { useGameFolder, writePreview } from './gameFolder';
 import { LinePreview } from './PlayStage';
 
 type SetLine = (fn: (x: Line) => void, key?: string) => void;
@@ -162,15 +162,72 @@ export function SayFields({ l, set }: { l: Line; set: SetLine }) {
 
 // 오른쪽 편집 탭의 글자 효과 칸. 글 칸에는 글만 남기려고 줄 밖으로 뺐고, 집중 모드에서는 패널과 함께 숨는다
 // 화면 효과는 렌파이 편집기에서 고치고, 여기서는 받아 적은 값을 보여 주기만 한다
+// [렌파이에서 보기]를 켰는지. 이 브라우저에만 기억한다
+const LIVE_KEY = 'pykaki-live-preview';
+const readLive = () => {
+  try {
+    return localStorage.getItem(LIVE_KEY) === '1';
+  } catch {
+    return false;
+  }
+};
+
 export function LineLook({ l, set }: { l: Line; set: SetLine }) {
   const fx = fxArgs(l.fx);
   const tagsOn = useStore((s) => s.project.settings.allowTextTags);
+  const folder = useGameFolder((f) => f.name);
+  const [live, setLive] = useState(readLive);
+  const toggleLive = (on: boolean) => {
+    setLive(on);
+    try {
+      localStorage.setItem(LIVE_KEY, on ? '1' : '0');
+    } catch {
+      /* 이번 창에서만 기억 */
+    }
+    if (!on) void writePreview({ enabled: false });
+  };
+
+  // 줄이나 값이 바뀌면 잠깐 기다렸다가 미리보기 파일에 적는다. 글자/초는 실제로 내보낼 값으로
+  const sayKey = JSON.stringify(l.say ?? {});
+  useEffect(() => {
+    if (!live || !folder) return;
+    const t = setTimeout(() => {
+      const cps = lineCps(l.say);
+      void writePreview({
+        enabled: true,
+        line: l.id,
+        text: tagsOn ? l.text : l.text.replace(/\{/g, '{{'),
+        say: { ...l.say, ...(cps !== undefined ? { cps } : {}) },
+      });
+    }, 300);
+    return () => clearTimeout(t);
+  }, [live, folder, l.id, l.text, sayKey, tagsOn]);
+
   return (
     <div className="look">
       <div className="look-title">글자 모양, 속도, 등장 효과</div>
       <LinePreview line={l} tagsOn={tagsOn} />
+      {l.say?.effect && <EffectClip effect={l.say.effect} />}
+      {folder && (
+        <label className="live-toggle" title="개발 모드로 켜 둔 렌파이 게임 화면 위에 이 줄이 진짜 효과로 나와요">
+          <input type="checkbox" checked={live} onChange={(e) => toggleLive(e.target.checked)} /> 렌파이에서 보기
+        </label>
+      )}
       <SayFields l={l} set={set} />
       {fx.length > 0 && <div className="sf-pos" title="렌파이 편집기의 대사 탭에서 고쳐요">{fx.join(', ')}</div>}
+    </div>
+  );
+}
+
+// 렌파이 견본: 효과마다 렌파이에서 찍어 둔 짧은 영상 (public/effects, tools/record_effect_clips.py로 만듦)
+function EffectClip({ effect }: { effect: string }) {
+  const [missing, setMissing] = useState<string | null>(null);
+  const name = effect.split(':')[0];
+  if (missing === name) return null;
+  return (
+    <div className="clip" title="렌파이에서 찍은 견본이에요. 문장은 예시예요">
+      <video key={name} src={`effects/${name}.webm`} autoPlay loop muted playsInline onError={() => setMissing(name)} />
+      <span>렌파이 견본</span>
     </div>
   );
 }
