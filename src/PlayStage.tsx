@@ -6,6 +6,8 @@ import { transInfo } from './playEngine';
 import { lineCps } from './stage';
 import { parseTagged, type Tagged } from './textTags';
 import { gameFont, pictureOf, useGameFolder, type GameLook } from './gameFolder';
+import { FxCanvas, webglOk } from './fx/FxCanvas';
+import { parseTextShader } from './fx/textShaders';
 
 // 줄마다 고른 글꼴. 못 읽으면 게임 기본 글꼴로 보인다
 const fontStack = (path?: string) => {
@@ -147,7 +149,7 @@ function useReveal(parsed: Tagged, cps: number, wait = 0) {
     if (stop) return setPassed((v) => v + 1), true;
     return false;
   };
-  return { shown: holding ? 0 : shown, done, click, fast };
+  return { shown: holding ? 0 : shown, done, click, fast, limit, holding };
 }
 
 // 글자마다 다른 값(0~1). showpy 셰이더와 같은 식이라 같은 글자는 같은 쪽으로 흩어진다
@@ -165,6 +167,7 @@ function Glyphs({ parsed, shown }: { parsed: Tagged; shown: number }) {
         ) : (
           <span
             key={i}
+            data-i={i}
             className={'ch' + (i < shown ? ' on' : i === shown ? ' next' : '')}
             style={{ ...g.style, '--i': i, '--r1': rand(i, 1) * 2 - 1, '--r2': rand(i, 2) * 2 - 1, '--r3': rand(i, 3) * 2 - 1, '--r4': rand(i, 4) } as React.CSSProperties}
           >
@@ -179,6 +182,24 @@ function Glyphs({ parsed, shown }: { parsed: Tagged; shown: number }) {
 // 등장 효과의 길이는 글자 수로 정해져 있어서, 한 글자 시간을 CSS에 넘긴다
 const charTime = (cps: number) => ({ '--cd': cps > 0 ? `${1 / cps}s` : '0s' }) as React.CSSProperties;
 const fxClass = (effect: string | undefined, fast: boolean) => 'fx-' + (effect || 'none') + (fast ? ' fast' : '');
+
+// 등장 효과를 WebGL로 그릴 수 있으면 셰이더를, 아니면 null (CSS 흉내로 그림)
+function useShader(effect: string | undefined) {
+  const [failed, setFailed] = useState<string | null>(null);
+  const ts = useMemo(() => {
+    if (!effect || !webglOk || failed === effect) return null;
+    try {
+      return parseTextShader(effect);
+    } catch {
+      return null;
+    }
+  }, [effect, failed]);
+  const onFail = (e: unknown) => {
+    console.warn('WebGL 효과를 못 그려서 CSS로 보여요', e);
+    if (effect) setFailed(effect);
+  };
+  return { ts, onFail };
+}
 
 // 설정 카드의 미리보기: 렌파이를 켜지 않고 이 줄의 글자 효과를 본다. 글자는 칸에 꽉 차게 맞춘다
 export function LinePreview({ line, tagsOn }: { line: Line; tagsOn: boolean }) {
@@ -195,7 +216,8 @@ const PREVIEW_MAX = 60;
 function PreviewBody({ line, tagsOn, cps, look, onReplay }: { line: Line; tagsOn: boolean; cps: number; look: GameLook; onReplay(): void }) {
   const text = line.text.trim() ? line.text : '효과 미리보기';
   const parsed = useMemo(() => parseTagged(text, tagsOn, gameFont), [text, tagsOn]);
-  const { shown, click, fast } = useReveal(parsed, cps);
+  const { shown, click, fast, limit, holding } = useReveal(parsed, cps);
+  const { ts, onFail } = useShader(line.say?.effect);
   const box = useRef<HTMLDivElement>(null);
   const inner = useRef<HTMLDivElement>(null);
   const style = line.say ?? {};
@@ -226,11 +248,12 @@ function PreviewBody({ line, tagsOn, cps, look, onReplay }: { line: Line; tagsOn
     >
       <div
         ref={inner}
-        className={'preview-text ' + fxClass(style.effect, fast)}
+        className={'preview-text ' + (ts ? 'fx-gl' : fxClass(style.effect, fast))}
         style={{ color: style.color ?? look.textColor, '--txt': style.color ?? look.textColor, fontFamily: fontStack(style.font), ...charTime(cps) } as React.CSSProperties}
       >
         <Glyphs parsed={parsed} shown={shown} />
       </div>
+      {ts && <FxCanvas target={inner} ts={ts} parsed={parsed} shown={shown} limit={limit} holding={holding} fast={fast} cps={cps} onFail={onFail} />}
       <button className="preview-again" title="다시 보기" onClick={(e) => (e.stopPropagation(), onReplay())}>↺</button>
     </div>
   );
@@ -250,7 +273,9 @@ export const SayBox = forwardRef<SayBoxHandle, {
   const style = line.say ?? {};
   const parsed = useMemo(() => parseTagged(line.text, tagsOn, gameFont), [line.text, tagsOn]);
   const cps = lineCps(style) ?? look.textCps;
-  const { shown, done, click, fast } = useReveal(parsed, cps, wait);
+  const { shown, done, click, fast, limit, holding } = useReveal(parsed, cps, wait);
+  const { ts, onFail } = useShader(style.effect);
+  const sayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     onDone(done);
@@ -289,7 +314,8 @@ export const SayBox = forwardRef<SayBoxHandle, {
         </div>
       )}
       <div
-        className={'say ' + fxClass(style.effect, fast)}
+        ref={sayRef}
+        className={'say ' + (ts ? 'fx-gl' : fxClass(style.effect, fast))}
         style={{
           left: style.x ?? look.dialogueX,
           top: style.y ?? look.dialogueY,
@@ -303,6 +329,7 @@ export const SayBox = forwardRef<SayBoxHandle, {
       >
         <Glyphs parsed={parsed} shown={shown} />
       </div>
+      {ts && <FxCanvas target={sayRef} ts={ts} parsed={parsed} shown={shown} limit={limit} holding={holding} fast={fast} cps={cps} onFail={onFail} />}
     </div>
   );
 });

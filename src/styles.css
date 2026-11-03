@@ -352,6 +352,9 @@ pre.rpy { background: #17191f; color: #d4d6dd; padding: 12px; border-radius: 8px
 /* 글자 하나씩: 나온 글자(.on)만 보인다. 등장 효과는 렌파이 텍스트 셰이더를 비슷하게 흉내 낸다 */
 .ch { visibility: hidden; }
 .ch.on { visibility: visible; }
+/* WebGL로 그릴 때: 글자는 자리만 잡고 캔버스가 그린다 (src/fx/FxCanvas.tsx) */
+.fx-gl .ch, .fx-gl .ch.on { visibility: hidden; }
+.fx-canvas { position: absolute; pointer-events: none; }
 .fx-dissolve .ch { visibility: visible; opacity: 0; }
 .fx-dissolve .ch.on { opacity: 1; transition: opacity .3s linear; }
 .fx-slowalpha .ch { visibility: visible; opacity: .2; }

@@ -55,13 +55,19 @@ label before_main_menu:
 
 
 def effects_from_pykaki():
-    """PyKaki stage.ts의 효과 목록과, 글자/초 기본값을 쓰는 효과."""
-    src = open(os.path.join(PYKAKI, "src", "stage.ts"), encoding="utf-8").read()
-    block = re.search(r"export const EFFECTS[^=]*=\s*\[(.*?)\n\];", src, re.S).group(1)
-    names = [n for n in re.findall(r"\['(\w*)',", block) if n]
-    typed = re.findall(r"'(\w+)'", re.search(r"const TYPED_EFFECTS = \[(.*?)\];", src, re.S).group(1))
-    cps = re.search(r"DEFAULT_CPS = (\d+)", src).group(1)
-    return names, set(typed), cps
+    """PyKaki 셰이더 파일(src/fx/*.glsl)의 효과 목록과, 글자/초 기본값을 쓰는 효과(@cps)."""
+    names, typed = [], set()
+    for fn in ("renpy_textshaders.glsl", "text_effects.glsl"):
+        cur = None
+        for line in open(os.path.join(PYKAKI, "src", "fx", fn), encoding="utf-8"):
+            m = re.match(r"@effect (\w+)", line)
+            if m:
+                cur = m.group(1)
+                names.append(cur)
+            elif line.strip() == "@cps" and cur:
+                typed.add(cur)
+    cps = re.search(r"DEFAULT_CPS = (\d+)", open(os.path.join(PYKAKI, "src", "stage.ts"), encoding="utf-8").read()).group(1)
+    return names, typed, cps
 
 
 def make_project(tmp):

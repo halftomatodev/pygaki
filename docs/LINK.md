@@ -153,7 +153,20 @@ PyKaki가 쓰고 showpy가 읽기만 합니다. PyKaki 글자 효과 칸의 [렌
 
 게임을 켤 때 이미 있던 파일은 띄우지 않습니다. 켤 때 파일이 없었으면 PyKaki가 처음 쓴 파일부터 띄웁니다. 폴더 권한이 없어 쓰지 못하면 PyKaki가 스위치 옆에 안내와 [권한 허용] 버튼을 보여 줍니다. 배포판에서 빠집니다.
 
-## 8. 확인 상태 (showpy 4.12, 렌파이 8.5.3)
+## 8. 등장 효과 셰이더 (`text_effects.glsl`)
+
+등장 효과의 셰이더 코드는 showpy `game/ui_kit/engine/text_effects.glsl` 하나에 있습니다. **이 파일이 원본**이고, PyKaki `src/fx/text_effects.glsl`은 사본입니다(PyKaki에서 `npm run sync-shaders`로 복사. `SHOWPY_DIR`로 showpy 폴더를 정함).
+
+| 누가 | 어떻게 쓰나 |
+|---|---|
+| showpy `engine/text_effects.rpy` | init에서 읽어 효과마다 `renpy.register_textshader`로 등록. 편집기 대사 탭의 효과 버튼 이름도 여기서 |
+| PyKaki `src/fx/textShaders.ts`, `src/fx/FxCanvas.tsx` | 같은 코드를 렌파이가 셰이더 조각을 합치는 방식대로 합쳐 WebGL로 미리보기를 그림. 효과 목록, 한글 이름, 글자/초 기본값(`@cps`)도 여기서 |
+
+적는 법은 파일 맨 위에 있습니다. `@effect 이름 한글이름`, `@cps`, `@slow 식`, `@redraw`, `@outline`, `@set u__이름 값`, `@variables`, `@vertex_N`, `@fragment_N`, `@part`/`@use`, `RAND(n)`. 두 프로그램의 읽는 코드(showpy `tfx_parse`, PyKaki `parseShaders`)는 같은 규칙이라 표시를 새로 만들면 둘 다 고칩니다.
+
+렌파이에 들어 있는 효과(`dissolve` 등 7개)는 렌파이가 등록하므로 showpy 파일에 없고, PyKaki가 미리보기용으로 `src/fx/renpy_textshaders.glsl`에 같은 형식으로 옮겨 둡니다.
+
+## 9. 확인 상태 (showpy 4.13, 렌파이 8.5.3)
 
 **자동으로 실행해서 확인함:**
 - 실시간 미리보기: showpy는 미리보기 파일을 바꾸면 창이 새 줄로 바뀌고 `enabled: false`면 닫힘. PyKaki는 스위치를 켜고 고치고 끌 때 파일 내용이 맞음. **둘을 동시에 켜 놓고 확인하지는 않음**
@@ -166,7 +179,11 @@ PyKaki가 쓰고 showpy가 읽기만 합니다. PyKaki 글자 효과 칸의 [렌
 - 대사 저장 막기, 위치 저장과 우선순위
 - PyKaki 화면에서 폴더 연결, 목록 찾기, 창으로 돌아올 때 받아 적기, 내보내기. **브라우저의 폴더 선택창은 시험 도구로 바꿔서 돌림**
 
+- 등장 효과 셰이더 파일: 새 `text_effects.rpy`가 파일을 읽어 등록하는 값(셰이더 코드, 기본값, 기다리는 시간, 다시 그리기)이 4.12와 20개 모두 같음 (렌파이 없이 등록 함수를 바꿔 끼워 비교). **렌파이 Lint와 실행은 아직 안 함**
+- PyKaki WebGL 미리보기: 효과 27개를 렌파이 견본 영상과 같은 조건(1280x720, 글자 40, 30글자/초, 같은 문장)으로 프레임마다 찍어 나란히 비교해 모양과 순서가 맞음. 여러 줄, 색과 굵기 태그, WebGL을 끈 브라우저(CSS로 돌아감)도 확인
+
 **아직 사람이 확인해야 함:**
+- 바뀐 showpy(4.13)를 렌파이에서 Lint하고 실행해 효과가 그대로 나오는지
 - 실제 폴더 선택창과 권한 창을 누르는 것
 - 소리가 실제로 나는지 (플레이 화면에서 재생이 시작되는 것까지는 확인함)
 - 크롬과 엣지에서 F8로 실제 전체화면이 되는 것
