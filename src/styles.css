@@ -356,7 +356,7 @@ pre.rpy { background: #17191f; color: #d4d6dd; padding: 12px; border-radius: 8px
 .fx-dissolve .ch.on { opacity: 1; transition: opacity .3s linear; }
 .fx-slowalpha .ch { visibility: visible; opacity: .2; }
 .fx-slowalpha .ch.on { opacity: 1; transition: opacity .15s linear; }
-.fx-flip .ch, .fx-zoom .ch, .fx-jitter .ch, .fx-wave .ch, .fx-scatter .ch, .fx-drop .ch, .fx-spin .ch, .fx-slam .ch, .fx-echo .ch, .fx-glitch .ch, .fx-wipe .ch { display: inline-block; white-space: pre; }
+.fx-flip .ch, .fx-zoom .ch, .fx-jitter .ch, .fx-wave .ch, .fx-scatter .ch, .fx-drop .ch, .fx-spin .ch, .fx-slam .ch, .fx-echo .ch, .fx-glitch .ch, .fx-wipe .ch, .fx-blockglitch .ch { display: inline-block; white-space: pre; }
 .fx-flip .ch { transform: rotateY(90deg); }
 .fx-flip .ch.on { transform: none; transition: transform .25s ease-out; }
 .fx-zoom .ch { transform: scale(0); }
@@ -393,6 +393,19 @@ pre.rpy { background: #17191f; color: #d4d6dd; padding: 12px; border-radius: 8px
   45% { transform: translateX(-.06em); clip-path: none; text-shadow: -.04em 0 #f0f, .04em 0 #0ff; }
   65% { transform: translateX(.03em); text-shadow: .02em 0 #f0f, -.02em 0 #0ff; }
   85% { transform: none; text-shadow: none; }
+}
+/* 블록 글리치: 칸 단위로 밀리고 잘리고 색이 바뀌다가 선다. 글자마다 시작 칸을 다르게 해서 같이 깨지지 않게 */
+.fx-blockglitch .ch.on { animation: fx-block calc(var(--cd) * 12) steps(1) backwards; animation-delay: calc(var(--r4) * -1 * var(--cd) * 3); }
+@keyframes fx-block {
+  0% { transform: translate(.2em, -.1em); clip-path: inset(0 40% 50% 0); color: #ff00ff; }
+  10% { transform: translate(-.15em, .05em); clip-path: inset(30% 0 20% 30%); color: #00ffff; }
+  20% { transform: translate(.1em, 0); clip-path: inset(0 0 60% 0); color: #ffff00; }
+  30% { transform: scaleX(1.4); clip-path: inset(50% 0 0 0); color: #00ff66; }
+  42% { transform: translate(-.08em, .08em); clip-path: inset(20% 30% 0 0); color: inherit; }
+  55% { transform: translate(.05em, 0); clip-path: inset(0 0 30% 0); color: #ff3355; }
+  70% { transform: none; clip-path: none; color: inherit; }
+  80% { transform: translateX(-.04em); color: #33aaff; }
+  90% { transform: none; color: inherit; }
 }
 /* 빛 번짐: 글자 주변이 흐리게 빛난다 */
 .fx-glow .ch { text-shadow: 0 0 .2em rgba(255, 255, 255, .9), 0 0 .45em rgba(255, 255, 255, .55); }
