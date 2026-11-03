@@ -13,7 +13,35 @@
 그리고 이 기능들을 **게임을 실행한 채로 마우스로 고치는 편집기**가 들어 있습니다. (개발 모드에서 Shift+M)
 대사, 선택지, show·hide·scene 줄은 편집기에서 고친 값이 **원고(.rpy)의 그 줄에 바로 저장**됩니다.
 
-버전 3.11 · 렌파이 8.5.3 기준으로 만들었습니다.
+버전 3.12 · 렌파이 8.5.3 기준으로 만들었습니다.
+
+### 3.12에서 바뀐 점
+
+- **등장 효과 셰이더를 한 파일로** (`engine/text_effects.glsl`): 등장 효과 20개의 셰이더 코드를 셰이더만 담은 파일로 옮겼습니다. `engine/text_effects.rpy`는 게임을 켤 때 이 파일을 읽어 등록만 합니다. 효과의 모양과 값은 3.11과 똑같습니다.
+  - PyKaki가 같은 파일(사본)로 미리보기를 WebGL로 그려서, PyKaki 미리보기와 렌파이 효과가 같은 코드에서 나옵니다.
+  - 새 효과는 `text_effects.glsl`에 한 번만 쓰면 됩니다. 편집기 대사 탭의 효과 버튼도 이 파일에서 이름을 가져옵니다. 적는 법은 파일 맨 위에 있습니다.
+    ```
+    @effect pop 튀어나오기
+    @cps
+    @slow u__duration
+    @set u__duration 8.0
+    @variables
+        uniform float u__duration;
+        uniform float u_text_slow_duration;
+        uniform float u_text_slow_time;
+        attribute float a_text_min_time;
+        attribute vec2 a_text_center;
+        varying float v_tfx_pop;
+    @vertex_30
+    @use T
+        gl_Position.xy = a_text_center + (gl_Position.xy - a_text_center) * mix(1.6, 1.0, l__t);
+        v_tfx_pop = l__t;
+    @fragment_350
+        gl_FragColor = gl_FragColor * clamp(v_tfx_pop * 3.0, 0.0, 1.0);
+    ```
+    대사에서는 `e "펑!" (effect="pop")`처럼 씁니다. (`@use T`는 파일 위쪽의 공통 조각으로, 이 글자가 나오기 시작한 뒤 얼마나 지났는지를 `l__t`(0에서 1)에 넣습니다.)
+- 고침: 게임을 켤 때 `pykaki_preview.json`이 없으면 PyKaki가 처음 쓴 미리보기를 띄우지 않던 것.
+- 옮기기: `ui_kit` 폴더를 통째로 바꿔 넣고(`text_effects.glsl`이 같이 있어야 함) `.rpyc`를 지웁니다. PyKaki도 같이 새로 고침합니다.
 
 ### 3.11에서 바뀐 점
 

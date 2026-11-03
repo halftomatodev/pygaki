@@ -1,6 +1,6 @@
 # showpy (먼저 읽기)
 
-버전 4.12
+버전 4.13
 
 예전 이름은 "렌파이 UI 플러그인 묶음"이었습니다.
 
@@ -21,6 +21,16 @@
 - `screen_fx`는 예전의 `watermorph`, `vhs_crt` 두 플러그인을 합친 것입니다.
 - 합친 기능들은 각자 설정 파일의 스위치(`enabled`)로 따로 끌 수 있고, 끄면 렌파이 기본(효과 없음)과 똑같이 보입니다.
 - `screen_fx`는 넣자마자 VHS 덮개가 화면 전체에 켜집니다. 처음에는 깨끗한 화면으로 보고 싶다면 `screen_fx/screen_fx_config.rpy`의 `screen_fx.overlay`를 `False`로(평소엔 깨끗하고 `use()`나 `fx_overlay=True`로 켤 때만 효과), 타이틀 일렁임은 `screen_fx/watermorph_config.rpy`의 `watermorph.enabled`를 `False`로 바꾸세요.
+
+## 4.13에서 바뀐 점
+
+### `ui_kit` 3.12: 등장 효과 셰이더를 한 파일로
+
+등장 효과의 셰이더 코드를 `ui_kit/engine/text_effects.glsl` 하나에 모았습니다. 렌파이와 PyKaki 미리보기가 같은 코드를 써서, PyKaki에서 보는 효과가 렌파이와 같은 모양으로 나옵니다. 효과의 모양과 값은 그대로입니다. 새 효과는 이 파일에 한 번만 쓰면 됩니다(적는 법은 파일 맨 위).
+
+PyKaki 실시간 미리보기에서, 게임을 켤 때 미리보기 파일이 없으면 첫 미리보기가 뜨지 않던 것도 고쳤습니다.
+
+옮기기: `ui_kit` 폴더를 통째로 바꿔 넣고 `.rpyc`를 지웁니다. PyKaki도 같이 새로 고침합니다.
 
 ## 4.12에서 바뀐 점
 

@@ -63,27 +63,9 @@ init -8 python in ui_editor:
             ("zoom", "커지며"),
             ("jitter", "떨림"),
             ("wave", "물결"),
-            ## showpy가 등록한 효과 (engine/text_effects.rpy)
-            ("scatter", "흩어졌다 모이기"),
-            ("drop", "떨어지기"),
-            ("spin", "회전하며"),
-            ("shuffle", "무작위 순서"),
-            ("flash", "색 번쩍"),
-            ("slam", "크게 찍히기"),
-            ("typecursor", "커서 타자기"),
-            ("echo", "색 잔상"),
-            ("glitch", "글리치"),
-            ("glow", "빛 번짐"),
-            ("blurin", "흐렸다 또렷"),
-            ("wipe", "위에서 그려지기"),
-            ("blockglitch", "블록 글리치"),
-            ("melt", "녹아내림"),
-            ("mosh", "데이터모싱"),
-            ("liquid", "일렁임"),
-            ("vhs", "VHS 지직거림"),
-            ("rise", "떠오르기"),
-            ("lean", "기울며 들어오기"),
-            ("stretch", "늘어나며 들어오기"),
+            ) + tuple(
+            ## showpy가 등록한 효과 (engine/text_effects.glsl의 @effect 이름과 한글 이름)
+            (e["name"], e["label"]) for e in store.say_style.TFX_EFFECTS
             )
 
         def __init__(self):

@@ -2,11 +2,16 @@
 
 버전별 자세한 설명은 [docs/READ_ME_FIRST.md](docs/READ_ME_FIRST.md)와 폴더별 `README.md`에 있습니다.
 
+## 4.13 (2026-11-03)
+
+`ui_kit` 3.12:
+- 등장 효과 20개의 셰이더 코드를 `engine/text_effects.glsl` 한 파일로 옮겼습니다. `text_effects.rpy`는 init에서 이 파일을 읽어 등록하고, 편집기 대사 탭의 효과 버튼도 여기서 이름을 가져옵니다. 등록 값은 4.12와 같습니다. PyKaki가 같은 파일(사본)로 미리보기를 WebGL로 그려서, 새 효과는 한 번만 쓰면 됩니다.
+- 고침: 게임을 켤 때 `pykaki_preview.json`이 없으면 PyKaki가 처음 쓴 파일을 "켤 때 있던 파일"로 보고 띄우지 않던 것.
+
 ## 4.12 (2026-11-03)
 
 `ui_kit` 3.11:
 - PyKaki 실시간 미리보기: 개발 모드에서 `game/pykaki_preview.json`이 바뀌면 화면 위에 미리보기 창을 띄워 그 줄을 진짜 효과로 다시 보여줍니다(`editor/editor_preview.rpy`). PyKaki 미리보기와 렌파이의 차이를 바로 확인하려는 것입니다.
-- 고침: 게임을 켤 때 `pykaki_preview.json`이 없으면 PyKaki가 처음 쓴 파일을 "켤 때 있던 파일"로 보고 띄우지 않던 것.
 
 ## 4.11 (2026-11-03)
 
