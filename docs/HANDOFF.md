@@ -67,7 +67,7 @@
 3. ~~**링크 바꾸기**~~ (2026-11-04 함. 맨 위 README의 예전 저장소 소개만 남김): 문서와 화면에 남은 예전 주소를 pygaki로 바꿉니다.
    - `github.io/pykaki`, `github.com/halftomatodev/pykaki`, `github.com/halftomatodev/showpy`
    - 들어 있는 곳: `pykaki/src/Sidebar.tsx`, `pykaki/README.md`, `pykaki/CLAUDE.md`, `pykaki/docs/*.md`, `showpy/README.md`, `showpy/docs/*.md`, `showpy/CHANGELOG.md`, `showpy/examples/pykaki_sample/README.md`
-4. **예전 저장소 정리**: pykaki, showpy 저장소를 지울지, README에 "pygaki로 옮겼어요"만 남기고 보관(archive)할지 정하기.
+4. ~~**예전 저장소 정리**~~ (2026-11-04 함): pykaki, showpy 두 저장소 README 맨 위에 "pygaki로 옮겼어요" 안내를 넣고 보관(archive)함. 예전 사이트 github.io/pykaki는 예전 PyKaki 그대로 열림(브라우저 저장은 같은 주인이라 함께 씀).
 5. **구글 문서**: 공개용 사용 안내(https://docs.google.com/document/d/10kmDFgiQ9JpbgIY6Q7vejf3EjMC06rCJCxjVSeukdes/edit)에 4.13과 데스크톱 앱 내용을 반영. 아직 반영 안 한 내용은 `F:\SHOWPY\구글문서_수정안.md`.
 6. **시험 프로젝트에 showpy 4.13 넣기**: `fx_test_25`, `pykaki_sample`의 `game/` 플러그인 폴더를 `pygaki\showpy\game\`에서 통째로 바꾸고 `.rpyc` 지우기. `text_effects.glsl`이 같이 들어가야 합니다.
 
