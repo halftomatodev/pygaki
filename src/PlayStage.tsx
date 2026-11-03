@@ -227,7 +227,7 @@ function PreviewBody({ line, tagsOn, cps, look, onReplay }: { line: Line; tagsOn
       <div
         ref={inner}
         className={'preview-text ' + fxClass(style.effect, fast)}
-        style={{ color: style.color ?? look.textColor, fontFamily: fontStack(style.font), ...charTime(cps) }}
+        style={{ color: style.color ?? look.textColor, '--txt': style.color ?? look.textColor, fontFamily: fontStack(style.font), ...charTime(cps) } as React.CSSProperties}
       >
         <Glyphs parsed={parsed} shown={shown} />
       </div>
@@ -296,6 +296,7 @@ export const SayBox = forwardRef<SayBoxHandle, {
           width: look.dialogueWidth,
           fontSize: size,
           color: style.color ?? look.textColor,
+          '--txt': style.color ?? look.textColor,
           fontFamily: fontStack(style.font),
           ...charTime(cps),
         } as React.CSSProperties}
