@@ -2,6 +2,12 @@
 
 버전별 자세한 설명은 [docs/READ_ME_FIRST.md](docs/READ_ME_FIRST.md)와 폴더별 `README.md`에 있습니다.
 
+## 4.6 (2026-11-03)
+
+`ui_kit` 3.5:
+- 글자마다 움직이는 등장 효과 7개를 텍스트 셰이더로 등록했습니다: `scatter`, `drop`, `spin`, `shuffle`, `flash`, `slam`, `typecursor`. 대사 괄호의 `effect`와 대사 탭에서 고릅니다.
+- PyKaki의 플레이 화면과 미리보기도 같은 효과를 보여 줍니다.
+
 ## 4.5 (2026-10-31)
 
 줄마다 바꾸는 화면 효과를 렌파이 편집기로 옮겼습니다. PyKaki도 같이 새로 고침해야 합니다.

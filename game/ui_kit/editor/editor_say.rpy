@@ -63,6 +63,14 @@ init -8 python in ui_editor:
             ("zoom", "커지며"),
             ("jitter", "떨림"),
             ("wave", "물결"),
+            ## showpy가 등록한 효과 (engine/text_effects.rpy)
+            ("scatter", "흩어졌다 모이기"),
+            ("drop", "떨어지기"),
+            ("spin", "회전하며"),
+            ("shuffle", "무작위 순서"),
+            ("flash", "색 번쩍"),
+            ("slam", "크게 찍히기"),
+            ("typecursor", "커서 타자기"),
             )
 
         def __init__(self):
