@@ -2,6 +2,10 @@
 
 렌파이 대본 에디터 PyKaki와 렌파이 플러그인 showpy를 한 저장소에 모은 것. 렌파이 SDK와 함께 윈도우용 오프라인 묶음으로 배포한다. 사용자는 한국어로 대화한다.
 
+**지금 진행 상황과 다음 할 일: [docs/HANDOFF.md](docs/HANDOFF.md)** (클라우드 세션에서 넘겨받은 것)
+
+로컬 자리: `F:\SHOWPY\pygaki` (Dropbox 밖). 렌파이 SDK `F:\SHOWPY\renpy-8.5.3-sdk`, 시험 프로젝트 `F:\Dropbox\1_DEV\RENPY\fx_test_25`, `F:\Dropbox\1_DEV\RENPY\pykaki_sample`.
+
 | 폴더 | 내용 | 먼저 읽기 |
 |---|---|---|
 | `pykaki/` | 대본 에디터 (웹 버전 + 데스크톱 앱) | [pykaki/CLAUDE.md](pykaki/CLAUDE.md), [pykaki/docs/SPEC.md](pykaki/docs/SPEC.md) |

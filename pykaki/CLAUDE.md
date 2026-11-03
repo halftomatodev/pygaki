@@ -16,8 +16,9 @@ npm run build      # dist/index.html 한 파일로 빌드
 
 ## 꼭 지킬 것
 
+- 저장소 맨 위 [../CLAUDE.md](../CLAUDE.md)도 같이 따른다.
 - 기능을 고친 뒤에는 **`npm run build`로 로컬 `dist/index.html`도 다시 만든다.** 사용자가 그 파일을 직접 열어 쓴다.
-- 작업 폴더는 Dropbox 밖의 `F:\SHOWPY\pykaki`다. 저장소를 Dropbox 안에 두지 않는다. Vite 캐시는 `vite.config.ts`의 `cacheDir`로 임시 폴더에 둔다(Dropbox 안에서 돌릴 때도 EBUSY로 개발 서버가 멈추지 않게).
+- 작업 폴더는 Dropbox 밖의 `F:\SHOWPY\pygaki\pykaki`다(pygaki 저장소 안). 저장소를 Dropbox 안에 두지 않는다. Vite 캐시는 `vite.config.ts`의 `cacheDir`로 임시 폴더에 둔다(Dropbox 안에서 돌릴 때도 EBUSY로 개발 서버가 멈추지 않게).
 - Windows는 파일 이름 대소문자를 구분하지 않는다. `Player.tsx`가 있으니 엔진 파일은 `playEngine.ts`처럼 다른 이름을 쓴다.
 - 커밋 작성자는 `halftomato <wwonwan@naver.com>`, GitHub 계정은 `halftomatodev`. 이 저장소의 git 설정에 `http.sslBackend=schannel`과 gh 자격 증명이 들어 있어 push가 된다.
 - 저장 파일 형식(`src/types.ts`)을 바꿀 때는 `normalizeProject()`에서 예전 파일도 열리게 한다.
