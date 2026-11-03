@@ -4,7 +4,7 @@ import { useStore } from './store';
 import * as ops from './ops';
 import type { ImageKind, Line, LineFx, SayStyle } from './types';
 import { EFFECTS, FX_BASE, FX_CURSOR, FX_OVERLAY, FX_TRANS, FX_WARP, POSITIONS, STAGE_LABEL, STAGE_TYPES, TRANSITIONS, fxArgs, lineCps, stageCode } from './stage';
-import { useGameFolder, writePreview } from './gameFolder';
+import { useGameFolder, writePreview, type PreviewResult } from './gameFolder';
 import { LinePreview } from './PlayStage';
 
 type SetLine = (fn: (x: Line) => void, key?: string) => void;
@@ -177,29 +177,34 @@ export function LineLook({ l, set }: { l: Line; set: SetLine }) {
   const tagsOn = useStore((s) => s.project.settings.allowTextTags);
   const folder = useGameFolder((f) => f.name);
   const [live, setLive] = useState(readLive);
-  const toggleLive = (on: boolean) => {
+  const [sent, setSent] = useState<PreviewResult>('ok'); // 마지막으로 미리보기 파일에 쓴 결과
+  const preview = () => {
+    const cps = lineCps(l.say);
+    return {
+      enabled: true,
+      line: l.id,
+      text: tagsOn ? l.text : l.text.replace(/\{/g, '{{'),
+      say: { ...l.say, ...(cps !== undefined ? { cps } : {}) },
+    };
+  };
+  // 클릭 안에서 부르면 폴더 권한 창을 띄울 수 있다
+  const send = async (ask: boolean) => setSent(await writePreview(live ? preview() : { enabled: false }, ask));
+  const toggleLive = async (on: boolean) => {
     setLive(on);
     try {
       localStorage.setItem(LIVE_KEY, on ? '1' : '0');
     } catch {
       /* 이번 창에서만 기억 */
     }
-    if (!on) void writePreview({ enabled: false });
+    const r = await writePreview(on ? preview() : { enabled: false }, true);
+    setSent(on ? r : 'ok');
   };
 
   // 줄이나 값이 바뀌면 잠깐 기다렸다가 미리보기 파일에 적는다. 글자/초는 실제로 내보낼 값으로
   const sayKey = JSON.stringify(l.say ?? {});
   useEffect(() => {
     if (!live || !folder) return;
-    const t = setTimeout(() => {
-      const cps = lineCps(l.say);
-      void writePreview({
-        enabled: true,
-        line: l.id,
-        text: tagsOn ? l.text : l.text.replace(/\{/g, '{{'),
-        say: { ...l.say, ...(cps !== undefined ? { cps } : {}) },
-      });
-    }, 300);
+    const t = setTimeout(() => void send(false), 300);
     return () => clearTimeout(t);
   }, [live, folder, l.id, l.text, sayKey, tagsOn]);
 
@@ -209,9 +214,21 @@ export function LineLook({ l, set }: { l: Line; set: SetLine }) {
       <LinePreview line={l} tagsOn={tagsOn} />
       {l.say?.effect && <EffectClip effect={l.say.effect} />}
       {folder && (
-        <label className="live-toggle" title="개발 모드로 켜 둔 렌파이 게임 화면 위에 이 줄이 진짜 효과로 나와요">
-          <input type="checkbox" checked={live} onChange={(e) => toggleLive(e.target.checked)} /> 렌파이에서 보기
-        </label>
+        <div className="live-row">
+          <label className="live-toggle" title="개발 모드로 켜 둔 렌파이 게임 화면 위에 이 줄이 진짜 효과로 나와요">
+            <input type="checkbox" checked={live} onChange={(e) => void toggleLive(e.target.checked)} /> 렌파이에서 보기
+          </label>
+          {live && sent === 'denied' && (
+            <span className="live-warn">
+              폴더 권한이 없어 렌파이로 못 보내요 <button className="primary" onClick={() => void send(true)}>권한 허용</button>
+            </span>
+          )}
+          {live && sent === 'error' && (
+            <span className="live-warn">
+              미리보기 파일을 못 썼어요 <button className="primary" onClick={() => void send(true)}>다시 쓰기</button>
+            </span>
+          )}
+        </div>
       )}
       <SayFields l={l} set={set} />
       {fx.length > 0 && <div className="sf-pos" title="렌파이 편집기의 대사 탭에서 고쳐요">{fx.join(', ')}</div>}

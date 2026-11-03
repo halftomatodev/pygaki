@@ -636,6 +636,9 @@ fieldset.plain:disabled { opacity: 0.4; }
 .clip video { display: block; width: 100%; }
 .clip span { position: absolute; right: 6px; bottom: 3px; font-size: 10px; color: rgba(255, 255, 255, .6); pointer-events: none; }
 .live-toggle { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--muted); }
+.live-row { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; }
+.live-warn { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--danger); }
+.live-warn button { font-size: 11px; padding: 1px 6px; }
 .look-title { font-size: 11px; font-weight: 600; color: var(--muted); }
 .look-title:not(:first-child) { margin-top: 4px; }
 .look .sf-row select { max-width: 92px; }

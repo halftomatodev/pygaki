@@ -323,10 +323,18 @@ export const looksLikeGame = async () => (await readText(dir, 'gui.rpy')) !== nu
 export const readRpyFromFolder = () => readText(dir, RPY_FILE);
 
 // 렌파이 실시간 미리보기: 지금 줄을 적어 두면 개발 모드로 켠 게임이 화면 위에 다시 보여 준다
-export async function writePreview(data: object) {
-  if (!dir || !(await allowed(false))) return false;
-  await writeText(dir, PREVIEW_FILE, JSON.stringify({ format: 'pykaki-preview', version: 1, ...data }));
-  return true;
+// 'denied'면 폴더 권한이 없는 것 (ask는 클릭 안에서만 true. 브라우저가 권한 창을 클릭 때만 띄움)
+export type PreviewResult = 'ok' | 'denied' | 'error';
+export async function writePreview(data: object, ask = false): Promise<PreviewResult> {
+  if (!dir) return 'error';
+  try {
+    if (!(await allowed(ask))) return 'denied';
+    await writeText(dir, PREVIEW_FILE, JSON.stringify({ format: 'pykaki-preview', version: 1, ...data }));
+    return 'ok';
+  } catch (e) {
+    console.warn('미리보기 파일을 못 썼어요', e);
+    return 'error';
+  }
 }
 
 export async function writeRpyToFolder(code: string) {
