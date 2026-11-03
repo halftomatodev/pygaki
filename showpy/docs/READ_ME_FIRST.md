@@ -138,7 +138,7 @@ e "흩어졌다가 모인다." (cps=30, effect="scatter")
 
 ## 4.3에서 바뀐 점
 
-묶음 이름을 **showpy**로 정하고 [PyKaki](https://github.com/halftomatodev/pykaki)와 연결했습니다.
+묶음 이름을 **showpy**로 정하고 [PyKaki](https://github.com/halftomatodev/pygaki/tree/main/pykaki)와 연결했습니다.
 
 ### `ui_kit` 3.2: 지금 대사 앞에 그림과 소리 넣기, PyKaki 원고
 

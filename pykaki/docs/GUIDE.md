@@ -2,7 +2,7 @@
 
 상자와 선으로 렌파이 대본을 쓰고, 렌파이 스크립트(`.rpy`)로 내보내는 도구예요.
 
-**여는 곳**: https://halftomatodev.github.io/pykaki/
+**여는 곳**: https://halftomatodev.github.io/pygaki/
 (크롬이나 엣지를 추천해요. 설치는 필요 없어요.)
 
 ---
@@ -188,7 +188,7 @@
 
 ## 9-1. 렌파이 플러그인 showpy와 함께 쓰기
 
-[showpy](https://github.com/halftomatodev/showpy)는 게임을 실행한 채 마우스로 화면을 고치는 렌파이 플러그인이에요. **글과 글자 모양은 여기서, 그림과 영상, 소리, 위치, 화면 효과는 렌파이에서** 맞출 수 있어요.
+[showpy](https://github.com/halftomatodev/pygaki/tree/main/showpy)는 게임을 실행한 채 마우스로 화면을 고치는 렌파이 플러그인이에요. **글과 글자 모양은 여기서, 그림과 영상, 소리, 위치, 화면 효과는 렌파이에서** 맞출 수 있어요.
 
 왼쪽 **[렌파이 프로젝트 연결]**을 누르고 프로젝트 폴더를 고르면 끝이에요.
 
@@ -205,7 +205,7 @@
 - 그림 위치 칸이 사라져요. 위치는 렌파이 편집기에서 끌어서 정해요.
 - showpy가 없는 게임에서는 이 연결이 꺼진 채로 내보내요. 글자 모양, 속도, 등장 효과는 그래도 적용돼요.
 
-자세한 순서와 문제 해결은 [showpy 커스텀 가이드](https://github.com/halftomatodev/showpy/blob/main/docs/CUSTOM_GUIDE.md)를 보세요.
+자세한 순서와 문제 해결은 [showpy 커스텀 가이드](https://github.com/halftomatodev/pygaki/blob/main/showpy/docs/CUSTOM_GUIDE.md)를 보세요.
 
 ## 9-2. 데스크톱 앱 (렌파이 묶음)
 

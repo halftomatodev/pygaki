@@ -85,7 +85,7 @@ showpy 4.13을 받은 사람이 **어떤 파일의 어떤 값을 고치면 무�
 
 ## PyKaki와 함께 쓰기
 
-[PyKaki](https://halftomatodev.github.io/pykaki/)는 상자와 선으로 대본을 쓰는 웹 에디터입니다. 두 프로그램을 함께 쓰면 **글은 PyKaki에서, 화면은 렌파이에서** 맞춥니다. 렌파이 코드를 몰라도 됩니다.
+[PyKaki](https://halftomatodev.github.io/pygaki/)는 상자와 선으로 대본을 쓰는 웹 에디터입니다. 두 프로그램을 함께 쓰면 **글은 PyKaki에서, 화면은 렌파이에서** 맞춥니다. 렌파이 코드를 몰라도 됩니다.
 
 | 하고 싶은 것 | 어디서 |
 |---|---|

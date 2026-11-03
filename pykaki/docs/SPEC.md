@@ -2,8 +2,8 @@
 
 지금 구현된 상태를 기준으로 정리한 명세예요. 처음 설계 문서(`../RENPY_FLOW_EDITOR_SPEC.md`)와 다른 곳은 이 문서가 맞아요.
 
-- 사이트: https://halftomatodev.github.io/pykaki/
-- 저장소: https://github.com/halftomatodev/pykaki
+- 사이트: https://halftomatodev.github.io/pygaki/
+- 저장소: https://github.com/halftomatodev/pygaki (`pykaki/` 폴더)
 - 사용자 가이드: [GUIDE.md](GUIDE.md)
 
 ## 1. 목적과 원칙

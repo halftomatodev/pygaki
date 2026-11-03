@@ -59,12 +59,12 @@
 
 ## 4. 다음에 할 일
 
-1. **묶음 만들어 시험하기**: Actions "PyKaki 앱"의 `PyKaki-win`을 받아 풀고 아래를 돌린 뒤 3장의 체크 항목을 봅니다. 파이썬이 없으면 `renpy-8.5.3-sdk\lib\py3-windows-x86_64\python.exe`.
+1. ~~**묶음 만들어 시험하기**~~ (2026-11-04 함, 남은 확인은 3장): Actions "PyKaki 앱"의 `PyKaki-win`을 받아 풀고 아래를 돌린 뒤 3장의 체크 항목을 봅니다. 파이썬이 없으면 `renpy-8.5.3-sdk\lib\py3-windows-x86_64\python.exe`.
    ```
    python bundle\make_bundle.py --sdk F:\SHOWPY\renpy-8.5.3-sdk --app F:\SHOWPY\PyKaki-win --zip
    ```
-2. **GitHub Pages 켜기**: https://github.com/halftomatodev/pygaki/settings/pages 에서 Source를 GitHub Actions로 하고 "Deploy to GitHub Pages"를 다시 돌립니다(첫 실행은 Pages가 꺼져 있어 404로 실패).
-3. **링크 바꾸기** (Pages가 뜬 뒤): 문서와 화면에 남은 예전 주소를 pygaki로 바꿉니다.
+2. ~~**GitHub Pages 켜기**~~ (2026-11-04 함, https://halftomatodev.github.io/pygaki/): https://github.com/halftomatodev/pygaki/settings/pages 에서 Source를 GitHub Actions로 하고 "Deploy to GitHub Pages"를 다시 돌립니다(첫 실행은 Pages가 꺼져 있어 404로 실패).
+3. ~~**링크 바꾸기**~~ (2026-11-04 함. 맨 위 README의 예전 저장소 소개만 남김): 문서와 화면에 남은 예전 주소를 pygaki로 바꿉니다.
    - `github.io/pykaki`, `github.com/halftomatodev/pykaki`, `github.com/halftomatodev/showpy`
    - 들어 있는 곳: `pykaki/src/Sidebar.tsx`, `pykaki/README.md`, `pykaki/CLAUDE.md`, `pykaki/docs/*.md`, `showpy/README.md`, `showpy/docs/*.md`, `showpy/CHANGELOG.md`, `showpy/examples/pykaki_sample/README.md`
 4. **예전 저장소 정리**: pykaki, showpy 저장소를 지울지, README에 "pygaki로 옮겼어요"만 남기고 보관(archive)할지 정하기.
