@@ -1,4 +1,4 @@
-// showpy가 남긴 그림/영상/소리 줄을 대본에 받아 적는다. 문서: docs/LINK.md
+// showpy가 남긴 그림/영상/소리 줄을 대본에 받아 적는다. 문서: 저장소 맨 위 docs/LINK.md
 // .rpy를 되읽지 않는다. showpy_inbox.json에 적힌 줄만 받는다. 대사 글자와 선택지는 받지 않고, 대사는 위치만 받는다.
 import type { BoxNode, Line, LineFx, Project, SayStyle } from './types';
 

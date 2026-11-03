@@ -1,8 +1,8 @@
 // 등장 효과 셰이더: showpy와 같은 셰이더 파일을 읽고, 렌파이가 셰이더 조각을 합치는 방식 그대로 합친다.
-// - text_effects.glsl: showpy game/ui_kit/engine/text_effects.glsl의 사본 (npm run sync-shaders로 복사)
+// - text_effects.glsl: showpy의 셰이더 파일을 그대로 가져옴 (저장소의 showpy/game/ui_kit/engine/text_effects.glsl)
 // - renpy_textshaders.glsl: 렌파이에 들어 있는 효과 (dissolve, typewriter ...)
 // 합치는 방식은 렌파이 8.5.3 renpy/gl2/gl2shadercache.py와 renpy/text/shader.py를 따른다.
-import showpySource from './text_effects.glsl?raw';
+import showpySource from '../../../showpy/game/ui_kit/engine/text_effects.glsl?raw';
 import renpySource from './renpy_textshaders.glsl?raw';
 
 export interface ShaderEffect {

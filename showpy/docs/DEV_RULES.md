@@ -24,7 +24,7 @@ showpy를 고치는 사람과 AI가 지킬 규칙입니다.
 
 ## PyKaki와 맞출 때
 
-- 형식이 바뀌면 [LINK.md](LINK.md)를 고치고, PyKaki 저장소의 `docs/LINK.md`도 똑같이 고칩니다.
+- 형식이 바뀌면 저장소 맨 위의 [docs/LINK.md](../../docs/LINK.md)를 고치고, `pykaki/`의 맞는 코드도 같은 커밋에서 고칩니다.
 - PyKaki의 저장 형식 이름(`renpy-flow`, `.flow.json`, IndexedDB `renpy-flow-editor`)은 바꾸지 않습니다.
 
 ## 버전 올리기

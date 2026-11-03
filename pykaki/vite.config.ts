@@ -10,4 +10,6 @@ export default defineConfig({
   // Dropbox 폴더 안에 캐시를 두면 동기화가 파일을 잠가서 개발 서버가 멈춘다
   cacheDir: join(tmpdir(), 'pykaki-vite'),
   plugins: [react(), viteSingleFile()],
+  // 등장 효과 셰이더를 옆의 showpy 폴더에서 가져온다 (../showpy/game/ui_kit/engine/text_effects.glsl)
+  server: { fs: { allow: ['..'] } },
 });

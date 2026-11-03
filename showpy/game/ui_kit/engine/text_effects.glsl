@@ -2,8 +2,8 @@
 //
 // 이 파일 하나에 효과의 셰이더 코드를 적으면, 렌파이(ui_kit/engine/text_effects.rpy가
 // init에서 읽어 renpy.register_textshader로 등록)와 PyKaki(효과 미리보기를 WebGL로 그림)가
-// 같은 코드를 씁니다. PyKaki 저장소에는 사본(src/fx/text_effects.glsl)이 있고,
-// PyKaki에서 npm run sync-shaders를 하면 이 파일을 복사해 갑니다.
+// 같은 코드를 씁니다. PyKaki는 빌드할 때 이 파일을 그대로 가져갑니다(pygaki 저장소의
+// pykaki/src/fx/textShaders.ts).
 //
 // 적는 법 (@로 시작하는 줄이 표시, 들여 쓴 줄이 GLSL 코드, 맨 앞에서 시작하는 // 줄은 설명)
 //

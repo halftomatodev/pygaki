@@ -38,7 +38,7 @@ PyKaki에서 글을 쓴다 → Ctrl+E → 렌파이에서 바로 본다
 | [docs/READ_ME_FIRST.md](docs/READ_ME_FIRST.md) | 게임을 만드는 사람 | 처음 넣을 때 알 것, 버전별 바뀐 점과 옮기는 법 |
 | `game/*/README.md` | 게임을 만드는 사람 | 폴더별 모든 값의 자세한 설명 |
 | [docs/SPEC.md](docs/SPEC.md) | 고치는 사람 | showpy 구조와 동작 |
-| [docs/LINK.md](docs/LINK.md) | 고치는 사람 | showpy와 PyKaki가 맞춰야 하는 형식 |
+| [../docs/LINK.md](../docs/LINK.md) | 고치는 사람 | showpy와 PyKaki가 맞춰야 하는 형식 |
 | [docs/DEV_RULES.md](docs/DEV_RULES.md) | 고치는 사람 | 작업 규칙, 버전 올리는 법 |
 | [PyKaki 명세](https://github.com/halftomatodev/pykaki/blob/main/docs/SPEC.md), [PyKaki 가이드](https://github.com/halftomatodev/pykaki/blob/main/docs/GUIDE.md) | | PyKaki 저장소에 있어요 |
 | [CHANGELOG.md](CHANGELOG.md) | 모두 | 버전 기록 |

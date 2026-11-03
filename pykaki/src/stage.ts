@@ -42,7 +42,7 @@ export function fxArgs(f?: LineFx): string[] {
 
 // 대사 등장 효과. 이름과 한글 이름은 셰이더 파일에서 온다 (src/fx/*.glsl, @effect 줄)
 // - 렌파이에 들어 있는 효과: src/fx/renpy_textshaders.glsl
-// - showpy가 등록하는 효과: src/fx/text_effects.glsl (showpy ui_kit/engine/text_effects.glsl의 사본). showpy가 없는 게임에서는 내보내지 않는다
+// - showpy가 등록하는 효과: showpy/game/ui_kit/engine/text_effects.glsl (빌드할 때 그대로 가져옴). showpy가 없는 게임에서는 내보내지 않는다
 export const EFFECTS: [string, string][] = [['', '효과 없음'], ...[...RENPY_SHADERS, ...SHOWPY_SHADERS].map((e): [string, string] => [e.name, e.label])];
 // 렌파이에 들어 있는 효과. 나머지는 showpy가 있어야 한다
 export const RENPY_EFFECTS = RENPY_SHADERS.map((e) => e.name);
