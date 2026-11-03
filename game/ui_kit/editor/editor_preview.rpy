@@ -45,8 +45,9 @@ init -8 python in ui_editor:
             if n.startswith("what_"):
                 props[n[5:]] = v
         ts = props.get("textshader")
-        if isinstance(ts, str) and ts.split(":")[0] == "echo" and "outlines" not in props and ss is not None:
-            props["outlines"] = list(getattr(ss, "ECHO_OUTLINES", [ ]))
+        outlines = getattr(ss, "TFX_OUTLINES", { }) if ss is not None else { }
+        if isinstance(ts, str) and ts.split(":")[0] in outlines and "outlines" not in props:
+            props["outlines"] = list(outlines[ts.split(":")[0]])
         return props
 
     def preview_replay():

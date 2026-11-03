@@ -2,7 +2,7 @@
 
 코드를 고치는 사람과 AI가 읽는 문서입니다. 사용법은 [CUSTOM_GUIDE.md](CUSTOM_GUIDE.md)에 있습니다.
 
-- 묶음 버전 4.12 (`ui_kit` 3.11, `screen_fx` 4.2, `hotkeys` 1.0, `splash` 1.1)
+- 묶음 버전 4.13 (`ui_kit` 3.12, `screen_fx` 4.2, `hotkeys` 1.0, `splash` 1.1)
 - 렌파이 8.5.3 기준
 - 작업 규칙: [DEV_RULES.md](DEV_RULES.md)
 - PyKaki 연결 형식: [LINK.md](LINK.md)
@@ -22,7 +22,7 @@
 
 | 폴더 | 버전 | 하는 일 |
 |---|---|---|
-| `game/ui_kit` | 3.11 | 타이틀 메뉴, ESC 메뉴, 선택지, 커서, 클릭 대기 표시, 대사 소리, 대사 스타일, 그림과 영상 배치(`stage`), 편집기(개발 모드 Shift+M), 원고 쓰기 도구(`script_edit`) |
+| `game/ui_kit` | 3.12 | 타이틀 메뉴, ESC 메뉴, 선택지, 커서, 클릭 대기 표시, 대사 소리, 대사 스타일, 그림과 영상 배치(`stage`), 편집기(개발 모드 Shift+M), 원고 쓰기 도구(`script_edit`) |
 | `game/screen_fx` | 4.2 | 기본 효과(없음, ASCII, 레트로 터미널, 게임보이) + VHS 덮개, TV 전환, 글자 빼기, 커서 자리, 타이틀 일렁임 |
 | `game/hotkeys` | 1.0 | 단축키, 조작방법 화면 |
 | `game/splash` | 1.1 | 타이틀 전 로고, 경고, 조작 방법 페이지 |
@@ -64,7 +64,7 @@ PyKaki가 내보내는 문법이기도 합니다.
 | `size` `font` `color` `outline` `spacing` `bold` `italic` `kerning` `width` `align` | | 글자 모양 |
 | `speed` | 배율 | 나오는 속도. 플레이어 설정에 곱함 (설정이 "즉시"면 효과 없음) |
 | `cps` | 숫자 | 나오는 속도, 1초에 나오는 글자 수. 플레이어 설정과 상관없음 |
-| `effect` | `"dissolve"` `"typewriter"` `"slowalpha"` `"flip"` `"zoom"` `"jitter"` `"wave"`, showpy가 등록한 `"scatter"` `"drop"` `"spin"` `"shuffle"` `"flash"` `"slam"` `"typecursor"` `"echo"` `"glitch"` `"glow"` `"blurin"` `"wipe"` `"blockglitch"` `"melt"` `"mosh"` `"liquid"` `"vhs"` `"rise"` `"lean"` `"stretch"` (`ui_kit/engine/text_effects.rpy`. `echo`는 `outlines`가 없으면 `say_style`이 복사본 겹을 넣음) | 등장 효과 |
+| `effect` | `"dissolve"` `"typewriter"` `"slowalpha"` `"flip"` `"zoom"` `"jitter"` `"wave"`, showpy가 등록한 `"scatter"` `"drop"` `"spin"` `"shuffle"` `"flash"` `"slam"` `"typecursor"` `"echo"` `"glitch"` `"glow"` `"blurin"` `"wipe"` `"blockglitch"` `"melt"` `"mosh"` `"liquid"` `"vhs"` `"rise"` `"lean"` `"stretch"` (셰이더는 `ui_kit/engine/text_effects.glsl`, `text_effects.rpy`가 init에서 읽어 등록. PyKaki도 같은 파일의 사본으로 미리보기를 그림. `echo`는 `outlines`가 없으면 `say_style`이 파일의 `@outline` 겹을 넣음) | 등장 효과 |
 | `name_x` `name_y` `name_font` `name_size` `name_color` | | 이름 |
 
 `screen_fx` 값은 다시 바꿀 때까지 유지되고 세이브에 저장됩니다. 플러그인을 빼면 이 괄호에서 오류가 납니다.
