@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { disconnectFolder, hasDirPicker, pullInbox, scanFolder, useGameFolder } from './gameFolder';
+import { desktop, isDesktop } from './desktop';
 import { linkProject } from './files';
 import { useStore } from './store';
 import * as ops from './ops';
@@ -76,6 +77,20 @@ export function Sidebar() {
 function LinkPanel() {
   const f = useGameFolder();
   const hasStart = useStore((v) => v.project.labels.some((l) => l.name === 'start'));
+  if (isDesktop)
+    return (
+      <div className="link-panel">
+        <p className="tip">렌파이 프로젝트: {f.name}</p>
+        <div className="row">
+          <button onClick={() => void pullInbox(true).then(() => scanFolder())}>다시 읽기</button>
+          <button onClick={() => void desktop!.openFolder('')}>폴더 열기</button>
+          <button onClick={() => void desktop!.choose()}>다른 프로젝트</button>
+        </div>
+        <p className="tip">그림과 영상 {f.media.images.length}개, 소리 {f.media.audio.length}개를 찾았어요.</p>
+        {!f.hasShowpy && <p className="tip">이 프로젝트에는 showpy가 없어요. 위치와 화면 효과를 렌파이에서 고치려면 showpy로 만든 프로젝트를 쓰세요.</p>}
+        {f.startClash && hasStart && <p className="tip warn-text">{f.startClash}에도 label start가 있어요. 대본의 start label 이름을 바꾸거나 그 파일의 label start를 지워 주세요.</p>}
+      </div>
+    );
   if (!hasDirPicker) return <p className="tip">폴더 연결은 크롬과 엣지에서 돼요. 이 브라우저에서는 내려받은 script_flow.rpy를 game 폴더에 넣어 주세요. showpy에서 넣은 줄은 받아 적지 못해요.</p>;
   return (
     <div className="link-panel">

@@ -1,0 +1,84 @@
+// 데스크톱 앱(pykaki/app, Electron)에서 열렸을 때: 앱이 건넨 파일 기능(window.pygaki)을
+// 브라우저의 폴더 손잡이(FileSystemDirectoryHandle)와 같은 모양으로 감싼다. 그래서 gameFolder.ts, files.ts는
+// 웹 버전과 같은 코드로 돈다. 앱에서는 렌파이 프로젝트 하나를 열고, 연결이나 권한 창이 없다.
+
+interface PygakiApi {
+  info(): Promise<{ project: string; name: string; flows: string[]; version: string }>;
+  list(rel: string): Promise<{ name: string; dir: boolean }[] | null>;
+  stat(rel: string): Promise<{ dir: boolean; size: number; mtime: number } | null>;
+  read(rel: string): Promise<Uint8Array | null>;
+  write(rel: string, data: string | Uint8Array): Promise<boolean>;
+  openFolder(rel: string): Promise<string>;
+  choose(): Promise<boolean>;
+  onChange(fn: (rel: string) => void): () => void;
+}
+
+export const desktop: PygakiApi | null = (window as any).pygaki ?? null;
+export const isDesktop = !!desktop;
+
+const join = (a: string, b: string) => (a ? a + '/' + b : b);
+const notFound = (rel: string) => Object.assign(new Error('파일이 없어요: ' + rel), { name: 'NotFoundError' });
+
+const MIME: Record<string, string> = {
+  png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp', avif: 'image/avif', webm: 'video/webm',
+  ogg: 'audio/ogg', opus: 'audio/ogg', mp3: 'audio/mpeg', wav: 'audio/wav', flac: 'audio/flac',
+  ttf: 'font/ttf', otf: 'font/otf', ttc: 'font/collection', woff: 'font/woff', woff2: 'font/woff2',
+};
+
+export class AppFile {
+  kind = 'file' as const;
+  constructor(public name: string, public rel: string) {}
+  async getFile() {
+    const [bytes, st] = await Promise.all([desktop!.read(this.rel), desktop!.stat(this.rel)]);
+    if (!bytes) throw notFound(this.rel);
+    const ext = this.name.split('.').pop()?.toLowerCase() ?? '';
+    return new File([bytes as BlobPart], this.name, { type: MIME[ext] ?? '', lastModified: st?.mtime });
+  }
+  async createWritable() {
+    const parts: string[] = [];
+    const rel = this.rel;
+    return {
+      write: async (t: string) => void parts.push(t),
+      close: async () => void (await desktop!.write(rel, parts.join(''))),
+    };
+  }
+}
+
+export class AppDir {
+  kind = 'directory' as const;
+  constructor(public name: string, public rel: string) {}
+  async *entries(): AsyncGenerator<[string, AppDir | AppFile]> {
+    for (const e of (await desktop!.list(this.rel)) ?? []) {
+      const r = join(this.rel, e.name);
+      yield [e.name, e.dir ? new AppDir(e.name, r) : new AppFile(e.name, r)];
+    }
+  }
+  async getDirectoryHandle(name: string) {
+    const r = join(this.rel, name);
+    const st = await desktop!.stat(r);
+    if (!st?.dir) throw notFound(r);
+    return new AppDir(name, r);
+  }
+  async getFileHandle(name: string, opt?: { create?: boolean }) {
+    const r = join(this.rel, name);
+    const st = await desktop!.stat(r);
+    if (st?.dir) throw notFound(r);
+    if (!st && !opt?.create) throw notFound(r);
+    return new AppFile(name, r);
+  }
+  async queryPermission() {
+    return 'granted';
+  }
+  async requestPermission() {
+    return 'granted';
+  }
+}
+
+// 연 프로젝트 정보. 대본 파일은 프로젝트 폴더 맨 위의 *.flow.json (없으면 "프로젝트이름.flow.json"을 새로 만듦)
+let info: Awaited<ReturnType<PygakiApi['info']>> | null = null;
+export async function projectInfo() {
+  info ??= await desktop!.info();
+  return info;
+}
+export const gameDir = () => new AppDir('game', 'game');
+export const flowFile = (name: string) => new AppFile(name, name);

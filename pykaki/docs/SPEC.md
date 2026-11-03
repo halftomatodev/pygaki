@@ -228,6 +228,18 @@
 - 내보내기: 폴더를 연결했거나 연결을 켜면 먼저 받아 적고 `script_flow.rpy`에 쓴다. 받아 적기가 실패하면 쓰지 않는다. 폴더 권한을 못 쓰는 브라우저에서는 예전처럼 내려받기.
 - 연결을 켜면 show 줄의 위치 칸을 숨긴다(값이 이미 있을 때만 보임). 위치는 showpy가 저장한다.
 
+## 9-2. 데스크톱 앱 (`app/`, `src/desktop.ts`)
+
+- Electron 앱. 화면은 웹 빌드(`dist/index.html`)를 그대로 `app/web/index.html`로 복사해 `?app=1`로 연다. 웹 코드는 `window.pygaki`가 있으면 앱 모드(`isDesktop`)로 돈다.
+- 렌파이 프로젝트 폴더 하나를 연다. `PyKaki.exe --project "폴더"`(렌파이 런처 버튼), 없으면 폴더 고르는 창. 같은 프로젝트를 다시 열면 있던 창을 앞으로, 다른 프로젝트는 새 창.
+- 파일은 메인 프로세스(`app/main.cjs`)가 다룬다: `info` `list` `stat` `read` `write`(임시 파일에 쓰고 바꿔 끼움) `openFolder` `choose`. 경로는 프로젝트 폴더 기준이고 밖은 막는다. `game/` 폴더를 `fs.watch`로 지켜보고 바뀐 파일 이름을 `pygaki:changed`로 알린다.
+- `src/desktop.ts`의 `AppDir`, `AppFile`이 이 기능을 브라우저 폴더 손잡이(`FileSystemDirectoryHandle`)와 같은 모양으로 감싼다. 그래서 `gameFolder.ts`, `files.ts`는 웹과 같은 코드로 돈다. 권한은 늘 `granted`.
+- 대본: 프로젝트 폴더 맨 위의 `*.flow.json`(이름순 첫 번째)을 연다. 없으면 `프로젝트이름.flow.json`으로 빈 대본을 만들고, showpy(`game/ui_kit`)가 있으면 `renpyLink`를 켠다. 바뀌면 0.7초 뒤 그 파일에 자동 저장(`saveQuiet`). 브라우저 저장소의 `current`는 읽지 않는다. 버전 목록(IndexedDB)은 앱 전체가 같이 쓴다.
+- [열기]는 고른 파일의 내용을 이 프로젝트 대본으로 가져오고, [새로]는 이 프로젝트 대본을 비운다. 저장 파일은 바뀌지 않는다.
+- 왼쪽 "렌파이 프로젝트" 칸: [다시 읽기] [폴더 열기] [다른 프로젝트]. 연결과 끊기는 없다.
+- `showpy_inbox.json`이 바뀌면 0.3초 뒤 받아 적는다(창으로 돌아올 때도).
+- 확인: GitHub Actions "PyKaki 앱"(`.github/workflows/app.yml`)이 리눅스에서 진짜 Electron으로 켜서 `app/smoke.cjs`(자동 저장, 내보내기, 받아 적기, 밖에 쓰기 막기)를 돌리고, 윈도우 `PyKaki.exe` 폴더(`PyKaki-win`)를 만든다. 배포 묶음은 저장소 맨 위 `bundle/`.
+
 ## 9-1. 웹앱 설치 (PWA)
 
 - `public/`의 `manifest.webmanifest`, `sw.js`, 아이콘(Ren'Py 런처 아이콘을 보라색 모노톤으로 바꾼 PNG 32/192/512/마스크용 512, `licenses/RENPY-ICON.txt`)이 빌드 때 `dist/`로 그대로 복사된다. 경로는 모두 상대 경로라 GitHub Pages의 `/pykaki/` 아래에서 동작한다.
