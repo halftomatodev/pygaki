@@ -13,7 +13,26 @@
 그리고 이 기능들을 **게임을 실행한 채로 마우스로 고치는 편집기**가 들어 있습니다. (개발 모드에서 Shift+M)
 대사, 선택지, show·hide·scene 줄은 편집기에서 고친 값이 **원고(.rpy)의 그 줄에 바로 저장**됩니다.
 
-버전 3.7 · 렌파이 8.5.3 기준으로 만들었습니다.
+버전 3.8 · 렌파이 8.5.3 기준으로 만들었습니다.
+
+### 3.8에서 바뀐 점
+
+- **등장 효과 3개 추가** (`engine/text_effects.rpy`):
+
+  | 이름 | 모습 |
+  |---|---|
+  | `melt` | 녹아내림: 세로 줄마다 다른 길이로 색이 흘러내렸다가 모여 글자가 됨 |
+  | `mosh` | 데이터모싱 흉내: 네모 칸이 제각각 한쪽으로 끌리며 번졌다가 돌아옴 |
+  | `liquid` | 일렁임: 물에 비친 것처럼 계속 출렁임. 한 번에 나와도 보임 |
+
+  ```renpy
+  e "녹는다." (cps=30, effect="melt")
+  e "계속 녹아 흐른다." (cps=30, effect="melt:u__hold=0.6")   # 다 나온 뒤에도
+  e "번진다." (cps=30, effect="mosh:u__hold=0.3")
+  e "출렁인다." (effect="liquid:u__amplitude=3")
+  ```
+  렌파이는 글자마다 줄 높이만큼의 칸에만 그려서, 녹은 자국이 아래 줄까지 길게 흐르지는 않습니다.
+- 옮기기: 폴더를 바꿔 넣고 `.rpyc`를 지우면 됩니다. PyKaki도 같이 새로 고침합니다.
 
 ### 3.7에서 바뀐 점
 
@@ -819,7 +838,7 @@ e "어디 갔었어?" (name_x=820, name_y=-60, speed=0.5, effect="jitter")
 | `align` | 줄 정렬 (0.0 왼쪽 ~ 1.0 오른쪽) | `align=0.5` |
 | `speed` | 나오는 속도 배율 (플레이어 텍스트 속도에 곱함. 0.5 = 절반 속도). 텍스트 속도가 "즉시"면 효과가 없음 | `speed=0.5` |
 | `cps` | 나오는 속도, 1초에 나오는 글자 수. 플레이어 텍스트 속도와 상관없이 이 값 | `cps=20` |
-| `effect` | 등장 효과: `"dissolve"` 서서히, `"typewriter"` 타자기, `"slowalpha"` 흐리게 대기, `"flip"` 뒤집히며, `"zoom"` 커지며, `"jitter"` 떨림, `"wave"` 물결. showpy 효과(3.5~3.6): `"scatter"` 흩어졌다 모이기, `"drop"` 떨어지기, `"spin"` 회전하며, `"shuffle"` 무작위 순서, `"flash"` 색 번쩍, `"slam"` 크게 찍히기, `"typecursor"` 커서 타자기, `"echo"` 색 잔상, `"glitch"` 글리치, `"glow"` 빛 번짐, `"blurin"` 흐렸다 또렷해지기, `"wipe"` 위에서 그려지기, `"blockglitch"` 블록 글리치 | `effect="wave"` |
+| `effect` | 등장 효과: `"dissolve"` 서서히, `"typewriter"` 타자기, `"slowalpha"` 흐리게 대기, `"flip"` 뒤집히며, `"zoom"` 커지며, `"jitter"` 떨림, `"wave"` 물결. showpy 효과(3.5~3.6): `"scatter"` 흩어졌다 모이기, `"drop"` 떨어지기, `"spin"` 회전하며, `"shuffle"` 무작위 순서, `"flash"` 색 번쩍, `"slam"` 크게 찍히기, `"typecursor"` 커서 타자기, `"echo"` 색 잔상, `"glitch"` 글리치, `"glow"` 빛 번짐, `"blurin"` 흐렸다 또렷해지기, `"wipe"` 위에서 그려지기, `"blockglitch"` 블록 글리치, `"melt"` 녹아내림, `"mosh"` 데이터모싱 흉내, `"liquid"` 일렁임 | `effect="wave"` |
 | `name_x`, `name_y` | 이름 상자 위치 (대사 창 왼쪽 위 기준. 이름 배경 그림째 움직임) | `name_x=820, name_y=-60` |
 | `name_font`, `name_size`, `name_color` | 이름 글꼴, 크기, 색 | `name_size=34` |
 | `fx` | (`screen_fx`가 있을 때) 이 대사부터 켤 화면 효과. `"default"` = 선택취소. 다음에 바꿀 때까지 이어짐 | `fx="ascii"` |
