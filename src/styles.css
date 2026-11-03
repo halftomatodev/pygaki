@@ -632,6 +632,10 @@ fieldset.plain:disabled { opacity: 0.4; }
 .preview { position: relative; display: flex; align-items: center; height: 84px; padding: 0; background: #15171f; border-radius: 6px; overflow: hidden; cursor: pointer; user-select: none; }
 .preview-text { width: 100%; padding: 0; line-height: 1.25; white-space: pre-wrap; word-break: keep-all; overflow-wrap: anywhere; font-family: var(--game-font); }
 .preview-again { position: absolute; right: 3px; bottom: 3px; color: #fff; background: rgba(255, 255, 255, .14); line-height: 1; }
+.clip { position: relative; background: #000; border-radius: 6px; overflow: hidden; }
+.clip video { display: block; width: 100%; }
+.clip span { position: absolute; right: 6px; bottom: 3px; font-size: 10px; color: rgba(255, 255, 255, .6); pointer-events: none; }
+.live-toggle { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--muted); }
 .look-title { font-size: 11px; font-weight: 600; color: var(--muted); }
 .look-title:not(:first-child) { margin-top: 4px; }
 .look .sf-row select { max-width: 92px; }
