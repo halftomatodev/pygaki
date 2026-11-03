@@ -115,6 +115,7 @@ function useReveal(parsed: Tagged, cps: number, wait = 0) {
   const limit = stop ? stop.at : total; // 지금 나올 수 있는 데까지
   const [shown, setShown] = useState(() => (anyRate ? parsed.fastTo : Math.max(parsed.fastTo, parsed.stops[0]?.at ?? total)));
   const [holding, setHolding] = useState(wait > 0);
+  const [fast, setFast] = useState(false); // 클릭으로 한 번에 보였으면 등장 효과 없이 (렌파이와 같음)
   const done = shown >= total && !stop;
 
   // 앞 줄의 전환이 끝날 때까지 글자를 기다린다
@@ -142,12 +143,18 @@ function useReveal(parsed: Tagged, cps: number, wait = 0) {
   // 아직 다 안 나왔으면 다 보여 주고 true
   const click = () => {
     if (holding) return setHolding(false), true;
-    if (shown < limit) return setShown(limit), true;
+    if (shown < limit) return setShown(limit), setFast(true), true;
     if (stop) return setPassed((v) => v + 1), true;
     return false;
   };
-  return { shown: holding ? 0 : shown, done, click };
+  return { shown: holding ? 0 : shown, done, click, fast };
 }
+
+// 글자마다 다른 값(0~1). showpy 셰이더와 같은 식이라 같은 글자는 같은 쪽으로 흩어진다
+const rand = (i: number, seed: number) => {
+  const v = Math.sin(i * 12.9898 + seed) * 43758.5453;
+  return v - Math.floor(v);
+};
 
 function Glyphs({ parsed, shown }: { parsed: Tagged; shown: number }) {
   return (
@@ -156,12 +163,22 @@ function Glyphs({ parsed, shown }: { parsed: Tagged; shown: number }) {
         g.ch === '\n' ? (
           <br key={i} />
         ) : (
-          <span key={i} className={'ch' + (i < shown ? ' on' : '')} style={{ ...g.style, '--i': i } as React.CSSProperties}>{g.ch}</span>
+          <span
+            key={i}
+            className={'ch' + (i < shown ? ' on' : i === shown ? ' next' : '')}
+            style={{ ...g.style, '--i': i, '--r1': rand(i, 1) * 2 - 1, '--r2': rand(i, 2) * 2 - 1, '--r3': rand(i, 3) * 2 - 1, '--r4': rand(i, 4) } as React.CSSProperties}
+          >
+            {g.ch}
+          </span>
         ),
       )}
     </>
   );
 }
+
+// 등장 효과의 길이는 글자 수로 정해져 있어서, 한 글자 시간을 CSS에 넘긴다
+const charTime = (cps: number) => ({ '--cd': cps > 0 ? `${1 / cps}s` : '0s' }) as React.CSSProperties;
+const fxClass = (effect: string | undefined, fast: boolean) => 'fx-' + (effect || 'none') + (fast ? ' fast' : '');
 
 // 설정 카드의 미리보기: 렌파이를 켜지 않고 이 줄의 글자 효과를 본다. 글자는 칸에 꽉 차게 맞춘다
 export function LinePreview({ line, tagsOn }: { line: Line; tagsOn: boolean }) {
@@ -178,7 +195,7 @@ const PREVIEW_MAX = 60;
 function PreviewBody({ line, tagsOn, cps, look, onReplay }: { line: Line; tagsOn: boolean; cps: number; look: GameLook; onReplay(): void }) {
   const text = line.text.trim() ? line.text : '효과 미리보기';
   const parsed = useMemo(() => parseTagged(text, tagsOn, gameFont), [text, tagsOn]);
-  const { shown, click } = useReveal(parsed, cps);
+  const { shown, click, fast } = useReveal(parsed, cps);
   const box = useRef<HTMLDivElement>(null);
   const inner = useRef<HTMLDivElement>(null);
   const style = line.say ?? {};
@@ -209,8 +226,8 @@ function PreviewBody({ line, tagsOn, cps, look, onReplay }: { line: Line; tagsOn
     >
       <div
         ref={inner}
-        className={'preview-text fx-' + (style.effect || 'none')}
-        style={{ color: style.color ?? look.textColor, fontFamily: fontStack(style.font) }}
+        className={'preview-text ' + fxClass(style.effect, fast)}
+        style={{ color: style.color ?? look.textColor, fontFamily: fontStack(style.font), ...charTime(cps) }}
       >
         <Glyphs parsed={parsed} shown={shown} />
       </div>
@@ -232,7 +249,8 @@ export const SayBox = forwardRef<SayBoxHandle, {
 }>(function SayBox({ line, who, look, tagsOn, wait, onDone, onNoWait, onEdit }, ref) {
   const style = line.say ?? {};
   const parsed = useMemo(() => parseTagged(line.text, tagsOn, gameFont), [line.text, tagsOn]);
-  const { shown, done, click } = useReveal(parsed, lineCps(style) ?? look.textCps, wait);
+  const cps = lineCps(style) ?? look.textCps;
+  const { shown, done, click, fast } = useReveal(parsed, cps, wait);
 
   useEffect(() => {
     onDone(done);
@@ -271,7 +289,7 @@ export const SayBox = forwardRef<SayBoxHandle, {
         </div>
       )}
       <div
-        className={'say fx-' + (style.effect || 'none')}
+        className={'say ' + fxClass(style.effect, fast)}
         style={{
           left: style.x ?? look.dialogueX,
           top: style.y ?? look.dialogueY,
@@ -279,7 +297,8 @@ export const SayBox = forwardRef<SayBoxHandle, {
           fontSize: size,
           color: style.color ?? look.textColor,
           fontFamily: fontStack(style.font),
-        }}
+          ...charTime(cps),
+        } as React.CSSProperties}
       >
         <Glyphs parsed={parsed} shown={shown} />
       </div>

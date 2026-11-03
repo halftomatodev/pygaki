@@ -2,7 +2,7 @@
 import type { BoxNode, LabelGroup, Line, Project, Settings } from './types';
 import { exitLinks, fallTarget } from './ops';
 import { IDENT, PLUGIN_NAMES, RESERVED } from './util';
-import { badImageName, fxArgs, isStage, sayArgs, stageCode } from './stage';
+import { RENPY_EFFECTS, badImageName, fxArgs, isStage, sayArgs, stageCode } from './stage';
 
 export interface Warn { level: 'error' | 'warn'; msg: string; nodeId?: string }
 
@@ -161,6 +161,7 @@ export function generateRpy(p: Project): { code: string; warnings: Warn[] } {
         if (!l.text.trim()) W.push({ level: 'warn', msg: `빈 대사가 있어요 (${b.title || b.id})`, nodeId: b.id });
         pct(l.text, '대사');
         // 짧은 이름과 화면 효과는 플러그인이 받는다. 플러그인이 없으면 오류가 나서 글자 모양만 렌파이 원래 이름으로 쓴다
+        if (!S.renpyLink && l.say?.effect && !RENPY_EFFECTS.includes(l.say.effect)) W.push({ level: 'warn', msg: `이 등장 효과는 showpy가 있어야 해서 내보내지 않았어요 (${b.title || b.id})`, nodeId: b.id });
         const fa = S.renpyLink ? [...fxArgs(l.fx), ...sayArgs(l.say)] : sayArgs(l.say, true);
         const tail = fa.length ? ` (${fa.join(', ')})` : '';
         if (l.type === 'narration') return body.push(q(l.text) + tail);

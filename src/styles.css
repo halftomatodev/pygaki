@@ -356,7 +356,7 @@ pre.rpy { background: #17191f; color: #d4d6dd; padding: 12px; border-radius: 8px
 .fx-dissolve .ch.on { opacity: 1; transition: opacity .3s linear; }
 .fx-slowalpha .ch { visibility: visible; opacity: .2; }
 .fx-slowalpha .ch.on { opacity: 1; transition: opacity .15s linear; }
-.fx-flip .ch, .fx-zoom .ch, .fx-jitter .ch, .fx-wave .ch { display: inline-block; white-space: pre; }
+.fx-flip .ch, .fx-zoom .ch, .fx-jitter .ch, .fx-wave .ch, .fx-scatter .ch, .fx-drop .ch, .fx-spin .ch, .fx-slam .ch { display: inline-block; white-space: pre; }
 .fx-flip .ch { transform: rotateY(90deg); }
 .fx-flip .ch.on { transform: none; transition: transform .25s ease-out; }
 .fx-zoom .ch { transform: scale(0); }
@@ -365,6 +365,23 @@ pre.rpy { background: #17191f; color: #d4d6dd; padding: 12px; border-radius: 8px
 @keyframes fx-jitter { 0% { translate: 1px -1px; } 25% { translate: -1px 1px; } 50% { translate: 1px 1px; } 75% { translate: -1px -1px; } }
 .fx-wave .ch.on { animation: fx-wave 1.2s ease-in-out infinite; animation-delay: calc(var(--i) * -90ms); }
 @keyframes fx-wave { 0%, 100% { translate: 0 -4px; } 50% { translate: 0 4px; } }
+/* showpy가 등록하는 효과 (ui_kit/engine/text_effects.rpy와 같은 값). 길이는 글자 수 × 한 글자 시간(--cd), 거리는 글자 크기(em) 기준 */
+.fx-scatter .ch.on { animation: fx-scatter calc(var(--cd) * 12) cubic-bezier(.33, 1, .68, 1) backwards, fx-fade calc(var(--cd) * 4) linear backwards; }
+@keyframes fx-scatter { from { transform: translate(calc(var(--r2) * 3em), calc(var(--r3) * 3em)) rotate(calc(var(--r1) * 180deg)); } }
+@keyframes fx-fade { from { opacity: 0; } }
+.fx-drop .ch.on { animation: fx-drop calc(var(--cd) * 8) cubic-bezier(.34, 1.56, .64, 1) backwards, fx-fade calc(var(--cd) * 2) linear backwards; }
+@keyframes fx-drop { from { transform: translateY(-1.3em); } }
+.fx-spin .ch.on { animation: fx-spin calc(var(--cd) * 8) cubic-bezier(.33, 1, .68, 1) backwards, fx-fade calc(var(--cd) * 2.7) linear backwards; }
+@keyframes fx-spin { from { transform: rotate(-90deg) scale(.3); } }
+.fx-shuffle .ch.on { animation: fx-fade calc(var(--cd) * 3) linear backwards; animation-delay: calc(var(--r4) * 10 * var(--cd)); }
+.fx-flash .ch.on { animation: fx-flash calc(var(--cd) * 12) cubic-bezier(.5, 1, .89, 1) backwards; }
+@keyframes fx-flash { from { color: #ffc400; } }
+.fx-slam .ch.on { animation: fx-slam calc(var(--cd) * 3.5) cubic-bezier(.33, 1, .68, 1) backwards, fx-fade calc(var(--cd) * 1.75) linear backwards, fx-shake calc(var(--cd) * 6.5) steps(1) calc(var(--cd) * 3.5); }
+@keyframes fx-slam { from { transform: scale(3); } }
+@keyframes fx-shake { 0% { translate: .2em -.15em; } 15% { translate: -.17em .12em; } 30% { translate: .13em .1em; } 45% { translate: -.1em -.08em; } 60% { translate: .07em .05em; } 75% { translate: -.04em .03em; } 90% { translate: 0 0; } }
+.fx-typecursor .ch.next { visibility: visible; color: transparent; text-decoration: underline #fff; text-decoration-thickness: .1em; text-underline-offset: .13em; }
+/* 클릭으로 한 번에 보이면 렌파이처럼 효과 없이 */
+.fast .ch.on { animation: none !important; transition: none !important; }
 .ctrl { display: flex; gap: 2px; margin-top: 8px; flex-wrap: wrap; }
 .plog { margin-top: 8px; max-height: 200px; overflow: auto; border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; line-height: 1.6; }
 .plog .c { color: var(--accent); }
