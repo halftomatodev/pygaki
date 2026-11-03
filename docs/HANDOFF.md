@@ -124,7 +124,8 @@ python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app 'F:\SHOWPY\
 
 ## 6. 다음에 할 만한 것
 
-- 배포: `release.yml`(태그 → Releases 초안)을 만들었지만 아직 Actions에서 돌려 본 적 없음. 윈도우 러너에서 `gui_images`(템플릿 그림 만들기)가 되는지가 걸리는 곳. 앱은 서명이 없어서 윈도우가 처음에 경고함(읽어주세요에 [추가 정보] → [실행] 안내)
+- 배포: `release.yml`을 손으로 돌려 성공함(2026-11-04, 템플릿 그림 만들기·Lint 통과, Artifacts `pygaki-dev`에 두 zip). 아직 태그를 올려 Releases에 낸 적은 없음. 앱은 서명이 없어서 윈도우가 처음에 경고함(읽어주세요에 [추가 정보] → [실행] 안내)
+- Actions 경고: Node.js 20 액션(`checkout@v4` 등)이 곧 막힘. 새 판으로 올리기
 - 덧붙임 zip을 진짜 런처 화면에서 켜 보기(로컬에서는 SDK 복사본에 풀어 런처 Lint, 템플릿 프로젝트 Lint까지만 함)
 - 화면 전체 글리치: VHS 덮개 보강, 화면 블록 글리치, 화면 데이터모싱 흉내
 - 참고자료 `F:\Dropbox\1_DEV\renpydev\assets\참고자료\uRHAHdq1xFNfW-Wc.mp4` 아직 안 봄
