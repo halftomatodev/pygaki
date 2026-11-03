@@ -21,6 +21,8 @@
 ##   glow        빛 번짐: 글자 주변이 흐리게 빛남 (한 번에 나와도 보임)
 ##   blurin      흐렸다 또렷해지기
 ##   wipe        위에서 아래로 그려지기 (글자가 크면 effect="wipe:u__span=80")
+##   blockglitch 블록 글리치: 네모 칸마다 밀리거나 늘어나거나 색이 바뀌었다가 섬
+##               (effect="blockglitch:u__hold=0.3"이면 다 나온 뒤에도 계속 깨짐)
 ##
 ## 값은 콜론으로 바꿀 수 있습니다. (렌파이 텍스트 셰이더 문법)
 ##     effect="scatter:u__distance=200"      더 멀리서 모임
@@ -475,4 +477,78 @@ init -10 python in say_style:
         """,
         u__duration=8.0,
         u__span=40.0,
+        )
+
+    ## ── 블록 글리치 (3.7) ───────────────────────────────────────────────────
+    ##   blockglitch  화면을 네모 칸으로 나눠, 칸마다 무작위로 밀리거나 옆으로 늘어나거나
+    ##                색이 바뀌었다가 선다. 디지털 글리치(데이터 글리치)의 블록 깨짐.
+    ##     effect="blockglitch:u__hold=0.3"   다 나온 뒤에도 30% 세기로 계속 깨짐
+    ##     effect="blockglitch:u__block=20"   칸 크기 (기본 12픽셀)
+
+    def _tfx_adjust_block(ts, u__duration, u__hold, **kwargs):
+        ts.extra_slow_duration = u__duration
+        if u__hold > 0.0:
+            ts.redraw = 0.0
+
+    store.renpy.register_textshader(
+        "blockglitch",
+        include_default=False,
+        adjust_function=_tfx_adjust_block,
+        variables="""
+        uniform float u__duration;
+        uniform float u__block;
+        uniform float u__shift;
+        uniform float u__rate;
+        uniform float u__hold;
+        uniform float u_text_slow_duration;
+        uniform float u_text_slow_time;
+        uniform float u_text_to_drawable;
+        uniform float u_text_main;
+        uniform float u_time;
+        uniform sampler2D tex0;
+        uniform vec2 res0;
+        attribute float a_text_min_time;
+        varying vec2 v_tex_coord;
+        varying float v_tfx_block;
+        """,
+        vertex_30=_TFX_T + """
+        v_tfx_block = l__t;
+        """,
+        fragment_340="""
+        float l__amt = max(1.0 - v_tfx_block, u__hold);
+        if (v_tfx_block > 0.0 && l__amt > 0.0 && u_text_main > 0.5) {
+            float l__size = u__block * u_text_to_drawable;
+            vec2 l__cell = floor(gl_FragCoord.xy / l__size);
+            float l__tick = floor(u_time * u__rate);
+            float l__r1 = fract(sin(dot(l__cell + l__tick, vec2(12.9898, 78.233))) * 43758.5453);
+            float l__r2 = fract(sin(dot(l__cell + l__tick, vec2(39.346, 11.135))) * 43758.5453);
+            float l__r3 = fract(sin(dot(l__cell + l__tick, vec2(73.156, 52.235))) * 43758.5453);
+            vec2 l__uv = v_tex_coord;
+            float l__hit = l__r1 > 1.0 - 0.5 * l__amt ? 1.0 : 0.0;
+            if (l__hit > 0.5) {
+                if (l__r2 < 0.5) {
+                    // 칸째로 밀기
+                    vec2 l__d = vec2((l__r3 - 0.5) * 2.0, (l__r2 - 0.25) * 2.0) * u__shift * u_text_to_drawable;
+                    l__uv += l__d / res0;
+                } else {
+                    // 칸의 왼쪽 한 줄을 옆으로 늘이기
+                    float l__x0 = l__cell.x * l__size;
+                    l__uv.x -= (gl_FragCoord.x - l__x0) / res0.x;
+                }
+            }
+            vec4 l__c = texture2D(tex0, l__uv);
+            if (l__hit > 0.5 && l__r3 > 0.55) {
+                // 컬러 바처럼 칸의 색을 바꾼다
+                vec3 l__hue = clamp(abs(fract(l__r2 + vec3(0.0, 2.0 / 3.0, 1.0 / 3.0)) * 6.0 - 3.0) - 1.0, 0.0, 1.0);
+                l__c.rgb = mix(l__c.rgb, l__hue * l__c.a, 0.85);
+            }
+            gl_FragColor = l__c;
+        }
+        """,
+        fragment_350=_TFX_ALPHA.format("(v_tfx_block > 0.0 ? 1.0 : 0.0)"),
+        u__duration=12.0,
+        u__block=12.0,
+        u__shift=10.0,
+        u__rate=14.0,
+        u__hold=0.0,
         )
