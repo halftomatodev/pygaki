@@ -66,7 +66,7 @@ PyKaki가 `label start:`를 내보내지 않고 `config.label_overrides`로 `sta
 
 ## 4.3 (2026-10-31)
 
-묶음 이름을 **showpy**로 정하고, [PyKaki](https://github.com/halftomatodev/pykaki)와 연결했습니다.
+묶음 이름을 **showpy**로 정하고, [PyKaki](https://github.com/halftomatodev/pygaki/tree/main/pykaki)와 연결했습니다.
 
 `ui_kit` 3.2:
 - 지금 대사 앞에 그림, 영상, 음악, 효과음을 넣을 수 있습니다. 대본에 그림 줄이 하나도 없어도 됩니다.

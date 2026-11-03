@@ -103,7 +103,7 @@ function LinkPanel() {
       {f.name && <p className="tip">그림과 영상 {f.media.images.length}개, 소리 {f.media.audio.length}개를 찾았어요.</p>}
       {f.name && !f.hasShowpy && f.media.images.length + f.media.audio.length + f.media.fonts.length > 0 && (
         <p className="tip">
-          showpy가 없어요. 위치와 화면 효과를 렌파이에서 고치려면 <a href="https://github.com/halftomatodev/showpy" target="_blank" rel="noreferrer">showpy</a> 폴더들을 game에 넣고 [폴더 바꾸기]로 다시 연결하세요.
+          showpy가 없어요. 위치와 화면 효과를 렌파이에서 고치려면 <a href="https://github.com/halftomatodev/pygaki/tree/main/showpy" target="_blank" rel="noreferrer">showpy</a> 폴더들을 game에 넣고 [폴더 바꾸기]로 다시 연결하세요.
         </p>
       )}
       {f.startClash && hasStart && <p className="tip warn-text">{f.startClash}에도 label start가 있어요. 대본의 start label 이름을 바꾸거나 그 파일의 label start를 지워 주세요.</p>}

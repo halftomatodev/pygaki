@@ -3,7 +3,7 @@
 **파이썬을 몰라도 렌파이(Ren'Py) 대본을 쓸 수 있는 웹 에디터예요.**
 상자와 선으로 이야기 흐름을 그리고, 대사를 쓰고, 렌파이 스크립트(`.rpy`)로 내보내요.
 
-👉 **바로 쓰기: https://halftomatodev.github.io/pykaki/**
+👉 **바로 쓰기: https://halftomatodev.github.io/pygaki/**
 (크롬이나 엣지를 추천해요. 회원가입은 필요 없고, 원하면 [앱 설치]로 바탕화면 앱처럼 설치해서 인터넷 없이도 쓸 수 있어요.)
 
 ## 할 수 있는 것
@@ -14,7 +14,7 @@
 - 렌파이 대화창처럼 미리 플레이해 보기
 - 문제(연결 안 된 선, 빈 대사, 잘못된 이름) 검사
 - `.rpy`로 내보내기
-- 렌파이 플러그인 [showpy](https://github.com/halftomatodev/showpy)와 연결: 렌파이 편집기에서 넣은 그림, 영상, 소리가 대본에도 나타나요
+- 렌파이 플러그인 [showpy](https://github.com/halftomatodev/pygaki/tree/main/showpy)와 연결: 렌파이 편집기에서 넣은 그림, 영상, 소리가 대본에도 나타나요
 - 집중 모드(화면을 비우고 쓰는 줄만 또렷하게), 화면 색·글꼴(Pretendard 400/500/600, Neo둥근모)·단축키 바꾸기
 
 자세한 사용법은 [사용 가이드](docs/GUIDE.md)를 보세요.

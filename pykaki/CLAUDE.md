@@ -4,7 +4,7 @@
 
 - 구현 명세: [docs/SPEC.md](docs/SPEC.md) — 작업 전에 먼저 읽기
 - 사용자 가이드: [docs/GUIDE.md](docs/GUIDE.md) — 기능을 바꾸면 같이 고치기
-- 배포: `main`에 push하면 GitHub Actions가 GitHub Pages에 배포 (https://halftomatodev.github.io/pykaki/)
+- 배포: `main`에 push하면 GitHub Actions가 GitHub Pages에 배포 (https://halftomatodev.github.io/pygaki/)
 
 ## 명령
 
