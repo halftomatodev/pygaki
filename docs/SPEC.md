@@ -2,7 +2,7 @@
 
 코드를 고치는 사람과 AI가 읽는 문서입니다. 사용법은 [CUSTOM_GUIDE.md](CUSTOM_GUIDE.md)에 있습니다.
 
-- 묶음 버전 4.11 (`ui_kit` 3.10, `screen_fx` 4.2, `hotkeys` 1.0, `splash` 1.1)
+- 묶음 버전 4.12 (`ui_kit` 3.11, `screen_fx` 4.2, `hotkeys` 1.0, `splash` 1.1)
 - 렌파이 8.5.3 기준
 - 작업 규칙: [DEV_RULES.md](DEV_RULES.md)
 - PyKaki 연결 형식: [LINK.md](LINK.md)
@@ -22,7 +22,7 @@
 
 | 폴더 | 버전 | 하는 일 |
 |---|---|---|
-| `game/ui_kit` | 3.10 | 타이틀 메뉴, ESC 메뉴, 선택지, 커서, 클릭 대기 표시, 대사 소리, 대사 스타일, 그림과 영상 배치(`stage`), 편집기(개발 모드 Shift+M), 원고 쓰기 도구(`script_edit`) |
+| `game/ui_kit` | 3.11 | 타이틀 메뉴, ESC 메뉴, 선택지, 커서, 클릭 대기 표시, 대사 소리, 대사 스타일, 그림과 영상 배치(`stage`), 편집기(개발 모드 Shift+M), 원고 쓰기 도구(`script_edit`) |
 | `game/screen_fx` | 4.2 | 기본 효과(없음, ASCII, 레트로 터미널, 게임보이) + VHS 덮개, TV 전환, 글자 빼기, 커서 자리, 타이틀 일렁임 |
 | `game/hotkeys` | 1.0 | 단축키, 조작방법 화면 |
 | `game/splash` | 1.1 | 타이틀 전 로고, 경고, 조작 방법 페이지 |
@@ -36,13 +36,13 @@
 | 종류 | 내용 |
 |---|---|
 | 스크린 교체 | `choice`, `main_menu`, `navigation`, `keyboard_help` |
-| 새 스크린 | `tmenu_pause`, `title_menu`, `cmenu_choice`, `splash_page`, `ui_editor_*` |
+| 새 스크린 | `tmenu_pause`, `title_menu`, `cmenu_choice`, `splash_page`, `ui_editor_*` (`ui_editor_pk_watch`, `ui_editor_pk_preview`: PyKaki 실시간 미리보기) |
 | 층 | `sfx_say`, `sfx_choice` (screens 아래), `ui_editor` (top_layers) |
 | config | `say_arguments_callback`(`screen_fx` → `say_style` 순서로 이어짐), `layer_transforms`, `say_layer`, `choice_layer`, `nvl_layer`, `nvl_choice_layer`, `context_clear_layers`, `mouse`, `mouse_displayable`, `always_shown_screens`, `top_layers`, `label_overrides["splashscreen"]`, `end_splash_transition`, `all_character_callbacks`, `start_callbacks`, `after_load_callbacks`, `after_default_callbacks`, `default_text_cps`, `keymap`, `underlay`, `language_callbacks`, `lint_hooks`, `show`, `hide`, `scene`, `with_callback`, `start_interact_callbacks`, `label_callbacks` |
 | 그 밖 | `_game_menu_screen`, `gui.main_menu_background` |
 | 세이브 값 | `screen_fx.current`, `cur_overlay`, `cur_target`, `cur_cursor`, `overrides`, `changes`, `stage.cur_box` |
 | persistent | `splash_seen`, `splash_hidden`, `screen_fx_off`, `vhs_crt_off`, `ascii_off`, `retro_term_off`, `gameboy_off`, `_ui_kit_text_cps` |
-| 프로젝트 폴더 | `ui_kit_backup/` (원고 백업), `game/showpy_inbox.json` (PyKaki 전달, 배포판 제외) |
+| 프로젝트 폴더 | `ui_kit_backup/` (원고 백업), `game/showpy_inbox.json` (PyKaki 전달, 배포판 제외), `game/pykaki_preview.json` (PyKaki 실시간 미리보기, 배포판 제외) |
 
 ## 4. 스크립트 문법
 
@@ -103,7 +103,7 @@ hide ghost with stage.ease("outright", 1.2)
 | 대사의 위치(대사, 이름)와 화면 효과 | 원고 | 원고 + `showpy_inbox.json` |
 | 대사 글자 모양, 속도, 등장 효과, 선택지, 화면 효과 줄에 넣기 | 원고 | **저장 안 함.** 대사 탭은 칸을 숨기고, 나머지는 이유를 보여 줌 |
 
-## 6. PyKaki 원고 처리 (3.10)
+## 6. PyKaki 원고 처리 (3.11)
 
 - 알아보기: `script_edit.is_pykaki(filename)`. 파일 앞 5줄의 표시 문구.
 - 저장: `script_edit.apply`가 파일을 읽은 뒤 `_pk_prepare`로 거릅니다.
