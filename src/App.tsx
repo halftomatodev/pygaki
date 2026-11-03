@@ -69,6 +69,15 @@ export function App() {
         </div>
       </div>
       {flash && <div className="toast">{flash}</div>}
+      {/* 일렁임(liquid) 효과가 쓰는 물결 필터 */}
+      <svg className="svg-defs" aria-hidden="true">
+        <filter id="pk-liquid">
+          <feTurbulence type="turbulence" baseFrequency="0.02 0.05" numOctaves={2} seed={3}>
+            <animate attributeName="baseFrequency" dur="3s" values="0.02 0.05;0.026 0.062;0.02 0.05" repeatCount="indefinite" />
+          </feTurbulence>
+          <feDisplacementMap in="SourceGraphic" scale={5} xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </svg>
       {showPrefs && <SettingsModal />}
       <EditCaret />
     </ReactFlowProvider>
