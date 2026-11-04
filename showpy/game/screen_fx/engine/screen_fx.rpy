@@ -42,7 +42,7 @@ init -110 python in screen_fx:
 
     import store
 
-    VERSION = "4.3"
+    VERSION = "4.4"
 
     ## ── 플러그인 폴더 위치 ──
     ## 이 파일은 <플러그인 폴더>/engine/screen_fx.rpy 에 있습니다.
@@ -308,7 +308,12 @@ init -110 python in screen_fx:
         ## ── 편집기 ──
 
         def editing(self):
-            return editing_effect() == self.id
+            ## 4.4: 화면 효과 탭(인게임), 타이틀/게임 내 메뉴 셰이더 탭을 쓰는 동안은 효과마다 편집한 값으로
+            ## (세부 속성이 1번, 2번 아래에 같이 있어서 고르는 효과가 페이지와 상관없음)
+            if editing_effect() == self.id:
+                return True
+            t = editor_tab()
+            return t == TAB_ID or t in MENU_TABS
 
         def preset_values(self, name):
             """프리셋의 값. 편집 중이면 편집기가 고친 프리셋 전체로."""

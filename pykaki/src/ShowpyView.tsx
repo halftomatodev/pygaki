@@ -184,12 +184,18 @@ function Script({ file, line }: { file: string | null; line: number }) {
             PyKaki 상자: {node.name || node.id} →
           </button>
         )}
+        <span className="tip">줄을 누르면 게임도 그 줄로 가요</span>
       </div>
       <pre className="sp-script">
         {lines.slice(from - 1, to).map((l, i) => {
           const n = from + i;
           return (
-            <div key={n} className={n === line ? 'cur' : ''}>
+            <div
+              key={n}
+              className={n === line ? 'cur' : 'go'}
+              onClick={n === line ? undefined : () => liveSend({ cmd: 'goto', where: 'line', file, line: n })}
+              title={n === line ? '게임의 지금 줄' : '게임을 이 줄로 옮겨요 (지나온 줄이면 되감기, 아니면 게임을 다시 시작해서 건너뜀)'}
+            >
               <span className="ln">{n}</span>
               {l || ' '}
             </div>

@@ -23,6 +23,7 @@ init -6 python in screen_fx:
     if HAS_EDITOR:
 
         from store.ui_kit import format_value, file_header
+        import functools
 
         def _fmt_num(v, digits):
             if digits == 0:
@@ -34,16 +35,20 @@ init -6 python in screen_fx:
         class FxBarValue(store.BarValue, store.DictEquality):
             """탭의 값을 읽고 쓰는 막대."""
 
-            def __init__(self, tab_id, key, lo, hi, step, digits):
+            def __init__(self, tab_id, key, lo, hi, step, digits, page=None):
                 self.tab_id = tab_id
                 self.key = key
                 self.lo = lo
                 self.hi = hi
                 self.step = step
                 self.digits = digits
+                self.page = page        # 4.4: 화면 효과 탭의 어느 효과(또는 "tv") 값인지
 
             def _tab(self):
-                return _ed.get_tab(self.tab_id)
+                t = _ed.get_tab(self.tab_id)
+                if self.page is not None and hasattr(t, "view"):
+                    return t.view(self.page)
+                return t
 
             def changed(self, v):
                 value = self.lo + v
@@ -204,6 +209,41 @@ init -6 python in screen_fx:
 
         ## ── 화면 효과 (VHS 덮개, ASCII … 등록된 효과 전부 + 기본 효과, 전환) ──
 
+        class FxView(store.python_object):
+            """화면 효과 탭을 한 효과(또는 "tv")에 맞춰 보는 창 (4.4).
+            1번, 2번 아래에 세부 속성을 같이 그리려고, 부를 때만 탭의 page를 잠시 그 효과로 바꿉니다."""
+
+            def __init__(self, tab, page):
+                self._t = tab
+                self.view_page = page
+                self.key_prefix = page + ":"
+                self._fns = { }
+
+            def _swap(self, fn, *args, **kwargs):
+                t = self._t
+                old = t.page
+                t.page = self.view_page
+                try:
+                    return fn(*args, **kwargs)
+                finally:
+                    t.page = old
+
+            def __getattr__(self, name):
+                if name.startswith("__") or name in ("_t", "_fns", "view_page", "key_prefix"):
+                    raise AttributeError(name)
+                fns = self.__dict__.get("_fns")
+                if fns is not None and name in fns:
+                    return fns[name]
+                t = self.__dict__["_t"]
+                cls_attr = getattr(type(t), name, None)
+                if isinstance(cls_attr, property) or not callable(cls_attr):
+                    return self._swap(getattr, t, name)
+                fn = getattr(t, name)
+                ## 같은 함수를 돌려줘야 화면의 Function(…)이 매번 바뀐 것으로 보이지 않음
+                w = functools.partial(self._swap, fn)
+                fns[name] = w
+                return w
+
         class FxTab(FxTabBase):
 
             id = TAB_ID
@@ -228,7 +268,7 @@ init -6 python in screen_fx:
                 )
 
             def __init__(self):
-                self.page = None        # 효과 이름, "tv"(기본 효과, 전환), "lines"(줄에 넣기)
+                self.page = "lines"     # 늘 "lines"(셰이더 고르기). 효과 이름, "tv"는 FxView가 잠시 바꿀 때만 (4.4)
                 self.line_sel = None    # 줄에 넣기: 고른 줄 (파일, 줄 번호)
                 self.line_edits = { }   # 줄에 넣기: (파일, 줄 번호) -> {"fx", "overlay", "warp", "cursor", "transition", "remove", "expect"}
                 self.list_open = True
@@ -238,6 +278,20 @@ init -6 python in screen_fx:
                 self.picks = None       # 셰이더 고르기: 고른 (1번, 2번). None = 아직 안 고름 (게임의 지금 값) (4.3)
                 self.follow = True      # 셰이더 고르기: 고른 줄이 ▶(게임의 지금 줄)를 따라감
                 self.mark_t = 0.0       # ▶ 더블 클릭 판정용
+                self.detail_open = [ True, True ]   # 1번, 2번 아래 세부 속성 펴기 (4.4)
+                self.tv_open = False    # 맨 아래 "처음 상태, 전환" 펴기 (4.4)
+                self._views = { }
+
+            def view(self, page):
+                """그 효과(또는 "tv")의 값을 고치는 창. 패널의 세부 속성 칸과 막대가 씀."""
+                v = self._views.get(page)
+                if v is None:
+                    v = self._views[page] = FxView(self, page)
+                return v
+
+            def toggle_detail(self, slot):
+                self.detail_open[slot] = not self.detail_open[slot]
+                renpy.restart_interaction()
 
             ## ── 페이지 ──
 
@@ -246,14 +300,6 @@ init -6 python in screen_fx:
 
             def is_tv(self):
                 return self.page == "tv"
-
-            def pages(self):
-                rv = [ ]
-                if getattr(store, "script_edit", None) is not None:
-                    rv.append(("lines", "셰이더 고르기"))
-                rv += [ (i, slot_label(i)) for i, _l in slot_choices() if i in EFFECTS ]
-                rv.append(("tv", "처음 상태, 전환"))
-                return rv
 
             def is_lines(self):
                 return self.page == "lines"
@@ -264,19 +310,11 @@ init -6 python in screen_fx:
                 return (True, "")
 
             def on_open(self):
-                if self.is_lines():
-                    if self.line_sel is None:
-                        self.follow = True
-                        self._follow()
-                    self._sync()
-                    return
-                if self.page not in EFFECTS and self.page != "tv":
-                    if getattr(store, "script_edit", None) is not None:
-                        self.page = "lines"
-                        self.on_open()
-                        return
-                    cur = current_effect()
-                    self.page = cur if cur in EFFECTS else ORDER[0]
+                ## 4.4: 페이지 고르기가 없어지고 늘 셰이더 고르기 (세부 속성은 1번, 2번 아래)
+                self.page = "lines"
+                if self.line_sel is None:
+                    self.follow = True
+                    self._follow()
                 self._sync()
 
             def on_close(self):
@@ -284,8 +322,9 @@ init -6 python in screen_fx:
                     fx.state.preview = None
 
             def _sync(self):
+                ## 세부 속성에서 고른 프리셋을 미리 보여줌 (효과마다)
                 for i, fx in EFFECTS.items():
-                    fx.state.preview = self.targets.get(i) if i == self.page else None
+                    fx.state.preview = self.targets.get(i)
 
             def set_page(self, p):
                 self.page = p
@@ -467,10 +506,18 @@ init -6 python in screen_fx:
             ## 색 (UI Kit 색 고르기 창이 씀)
 
             def get_value(self, key):
+                ## 색 고르기 창: "효과:값" (4.4, 1번/2번 아래 세부 속성)
+                if ":" in key and self.page == "lines":
+                    p, k = key.split(":", 1)
+                    return self.view(p).get_value(k)
                 v = self.val(key)
                 return v if isinstance(v, str) else None
 
             def set_value(self, key, value):
+                if ":" in key and self.page == "lines":
+                    p, k = key.split(":", 1)
+                    self.view(p).set_value(k, value)
+                    return
                 self.put(key, value)
 
             def value_label(self, key):
@@ -625,6 +672,16 @@ init -6 python in screen_fx:
                 self.follow = (key is not None and key == self.here_key())
                 renpy.restart_interaction()
 
+            def pick_line(self, key):
+                """목록에서 줄을 누름: 그 줄을 고르고 게임도 그 줄로 옮김 (4.4).
+                되감기나 다시 시작으로 화면이 바뀌므로 고른 줄을 먼저 정해 둡니다."""
+                self.set_line(key)
+                if key is None or self.follow:
+                    return
+                go = getattr(_ed, "goto_line", None)
+                if go is not None:
+                    go(key[0], key[1])
+
             def step_line(self, step):
                 fn = self.line_file()
                 lines = [ l for l, _n in self.lines_of(fn) ]
@@ -643,9 +700,9 @@ init -6 python in screen_fx:
                 if not lines:
                     return
                 after = [ l for l in lines if l >= num ]
-                self.set_line((fn, after[0] if after else lines[-1]))
-                if self.line_sel[1] != num:
-                    _ed.msg("{}번째 줄에는 넣을 수 없어서 가장 가까운 {}번째 줄을 골랐습니다.".format(num, self.line_sel[1]))
+                if after and after[0] != num:
+                    _ed.msg("{}번째 줄에는 넣을 수 없어서 가장 가까운 {}번째 줄을 골랐습니다.".format(num, after[0]))
+                self.pick_line((fn, after[0] if after else lines[-1]))
 
             def line_source(self, key):
                 se = self.se()
@@ -1125,7 +1182,13 @@ init -6 python in screen_fx:
                             rv.append("저장하면: " + (" / ".join(pv) if pv else "(지움)"))
                     rv.append(self._scene_line())
                     n = self.pending_lines()
-                    rv.append("원고에 저장 안 한 줄 {}곳 (Ctrl+S)".format(n) if n else "저장 안 한 변경 없음")
+                    m = self.pending()
+                    if n:
+                        rv.append("원고에 저장 안 한 줄 {}곳 (Ctrl+S)".format(n))
+                    if m:
+                        rv.append("저장 안 한 세부 속성, 전환 변경: {}개 (Ctrl+S)".format(m))
+                    if not n and not m:
+                        rv.append("저장 안 한 변경 없음")
                     return [ _ed.esc(i) for i in rv ]
                 if self.is_tv():
                     rv.append("게임을 시작할 때: 1번 {}   2번 {}".format(
@@ -1180,8 +1243,8 @@ init -6 python in screen_fx:
             def help_lines(self):
                 if self.is_lines():
                     return [
-                        "1번, 2번을 고르면 화면에 바로 보입니다. 고른 줄은 세모(게임의 지금 줄)를 따라갑니다.",
-                        "[[ ] 앞뒤 줄 | 목록에서 줄 누르기 | 세모 두 번 누르기: 지금 줄로 | Ctrl+S 원고에 넣기",
+                        "1번, 2번을 고르면 화면에 바로 보이고, 그 아래에서 효과의 세부 속성을 고칩니다.",
+                        "목록에서 줄 누르기: 그 줄을 고르고 게임도 그 줄로 | [[ ] 앞뒤 줄 | 세모 두 번: 지금 줄로 | Ctrl+S 저장",
                         ]
                 if self.is_tv():
                     return [
@@ -1205,7 +1268,7 @@ init -6 python in screen_fx:
 
             def restore(self, d):
                 if d:
-                    self.page = d.get("page", None)
+                    self.page = "lines"
                     self.groups = dict(d.get("groups") or { })
                     self.targets = dict(d.get("targets") or { })
                     self.line_edits = { tuple(k) : dict(v) for k, v in (d.get("line_edits") or { }).items() }
@@ -1224,6 +1287,31 @@ init -6 python in screen_fx:
                 self.label = label
                 self.ctx = ctx
                 self.key = MENU_KEYS[ctx]
+                self.detail_open = [ True, True ]
+
+            ## 4.4: 1번, 2번 아래 세부 속성. 값은 화면 효과 탭과 같이 씀 (저장도 그 탭이 함)
+            def fx_tab(self):
+                return _ed.get_tab(TAB_ID)
+
+            def view(self, page):
+                return self.fx_tab().view(page)
+
+            def toggle_detail(self, slot):
+                self.detail_open[slot] = not self.detail_open[slot]
+                renpy.restart_interaction()
+
+            def get_value(self, key):
+                return self.fx_tab().get_value(key)
+
+            def set_value(self, key, value):
+                self.fx_tab().set_value(key, value)
+
+            def on_open(self):
+                self.fx_tab()._sync()
+
+            def on_close(self):
+                for fx in EFFECTS.values():
+                    fx.state.preview = None
 
             def available(self):
                 if not EFFECTS:
@@ -1289,8 +1377,9 @@ init -6 python in screen_fx:
                     rv.append("타이틀과 타이틀에서 연 화면(환경설정, 불러오기)에만 걸립니다. 인게임 셰이더와 따로입니다.")
                 else:
                     rv.append("게임 중 ESC 메뉴와 거기서 연 화면(저장, 환경설정 …)에만 걸립니다. 뒤에 비치는 게임 화면도 이 셰이더로 보입니다.")
-                rv.append("효과마다 세부 속성은 '화면 효과' 탭에서 고칩니다 (인게임과 같이 씀).")
-                rv.append("저장 안 한 변경 있음" if self.pending() else "저장 안 한 변경 없음")
+                rv.append("1번, 2번 아래 세부 속성은 효과마다 하나라 인게임과 같이 씁니다.")
+                n = self.pending() + self.fx_tab().pending() - (1 if self.key in cedit.edits else 0)
+                rv.append("저장 안 한 변경: {}개".format(n) if n else "저장 안 한 변경 없음")
                 return rv
 
             def help_lines(self):
@@ -1355,7 +1444,7 @@ screen ui_editor_fx_row(tab, row):
         elif row[2] == "resolution":
             textbutton ("자동" if tab.res_auto() else "직접") style "ui_editor_fx_button" action Function(tab.set_res_auto, not tab.res_auto()) selected tab.res_auto()
             if not tab.res_auto():
-                bar value screen_fx.FxBarValue(tab.id, "_res", 60, 720, 10, 0) xsize 160 yalign 0.5
+                bar value screen_fx.FxBarValue(tab.id, "_res", 60, 720, 10, 0, getattr(tab, "view_page", None)) xsize 160 yalign 0.5
             text ("{:.0f}줄".format(tab.res_lines())) style "ui_editor_fx_value"
         elif row[2] == "options":
             hbox:
@@ -1369,13 +1458,13 @@ screen ui_editor_fx_row(tab, row):
             $ _c = tab.get_value(_k) or "#ffffff"
             button:
                 style "ui_editor_fx_button"
-                action Function(ui_editor.open_popup, "color", _k)
+                action Function(ui_editor.open_popup, "color", getattr(tab, "key_prefix", "") + _k)
                 hbox:
                     spacing 4
                     add Solid(_c, xysize=(16, 16)) yalign 0.5
                     text _c style "ui_editor_fx_button_text" yalign 0.5
         else:
-            bar value screen_fx.FxBarValue(tab.id, _k, row[2], row[3], row[4], row[5]) xsize 200 yalign 0.5
+            bar value screen_fx.FxBarValue(tab.id, _k, row[2], row[3], row[4], row[5], getattr(tab, "view_page", None)) xsize 200 yalign 0.5
             text tab.label_of(_k, row[5]) style "ui_editor_fx_value"
         if getattr(tab, "target", None) is not None and tab.in_preset(_k):
             textbutton "빼기" style "ui_editor_fx_button" action Function(tab.unset, _k)
@@ -1420,7 +1509,8 @@ screen ui_editor_watermorph_panel(tab):
 
 
 ## 셰이더 한 자리 고르기 줄 (1번 / 2번). pick(slot, name)으로 고름 (4.3)
-screen ui_editor_fx_slot_row(label, slot, cur, pick, clear=None):
+## owner가 있으면 끝에 그 자리 세부 속성 접기/펴기 (4.4)
+screen ui_editor_fx_slot_row(label, slot, cur, pick, clear=None, owner=None):
     hbox:
         spacing 4
         box_wrap True
@@ -1431,92 +1521,113 @@ screen ui_editor_fx_slot_row(label, slot, cur, pick, clear=None):
             textbutton _nl style "ui_editor_fx_button" action Function(pick, slot, _n) selected (cur == _n)
         if clear is not None:
             textbutton "전부 셰이더 적용 취소" style "ui_editor_fx_button" action Function(clear)
+        if owner is not None and cur in screen_fx.EFFECTS:
+            textbutton ("세부 속성 접기" if owner.detail_open[slot] else "세부 속성 펴기") style "ui_editor_fx_button" action Function(owner.toggle_detail, slot)
 
 
+## 한 효과의 세부 속성 (4.4): 1번, 2번 줄 바로 아래. v = 화면 효과 탭의 view(효과 이름)
+## whole: 타이틀, 게임 내 메뉴처럼 화면 전체에 씌우는 자리 (글자 빼기 없음)
+screen ui_editor_fx_detail(v, whole=False):
+    hbox:
+        spacing 0
+        null width 16
+        vbox:
+            spacing 6
+
+            if not whole:
+                hbox:
+                    spacing 6
+                    box_wrap True
+                    xmaximum 616
+                    use ui_editor_fx_name("글자 빼기")
+                    $ _ex = v.cur_exclude()
+                    for _g, _gl in v.text_groups():
+                        textbutton _gl style "ui_editor_fx_button" action Function(v.toggle_exclude, _g) selected (_g in _ex)
+                    textbutton "안 뺌" style "ui_editor_fx_button" action Function(v.set_exclude, ()) selected (not _ex)
+                    textbutton "전부 뺌" style "ui_editor_fx_button" action Function(v.set_exclude, "all") selected (len(_ex) == 3)
+
+            hbox:
+                spacing 6
+                box_wrap True
+                xmaximum 616
+                use ui_editor_fx_name("세부 속성")
+                textbutton "기본 설정" style "ui_editor_fx_button" action Function(v.set_target, None) selected (v.target is None)
+                for _n in v.preset_names():
+                    textbutton ("프리셋: " + _n) style "ui_editor_fx_button" action Function(v.set_target, _n) selected (v.target == _n)
+
+            $ _gl = v.group_list()
+            if len(_gl) > 1:
+                hbox:
+                    spacing 4
+                    box_wrap True
+                    box_wrap_spacing 4
+                    xmaximum 616
+                    for _i, _g in enumerate(_gl):
+                        textbutton _g[0] style "ui_editor_tab" action Function(v.set_group, _i) selected (v.group == _i)
+
+            for _row in v.rows():
+                use ui_editor_fx_row(v, _row)
+
+
+## 1번, 2번 두 자리와 그 아래 세부 속성 (4.4)
+screen ui_editor_fx_slots(owner, a, b, pick, clear, whole=False):
+    use ui_editor_fx_slot_row("1번 셰이더", 0, a, pick, clear, owner)
+    if a in screen_fx.EFFECTS and owner.detail_open[0]:
+        use ui_editor_fx_detail(owner.view(a), whole)
+    use ui_editor_fx_slot_row("2번 셰이더", 1, b, pick, clear, owner)
+    if b in screen_fx.EFFECTS and b != a and owner.detail_open[1]:
+        use ui_editor_fx_detail(owner.view(b), whole)
+
+
+## 인게임 화면 셰이더 (4.4): 페이지 고르기 없이 1번, 2번 + 세부 속성, 줄 목록, 맨 아래 처음 상태와 전환
 screen ui_editor_screen_fx_panel(tab):
 
     vbox:
         spacing 6
 
-        ## 페이지 고르기: 셰이더 고르기 / 효과마다 세부 속성 / 처음 상태, 전환
-        hbox:
-            spacing 4
-            box_wrap True
-            box_wrap_spacing 4
-            xmaximum 632
-            for _p, _pl in tab.pages():
-                textbutton _pl style "ui_editor_tab" action Function(tab.set_page, _p) selected (tab.page == _p)
+        $ _a, _b = tab.get_picks()
+        use ui_editor_fx_slots(tab, _a, _b, tab.set_pick, tab.clear_picks)
 
-        if tab.is_lines():
+        if tab.se() is not None:
             use ui_editor_fx_lines_panel(tab)
-
-        elif tab.is_tv():
-
-            use ui_editor_fx_slot_row("처음 1번", 0, tab.start_slot(0), tab.set_start_slot)
-            use ui_editor_fx_slot_row("처음 2번", 1, tab.start_slot(1), tab.set_start_slot)
-
-            hbox:
-                spacing 6
-                use ui_editor_fx_name("바꿀 때 전환")
-                for _t, _tl in tab.TRANSITION_LABELS:
-                    textbutton _tl style "ui_editor_fx_button" action Function(tab.cfg_put, "transition", _t) selected (tab.cfg_val("transition") == _t)
-
-            for _row in tab.rows():
-                use ui_editor_fx_row(tab, _row)
-
-            hbox:
-                spacing 6
-                use ui_editor_fx_name("전환을 기다림")
-                textbutton ("기다림" if tab.cfg_val("wait") else "안 기다림") style "ui_editor_fx_button" action Function(tab.cfg_put, "wait", not tab.cfg_val("wait")) selected bool(tab.cfg_val("wait"))
-                use ui_editor_fx_name("클릭으로 건너뛰기")
-                textbutton ("됨" if tab.cfg_val("skippable") else "안 됨") style "ui_editor_fx_button" action Function(tab.cfg_put, "skippable", not tab.cfg_val("skippable")) selected bool(tab.cfg_val("skippable"))
-
-            hbox:
-                spacing 6
-                textbutton "미리 보기: TV" style "ui_editor_button" action Function(tab.preview, "tv")
-                textbutton "미리 보기: 서서히" style "ui_editor_button" action Function(tab.preview, "fade")
-
         else:
+            text "원고 쓰기 도구(UI Kit 3.0 이상)가 없어서 줄 고르기와 [[여기에서부터 적용]은 못 씁니다." style "ui_editor_small"
 
-            hbox:
-                spacing 6
-                box_wrap True
-                xmaximum 632
-                use ui_editor_fx_name("글자 빼기")
-                $ _ex = tab.cur_exclude()
-                for _g, _gl in tab.text_groups():
-                    textbutton _gl style "ui_editor_fx_button" action Function(tab.toggle_exclude, _g) selected (_g in _ex)
-                textbutton "안 뺌" style "ui_editor_fx_button" action Function(tab.set_exclude, ()) selected (not _ex)
-                textbutton "전부 뺌" style "ui_editor_fx_button" action Function(tab.set_exclude, "all") selected (len(_ex) == 3)
-
-            hbox:
-                spacing 6
-                box_wrap True
-                xmaximum 630
-                use ui_editor_fx_name("세부 속성")
-                textbutton "기본 설정" style "ui_editor_fx_button" action Function(tab.set_target, None) selected (tab.target is None)
-                for _n in tab.preset_names():
-                    textbutton ("프리셋: " + _n) style "ui_editor_fx_button" action Function(tab.set_target, _n) selected (tab.target == _n)
-
-            if len(tab.group_list()) > 1:
-                hbox:
-                    spacing 4
-                    box_wrap True
-                    box_wrap_spacing 4
-                    xmaximum 632
-                    for _i, _g in enumerate(tab.group_list()):
-                        textbutton _g[0] style "ui_editor_tab" action Function(tab.set_group, _i) selected (tab.group == _i)
-
-            for _row in tab.rows():
-                use ui_editor_fx_row(tab, _row)
+        textbutton ("처음 상태, 전환 접기" if tab.tv_open else "처음 상태, 전환 펴기") style "ui_editor_button" text_size 13 action ToggleField(tab, "tv_open")
+        if tab.tv_open:
+            use ui_editor_fx_tv_panel(tab, tab.view("tv"))
 
 
-## "셰이더 고르기" 페이지 (4.3): 1번, 2번을 고르고 고른 줄부터 적용 ($ screen_fx.shaders(…) 줄을 넣음)
+## 처음 상태(게임을 시작할 때 두 자리)와 바꿀 때 전환
+screen ui_editor_fx_tv_panel(tab, tv):
+
+    use ui_editor_fx_slot_row("처음 1번", 0, tab.start_slot(0), tab.set_start_slot)
+    use ui_editor_fx_slot_row("처음 2번", 1, tab.start_slot(1), tab.set_start_slot)
+
+    hbox:
+        spacing 6
+        use ui_editor_fx_name("바꿀 때 전환")
+        for _t, _tl in tab.TRANSITION_LABELS:
+            textbutton _tl style "ui_editor_fx_button" action Function(tab.cfg_put, "transition", _t) selected (tab.cfg_val("transition") == _t)
+
+    for _row in tv.rows():
+        use ui_editor_fx_row(tv, _row)
+
+    hbox:
+        spacing 6
+        use ui_editor_fx_name("전환을 기다림")
+        textbutton ("기다림" if tab.cfg_val("wait") else "안 기다림") style "ui_editor_fx_button" action Function(tab.cfg_put, "wait", not tab.cfg_val("wait")) selected bool(tab.cfg_val("wait"))
+        use ui_editor_fx_name("클릭으로 건너뛰기")
+        textbutton ("됨" if tab.cfg_val("skippable") else "안 됨") style "ui_editor_fx_button" action Function(tab.cfg_put, "skippable", not tab.cfg_val("skippable")) selected bool(tab.cfg_val("skippable"))
+
+    hbox:
+        spacing 6
+        textbutton "미리 보기: TV" style "ui_editor_button" action Function(tab.preview, "tv")
+        textbutton "미리 보기: 서서히" style "ui_editor_button" action Function(tab.preview, "fade")
+
+
+## 줄 목록 (4.3): 고른 줄부터 적용 ($ screen_fx.shaders(…) 줄을 넣음). 줄을 누르면 게임도 그 줄로 (4.4)
 screen ui_editor_fx_lines_panel(tab):
-
-    $ _a, _b = tab.get_picks()
-    use ui_editor_fx_slot_row("1번 셰이더", 0, _a, tab.set_pick, tab.clear_picks)
-    use ui_editor_fx_slot_row("2번 셰이더", 1, _b, tab.set_pick, tab.clear_picks)
 
     hbox:
         spacing 4
@@ -1552,12 +1663,12 @@ screen ui_editor_fx_lines_panel(tab):
                         if _here:
                             text "▶" font tab.mark_font() size 14 color "#ff3b8d" xalign 0.5
                         else:
-                            null width 1
+                            text " " size 14
                     button:
                         style "ui_editor_button"
                         xsize 594
                         padding (6, 1)
-                        action Function(tab.set_line, (tab.line_file(), _line))
+                        action Function(tab.pick_line, (tab.line_file(), _line))
                         selected _on
                         hbox:
                             spacing 6
@@ -1581,11 +1692,10 @@ screen ui_editor_fx_lines_panel(tab):
         textbutton "이 줄 위의 셰이더 줄 지우기" style "ui_editor_button" action Function(tab.lremove)
 
 
-## 타이틀 셰이더 / 게임 내 메뉴 셰이더 탭 (4.3)
+## 타이틀 셰이더 / 게임 내 메뉴 셰이더 탭 (4.3). 세부 속성은 1번, 2번 아래 (4.4, 인게임과 같은 값)
 screen ui_editor_menu_fx_panel(tab):
 
     vbox:
         spacing 6
         $ _a, _b = tab.slots()
-        use ui_editor_fx_slot_row("1번 셰이더", 0, _a, tab.set_slot, tab.clear)
-        use ui_editor_fx_slot_row("2번 셰이더", 1, _b, tab.set_slot, tab.clear)
+        use ui_editor_fx_slots(tab, _a, _b, tab.set_slot, tab.clear, True)
