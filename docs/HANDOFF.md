@@ -24,7 +24,7 @@
 | 시험 프로젝트 (showpy 4.13 들어 있음) | `fx_test_25`, `pykaki_sample` |
 | 사용자의 진짜 게임 (말할 때만 건드림) | `horror`, `test_plugin` |
 
-예전 `pykaki`, `showpy` 저장소는 "pygaki로 옮겼어요" 안내를 넣고 보관(archive)했습니다. 예전 로컬 폴더 `F:\SHOWPY\pykaki`, `F:\SHOWPY\showpy`는 더 이상 고치지 않습니다.
+예전 `pykaki`, `showpy` 저장소는 "pygaki로 옮겼어요" 안내를 넣고 보관(archive)했습니다(두 저장소의 기록은 모두 이 저장소에 있음). 예전 로컬 폴더 `F:\SHOWPY\pykaki`, `F:\SHOWPY\showpy`는 2026-11-04에 지웠습니다. 지나온 기록과 주요 결정은 [HISTORY.md](HISTORY.md)에 있습니다.
 
 ### 저장소 구조
 
