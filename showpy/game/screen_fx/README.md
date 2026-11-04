@@ -23,12 +23,32 @@
 
 `ui_kit` 플러그인이 같이 있으면 그 편집기(개발 모드에서 Shift+M)에 **"화면 효과", "타이틀 일렁임" 탭**이 생기고, **대사 탭에서 "이 대사부터 이 효과", 덮개 켬/끔, 덮개 휘어짐을 골라 원고에 바로 저장**할 수 있습니다. 대사가 아닌 줄(show, scene, with, $ 줄 등)에서 바꾸고 싶으면 **"화면 효과" 탭의 "줄에 넣기"** 로 그 줄 바로 위에 `$ screen_fx.use(…)` 줄을 넣습니다(4.1). `ui_kit`이 없어도 효과는 설정 파일과 스크립트로 그대로 동작합니다.
 
-버전 4.2 · 렌파이 8.5.3에서 만들고 테스트했습니다.
+버전 4.3 · 렌파이 8.5.3에서 만들고 테스트했습니다.
 
 VHS 셰이더 원본: [VHS and CRT monitor effect](https://godotshaders.com/shader/vhs-and-crt-monitor-effect/) (Godot Shaders, CC0). 렌파이용으로 옮기면서 채도·대비·전체 세기를 바꿀 수 있게 추가했습니다.
 레트로 터미널은 [cool-retro-term](https://github.com/Swordfish90/cool-retro-term)의 모습과 설정 목록을 참고해 새로 썼습니다(코드는 가져오지 않음).
 게임보이는 [Retro dither](https://godotshaders.com/shader/retro-dither/) (tcmug, CC0)의 4×4 디더링 무늬와 [Gameboy Classic Shader](https://github.com/HarlequinVG/shaders/tree/master/gameboy_shader) (Harlequin, GPL v3)의 LCD 모습(점 격자·점 그림자)을 참고해 새로 썼습니다(코드는 가져오지 않음).
 ASCII 효과는 [ASCII shader](https://godotshaders.com/shader/ascii-shader/) (Daniel Bologna, Acerola의 아이디어, MIT)를 참고해 렌파이용으로 새로 썼습니다. 글꼴은 [Neo둥근모](https://neodgm.dalgona.dev/) (SIL OFL 1.1)입니다.
+
+### 4.3에서 바뀐 점
+
+- **셰이더 두 자리**: 1번(예전 기본 효과 자리)과 2번(예전 덮개 자리) 모두 기본(`"none"`, 아무것도 안 함) / 아스키(`"ascii"`) / VHS(`"vhs_crt"`) / 단말기(`"retro_term"`) / 게임보이(`"gameboy"`) 중 하나. 같은 효과를 두 자리에 고르면 한 번만 씌웁니다.
+  ```renpy
+  $ screen_fx.shaders("ascii", "vhs_crt")     # 1번 아스키 + 2번 VHS
+  $ screen_fx.shaders("gameboy")              # 1번 게임보이, 2번 없음
+  $ screen_fx.shaders("none", "none")         # 전부 셰이더 적용 취소
+  $ screen_fx.use("vhs_crt", overlay="gameboy")   # use()로도 (overlay에 효과 이름)
+  ```
+  예전 줄은 그대로 됩니다: `use("vhs_crt")`(2번을 안 적으면 예전처럼 "없음 + VHS"), `fx=`, `fx_overlay=True/False`.
+- **타이틀 셰이더, 게임 내 메뉴 셰이더**: `screen_fx_config.rpy`의 `screen_fx.title_shaders`, `screen_fx.menu_shaders` (기본 `("none", "none")`). 타이틀과 타이틀에서 연 화면, 게임 중 ESC 메뉴와 거기서 연 화면에서는 인게임 셰이더 대신 이 두 자리를 화면 전체(글자 포함)에 씌웁니다. 메뉴가 열려 있는 동안 뒤 게임 화면도 메뉴 셰이더로 보입니다. VHS의 `vhs_crt.scope`, `vhs_crt.auto`는 더 쓰지 않습니다.
+- 편집기 "화면 효과" 탭 (9-1, 9-4):
+  - 첫 페이지 **"셰이더 고르기"**: 1번, 2번 줄에서 고르면 화면에 바로 보입니다. 두 줄 끝의 "전부 셰이더 적용 취소"는 둘 다 "기본"으로.
+  - 줄 목록 왼쪽 **세모(▶)**는 게임의 지금 줄입니다. 고른 줄(분홍)은 세모를 따라갑니다. 다른 줄을 누르면 거기서 멈추고, 세모를 두 번 누르면 다시 지금 줄로 가서 따라갑니다.
+  - **[여기에서부터 적용]**: 고른 줄 바로 위에 `$ screen_fx.shaders("…", "…")`를 넣습니다(Ctrl+S로 원고에). 같은 줄에 다시 적용하면 바꿔 씁니다. [이 줄 위의 셰이더 줄 지우기].
+  - 효과 페이지(아스키, VHS, 단말기, 게임보이): "고칠 대상" → **"세부 속성"**. 켜기/범위, 덮개 줄, "이 대사부터/이 줄부터 이 효과", "덮개 켜기", "이 대상 되돌리기", "모두 버리기" 버튼은 뺐습니다.
+  - "기본 효과, 전환" → **"처음 상태, 전환"**: 게임을 시작할 때 1번, 2번(`screen_fx.base`, `screen_fx.overlay`)과 전환.
+- 편집기 탭 **"타이틀 셰이더"**(타이틀에서), **"게임 내 메뉴 셰이더"**(ESC 메뉴를 연 채로): 1번, 2번. 저장하면 `screen_fx_layout.rpy`의 `title_shaders`, `menu_shaders`.
+- 같이 쓰는 `ui_kit`은 3.19여야 PyKaki 앱 목록에 "└ 타이틀 셰이더", "└ 게임 내 메뉴 셰이더"가 나옵니다(게임 안 편집기에서는 3.x 어느 판이든 됨).
 
 ### 4.2에서 바뀐 점
 

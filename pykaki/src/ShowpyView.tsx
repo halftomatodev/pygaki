@@ -20,9 +20,11 @@ interface Section {
 const SECTIONS: Section[] = [
   { id: 'splash', label: '스플래시 (로고, 경고, 조작 방법)', tab: 'splash', app: false, mirror: true, note: '게임을 켰을 때 타이틀 전에 나오는 페이지예요. showpy 4.18(splash 1.2)부터 여기서 고쳐요. 예전 판이면 splash/splash_config.rpy에서 고쳐요.' },
   { id: 'title', label: '타이틀 메뉴', tab: 'title', app: true, note: '' },
+  { id: 'title_fx', label: '└ 타이틀 셰이더', tab: 'title_fx', app: false, mirror: true, note: '타이틀에만 걸리는 셰이더 두 자리예요. 1번과 2번에 고른 것이 겹쳐요. showpy 4.20(screen_fx 4.3)부터 있어요.' },
   { id: 'pause', label: '게임 내 메뉴 (ESC)', tab: 'title', app: true, note: '' },
-  { id: 'watermorph', label: '타이틀 셰이더 (일렁임)', tab: 'watermorph', app: false, mirror: true, note: '타이틀 배경에만 걸리는 일렁임 효과예요.' },
-  { id: 'screen_fx', label: '인게임 화면 셰이더', tab: 'screen_fx', app: false, mirror: true, note: '게임 화면 전체에 씌우는 효과(VHS, ASCII 등)예요.' },
+  { id: 'pause_fx', label: '└ 게임 내 메뉴 셰이더', tab: 'pause_fx', app: false, mirror: true, note: 'ESC 메뉴와 거기서 연 화면에만 걸리는 셰이더 두 자리예요. 메뉴가 열려 있는 동안 뒤 게임 화면도 이 셰이더로 보여요.' },
+  { id: 'watermorph', label: '타이틀 일렁임', tab: 'watermorph', app: false, mirror: true, note: '타이틀 배경에만 걸리는 일렁임 효과예요.' },
+  { id: 'screen_fx', label: '인게임 화면 셰이더', tab: 'screen_fx', app: false, mirror: true, note: '게임 화면에 씌우는 셰이더 두 자리(기본, 아스키, VHS, 단말기, 게임보이)예요. 고르고 [여기에서부터 적용]을 누르면 고른 줄부터 바뀌어요.' },
   { id: 'custom_ui', label: '커서, 클릭 대기(CTC), 대사 소리', tab: 'custom_ui', app: true, note: '' },
   { id: 'say', label: '대사 (위치, 줄마다 화면 효과)', tab: 'say', app: false, mirror: true, note: '' },
   { id: 'choice', label: '선택지', tab: 'choice', app: false, mirror: true, note: '' },
@@ -251,8 +253,10 @@ function MirrorSection({ st, sec }: { st: GameState; sec: Section }) {
   // 그 탭을 쓸 수 없는 화면이면 갈 곳 버튼 (대사, 선택지, 그림은 게임 중 / 일렁임은 타이틀)
   const go = !t.ok && (
     <p>
-      {sec.id === 'watermorph' ? (
+      {sec.id === 'watermorph' || sec.id === 'title_fx' ? (
         !st.where.main_menu && <button onClick={() => confirm('타이틀로 갈까요? 진행 중인 게임은 끝나요.') && liveSend({ cmd: 'goto', where: 'title' })}>타이틀로 가기</button>
+      ) : sec.id === 'pause_fx' ? (
+        !st.where.main_menu && !st.where.menu ? <button onClick={() => liveSend({ cmd: 'goto', where: 'pause' })}>ESC 메뉴 열기</button> : null
       ) : st.where.main_menu ? (
         <button onClick={() => liveSend({ cmd: 'goto', where: 'start' })}>게임 시작</button>
       ) : null}
@@ -370,11 +374,13 @@ function TitlePanel({ st, want }: { st: GameState; want: 'title' | 'pause' }) {
         <button className={t.scope === 'all' ? 'on' : ''} onClick={() => liveSend({ cmd: 'title.scope', scope: 'all' })}>모든 항목 공통</button>
       </div>
 
+      {t.background !== undefined && <BackgroundField t={t} />}
+
       <div className="sp-items">
         {t.items.map((x, i) => (
-          <button key={x.id} className={'sp-item' + (i === t.sel ? ' on' : '')} onClick={() => liveSend({ cmd: 'title.select', index: i })}>
-            <span>{x.text}</span>
-            <span className="tip">{x.id}</span>
+          <button key={x.kind + ':' + x.id} className={'sp-item' + (i === t.sel ? ' on' : '')} onClick={() => liveSend({ cmd: 'title.select', index: i })}>
+            <span>{x.kind === 'label' ? x.text || '(비어 있음)' : x.text}</span>
+            <span className="tip">{x.kind === 'label' ? x.name : x.id}</span>
             {x.edited && <b className="dirty" title="저장 안 한 변경"> ●</b>}
           </button>
         ))}
@@ -385,14 +391,42 @@ function TitlePanel({ st, want }: { st: GameState; want: 'title' | 'pause' }) {
       <div className="sp-row">
         <button onClick={() => liveSend({ cmd: 'title.reset' })}>{t.scope === 'all' ? '공통 값 되돌리기' : '이 항목 되돌리기'}</button>
       </div>
-      <p className="tip">게임 화면에서 항목을 끌어서 옮기고, 휠로 돌리고, Shift+휠로 글자 크기를 바꿀 수도 있어요. 여기 숫자가 같이 바뀌어요.</p>
+      <p className="tip">게임 화면에서 항목을 끌어서 옮기고, 분홍 네모를 끌어서 돌리고(Shift: 15도씩), Shift+휠로 글자 크기를 바꿀 수도 있어요. 여기 숫자가 같이 바뀌어요.</p>
     </div>
   );
 }
 
+// 배경: 그림이나 영상(webm). 없으면 타이틀은 검은 화면, ESC 메뉴는 투명 (ui_kit 3.19)
+function BackgroundField({ t }: { t: TitleState }) {
+  const files = useLive((s) => s.files);
+  useEffect(() => {
+    if (!files?.movies) liveSend({ cmd: 'files' });
+  }, [files]);
+  const cur = t.background ?? '';
+  const list = [...(files?.images ?? []), ...(files?.movies ?? [])];
+  if (cur && !list.includes(cur)) list.unshift(cur);
+  return (
+    <label className="sp-field wide">
+      <span>배경</span>
+      <select value={cur} onChange={(e) => liveSend({ cmd: 'title.background', value: e.target.value || null })}>
+        <option value="">{t.menu === 'pause' ? '없음 (투명, 뒤 게임 화면)' : '없음 (검은 화면)'}</option>
+        {list.map((f) => (
+          <option key={f} value={f}>
+            {f}
+          </option>
+        ))}
+      </select>
+      <button onClick={() => liveSend({ cmd: 'files' })} title="game 폴더에 그림이나 영상을 새로 넣었으면 눌러요">
+        목록 새로
+      </button>
+    </label>
+  );
+}
+
 function TitleFields({ t, it }: { t: TitleState; it: TitleItem }) {
-  const hover = t.mode === 'hover';
-  const all = t.scope === 'all';
+  const label = it.kind === 'label';
+  const hover = t.mode === 'hover' && !label;
+  const all = t.scope === 'all' && !label;
   const set = (key: string, value: unknown) => liveSend({ cmd: 'title.set', key, value });
   const k = (name: string) => (hover ? 'hover_' + name : name);
 
@@ -406,6 +440,9 @@ function TitleFields({ t, it }: { t: TitleState; it: TitleItem }) {
 
   return (
     <div className="sp-fields">
+      {!all && (label || t.scope === 'item') && (
+        <TextField label={label ? it.name + ' 글' : '글'} value={it.text} placeholder={label ? '비우면 안 보여요' : ''} onSet={(v) => set('text', v)} />
+      )}
       {!all &&
         (hover ? (
           <>
@@ -419,11 +456,23 @@ function TitleFields({ t, it }: { t: TitleState; it: TitleItem }) {
           </>
         ))}
       <Num label="회전" value={val('rotate')} step={0.5} round={r1} onSet={(v) => set(k('rotate'), v)} />
-      <Num label="기울기" value={val('skew')} step={0.5} round={r1} onSet={(v) => set(k('skew'), v)} />
+      {!label && <Num label="기울기" value={val('skew')} step={0.5} round={r1} onSet={(v) => set(k('skew'), v)} />}
       <Num label="확대" value={val('zoom')} step={0.05} round={r2} onSet={(v) => set(k('zoom'), Math.max(0.05, v))} />
       <Num label="글자 크기" value={val('size')} onSet={(v) => set(k('size'), Math.max(4, Math.round(v)))} />
       <ColorField label="색" value={val('color')} onSet={(v) => set(k('color'), v)} />
       <TextField label="글꼴" value={val('font')} placeholder="fonts/내글꼴.ttf" onSet={(v) => set(k('font'), v || null)} />
+      {t.effects && (
+        <label className="sp-field wide">
+          <span>글자 효과</span>
+          <select value={(all ? (t.common as any).effect : it.effect) ?? ''} onChange={(e) => set('effect', e.target.value || null)}>
+            {t.effects.map(([n, l]) => (
+              <option key={n ?? ''} value={n ?? ''}>
+                {l}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
     </div>
   );
 }

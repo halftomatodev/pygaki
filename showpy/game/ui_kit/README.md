@@ -13,7 +13,15 @@
 그리고 이 기능들을 **게임을 실행한 채로 마우스로 고치는 편집기**가 들어 있습니다. (개발 모드에서 Shift+M)
 대사, 선택지, show·hide·scene 줄은 편집기에서 고친 값이 **원고(.rpy)의 그 줄에 바로 저장**됩니다.
 
-버전 3.18 · 렌파이 8.5.3 기준으로 만들었습니다.
+버전 3.19 · 렌파이 8.5.3 기준으로 만들었습니다.
+
+### 3.19에서 바뀐 점
+
+- 타이틀 배경: 기본은 검은 화면(`tmenu.background = None`). 그림이나 webm 영상 경로를 적거나 편집기 "배경" 버튼으로 고릅니다. ESC 메뉴는 기본이 투명(`tmenu.pause_dim = None`), `tmenu.pause_background`로 그림이나 영상. 렌파이 기본 GUI의 반투명 판(`tmenu.main_menu_frame`)도 기본은 끔.
+- 제목, 부제(`tmenu.labels`, `tmenu.pause_labels`): 메뉴 항목처럼 위치, 회전, 크기, 글꼴, 색, 효과. 저장하면 `title_menu_layout.rpy`의 `tmenu.label_layout`, `pause_label_layout`, 배경은 `tmenu.screen_layout`.
+- 글자 효과 `"effect"`: 메뉴 항목, 제목, 부제에 대사 등장 효과(텍스트 셰이더). 나오는 속도는 `tmenu.effect_cps`(기본 30).
+- 편집기 타이틀 메뉴 탭: 분홍 네모(회전 손잡이)를 끌면 돌아감(Shift: 15도씩), "글자 효과:" 줄, "배경:" 버튼(고르기 창 `background`). Tab으로 제목, 부제도 고름.
+- 실시간 연결: `state.title.items`에 제목, 부제(`kind: "label"`), `background`, `effects`. 명령 `title.background`. 파일 목록에 `movies`. 저장 수(`editor.pending`)에 원고 줄 변경도 셈.
 
 ### 3.18에서 바뀐 점
 
