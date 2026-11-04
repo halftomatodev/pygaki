@@ -4,6 +4,8 @@
 
 **지금 진행 상황, 쓰는 법과 고치는 법, 남은 일: [docs/HANDOFF.md](docs/HANDOFF.md)** (2026-11-04 로컬 세션에서 정리)
 
+지나온 기록과 주요 결정: [docs/HISTORY.md](docs/HISTORY.md). 예전 `pykaki`, `showpy` 저장소는 보관만 하고, 이 저장소 하나만 고친다.
+
 로컬 자리: `<저장소>` (Dropbox 밖). 렌파이 SDK `<렌파이 SDK>`, 시험 프로젝트 `<렌파이 프로젝트 폴더>\fx_test_25`, `<렌파이 프로젝트 폴더>\pykaki_sample`.
 
 | 폴더 | 내용 | 먼저 읽기 |
