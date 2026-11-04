@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { desktop } from './desktop';
 import { liveSend, useLive, type GameState, type TitleItem, type TitleState } from './showpyLive';
 import { useStore } from './store';
+import { CustomUIPanel } from './ShowpyCustomUI';
 
 interface Section {
   id: string;
@@ -20,7 +21,7 @@ const SECTIONS: Section[] = [
   { id: 'pause', label: '게임 내 메뉴 (ESC)', tab: 'title', app: true, note: '' },
   { id: 'watermorph', label: '타이틀 셰이더 (일렁임)', tab: 'watermorph', app: false, note: '타이틀 배경에만 걸리는 일렁임 효과예요.' },
   { id: 'screen_fx', label: '인게임 화면 셰이더', tab: 'screen_fx', app: false, note: '게임 화면 전체에 씌우는 효과(VHS, ASCII 등)예요.' },
-  { id: 'custom_ui', label: '커서, 클릭 대기(CTC), 대사 소리', tab: 'custom_ui', app: false, note: '' },
+  { id: 'custom_ui', label: '커서, 클릭 대기(CTC), 대사 소리', tab: 'custom_ui', app: true, note: '' },
   { id: 'say', label: '대사 (위치, 줄마다 화면 효과)', tab: 'say', app: false, note: '' },
   { id: 'choice', label: '선택지', tab: 'choice', app: false, note: '' },
   { id: 'stage', label: '그림, 영상 배치', tab: 'stage', app: false, note: '' },
@@ -60,8 +61,10 @@ export function ShowpyView() {
         {err && <p className="sp-err">{err}</p>}
         {!on ? (
           <p className="tip">게임과 연결되면 여기서 고쳐요.</p>
-        ) : !st ? null : sec.app ? (
-          <TitlePanel st={st} want={sec.id as 'title' | 'pause'} />
+        ) : !st ? null : sec.id === 'custom_ui' && st.custom_ui !== undefined ? (
+          <CustomUIPanel cu={st.custom_ui} />
+        ) : sec.id === 'title' || sec.id === 'pause' ? (
+          <TitlePanel st={st} want={sec.id} />
         ) : (
           <InGamePanel st={st} sec={sec} />
         )}

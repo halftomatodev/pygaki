@@ -166,7 +166,7 @@ PyKaki가 쓰고 showpy가 읽기만 합니다. PyKaki 글자 효과 칸의 [렌
 
 렌파이에 들어 있는 효과(`dissolve` 등 7개)는 렌파이가 등록하므로 showpy 파일에 없고, PyKaki가 미리보기용으로 `src/fx/renpy_textshaders.glsl`에 같은 형식으로 옮겨 둡니다.
 
-## 9. 실시간 연결 (`game/showpy_live.json`, showpy 4.15)
+## 9. 실시간 연결 (`game/showpy_live.json`, showpy 4.15, 커서/대사 소리 4.16)
 
 PyKaki 데스크톱 앱의 showpy 화면이 게임 안 편집기를 바깥에서 조종하는 연결입니다. 게임 창은 그대로 두고, 패널(숫자, 목록, 대본)만 앱에서 봅니다. 게임 화면에는 끌어서 옮기는 표시만 남습니다. 웹 버전 PyKaki에는 없습니다.
 
@@ -185,6 +185,8 @@ PyKaki 데스크톱 앱의 showpy 화면이 게임 안 편집기를 바깥에서
 | type | 언제 | 내용 |
 |---|---|---|
 | `state` | 붙자마자, 그 뒤 바뀔 때마다 (0.1초마다 비교, 같으면 안 보냄) | 아래 |
+| `files` | 붙자마자 한 번, 앱이 `files`를 보낼 때 (3.15) | `{"type": "files", "audio": ["audio/type.ogg"], "images": ["gui/ctc/ctc1.png", ...]}` 게임 폴더 기준. 렌파이 `list_files`라 `.rpa` 안 파일도 들어감 |
+| `error` | 명령 처리가 실패했을 때 | `{"type": "error", "text": "..."}` |
 
 ```json
 {
@@ -197,11 +199,18 @@ PyKaki 데스크톱 앱의 showpy 화면이 게임 안 편집기를 바깥에서
              "items": [ { "id": "start", "text": "시작하기", "x": 77, "y": 302, "anchor": [0.06, 0.42],
                           "rotate": -4, "skew": 0, "zoom": 1, "size": 36, "font": "...", "color": "#...",
                           "hover": { "offset": [10, 0], "rotate": -4, "skew": 0, "zoom": 1.15, "size": 36, "font": "...", "color": "#..." },
-                          "edited": true } ] }
+                          "edited": true } ] },
+  "custom_ui": { "ok": true, "why": "", "cps": 30, "fps": 24, "max_frames": 12, "playing": false,
+                 "values": { "text_cps": null, "typing_sound": "audio/type.ogg", "typing_volume": 1.0,
+                             "ctc": true, "ctc_frames": ["gui/ctc/ctc1.png"], "ctc_hold": 2,
+                             "cursor": false, "cursor_frames": [], "cursor_hold": 2, "cursor_mode": "software", "cursor_hotspot": [0, 0],
+                             "quick_menu": true },
+                 "edited": ["typing_sound"], "reload_keys": ["cursor", "cursor_frames", "cursor_mode", "cursor_hotspot", "ctc"] }
 }
 ```
 
 - `where.file`은 프로젝트 폴더 기준 경로입니다(렌파이 `get_filename_line`). 앱이 그 파일을 읽어 `line` 앞뒤 줄을 보여줍니다.
+- `custom_ui`(3.15)는 편집기 "커서/대사 소리" 탭입니다. `values`는 편집 중인 값 → `custom_ui_layout.rpy` → 설정 파일 순서로 지금 쓰는 값이고, 이름은 `custom_ui.EDIT_KEYS`와 같습니다. `cps`는 `text_cps`가 `null`일 때 환경설정의 지금 값. `edited`는 저장 안 한 값 이름, `reload_keys`는 저장한 뒤 게임을 다시 불러와야 적용되는 값(저장할 때 게임이 저절로 다시 불러옴). 플러그인이 없으면 `null`, 꺼져 있으면 `{"ok": false, "why": "..."}`. 3.14 게임은 이 값이 없습니다.
 - `title`은 `tmenu`가 없거나 꺼져 있으면 `null`입니다. `menu`는 지금 보이는 메뉴(`"title"` 타이틀 / `"pause"` ESC 메뉴), `x`, `y`는 화면 픽셀입니다.
 
 앱 → 게임 (`cmd`):
@@ -217,6 +226,11 @@ PyKaki 데스크톱 앱의 showpy 화면이 게임 안 편집기를 바깥에서
 | `title.scope` | `scope`: `"item"`, `"all"` | 이 항목만 / 모든 항목 공통 |
 | `title.set` | `key`, `value` | 고른 항목(공통이면 공통 값)의 값. `key`는 `title_menu_layout.rpy`와 같은 이름(`x`, `y`, `rotate`, `skew`, `zoom`, `size`, `font`, `color`, `hover_offset`, `hover_rotate` ...) |
 | `title.reset` | | 고른 항목(공통이면 공통 값)의 저장 안 한 변경 되돌리기 |
+| `custom_ui.set` | `key`, `value` | 커서/대사 소리 값 하나 (3.15). `key`는 `values`의 이름. 그림은 game 기준 경로 목록(12장까지), `*_hold`는 1 또는 2, `text_cps`가 `null`이면 options.rpy 값, `typing_sound`가 `null`이면 끔. `ctc`, `cursor`를 켤 때 그림이 없으면 첫 그림 폴더를 넣음 |
+| `custom_ui.reset` | `key` | 그 값의 저장 안 한 변경 되돌리기 |
+| `custom_ui.listen` | | 지금 고른 대사 소리를 게임에서 1.5초 들려줌 (`playing`이 참) |
+| `custom_ui.stop` | | 들려주던 소리 멈춤 |
+| `files` | | 파일 목록(`files`)을 다시 보내 달라고 함 |
 | `save` | | 편집기 Ctrl+S와 같음 (배치 파일과 원고 저장) |
 | `discard` | | 지금 탭의 저장 안 한 변경을 모두 버림 |
 

@@ -65,6 +65,11 @@ async function until(what, fn, ms = 10000) {
     where: { file: 'game/script_flow.rpy', line: 3, screens: ['say'], main_menu: false, menu: false },
     editor: { open: false, tab: null, hide_panel: true, message: '', pending: 0, tabs: [{ id: 'screen_fx', label: '화면 효과', ok: true, why: '' }], info: [] },
     title: null,
+    custom_ui: {
+      ok: true, why: '', cps: 30, fps: 24, max_frames: 12, playing: false, edited: [], reload_keys: ['cursor', 'ctc'],
+      values: { text_cps: null, typing_sound: null, typing_volume: 1, ctc: false, ctc_frames: ['gui/ctc/ctc1.png'], ctc_hold: 2,
+                cursor: false, cursor_frames: [], cursor_hold: 2, cursor_mode: 'software', cursor_hotspot: [0, 0], quick_menu: true },
+    },
   };
   const srv = net.createServer((c) => {
     c.setEncoding('utf8');
@@ -78,6 +83,7 @@ async function until(what, fn, ms = 10000) {
       }
     });
     c.write(JSON.stringify(state) + '\n');
+    c.write(JSON.stringify({ type: 'files', audio: ['audio/type.ogg'], images: ['gui/ctc/ctc1.png', 'gui/ctc/ctc2.png'] }) + '\n');
   });
   await new Promise((r) => srv.listen(0, '127.0.0.1', r));
   fs.writeFileSync(path.join(proj, 'game', 'showpy_live.json'), JSON.stringify({ version: 1, port: srv.address().port, token: 'smoketoken', showpy: '3.14' }));
@@ -87,6 +93,16 @@ async function until(what, fn, ms = 10000) {
   await page.waitForSelector('.sp-script .cur', { timeout: 10000 });
   await page.click('.sp-nav-item:has-text("인게임 화면 셰이더")');
   await until('편집기 명령을 보내지 않음', () => got.some((m) => m.cmd === 'editor' && m.tab === 'screen_fx'));
+  // 커서, 클릭 대기, 대사 소리 칸 (ui_kit 3.15): 앱 칸이 나오고 값을 보내는지
+  await page.click('.sp-nav-item:has-text("커서, 클릭 대기")');
+  await page.waitForSelector('.sp-cu select', { timeout: 10000 });
+  await page.selectOption('.sp-cu select', 'audio/type.ogg');
+  await until('대사 소리 값을 보내지 않음', () => got.some((m) => m.cmd === 'custom_ui.set' && m.key === 'typing_sound' && m.value === 'audio/type.ogg'));
+  await page.locator('.sp-cu .sp-slot').first().click();
+  await page.waitForSelector('.sp-picker .sp-pick-grid button', { timeout: 10000 });
+  await page.locator('.sp-picker .sp-pick-grid button').nth(1).click();
+  await until('그림 칸 값을 보내지 않음', () => got.some((m) => m.cmd === 'custom_ui.set' && m.key === 'ctc_frames' && m.value?.[0] === 'gui/ctc/ctc2.png'));
+  console.log('커서/대사 소리 칸: 됨');
   console.log('showpy 연결: 됨, 받은 명령', got.length);
   srv.close();
 

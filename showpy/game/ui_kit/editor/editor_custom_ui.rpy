@@ -247,7 +247,7 @@ init -8 python in ui_editor:
             return len(self.edits)
 
         def _merged(self):
-            lay = dict(getattr(self.cu(), "layout", None) or { })
+            lay = dict(self.cu().saved_layout())
             lay.update(self.edits)
             return lay
 
@@ -279,7 +279,8 @@ init -8 python in ui_editor:
         def after_save(self):
             cu = self.cu()
             changed = set(self.edits)
-            cu.layout = self._merged()
+            ## store 변수가 아니라 실행 중 값으로 (다시 불러올 때 옛 값이 덮지 않게, 3.15)
+            cu.runtime.layout = store.python_dict(self._merged())
             self.edits = { }
 
             ## 지금 게임에도 바로 적용할 수 있는 것
