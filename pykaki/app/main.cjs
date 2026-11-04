@@ -44,7 +44,7 @@ function liveConnect(entry) {
   if (entry.live && entry.live.info.port === info.port && entry.live.info.token === info.token) return;
   if (entry.live) liveDrop(entry);
   const sock = net.createConnection({ host: '127.0.0.1', port: info.port });
-  const l = { sock, info, buf: '', ready: false };
+  const l = { sock, info, buf: '', ready: false, last: {} }; // last: 종류마다 마지막으로 받은 것 (화면이 늦게 뜰 때 넘겨줌)
   entry.live = l;
   sock.setEncoding('utf8');
   sock.setNoDelay(true);
@@ -61,7 +61,9 @@ function liveConnect(entry) {
       l.buf = l.buf.slice(i + 1);
       if (!line.trim() || entry.win.isDestroyed()) continue;
       try {
-        entry.win.webContents.send('pygaki:live', JSON.parse(line));
+        const m = JSON.parse(line);
+        if (m?.type === 'state' || m?.type === 'files') l.last[m.type] = m;
+        entry.win.webContents.send('pygaki:live', m);
       } catch {
         /* 깨진 줄은 버림 */
       }
@@ -215,7 +217,8 @@ ipcMain.handle('pygaki:liveSend', (e, msg) => {
 
 ipcMain.handle('pygaki:liveStatus', (e) => {
   const l = windows.get(e.sender.id)?.live;
-  return { on: !!(l && l.ready), showpy: l?.info?.showpy ?? null };
+  // 게임은 상태가 바뀔 때만 보내므로, 화면이 뜨기 전에 온 것은 여기서 넘겨준다
+  return { on: !!(l && l.ready), showpy: l?.info?.showpy ?? null, last: l ? Object.values(l.last) : [] };
 });
 
 ipcMain.handle('pygaki:openFolder', (e, rel) => shell.openPath(inside(projectOf(e), rel)));

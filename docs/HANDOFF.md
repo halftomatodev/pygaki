@@ -5,10 +5,10 @@
 
 ## 0. 지금 어디까지 (먼저 읽기)
 
-- **최신 판**: showpy 4.15 (`ui_kit` 3.14) + PyKaki 앱 [showpy] 화면. 모두 `main`에 push됨(마지막 `8ea019e`). Actions "PyKaki 앱"(e42cb63) 성공
-- **사용자가 확인하는 곳**: `F:\SHOWPY\pygaki-dev-renpy-8.5.3\renpy.exe` (로컬에서 만든 시험용 묶음, 최신). 확인 순서는 3장 "확인용 묶음"
-- **사용자가 아직 직접 안 본 것**: 5장 맨 위 두 줄 (앱이 붙은 채 게임 화면에서 끌기/휠, Shift+R 뒤 다시 붙기, ESC 메뉴 칸, 4.14 게임 메뉴 화면). 다음 대화는 이 결과부터 묻고 시작
-- **다음 큰 일**: 앱의 "게임 안" 칸을 하나씩 앱 칸으로 옮기기 (6장 맨 위)
+- **최신 판**: showpy 4.16 (`ui_kit` 3.15) + PyKaki 앱 [showpy] 화면에 커서/CTC/대사 소리 칸. 4.15까지는 `main`에 push됨. 4.16이 올라갔는지는 `git log`로 확인
+- **사용자가 확인하는 곳**: `F:\SHOWPY\pygaki-dev-renpy-8.5.3\renpy.exe` (로컬에서 만든 시험용 묶음. 4.16 템플릿 ui_kit 파일과 새 앱으로 바꿔 넣음). 확인 순서는 3장 "확인용 묶음"
+- **사용자가 아직 직접 안 본 것**: 5장 맨 위 줄 (4.16 커서/대사 소리 칸). 4.15 앱 연결과 4.14 게임 메뉴 화면은 2026-11-04에 사용자가 확인함(괜찮음)
+- **다음 큰 일**: 앱 칸 옮기기 계속 (6장 맨 위, 다음은 셰이더 두 탭). 같은 "다시 불러오면 옛 값" 문제가 다른 탭에도 있음 (7장)
 - **미뤄 둔 것**: 공개용 구글 문서(아직 4.13 기준)는 앱 칸을 몇 개 더 옮긴 뒤 한 번에. 정식 판(v1.1 태그)도 사용자가 4.15를 확인한 뒤
 
 ## 1. pygaki 한눈에
@@ -29,8 +29,8 @@
 | 렌파이 SDK | `F:\SHOWPY\renpy-8.5.3-sdk` |
 | PyKaki 앱 빌드(받아 둔 것) | `F:\SHOWPY\PyKaki-win` (v1.0 때 받은 예전 판. 최신은 Actions "PyKaki 앱"의 `PyKaki-win`이나 로컬 빌드 `pykaki/app/out/win-unpacked`) |
 | 렌파이 프로젝트 폴더 | `F:\Dropbox\1_DEV\RENPY` |
-| 시험 프로젝트 (showpy 4.15 들어 있음) | `fx_test_25`, `pykaki_sample` |
-| 최신 시험용 묶음 (2026-11-04, showpy 4.15 + 새 앱) | `F:\SHOWPY\pygaki-dev-renpy-8.5.3\renpy.exe` (덧붙임은 `pygaki-dev-addon`). v1.0 폴더는 4.13 그대로 |
+| 시험 프로젝트 (showpy 4.16 들어 있음) | `fx_test_25`, `pykaki_sample` |
+| 최신 시험용 묶음 (2026-11-04, showpy 4.16 + 새 앱) | `F:\SHOWPY\pygaki-dev-renpy-8.5.3\renpy.exe` (덧붙임은 `pygaki-dev-addon`). v1.0 폴더는 4.13 그대로 |
 | 사용자의 진짜 게임 (말할 때만 건드림) | `horror`, `test_plugin` |
 
 예전 `pykaki`, `showpy` 저장소는 "pygaki로 옮겼어요" 안내를 넣고 보관(archive)했습니다(두 저장소의 기록은 모두 이 저장소에 있음). 예전 로컬 폴더 `F:\SHOWPY\pykaki`, `F:\SHOWPY\showpy`는 2026-11-04에 지웠습니다. 지나온 기록과 주요 결정은 [HISTORY.md](HISTORY.md)에 있습니다.
@@ -151,6 +151,16 @@ python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app 'F:\SHOWPY\
 7. 시험 프로젝트 두 곳에 showpy 4.13 넣음 (Lint 깨끗). 바꾸기 전 폴더 백업은 임시 폴더에 있었음(세션이 끝나면 없어질 수 있음)
 8. 구글 문서를 4.13 기준으로 고침 (1장 표와 바뀐 점, 2장 글자 효과 칸·F8·데스크톱 앱 절, 3장 준비 순서, 4장 cps, 링크 전부). 원안은 `F:\SHOWPY\구글문서_수정안.md`
 
+### 2026-11-04 (로컬 세션 4)
+
+1. 사용자가 4.15 앱 연결, 4.14 게임 메뉴 화면을 확인함 (괜찮음)
+2. showpy 4.16 (`ui_kit` 3.15): 커서, CTC, 대사 소리를 앱 칸으로 (앱 칸 옮기기 1번)
+   - 게임: `editor_live.rpy`에 상태 `custom_ui`, 파일 목록 메시지 `files`, 명령 `custom_ui.set/reset/listen/stop`, `files`. 형식은 `docs/LINK.md` 9장
+   - 앱: `src/ShowpyCustomUI.tsx` (텍스트 속도, 대사 소리, CTC/커서 그림 12칸과 고르기, 커서 방식·기준점, 퀵메뉴, 24fps 미리보기). 그림은 앱이 `game/`에서 직접 읽음. 게임 폴더에 없는 그림은 빨갛게 표시
+   - 고침: 저장 뒤 저절로 다시 불러오면 옛 값으로 보이던 것 (`custom_ui.runtime`). 앱 화면이 늦게 뜨면 첫 상태를 놓치던 것 (`main.cjs`가 마지막 state/files를 기억해 `liveStatus`로 넘김)
+   - 확인: 파이썬 시험 클라이언트로 명령 전부와 저장 → 다시 불러오기(새 파일, 있던 파일, 두 번 저장), 로컬 smoke(커서/대사 소리 칸 추가) 통과, 진짜 앱 + pykaki_sample로 화면 찍기. Lint 깨끗(시험 프로젝트 두 곳, 묶음 템플릿)
+   - 시험하다 pykaki_sample의 환경설정 글자 속도(persistent)가 40글자/초로 바뀌었을 수 있음. 시험으로 생긴 `custom_ui_layout.rpy`는 지움
+
 ### 2026-11-04 (로컬 세션 2, 3)
 
 1. showpy 4.14 (`ui_kit` 3.13): 게임 메뉴 화면(대사록, 저장, 불러오기, 환경설정 등)에서 ESC 메뉴를 왼쪽에 그대로 두고 제목과 내용을 오른편에. `title_menu.rpy`가 `game_menu` 스크린을 대신 정의함. 설정 `tmenu.game_menu_side`, `game_menu_content_x`, `game_menu_gap`, `game_menu_line`. 시험 프로젝트 두 곳에 넣고 Lint, pykaki_sample을 켜서 화면을 찍어 확인(게임 중, 타이틀에서, `game_menu_side = False`)
@@ -170,8 +180,8 @@ python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app 'F:\SHOWPY\
 
 사용자는 `pygaki-dev` 묶음의 런처에서 `pykaki_sample`을 [프로젝트 실행]하고 [PyKaki로 대본 쓰기] → [showpy]로 확인합니다.
 
-- [ ] showpy 4.15 앱 연결: 앱이 붙은 채 게임 화면에서 타이틀 항목을 마우스로 끌기, 휠로 돌리기 → 앱 숫자가 따라오는지. 게임에서 Shift+R 뒤 앱이 다시 붙는지. ESC 메뉴 칸(게임 시작 → [ESC 메뉴 열기])
-- [ ] 게임 메뉴 화면 4.14: 마우스로 메뉴 항목 위를 오갈 때 선택 모양이 지금 화면 항목으로 돌아오는지, 키보드 이동, 저장 칸이 넓은 메뉴 배치에서 오른쪽으로 넘치지 않는지
+- [ ] showpy 4.16 커서/대사 소리 칸: [들어보기] 소리가 실제로 나는지, 클릭 대기 표시와 커서를 켜고 저장 → 게임이 다시 불러온 뒤 게임 화면에 그 그림이 도는지, 앱 미리보기와 게임 속도가 비슷한지
+- [x] showpy 4.15 앱 연결, 4.14 게임 메뉴 화면 (2026-11-04 사용자 확인)
 
 - [ ] `fx_test_25`를 켜서 4.13 등장 효과를 눈으로 보기, 대사 탭 효과 버튼(이제 glsl에서 이름을 읽음)
 - [ ] 런처를 영어로 바꿨을 때 버튼 한글이 보이는지
@@ -183,7 +193,7 @@ python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app 'F:\SHOWPY\
 ## 6. 다음에 할 만한 것
 
 - **앱 칸 옮기기 (3단계)**: 지금 "게임 안" 칸을 하나씩 앱 칸으로. 하나 옮길 때마다 게임 쪽 상태/명령(`editor_live.rpy`의 `live_state`, `_live_cmd`), `docs/LINK.md` 9장 표, 앱 칸(`ShowpyView.tsx`의 `SECTIONS`에서 `app: true`), smoke 시험을 같은 커밋에서. 추천 순서:
-  1. 커서, CTC, 대사 소리 (`custom_ui`, 값이 단순해서 연습용으로 좋음)
+  1. ~~커서, CTC, 대사 소리~~ (4.16에서 함)
   2. 인게임 화면 셰이더 / 타이틀 셰이더 (`screen_fx`, `watermorph`)
   3. 선택지, 대사, 그림 배치 (원고에 바로 쓰는 탭이라 저장 흐름을 같이 봄)
   4. 스플래시 (게임 안 탭이 없어서 편집 기능부터 새로 만듦)
@@ -209,4 +219,6 @@ python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app 'F:\SHOWPY\
 - 내장 브라우저는 구글에 로그인되어 있지 않습니다. 사용자의 크롬은 로그인되어 있습니다.
 - 로컬에서 `npm run dist`(앱 빌드)를 하면 electron-builder가 `winCodeSign`을 풀다 심볼릭 링크 권한 오류가 남. 시험용은 `npx electron-builder --win dir -c.win.signAndEditExecutable=false`로 빌드(실행 파일 아이콘, 버전 정보만 빠짐). 공식 빌드는 Actions가 함
 - 템플릿 프로젝트를 Lint하면 `.rpyc`, `game/cache`, `game/saves`가 생김. 묶음 템플릿에서는 지움
+- **실행 중에 store 변수를 바꾸면, 다시 불러올 때 옛 값으로 돌아감**: 렌파이는 다시 불러오기(저장 뒤 저절로, Shift+R) 직전 상태를 "지금 대사가 시작될 때" 모습으로 저장해. 그래서 그 사이에 바꾼 `define` 값(예: `tm.layout`)은 옛 값으로 돌아오고, 새로 쓴 `*_layout.rpy` 값을 덮음. custom_ui는 4.16에서 `custom_ui.runtime`(보통 파이썬 객체)로 고침. 타이틀(`tm.layout`, `pause_layout`), 일렁임(`wm.layout`), 화면 효과(`fx.saved`)는 아직 같은 방식이라, 원고 저장처럼 다시 불러오는 저장과 같이 하면 그 세션에서 옛 값으로 보일 수 있음(파일은 맞음). 그 탭을 앱으로 옮길 때 같이 고침
+- 앱(`main.cjs`)은 게임에서 마지막으로 받은 `state`, `files`를 기억했다가 화면이 `liveStatus`를 부르면 넘겨줌. 게임은 바뀔 때만 상태를 보내기 때문
 - 기본 SDK 런처(`renpy-8.5.3-sdk`)에는 pygaki 버튼이 없음(묶음 사본에만 넣음). 원본 SDK는 묶음 재료라 손대지 않음

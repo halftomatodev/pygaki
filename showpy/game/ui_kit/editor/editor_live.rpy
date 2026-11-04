@@ -1,5 +1,5 @@
 ################################################################################
-## UI Kit — 편집기: PyKaki 앱과 실시간 연결 (3.14)
+## UI Kit — 편집기: PyKaki 앱과 실시간 연결 (3.14, 커서/대사 소리 3.15)
 ##
 ## PyKaki 데스크톱 앱의 showpy 화면이 이 편집기를 바깥에서 조종합니다.
 ## 게임 창에는 끌어서 옮기는 표시만 남고, 숫자, 목록, 대본은 앱에서 봅니다.
@@ -19,6 +19,7 @@ init -8 python in ui_editor:
     import random
     import socket
     import threading
+    import time
 
     LIVE_FILE = "showpy_live.json"
 
@@ -43,6 +44,8 @@ init -8 python in ui_editor:
             self.last = None
             self.hide_panel = True      # 앱이 붙어 있으면 게임 안 패널을 숨김
             self.failed = False
+            self.files_due = False      # 파일 목록(소리, 그림)을 보내야 함 (붙을 때, 앱이 달라고 할 때)
+            self.listen_until = None    # 앱에서 [들어보기]를 누른 대사 소리를 멈출 시각
 
     live = _Live()
 
@@ -87,6 +90,7 @@ init -8 python in ui_editor:
                                 old = live.client
                                 live.client = conn
                                 live.last = None
+                                live.files_due = True
                             if old is not None:
                                 _live_close(old)
                             continue
@@ -241,6 +245,30 @@ init -8 python in ui_editor:
             common_edited=bool(s.default_edits),
             )
 
+    def _custom_ui_state():
+        """커서/대사 소리 탭 (3.15). 값은 편집 중인 값 → 저장한 값 → 설정 파일 순서로 지금 쓰는 값."""
+        t = get_tab("custom_ui")
+        cu = getattr(store, "custom_ui", None)
+        if t is None or cu is None:
+            return None
+        ok, why = tab_available(t)
+        if not ok:
+            return dict(ok=False, why=str(why or ""))
+        return dict(
+            ok=True, why="",
+            values={ k : _js(t.val(k)) for k in cu.EDIT_KEYS },
+            edited=sorted(str(k) for k in t.edits),
+            cps=_js(t.cps()),
+            reload_keys=list(t.RELOAD_KEYS),
+            fps=getattr(cu, "FPS", 24), max_frames=t.max_frames(),
+            playing=live.listen_until is not None,
+            )
+
+    def _files():
+        uk = store.ui_kit
+        return dict(type="files", audio=list(uk.audio_files()),
+                    images=list(uk.game_files((".png", ".webp", ".jpg", ".jpeg", ".avif"))))
+
     def _where_line():
         """게임 진행 위치 (원고 파일, 줄). ESC 메뉴 같은 메뉴 화면에 있어도 게임 쪽 위치."""
         try:
@@ -278,6 +306,7 @@ init -8 python in ui_editor:
             editor=dict(open=state.open, tab=state.tab, hide_panel=live.hide_panel, message=str(state.message or ""),
                         pending=sum(t.pending() for t in TABS), tabs=tabs, info=info),
             title=_title_state(),
+            custom_ui=_custom_ui_state(),
             )
 
     ## ── 앱이 보낸 명령 ──
@@ -308,6 +337,49 @@ init -8 python in ui_editor:
             else:
                 d[key] = value
         tm.state.edit_serial += 1
+
+    def _custom_ui_set(t, key, value):
+        cu = t.cu()
+        if key not in cu.EDIT_KEYS:
+            raise ValueError("모르는 값 이름: {}".format(key))
+        if key in ("ctc", "cursor", "quick_menu"):
+            value = bool(value)
+            ## 켤 때 그림이 하나도 없으면 첫 그림 폴더를 넣는 것까지 게임 안 패널과 같게
+            if key != "quick_menu" and value != bool(t.val(key)):
+                t.toggle(key)
+                return
+        elif key in ("ctc_frames", "cursor_frames"):
+            value = list(str(i) for i in (value or [ ]))[:t.max_frames()]
+        elif key in ("ctc_hold", "cursor_hold"):
+            value = 1 if int(value) == 1 else 2
+        elif key == "cursor_mode":
+            value = "hardware" if value == "hardware" else "software"
+        elif key == "cursor_hotspot":
+            value = (int(value[0]), int(value[1]))
+        elif key == "typing_volume":
+            value = round(max(0.0, min(1.0, float(value))), 2)
+        elif key == "typing_sound":
+            value = str(value) if value else None
+        elif key == "text_cps":
+            value = None if value is None else max(0, int(value))
+        t.put(key, value)
+
+    def _custom_ui_cmd(cmd, c):
+        t = get_tab("custom_ui")
+        if t is None or not tab_available(t)[0]:
+            return False
+        if cmd == "custom_ui.set":
+            _custom_ui_set(t, str(c.get("key")), c.get("value"))
+        elif cmd == "custom_ui.reset":
+            ## 이 값의 저장 안 한 변경 되돌리기
+            t.edits.pop(str(c.get("key")), None)
+        elif cmd == "custom_ui.listen":
+            t.listen()
+            live.listen_until = (time.time() + 1.5) if t.sound_until is not None else None
+        elif cmd == "custom_ui.stop":
+            t.stop_sound()
+            live.listen_until = None
+        return True
 
     def _live_cmd(c):
         """명령 하나를 처리합니다. 화면을 다시 그려야 하면 True."""
@@ -367,6 +439,13 @@ init -8 python in ui_editor:
                 t.reset_item()
             return True
 
+        if cmd and cmd.startswith("custom_ui."):
+            return _custom_ui_cmd(cmd, c)
+
+        if cmd == "files":
+            live.files_due = True
+            return False
+
         if cmd == "save":
             save_all()
             return True
@@ -403,11 +482,25 @@ init -8 python in ui_editor:
                     raise
                 _live_send(dict(type="error", text="{}: {}".format(c.get("cmd"), e)))
 
+        ## 앱에서 들어본 대사 소리는 1.5초 뒤에 멈춤 (게임 안 패널이 숨어 있어 그 타이머가 돌지 않음)
+        if live.listen_until is not None and time.time() > live.listen_until:
+            live.listen_until = None
+            t = get_tab("custom_ui")
+            if t is not None:
+                t.stop_sound()
+
         if changed:
             store.renpy.restart_interaction()
 
         if live.client is None:
             return
+
+        if live.files_due:
+            live.files_due = False
+            try:
+                _live_send(_files())
+            except Exception as e:
+                _live_send(dict(type="error", text="파일 목록을 만들지 못했습니다: {}".format(e)))
 
         try:
             st = live_state()

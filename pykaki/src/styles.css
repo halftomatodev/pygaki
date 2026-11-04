@@ -699,3 +699,34 @@ fieldset.plain:disabled { opacity: 0.4; }
 .sp-color > span { width: 100%; }
 .sp-color input[type='color'] { width: 36px; height: 28px; padding: 1px; }
 .sp-color .sp-field { flex: 1; }
+/* showpy 화면: 커서, 클릭 대기, 대사 소리 칸 (ui_kit 3.15) */
+.sp-cu section { border-bottom: 1px solid var(--line); padding: 8px 0 10px; }
+.sp-cu section:last-of-type { border-bottom: 0; }
+.sp-cu-head { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; font-size: 13px; }
+.sp-cu-lab { font-size: 12px; color: var(--muted); }
+.sp-cu-val { font-size: 12px; min-width: 64px; }
+.sp-cu select { min-width: 0; padding: 4px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); }
+.sp-check.strong { color: var(--text); font-size: 13px; font-weight: 600; }
+.sp-undo { font-size: 11px; padding: 0 6px; color: var(--play); }
+.sp-small-num { width: 56px; padding: 3px 5px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); }
+.sp-slots { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin-top: 6px; }
+.sp-slot { aspect-ratio: 1; padding: 2px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); overflow: hidden; }
+.sp-slot.on { box-shadow: 0 0 0 2px var(--accent); }
+.sp-slot.add { font-size: 18px; color: var(--muted); }
+.sp-slot.missing { border-color: var(--danger); }
+.sp-slot.missing .sp-thumb-name { color: var(--danger); }
+.sp-slot.empty { border: 1px dashed var(--line); border-radius: 6px; aspect-ratio: 1; opacity: 0.5; }
+.sp-slot img, .sp-pick-grid img, .sp-anim img { max-width: 100%; max-height: 100%; object-fit: contain; image-rendering: auto; }
+.sp-thumb-name { font-size: 9px; color: var(--muted); word-break: break-all; }
+.sp-picker { margin-top: 8px; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+.sp-folders { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 6px; }
+.sp-folders button { font-size: 11.5px; padding: 2px 7px; }
+.sp-folders button.on { background: var(--accent-soft); color: var(--text); }
+.sp-pick-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; max-height: 260px; overflow: auto; margin-bottom: 6px; }
+.sp-pick-grid button { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 3px; height: 74px; overflow: hidden; }
+.sp-pick-grid button.on { box-shadow: 0 0 0 2px var(--accent); }
+.sp-pick-grid button img { height: 48px; }
+.sp-pick-grid button > span:last-child { font-size: 10px; color: var(--muted); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sp-preview { background: var(--faint); border-radius: 8px; padding: 8px 10px; }
+.sp-preview-text { min-height: 44px; font-size: 14px; line-height: 1.5; margin-bottom: 6px; }
+.sp-anim { display: inline-flex; width: 28px; height: 28px; vertical-align: bottom; align-items: center; justify-content: center; }

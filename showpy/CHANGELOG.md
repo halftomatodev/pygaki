@@ -2,6 +2,13 @@
 
 버전별 자세한 설명은 [docs/READ_ME_FIRST.md](docs/READ_ME_FIRST.md)와 폴더별 `README.md`에 있습니다.
 
+## 4.16 (2026-11-04)
+
+`ui_kit` 3.15:
+- PyKaki 앱의 [showpy] 화면에서 커서, 클릭 대기 표시(CTC), 대사 소리를 고칩니다(편집기 "커서/대사 소리" 탭을 앱 칸으로). 실시간 연결에 상태 `custom_ui`, 파일 목록 `files`, 명령 `custom_ui.set`, `custom_ui.reset`, `custom_ui.listen`, `custom_ui.stop`, `files`를 더했습니다. 형식은 `docs/LINK.md` 9장.
+- 고침: 커서/대사 소리 탭에서 커서나 클릭 대기 표시를 켜고 끈 뒤 저장하면, 게임이 저절로 다시 불러온 뒤 저장 전 값으로 돌아가 보이던 것(파일에는 맞게 저장됨). 실행 중에 저장한 값을 렌파이 저장과 되감기에 들어가지 않는 곳(`custom_ui.runtime`)에 둡니다.
+- PyKaki 앱: 앱 화면이 뜨기 전에 게임이 보낸 첫 상태를 놓쳐서, 스플래시처럼 가만히 있는 화면에서 오른쪽 칸이 비어 있던 것.
+
 ## 4.15 (2026-11-04)
 
 `ui_kit` 3.14:

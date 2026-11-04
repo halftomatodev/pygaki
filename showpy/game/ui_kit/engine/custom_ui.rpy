@@ -61,10 +61,27 @@ init -10 python in custom_ui:
             hold = 2
         return max(1, hold) / float(FPS)
 
+    class _Runtime(python_object):
+        """편집기가 게임 실행 중에 저장한 값 (3.15).
+
+        store 변수(custom_ui.layout)를 실행 중에 바꾸면 렌파이가 그 값을 게임 상태로 기억해서,
+        저장 뒤 다시 불러오기(Shift+R 포함)를 하면 그 대사가 시작될 때의 옛 값이 새로 쓴
+        custom_ui_layout.rpy 값을 덮습니다. 그래서 되감기와 저장에 들어가지 않는 보통 파이썬
+        객체에 둡니다. 다시 불러오면 비워지고 파일 값을 씁니다."""
+        layout = None
+
+    runtime = _Runtime()
+
+    def saved_layout():
+        """편집기가 저장한 값: 이번 실행 중 저장한 것 → custom_ui_layout.rpy"""
+        if runtime.layout is not None:
+            return runtime.layout
+        return globals().get("layout", None) or { }
+
     def cfg(name):
         """설정값. 편집기가 저장한 값(custom_ui_layout.rpy) → 설정 파일 → 기본값 순서."""
         g = globals()
-        lay = g.get("layout", None) or { }
+        lay = saved_layout()
         if name in lay:
             return lay[name]
         if name in g:
