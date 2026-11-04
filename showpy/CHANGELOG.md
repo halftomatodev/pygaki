@@ -2,6 +2,11 @@
 
 버전별 자세한 설명은 [docs/READ_ME_FIRST.md](docs/READ_ME_FIRST.md)와 폴더별 `README.md`에 있습니다.
 
+## 4.14 (2026-11-04)
+
+`ui_kit` 3.13:
+- 게임 메뉴 화면(대사록, 저장, 불러오기, 환경설정 등)에서 왼쪽에 ESC 메뉴를 같은 자리, 같은 모양으로 두고 제목과 내용을 그 오른편에 놓습니다. 지금 열린 화면의 항목이 선택된 모양. 타이틀에서 열면 타이틀 메뉴 항목. 렌파이 기본 `game_menu` 스크린을 대신 정의합니다. 설정: `tmenu.game_menu_side`, `game_menu_content_x`, `game_menu_gap`, `game_menu_line`.
+
 ## 4.13 (2026-11-03)
 
 `ui_kit` 3.12:

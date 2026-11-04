@@ -1,10 +1,10 @@
-# showpy 커스텀 가이드 (4.13)
+# showpy 커스텀 가이드 (4.14)
 
-2026-10-31 · 버전 4.13 (4.13에서 바뀐 것: 등장 효과 셰이더를 text_effects.glsl 한 파일로)
+2026-11-04 · 버전 4.14 (4.14에서 바뀐 것: 게임 메뉴 화면이 ESC 메뉴 옆에 나옴)
 
 ## 이 문서 보는 법
 
-showpy 4.13을 받은 사람이 **어떤 파일의 어떤 값을 고치면 무엇이 바뀌는지** 찾아보는 문서입니다. 설정 이름의 전체 설명은 각 폴더의 `README.md`에 있고, 이 문서는 "하고 싶은 일"에서 출발합니다. 글을 PyKaki에서 쓰려면 "PyKaki와 함께 쓰기"부터 보세요.
+showpy 4.14를 받은 사람이 **어떤 파일의 어떤 값을 고치면 무엇이 바뀌는지** 찾아보는 문서입니다. 설정 이름의 전체 설명은 각 폴더의 `README.md`에 있고, 이 문서는 "하고 싶은 일"에서 출발합니다. 글을 PyKaki에서 쓰려면 "PyKaki와 함께 쓰기"부터 보세요.
 
 | 폴더 | 하는 일 | 고치는 파일 |
 | --- | --- | --- |
@@ -36,7 +36,7 @@ showpy 4.13을 받은 사람이 **어떤 파일의 어떤 값을 고치면 무�
 | 선택을 옮길 때 밀려나는 거리·속도 | `ui_kit/title_menu_config.rpy` | `tmenu.push_before`, `push_after`, `move_time`, `move_warper` |  |
 | 타이틀 배경 영상 | `ui_kit/title_menu_config.rpy` | `tmenu.background_movie` |  |
 | 타이틀 게임 제목 위치·색, 버전 표시 | `ui_kit/title_menu_config.rpy` | `style main_menu_vbox`, `style main_menu_title`, `tmenu.show_version` |  |
-| 게임 메뉴(저장·불러오기 화면) 왼쪽 목록 | `ui_kit/title_menu_config.rpy` | `tmenu.game_menu`, `style navigation_button_text` |  |
+| 게임 메뉴(저장·불러오기 화면) 모양, 왼쪽 목록 | `ui_kit/title_menu_config.rpy` | `tmenu.game_menu_side`, `tmenu.game_menu_content_x`, `tmenu.game_menu`, `style navigation_button_text` |  |
 | 게임 중 ESC 메뉴 (타이틀 메뉴 모양) | `ui_kit/title_menu_config.rpy` | `tmenu.pause`(켜기), `tmenu.pause_dim`(뒤 화면 어둡게), `tmenu.pause_background`, `tmenu.pause_items` (3.1) | ESC 메뉴를 연 채로 타이틀 메뉴 탭 → Ctrl+S |
 | 선택지 하나의 위치·글꼴·색 | 스크립트 (`script.rpy` 등) | 선택지 뒤 괄호 `(x=…, y=…, font=…, color=…)` | 선택지 탭 → Ctrl+S (원고에 바로) |
 | 모든 선택지의 글꼴·크기·색·배경 | `ui_kit/choice_menu_config.rpy` | `cmenu.default` |  |
@@ -646,7 +646,10 @@ define tmenu.items = [
 | 버전 번호 숨기기 | `tmenu.show_version = False` |
 | 메뉴 뒤 반투명 판 없애기 | `tmenu.main_menu_frame = False` |
 | 타이틀에서 연 환경설정 화면의 왼쪽 목록 숨기기 | `tmenu.title_game_menu_navigation = False` |
-| 게임 메뉴 왼쪽 목록 바꾸기 | `tmenu.game_menu = [ (_("대사록"), ShowMenu("history"), "not main_menu"), … ]` |
+| 게임 메뉴 화면을 예전 모양(렌파이 기본)으로 | `tmenu.game_menu_side = False` |
+| 게임 메뉴 내용이 시작하는 자리 | `tmenu.game_menu_content_x = 400` (None이면 메뉴 오른쪽 끝 + `tmenu.game_menu_gap`) |
+| 메뉴와 내용 사이 세로줄 | `tmenu.game_menu_line = "#ffffff33"` |
+| 게임 메뉴 왼쪽 목록 바꾸기 (`game_menu_side = False`일 때) | `tmenu.game_menu = [ (_("대사록"), ShowMenu("history"), "not main_menu"), … ]` |
 | 게임 메뉴 버튼 글자 | `style navigation_button_text:` `size`, `color`, `hover_color`, `hover_strikethrough` |
 
 오타가 있으면 타이틀 화면이 나올 때 어느 항목의 어떤 이름이 틀렸는지 오류 화면으로 알려줍니다.

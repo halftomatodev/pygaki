@@ -215,7 +215,32 @@ define tmenu.pause_items = None
 ## 저장, 불러오기 화면의 "돌아가기"는 렌파이 기본처럼 게임으로 돌아갑니다. (ESC 메뉴로 가지 않음)
 
 
-## ── 게임 메뉴 (대사록·저장·불러오기·환경설정 화면 왼쪽 목록) ────────────────
+## ── 게임 메뉴 (대사록·저장·불러오기·환경설정 화면) ────────────────────────────
+
+## True: 왼쪽에 ESC 메뉴를 같은 자리, 같은 모양으로 두고 제목과 내용은 그 오른편에 (4.14)
+##       타이틀에서 연 화면은 타이틀 메뉴 항목이 왼쪽에 나옵니다.
+##       지금 열린 화면의 항목(예: "환경설정")이 선택된 모양으로 보입니다.
+## False: 렌파이 기본 모양 (왼쪽에 작은 글자 목록, 제목은 왼쪽 위)
+define tmenu.game_menu_side = True
+
+## 제목과 내용이 시작하는 가로 위치. None이면 메뉴 오른쪽 끝을 재서 알아서 정합니다.
+##   define tmenu.game_menu_content_x = 400     ## 픽셀
+##   define tmenu.game_menu_content_x = 0.3     ## 화면 너비의 30%
+define tmenu.game_menu_content_x = None
+
+## 알아서 정할 때 메뉴 오른쪽 끝과 내용 사이 간격 (픽셀)
+define tmenu.game_menu_gap = 50
+
+## 메뉴와 내용 사이 세로줄. 색을 적으면 그려집니다. None이면 줄 없음.
+##   define tmenu.game_menu_line = "#ffffff33"
+define tmenu.game_menu_line = None
+
+## 제목 글자 모양은 렌파이 스타일 문법으로 (적은 속성만 바뀜)
+## style game_menu_label_text:
+##     size 50
+##     color "#ffffff"
+
+## ── 아래는 tmenu.game_menu_side = False일 때만 쓰는 값 (렌파이 기본 모양의 왼쪽 목록) ──
 
 ## 타이틀에서 연 환경설정·불러오기 화면에도 왼쪽 목록을 보여줄지
 ## False면 "돌아가기" 버튼만 나옵니다.

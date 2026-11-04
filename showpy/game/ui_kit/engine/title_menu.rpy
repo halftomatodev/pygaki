@@ -3,7 +3,7 @@
 ##
 ## 이 파일은 고칠 필요가 없습니다. 설정은 title_menu_config.rpy에서 하세요.
 ##
-## 렌파이 기본 screens.rpy의 main_menu, navigation 스크린을 대신 정의합니다.
+## 렌파이 기본 screens.rpy의 main_menu, navigation, game_menu 스크린을 대신 정의합니다.
 ## 게임 중 ESC 메뉴(일시정지 메뉴, tmenu_pause 스크린)도 같은 모양으로 그립니다. (3.1)
 ## tmenu.enabled = False면 렌파이 기본 타이틀 화면과 똑같이 그립니다.
 ################################################################################
@@ -56,6 +56,10 @@ init -10 python in tmenu:
         main_menu_frame=True,
         title_game_menu_navigation=True,
         game_menu=None,
+        game_menu_side=True,
+        game_menu_content_x=None,
+        game_menu_gap=50,
+        game_menu_line=None,
         pause=True,
         pause_items=None,
         pause_layout={ },
@@ -450,8 +454,8 @@ init -10 python in tmenu:
         k = order.index(sel)
         return (order[(k - 1) % len(order)], order[(k + 1) % len(order)])
 
-    def intro_args(i):
-        if not cfg("intro"):
+    def intro_args(i, intro=True):
+        if not intro or not cfg("intro"):
             return (0.0, 0.0, 0, 0)
 
         ox, oy = cfg("intro_offset")
@@ -506,6 +510,75 @@ init -10 python in tmenu:
         if not cfg("enabled"):
             return True
         return not (store.main_menu and not cfg("title_game_menu_navigation"))
+
+    ## ── 게임 메뉴 화면 (대사록·저장·불러오기·환경설정) 옆 모양 (4.14) ──
+    ## 왼쪽에 ESC 메뉴(타이틀에서 열면 타이틀 메뉴)를 그대로 두고,
+    ## 제목과 내용은 그 메뉴의 오른쪽 끝보다 오른편에 놓습니다.
+
+    def game_menu_kind():
+        """게임 메뉴 화면 왼쪽에 그릴 메뉴. "title" / "pause" / None(렌파이 기본 모양)."""
+        if not (cfg("enabled") and cfg("game_menu_side")):
+            return None
+        if store.main_menu:
+            if not cfg("title_game_menu_navigation"):
+                return None
+            return "title"
+        if pause_on():
+            return "pause"
+        return None
+
+    def selected_index(items):
+        """지금 열린 화면을 여는 항목 번호 (예: 환경설정 화면이면 "환경설정" 항목).
+        없으면 -1 (아무 항목도 선택된 모양이 아님)."""
+        for i, it in enumerate(items):
+            try:
+                if it.action is not None and store.renpy.is_selected(it.action):
+                    return i
+            except Exception:
+                pass
+        return -1
+
+    def _item_right(it, sw):
+        """항목이 화면에서 차지하는 오른쪽 끝 (회전, 확대, 선택됐을 때 이동까지 넉넉히)."""
+        import math
+        try:
+            w, h = it.idle_disp.size()
+        except Exception:
+            w, h = (0, 0)
+        try:
+            hw, hh = it.active_disp.size()
+            w, h = max(w, hw), max(h, hh)
+        except Exception:
+            pass
+        z = max(abs(it.zoom), abs(it.h_zoom))
+        r = math.radians(max(abs(it.rotate), abs(it.h_rotate)))
+        bw = (w * abs(math.cos(r)) + h * abs(math.sin(r))) * z
+        center = to_pixels(it.x, sw) + (0.5 - it.anchor[0]) * w
+        return center + bw / 2.0 + max(0, it.h_offset[0]) + max(0, it.shift[0])
+
+    _cx_cache = { }
+
+    def content_x_for(kind):
+        """제목과 내용이 시작하는 x (픽셀)."""
+        sw = store.config.screen_width
+        v = cfg("game_menu_content_x")
+        if v is not None:
+            return int(to_pixels(v, sw))
+
+        items = get_items(kind)
+        key = (kind, state.edit_serial, store._preferences.language, tuple(it.id for it in items), sw)
+        rv = _cx_cache.get(key)
+        if rv is None:
+            right = 0
+            for it in items:
+                right = max(right, _item_right(it, sw))
+            if items:
+                right += max(0, cfg("push_before")[0], cfg("push_after")[0])
+            rv = int(right + cfg("game_menu_gap"))
+            ## 메뉴가 화면 가운데까지 와 있으면 내용 자리가 없으므로 절반에서 멈춤
+            rv = max(0, min(rv, int(sw * 0.5)))
+            _cx_cache[key] = rv
+        return rv
 
     ## ── 편집기 연결 (편집기 본체는 editor 폴더) ──
 
@@ -693,11 +766,180 @@ screen navigation():
         ## 타이틀에서 연 환경설정·불러오기 화면에는 왼쪽 목록을 두지 않음
         null
 
+## 대사록·저장·불러오기·환경설정 화면의 틀. (렌파이 기본 game_menu 스크린을 대신합니다) (4.14)
+## 왼쪽에 ESC 메뉴(타이틀에서 열면 타이틀 메뉴)를 같은 자리, 같은 모양으로 두고
+## 제목과 내용은 그 오른편에 놓습니다. 지금 열린 화면의 항목이 선택된 모양으로 보입니다.
+## tmenu.game_menu_side = False면 렌파이 기본 모양(왼쪽 목록 + 내용)과 같습니다.
+screen game_menu(title, scroll=None, yinitial=0.0, spacing=0):
+
+    style_prefix "game_menu"
+
+    $ _kind = tmenu.game_menu_kind()
+
+    if _kind is not None:
+
+        $ _items = tmenu.get_items(_kind)
+        $ _cur = tmenu.selected_index(_items)
+        $ _cx = tmenu.content_x_for(_kind)
+        $ _vw = min(920, config.screen_width - _cx - 40)
+
+        ## 배경: 타이틀에서는 타이틀 배경, 게임 중에는 ESC 메뉴와 같은 배경
+        if main_menu:
+            if tmenu.scene_fx() is not None:
+                add gui.main_menu_background at tmenu.scene_fx()
+            else:
+                add gui.main_menu_background
+        elif tmenu.cfg("pause_background") is not None:
+            add tmenu.cfg("pause_background")
+        elif tmenu.cfg("pause_dim"):
+            add Solid(tmenu.cfg("pause_dim"))
+
+        ## 메뉴와 내용 사이 세로줄 (tmenu.game_menu_line에 색을 적으면)
+        if tmenu.cfg("game_menu_line"):
+            add Solid(tmenu.cfg("game_menu_line")):
+                xpos (_cx - tmenu.cfg("game_menu_gap") // 2)
+                xsize 2
+                ypos 40
+                ysize (config.screen_height - 80)
+
+        frame:
+            style "game_menu_outer_frame"
+            background None
+
+            hbox:
+
+                null width _cx
+
+                frame:
+                    style "game_menu_content_frame"
+                    left_margin 0
+
+                    if scroll == "viewport":
+
+                        viewport:
+                            xsize _vw
+                            yinitial yinitial
+                            scrollbars "vertical"
+                            mousewheel True
+                            draggable True
+                            pagekeys True
+
+                            side_yfill True
+
+                            vbox:
+                                spacing spacing
+
+                                transclude
+
+                    elif scroll == "vpgrid":
+
+                        vpgrid:
+                            xsize _vw
+                            cols 1
+                            yinitial yinitial
+
+                            scrollbars "vertical"
+                            mousewheel True
+                            draggable True
+                            pagekeys True
+
+                            side_yfill True
+
+                            spacing spacing
+
+                            transclude
+
+                    else:
+
+                        transclude
+
+        use title_menu(screen_name=renpy.current_screen().screen_name[0], menu=_kind, start=_cur, intro=False, rest=_cur)
+
+        ## 타이틀 메뉴에는 "돌아가기" 항목이 없으므로 버튼을 따로 둠
+        if _kind == "title":
+            textbutton _("돌아가기"):
+                style "return_button"
+                action Return()
+
+        label title:
+            xpos _cx
+
+    else:
+
+        ## 렌파이 기본 screens.rpy의 game_menu와 같습니다.
+        if main_menu:
+            add gui.main_menu_background
+        else:
+            add gui.game_menu_background
+
+        frame:
+            style "game_menu_outer_frame"
+
+            hbox:
+
+                ## 탐색 섹션을 위한 공간 예약.
+                frame:
+                    style "game_menu_navigation_frame"
+
+                frame:
+                    style "game_menu_content_frame"
+
+                    if scroll == "viewport":
+
+                        viewport:
+                            yinitial yinitial
+                            scrollbars "vertical"
+                            mousewheel True
+                            draggable True
+                            pagekeys True
+
+                            side_yfill True
+
+                            vbox:
+                                spacing spacing
+
+                                transclude
+
+                    elif scroll == "vpgrid":
+
+                        vpgrid:
+                            cols 1
+                            yinitial yinitial
+
+                            scrollbars "vertical"
+                            mousewheel True
+                            draggable True
+                            pagekeys True
+
+                            side_yfill True
+
+                            spacing spacing
+
+                            transclude
+
+                    else:
+
+                        transclude
+
+        use navigation
+
+        textbutton _("돌아가기"):
+            style "return_button"
+
+            action Return()
+
+        label title
+
+    if main_menu:
+        key "game_menu" action ShowMenu("main_menu")
+
 ## 타이틀 메뉴 본체. 위의 main_menu 스크린이 불러옵니다.
 ## screen_name: 이 메뉴가 들어 있는 최상위 스크린 이름 (키보드 이동에 사용)
-screen title_menu(screen_name="main_menu", menu="title"):
+## start: 처음 선택된 항목 (None이면 tmenu.start_index)
+## intro: 등장 연출을 할지 / rest: 마우스가 떠나면 돌아갈 항목 (None이면 그대로 둠)
+screen title_menu(screen_name="main_menu", menu="title", start=None, intro=True, rest=None):
 
-    default sel = tmenu.cfg("start_index")
+    default sel = (tmenu.cfg("start_index") if start is None else start)
 
     $ _items = tmenu.get_items(menu)
     $ _n = len(_items)
@@ -728,7 +970,7 @@ screen title_menu(screen_name="main_menu", menu="title"):
             $ _act = (i == _sel)
             $ _dx, _dy, _a = tmenu.motion(_items, i, _sel, _shift)
             $ _fr, _fs, _fz = tmenu.shape(it, _act)
-            $ _id, _it, _iox, _ioy = tmenu.intro_args(i)
+            $ _id, _it, _iox, _ioy = tmenu.intro_args(i, intro)
 
             fixed:
                 fit_first True
@@ -776,6 +1018,8 @@ screen title_menu(screen_name="main_menu", menu="title"):
                 else:
                     action it.action
                     hovered SetLocalVariable("sel", i)
+                    if rest is not None:
+                        unhovered SetLocalVariable("sel", rest)
                     hover_sound it.hover_sound
                     activate_sound it.activate_sound
                     default_focus (i == sel)

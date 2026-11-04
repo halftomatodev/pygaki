@@ -13,7 +13,14 @@
 그리고 이 기능들을 **게임을 실행한 채로 마우스로 고치는 편집기**가 들어 있습니다. (개발 모드에서 Shift+M)
 대사, 선택지, show·hide·scene 줄은 편집기에서 고친 값이 **원고(.rpy)의 그 줄에 바로 저장**됩니다.
 
-버전 3.12 · 렌파이 8.5.3 기준으로 만들었습니다.
+버전 3.13 · 렌파이 8.5.3 기준으로 만들었습니다.
+
+### 3.13에서 바뀐 점
+
+- **게임 메뉴 화면을 ESC 메뉴 옆으로**: 대사록, 저장, 불러오기, 환경설정, 버전정보, 조작방법 화면에서 왼쪽에 ESC 메뉴가 같은 자리, 같은 모양으로 남고, 제목과 내용은 그 오른편에 나옵니다. 지금 열린 화면의 항목은 선택된 모양으로 보입니다. 타이틀에서 연 화면은 타이틀 메뉴 항목이 왼쪽에 나옵니다.
+  - 내용이 시작하는 자리는 메뉴의 오른쪽 끝을 재서 알아서 정합니다. 직접 정하려면 `define tmenu.game_menu_content_x = 400`.
+  - 예전 모양(렌파이 기본)으로 돌리려면 `define tmenu.game_menu_side = False`.
+  - 렌파이 기본 `screens.rpy`의 `game_menu` 스크린을 대신 정의합니다. `screens.rpy`에서 `game_menu`를 고쳐 쓰던 프로젝트는 `game_menu_side = False`여도 이 파일의 것이 쓰이니, 고친 내용이 있으면 `title_menu.rpy`에 옮기세요.
 
 ### 3.12에서 바뀐 점
 
@@ -667,7 +674,11 @@ define tmenu.items = [
 | `tmenu.show_version` | `True` | 타이틀의 게임 제목 아래 버전 번호 표시 |
 | `tmenu.main_menu_frame` | `True` | 렌파이 기본 GUI의 메뉴 뒤 반투명 판(`gui/overlay/main_menu.png`) 표시 |
 | `tmenu.title_game_menu_navigation` | `True` | 타이틀에서 연 환경설정·불러오기 화면에 왼쪽 목록 표시. `False`면 "돌아가기"만 |
-| `tmenu.game_menu` | `None` | 게임 메뉴 왼쪽 목록. `None`이면 렌파이 기본 목록과 같음 (5-3 참고) |
+| `tmenu.game_menu_side` | `True` | 대사록·저장·불러오기·환경설정 화면 왼쪽에 ESC 메뉴(타이틀에서 열면 타이틀 메뉴)를 그대로 두고, 제목과 내용은 그 오른편에. `False`면 렌파이 기본 모양 (4.14) |
+| `tmenu.game_menu_content_x` | `None` | 제목과 내용이 시작하는 가로 위치(픽셀 또는 `0.3` 같은 비율). `None`이면 메뉴 오른쪽 끝 + 간격 |
+| `tmenu.game_menu_gap` | `50` | 알아서 정할 때 메뉴와 내용 사이 간격(픽셀) |
+| `tmenu.game_menu_line` | `None` | 메뉴와 내용 사이 세로줄 색. 예: `"#ffffff33"` |
+| `tmenu.game_menu` | `None` | 게임 메뉴 왼쪽 목록 (`game_menu_side = False`일 때만). `None`이면 렌파이 기본 목록과 같음 (5-3 참고) |
 
 편집기 단축키를 바꾸려면 설정 파일 아무 곳에 `define ui_kit.editor_key = "shift_K_e"`처럼 적습니다.
 
@@ -688,7 +699,9 @@ style navigation_button_text:  ## 게임 메뉴 왼쪽 버튼 글자 ("돌아가
     hover_strikethrough True
 ```
 
-게임 메뉴 왼쪽 목록을 바꾸려면 `tmenu.game_menu`에 (글자, 동작) 또는 (글자, 동작, "보일 조건")을 순서대로 적습니다.
+`tmenu.game_menu_side = True`(기본)이면 게임 메뉴 왼쪽에는 ESC 메뉴 항목(`tmenu.pause_items`)이, 타이틀에서 연 화면에는 타이틀 메뉴 항목(`tmenu.items`)이 같은 자리에 나옵니다. 항목을 바꾸려면 그 목록을 고치세요. 제목 글자는 `style game_menu_label_text:`로 바꿉니다.
+
+`tmenu.game_menu_side = False`일 때 게임 메뉴 왼쪽 목록을 바꾸려면 `tmenu.game_menu`에 (글자, 동작) 또는 (글자, 동작, "보일 조건")을 순서대로 적습니다.
 
 ```renpy
 define tmenu.game_menu = [
