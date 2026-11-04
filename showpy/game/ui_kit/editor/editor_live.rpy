@@ -622,6 +622,120 @@ init -8 python in ui_editor:
             live.listen_until = None
         return True
 
+    ## ── 원고의 줄로 게임을 옮기기 (3.20) ──
+    ## 이번에 지나온 줄이면 되감기(그때 변수와 화면 그대로), 아니면 렌파이 warp
+    ## (게임을 다시 시작해서 그 줄까지 scene/show만 따라 하고 들어감. 개발 모드에서만)
+
+    def _game_file(fn):
+        fn = str(fn or "").replace("\\", "/")
+        if fn and not fn.startswith("game/"):
+            fn = "game/" + fn
+        return fn
+
+    def _src_line(fn, line):
+        try:
+            with open(os.path.join(store.config.basedir, fn), encoding="utf-8-sig") as f:
+                for i, t in enumerate(f, 1):
+                    if i == line:
+                        return t
+        except Exception:
+            pass
+        return None
+
+    def _node_at(fn, line):
+        """그 줄의 문장. 빈 줄이나 주석 줄이면 그 뒤 첫 문장, 아니면 그 줄이나 그 앞에서 가장 가까운 문장."""
+        t = _src_line(fn, line)
+        after = t is not None and (not t.strip() or t.strip().startswith("#"))
+        best = None
+        for n in store.renpy.game.script.namemap.values():
+            if getattr(n, "filename", None) != fn:
+                continue
+            ln = getattr(n, "linenumber", 0)
+            if after:
+                if ln >= line and (best is None or ln < best.linenumber):
+                    best = n
+            elif ln <= line and (best is None or ln > best.linenumber):
+                best = n
+        if best is None and after:
+            return _node_at_before(fn, line)
+        return best
+
+    def _node_at_before(fn, line):
+        best = None
+        for n in store.renpy.game.script.namemap.values():
+            if getattr(n, "filename", None) == fn and n.linenumber <= line and (best is None or n.linenumber > best.linenumber):
+                best = n
+        return best
+
+    def _rollback_steps(fn, line):
+        """되감기로 갈 수 있으면 되감을 저장 지점 수, 아니면 None.
+        되감기 기록 하나는 한 문장에서 시작해 다음 대사까지라, 그 줄이 든 가장 최근 기록을 찾아서
+        그 뒤의 저장 지점을 셈 (되감으면 그 기록의 처음부터 다시 진행)."""
+        if getattr(store, "main_menu", False):
+            return None
+        log = store.renpy.game.log
+        entries = list(log.log)
+        if len(entries) < 2:
+            return None
+        sm = store.renpy.game.script.namemap
+
+        def node(rb):
+            return sm.get(getattr(rb.context, "current", None), None)
+
+        ## 지금 기록 안의 줄이면 (지금 보이는 대사까지) 이미 그 자리: 0
+        cur = node(entries[-1])
+        here = _where_line()
+        if cur is not None and cur.filename == fn and here[0] == fn and cur.linenumber <= line <= here[1]:
+            return 0
+
+        ## 지금 기록이 저장 지점이 아니면(선택지에서 기다리는 중 등) 되감기 한 번이 바로 앞 저장 지점으로 감
+        steps = 0 if getattr(entries[-1], "checkpoint", False) else 1
+        for i in range(len(entries) - 2, -1, -1):
+            if getattr(entries[i + 1], "checkpoint", False):
+                steps += 1
+            n = node(entries[i])
+            if n is None or n.filename != fn or n.linenumber > line:
+                continue
+            nx = node(entries[i + 1])
+            if nx is None or nx.filename != fn or nx.linenumber > line:
+                return steps if steps > 0 else None
+        return None
+
+    def goto_line(fn, line):
+        """게임을 원고 fn의 line번째 줄로 옮깁니다. 옮기면 렌파이 예외(되감기, 다시 시작)가 올라갑니다."""
+        if not store.config.developer:
+            msg("줄로 옮기기는 개발 모드에서만 됩니다.")
+            return False
+        fn = _game_file(fn)
+        try:
+            line = int(line)
+        except Exception:
+            return False
+        n = _node_at(fn, line)
+        if n is None:
+            msg("{} {}번째 줄 앞에 옮겨 갈 문장이 없습니다.".format(fn[5:], line))
+            return False
+        steps = _rollback_steps(fn, n.linenumber)
+        if steps == 0:
+            msg("이미 {} {}번째 줄에 있습니다.".format(fn[5:], n.linenumber))
+            return False
+        if steps is not None and steps <= store.renpy.game.log.rollback_limit:
+            msg("{} {}번째 줄로 되감았습니다.".format(fn[5:], n.linenumber))
+            store.renpy.rollback(force=True, checkpoints=steps, defer=True, abnormal=True)
+            return True
+        ## 처음 가는 줄: warp. 편집기는 다시 시작한 뒤 같은 탭으로 다시 엶
+        msg("{} {}번째 줄로 갔습니다 (게임을 다시 시작해서 그 줄까지 건너뜀).".format(fn[5:], n.linenumber))
+        was_open = state.open
+        remember_session()
+        r = store.renpy.session.pop("ui_editor", None)
+        if was_open and r is not None:
+            state.open = False
+            state.popup = None
+            _set_editing(False)
+            state.reopen = r
+        store.renpy.warp_to_line("{}:{}".format(fn, n.linenumber))
+        return True
+
     def _live_cmd(c):
         """명령 하나를 처리합니다. 화면을 다시 그려야 하면 True."""
         cmd = c.get("cmd")
@@ -663,6 +777,9 @@ init -8 python in ui_editor:
                     store.renpy.run(store.Start())
                 else:
                     msg("게임 시작은 타이틀 화면에서 할 수 있습니다.")
+            elif where == "line":
+                ## 원고의 그 줄로 (3.20): {"cmd": "goto", "where": "line", "file": "game/script.rpy", "line": 22}
+                goto_line(c.get("file"), c.get("line"))
             return True
 
         if cmd and cmd.startswith("title."):
@@ -733,6 +850,8 @@ init -8 python in ui_editor:
                 if isinstance(e, _control_exceptions()):
                     raise
                 _live_send(dict(type="error", text="{}: {}".format(c.get("cmd"), e)))
+            ## 되감기(RollbackException)는 BaseException이라 그대로 올라감. 남은 명령은 다음에
+            ## (goto line 뒤에 온 명령은 되감은 뒤 처리되도록 inbox에 남아 있음)
 
         ## 앱에서 들어본 대사 소리는 1.5초 뒤에 멈춤 (게임 안 패널이 숨어 있어 그 타이머가 돌지 않음)
         if live.listen_until is not None and time.time() > live.listen_until:

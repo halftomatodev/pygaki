@@ -676,6 +676,8 @@ fieldset.plain:disabled { opacity: 0.4; }
 .sp-script { margin: 0; font-family: var(--mono); font-size: 12.5px; line-height: 1.55; overflow-x: auto; }
 .sp-script > div { white-space: pre; padding: 0 6px; border-radius: 4px; }
 .sp-script > div.cur { background: var(--accent-soft); }
+.sp-script > div.go { cursor: pointer; }
+.sp-script > div.go:hover { background: var(--hover, rgba(127, 127, 127, 0.12)); }
 .sp-script .ln { display: inline-block; width: 40px; color: var(--muted); user-select: none; }
 .sp-help { max-width: 560px; }
 .sp-help li { margin-bottom: 6px; }

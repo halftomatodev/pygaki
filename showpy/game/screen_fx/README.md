@@ -23,12 +23,20 @@
 
 `ui_kit` 플러그인이 같이 있으면 그 편집기(개발 모드에서 Shift+M)에 **"화면 효과", "타이틀 일렁임" 탭**이 생기고, **대사 탭에서 "이 대사부터 이 효과", 덮개 켬/끔, 덮개 휘어짐을 골라 원고에 바로 저장**할 수 있습니다. 대사가 아닌 줄(show, scene, with, $ 줄 등)에서 바꾸고 싶으면 **"화면 효과" 탭의 "줄에 넣기"** 로 그 줄 바로 위에 `$ screen_fx.use(…)` 줄을 넣습니다(4.1). `ui_kit`이 없어도 효과는 설정 파일과 스크립트로 그대로 동작합니다.
 
-버전 4.3 · 렌파이 8.5.3에서 만들고 테스트했습니다.
+버전 4.4 · 렌파이 8.5.3에서 만들고 테스트했습니다.
 
 VHS 셰이더 원본: [VHS and CRT monitor effect](https://godotshaders.com/shader/vhs-and-crt-monitor-effect/) (Godot Shaders, CC0). 렌파이용으로 옮기면서 채도·대비·전체 세기를 바꿀 수 있게 추가했습니다.
 레트로 터미널은 [cool-retro-term](https://github.com/Swordfish90/cool-retro-term)의 모습과 설정 목록을 참고해 새로 썼습니다(코드는 가져오지 않음).
 게임보이는 [Retro dither](https://godotshaders.com/shader/retro-dither/) (tcmug, CC0)의 4×4 디더링 무늬와 [Gameboy Classic Shader](https://github.com/HarlequinVG/shaders/tree/master/gameboy_shader) (Harlequin, GPL v3)의 LCD 모습(점 격자·점 그림자)을 참고해 새로 썼습니다(코드는 가져오지 않음).
 ASCII 효과는 [ASCII shader](https://godotshaders.com/shader/ascii-shader/) (Daniel Bologna, Acerola의 아이디어, MIT)를 참고해 렌파이용으로 새로 썼습니다. 글꼴은 [Neo둥근모](https://neodgm.dalgona.dev/) (SIL OFL 1.1)입니다.
+
+### 4.4에서 바뀐 점
+
+- 편집기 "화면 효과" 탭(앱 "인게임 화면 셰이더")의 페이지 고르기 줄(셰이더 고르기 / 아스키 / VHS / 단말기 / 게임보이 / 처음 상태, 전환)을 없앴습니다. 탭을 열면 바로 1번, 2번이고, **고른 효과의 세부 속성(글자 빼기, 기본 설정/프리셋, 막대)이 그 줄 바로 아래**에 나옵니다. 줄 끝 "세부 속성 접기/펴기".
+- "처음 상태, 전환"은 맨 아래 [처음 상태, 전환 펴기]로.
+- **줄 목록에서 줄을 누르면 게임도 그 줄로** 갑니다(지나온 줄이면 되감기, 아니면 게임을 다시 시작해서 그 줄까지 건너뜀. `ui_kit` 3.20의 `goto_line`). 줄 번호 칸도 같음. [ ] 키는 고르기만 합니다.
+- "타이틀 셰이더", "게임 내 메뉴 셰이더" 탭에도 1번, 2번 아래 세부 속성(글자 빼기 없음, 화면 전체라서). 효과 값은 인게임과 같이 씁니다(효과마다 하나). 저장은 그대로 `*_layout.rpy`.
+- 편집 중 효과 값: 화면 효과, 타이틀/메뉴 셰이더 탭을 쓰는 동안은 모든 효과가 편집한 값과 고른 프리셋으로 보입니다.
 
 ### 4.3에서 바뀐 점
 
