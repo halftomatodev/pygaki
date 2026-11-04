@@ -11,7 +11,7 @@
 - **새 시험 프로젝트**: `F:\Dropbox\1_DEV\RENPY\pygaki_sample` (묶음 템플릿 그대로 + 커서·CTC 샘플 + 시험용 짧은 `script.rpy`). 사용자가 "예전 것이 얽혀 있으니 새 샘플로"라고 함. 시험은 여기서
 - **다음 대화는 이것부터 물어보기**: 5장 맨 위 4.22 줄과 4.21 줄. 그 아래 4.20~4.17도 아직 사용자 확인 전
 - **공개용 구글 문서**: 4.22 기준으로 고침(세션 6 끝, 수정안 `F:\SHOWPY\구글문서_수정안.md`). 고치는 방법은 6장
-- **그다음 할 일**: 사용자가 확인하면 정식 판 v1.1(태그) (6장)
+- **정식 판 v1.1 공개함** (2026-11-04, https://github.com/halftomatodev/pygaki/releases/tag/v1.1 = showpy 4.22 + pygaki 앱). 묶음 zip을 받아 구성과 안의 앱 켜기는 확인함. 런처 버튼 눌러 보기와 덧붙임 zip은 사람이 확인할 것(5장 맨 위)
 - **pykaki_sample에 사용자가 저장한 것**: `game/screen_fx/vhs_crt_layout.rpy`, `game/splash/splash_layout.rpy`. 지우지 말 것
 
 ## 1. pygaki 한눈에
@@ -26,7 +26,7 @@
 | 무엇 | 자리 |
 |---|---|
 | 저장소 | https://github.com/halftomatodev/pygaki (`main`) |
-| 배포 파일 (묶음, 덧붙임 zip) | https://github.com/halftomatodev/pygaki/releases (v1.0, showpy 4.13) |
+| 배포 파일 (묶음, 덧붙임 zip) | https://github.com/halftomatodev/pygaki/releases (최신 v1.1 = showpy 4.22, v1.0 = 4.13) |
 | 웹 버전 PyKaki | https://halftomatodev.github.io/pygaki/ (`main`에 push하면 자동 배포) |
 | 공개용 사용 안내 (구글 문서, showpy 4.22 기준) | https://docs.google.com/document/d/10kmDFgiQ9JpbgIY6Q7vejf3EjMC06rCJCxjVSeukdes/edit |
 | 구글 문서 수정안 | `F:\SHOWPY\구글문서_수정안.md` (4.22, 반영함), `구글문서_수정안_4.13_반영함.md` (지난번) |
@@ -152,6 +152,7 @@ python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app 'F:\SHOWPY\
 
 사용자는 `pygaki-dev` 묶음의 런처에서 프로젝트를 [Launch Project]로 켜고 [pygaki로 편집] → [GUI 편집]으로 확인합니다.
 
+- [ ] **v1.1 배포 파일**: Releases의 묶음 zip을 탐색기로 풀고 런처 [pygaki로 새 프로젝트] → [pygaki로 편집], 덧붙임 zip을 렌파이 SDK에 넣어 보기
 - [ ] **4.22**: 런처 [pygaki로 편집] [pygaki로 새 프로젝트](런처 껐다 켜기), 앱 제목 pygaki와 [대본 편집] [GUI 편집], 예전 PyKaki의 최근 파일·설정이 그대로인지, 원고 칸 스크롤과 [지금 줄로], 셰이더가 바뀌는 줄의 전환 고르기와 [두 자리로 바꾸기] → 저장, 커서 칸 "커서와 셰이더"(소프트웨어 커서를 켜고 셰이더가 있는 장면에서 세 가지 차이), 커서·CTC 샘플 그림과 바둑판 칸, 대사 탭 안내 줄, **PyKaki 원고에서 [여기에서부터 적용] → 저장 → 대본에 받아 적힘**
 - [ ] **4.21**: 셰이더 칸 1번/2번 아래 세부 속성, 막대가 바로 화면에, 줄을 누르면 게임이 그 줄로(되감기/warp), warp 뒤 편집기 다시 열림, 타이틀 셰이더 칸 세부 속성, 세부 속성 바꾸고 [저장] → `ascii_layout.rpy` 같은 파일 (저장은 시험에서 안 해 봄)
 - [ ] **4.20**: 타이틀 검은 배경, 배경 그림/webm, 제목/부제와 글자 효과, **회전 손잡이를 마우스로 끌기(자동 시험으로는 못 함)**, ESC 메뉴 투명 배경, "└" 셰이더 두 칸
@@ -167,7 +168,8 @@ python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app 'F:\SHOWPY\
 - **공개용 구글 문서**: 판이 바뀌면 수정안 파일을 만들고 반영 (4.22까지 반영함)
   - 문서는 공개 보기라 `https://docs.google.com/document/d/10kmDFgiQ9JpbgIY6Q7vejf3EjMC06rCJCxjVSeukdes/export?format=md`를 `curl`로 받아 읽음(로그인 없이). 고치기 전과 뒤에 받아서 `diff`
   - 고치기는 사용자 크롬(Claude in Chrome 확장, 로그인됨). 한 문장은 찾기 및 바꾸기(Ctrl+H, 칸을 세 번 눌러 고르고 입력 → [모두 바꾸기]). 여러 줄 절은 Ctrl+F로 찾고 Esc(찾은 글이 골라진 채) → Home/End/Enter로 자리를 만든 뒤, 페이지 JS로 `.docs-texteventtarget-iframe` 안의 편집 칸에 `ClipboardEvent('paste', {clipboardData})`(text/html)를 보냄. 제목이 굵게 들어오면 줄을 고르고 Ctrl+\ (서식 지우기). 끝에 생긴 빈 줄은 BackSpace
-- **정식 판 v1.1**: 사용자가 5장 4.22, 4.21을 확인한 뒤 `git tag v1.1 && git push origin v1.1` → Actions "배포 파일"이 Releases 초안(앱은 이제 `pygaki-win`, 묶음 안 `pygaki\app\pygaki.exe`) → 확인 → 공개. 앱은 서명이 없어 윈도우가 처음에 경고함
+- **다음 정식 판(v1.2 등)**: v1.1처럼. `git tag v1.2 && git push origin v1.2` → Actions "배포 파일"이 Releases 초안(앱 `pygaki-win`, 묶음 안 `pygaki\app\pygaki.exe`) → `gh release download`로 묶음 zip을 받아 구성 확인, 묶음 안 `pygaki.exe`를 Playwright `executablePath`로 켜 보기 → 안내 글에 "바뀐 점" 더하기(`gh release edit --notes-file`) → 사용자에게 물은 뒤 `gh release edit v1.2 --draft=false --latest`. 앱은 서명이 없어 윈도우가 처음에 경고함
+- v1.1에서 남은 것: Actions가 만든 템플릿의 `script.rpy`가 렌파이 영어 기본 대본(`scene bg room`, `show eileen happy`, Lint 경고 2줄, 게임은 빈 자리 그림으로 돎, v1.0도 같음). 로컬에서 만든 묶음은 한국어 대본. 고치려면 `make_bundle.py`가 템플릿 `script.rpy`를 직접 써 넣게
 - 다듬을 것(사용자가 말하면): 셰이더가 바뀌는 줄의 두 자리는 파일을 위에서부터 읽은 대강의 값(분기, jump, 다른 파일은 안 봄). warp는 그 사이 변수(선택지 결과 등)를 따라 하지 않음(셰이더, 커서는 맞춤). 앱 미러에서 세모 없는 줄의 왼쪽 칸이 비어 조금 어긋남, 세부 속성 들여쓰기가 안 보임. 게임보이처럼 층마다 씌우는 효과는 VHS보다 먼저 그려짐
 - 스플래시 글 내용(제목, 본문, 조작 방법) 고치기, 페이지 더하기/지우기 (번역 문자열이라 저장 방식을 먼저 정해야 함)
 - 앱 창을 게임 창 옆에 저절로 붙이기
