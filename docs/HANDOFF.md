@@ -5,8 +5,9 @@
 
 ## 0. 지금 어디까지 (먼저 읽기)
 
-- **최신 판**: showpy 4.18 (`ui_kit` 3.17, `splash` 1.2). PyKaki 앱 [showpy] 화면에서 스플래시까지 모든 칸을 고침("게임 안" 표시 없음). 타이틀/ESC/커서는 앱 전용 칸, 나머지는 게임 안 패널을 통째로 옮겨 그림. 4.17까지 `main`에 push됨. 4.18이 올라갔는지는 `git log`로 확인
-- **사용자가 확인하는 곳**: `F:\SHOWPY\pygaki-dev-renpy-8.5.3\renpy.exe` (로컬에서 만든 시험용 묶음. 4.18 템플릿 ui_kit/screen_fx/splash 파일과 새 앱으로 바꿔 넣음). 확인 순서는 3장 "확인용 묶음"
+- **최신 판**: showpy 4.19 (`ui_kit` 3.18, `splash` 1.2). PyKaki 앱 [showpy] 화면에서 스플래시까지 모든 칸을 고침("게임 안" 표시 없음). 타이틀/ESC/커서는 앱 전용 칸, 나머지는 게임 안 패널을 통째로 옮겨 그림. 4.18까지 `main`에 push됨. 4.19가 올라갔는지는 `git log`로 확인
+- **사용자가 확인하는 곳**: `F:\SHOWPY\pygaki-dev-renpy-8.5.3\renpy.exe` (로컬에서 만든 시험용 묶음. 4.19 템플릿 ui_kit/screen_fx/splash 파일과 새 앱으로 바꿔 넣음). 확인 순서는 3장 "확인용 묶음"
+- **pykaki_sample에 사용자가 저장한 것**: `screen_fx/vhs_crt_layout.rpy`, `splash/splash_layout.rpy` (2026-11-04 17:04~05, 사용자가 확인하며 저장). 시험 뒤 지우지 말 것
 - **사용자가 아직 직접 안 본 것**: 5장 맨 위 두 줄 (4.17 셰이더, 대사, 선택지, 그림 칸 / 4.18 스플래시 칸). 4.16 커서/대사 소리 칸, 4.15 앱 연결, 4.14 게임 메뉴 화면은 2026-11-04에 사용자가 확인함(괜찮음)
 - **다음 큰 일**: 앱 칸 옮기기는 끝. 사용자 확인 뒤 정식 판(v1.1)과 공개용 구글 문서 (6장)
 - **미뤄 둔 것**: 공개용 구글 문서(아직 4.13 기준)는 앱 칸을 몇 개 더 옮긴 뒤 한 번에. 정식 판(v1.1 태그)도 사용자가 4.15를 확인한 뒤
@@ -29,8 +30,8 @@
 | 렌파이 SDK | `F:\SHOWPY\renpy-8.5.3-sdk` |
 | PyKaki 앱 빌드(받아 둔 것) | `F:\SHOWPY\PyKaki-win` (v1.0 때 받은 예전 판. 최신은 Actions "PyKaki 앱"의 `PyKaki-win`이나 로컬 빌드 `pykaki/app/out/win-unpacked`) |
 | 렌파이 프로젝트 폴더 | `F:\Dropbox\1_DEV\RENPY` |
-| 시험 프로젝트 (showpy 4.18 들어 있음) | `fx_test_25`, `pykaki_sample` |
-| 최신 시험용 묶음 (2026-11-04, showpy 4.18 + 새 앱) | `F:\SHOWPY\pygaki-dev-renpy-8.5.3\renpy.exe` (덧붙임은 `pygaki-dev-addon`). v1.0 폴더는 4.13 그대로 |
+| 시험 프로젝트 (showpy 4.19 들어 있음) | `fx_test_25`, `pykaki_sample` |
+| 최신 시험용 묶음 (2026-11-04, showpy 4.19 + 새 앱) | `F:\SHOWPY\pygaki-dev-renpy-8.5.3\renpy.exe` (덧붙임은 `pygaki-dev-addon`). v1.0 폴더는 4.13 그대로 |
 | 사용자의 진짜 게임 (말할 때만 건드림) | `horror`, `test_plugin` |
 
 예전 `pykaki`, `showpy` 저장소는 "pygaki로 옮겼어요" 안내를 넣고 보관(archive)했습니다(두 저장소의 기록은 모두 이 저장소에 있음). 예전 로컬 폴더 `F:\SHOWPY\pykaki`, `F:\SHOWPY\showpy`는 2026-11-04에 지웠습니다. 지나온 기록과 주요 결정은 [HISTORY.md](HISTORY.md)에 있습니다.
@@ -153,6 +154,11 @@ python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app 'F:\SHOWPY\
 
 ### 2026-11-04 (로컬 세션 4)
 
+000. (마지막) showpy 4.19 (`ui_kit` 3.18): "PyKaki가 켜져 있으면 게임 화면이 가끔 클릭/입력이 안 먹음" (사용자 제보)
+   - 원인: 앱에서 칸을 고르면 게임 안 편집기가 패널 없이 열리는데, 편집기(`EditorInput`)는 열려 있는 동안 마우스 클릭과 키를 전부 가져감(끌어서 옮기기용, 원래 설계). 게임 창에 표시가 없어서 몰랐음. 앱의 고르기 창이 열려 있으면 Esc 말고 전부 막힘
+   - 고침: 게임 화면 위 가운데에 "편집 중: <탭> (PyKaki 앱) | 클릭과 키는 편집기로 가요 | Esc로 닫기" 띠(`ui_editor_live_mirror`, 글자만이라 입력은 안 막음). 고르기 창이 열려 있으면 그 안내로. 앱은 커서/대사 소리 칸에서 편집기를 열지 않고(열려 있으면 닫음), [대본] 화면으로 가면 닫고, 편집 중이면 오른쪽 칸 위에 알림 + [편집기 닫기]
+   - 함정: 편집기 글꼴에 가운뎃점(·)이 없어서 네모로 나옴. 게임에 띄우는 글에는 `|` 같은 것을 씀
+   - 확인: 게임에서 화면 찍기(시험 파일 `zz_shot.rpy`로 `renpy.screenshot`, 끝나고 지움)로 띠 두 가지, 진짜 앱으로 열고 닫는 흐름 다섯 가지, smoke, Lint
 00. (맨 뒤에) showpy 4.18 (`splash` 1.2, `ui_kit` 3.17): 스플래시 편집 탭
    - `splash/editor/editor_splash.rpy`(ui_kit이 있을 때만 등록, 없으면 아무것도 안 함). 페이지 고르기, 바탕색, 바탕·로고 그림(패널 안 격자로 고름), 로고 확대, 제목·본문 색·글꼴·크기·줄 간격, 위치, 넘어가는 때, 시간, 클릭으로 넘기기, 처음 한 번만, [이 페이지 보기](`ShowPage`), [처음부터 보기](`preview`)
    - 엔진: `merged()` = 엔진 기본 → `splash.default` → 페이지 → `splash.layout`(`splash_layout.rpy`) → 편집 중인 값(`state.edits`). 저장한 값은 `state.saved`. `check()`도 layout까지 봄
