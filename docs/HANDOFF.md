@@ -21,7 +21,8 @@
 | 렌파이 SDK | `F:\SHOWPY\renpy-8.5.3-sdk` |
 | PyKaki 앱 빌드(받아 둔 것) | `F:\SHOWPY\PyKaki-win` (Actions "PyKaki 앱"의 `PyKaki-win`) |
 | 렌파이 프로젝트 폴더 | `F:\Dropbox\1_DEV\RENPY` |
-| 시험 프로젝트 (showpy 4.13 들어 있음) | `fx_test_25`, `pykaki_sample` |
+| 시험 프로젝트 (showpy 4.15 들어 있음) | `fx_test_25`, `pykaki_sample` |
+| 최신 시험용 묶음 (2026-11-04, showpy 4.15 + 새 앱) | `F:\SHOWPY\pygaki-dev-renpy-8.5.3\renpy.exe` (덧붙임은 `pygaki-dev-addon`). v1.0 폴더는 4.13 그대로 |
 | 사용자의 진짜 게임 (말할 때만 건드림) | `horror`, `test_plugin` |
 
 예전 `pykaki`, `showpy` 저장소는 "pygaki로 옮겼어요" 안내를 넣고 보관(archive)했습니다(두 저장소의 기록은 모두 이 저장소에 있음). 예전 로컬 폴더 `F:\SHOWPY\pykaki`, `F:\SHOWPY\showpy`는 2026-11-04에 지웠습니다. 지나온 기록과 주요 결정은 [HISTORY.md](HISTORY.md)에 있습니다.
@@ -157,3 +158,6 @@ python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app 'F:\SHOWPY\
 - 앱은 Electron 33, electron-builder `--win dir`. Actions "PyKaki 앱"은 `pykaki/**`나 `text_effects.glsl`이 바뀌면 돕니다.
 - 크롬 확장(Claude in Chrome)으로 구글 문서를 고칠 때: 단축키 창(Ctrl+H, Ctrl+F)이 안 열렸는데 글을 치면 본문에 들어갑니다. 창이 열린 것을 화면으로 확인한 뒤 칩니다. 한글이 가끔 깨지고("둬도"→"둠도"), 따옴표가 둥근 따옴표로 바뀝니다. 끝나면 export로 받아 diff로 확인합니다. Ctrl+Alt+숫자(제목 스타일)는 안 먹어서 툴바의 스타일 목록을 씁니다.
 - 내장 브라우저는 구글에 로그인되어 있지 않습니다. 사용자의 크롬은 로그인되어 있습니다.
+- 로컬에서 `npm run dist`(앱 빌드)를 하면 electron-builder가 `winCodeSign`을 풀다 심볼릭 링크 권한 오류가 남. 시험용은 `npx electron-builder --win dir -c.win.signAndEditExecutable=false`로 빌드(실행 파일 아이콘, 버전 정보만 빠짐). 공식 빌드는 Actions가 함
+- 템플릿 프로젝트를 Lint하면 `.rpyc`, `game/cache`, `game/saves`가 생김. 묶음 템플릿에서는 지움
+- 기본 SDK 런처(`renpy-8.5.3-sdk`)에는 pygaki 버튼이 없음(묶음 사본에만 넣음). 원본 SDK는 묶음 재료라 손대지 않음
