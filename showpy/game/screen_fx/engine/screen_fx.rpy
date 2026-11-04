@@ -3,13 +3,15 @@
 ##
 ## 이 파일은 고칠 필요가 없습니다. 설정은 플러그인 폴더의 *_config.rpy에서 하세요.
 ##
-## 버전 4.2 · Ren'Py 8.5.3에서 제작·테스트
+## 버전 4.3 · Ren'Py 8.5.3에서 제작·테스트
 ## 설치·설정 방법: 플러그인 폴더의 README.md
 ##
 ## 하는 일
-##   1. 화면은 셰이더 두 개를 겹쳐 그립니다.
-##        기본 효과: 없음 / ASCII / 레트로 터미널 / 게임보이 … 중 하나 (screen_fx.base, 배포 설정은 "none")
-##        덮개:      VHS 하나. 켬 / 끔만 고릅니다 (screen_fx.overlay, 배포 설정은 켬)
+##   1. 화면은 셰이더 두 자리를 겹쳐 그립니다. (4.3부터 두 자리 모두 기본/아스키/VHS/단말기/게임보이 중 하나)
+##        1번 (기본 효과): screen_fx.base, 배포 설정은 "none"
+##        2번 (덮개):      screen_fx.overlay, True는 VHS
+##          $ screen_fx.shaders("ascii", "vhs_crt")     # 1번 아스키 + 2번 VHS
+##      타이틀과 게임 내 메뉴는 따로 고른 두 자리(screen_fx.title_shaders, menu_shaders)를 씁니다.
 ##      처음에는 기본 효과와 덮개가 설정대로 켜져 있고,
 ##          $ screen_fx.use("ascii")
 ##      를 만나면 그 효과로 바뀌어 $ screen_fx.clear()를 만날 때까지 유지됩니다.
@@ -40,7 +42,7 @@ init -110 python in screen_fx:
 
     import store
 
-    VERSION = "4.2"
+    VERSION = "4.3"
 
     ## ── 플러그인 폴더 위치 ──
     ## 이 파일은 <플러그인 폴더>/engine/screen_fx.rpy 에 있습니다.
@@ -711,6 +713,8 @@ init -110 python in screen_fx:
         split_text_layers=True,
         editor_preview=True,
         cursor="effect",
+        title_shaders=("none", "none"),
+        menu_shaders=("none", "none"),
         )
 
     TV_DEFAULTS = {
@@ -771,17 +775,15 @@ init -110 python in screen_fx:
         return fx is not None and fx.overlay_only
 
     def base_effect():
-        """기본 효과 이름 (screen_fx.base). 없는 이름이나 덮개 전용(VHS)이면 "none"."""
+        """처음 1번 셰이더 (screen_fx.base). 없는 이름이면 "none". (4.3부터 VHS도 1번에 올 수 있음)"""
         b = cfg("base")
-        if b in EFFECTS and not overlay_only(b):
+        if b in EFFECTS:
             return b
         return NONE
 
     def resolve(name):
         if name is None or name == DEFAULT:
             return base_effect()
-        if overlay_only(name):
-            return NONE
         return name
 
     def current_effect():
@@ -793,20 +795,18 @@ init -110 python in screen_fx:
         예전 값도 읽습니다: "vhs_crt" → True, None·"none" → False."""
         if raw == DEFAULT:
             return DEFAULT
-        if raw is True or raw == OVERLAY:
+        if raw is True:
             return True
         if raw in (None, False, NONE):
             return False
         if isinstance(raw, str) and raw in EFFECTS:
-            ## 예전에는 다른 효과도 덮개로 쓸 수 있었음. 이제 덮개는 VHS 하나라 "켬"으로 읽음
-            return True
+            ## 4.3: 2번 셰이더(덮개)에 VHS 말고 다른 효과도 올 수 있음
+            return raw
         return bool(raw)
 
     def _resolve_overlay(raw, effect=None):
-        """덮개 값 → "vhs_crt"(켬) 또는 None(끔).
-        설정대로(DEFAULT)면 screen_fx.overlay가 켜져 있고, 그 효과가 덮개를 받을 때만 켬."""
-        if OVERLAY not in EFFECTS:
-            return None
+        """2번 셰이더(덮개) 값 → 효과 이름 또는 None(없음).
+        True는 VHS. 설정대로(DEFAULT)면 screen_fx.overlay를 따르고, 그 1번 효과가 덮개를 받을 때만 씌움."""
         f = overlay_flag(raw)
         if f == DEFAULT:
             f = overlay_flag(cfg("overlay"))
@@ -815,7 +815,11 @@ init -110 python in screen_fx:
             fx = EFFECTS.get(effect)
             if f and fx is not None and not fx.overlay_default():
                 f = False
-        return OVERLAY if f else None
+        if f is True:
+            return OVERLAY if OVERLAY in EFFECTS else None
+        if isinstance(f, str) and f in EFFECTS:
+            return f
+        return None
 
     def current_overlay():
         """지금 위에 덮인 효과 이름 ("vhs_crt"). 덮개가 꺼져 있으면 None."""
@@ -894,8 +898,82 @@ init -110 python in screen_fx:
         if name in (None, NONE, DEFAULT, False, True) or name == OVERLAY:
             return
         if isinstance(name, str) and name in EFFECTS:
-            raise Exception("screen_fx: {}에 {!r}를 쓸 수 없습니다. 4.0부터 덮개는 VHS 하나라 True(켬) / False(끔)만 씁니다.".format(where, name))
-        raise Exception("screen_fx: {} {!r}는 쓸 수 없습니다. 덮개는 True(켬) / False(끔) / \"default\"(설정대로)만 씁니다.".format(where, name))
+            return
+        raise Exception("screen_fx: {} {!r}는 쓸 수 없습니다. 2번 셰이더(덮개)는 효과 이름(\"vhs_crt\", \"ascii\" …), True(VHS) / False(없음) / \"default\"(설정대로)만 씁니다.".format(where, name))
+
+    ## ── 셰이더 두 자리 (4.3) ──
+    ## 1번 = 기본 효과 자리(current), 2번 = 덮개 자리(cur_overlay). 두 자리 모두 아래 중에서 고릅니다.
+    ##   "none"(기본, 아무것도 안 함) / "ascii" / "vhs_crt" / "retro_term"(단말기) / "gameboy" / 새로 넣은 효과
+
+    SLOT_ORDER = ("ascii", "vhs_crt", "retro_term", "gameboy")
+    SLOT_NAMES = { NONE: "기본", "ascii": "아스키", "vhs_crt": "VHS", "retro_term": "단말기", "gameboy": "게임보이" }
+
+    def slot_label(name):
+        if name in SLOT_NAMES:
+            return SLOT_NAMES[name]
+        fx = EFFECTS.get(name)
+        return fx.label if fx is not None else str(name)
+
+    def slot_choices():
+        """셰이더 자리에서 고를 수 있는 (이름, 표시) 목록. 맨 앞은 "기본"(아무것도 안 함)."""
+        names = [ i for i in SLOT_ORDER if i in EFFECTS ] + [ i for i in ORDER if i not in SLOT_ORDER ]
+        return [ (NONE, slot_label(NONE)) ] + [ (i, slot_label(i)) for i in names ]
+
+    def norm_slots(v):
+        """(1번, 2번) → 효과 이름 두 개. 없는 이름은 "none"."""
+        try:
+            a, b = v
+        except Exception:
+            a, b = NONE, NONE
+        a = a if a in EFFECTS else NONE
+        b = b if b in EFFECTS else NONE
+        return (a, b)
+
+    def current_slots():
+        """게임의 지금 셰이더 두 자리 (1번, 2번)."""
+        return (current_effect(), current_overlay() or NONE)
+
+    def shaders(first=NONE, second=NONE, transition=DEFAULT, duration=None, wait=None):
+        """
+        인게임 셰이더 두 자리를 한 번에 정합니다. 다음에 바꿀 때까지 유지되고, 세이브·되감기에 저장됩니다. (4.3)
+            $ screen_fx.shaders("ascii", "vhs_crt")     # 1번 아스키 + 2번 VHS
+            $ screen_fx.shaders("gameboy")              # 1번 게임보이, 2번 없음
+            $ screen_fx.shaders("none", "none")         # 전부 셰이더 적용 취소 (아무것도 안 함)
+        이름: "none"(기본) "ascii"(아스키) "vhs_crt"(VHS) "retro_term"(단말기) "gameboy"(게임보이)
+        """
+        first = first or NONE
+        second = second or NONE
+        _check_name(first)
+        _check_overlay(second, "shaders()의 2번")
+        use(first, transition=transition, duration=duration, wait=wait,
+            overlay=(False if second in (NONE, None, False) else second))
+
+    ## ── 타이틀, 게임 내 메뉴 셰이더 (4.3) ──
+    ## 타이틀(과 타이틀에서 연 화면), 게임 중 ESC 메뉴(와 거기서 연 화면)는 인게임 셰이더 대신
+    ## 따로 고른 두 자리(screen_fx.title_shaders, screen_fx.menu_shaders)를 화면 전체에 씌웁니다.
+
+    MENU_KEYS = { "title": "title_shaders", "pause": "menu_shaders" }
+    MENU_TABS = { "title_fx": "title", "pause_fx": "pause" }
+
+    def menu_context():
+        """"title" 타이틀 쪽 / "pause" 게임 중 메뉴 / None 게임 화면 (스플래시도 None)."""
+        if in_splash():
+            return None
+        if store.main_menu:
+            return "title"
+        if getattr(store, "_menu", False):
+            return "pause"
+        return None
+
+    def menu_slots(ctx):
+        """그 메뉴의 셰이더 두 자리. 편집기에서 그 탭을 고치고 있으면 고친 값."""
+        key = MENU_KEYS[ctx]
+        if MENU_TABS.get(editor_tab()) == ctx and key in cedit.edits:
+            return norm_slots(cedit.edits[key])
+        lay = _lay()
+        if key in lay:
+            return norm_slots(lay[key])
+        return norm_slots(globals().get(key, DEFAULTS[key]))
 
     def _check_target(t, where="target"):
         if t == DEFAULT or t in TARGETS:
@@ -1100,8 +1178,8 @@ init -110 python in screen_fx:
         _check_overlay(overlay)
         stored = _store_exclude(exclude, target)
 
-        ## 예전 이름: use("vhs_crt") = 기본 효과 없음 + 덮개 켬
-        if overlay_only(effect):
+        ## 예전 이름: use("vhs_crt") = 기본 효과 없음 + 덮개 켬 (2번을 적으면 1번 VHS로 읽음, 4.3)
+        if overlay_only(effect) and overlay == DEFAULT:
             effect = NONE
             if overlay == DEFAULT:
                 overlay = True
@@ -1453,20 +1531,42 @@ init -110 python in screen_fx:
 
     def _paused(tab):
         """편집기의 다른 탭을 쓰는 중이고 편집 중 효과 보기가 꺼져 있어서, 효과를 잠시 끌 때 True."""
-        if tab is None or tab == TAB_ID:
+        if tab is None or tab == TAB_ID or tab in MENU_TABS:
             return False
         return not editor_preview_on()
 
     def _effect_obj(name, editor):
+        ## 4.3: 어디에 씌울지는 자리(인게임 / 타이틀 / 게임 내 메뉴)로 정하므로 scope는 보지 않음
         fx = EFFECTS.get(name)
         if fx is None or not fx.is_enabled():
             return None
         if not editor:
             if not fx.player_enabled():
                 return None
-            if fx.scoped and not (fx.conf("auto", True) and fx.in_scope()):
-                return None
         return fx
+
+    def _fill(rv, name, ovl, ex, editor, whole=False):
+        """1번(name), 2번(ovl) 효과를 rv에 채웁니다. whole: 글자 빼기 없이 화면 전체에 (타이틀, 메뉴)."""
+        rv.fx = _effect_obj(name, editor) if name not in (None, NONE) else None
+        rv.ex = () if whole else ex
+        if ovl is not None and ovl != NONE and ovl != name:
+            rv.ovl = _effect_obj(ovl, editor)
+            if rv.ovl is None or whole:
+                rv.ovl_ex = ()
+            elif rv.fx is None:
+                ## 1번이 없으면 2번이 혼자 화면을 맡음: 고른 글자 빼기, 없으면 그 효과의 설정
+                rv.ovl_ex = ex if ex else _split(rv.ovl.exclude())
+            elif not ex:
+                ## 1번이 화면 전체(아무것도 안 뺌)면 2번도 화면 전체 (2번이 늘 위에 오도록)
+                rv.ovl_ex = ()
+            else:
+                rv.ovl_ex = _split(rv.ovl.exclude())
+        return rv
+
+    def _slots_shown(slots, editor, whole):
+        a, b = slots
+        ex = () if whole else _split(_resolve_exclude(a, DEFAULT))
+        return _fill(_Shown(), a, b, ex, editor, whole)
 
     class _Shown(store.python_object):
         """지금 화면에 보일 것 (한 프레임)."""
@@ -1497,8 +1597,21 @@ init -110 python in screen_fx:
                     rv.fx = fx
                     rv.ex = _split(fx.exclude())
                 return rv
+            ## "셰이더 고르기" 페이지: 고른 두 자리를 미리 보여줌 (4.3)
+            pv = getattr(fx_tab(), "preview_slots", None)
+            pv = pv() if callable(pv) else None
+            if pv is not None:
+                return _slots_shown(pv, True, False)
+        elif tab in MENU_TABS:
+            ## 타이틀 셰이더 / 게임 내 메뉴 셰이더 탭: 그 두 자리를 보여줌
+            return _slots_shown(menu_slots(MENU_TABS[tab]), True, True)
         elif tab is None and store.persistent.screen_fx_off:
             return _NOTHING
+
+        ## 타이틀, 게임 내 메뉴는 따로 고른 두 자리 (4.3)
+        ctx = menu_context()
+        if ctx is not None:
+            return _slots_shown(menu_slots(ctx), tab is not None, True)
 
         a = rt.anim
         if a is not None and (a.done() or (not a.preview and a.new != state_now())):
@@ -1514,25 +1627,9 @@ init -110 python in screen_fx:
         ex = _split(ex)
 
         rv.anim = a
-        rv.fx = _effect_obj(name, editor)
         rv.mix = mix
-        rv.ex = ex
-
-        if ovl is not None and ovl != name:
-            rv.ovl = _effect_obj(ovl, editor)
-            rv.ovl_mix = ovl_mix
-            if rv.ovl is None:
-                rv.ovl_ex = ()
-            elif rv.fx is None:
-                ## 기본 효과가 없으면 덮개가 혼자 화면을 맡음: 고른 글자 빼기, 없으면 VHS의 설정
-                rv.ovl_ex = ex if ex else _split(rv.ovl.exclude())
-            elif not ex:
-                ## 효과가 화면 전체(아무것도 안 뺌)면 덮개도 화면 전체 (덮개가 늘 위에 오도록)
-                rv.ovl_ex = ()
-            else:
-                rv.ovl_ex = _split(rv.ovl.exclude())
-
-        return rv
+        rv.ovl_mix = ovl_mix
+        return _fill(rv, name, ovl, ex, editor)
 
     def _split(ex):
         """대사·선택지를 따로 층에 띄우지 않으면 글자는 한꺼번에만 뺄 수 있음."""
@@ -1742,6 +1839,16 @@ init -110 python in screen_fx:
                 b, ", ".join(list(ORDER) + [ NONE ])))
         _check_transition(cfg("transition"))
         _check_overlay(cfg("overlay"), "screen_fx.overlay")
+        for _k in MENU_KEYS.values():
+            _v = cfg(_k)
+            try:
+                _a, _b = _v
+            except Exception:
+                raise Exception("screen_fx.{}는 (1번, 2번) 두 이름으로 적습니다. 예: (\"vhs_crt\", \"none\")".format(_k))
+            for _n in (_a, _b):
+                if _n != NONE and _n not in EFFECTS:
+                    raise Exception("screen_fx.{}: {!r}라는 효과가 없습니다. 쓸 수 있는 이름: {}".format(
+                        _k, _n, ", ".join([ NONE ] + list(ORDER))))
         _cursor_flag(cfg("cursor"))
         tv = dict(globals().get("tv", None) or { })
         tv.update(_lay().get("tv", { }))

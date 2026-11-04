@@ -1230,6 +1230,60 @@ screen ui_editor_popup():
         use ui_editor_media_popup
     elif ui_editor.state.popup == "frame":
         use ui_editor_frame_popup
+    elif ui_editor.state.popup == "background":
+        use ui_editor_background_popup
+
+
+## 배경 고르기 창 (3.19): 그림이나 영상 하나. 탭의 background_files()와 set_value(키, 경로)를 씀
+screen ui_editor_background_popup():
+
+    $ _tab = ui_editor.current_tab()
+    $ _key = ui_editor.state.popup_key
+    $ _cur = _tab.get_value(_key) if _tab else None
+    $ _files = _tab.background_files() if (_tab and hasattr(_tab, "background_files")) else [ ]
+
+    button:
+        style "empty"
+        xfill True
+        yfill True
+        background "#00000066"
+        action Function(ui_editor.close_popup)
+
+    frame:
+        style "ui_editor_frame"
+        modal True
+        align (0.5, 0.5)
+        xsize 620
+        ysize 560
+
+        vbox:
+            spacing 6
+            text ("배경 고르기 - 그림이나 영상(webm)") style "ui_editor_title"
+            text ("지금: " + (ui_editor.short_path(_cur) if _cur else "없음")) style "ui_editor_small"
+
+            viewport:
+                scrollbars "vertical"
+                mousewheel True
+                ysize 430
+
+                vbox:
+                    spacing 4
+                    textbutton "없음 (타이틀은 검은 화면, ESC 메뉴는 투명)":
+                        style "ui_editor_button"
+                        xfill True
+                        action Function(ui_editor.pick_font, None)
+                        selected (not _cur)
+                    for _f in _files:
+                        textbutton _f:
+                            style "ui_editor_button"
+                            xfill True
+                            text_size 13
+                            action Function(ui_editor.pick_font, _f)
+                            selected (_cur == _f)
+                    if not _files:
+                        text "game 폴더에 그림(.png, .jpg, .webp)이나 영상(.webm)이 없습니다." style "ui_editor_text"
+
+            textbutton "취소 (Esc)" style "ui_editor_button" action Function(ui_editor.close_popup)
 
 
 screen ui_editor_panel():

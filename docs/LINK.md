@@ -185,7 +185,7 @@ PyKaki 데스크톱 앱의 showpy 화면이 게임 안 편집기를 바깥에서
 | type | 언제 | 내용 |
 |---|---|---|
 | `state` | 붙자마자, 그 뒤 바뀔 때마다 (0.1초마다 비교, 같으면 안 보냄) | 아래 |
-| `files` | 붙자마자 한 번, 앱이 `files`를 보낼 때 (3.15) | `{"type": "files", "audio": ["audio/type.ogg"], "images": ["gui/ctc/ctc1.png", ...]}` 게임 폴더 기준. 렌파이 `list_files`라 `.rpa` 안 파일도 들어감 |
+| `files` | 붙자마자 한 번, 앱이 `files`를 보낼 때 (3.15) | `{"type": "files", "audio": ["audio/type.ogg"], "images": ["gui/ctc/ctc1.png", ...], "movies": ["movies/title.webm"]}` 게임 폴더 기준(`movies`는 3.19부터). 렌파이 `list_files`라 `.rpa` 안 파일도 들어감 |
 | `error` | 명령 처리가 실패했을 때 | `{"type": "error", "text": "..."}` |
 
 ```json
@@ -230,6 +230,8 @@ PyKaki 데스크톱 앱의 showpy 화면이 게임 안 편집기를 바깥에서
 
   `id`는 위젯 자리 번호라 화면이 바뀌면 다른 것을 가리킬 수 있습니다. 버튼은 `t`를 같이 보내서 글이 다르면 게임이 누르지 않습니다. 창 바탕, 세로 스크롤바, 거의 투명한 색, 무지개 띠 같은 꾸밈은 보내지 않습니다.
 - `title`은 `tmenu`가 없거나 꺼져 있으면 `null`입니다. `menu`는 지금 보이는 메뉴(`"title"` 타이틀 / `"pause"` ESC 메뉴), `x`, `y`는 화면 픽셀입니다.
+  - 3.19부터: `items`의 메뉴 항목 뒤에 제목, 부제가 `"kind": "label"`, `"name": "제목"`으로 붙습니다(`sel` 번호도 이어짐). 항목마다 `"kind": "item"`, `"effect"`(글자 효과 이름 또는 `null`). `title`에 `"background"`(이 메뉴의 배경 그림/영상 경로, 없으면 `null` = 타이틀 검은 화면 / ESC 메뉴 투명), `"effects"`(고를 수 있는 글자 효과 `[[이름, 표시], ...]`, 첫째는 `[null, "없음"]`).
+- `editor.pending`은 저장할 것의 수입니다. 3.19부터 원고에 넣을 줄(화면 효과 "여기에서부터 적용" 등)도 셉니다.
 
 앱 → 게임 (`cmd`):
 
@@ -243,8 +245,9 @@ PyKaki 데스크톱 앱의 showpy 화면이 게임 안 편집기를 바깥에서
 | `title.select` | `index` | 고친 항목 고르기 |
 | `title.mode` | `mode`: `"base"`, `"hover"` | 평소 / 선택됐을 때 |
 | `title.scope` | `scope`: `"item"`, `"all"` | 이 항목만 / 모든 항목 공통 |
-| `title.set` | `key`, `value` | 고른 항목(공통이면 공통 값)의 값. `key`는 `title_menu_layout.rpy`와 같은 이름(`x`, `y`, `rotate`, `skew`, `zoom`, `size`, `font`, `color`, `hover_offset`, `hover_rotate` ...) |
+| `title.set` | `key`, `value` | 고른 항목(공통이면 공통 값)의 값. `key`는 `title_menu_layout.rpy`와 같은 이름(`text`, `x`, `y`, `rotate`, `skew`, `zoom`, `size`, `font`, `color`, `effect`, `hover_offset`, `hover_rotate` ...). 제목, 부제를 골랐으면 그 글자의 값(공통 값으로 가지 않음, 3.19). `value`가 `null`이면 그 값을 지움 |
 | `title.reset` | | 고른 항목(공통이면 공통 값)의 저장 안 한 변경 되돌리기 |
+| `title.background` | `value`(경로 또는 `null`) | 지금 메뉴의 배경 그림/영상 (3.19). `null`이면 타이틀은 검은 화면, ESC 메뉴는 투명 |
 | `custom_ui.set` | `key`, `value` | 커서/대사 소리 값 하나 (3.15). `key`는 `values`의 이름. 그림은 game 기준 경로 목록(12장까지), `*_hold`는 1 또는 2, `text_cps`가 `null`이면 options.rpy 값, `typing_sound`가 `null`이면 끔. `ctc`, `cursor`를 켤 때 그림이 없으면 첫 그림 폴더를 넣음 |
 | `custom_ui.reset` | `key` | 그 값의 저장 안 한 변경 되돌리기 |
 | `custom_ui.listen` | | 지금 고른 대사 소리를 게임에서 1.5초 들려줌 (`playing`이 참) |

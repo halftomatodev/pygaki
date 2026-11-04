@@ -1,14 +1,14 @@
-# 인수인계 (2026-11-04 로컬 세션 4 → 다음 대화)
+# 인수인계 (2026-11-04 로컬 세션 5 → 다음 대화)
 
 새 대화에서 pygaki를 쓰거나 고칠 때 이 문서부터 읽습니다. 맨 위 [CLAUDE.md](../CLAUDE.md)의 규칙도 같이 지킵니다.
 새 대화는 "docs/HANDOFF.md 읽고 이어서 하자"로 시작하면 됩니다. 지나온 기록과 주요 결정은 [HISTORY.md](HISTORY.md)에 있습니다.
 
 ## 0. 지금 어디까지 (먼저 읽기)
 
-- **최신 판**: showpy 4.19 (`ui_kit` 3.18, `screen_fx` 4.2, `hotkeys` 1.0, `splash` 1.2) + PyKaki 앱. 모두 `main`에 push됨(마지막 `068d9bc`)
-- **이번 세션에 한 큰 일**: PyKaki 앱의 [showpy] 화면에서 게임 안 편집기의 **모든 탭**을 고칠 수 있게 됨("게임 안" 표시 없음). 스플래시는 편집 탭을 새로 만듦. 앱이 붙어 있을 때 게임 입력이 안 먹던 문제도 고침 (4장)
-- **사용자가 확인하는 곳**: `F:\SHOWPY\pygaki-dev-renpy-8.5.3\renpy.exe` (로컬 시험용 묶음. 4.19 템플릿 파일과 새 앱으로 바꿔 넣음). 확인 순서는 3장 "확인용 묶음"
-- **다음 대화는 이것부터 물어보기**: 5장 맨 위 세 줄 (4.19 "편집 중" 띠, 4.18 스플래시 칸, 4.17 셰이더/대사/선택지/그림 칸). 4.16 커서/대사 소리 칸, 4.15 앱 연결, 4.14 게임 메뉴 화면은 사용자가 확인함(괜찮음). 4.18 스플래시는 사용자가 저장까지 해 본 흔적이 있음(아래)
+- **최신 판**: showpy 4.20 (`ui_kit` 3.19, `screen_fx` 4.3, `hotkeys` 1.0, `splash` 1.2) + PyKaki 앱. 4.19까지는 `main`에 push됨(`068d9bc`). 4.20이 커밋됐는지는 `git log`로 확인
+- **이번 세션(5)에 한 큰 일**: 셰이더 두 자리(인게임, 타이틀, 게임 내 메뉴 따로), "셰이더 고르기" + 세모(▶) + [여기에서부터 적용], 타이틀 배경(검은 화면 기본, 그림/webm), 제목/부제 글자, 글자 효과, 회전 손잡이, ESC 메뉴 투명 배경 (4장)
+- **사용자가 확인하는 곳**: `F:\SHOWPY\pygaki-dev-renpy-8.5.3\renpy.exe` (로컬 시험용 묶음. 4.20 템플릿 파일과 새 앱으로 바꿔 넣음). 확인 순서는 3장 "확인용 묶음"
+- **다음 대화는 이것부터 물어보기**: 5장 맨 위 4.20 세 줄. 그 아래 4.19, 4.18, 4.17 줄도 아직 사용자 확인 전
 - **그다음 할 일**: 사용자가 확인하면 정식 판 v1.1(태그) → 공개용 구글 문서(아직 4.13 기준)를 4.14~4.19로 한 번에 (6장)
 - **pykaki_sample에 사용자가 저장한 것**: `game/screen_fx/vhs_crt_layout.rpy`, `game/splash/splash_layout.rpy` (2026-11-04 17:04~05). 시험한 뒤 지우지 말 것. 시험으로 생긴 `*_layout.rpy`만 지움
 
@@ -173,6 +173,10 @@ python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app 'F:\SHOWPY\
 
 사용자는 `pygaki-dev` 묶음의 런처에서 `pykaki_sample`을 [프로젝트 실행]하고 [PyKaki로 대본 쓰기] → [showpy]로 확인합니다.
 
+- [ ] showpy 4.20 인게임 화면 셰이더: "셰이더 고르기"에서 1번/2번 고르면 바로 보이는지, 세모(▶)가 게임 줄을 따라가는지, 세모 두 번 누르기, [여기에서부터 적용] → [저장] → 원고에 `$ screen_fx.shaders(…)`, 다시 켜서 그 줄부터 바뀌는지 (원고에 저장은 시험에서 안 해 봄)
+- [ ] showpy 4.20 타이틀: 검은 배경, 배경 그림/webm 고르기, 제목/부제 글과 글자 효과, **회전 손잡이를 마우스로 끌기(자동 시험으로는 못 함)**, "└ 타이틀 셰이더"
+- [ ] showpy 4.20 ESC 메뉴: 투명 배경, 배경 고르기, "└ 게임 내 메뉴 셰이더"(ESC 메뉴 연 채로)
+
 - [ ] showpy 4.19: 앱에서 칸을 고르면 게임 화면 위에 "편집 중" 띠, Esc나 [편집기 닫기] 뒤 게임이 다시 넘어가는지, 커서 칸이나 [대본] 화면에서는 게임 입력이 되는지
 - [ ] showpy 4.18 스플래시 칸: 값 바꾸고 [이 페이지 보기] → 게임 창에 바뀐 모양, 저장 뒤 게임을 다시 켜도 그 모양 (사용자가 warning 페이지 글자 크기를 저장해 봄)
 - [ ] showpy 4.17 앱 칸: 타이틀 셰이더(타이틀에서), 인게임 화면 셰이더, 대사, **선택지(선택지가 뜬 화면에서, 자동으로는 아직 못 봄)**, 그림 배치 → 게임에 바로 보이는지, 저장
@@ -186,6 +190,26 @@ python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app 'F:\SHOWPY\
 - [ ] 실시간 미리보기([렌파이에서 보기])를 PyKaki와 렌파이를 같이 켜 놓고
 - [ ] 실제 폴더 선택창으로 [렌파이 프로젝트 연결], 크롬에서 F8 전체화면, 소리, 렌파이 대사 탭 저장
 - [ ] 구글 문서: 새로 넣은 목록 글머리, 새 표 줄 글꼴
+
+### 2026-11-04 (로컬 세션 5)
+
+사용자 요청 세 가지(타이틀 꾸미기와 셰이더, 게임 내 메뉴 꾸미기와 셰이더, 인게임 셰이더 단순하게) + 회전 손잡이.
+
+1. **`screen_fx` 4.3** (`engine/screen_fx.rpy`, `editor/editor_fx.rpy`, `screen_fx_config.rpy`)
+   - 두 자리: 1번 = `current`, 2번 = `cur_overlay`. 2번에 효과 이름이 들어감(`overlay_flag`, `_resolve_overlay`, `_check_overlay`). VHS도 1번에 옴(`resolve`, `base_effect`). `use("vhs_crt")`는 `overlay`를 안 적을 때만 예전처럼 "없음 + VHS"
+   - `screen_fx.shaders(a, b)`, `slot_choices()`, `slot_label()`(기본/아스키/VHS/단말기/게임보이), `current_slots()`
+   - 타이틀/메뉴: `menu_context()`(스플래시 아님 + `main_menu` → "title", `_menu` → "pause"), `menu_slots()`, 설정 `title_shaders`, `menu_shaders`. `_shown()`이 그 자리를 화면 전체(글자 빼기 없음)에 씌움. 효과의 `scope`, `auto`는 안 봄
+   - 편집기: FxTab "셰이더 고르기"(page 이름은 `"lines"` 그대로) = 고르기(`picks`, `preview_slots`) + 줄 목록(세모, `follow`, `mark_click`은 0.6초 안에 두 번) + `apply_here` → `{"slots": (a, b)}` → `$ screen_fx.shaders("a", "b")`. MenuFxTab `title_fx`, `pause_fx`(cedit.edits에 넣고 `screen_fx_layout.rpy`로)
+   - 세모는 Neo둥근모(`screen_fx/fonts/neodgm.ttf`)로 그림(기본 글꼴에 없음)
+2. **`ui_kit` 3.19** (`engine/title_menu.rpy`, `editor/editor_title.rpy`, `editor/editor.rpy`, `editor/editor_live.rpy`, `title_menu_config.rpy`)
+   - `background_disp(menu)`: 타이틀은 고른 것이 없으면 검은 Solid, ESC 메뉴는 None(투명). 그림은 `fit="cover"`, 영상은 `Movie`. 일렁임 `target="background"`면 감쌈. `main_menu_frame`, `pause_dim` 기본 끔
+   - `label_items(menu)`: 제목, 부제(`tmenu.labels`, `pause_labels` → `label_layout` → `state.label_edits`). 화면 `tmenu_labels`. 편집 중에는 `tmenu_lbl_N` 버튼, `focused_index()`는 메뉴 항목 수 + N
+   - 글자 효과: `with_effect()` = `textshader` + `slow_cps`(`tmenu.effect_cps`). 크기 재는 sizer에는 안 넣음
+   - TitleTab: `_entries()` = 항목 + 글자, `set_key()`(앱이 씀), 회전 손잡이(`rot_center`, `rot_handle`, 끌기 토큰 `("rot", i)`, 마우스 위치로 각도, Shift 15도), 배경 고르기 창 `background`
+   - 실시간 연결: title에 `kind`, `name`, `effect`, `background`, `effects`. 명령 `title.background`. files에 `movies`. `editor.pending`에 `pending_lines()`도 셈
+3. **PyKaki 앱** (`ShowpyView.tsx`, `showpyLive.ts`): 목록 "└ 타이틀 셰이더", "└ 게임 내 메뉴 셰이더", "타이틀 일렁임"(이름 바꿈). 타이틀 칸에 배경 고르기, 글 칸, 글자 효과
+4. 확인: Lint(pykaki_sample, fx_test_25, 묶음 템플릿, ui_kit만, screen_fx만). 시험 클라이언트로 타이틀 글자/효과, 타이틀 셰이더 VHS+게임보이, 저장 → 다시 켜도 그대로, 인게임 셰이더 고르기 미리 보기, 줄 고르기, 세모 두 번, ESC 메뉴 투명 + 메뉴 셰이더 아스키, 회전 손잡이 그림. smoke 통과, 진짜 앱 화면 찍기. 시험으로 저장한 것은 지움(`pykaki_sample`의 `title_menu_layout.rpy`는 원래 있던 `start` 한 줄만 남김)
+5. 확인용 묶음: 템플릿 `showpy\game`에 4.20 복사(템플릿 `screen_fx.overlay = False` 다시 적용), `pygaki\PyKaki`를 새 앱으로
 
 ## 6. 다음에 할 만한 것
 
@@ -207,7 +231,9 @@ python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app 'F:\SHOWPY\
 - 렌파이 글자 안의 `[이름]`은 변수 넣기. `[이 페이지 보기]` 같은 글은 `[[`로 써야 함 (안 그러면 게임이 오류로 멈춤)
 - 편집기 글꼴에 가운뎃점(·)이 없어서 네모로 나옴. 게임 화면에 띄우는 글에는 `|` 같은 것을 씀
 - 편집기가 열려 있으면 게임 입력이 편집기로 감(`EditorInput`). 앱이 붙어 있으면 "편집 중" 띠로 알림 (4.19)
-- `tmenu` 설정 이름과 같은 이름의 함수를 만들면 안 됨 (`cfg()`가 전역 이름으로 찾음)
+- `tmenu` 설정 이름과 같은 이름의 함수를 만들면 안 됨 (`cfg()`가 전역 이름으로 찾음). 3.19의 `background`, `labels` 같은 설정 이름도 마찬가지(함수는 `background_disp`, `label_items`)
+- 시험 프로젝트처럼 묶음 템플릿에 플러그인을 복사하면 템플릿의 `screen_fx_config.rpy`가 `overlay = True`로 돌아감. 템플릿에서는 `make_bundle.py`의 `TEMPLATE_SETTINGS`대로 다시 `False`로
+- 실시간 연결 `panel.do`의 `id`는 패널 안내 줄 수가 바뀌면 같이 바뀜(예: `p.0.5…` ↔ `p.0.6…`). 시험 클라이언트는 누르기 전에 나무를 다시 읽음
 - 앱 공통 틀(4.17)은 게임 화면 밖(x -40000)에 패널을 하나 더 그림. 화면 밖이라 눌리지 않음(렌파이 `modal`은 자기 영역 안에서만 막음)
 - 템플릿 프로젝트를 Lint하면 `.rpyc`, `game/cache`, `game/saves`가 생김. 묶음 템플릿에서는 지움
 - 렌파이 SDK의 `gui/game`은 그대로 템플릿으로 쓰면 안 됨(그림 없이 첫 실행 때 만들다 실패)

@@ -19,6 +19,9 @@ export interface TitleItem extends TitleLook {
   anchor: [number, number];
   hover: TitleLook & { offset: [number, number] };
   edited: boolean;
+  effect?: string | null; // 글자 효과 (ui_kit 3.19)
+  kind?: 'item' | 'label'; // label = 제목, 부제 (ui_kit 3.19)
+  name?: string;
 }
 export interface TitleState {
   ok: boolean;
@@ -29,6 +32,8 @@ export interface TitleState {
   items: TitleItem[];
   common: Record<string, unknown>;
   common_edited: boolean;
+  background?: string | null; // 이 메뉴의 배경 그림/영상 (ui_kit 3.19). 없으면 타이틀 검은 화면, ESC 메뉴 투명
+  effects?: [string | null, string][]; // 고를 수 있는 글자 효과 [이름, 표시]
 }
 export interface EditorTab {
   id: string;
@@ -80,6 +85,7 @@ export interface PanelState {
 export interface GameFiles {
   audio: string[];
   images: string[];
+  movies?: string[]; // ui_kit 3.19부터
 }
 export interface GameState {
   where: { file: string | null; line: number; screens: string[]; main_menu: boolean; menu: boolean };
@@ -118,7 +124,7 @@ export function startLive() {
     useLive.setState(s.on ? { on: s.on, showpy: s.showpy } : { on: false, showpy: s.showpy, st: null, files: null });
   const take = (m: any) => {
     if (m?.type === 'state') useLive.setState({ st: m as GameState, err: null });
-    else if (m?.type === 'files') useLive.setState({ files: { audio: m.audio ?? [], images: m.images ?? [] } });
+    else if (m?.type === 'files') useLive.setState({ files: { audio: m.audio ?? [], images: m.images ?? [], movies: m.movies ?? [] } });
     else if (m?.type === 'error') useLive.setState({ err: String(m.text) });
   };
   desktop.onLiveStatus(status);

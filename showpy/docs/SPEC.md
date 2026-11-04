@@ -2,7 +2,7 @@
 
 코드를 고치는 사람과 AI가 읽는 문서입니다. 사용법은 [CUSTOM_GUIDE.md](CUSTOM_GUIDE.md)에 있습니다.
 
-- 묶음 버전 4.19 (`ui_kit` 3.18, `screen_fx` 4.2, `hotkeys` 1.0, `splash` 1.2)
+- 묶음 버전 4.20 (`ui_kit` 3.19, `screen_fx` 4.3, `hotkeys` 1.0, `splash` 1.2)
 - 렌파이 8.5.3 기준
 - 작업 규칙: [DEV_RULES.md](DEV_RULES.md)
 - PyKaki 연결 형식: [LINK.md](../../docs/LINK.md)
@@ -22,8 +22,8 @@
 
 | 폴더 | 버전 | 하는 일 |
 |---|---|---|
-| `game/ui_kit` | 3.18 | 타이틀 메뉴, ESC 메뉴, 선택지, 커서, 클릭 대기 표시, 대사 소리, 대사 스타일, 그림과 영상 배치(`stage`), 편집기(개발 모드 Shift+M), 원고 쓰기 도구(`script_edit`) |
-| `game/screen_fx` | 4.2 | 기본 효과(없음, ASCII, 레트로 터미널, 게임보이) + VHS 덮개, TV 전환, 글자 빼기, 커서 자리, 타이틀 일렁임 |
+| `game/ui_kit` | 3.19 | 타이틀 메뉴(배경, 제목, 부제, 글자 효과), ESC 메뉴, 선택지, 커서, 클릭 대기 표시, 대사 소리, 대사 스타일, 그림과 영상 배치(`stage`), 편집기(개발 모드 Shift+M), 원고 쓰기 도구(`script_edit`) |
+| `game/screen_fx` | 4.3 | 셰이더 두 자리(기본, 아스키, VHS, 단말기, 게임보이 중 둘), 타이틀과 게임 내 메뉴 셰이더(따로 두 자리), TV 전환, 글자 빼기, 커서 자리, 타이틀 일렁임 |
 | `game/hotkeys` | 1.0 | 단축키, 조작방법 화면 |
 | `game/splash` | 1.2 | 타이틀 전 로고, 경고, 조작 방법 페이지, 편집기 "스플래시" 탭(ui_kit이 있을 때) |
 
@@ -72,6 +72,8 @@ PyKaki가 내보내는 문법이기도 합니다.
 ### 4-2. 명령 줄
 
 ```renpy
+$ screen_fx.shaders("ascii", "vhs_crt")     # 4.3: 1번, 2번 (편집기 [여기에서부터 적용]이 넣는 줄)
+$ screen_fx.shaders("none", "none")         # 전부 셰이더 적용 취소
 $ screen_fx.use("ascii", overlay=False, transition="fade", cursor="overlay")
 $ screen_fx.clear()
 $ screen_fx.set_overlay(True)
@@ -79,7 +81,7 @@ $ screen_fx.set_warp(3)
 $ screen_fx.set_cursor("top")
 ```
 
-`use()`, `clear()`는 부를 때마다 덮개를 설정대로 다시 정합니다. 커서 자리는 `cursor=`를 적을 때만 바뀝니다.
+1번 = `current`(기본 효과 자리), 2번 = `cur_overlay`(덮개 자리). `overlay=`에는 True(VHS), False, 효과 이름을 씁니다. 타이틀(`main_menu`)과 메뉴(`_menu`) 안에서는 이 값 대신 `screen_fx.title_shaders`, `screen_fx.menu_shaders`를 화면 전체에 씌웁니다(`menu_context()`). `use()`, `clear()`는 부를 때마다 덮개를 설정대로 다시 정합니다. 커서 자리는 `cursor=`를 적을 때만 바뀝니다.
 
 ### 4-3. 선택지 괄호
 
@@ -97,7 +99,7 @@ hide ghost with stage.ease("outright", 1.2)
 
 | 편집기 탭 | 일반 원고 | PyKaki 원고 |
 |---|---|---|
-| 타이틀 메뉴, 커서/대사 소리, 화면 효과 값, 타이틀 일렁임 | `*_layout.rpy` | 같음 |
+| 타이틀 메뉴(배경, 제목, 부제 포함), 커서/대사 소리, 화면 효과 값, 타이틀/게임 내 메뉴 셰이더, 타이틀 일렁임 | `*_layout.rpy` | 같음 |
 | 이미지/영상의 위치 | 원고의 그 줄 `at` | `ui_kit/stage_layout.rpy` |
 | 이미지/영상의 전환, 그림 바꾸기, 줄 넣기, 소리 넣기 | 원고 | 원고 + `showpy_inbox.json` |
 | 대사의 위치(대사, 이름)와 화면 효과 | 원고 | 원고 + `showpy_inbox.json` |

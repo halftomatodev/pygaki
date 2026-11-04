@@ -8,8 +8,8 @@
 ##
 ## ── 화면은 셰이더 두 개를 겹쳐 그립니다 (4.0) ──────────────────────────────
 ##
-##   기본 효과   없음 / ASCII / 레트로 터미널 / 게임보이 중 하나   (아래 screen_fx.base)
-##   덮개        VHS 하나. 켬 / 끔만 고름                        (아래 screen_fx.overlay)
+##   1번 (기본 효과)  기본 / 아스키 / VHS / 단말기 / 게임보이 중 하나   (아래 screen_fx.base)
+##   2번 (덮개)       같은 다섯 중 하나. True는 VHS, False는 없음     (아래 screen_fx.overlay) (4.3)
 ##
 ##   그림:  [게임 화면] → 기본 효과 → 덮개(VHS) → 눈에 보이는 화면
 ##   처음 상태(배포 설정)는 "기본 효과 없음 + 덮개 켬" = 화면 전체에 VHS.
@@ -25,6 +25,11 @@
 ##   $ screen_fx.use("none")                       # 기본 효과 없음 (덮개는 설정대로)
 ##   $ screen_fx.use("none", overlay=False)        # 아무 효과 없는 깨끗한 화면
 ##   $ screen_fx.clear()                           # 선택취소: 기본 효과와 덮개를 설정대로
+##
+##   ## 셰이더 두 자리를 한 번에 (4.3, 편집기 "여기에서부터 적용"이 넣는 줄)
+##   $ screen_fx.shaders("ascii", "vhs_crt")       # 1번 아스키 + 2번 VHS
+##   $ screen_fx.shaders("gameboy")                # 1번 게임보이, 2번 없음
+##   $ screen_fx.shaders("none", "none")           # 전부 셰이더 적용 취소
 ##   $ screen_fx.clear(transition="fade")          # 서서히 돌아감
 ##
 ##   ## 덮개(VHS) 켜고 끄기
@@ -130,6 +135,21 @@ define screen_fx.skippable = True
 ##   $ screen_fx.use("ascii", cursor="overlay")       # 효과를 바꾸면서 같이
 ##   e "커서가 깨끗해졌다." (fx_cursor="top")           # 대사 괄호
 define screen_fx.cursor = "effect"
+
+## ── 타이틀, 게임 내 메뉴 셰이더 (4.3) ──────────────────────────────────────
+## 타이틀(과 타이틀에서 연 환경설정, 불러오기 화면)과 게임 중 ESC 메뉴(와 거기서 연 저장, 환경설정 화면)에는
+## 인게임 셰이더 대신 여기서 고른 두 자리를 화면 전체에 씌웁니다. (1번, 2번) 순서.
+##   "none"        기본 (아무것도 안 함)
+##   "ascii"       아스키
+##   "vhs_crt"     VHS
+##   "retro_term"  단말기 (레트로 터미널)
+##   "gameboy"     게임보이
+## 예: define screen_fx.title_shaders = ("vhs_crt", "none")      # 타이틀에 VHS
+##     define screen_fx.menu_shaders = ("gameboy", "vhs_crt")    # ESC 메뉴에 게임보이 + VHS
+## 편집기(Shift+M) "타이틀 셰이더", "게임 내 메뉴 셰이더" 탭에서 고르고 저장하면 screen_fx_layout.rpy에 들어갑니다.
+## 효과마다 세부 값(휘어짐, 글자 크기 …)은 인게임과 같이 씁니다 (<이름>_config.rpy).
+define screen_fx.title_shaders = ("none", "none")
+define screen_fx.menu_shaders = ("none", "none")
 
 ## UI Kit 편집기(Shift+M)를 연 동안에도 화면 효과를 보여줄지 (3.4)
 ##   True   효과를 켠 채로 편집. 편집기 패널은 효과 위에 깨끗하게 보임 (기본)

@@ -49,11 +49,18 @@ init -10 python in tmenu:
         insensitive_alpha=0.4,
         hover_sound=None,
         activate_sound=None,
+        background=None,
         background_movie=None,
         background_side_mask=False,
         movie_group=None,
         show_version=True,
-        main_menu_frame=True,
+        main_menu_frame=False,
+        labels={ },
+        pause_labels={ },
+        label_layout={ },
+        pause_label_layout={ },
+        screen_layout={ },
+        effect_cps=30,
         title_game_menu_navigation=True,
         game_menu=None,
         game_menu_side=True,
@@ -63,7 +70,7 @@ init -10 python in tmenu:
         pause=True,
         pause_items=None,
         pause_layout={ },
-        pause_dim="#000000b3",
+        pause_dim=None,
         pause_background=None,
         )
 
@@ -81,16 +88,28 @@ init -10 python in tmenu:
         "hover_label_movie", "hover_label_movie_side_mask", "hover_label_movie_size",
         "hover_label_movie_offset", "hover_label_movie_loop",
         "hover_sound", "activate_sound", "hit_padding", "insensitive_alpha",
+        "effect", "effect_cps",
         }
 
     ## 편집기가 다루는 값 (저장할 때 이 순서로 적습니다).
-    EDIT_KEYS = ("x", "y", "anchor", "rotate", "skew", "zoom", "size", "font", "color",
+    EDIT_KEYS = ("text", "x", "y", "anchor", "rotate", "skew", "zoom", "size", "font", "color", "effect",
                  "hover_offset", "hover_rotate", "hover_skew", "hover_zoom", "hover_size",
                  "hover_font", "hover_color")
 
     ## 편집기가 이번 실행 중에 저장한 값으로 대신 읽는 이름 (3.17). store 변수를 바꾸면 다시 불러올 때
     ## (저장 뒤 저절로, Shift+R) 그 대사가 시작될 때의 옛 값이 새 *_layout.rpy 값을 덮어서 state.saved에 둡니다.
-    SAVED_KEYS = ("layout", "pause_layout", "layout_default")
+    SAVED_KEYS = ("layout", "pause_layout", "layout_default", "label_layout", "pause_label_layout", "screen_layout")
+
+    ## 화면 글자 두 줄: 제목, 부제 (3.19). 메뉴마다 따로 (타이틀 / ESC 메뉴)
+    LABEL_IDS = ("title", "subtitle")
+    LABEL_NAMES = { "title": "제목", "subtitle": "부제" }
+    LABEL_DEFAULTS = {
+        "title": { "xalign": 0.5, "yalign": 0.2, "size": 72 },
+        "subtitle": { "xalign": 0.5, "yalign": 0.31, "size": 30 },
+        }
+
+    ## 배경으로 쓸 수 있는 영상 확장자 (그 밖은 그림)
+    MOVIE_EXTS = (".webm", ".ogv", ".mp4", ".mkv", ".avi", ".mpg", ".mpeg", ".m2v")
 
     def cfg(name):
         """설정값을 돌려줍니다. 설정 파일에 없으면 기본값."""
@@ -127,6 +146,9 @@ init -10 python in tmenu:
             self.default_edits = { }    # {키: 값}  (아직 저장 안 한 공통 값 편집)
             self.edit_serial = 0
             self.saved = None           # 편집기가 이번 실행 중 저장한 layout, pause_layout, layout_default (3.17)
+            self.label_edits = { "title": { }, "pause": { } }   # 메뉴 -> 글자 id -> {키: 값} (3.19)
+            self.screen_edits = { }     # 배경 등 화면 값 {"background": …, "pause_background": …} (3.19)
+            self.rot_drag = None        # 회전 손잡이를 끄는 중 (3.19)
 
     state = _State()
 
@@ -321,16 +343,23 @@ init -10 python in tmenu:
         hover_props.update(hover)
 
         it.size = base.get("size", None)
+        it.effect = d.get("effect", None)
         it.base_props = base
         it.hover_props = hover_props
+
+        ## 글자 효과 (3.19): 대사 등장 효과(텍스트 셰이더)를 메뉴 글자에도
+        sizer_props = dict(base)
+        base = with_effect(base, it.effect, d.get("effect_cps", None))
+        hover_props = with_effect(hover_props, it.effect, d.get("effect_cps", None))
 
         ## 표시용 displayable (한 번 만들어 계속 재사용해야 영상·애니메이션이 끊기지 않음)
         bk = _props_key(base)
         hk = _props_key(hover_props)
+        sk = _props_key(sizer_props)
 
-        it.sizer = _cached(("sizer", iid, it.text, bk), lambda: Transform(Text(it.text, **base), alpha=0.0))
-        it.hit_sizer = _cached(("hit", iid, it.text, bk), lambda: Transform(Text(it.text, **base), alpha=0.0))
-        it.ed_sizer = _cached(("ed", iid, it.text, bk), lambda: Transform(Text(it.text, **base), alpha=0.0))
+        it.sizer = _cached(("sizer", iid, it.text, sk), lambda: Transform(Text(it.text, **sizer_props), alpha=0.0))
+        it.hit_sizer = _cached(("hit", iid, it.text, sk), lambda: Transform(Text(it.text, **sizer_props), alpha=0.0))
+        it.ed_sizer = _cached(("ed", iid, it.text, sk), lambda: Transform(Text(it.text, **sizer_props), alpha=0.0))
         it.idle_disp = _cached(("idle", iid, it.text, bk), lambda: Text(it.text, **base))
 
         if d.get("hover_label_movie"):
@@ -478,6 +507,148 @@ init -10 python in tmenu:
         """항목 위치를 화면 픽셀 좌표로."""
         return (to_pixels(it.x, store.config.screen_width), to_pixels(it.y, store.config.screen_height))
 
+    ## ── 글자 효과 (3.19) ──
+
+    def effect_names():
+        """고를 수 있는 글자 효과 [(이름, 표시)]. 대사 등장 효과와 같은 목록."""
+        rv = [ (None, "없음"), ("dissolve", "서서히"), ("typewriter", "타자기"), ("wave", "물결"), ("jitter", "떨림") ]
+        ss = getattr(store, "say_style", None)
+        for e in getattr(ss, "TFX_EFFECTS", [ ]):
+            rv.append((e["name"], e["label"]))
+        return rv
+
+    def with_effect(props, effect, cps=None):
+        """글자 스타일에 등장 효과(텍스트 셰이더)를 넣은 사본. 효과는 글자가 하나씩 나올 때 보이므로 속도도 넣음."""
+        if not effect:
+            return props
+        p = dict(props)
+        p["textshader"] = effect
+        p.setdefault("slow_cps", cps or cfg("effect_cps"))
+        ss = getattr(store, "say_style", None)
+        outl = getattr(ss, "TFX_OUTLINES", { }).get(str(effect).split(":")[0])
+        if outl and "outlines" not in props:
+            p["outlines"] = list(outl)
+        return p
+
+    ## ── 화면 값: 배경 (3.19) ──
+    ## 타이틀은 그림이나 영상을 고르기 전에는 검은 화면, ESC 메뉴는 투명(뒤 게임 화면이 그대로)
+
+    def screen_value(name):
+        """배경 같은 화면 값. 편집 중인 값 → 저장한 값(screen_layout) → 설정 파일."""
+        if name in state.screen_edits:
+            return state.screen_edits[name]
+        sl = cfg("screen_layout") or { }
+        if name in sl:
+            return sl[name]
+        return cfg(name)
+
+    def is_movie(path):
+        return isinstance(path, str) and path.lower().endswith(MOVIE_EXTS)
+
+    _BLACK = store.Solid("#000")
+
+    def background_disp(menu):
+        """메뉴 배경. 타이틀: 고른 그림/영상, 없으면 검은 화면. ESC 메뉴: 고른 그림/영상, 없으면 None(투명)."""
+        if menu == "title":
+            path = screen_value("background") or cfg("background_movie")
+        else:
+            path = screen_value("pause_background")
+        if not path:
+            return _BLACK if menu == "title" else None
+
+        def make():
+            if not isinstance(path, str):
+                d = store.renpy.displayable(path)
+            elif is_movie(path):
+                d = store.Movie(play=path, loop=True, side_mask=cfg("background_side_mask"))
+            else:
+                d = Transform(path, fit="cover", xysize=(store.config.screen_width, store.config.screen_height))
+            ## 타이틀 일렁임(screen_fx)을 "배경만"에 씌우는 설정이면 여기에도
+            wm = getattr(store, "watermorph", None)
+            if menu == "title" and wm is not None:
+                try:
+                    if wm.cfg("enabled") and wm.cfg("target") == "background":
+                        d = wm.wrap(d)
+                except Exception:
+                    pass
+            return d
+
+        return _cached(("background", menu, repr(path)), make)
+
+    ## ── 화면 글자: 제목, 부제 (3.19) ──
+
+    def label_items(menu=None):
+        """제목, 부제 글자. 메뉴 항목처럼 위치, 회전, 크기, 글꼴, 색, 효과를 가짐 (눌리지는 않음)."""
+        menu = menu or current_menu()
+        raw = cfg("pause_labels" if menu == "pause" else "labels") or { }
+        lay = cfg("pause_label_layout" if menu == "pause" else "label_layout") or { }
+        ed = state.label_edits.get(menu, { })
+        common = common_values()
+
+        rv = [ ]
+        for k, lid in enumerate(LABEL_IDS):
+            d = { "font": common.get("font", store.gui.interface_text_font), "color": "#ffffff",
+                  "outlines": [ (3, "#000000aa", 0, 0) ] }
+            d.update(LABEL_DEFAULTS[lid])
+            d.update(raw.get(lid, { }))
+            d.update(lay.get(lid, { }))
+            d.update(ed.get(lid, { }))
+
+            it = Item()
+            it.is_label = True
+            it.index = k
+            it.id = lid
+            it.name = LABEL_NAMES[lid]
+            text = d.get("text", None)
+            if text is None:
+                text = ("[config.name!t]" if (menu == "title" and lid == "title") else "")
+            it.text = text
+            it.empty = not str(text).strip()
+            it.own_keys = set(raw.get(lid, { })) | set(lay.get(lid, { })) | set(ed.get(lid, { }))
+
+            anchor = d.get("anchor", (0.5, 0.5))
+            ax, ay = anchor
+            if "xalign" in d and "x" not in d:
+                x = ax = d["xalign"]
+            else:
+                x = d.get("x", 0.5)
+            if "yalign" in d and "y" not in d:
+                y = ay = d["yalign"]
+            else:
+                y = d.get("y", 0.5)
+            it.x, it.y, it.anchor = x, y, (ax, ay)
+
+            it.rotate = float(d.get("rotate", 0.0))
+            it.skew = float(d.get("skew", 0.0))
+            it.zoom = float(d.get("zoom", 1.0))
+            it.alpha = float(d.get("alpha", 1.0))
+            it.h_rotate, it.h_skew, it.h_zoom, it.h_alpha = it.rotate, it.skew, it.zoom, it.alpha
+            it.h_offset = (0, 0)
+            it.shift = (0, 0)
+            it.hit_padding = 6
+            it.effect = d.get("effect", None)
+
+            props = { }
+            for key, v in d.items():
+                if key in RESERVED or key in ("xalign", "yalign"):
+                    continue
+                if is_style_property(key):
+                    props[key] = v
+            it.size = props.get("size", None)
+            it.base_props = props
+            it.hover_props = props
+
+            sk = _props_key(props)
+            shown = with_effect(props, it.effect, d.get("effect_cps", None))
+            it.disp = _cached(("label", menu, lid, text, _props_key(shown)), lambda: Text(text, **shown))
+            it.ed_sizer = _cached(("label_ed", menu, lid, text, sk), lambda: Transform(Text(text or " ", **props), alpha=0.0))
+            rv.append(it)
+        return rv
+
+    def entries(menu=None):
+        """편집기가 고르는 것 전부: 메뉴 항목 + 제목, 부제."""
+        return list(all_items(menu)) + label_items(menu)
+
     ## ── 게임 메뉴 버튼 목록 ──
     ## 항목: (글자, 동작) 또는 (글자, 동작, "보일 조건")
 
@@ -609,6 +780,9 @@ init -10 python in tmenu:
             wid = getattr(f, "id", None) or ""
             if wid.startswith("tmenu_btn_"):
                 return int(wid[len("tmenu_btn_"):])
+            if wid.startswith("tmenu_lbl_"):
+                ## 제목, 부제 (편집 중에만 있는 버튼). 번호는 메뉴 항목 다음부터 (3.19)
+                return len(all_items()) + int(wid[len("tmenu_lbl_"):])
         except Exception:
             pass
         return None
@@ -718,13 +892,13 @@ screen main_menu():
     ## 이렇게 하면 다른 메뉴 화면이 모두 교체됩니다.
     tag menu
 
-    ## 배경 그림 (screen_fx가 있으면 '장면만' 효과도 배경에 씌움)
-    if tmenu.scene_fx() is not None:
-        add gui.main_menu_background at tmenu.scene_fx()
-    else:
-        add gui.main_menu_background
-
     if tmenu.cfg("enabled"):
+
+        ## 배경: 고른 그림이나 영상, 없으면 검은 화면 (3.19)
+        add tmenu.background_disp("title")
+
+        ## 제목, 부제 (3.19)
+        use tmenu_labels("title")
 
         ## 렌파이 기본 GUI의 메뉴 뒤 반투명 판 (gui/overlay/main_menu.png)
         if tmenu.cfg("main_menu_frame"):
@@ -733,23 +907,33 @@ screen main_menu():
 
         use title_menu
 
+        ## 버전 번호 (오른쪽 아래)
+        if tmenu.cfg("show_version"):
+            text "[config.version]":
+                style "main_menu_version"
+                align (0.98, 0.98)
+
     else:
 
         ## 기능을 끄면 렌파이 기본 타이틀 화면과 같습니다.
+        if tmenu.scene_fx() is not None:
+            add gui.main_menu_background at tmenu.scene_fx()
+        else:
+            add gui.main_menu_background
+
         frame:
             style "main_menu_frame"
 
         use navigation
 
-    if gui.show_name:
+        if gui.show_name:
 
-        vbox:
-            style "main_menu_vbox"
+            vbox:
+                style "main_menu_vbox"
 
-            text "[config.name!t]":
-                style "main_menu_title"
+                text "[config.name!t]":
+                    style "main_menu_title"
 
-            if tmenu.cfg("show_version") or not tmenu.cfg("enabled"):
                 text "[config.version]":
                     style "main_menu_version"
 
@@ -794,12 +978,9 @@ screen game_menu(title, scroll=None, yinitial=0.0, spacing=0):
 
         ## 배경: 타이틀에서는 타이틀 배경, 게임 중에는 ESC 메뉴와 같은 배경
         if main_menu:
-            if tmenu.scene_fx() is not None:
-                add gui.main_menu_background at tmenu.scene_fx()
-            else:
-                add gui.main_menu_background
-        elif tmenu.cfg("pause_background") is not None:
-            add tmenu.cfg("pause_background")
+            add tmenu.background_disp("title")
+        elif tmenu.background_disp("pause") is not None:
+            add tmenu.background_disp("pause")
         elif tmenu.cfg("pause_dim"):
             add Solid(tmenu.cfg("pause_dim"))
 
@@ -1036,6 +1217,32 @@ screen title_menu(screen_name="main_menu", menu="title", start=None, intro=True,
                 add it.hit_sizer
 
 
+## 제목, 부제 글자 (3.19). 편집 중에는 끌 수 있게 보이지 않는 버튼을 둡니다.
+screen tmenu_labels(menu):
+
+    for it in tmenu.label_items(menu):
+        if not it.empty:
+            fixed:
+                fit_first True
+                pos (it.x, it.y)
+                anchor it.anchor
+                at tmenu_base(it.rotate, it.skew, it.zoom)
+                add it.disp
+
+        if tmenu.state.editing:
+            button:
+                id ("tmenu_lbl_%d" % it.index)
+                style "tmenu_button"
+                pos (it.x, it.y)
+                anchor it.anchor
+                padding (it.hit_padding, it.hit_padding)
+                at tmenu_base(it.rotate, it.skew, it.zoom)
+                action NullAction()
+                hovered tmenu.EdHover(len(tmenu.all_items(menu)) + it.index)
+                unhovered tmenu.EdHover(None)
+                add it.ed_sizer
+
+
 ## 게임 중 ESC(오른쪽 클릭)로 여는 일시정지 메뉴 (3.1)
 ## 타이틀 메뉴와 같은 모양(tmenu.default, 등장 연출, 소리)으로 그립니다.
 ## 항목은 tmenu.pause_items, 자리는 편집기 "타이틀 메뉴" 탭에서 (tmenu.pause_layout으로 저장).
@@ -1043,11 +1250,14 @@ screen tmenu_pause():
 
     tag menu
 
-    ## 뒤에 깔린 게임 화면을 어둡게 (또는 그림)
-    if tmenu.cfg("pause_background") is not None:
-        add tmenu.cfg("pause_background")
+    ## 배경: 고른 그림이나 영상. 없으면 투명(뒤 게임 화면이 그대로), pause_dim을 적었으면 어둡게 (3.19)
+    if tmenu.background_disp("pause") is not None:
+        add tmenu.background_disp("pause")
     elif tmenu.cfg("pause_dim"):
         add Solid(tmenu.cfg("pause_dim"))
+
+    ## 제목, 부제 (3.19)
+    use tmenu_labels("pause")
 
     use title_menu(screen_name="tmenu_pause", menu="pause")
 

@@ -223,28 +223,40 @@ init -8 python in ui_editor:
         except Exception:
             return None
         edits = tm.edits_for(menu)
+        ## 제목, 부제 (ui_kit 3.19): 항목 다음 번호로, kind="label"
+        has_labels = hasattr(tm, "label_items")
+        labels = tm.label_items(menu) if has_labels else [ ]
+        ledits = tm.state.label_edits.get(menu, { }) if has_labels else { }
         out = [ ]
-        for it in items:
+        for it in list(items) + list(labels):
             x, y = tm.abs_pos(it)
             b = it.base_props
             h = it.hover_props
+            lab = bool(getattr(it, "is_label", False))
             out.append(dict(
                 id=it.id, text=str(it.text), x=round(float(x), 1), y=round(float(y), 1), anchor=_js(it.anchor),
                 rotate=it.rotate, skew=it.skew, zoom=it.zoom,
                 size=_js(b.get("size")), font=_js(b.get("font")), color=_js(b.get("color")),
+                effect=_js(getattr(it, "effect", None)),
                 hover=dict(offset=_js(it.h_offset), rotate=it.h_rotate, skew=it.h_skew, zoom=it.h_zoom,
                            size=_js(h.get("size")), font=_js(h.get("font")), color=_js(h.get("color"))),
-                edited=(it.id in edits),
+                edited=(it.id in (ledits if lab else edits)),
+                kind=("label" if lab else "item"),
+                name=str(getattr(it, "name", it.id)),
                 ))
         t = get_tab("title")
         s = tm.state
         common = tm.common_values()
-        return dict(
+        rv = dict(
             ok=bool(t is not None and tab_available(t)[0]),
             menu=menu, sel=s.ed_sel, mode=s.ed_mode, scope=s.ed_scope, items=out,
             common={ k : _js(common[k]) for k in tm.EDIT_KEYS if k in common },
             common_edited=bool(s.default_edits),
             )
+        if has_labels:
+            rv["background"] = _js(tm.screen_value("pause_background" if menu == "pause" else "background"))
+            rv["effects"] = [ [ _js(n), str(l) ] for n, l in tm.effect_names() ]
+        return rv
 
     def _custom_ui_state():
         """커서/대사 소리 탭 (3.15). 값은 편집 중인 값 → 저장한 값 → 설정 파일 순서로 지금 쓰는 값."""
@@ -268,7 +280,8 @@ init -8 python in ui_editor:
     def _files():
         uk = store.ui_kit
         return dict(type="files", audio=list(uk.audio_files()),
-                    images=list(uk.game_files((".png", ".webp", ".jpg", ".jpeg", ".avif"))))
+                    images=list(uk.game_files((".png", ".webp", ".jpg", ".jpeg", ".avif"))),
+                    movies=list(uk.game_files((".webm", ".ogv", ".mp4", ".mkv"))))
 
     ## ── 패널 통째로 (3.16) ──
     ## 앱이 붙어 있으면 게임 안 패널(ui_editor_panel_body)과 고르기 창을 화면 밖에 그려 두고
@@ -526,7 +539,7 @@ init -8 python in ui_editor:
             where=dict(file=fn, line=line, screens=_shown_screens(),
                        main_menu=bool(getattr(store, "main_menu", False)), menu=bool(getattr(store, "_menu", False))),
             editor=dict(open=state.open, tab=state.tab, hide_panel=live.hide_panel, message=str(state.message or ""),
-                        pending=sum(t.pending() for t in TABS), tabs=tabs, info=info),
+                        pending=sum(t.pending() + t.pending_lines() for t in TABS), tabs=tabs, info=info),
             title=_title_state(),
             custom_ui=_custom_ui_state(),
             panel=_panel_state(),
@@ -537,6 +550,11 @@ init -8 python in ui_editor:
     def _title_set(tm, key, value):
         if isinstance(value, (list, _plist)):
             value = tuple(value)
+        t = get_tab("title")
+        if t is not None and hasattr(t, "set_key"):
+            ## ui_kit 3.19: 제목, 부제까지 탭이 알아서
+            t.set_key(key, value)
+            return
         items = tm.all_items()
         if not items:
             return
@@ -653,7 +671,7 @@ init -8 python in ui_editor:
             s = tm.state
             t = get_tab("title")
             if cmd == "title.select":
-                n = len(tm.all_items())
+                n = len(tm.entries()) if hasattr(tm, "entries") else len(tm.all_items())
                 if n:
                     s.ed_sel = max(0, min(int(c.get("index", 0)), n - 1))
                     s.edit_serial += 1
@@ -666,6 +684,8 @@ init -8 python in ui_editor:
                 _title_set(tm, str(c.get("key")), c.get("value"))
             elif cmd == "title.reset" and t is not None:
                 t.reset_item()
+            elif cmd == "title.background" and t is not None and hasattr(t, "set_background"):
+                t.set_background(c.get("value") or None)
             return True
 
         if cmd == "panel.do":

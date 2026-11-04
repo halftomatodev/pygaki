@@ -132,11 +132,32 @@ define tmenu.intro_time = 0.35       # 나타나는 데 걸리는 시간(초)
 define tmenu.intro_offset = (-30, 0) # 어디서부터 미끄러져 들어올지 (픽셀)
 
 
-## ── 배경 영상 ────────────────────────────────────────────────────────────────
-## 쓰려면 경로를 적으세요. 비워두면(None) gui.rpy의 gui.main_menu_background를 그대로 씁니다.
-## 예: define tmenu.background_movie = "movies/title_bg.webm"
+## ── 배경 (그림이나 영상) ──────────────────────────────────────── (UI Kit 3.19) ──
+## None이면 검은 화면입니다. 그림(.png, .jpg, .webp)이나 영상(.webm)의 경로를 적으세요.
+## 그림은 화면에 꽉 차게 늘어납니다. 영상은 계속 반복합니다.
+##   define tmenu.background = "images/title_bg.png"
+##   define tmenu.background = "movies/title_bg.webm"
+## 편집기(Shift+M) "타이틀 메뉴" 탭의 "배경" 버튼이나 PyKaki 앱에서 고를 수도 있습니다.
+## (예전 이름 tmenu.background_movie도 그대로 됩니다)
 
-define tmenu.background_movie = None
+define tmenu.background = None
+
+
+## ── 제목, 부제 글자 ───────────────────────────────────────────── (UI Kit 3.19) ──
+## 타이틀 화면에 보일 제목과 부제. 메뉴 항목처럼 위치, 회전, 크기, 글꼴, 색, 글자 효과를 적습니다.
+##   "text": None    제목은 게임 이름(config.name). 부제는 "" (안 보임)
+##   "effect": "glitch"   글자 효과 (대사 등장 효과와 같은 이름: scatter, drop, glitch, glow, vhs, liquid …)
+## 편집기에서 끌어서 옮기고, 분홍 네모를 끌어서 돌리고, 저장하면 title_menu_layout.rpy에 들어갑니다.
+## 글 내용은 PyKaki 앱의 "타이틀 메뉴" 칸에서 고칠 수 있습니다.
+
+define tmenu.labels = {
+    "title": { "text": None, "xalign": 0.5, "yalign": 0.2, "size": 72 },
+    "subtitle": { "text": "", "xalign": 0.5, "yalign": 0.31, "size": 30 },
+}
+
+## 메뉴 항목 글자에도 효과를 줄 수 있습니다. 위 tmenu.default나 항목마다 "effect": "glow"처럼.
+## 효과는 글자가 하나씩 나오면서 보이므로, 나오는 속도(초당 글자 수)를 정합니다.
+define tmenu.effect_cps = 30
 
 
 ## ── 소리 (선택 사항) ─────────────────────────────────────────────────────────
@@ -149,19 +170,13 @@ define tmenu.activate_sound = None
 ## ── 타이틀 화면의 게임 제목 ──────────────────────────────────────────────────
 ## 제목 글자는 gui.rpy의 gui.show_name, config.name을 따릅니다.
 
-## 제목 아래 버전 번호 표시
+## 오른쪽 아래 버전 번호 표시
 define tmenu.show_version = True
 
-## 렌파이 기본 GUI의 메뉴 뒤 반투명 판(gui/overlay/main_menu.png) 표시
-define tmenu.main_menu_frame = True
+## 렌파이 기본 GUI의 메뉴 뒤 반투명 판(gui/overlay/main_menu.png) 표시 (3.19부터 기본은 끔)
+define tmenu.main_menu_frame = False
 
-## 제목 위치·색을 바꾸려면 렌파이 스타일 문법으로 적으세요. 적은 속성만 바뀝니다.
-## style main_menu_vbox:
-##     xalign 0.45
-##     yalign 0.42
-##
-## style main_menu_title:
-##     color "#ffffff"
+## (3.18까지의 gui.show_name 제목은 tmenu.enabled = False일 때만 나옵니다. 지금은 위 tmenu.labels를 씁니다)
 
 
 ## ── 게임 중 ESC 메뉴 (일시정지 메뉴) ─────────────────────────── (UI Kit 3.1) ──
@@ -173,16 +188,23 @@ define tmenu.main_menu_frame = True
 ## True: ESC 메뉴를 타이틀 스타일로 / False: 렌파이 기본 (ESC를 누르면 바로 저장 화면)
 define tmenu.pause = True
 
-## 뒤에 깔린 게임 화면을 얼마나 어둡게 할지 (색 코드의 마지막 두 자리가 진하기. 00 투명 ~ ff 새까맣게)
-##   "#000000b3"   70% 어둡게 (기본)
-##   "#00000066"   40% 어둡게 (게임 화면이 잘 보임)
-##   "#20000099"   붉은빛으로 어둡게
-##   None          어둡게 하지 않음
-define tmenu.pause_dim = "#000000b3"
-
-## 어둡게 하는 대신 그림을 깔려면 (그림이 있으면 pause_dim은 안 씀)
-## define tmenu.pause_background = "gui/game_menu.png"
+## 배경: 그림이나 영상(webm). None이면 투명 (뒤 게임 화면이 그대로 보임) (3.19)
+## 편집기 "타이틀 메뉴" 탭(ESC 메뉴를 연 채로)의 "배경" 버튼이나 PyKaki 앱에서 고를 수도 있습니다.
+##   define tmenu.pause_background = "images/pause_bg.png"
+##   define tmenu.pause_background = "movies/pause_bg.webm"
 define tmenu.pause_background = None
+
+## 배경이 없을 때 뒤 게임 화면을 어둡게 하려면 (색 코드의 마지막 두 자리가 진하기. 00 투명 ~ ff 새까맣게)
+##   "#000000b3"   70% 어둡게 (3.18까지의 기본)
+##   "#00000066"   40% 어둡게
+##   None          어둡게 하지 않음 (3.19부터 기본)
+define tmenu.pause_dim = None
+
+## ESC 메뉴의 제목, 부제 (쓰는 법은 위 tmenu.labels와 같음. 기본은 둘 다 비어 있어서 안 보임)
+define tmenu.pause_labels = {
+    "title": { "text": "", "xalign": 0.5, "yalign": 0.12, "size": 56 },
+    "subtitle": { "text": "", "xalign": 0.5, "yalign": 0.2, "size": 26 },
+}
 
 ## 항목 목록. 안 적으면(None) 아래 7개가 기본입니다:
 ##   돌아가기 / 저장하기 / 불러오기 / 환경설정 / 대사록 / 메인 메뉴 / 종료하기

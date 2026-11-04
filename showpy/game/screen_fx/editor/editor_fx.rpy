@@ -235,6 +235,9 @@ init -6 python in screen_fx:
                 self.groups = { }       # 효과 이름 -> 막대 묶음 번호
                 self.targets = { }      # 효과 이름 -> None(기본 설정) 또는 프리셋 이름
                 self.copy_hint = "설정 파일에 붙여넣으세요."
+                self.picks = None       # 셰이더 고르기: 고른 (1번, 2번). None = 아직 안 고름 (게임의 지금 값) (4.3)
+                self.follow = True      # 셰이더 고르기: 고른 줄이 ▶(게임의 지금 줄)를 따라감
+                self.mark_t = 0.0       # ▶ 더블 클릭 판정용
 
             ## ── 페이지 ──
 
@@ -245,9 +248,11 @@ init -6 python in screen_fx:
                 return self.page == "tv"
 
             def pages(self):
-                rv = [ (i, EFFECTS[i].label + (" 덮개" if EFFECTS[i].overlay_only else "")) for i in ORDER ] + [ ("tv", "기본 효과, 전환") ]
+                rv = [ ]
                 if getattr(store, "script_edit", None) is not None:
-                    rv.append(("lines", "줄에 넣기"))
+                    rv.append(("lines", "셰이더 고르기"))
+                rv += [ (i, slot_label(i)) for i, _l in slot_choices() if i in EFFECTS ]
+                rv.append(("tv", "처음 상태, 전환"))
                 return rv
 
             def is_lines(self):
@@ -261,10 +266,15 @@ init -6 python in screen_fx:
             def on_open(self):
                 if self.is_lines():
                     if self.line_sel is None:
-                        self.line_to_current()
+                        self.follow = True
+                        self._follow()
                     self._sync()
                     return
                 if self.page not in EFFECTS and self.page != "tv":
+                    if getattr(store, "script_edit", None) is not None:
+                        self.page = "lines"
+                        self.on_open()
+                        return
                     cur = current_effect()
                     self.page = cur if cur in EFFECTS else ORDER[0]
                 self._sync()
@@ -280,7 +290,8 @@ init -6 python in screen_fx:
             def set_page(self, p):
                 self.page = p
                 if p == "lines" and self.line_sel is None:
-                    self.line_to_current()
+                    self.follow = True
+                    self._follow()
                 self._sync()
                 store.renpy.restart_interaction()
 
@@ -473,12 +484,93 @@ init -6 python in screen_fx:
             def _other_default(self, fx, key):
                 return { "enabled": True, "scope": "all", "target": fx.default_target, "overlay": fx.with_overlay }.get(key)
 
+            ## ── 셰이더 고르기 (4.3): 1번, 2번 자리 ──
+
+            def get_picks(self):
+                if self.picks is None:
+                    return current_slots()
+                return tuple(self.picks)
+
+            def preview_slots(self):
+                """엔진이 부름: 셰이더 고르기 페이지면 고른 두 자리를 화면에 미리 보여줌."""
+                if not self.is_lines() or self.picks is None:
+                    return None
+                return tuple(self.picks)
+
+            def set_pick(self, slot, name):
+                p = list(self.get_picks())
+                p[slot] = name
+                self.picks = p
+                renpy.restart_interaction()
+
+            def clear_picks(self):
+                """전부 셰이더 적용 취소: 두 자리 모두 기본(아무것도 안 함)."""
+                self.picks = [ NONE, NONE ]
+                _ed.msg("두 자리 모두 '기본'으로 골랐습니다. [[여기에서부터 적용]을 눌러야 원고에 들어갑니다.")
+                renpy.restart_interaction()
+
+            def apply_here(self):
+                """고른 줄 바로 위에 $ screen_fx.shaders(1번, 2번) 줄을 넣기로 함 (저장할 때 원고에)."""
+                if self.se() is None:
+                    _ed.msg("원고 쓰기 도구(UI Kit 3.0 이상)가 없습니다.")
+                    return
+                self._follow()
+                if self.line_sel is None:
+                    _ed.msg("줄을 넣을 수 있는 곳을 찾지 못했습니다. 게임을 진행한 뒤 다시 누르세요.")
+                    return
+                a, b = self.get_picks()
+                e = self._ledit(True)
+                for k in ("remove", "fx", "overlay", "warp", "cursor", "transition"):
+                    e.pop(k, None)
+                e["slots"] = (a, b)
+                _ed.msg("{}번째 줄부터 1번 {} + 2번 {}. 저장(Ctrl+S)하면 원고에 들어갑니다.".format(
+                    self.line_sel[1], slot_label(a), slot_label(b)))
+                renpy.restart_interaction()
+
+            def here_key(self):
+                """▶ 게임의 지금 줄 (파일, 줄 번호). 줄을 넣을 수 있는 다음 줄로 맞춤."""
+                n = self._current_node()
+                if n is None:
+                    return None
+                lines = [ l for l, _n in self.lines_of(n.filename) ]
+                if not lines:
+                    return None
+                after = [ l for l in lines if l >= n.linenumber ]
+                return (n.filename, (after[0] if after else lines[-1]))
+
+            def _follow(self):
+                """고른 줄이 ▶를 따라가는 중이면 지금 줄로 맞춤."""
+                if self.follow:
+                    k = self.here_key()
+                    if k is not None:
+                        self.line_sel = k
+
+            def mark_click(self):
+                """▶를 두 번 누르면(더블 클릭) 고른 줄을 ▶ 줄로 옮기고 다시 따라가게 함."""
+                now = time.time()
+                if now - self.mark_t < 0.6:
+                    self.mark_t = 0.0
+                    self.follow = True
+                    self._follow()
+                    _ed.msg("지금 줄로 옮겼습니다. 게임을 진행하면 고른 줄이 따라갑니다.")
+                else:
+                    self.mark_t = now
+                    _ed.msg("세모는 게임의 지금 줄입니다. 두 번 누르면 그 줄로 갑니다.")
+                renpy.restart_interaction()
+
+            def mark_font(self):
+                """세모 표시용 글꼴 (Neo둥근모. 렌파이 기본 글꼴에는 세모가 없음)."""
+                root = ROOT.replace("\\", "/")
+                if root.startswith("game/"):
+                    root = root[5:]
+                return root + "/fonts/neodgm.ttf"
+
             ## ── 줄에 넣기 (4.1): 원고의 고른 줄 바로 위에 $ screen_fx.use(…) 같은 줄을 넣음 ──
 
             FOLLOW = "__follow__"
             LIST_ROWS = 7
             ## 이 글자로 시작하는 줄은 편집기가 넣는 줄로 보고, 같은 자리에 다시 넣으면 바꿈
-            OUR_LINES = ("$ screen_fx.use(", "$ screen_fx.clear(", "$ screen_fx.set_overlay(", "$ screen_fx.set_warp(", "$ screen_fx.set_cursor(")
+            OUR_LINES = ("$ screen_fx.shaders(", "$ screen_fx.use(", "$ screen_fx.clear(", "$ screen_fx.set_overlay(", "$ screen_fx.set_warp(", "$ screen_fx.set_cursor(")
             WARPS = ((0.0, "0 평평"), (0.5, "0.5"), (1.0, "1 기본"), (2.0, "2"), (3.0, "3"), (5.0, "5 크게"))
 
             def se(self):
@@ -514,6 +606,7 @@ init -6 python in screen_fx:
                     return [ ]
 
             def line_to_current(self):
+                self.follow = True
                 n = self._current_node()
                 if n is None:
                     _ed.msg("지금 줄을 알 수 없습니다. 게임을 진행한 뒤 다시 누르세요.")
@@ -529,6 +622,7 @@ init -6 python in screen_fx:
 
             def set_line(self, key):
                 self.line_sel = key
+                self.follow = (key is not None and key == self.here_key())
                 renpy.restart_interaction()
 
             def step_line(self, step):
@@ -580,6 +674,7 @@ init -6 python in screen_fx:
 
             def nearby_lines(self):
                 """목록에 보여줄 줄 [(줄 번호, 글자, 고른 것인지, 지금 줄인지, 저장 안 한 변경이 있는지)]"""
+                self._follow()
                 fn = self.line_file()
                 lines = self.lines_of(fn)
                 if not lines:
@@ -588,14 +683,14 @@ init -6 python in screen_fx:
                 k = nums.index(self.line_sel[1]) if (self.line_sel is not None and self.line_sel[1] in nums) else 0
                 half = self.LIST_ROWS // 2
                 lo = max(0, min(k - half, len(lines) - self.LIST_ROWS))
-                cur = self._current_node()
+                hk = self.here_key()
                 rv = [ ]
                 for l, _n in lines[lo:lo + self.LIST_ROWS]:
                     key = (fn, l)
                     t = (self.line_source(key) or "").strip()
-                    if len(t) > 54:
-                        t = t[:53] + "…"
-                    here = cur is not None and cur.filename == fn and cur.linenumber == l
+                    if len(t) > 50:
+                        t = t[:49] + "…"
+                    here = (hk == key)
                     rv.append((l, _ed.esc(t), key == self.line_sel, here, key in self.line_edits))
                 return rv
 
@@ -651,6 +746,9 @@ init -6 python in screen_fx:
 
             def gen_lines(self, e):
                 """편집 값 → 넣을 줄 목록 (앞 공백 없이)."""
+                if "slots" in e:
+                    a, b = e["slots"]
+                    return [ '$ screen_fx.shaders("{}", "{}")'.format(a, b) ]
                 F = self.FOLLOW
                 fx, ov, warp, tr = (e.get(k, F) for k in ("fx", "overlay", "warp", "transition"))
                 cur = e.get("cursor", F)
@@ -858,6 +956,7 @@ init -6 python in screen_fx:
                 cedit.edits = { }
                 cedit.tv = { }
                 self.line_edits = { }
+                self.picks = None
                 store.renpy.restart_interaction()
 
             def _changed_presets(self, fx):
@@ -936,7 +1035,7 @@ init -6 python in screen_fx:
                     "이 파일을 지우면 설정 파일 값으로 돌아갑니다.",
                     ])
                 lines.append("define screen_fx.layout = {")
-                for k in ("base", "overlay", "transition", "fade_time", "wait", "skippable"):
+                for k in ("base", "overlay", "title_shaders", "menu_shaders", "transition", "fade_time", "wait", "skippable"):
                     if k in lay:
                         lines.append('    "{}": {},'.format(k, format_value(lay[k])))
                 if "tv" in lay:
@@ -985,7 +1084,7 @@ init -6 python in screen_fx:
                 if self.is_tv():
                     lay = self._merged_cfg()
                     lines = [ "# screen_fx_config.rpy에 붙여넣기" ]
-                    for k in ("base", "overlay", "transition", "fade_time", "wait", "skippable"):
+                    for k in ("base", "overlay", "title_shaders", "menu_shaders", "transition", "fade_time", "wait", "skippable"):
                         lines.append("define screen_fx.{} = {}".format(k, format_value(self._tv_val(k))))
                     lines.append("define screen_fx.tv = {")
                     for k in TV_DEFAULTS:
@@ -1009,11 +1108,16 @@ init -6 python in screen_fx:
             def info_lines(self):
                 rv = [ ]
                 if self.is_lines():
+                    self._follow()
+                    a, b = self.get_picks()
+                    rv.append("고른 셰이더: 1번 {} + 2번 {}{}".format(slot_label(a), slot_label(b),
+                        "" if self.picks is not None else " (게임의 지금 값)"))
                     if self.line_sel is None:
                         rv.append("고른 줄이 없습니다. [ ] 키, 목록, 줄 번호로 고르세요.")
                     else:
-                        rv.append("고른 줄: {} {}번째 줄 (이 줄 바로 위에 넣습니다)".format(
-                            self.line_sel[0].replace("\\", "/").replace("game/", "", 1), self.line_sel[1]))
+                        rv.append("고른 줄: {} {}번째 줄{} (이 줄부터 적용)".format(
+                            self.line_sel[0].replace("\\", "/").replace("game/", "", 1), self.line_sel[1],
+                            ", 지금 줄을 따라감" if self.follow else ""))
                         have = self.existing_lines(self.line_sel)
                         rv.append("지금 들어 있음: " + (" / ".join(have) if have else "없음"))
                         pv = self.preview_lines()
@@ -1024,9 +1128,8 @@ init -6 python in screen_fx:
                     rv.append("원고에 저장 안 한 줄 {}곳 (Ctrl+S)".format(n) if n else "저장 안 한 변경 없음")
                     return [ _ed.esc(i) for i in rv ]
                 if self.is_tv():
-                    rv.append("기본 효과: {}   덮개(VHS): {}".format(
-                        effect_label(resolve(self._tv_val("base"))),
-                        "끔" if overlay_flag(self._tv_val("overlay")) is False else "켬"))
+                    rv.append("게임을 시작할 때: 1번 {}   2번 {}".format(
+                        slot_label(self.start_slot(0)), slot_label(self.start_slot(1))))
                     rv.append(self._scene_line())
                     snd = [ ]
                     c = tv_conf()
@@ -1039,33 +1142,46 @@ init -6 python in screen_fx:
                         rv.append("꺼져 있습니다. 켜야 화면에 보입니다.")
                     if getattr(store.persistent, fx.id + "_off"):
                         rv.append("플레이어 설정({}.Toggle)에서 꺼져 있지만, 편집 중에는 보여줍니다.".format(fx.id))
-                    if fx.scoped and not fx.conf("auto", True):
-                        rv.append("auto = False: 게임에서는 camera at {}.effect를 쓴 곳에만 보입니다.".format(fx.id))
                     if fx.overrides():
                         rv.append("게임 중에 {}.set()으로 바꾼 값은 편집 중에 잠시 빼고 보여줍니다.".format(fx.id))
                     rv.append("글자 빼기: {}{}".format(exclude_label(fx.exclude()),
                         "" if text_layers_on() else "  (split_text_layers = False라서 글자는 한꺼번에만 뺄 수 있음)"))
-                    if not fx.overlay_only:
-                        rv.append("이 효과를 쓰는 동안 덮개(VHS): {}".format("켬" if self.cur_other("overlay") else "끔"))
-                    rv.append("이 탭은 효과의 설정값을 고칩니다. 편집하는 동안 이 효과만 보여줍니다.")
+                    rv.append("이 페이지는 {}의 세부 속성을 고칩니다. 편집하는 동안 이 효과만 보여줍니다.".format(slot_label(fx.id)))
+                    rv.append("인게임, 타이틀, 게임 내 메뉴에서 같이 씁니다.")
                     rv.append(self._scene_line())
-                    rv.append("지금 장면에 쓰려면 '이 대사부터 이 효과'(대사 괄호에) 또는 '이 줄부터 이 효과'(고른 줄 위에 넣기).")
+                    rv.append("지금 장면에 쓰려면 '셰이더 고르기'에서 고르고 [[여기에서부터 적용].")
                 n = self.pending()
                 rv.append("저장 안 한 변경: {}개".format(n) if n else "저장 안 한 변경 없음")
                 return rv
 
             def _scene_line(self):
-                ovl = current_overlay()
-                warp = warp_value()
-                return "게임의 지금 장면: {}{}".format(
-                    effect_label(current_effect()),
-                    (" + 덮개 VHS (휘어짐 {})".format(_fmt_num(float(warp), 2)) if warp is not None else " + 덮개 VHS") if ovl else ", 덮개 끔")
+                a, b = current_slots()
+                return "게임의 지금 장면: 1번 {} + 2번 {}".format(slot_label(a), slot_label(b))
+
+            ## 처음 상태 (screen_fx.base, screen_fx.overlay)
+
+            def start_slot(self, slot):
+                if slot == 0:
+                    b = self._tv_val("base")
+                    return b if b in EFFECTS else NONE
+                f = overlay_flag(self._tv_val("overlay"))
+                if f is True or f == DEFAULT:
+                    return OVERLAY if OVERLAY in EFFECTS else NONE
+                if isinstance(f, str) and f in EFFECTS:
+                    return f
+                return NONE
+
+            def set_start_slot(self, slot, name):
+                if slot == 0:
+                    self.cfg_put("base", name)
+                else:
+                    self.cfg_put("overlay", False if name == NONE else name)
 
             def help_lines(self):
                 if self.is_lines():
                     return [
-                        "[[ ] 앞뒤 줄 | PageUp/Down 7줄씩 | L 목록 접기 | 어느 줄이든 그 바로 위에 줄을 넣습니다.",
-                        "Ctrl+S 원고에 넣기 (그 앞 대사부터 다시 나옴) | Backspace 이 줄 되돌리기",
+                        "1번, 2번을 고르면 화면에 바로 보입니다. 고른 줄은 세모(게임의 지금 줄)를 따라갑니다.",
+                        "[[ ] 앞뒤 줄 | 목록에서 줄 누르기 | 세모 두 번 누르기: 지금 줄로 | Ctrl+S 원고에 넣기",
                         ]
                 if self.is_tv():
                     return [
@@ -1073,8 +1189,8 @@ init -6 python in screen_fx:
                         "Backspace 전환 설정 되돌리기",
                         ]
                 return [
-                    "막대를 끌면 바로 보입니다. 프리셋을 고르면 그 프리셋을 미리 보며 고칩니다.",
-                    "프리셋에서 '빼기'를 누르면 그 값은 기본 설정을 따릅니다. Backspace 지금 대상 되돌리기",
+                    "막대를 끌면 바로 보입니다. 세부 속성에서 프리셋을 고르면 그 프리셋을 미리 보며 고칩니다.",
+                    "프리셋에서 '빼기'를 누르면 그 값은 기본 설정을 따릅니다.",
                     ]
 
             def label_of(self, key, digits):
@@ -1094,8 +1210,96 @@ init -6 python in screen_fx:
                     self.targets = dict(d.get("targets") or { })
                     self.line_edits = { tuple(k) : dict(v) for k, v in (d.get("line_edits") or { }).items() }
 
+        ## ── 타이틀 셰이더 / 게임 내 메뉴 셰이더 (4.3) ──
+        ## 그 화면에만 씌우는 셰이더 두 자리. 저장하면 screen_fx_layout.rpy의 title_shaders / menu_shaders.
+
+        class MenuFxTab(FxTabBase):
+
+            panel_screen = "ui_editor_menu_fx_panel"
+            overlay_screen = None
+            copy_hint = "screen_fx_config.rpy에 붙여넣으세요."
+
+            def __init__(self, tab_id, label, ctx):
+                self.id = tab_id
+                self.label = label
+                self.ctx = ctx
+                self.key = MENU_KEYS[ctx]
+
+            def available(self):
+                if not EFFECTS:
+                    return (False, "등록된 화면 효과가 없습니다.")
+                if menu_context() != self.ctx:
+                    if self.ctx == "title":
+                        return (False, "타이틀 화면에서 쓸 수 있습니다. (이 셰이더는 타이틀에만 걸려서)")
+                    return (False, "게임 중 ESC 메뉴를 연 채로 쓸 수 있습니다. (이 셰이더는 그 메뉴에만 걸려서)")
+                return (True, "")
+
+            def _base(self):
+                lay = _lay()
+                if self.key in lay:
+                    return norm_slots(lay[self.key])
+                return norm_slots(globals().get(self.key, DEFAULTS[self.key]))
+
+            def slots(self):
+                if self.key in cedit.edits:
+                    return norm_slots(cedit.edits[self.key])
+                return self._base()
+
+            def set_slot(self, slot, name):
+                p = list(self.slots())
+                p[slot] = name
+                p = tuple(p)
+                if p == self._base():
+                    cedit.edits.pop(self.key, None)
+                else:
+                    cedit.edits[self.key] = p
+                renpy.restart_interaction()
+
+            def clear(self):
+                self.set_slot(0, NONE)
+                self.set_slot(1, NONE)
+                _ed.msg("두 자리 모두 '기본'(아무것도 안 함)으로 돌렸습니다.")
+
+            def reset_item(self):
+                self.discard()
+
+            def discard(self):
+                cedit.edits.pop(self.key, None)
+                renpy.restart_interaction()
+
+            def pending(self):
+                return 1 if self.key in cedit.edits else 0
+
+            def layout_file(self):
+                return _ed.get_tab(TAB_ID)._cfg_file()
+
+            def after_save(self):
+                cedit.saved = _ed.get_tab(TAB_ID)._merged_cfg()
+                cedit.edits = { }
+                cedit.tv = { }
+                return False
+
+            def copy_text(self):
+                return "define screen_fx.{} = {}".format(self.key, format_value(self.slots()))
+
+            def info_lines(self):
+                a, b = self.slots()
+                rv = [ "1번 {} + 2번 {}".format(slot_label(a), slot_label(b)) ]
+                if self.ctx == "title":
+                    rv.append("타이틀과 타이틀에서 연 화면(환경설정, 불러오기)에만 걸립니다. 인게임 셰이더와 따로입니다.")
+                else:
+                    rv.append("게임 중 ESC 메뉴와 거기서 연 화면(저장, 환경설정 …)에만 걸립니다. 뒤에 비치는 게임 화면도 이 셰이더로 보입니다.")
+                rv.append("효과마다 세부 속성은 '화면 효과' 탭에서 고칩니다 (인게임과 같이 씀).")
+                rv.append("저장 안 한 변경 있음" if self.pending() else "저장 안 한 변경 없음")
+                return rv
+
+            def help_lines(self):
+                return [ "1번, 2번을 고르면 화면에 바로 보입니다. 같은 효과는 한 번만 씌웁니다." ]
+
         _ed.register(WatermorphTab())
         _ed.register(FxTab())
+        _ed.register(MenuFxTab("title_fx", "타이틀 셰이더", "title"))
+        _ed.register(MenuFxTab("pause_fx", "게임 내 메뉴 셰이더", "pause"))
 
         ## "줄에 넣기" 페이지의 줄 번호 입력 칸 (UI Kit 3.0 이상)
         fx_line_input = _ed.LineInputValue(TAB_ID) if hasattr(_ed, "LineInputValue") else None
@@ -1214,18 +1418,32 @@ screen ui_editor_watermorph_panel(tab):
             textbutton "모두 버리기" style "ui_editor_button" action Function(tab.discard)
 
 
+
+## 셰이더 한 자리 고르기 줄 (1번 / 2번). pick(slot, name)으로 고름 (4.3)
+screen ui_editor_fx_slot_row(label, slot, cur, pick, clear=None):
+    hbox:
+        spacing 4
+        box_wrap True
+        box_wrap_spacing 4
+        xmaximum 632
+        use ui_editor_fx_name(label)
+        for _n, _nl in screen_fx.slot_choices():
+            textbutton _nl style "ui_editor_fx_button" action Function(pick, slot, _n) selected (cur == _n)
+        if clear is not None:
+            textbutton "전부 셰이더 적용 취소" style "ui_editor_fx_button" action Function(clear)
+
+
 screen ui_editor_screen_fx_panel(tab):
 
     vbox:
         spacing 6
 
-        ## 고칠 효과 고르기
+        ## 페이지 고르기: 셰이더 고르기 / 효과마다 세부 속성 / 처음 상태, 전환
         hbox:
             spacing 4
             box_wrap True
             box_wrap_spacing 4
             xmaximum 632
-            text "효과:" style "ui_editor_text" yalign 0.5
             for _p, _pl in tab.pages():
                 textbutton _pl style "ui_editor_tab" action Function(tab.set_page, _p) selected (tab.page == _p)
 
@@ -1234,23 +1452,8 @@ screen ui_editor_screen_fx_panel(tab):
 
         elif tab.is_tv():
 
-            hbox:
-                spacing 6
-                box_wrap True
-                xmaximum 632
-                use ui_editor_fx_name("기본 효과")
-                for _n, _nl in screen_fx.choices():
-                    if _n != screen_fx.DEFAULT:
-                        textbutton _nl style "ui_editor_fx_button" action Function(tab.cfg_put, "base", _n) selected (tab.cfg_val("base") == _n)
-
-            hbox:
-                spacing 6
-                box_wrap True
-                xmaximum 632
-                use ui_editor_fx_name("덮개(VHS)")
-                $ _of = screen_fx.overlay_flag(tab.cfg_val("overlay"))
-                textbutton "켬" style "ui_editor_fx_button" action Function(tab.cfg_put, "overlay", True) selected (_of is not False)
-                textbutton "끔" style "ui_editor_fx_button" action Function(tab.cfg_put, "overlay", False) selected (_of is False)
+            use ui_editor_fx_slot_row("처음 1번", 0, tab.start_slot(0), tab.set_start_slot)
+            use ui_editor_fx_slot_row("처음 2번", 1, tab.start_slot(1), tab.set_start_slot)
 
             hbox:
                 spacing 6
@@ -1272,25 +1475,8 @@ screen ui_editor_screen_fx_panel(tab):
                 spacing 6
                 textbutton "미리 보기: TV" style "ui_editor_button" action Function(tab.preview, "tv")
                 textbutton "미리 보기: 서서히" style "ui_editor_button" action Function(tab.preview, "fade")
-                textbutton "전환 되돌리기" style "ui_editor_button" action Function(tab.reset_item)
-                textbutton "모두 버리기" style "ui_editor_button" action Function(tab.discard)
 
         else:
-
-            hbox:
-                spacing 6
-                use ui_editor_fx_name("켜기/범위" if tab.fx().scoped else "켜기")
-                textbutton ("켬" if tab.cur_other("enabled") else "끔") style "ui_editor_fx_button" action Function(tab.put_other, "enabled", not tab.cur_other("enabled")) selected bool(tab.cur_other("enabled"))
-                if tab.fx().scoped:
-                    for _s, _sl in tab.SCOPES:
-                        textbutton _sl style "ui_editor_fx_button" action Function(tab.put_other, "scope", _s) selected (tab.cur_other("scope") == _s)
-
-            if not tab.fx().overlay_only:
-                hbox:
-                    spacing 6
-                    use ui_editor_fx_name("덮개(VHS)")
-                    textbutton "켬" style "ui_editor_fx_button" action Function(tab.put_other, "overlay", True) selected bool(tab.cur_other("overlay"))
-                    textbutton "끔" style "ui_editor_fx_button" action Function(tab.put_other, "overlay", False) selected (not tab.cur_other("overlay"))
 
             hbox:
                 spacing 6
@@ -1307,7 +1493,7 @@ screen ui_editor_screen_fx_panel(tab):
                 spacing 6
                 box_wrap True
                 xmaximum 630
-                use ui_editor_fx_name("고칠 대상")
+                use ui_editor_fx_name("세부 속성")
                 textbutton "기본 설정" style "ui_editor_fx_button" action Function(tab.set_target, None) selected (tab.target is None)
                 for _n in tab.preset_names():
                     textbutton ("프리셋: " + _n) style "ui_editor_fx_button" action Function(tab.set_target, _n) selected (tab.target == _n)
@@ -1315,22 +1501,22 @@ screen ui_editor_screen_fx_panel(tab):
             if len(tab.group_list()) > 1:
                 hbox:
                     spacing 4
+                    box_wrap True
+                    box_wrap_spacing 4
+                    xmaximum 632
                     for _i, _g in enumerate(tab.group_list()):
                         textbutton _g[0] style "ui_editor_tab" action Function(tab.set_group, _i) selected (tab.group == _i)
 
             for _row in tab.rows():
                 use ui_editor_fx_row(tab, _row)
 
-            hbox:
-                spacing 6
-                textbutton ("이 대사부터 덮개 켜기" if tab.fx().overlay_only else "이 대사부터 이 효과") style "ui_editor_button" action Function(tab.apply_to_line)
-                textbutton ("이 줄부터 덮개 켜기" if tab.fx().overlay_only else "이 줄부터 이 효과") style "ui_editor_button" action Function(tab.apply_to_lines)
-                textbutton "이 대상 되돌리기" style "ui_editor_button" action Function(tab.reset_item)
-                textbutton "모두 버리기" style "ui_editor_button" action Function(tab.discard)
 
-
-## "줄에 넣기" 페이지 (4.1): 고른 줄 바로 위에 $ screen_fx.use(…) 같은 줄을 넣음
+## "셰이더 고르기" 페이지 (4.3): 1번, 2번을 고르고 고른 줄부터 적용 ($ screen_fx.shaders(…) 줄을 넣음)
 screen ui_editor_fx_lines_panel(tab):
+
+    $ _a, _b = tab.get_picks()
+    use ui_editor_fx_slot_row("1번 셰이더", 0, _a, tab.set_pick, tab.clear_picks)
+    use ui_editor_fx_slot_row("2번 셰이더", 1, _b, tab.set_pick, tab.clear_picks)
 
     hbox:
         spacing 4
@@ -1346,85 +1532,60 @@ screen ui_editor_fx_lines_panel(tab):
                 xsize 70
                 action screen_fx.fx_line_input.Toggle()
                 input value screen_fx.fx_line_input style "ui_editor_text" length 6 allow "0123456789"
-        textbutton "지금 줄로" style "ui_editor_button" text_size 13 action Function(tab.line_to_current)
         textbutton ("L 목록 접기" if tab.list_open else "L 목록 펴기") style "ui_editor_button" text_size 13 action ToggleField(tab, "list_open")
 
     if tab.list_open:
+        $ _rows = tab.nearby_lines()
+        $ _hk = tab.here_key()
         vbox:
             spacing 1
-            for _line, _text, _on, _here, _dirty in tab.nearby_lines():
-                button:
-                    style "ui_editor_button"
-                    xsize 620
-                    padding (6, 1)
-                    action Function(tab.set_line, (tab.line_file(), _line))
-                    selected _on
-                    hbox:
-                        spacing 6
-                        text ("{:>4}".format(_line)) style "ui_editor_small" color ("#ff3b8d" if _here else "#cccccc") min_width 34
-                        text (("* " if _dirty else "") + _text) style "ui_editor_small" color "#ffffff"
-
-    $ _F = tab.FOLLOW
-
-    hbox:
-        spacing 4
-        box_wrap True
-        box_wrap_spacing 4
-        xmaximum 620
-        use ui_editor_fx_name("화면 효과")
-        textbutton "그대로" style "ui_editor_fx_button" action Function(tab.lput, "fx", _F) selected (tab.lval("fx") == _F)
-        for _n, _nl in screen_fx.choices():
-            textbutton (("선택취소 → " + _nl) if _n == screen_fx.DEFAULT else _nl) style "ui_editor_fx_button" action Function(tab.lput, "fx", _n) selected (tab.lval("fx") == _n)
-
-    hbox:
-        spacing 4
-        box_wrap True
-        box_wrap_spacing 4
-        xmaximum 620
-        use ui_editor_fx_name("덮개(VHS)")
-        $ _ov = tab.lval("overlay")
-        textbutton "그대로" style "ui_editor_fx_button" action Function(tab.lput, "overlay", _F) selected (_ov == _F)
-        textbutton "켬" style "ui_editor_fx_button" action Function(tab.lput, "overlay", True) selected (_ov is True)
-        textbutton "끔" style "ui_editor_fx_button" action Function(tab.lput, "overlay", False) selected (_ov is False)
-
-    hbox:
-        spacing 4
-        box_wrap True
-        box_wrap_spacing 4
-        xmaximum 620
-        use ui_editor_fx_name("덮개 휘어짐")
-        $ _wv = tab.lval("warp")
-        textbutton "그대로" style "ui_editor_fx_button" action Function(tab.lput, "warp", _F) selected (_wv == _F)
-        textbutton "설정값" style "ui_editor_fx_button" action Function(tab.lput, "warp", screen_fx.DEFAULT) selected (_wv == screen_fx.DEFAULT)
-        for _w, _wl in tab.WARPS:
-            textbutton _wl style "ui_editor_fx_button" action Function(tab.lput, "warp", _w) selected (_wv == _w)
-
-    if hasattr(screen_fx, "CURSOR_LABELS"):
-        hbox:
-            spacing 4
-            box_wrap True
-            box_wrap_spacing 4
-            xmaximum 620
-            use ui_editor_fx_name("커서")
-            $ _cv = tab.lval("cursor")
-            textbutton "그대로" style "ui_editor_fx_button" action Function(tab.lput, "cursor", _F) selected (_cv == _F)
-            textbutton "설정값" style "ui_editor_fx_button" action Function(tab.lput, "cursor", screen_fx.DEFAULT) selected (_cv == screen_fx.DEFAULT)
-            for _c, _cl in screen_fx.CURSOR_LABELS:
-                textbutton _cl style "ui_editor_fx_button" action Function(tab.lput, "cursor", _c) selected (_cv == _c)
-
-    hbox:
-        spacing 4
-        box_wrap True
-        box_wrap_spacing 4
-        xmaximum 620
-        use ui_editor_fx_name("전환")
-        $ _tv = tab.lval("transition")
-        textbutton "설정대로" style "ui_editor_fx_button" action Function(tab.lput, "transition", _F) selected (_tv == _F)
-        for _t, _tl in tab.TRANSITION_LABELS:
-            textbutton _tl style "ui_editor_fx_button" action Function(tab.lput, "transition", _t) selected (_tv == _t and _tv != _F)
+            for _line, _text, _on, _here, _dirty in _rows:
+                hbox:
+                    spacing 2
+                    ## 세모: 게임의 지금 줄. 두 번 누르면 고른 줄이 이 줄로 (그다음부터 따라감)
+                    button:
+                        style "ui_editor_button"
+                        xsize 26
+                        padding (2, 1)
+                        action Function(tab.mark_click)
+                        sensitive _here
+                        if _here:
+                            text "▶" font tab.mark_font() size 14 color "#ff3b8d" xalign 0.5
+                        else:
+                            null width 1
+                    button:
+                        style "ui_editor_button"
+                        xsize 594
+                        padding (6, 1)
+                        action Function(tab.set_line, (tab.line_file(), _line))
+                        selected _on
+                        hbox:
+                            spacing 6
+                            text ("{:>4}".format(_line)) style "ui_editor_small" color ("#ff3b8d" if _here else "#cccccc") min_width 34
+                            text (("* " if _dirty else "") + _text) style "ui_editor_small" color "#ffffff"
+            ## 세모가 목록 밖이면 (다른 파일이거나 멀리 있으면) 따로 한 줄
+            if _hk is not None and not [ r for r in _rows if r[3] ]:
+                hbox:
+                    spacing 2
+                    button:
+                        style "ui_editor_button"
+                        xsize 26
+                        padding (2, 1)
+                        action Function(tab.mark_click)
+                        text "▶" font tab.mark_font() size 14 color "#ff3b8d" xalign 0.5
+                    text ("지금 줄: {} {}번째 (세모를 두 번 누르면 그 줄로)".format(_hk[0].replace("\\", "/").replace("game/", "", 1), _hk[1])) style "ui_editor_small" yalign 0.5
 
     hbox:
         spacing 6
-        textbutton "이 줄 위의 효과 줄 지우기" style "ui_editor_button" action Function(tab.lremove)
-        textbutton "이 줄 되돌리기" style "ui_editor_button" action Function(tab.lreset)
-        textbutton "모두 버리기" style "ui_editor_button" action Function(tab.discard)
+        textbutton "여기에서부터 적용" style "ui_editor_button" action Function(tab.apply_here)
+        textbutton "이 줄 위의 셰이더 줄 지우기" style "ui_editor_button" action Function(tab.lremove)
+
+
+## 타이틀 셰이더 / 게임 내 메뉴 셰이더 탭 (4.3)
+screen ui_editor_menu_fx_panel(tab):
+
+    vbox:
+        spacing 6
+        $ _a, _b = tab.slots()
+        use ui_editor_fx_slot_row("1번 셰이더", 0, _a, tab.set_slot, tab.clear)
+        use ui_editor_fx_slot_row("2번 셰이더", 1, _b, tab.set_slot, tab.clear)
