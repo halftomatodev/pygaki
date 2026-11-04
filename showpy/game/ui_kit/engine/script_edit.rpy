@@ -683,7 +683,7 @@ init -19 python in script_edit:
     PYKAKI_MARK = "# PyKaki가 만든 파일이에요."
     INBOX_FILE = "showpy_inbox.json"
     MEDIA_HEADS = ("show", "scene", "hide", "play", "stop")
-    _PK_BLOCK = "PyKaki가 만든 원고라 저장하지 않았습니다. 대사 글자와 모양, 선택지는 PyKaki에서, 줄마다 바꾸는 화면 효과는 대사 탭에서 고치세요."
+    _PK_BLOCK = "PyKaki가 만든 원고라 저장하지 않았습니다. 대사 글자와 모양, 선택지는 PyKaki에서 고치세요. 셰이더와 커서는 화면 효과, 커서 칸의 [[여기에서부터 적용]으로."
     _PK_OLD = "이 줄의 표시가 없습니다. PyKaki에서 showpy 연결을 켜고 다시 내보내세요."
 
     _pk_cache = { }     # 실제 경로 -> (수정 시각, PyKaki 원고인지)
@@ -739,6 +739,15 @@ init -19 python in script_edit:
         _pk_seq[0] += 1
         return "sp{:x}{:x}".format(int(time.time() * 1000) & 0xfffffff, _pk_seq[0])
 
+    FX_HEAD = "$ screen_fx."
+
+    def _fx_insert(e):
+        """화면 효과 줄만 넣거나 바꾸는 편집인지 (넣을 줄이 없으면 지우기)."""
+        heads = tuple(e.args.get("replace", ( )))
+        if not heads or not all(h.startswith(FX_HEAD) for h in heads):
+            return False
+        return all(t.strip().startswith(FX_HEAD) for t in e.args.get("lines", [ ]) if t.strip())
+
     def _pk_prepare(lines, group):
         """PyKaki 원고에 쓸 수 있는 편집만 남기고, 받아 적을 기록을 붙입니다."""
         rv = [ ]
@@ -757,6 +766,43 @@ init -19 python in script_edit:
                     e.reason = _PK_OLD
                     e.no_copy = True
                     continue
+            elif e.kind == INSERT and _fx_insert(e):
+                ## 화면 효과 줄($ screen_fx.…, 3.21): 고른 줄 위의 같은 줄들을 바꿔 쓰고 PyKaki에도
+                ## 바꾸기(replace) / 넣기(insert) / 지우기(remove)로 알림
+                lid = _pk_mark(lines, n, "# @l:")
+                if lid is None:
+                    e.reason = _PK_OLD
+                    continue
+                heads = tuple(e.args.get("replace", ( )))
+                ind = _indent(_split_eol(lines[n - 1])[0])
+                existing = [ ]
+                k = n - 2       # 고른 줄의 표시(n-1) 바로 위 줄 (1부터 세는 번호)
+                while k >= 2:
+                    t = _split_eol(lines[k - 1])[0]
+                    m = _split_eol(lines[k - 2])[0]
+                    if (_indent(t) == ind and t.strip().startswith(heads) and
+                            _indent(m) == ind and m.strip().startswith("# @l:")):
+                        existing.insert(0, m.strip()[len("# @l:"):].strip())
+                        k -= 2
+                    else:
+                        break
+                box = _pk_box(lines, n)
+                codes = [ t.strip() for t in e.args.get("lines", [ ]) if t.strip() ]
+                new = [ ]
+                for i, t in enumerate(codes):
+                    if i < len(existing):
+                        x = existing[i]
+                        e.pk_ops.append(dict(id=_pk_id(), op="replace", line=x, code=t))
+                    else:
+                        x = _pk_id()
+                        e.pk_ops.append(dict(id=x, op="insert", code=t, box=box, before=lid))
+                    new += [ "# @l:" + x, t ]
+                for x in existing[len(codes):]:
+                    e.pk_ops.append(dict(id=_pk_id(), op="remove", line=x))
+                e.linenumber = n - 1
+                e.expect = None
+                e.args["lines"] = new
+                e.args["replace"] = heads + ("# @l:",)
             elif e.kind in INSERT_KINDS and all(t.strip().split(None, 1)[0] in MEDIA_HEADS for t in e.args.get("lines", [ ]) if t.strip()):
                 lid = _pk_mark(lines, n, "# @l:")
                 if e.kind == INSERT:
@@ -1005,11 +1051,18 @@ init -19 python in script_edit:
             t, _eol = _split_eol(new_lines[i])
             return _indent(t) == ind and t.strip().startswith(heads)
 
+        def blank(i):
+            return 0 <= i < len(new_lines) and not _split_eol(new_lines[i])[0].strip()
+
         if e.kind == INSERT:
             end = n - 1                  # 넣을 자리 (고른 줄 바로 앞)
             start = end
-            while ours(start - 1):
-                start -= 1
+            ## 위로 올라가며 우리 줄을 찾음. 사이의 빈 줄은 건너뛰되, 우리 줄이 더 없으면 빈 줄은 그대로 둠 (3.21)
+            j = start - 1
+            while ours(j) or blank(j):
+                if ours(j):
+                    start = j
+                j -= 1
         else:
             start = n
             if body.rstrip().endswith(":"):

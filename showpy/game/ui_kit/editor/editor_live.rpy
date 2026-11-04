@@ -46,6 +46,7 @@ init -8 python in ui_editor:
             self.failed = False
             self.files_due = False      # 파일 목록(소리, 그림)을 보내야 함 (붙을 때, 앱이 달라고 할 때)
             self.listen_until = None    # 앱에서 [들어보기]를 누른 대사 소리를 멈출 시각
+            self.after_warp = None      # warp 뒤에 셰이더, 커서 상태를 맞출 (파일, 줄) (3.21)
             self.widgets = { }          # 앱으로 보낸 패널의 누를 수 있는 것: 자리 번호 -> 위젯 (3.16)
 
     live = _Live()
@@ -275,7 +276,19 @@ init -8 python in ui_editor:
             reload_keys=list(t.RELOAD_KEYS),
             fps=getattr(cu, "FPS", 24), max_frames=t.max_frames(),
             playing=live.listen_until is not None,
+            cursor_lines=_cursor_lines(),
             )
+
+    def _cursor_lines():
+        """커서와 셰이더 '여기에서부터' (Screen FX 4.5가 있을 때, 3.21)."""
+        fx = get_tab("screen_fx")
+        f = getattr(fx, "cursor_state", None)
+        if f is None:
+            return None
+        try:
+            return _js(f())
+        except Exception:
+            return None
 
     def _files():
         uk = store.ui_kit
@@ -620,6 +633,27 @@ init -8 python in ui_editor:
         elif cmd == "custom_ui.stop":
             t.stop_sound()
             live.listen_until = None
+        elif cmd == "custom_ui.cursor":
+            ## 커서와 셰이더 '여기에서부터' (3.21): do = mode / pick / step / here / apply / remove / leave
+            fx = get_tab("screen_fx")
+            if fx is None or not hasattr(fx, "cursor_state"):
+                return False
+            do = c.get("do")
+            if do == "mode":
+                fx.set_cursor_pick(c.get("mode"))
+            elif do == "pick":
+                fx.pick_line((_game_file(c.get("file")), int(c.get("line"))))
+            elif do == "step":
+                fx.step_line(int(c.get("n", 1)))
+            elif do == "here":
+                fx.follow = True
+                fx._follow()
+            elif do == "apply":
+                fx.cursor_apply()
+            elif do == "remove":
+                fx.cursor_remove()
+            elif do == "leave":
+                fx.cursor_leave()
         return True
 
     ## ── 원고의 줄로 게임을 옮기기 (3.20) ──
@@ -733,6 +767,8 @@ init -8 python in ui_editor:
             state.popup = None
             _set_editing(False)
             state.reopen = r
+        ## 다시 시작한 뒤 셰이더, 커서 상태를 원고대로 맞춤 (live_tick에서, Screen FX 4.5)
+        live.after_warp = (fn, n.linenumber)
         store.renpy.warp_to_line("{}:{}".format(fn, n.linenumber))
         return True
 
@@ -837,6 +873,16 @@ init -8 python in ui_editor:
             return
         if live.server is None:
             live_start()
+
+        aw = getattr(live, "after_warp", None)
+        if aw is not None and not getattr(store, "main_menu", False):
+            live.after_warp = None
+            fx = get_tab("screen_fx")
+            if fx is not None and hasattr(fx, "warp_restore"):
+                try:
+                    fx.warp_restore(aw[0], aw[1])
+                except Exception as e:
+                    msg("셰이더 상태를 맞추지 못했습니다: {}".format(e))
 
         changed = False
         while True:

@@ -1,8 +1,8 @@
 {
   "name": "pykaki-desktop",
-  "productName": "PyKaki",
+  "productName": "pygaki",
   "version": "0.1.0",
-  "description": "렌파이 대본 에디터 PyKaki 데스크톱 앱",
+  "description": "pygaki 데스크톱 앱 (렌파이 대본 편집 + GUI 편집)",
   "author": "halftomato",
   "license": "MIT",
   "private": true,
@@ -18,9 +18,9 @@
   },
   "build": {
     "appId": "dev.halftomato.pykaki",
-    "productName": "PyKaki",
+    "productName": "pygaki",
     "directories": { "output": "out" },
     "files": ["main.cjs", "preload.cjs", "web/index.html", "package.json"],
-    "win": { "target": "dir", "executableName": "PyKaki" }
+    "win": { "target": "dir", "executableName": "pygaki" }
   }
 }

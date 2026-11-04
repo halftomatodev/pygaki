@@ -33,8 +33,8 @@ jobs:
           python-version: '3.12'
       - uses: actions/download-artifact@v4
         with:
-          name: PyKaki-win
-          path: PyKaki-win
+          name: pygaki-win
+          path: pygaki-win
 
       - name: 렌파이 SDK 받기
         id: sdk-cache
@@ -54,7 +54,7 @@ jobs:
         shell: bash
         env:
           SDL_AUDIODRIVER: dummy
-        run: python bundle/make_bundle.py --sdk "renpy-$RENPY_VERSION-sdk" --app PyKaki-win --out out --tag "$TAG" --zip
+        run: python bundle/make_bundle.py --sdk "renpy-$RENPY_VERSION-sdk" --app pygaki-win --out out --tag "$TAG" --zip
 
       - name: 묶은 것 확인 (템플릿으로 만든 프로젝트 Lint)
         shell: bash
@@ -82,14 +82,14 @@ jobs:
           ## 어떤 것을 받나요?
 
           - **렌파이가 아직 없으면** → \`pygaki-$TAG-renpy-$RENPY_VERSION.zip\`
-            아무 폴더에 풀고 \`renpy.exe\`를 켜면 됩니다. 렌파이 $RENPY_VERSION + showpy + PyKaki 앱이 다 들어 있습니다.
+            아무 폴더에 풀고 \`renpy.exe\`를 켜면 됩니다. 렌파이 $RENPY_VERSION + showpy + pygaki 앱이 다 들어 있습니다.
           - **렌파이 SDK가 이미 있으면** → \`pygaki-$TAG-addon.zip\`
             zip 안의 \`launcher\`, \`showpy\`, \`pygaki\` 세 폴더를 렌파이 SDK 폴더(\`renpy.exe\`가 있는 곳)에 끌어 넣고 런처를 껐다 켭니다. 렌파이의 원래 파일은 바뀌지 않습니다.
 
-          런처 첫 화면 아래쪽에 **[PyKaki로 대본 쓰기] [showpy 새 프로젝트]** 버튼이 생깁니다. 자세한 쓰는 법은 묶음 안의 \`pygaki/읽어주세요.txt\`.
+          런처 첫 화면 아래쪽에 **[pygaki로 편집] [pygaki로 새 프로젝트]** 버튼이 생깁니다. 자세한 쓰는 법은 묶음 안의 \`pygaki/읽어주세요.txt\`.
 
-          PyKaki 앱은 서명이 없어서 처음 켤 때 윈도우가 "PC 보호" 창을 띄울 수 있습니다. [추가 정보] → [실행]을 누릅니다.
+          pygaki 앱은 서명이 없어서 처음 켤 때 윈도우가 "PC 보호" 창을 띄울 수 있습니다. [추가 정보] → [실행]을 누릅니다.
 
-          웹 버전 PyKaki(설치 없이): https://halftomatodev.github.io/pygaki/
+          웹 버전 pygaki(설치 없이, 대본 편집만): https://halftomatodev.github.io/pygaki/
           EOF
           gh release create "$TAG" out/*.zip --draft --title "pygaki $TAG" --notes-file notes.md

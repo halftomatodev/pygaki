@@ -69,7 +69,9 @@ showpy가 쓰고, PyKaki가 읽은 뒤 비웁니다. PyKaki가 읽은 기록만 
     { "id": "sp9a8f103", "op": "insert", "code": "scene bg room", "box": "n3", "end": "n3" },
     { "id": "sp9a8f104", "op": "replace", "code": "show mina scared with dissolve", "line": "l4" },
     { "id": "sp9a8f105", "op": "say_pos", "line": "l5", "pos": { "x": 520, "y": 60 } },
-    { "id": "sp9a8f106", "op": "say_fx", "line": "l5", "sayFx": { "fx": "ascii", "overlay": "off", "warp": "3", "exclude": ["say"] } }
+    { "id": "sp9a8f106", "op": "say_fx", "line": "l5", "sayFx": { "fx": "ascii", "overlay": "off", "warp": "3", "exclude": ["say"] } },
+    { "id": "sp9a8f107", "op": "insert", "code": "$ screen_fx.shaders(\"ascii\", \"vhs_crt\", transition=\"fade\")", "box": "n1", "before": "l6" },
+    { "id": "sp9a8f108", "op": "remove", "line": "l7" }
   ]
 }
 ```
@@ -77,17 +79,17 @@ showpy가 쓰고, PyKaki가 읽은 뒤 비웁니다. PyKaki가 읽은 기록만 
 | 값 | 뜻 |
 |---|---|
 | `id` | `insert`면 새 줄의 id (`.rpy`의 `# @l:`과 같음). 이미 있는 id면 다시 넣지 않습니다 |
-| `op` | `insert` 줄 넣기, `replace` 줄 바꾸기, `say_pos` 대사 위치, `say_fx` 대사 화면 효과 |
+| `op` | `insert` 줄 넣기, `replace` 줄 바꾸기, `remove` 줄 지우기(showpy 4.22), `say_pos` 대사 위치, `say_fx` 대사 화면 효과 |
 | `code` | 렌파이 명령 한 줄 |
 | `box` | 줄이 들어갈 상자. 기준 줄이 사라졌을 때 그 상자의 끝에 넣습니다 |
 | `before` `after` `end` | `insert`의 자리. 줄 앞, 줄 뒤, 상자 끝 중 하나 |
-| `line` | `replace`, `say_pos`, `say_fx`로 바꿀 줄의 id |
+| `line` | `replace`, `remove`, `say_pos`, `say_fx`로 바꾸거나 지울 줄의 id |
 | `pos` | `say_pos`의 값. `x` `y` `name_x` `name_y`, 대사창 왼쪽 위 기준. `null`이면 지움 |
 | `sayFx` | `say_fx`의 값. PyKaki `LineFx`와 같은 이름: `fx` `transition`(`none`은 바로) `overlay`(`on` `off`) `warp` `cursor` `exclude`(목록). `null`이면 지움 |
 
 `say_pos`, `say_fx`를 받으면 그 대사 줄의 괄호에 같은 값을 내보냅니다. 괄호 순서는 PyKaki 순서로 정리됩니다. 예전 PyKaki는 이 기록을 모른 채 지우므로 두 프로그램을 같이 올립니다.
 
-`code`는 `show` `scene` `hide` `play` `stop`으로 시작하는 줄만 들어옵니다. PyKaki(`src/inbox.ts`)는 칸으로 나타낼 수 있으면 칸이 있는 연출 줄로, 아니면 "직접 명령" 줄로 바꿉니다.
+`code`는 `show` `scene` `hide` `play` `stop`으로 시작하는 줄과, 셰이더·커서 칸이 넣는 `$ screen_fx.`로 시작하는 줄(showpy 4.22: `shaders`, `set_cursor`. 고른 줄 바로 위의 같은 줄들은 `replace`/`remove`로 바꿈)만 들어옵니다. PyKaki(`src/inbox.ts`)는 칸으로 나타낼 수 있으면 칸이 있는 연출 줄로, 아니면 "직접 명령" 줄로 바꿉니다.
 
 | `code` | PyKaki 줄 |
 |---|---|
@@ -211,6 +213,7 @@ PyKaki 데스크톱 앱의 showpy 화면이 게임 안 편집기를 바깥에서
 
 - `where.file`은 프로젝트 폴더 기준 경로입니다(렌파이 `get_filename_line`). 앱이 그 파일을 읽어 `line` 앞뒤 줄을 보여줍니다.
 - `custom_ui`(3.15)는 편집기 "커서/대사 소리" 탭입니다. `values`는 편집 중인 값 → `custom_ui_layout.rpy` → 설정 파일 순서로 지금 쓰는 값이고, 이름은 `custom_ui.EDIT_KEYS`와 같습니다. `cps`는 `text_cps`가 `null`일 때 환경설정의 지금 값. `edited`는 저장 안 한 값 이름, `reload_keys`는 저장한 뒤 게임을 다시 불러와야 적용되는 값(저장할 때 게임이 저절로 다시 불러옴). 플러그인이 없으면 `null`, 꺼져 있으면 `{"ok": false, "why": "..."}`. 3.14 게임은 이 값이 없습니다.
+- `custom_ui.cursor_lines`(3.21, Screen FX 4.5가 있을 때)는 커서와 셰이더 '여기에서부터': `choices`([자리, 이름] `effect` 1번·2번 다 받음 / `overlay` 2번만 / `top` 안 받음), `now`(칸에 보일 자리), `picked`, `file`, `line`(고른 줄), `follow`, `here`([파일, 줄] 게임의 지금 줄), `rows`(고른 줄 주변 `{line, text, sel, here, dirty}`), `have`(고른 줄 위에 이미 있는 커서 줄), `pending`, `changes`(이 파일에서 커서가 바뀌는 줄 `{line, target, label, kind, pending}`). 셰이더 칸과 같은 줄 고르기를 씁니다.
 - `panel`(3.16)은 게임 안 편집기 패널을 통째로 옮긴 것입니다. 편집기가 열려 있고 게임 안 패널이 숨어 있을 때(`panel` 명령 `hide: true`)만 있고, 아니면 `null`. 게임이 패널(`ui_editor_panel_body`)과 고르기 창(글꼴, 색, 그림/영상, 프레임 그림)을 화면 밖에 그려 두고(`ui_editor_live_mirror` 스크린) 그 위젯을 나무 모양으로 보냅니다.
   ```json
   "panel": { "tab": "screen_fx", "popup_kind": null, "popup": null,
@@ -252,6 +255,7 @@ PyKaki 데스크톱 앱의 showpy 화면이 게임 안 편집기를 바깥에서
 | `custom_ui.reset` | `key` | 그 값의 저장 안 한 변경 되돌리기 |
 | `custom_ui.listen` | | 지금 고른 대사 소리를 게임에서 1.5초 들려줌 (`playing`이 참) |
 | `custom_ui.stop` | | 들려주던 소리 멈춤 |
+| `custom_ui.cursor` | `do`: `mode`(+ `mode`) / `pick`(+ `file`, `line`, 게임도 그 줄로) / `step`(+ `n`) / `here` / `apply` / `remove` / `leave` | 커서와 셰이더 '여기에서부터' (3.21). `mode`는 미리 보기도 함, `apply`는 고른 줄 위에 `$ screen_fx.set_cursor("…")`(저장하면 원고에), `leave`는 미리 보기 끝 |
 | `files` | | 파일 목록(`files`)을 다시 보내 달라고 함 |
 | `save` | | 편집기 Ctrl+S와 같음 (배치 파일과 원고 저장) |
 | `discard` | | 지금 탭의 저장 안 한 변경을 모두 버림 |

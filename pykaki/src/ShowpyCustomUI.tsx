@@ -3,7 +3,7 @@
 // 그림 미리보기는 앱이 프로젝트의 game 폴더에서 그림을 직접 읽어 24fps로 돌린다.
 import { useEffect, useMemo, useState } from 'react';
 import { desktop } from './desktop';
-import { liveSend, useLive, type CustomUIState, type CustomUIValues, type GameFiles } from './showpyLive';
+import { liveSend, useLive, type CursorLines, type CustomUIState, type CustomUIValues, type GameFiles } from './showpyLive';
 
 type Key = keyof CustomUIValues;
 type AnimKey = 'ctc' | 'cursor';
@@ -12,6 +12,7 @@ const set = (key: Key, value: unknown) => liveSend({ cmd: 'custom_ui.set', key, 
 const reset = (key: Key) => liveSend({ cmd: 'custom_ui.reset', key });
 
 const LABEL: Record<AnimKey, string> = { ctc: '클릭 대기 표시', cursor: '커서' };
+const FOLDER: Record<AnimKey, string> = { ctc: 'game/gui/ctc/', cursor: 'game/gui/cursor/' };
 
 export function CustomUIPanel({ cu }: { cu: CustomUIState | null | undefined }) {
   const files = useLive((s) => s.files);
@@ -152,7 +153,14 @@ export function CustomUIPanel({ cu }: { cu: CustomUIState | null | undefined }) 
                 return <span key={i} className="sp-slot empty" />;
               })}
             </div>
-            {missing.length > 0 && <p className="sp-warn">게임 폴더에 없는 그림이 {missing.length}장 있어요. 칸을 눌러 다른 그림으로 바꿔요.</p>}
+            <p className="tip">
+              그림 폴더: <code>{FOLDER[key]}</code> ({key === 'cursor' ? 'cursor1.png' : 'ctc1.png'}부터 순서대로, 12장까지, 64×64 권장). 같은 이름으로 덮어쓰면 바로 바뀌어요.
+            </p>
+            {missing.length > 0 && (
+              <p className="sp-warn">
+                게임 폴더에 없는 그림이 {missing.length}장 있어요. <code>{FOLDER[key]}</code>에 넣거나 칸을 눌러 다른 그림으로 바꿔요.
+              </p>
+            )}
             {slot?.key === key && (
               <Picker
                 files={files}
@@ -193,6 +201,8 @@ export function CustomUIPanel({ cu }: { cu: CustomUIState | null | undefined }) 
           <Mark k="quick_menu" />
         </div>
       </section>
+
+      {cu.cursor_lines && <CursorLinesPanel cl={cu.cursor_lines} />}
 
       <section>
         <div className="sp-cu-head">
@@ -364,6 +374,73 @@ function Picker(props: {
   );
 }
 
+// ── 커서와 셰이더 '여기에서부터' (screen_fx 4.5): 셰이더 칸처럼 줄을 골라 그 줄부터 ──
+
+function CursorLinesPanel({ cl }: { cl: CursorLines }) {
+  const send = (c: Record<string, unknown>) => liveSend({ cmd: 'custom_ui.cursor', ...c });
+  // 칸을 떠나면 미리 보기를 끝냄
+  useEffect(() => () => liveSend({ cmd: 'custom_ui.cursor', do: 'leave' }), []);
+  const label = (m: string) => cl.choices.find((c) => c[0] === m)?.[1] ?? m;
+  return (
+    <section>
+      <div className="sp-cu-head">
+        <b>커서와 셰이더 (여기에서부터)</b>
+        <span className="tip">커서가 셰이더를 받을지 줄마다 정해요. 소프트웨어 커서일 때만 보여요.</span>
+      </div>
+      <div className="sp-seg">
+        {cl.choices.map(([m, l]) => (
+          <button key={m} className={cl.now === m ? 'on' : ''} onClick={() => send({ do: 'mode', mode: m })}>
+            {l}
+          </button>
+        ))}
+      </div>
+      <div className="sp-row">
+        <button onClick={() => send({ do: 'step', n: -1 })}>◀ 앞 줄</button>
+        <button onClick={() => send({ do: 'step', n: 1 })}>뒤 줄 ▶</button>
+        {!cl.follow && <button onClick={() => send({ do: 'here' })}>지금 줄로</button>}
+        <span className="tip">{cl.line ? `고른 줄: ${cl.line}번째${cl.follow ? ' (지금 줄을 따라감)' : ''}` : '고른 줄 없음'}</span>
+      </div>
+      <div className="sp-lines">
+        {cl.rows.map((r) => (
+          <button
+            key={r.line}
+            className={'sp-line' + (r.sel ? ' on' : '') + (r.here ? ' here' : '')}
+            title="이 줄을 고르고 게임도 이 줄로 옮겨요"
+            onClick={() => cl.file && send({ do: 'pick', file: cl.file, line: r.line })}
+          >
+            <span className="mark">{r.here ? '▶' : ''}</span>
+            <span className="ln">{r.line}</span>
+            {r.dirty ? '* ' : ''}
+            {r.text}
+          </button>
+        ))}
+      </div>
+      <div className="sp-row">
+        <button className="primary" onClick={() => send({ do: 'apply' })} title="고른 줄 바로 위에 커서 줄을 넣어요 (저장하면 원고에)">
+          여기에서부터 적용: {label(cl.now)}
+        </button>
+        <button disabled={!cl.have.length && !cl.pending} onClick={() => send({ do: 'remove' })}>
+          이 줄 위의 커서 줄 지우기
+        </button>
+      </div>
+      {cl.have.length > 0 && <p className="tip">지금 들어 있음: {cl.have.join(' / ')}</p>}
+      <p className="tip">{cl.changes.length ? `커서가 바뀌는 줄 (이 파일 ${cl.changes.length}곳)` : '이 파일에는 커서가 바뀌는 줄이 없어요. (처음 값은 설정 screen_fx.cursor)'}</p>
+      {cl.changes.map((r) => (
+        <div key={r.line} className="sp-row">
+          <button onClick={() => send({ do: 'pick', file: r.target[0], line: r.target[1] })}>
+            {r.pending ? '* ' : ''}
+            {r.line}
+          </button>
+          <span>
+            {r.label}
+            {r.kind === 'say' ? ' (대사 괄호)' : ''}
+          </span>
+        </div>
+      ))}
+    </section>
+  );
+}
+
 // ── 미리보기: 글자 속도와 클릭 대기 표시, 커서 (게임과 같은 24fps) ──
 
 function useFrame(n: number, hold: number, fps: number) {
@@ -404,14 +481,20 @@ function Preview({ v, cps, fps }: { v: CustomUIValues; cps: number; fps: number 
     return () => clearInterval(id);
   }, [cps, run]);
   const done = shown >= SAMPLE.length;
+  // 흰 그림도 보이게 바탕을 고름 (대사창은 보통 어두움)
+  const [dark, setDark] = useState(true);
   return (
-    <div className="sp-preview">
+    <div className={'sp-preview' + (dark ? ' dark' : '')}>
       <div className="sp-preview-text">
         {SAMPLE.slice(0, shown)}
         {done && v.ctc && <Anim frames={v.ctc_frames} hold={v.ctc_hold} fps={fps} />}
       </div>
       <div className="sp-row">
         <button onClick={() => setRun((r) => r + 1)}>글자 다시 보기</button>
+        <span className="sp-seg">
+          <button className={!dark ? 'on' : ''} onClick={() => setDark(false)}>밝게</button>
+          <button className={dark ? 'on' : ''} onClick={() => setDark(true)}>어둡게</button>
+        </span>
         <span className="grow" />
         <span className="sp-cu-lab">커서</span>
         {v.cursor ? <Anim frames={v.cursor_frames} hold={v.cursor_hold} fps={fps} /> : <span className="tip">(끔)</span>}

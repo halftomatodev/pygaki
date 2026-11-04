@@ -33,6 +33,12 @@ init -8 python in ui_editor:
         def cu(self):
             return getattr(store, "custom_ui", None)
 
+        def on_close(self):
+            ## 커서와 셰이더 미리 보기를 끝냄 (Screen FX 4.5)
+            fx = get_tab("screen_fx")
+            if fx is not None and hasattr(fx, "cursor_leave"):
+                fx.cursor_leave()
+
         def available(self):
             cu = self.cu()
             if cu is None:
@@ -305,7 +311,10 @@ init -8 python in ui_editor:
 
         def info_lines(self):
             n = self.pending()
-            return [ "저장 안 한 변경: {}개".format(n) if n else "저장 안 한 변경 없음" ]
+            return [
+                "그림 폴더: 커서는 game/gui/cursor/, 클릭 대기 표시(CTC)는 game/gui/ctc/ (1번부터 순서대로, 12장까지, 64x64 권장)",
+                "저장 안 한 변경: {}개".format(n) if n else "저장 안 한 변경 없음",
+                ]
 
         def help_lines(self):
             return [
@@ -448,6 +457,10 @@ screen ui_editor_custom_ui_panel(tab):
                         add tab.frames_preview("cursor")
                     else:
                         text "(끔)" style "ui_editor_small"
+
+        ## 커서와 셰이더 '여기에서부터' (Screen FX 4.5가 있을 때, 3.21)
+        if renpy.has_screen("ui_editor_fx_cursor_panel") and ui_editor.get_tab("screen_fx") is not None:
+            use expression "ui_editor_fx_cursor_panel" pass (ui_editor.get_tab("screen_fx"))
 
 
 ## 프레임 칸 12개 (3.0). 그림이 든 칸 → 다음 빈 칸(+) → 나머지는 비어 있음

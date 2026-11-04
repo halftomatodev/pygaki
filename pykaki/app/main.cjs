@@ -1,12 +1,16 @@
-// PyKaki 데스크톱 앱 (Electron). 렌파이 프로젝트 폴더 하나를 열어 대본을 쓴다.
-//   PyKaki.exe --project "C:\...\내게임"     렌파이 런처의 [PyKaki로 대본 쓰기]가 이렇게 부른다
-//   PyKaki.exe                               프로젝트 폴더를 고르는 창이 뜬다
+// pygaki 데스크톱 앱 (Electron, 예전 이름 PyKaki). 렌파이 프로젝트 폴더 하나를 열어 대본을 쓰고 GUI를 고친다.
+//   pygaki.exe --project "C:\...\내게임"     렌파이 런처의 [pygaki로 편집]이 이렇게 부른다
+//   pygaki.exe                               프로젝트 폴더를 고르는 창이 뜬다
 // 화면은 웹 버전과 같은 web/index.html이고, 파일은 이 프로세스가 대신 읽고 쓴다(preload.cjs의 window.pygaki).
 // 읽고 쓸 수 있는 곳은 연 프로젝트 폴더 안으로만 막는다.
 const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const fs = require('node:fs');
 const path = require('node:path');
 const net = require('node:net');
+
+// 이름을 pygaki로 바꿔도(2026-11, 예전 PyKaki) 설정, 최근 파일, 자동 저장(IndexedDB renpy-flow-editor)이
+// 든 폴더는 예전 자리(%APPDATA%\PyKaki)를 그대로 쓴다. 단일 실행 잠금보다 먼저 정해야 함
+app.setPath('userData', path.join(app.getPath('appData'), 'PyKaki'));
 
 const windows = new Map(); // webContents.id → { win, project, watcher, live, liveTimer }
 
@@ -111,7 +115,7 @@ function open(project) {
   const win = new BrowserWindow({
     width: 1440,
     height: 900,
-    title: `PyKaki - ${path.basename(project)}`,
+    title: `pygaki - ${path.basename(project)}`,
     backgroundColor: '#15171f',
     autoHideMenuBar: true,
     webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, sandbox: true },

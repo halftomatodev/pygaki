@@ -2,8 +2,8 @@
 ## pygaki — 렌파이 런처에 붙이는 파일 (launcher/game/에 복사)
 ##
 ## 런처 첫 화면 아래쪽에 버튼 두 개를 띄웁니다.
-##   [PyKaki로 대본 쓰기]   지금 고른 프로젝트를 PyKaki 데스크톱 앱으로 엽니다
-##   [showpy 새 프로젝트]   showpy가 들어간 템플릿(SDK 폴더의 showpy)으로 새 프로젝트를 만듭니다
+##   [pygaki로 편집]         지금 고른 프로젝트를 pygaki 앱으로 엽니다 (대본 편집, GUI 편집)
+##   [pygaki로 새 프로젝트]  showpy가 들어간 템플릿(SDK 폴더의 showpy)으로 새 프로젝트를 만듭니다
 ##
 ## 런처의 원래 파일은 고치지 않고 이 파일 하나만 더합니다. 렌파이를 올리면 이 파일을 다시 복사합니다.
 ## (bundle/make_bundle.py가 넣어 줍니다)
@@ -15,7 +15,7 @@ init python:
     import subprocess
 
     ## SDK 폴더 기준 자리
-    PYGAKI_APP = os.path.join(config.renpy_base, "pygaki", "PyKaki", "PyKaki.exe")
+    PYGAKI_APP = os.path.join(config.renpy_base, "pygaki", "app", "pygaki.exe")
     PYGAKI_TEMPLATE = os.path.join(config.renpy_base, "showpy")
 
     def pygaki_open():
@@ -24,7 +24,7 @@ init python:
             interface.error(KO("먼저 왼쪽 목록에서 프로젝트를 고르세요."), label=None)
             return
         if not os.path.exists(PYGAKI_APP):
-            interface.error(KO("PyKaki 앱을 찾지 못했어요:") + "\n[pygaki_app!q]", label=None, pygaki_app=PYGAKI_APP)
+            interface.error(KO("pygaki 앱을 찾지 못했어요:") + "\n[pygaki_app!q]", label=None, pygaki_app=PYGAKI_APP)
             return
         subprocess.Popen([ PYGAKI_APP, "--project", p.path ], cwd=os.path.dirname(PYGAKI_APP))
 
@@ -51,7 +51,7 @@ screen pygaki_buttons():
             ypos 506
             spacing 24
 
-            textbutton "PyKaki로 대본 쓰기":
+            textbutton "pygaki로 편집":
                 style "l_link"
                 text_font "SourceHanSansLite.ttf"
                 text_size 16
@@ -59,7 +59,7 @@ screen pygaki_buttons():
                 action Jump("pygaki_open")
 
             if pygaki_can_new():
-                textbutton "showpy 새 프로젝트":
+                textbutton "pygaki로 새 프로젝트":
                     style "l_link"
                     text_font "SourceHanSansLite.ttf"
                     text_size 16

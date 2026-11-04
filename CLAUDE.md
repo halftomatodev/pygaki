@@ -34,4 +34,4 @@ cd pykaki && npm run build   # pykaki/dist/index.html 한 파일
 cd pykaki/app && npm ci && npm start   # 데스크톱 앱 (웹 빌드를 복사해서 켬)
 ```
 
-- 데스크톱 앱 확인: GitHub Actions "PyKaki 앱"이 리눅스에서 진짜 Electron으로 켜 보고(`pykaki/app/smoke.cjs`), 윈도우 `PyKaki.exe` 폴더를 만든다.
+- 데스크톱 앱 확인: GitHub Actions "pygaki 앱"이 리눅스에서 진짜 Electron으로 켜 보고(`pykaki/app/smoke.cjs`), 윈도우 `pygaki.exe` 폴더를 만든다.

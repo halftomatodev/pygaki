@@ -29,7 +29,7 @@ async function bootDesktop() {
     fresh = true;
   }
   useStore.getState().load(project, { fileName: name, dirty: fresh });
-  document.title = `PyKaki - ${inf.name}`;
+  document.title = `pygaki - ${inf.name}`;
 
   // 자동 저장: 바뀌고 0.7초 뒤 그 파일에
   let timer: ReturnType<typeof setTimeout> | undefined;

@@ -23,12 +23,26 @@
 
 `ui_kit` 플러그인이 같이 있으면 그 편집기(개발 모드에서 Shift+M)에 **"화면 효과", "타이틀 일렁임" 탭**이 생기고, **대사 탭에서 "이 대사부터 이 효과", 덮개 켬/끔, 덮개 휘어짐을 골라 원고에 바로 저장**할 수 있습니다. 대사가 아닌 줄(show, scene, with, $ 줄 등)에서 바꾸고 싶으면 **"화면 효과" 탭의 "줄에 넣기"** 로 그 줄 바로 위에 `$ screen_fx.use(…)` 줄을 넣습니다(4.1). `ui_kit`이 없어도 효과는 설정 파일과 스크립트로 그대로 동작합니다.
 
-버전 4.4 · 렌파이 8.5.3에서 만들고 테스트했습니다.
+버전 4.5 · 렌파이 8.5.3에서 만들고 테스트했습니다.
 
 VHS 셰이더 원본: [VHS and CRT monitor effect](https://godotshaders.com/shader/vhs-and-crt-monitor-effect/) (Godot Shaders, CC0). 렌파이용으로 옮기면서 채도·대비·전체 세기를 바꿀 수 있게 추가했습니다.
 레트로 터미널은 [cool-retro-term](https://github.com/Swordfish90/cool-retro-term)의 모습과 설정 목록을 참고해 새로 썼습니다(코드는 가져오지 않음).
 게임보이는 [Retro dither](https://godotshaders.com/shader/retro-dither/) (tcmug, CC0)의 4×4 디더링 무늬와 [Gameboy Classic Shader](https://github.com/HarlequinVG/shaders/tree/master/gameboy_shader) (Harlequin, GPL v3)의 LCD 모습(점 격자·점 그림자)을 참고해 새로 썼습니다(코드는 가져오지 않음).
 ASCII 효과는 [ASCII shader](https://godotshaders.com/shader/ascii-shader/) (Daniel Bologna, Acerola의 아이디어, MIT)를 참고해 렌파이용으로 새로 썼습니다. 글꼴은 [Neo둥근모](https://neodgm.dalgona.dev/) (SIL OFL 1.1)입니다.
+
+### 4.5에서 바뀐 점
+
+- **두 자리는 늘 같이**: 편집기는 `$ screen_fx.shaders("1번", "2번")`만 씁니다. 스크립트도 이렇게 쓰는 걸 권합니다. 예전 줄(`use()`, `clear()`, `set_overlay()`, 대사 괄호 `fx=`, `fx_overlay=`)도 그대로 됩니다.
+  ```renpy
+  $ screen_fx.shaders("ascii", "vhs_crt", transition="fade")   # 전환: "tv", "fade", None(바로), 안 적으면 설정대로
+  $ screen_fx.set_cursor("top")      # 커서: "effect" 1번·2번 다 받음 / "overlay" 2번만 / "top" 안 받음
+  ```
+- 화면 효과 탭 **셰이더가 바뀌는 줄**: 이 원고 파일에서 셰이더가 바뀌는 줄마다 두 자리와 전환을 보여주고 전환을 고릅니다. 한 자리만 바꾸는 예전 줄은 [두 자리로 바꾸기]. 두 자리 값은 파일을 위에서부터 읽어 센 대강의 값입니다(분기, jump는 따지지 않음).
+- [여기에서부터 적용]에 "적용할 때 전환".
+- "처음 상태": 처음 1번, 2번, '설정대로' 전환만. TV 시간 막대, 기다림, 건너뛰기, 미리 보기는 칸에서 뺐습니다(`screen_fx_config.rpy`의 `screen_fx.tv`, `wait`, `skippable`).
+- **커서와 셰이더 '여기에서부터'**: UI Kit 커서/대사 소리 탭 아래. 셰이더 줄과 커서 줄은 같은 줄 위에 있어도 서로 지우지 않습니다.
+- PyKaki 원고에서도 저장됩니다(4.20~4.21에서는 막혀 있었음).
+- warp 뒤 셰이더, 커서 상태를 원고대로 맞춤. 고른 줄이 다른 파일에 남아 있으면 지금 줄을 따라감.
 
 ### 4.4에서 바뀐 점
 
