@@ -1,6 +1,6 @@
 # showpy (먼저 읽기)
 
-버전 4.17
+버전 4.18
 
 예전 이름은 "렌파이 UI 플러그인 묶음"이었습니다.
 
@@ -21,6 +21,23 @@
 - `screen_fx`는 예전의 `watermorph`, `vhs_crt` 두 플러그인을 합친 것입니다.
 - 합친 기능들은 각자 설정 파일의 스위치(`enabled`)로 따로 끌 수 있고, 끄면 렌파이 기본(효과 없음)과 똑같이 보입니다.
 - `screen_fx`는 넣자마자 VHS 덮개가 화면 전체에 켜집니다. 처음에는 깨끗한 화면으로 보고 싶다면 `screen_fx/screen_fx_config.rpy`의 `screen_fx.overlay`를 `False`로(평소엔 깨끗하고 `use()`나 `fx_overlay=True`로 켤 때만 효과), 타이틀 일렁임은 `screen_fx/watermorph_config.rpy`의 `watermorph.enabled`를 `False`로 바꾸세요.
+
+## 4.18에서 바뀐 점
+
+### `splash` 1.2: 스플래시 편집 탭
+
+게임 안 편집기(Shift+M)와 PyKaki 앱의 [showpy] 화면에서 스플래시 페이지를 고칩니다.
+
+- 페이지(logo, warning, controls …)를 고르고 바탕색, 바탕·로고 그림이나 영상, 제목·본문 글자의 색·글꼴·크기, 위치, 넘어가는 때(클릭할 때까지 / 시간이 지나면 / 영상이 끝날 때), 나타나고 사라지는 시간을 바꿉니다.
+- [이 페이지 보기]로 지금 값으로 띄워 봅니다(클릭하면 닫힘).
+- 저장하면 `splash/splash_layout.rpy`에 바꾼 값만 적힙니다. 이 파일을 지우면 `splash_config.rpy` 값으로 돌아갑니다.
+- 제목, 본문 문장은 번역할 수 있는 글이라 지금처럼 `splash_config.rpy`에서 고칩니다.
+
+### `ui_kit` 3.17
+
+- 타이틀 메뉴 탭에서 고친 위치가 게임을 다시 불러온 뒤 옛 값으로 보이던 것을 고쳤습니다.
+
+옮기기: `ui_kit`, `splash` 폴더를 바꿔 넣고(`splash/editor/` 폴더가 새로 생김) `.rpyc`를 지웁니다. PyKaki 앱도 새 판으로 바꿉니다.
 
 ## 4.17에서 바뀐 점
 

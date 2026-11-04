@@ -18,7 +18,7 @@ interface Section {
 }
 
 const SECTIONS: Section[] = [
-  { id: 'splash', label: '스플래시 (로고, 경고, 조작 방법)', tab: null, app: false, note: '게임을 켰을 때 타이틀 전에 나오는 페이지예요. 지금은 splash/splash_config.rpy에서 고쳐요.' },
+  { id: 'splash', label: '스플래시 (로고, 경고, 조작 방법)', tab: 'splash', app: false, mirror: true, note: '게임을 켰을 때 타이틀 전에 나오는 페이지예요. showpy 4.18(splash 1.2)부터 여기서 고쳐요. 예전 판이면 splash/splash_config.rpy에서 고쳐요.' },
   { id: 'title', label: '타이틀 메뉴', tab: 'title', app: true, note: '' },
   { id: 'pause', label: '게임 내 메뉴 (ESC)', tab: 'title', app: true, note: '' },
   { id: 'watermorph', label: '타이틀 셰이더 (일렁임)', tab: 'watermorph', app: false, mirror: true, note: '타이틀 배경에만 걸리는 일렁임 효과예요.' },
@@ -226,7 +226,13 @@ function EditorBar({ st }: { st: GameState }) {
 function MirrorSection({ st, sec }: { st: GameState; sec: Section }) {
   const t = sec.tab ? st.editor.tabs.find((x) => x.id === sec.tab) : null;
   const open = () => (liveSend({ cmd: 'panel', hide: true }), liveSend({ cmd: 'editor', open: true, tab: sec.tab }));
-  if (!t) return <p className="tip">이 게임에는 이 편집기 탭이 없어요. (플러그인이 빠져 있을 수 있어요)</p>;
+  if (!t)
+    return (
+      <div>
+        {sec.note && <p>{sec.note}</p>}
+        <p className="tip">이 게임에는 이 편집기 탭이 없어요. (플러그인이 빠져 있거나 예전 판일 수 있어요)</p>
+      </div>
+    );
   const here = !!st.panel && st.panel.tab === sec.tab;
 
   // 그 탭을 쓸 수 없는 화면이면 갈 곳 버튼 (대사, 선택지, 그림은 게임 중 / 일렁임은 타이틀)

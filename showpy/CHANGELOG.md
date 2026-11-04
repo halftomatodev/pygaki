@@ -2,6 +2,15 @@
 
 버전별 자세한 설명은 [docs/READ_ME_FIRST.md](docs/READ_ME_FIRST.md)와 폴더별 `README.md`에 있습니다.
 
+## 4.18 (2026-11-04)
+
+`splash` 1.2:
+- 편집기(Shift+M)에 "스플래시" 탭(`splash/editor/editor_splash.rpy`). 페이지를 고르고 바탕색, 바탕·로고 그림/영상, 로고 확대, 제목·본문 글자(색, 글꼴, 크기, 줄 간격), 위치, 넘어가는 때, 나타나고 사라지는 시간, 클릭으로 넘기기, 처음 한 번만을 바꿉니다. [이 페이지 보기], [처음부터 보기]. 저장하면 `splash/splash_layout.rpy`(`define splash.layout = { "페이지 id": { … } }`)에 바꾼 값만 적고, 그 값이 `splash_config.rpy`보다 우선합니다. PyKaki 앱의 [showpy] 화면에도 그대로 나옵니다.
+- 엔진: 페이지 값을 엔진 기본 → `splash.default` → 페이지 → `splash.layout` → 편집 중인 값 순서로 합칩니다(`merged`). 설정 검사(`check`)도 `splash.layout`까지 봅니다.
+
+`ui_kit` 3.17:
+- 고침: 타이틀 메뉴 탭에서 고친 위치가, 원고 저장처럼 게임을 다시 불러오는 저장과 같이 하면 다시 불러온 뒤 옛 값으로 보이던 것(파일에는 맞게 저장됨). `tmenu.state.saved`에 둡니다. 이제 편집기의 모든 탭이 같은 방식입니다.
+
 ## 4.17 (2026-11-04)
 
 `ui_kit` 3.16:

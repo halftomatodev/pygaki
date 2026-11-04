@@ -2,7 +2,7 @@
 
 코드를 고치는 사람과 AI가 읽는 문서입니다. 사용법은 [CUSTOM_GUIDE.md](CUSTOM_GUIDE.md)에 있습니다.
 
-- 묶음 버전 4.17 (`ui_kit` 3.16, `screen_fx` 4.2, `hotkeys` 1.0, `splash` 1.1)
+- 묶음 버전 4.18 (`ui_kit` 3.17, `screen_fx` 4.2, `hotkeys` 1.0, `splash` 1.2)
 - 렌파이 8.5.3 기준
 - 작업 규칙: [DEV_RULES.md](DEV_RULES.md)
 - PyKaki 연결 형식: [LINK.md](../../docs/LINK.md)
@@ -22,10 +22,10 @@
 
 | 폴더 | 버전 | 하는 일 |
 |---|---|---|
-| `game/ui_kit` | 3.16 | 타이틀 메뉴, ESC 메뉴, 선택지, 커서, 클릭 대기 표시, 대사 소리, 대사 스타일, 그림과 영상 배치(`stage`), 편집기(개발 모드 Shift+M), 원고 쓰기 도구(`script_edit`) |
+| `game/ui_kit` | 3.17 | 타이틀 메뉴, ESC 메뉴, 선택지, 커서, 클릭 대기 표시, 대사 소리, 대사 스타일, 그림과 영상 배치(`stage`), 편집기(개발 모드 Shift+M), 원고 쓰기 도구(`script_edit`) |
 | `game/screen_fx` | 4.2 | 기본 효과(없음, ASCII, 레트로 터미널, 게임보이) + VHS 덮개, TV 전환, 글자 빼기, 커서 자리, 타이틀 일렁임 |
 | `game/hotkeys` | 1.0 | 단축키, 조작방법 화면 |
-| `game/splash` | 1.1 | 타이틀 전 로고, 경고, 조작 방법 페이지 |
+| `game/splash` | 1.2 | 타이틀 전 로고, 경고, 조작 방법 페이지, 편집기 "스플래시" 탭(ui_kit이 있을 때) |
 
 기능마다 자세한 값은 폴더 안 `README.md`에 있습니다.
 
