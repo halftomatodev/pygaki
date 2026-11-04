@@ -33,7 +33,7 @@ init -10 python in splash:
     import store
     from store import Action, DictEquality, Movie, Solid, Text, Transform, python_object
 
-    VERSION = "1.1"
+    VERSION = "1.2"
 
     def scene_fx():
         """screen_fx 플러그인의 '장면만' 효과를 페이지의 바탕·로고 그림에도 씌우는 트랜스폼.
@@ -46,6 +46,7 @@ init -10 python in splash:
         enabled=True,
         pages=[ ],
         default={ },
+        layout={ },     # 편집기가 저장한 페이지별 값 (splash_layout.rpy, 1.2)
         start_delay=0.3,
         gap=0.3,
         end_transition=None,
@@ -142,6 +143,9 @@ init -10 python in splash:
         def __init__(self):
             self.running = False        # 타이틀 전 페이지를 보여 주는 중
             self.music = False          # 이 플러그인이 음악을 틀었음
+            ## 편집기 (1.2): 페이지 id -> { 값 이름: 값 }
+            self.edits = { }            # 고치고 아직 저장 안 한 값
+            self.saved = None           # 이번 실행 중 저장한 값 (다시 불러오기 전까지 splash.layout 대신)
 
     state = _State()
 
@@ -274,9 +278,11 @@ init -10 python in splash:
                 if key not in RESERVED:
                     _check_style(where, key, out)
 
-            d = dict(BASE)
-            d.update(cfg("default"))
-            d.update(raw)
+            for key in saved_layout().get(pid, { }):
+                if key not in RESERVED:
+                    _check_style(where + " (splash_layout.rpy)", key, out)
+
+            d = merged(raw, edits=False)
 
             for key in ("color", "background", "image"):
                 _check_media(where, key, d.get(key), out)
@@ -352,10 +358,25 @@ init -10 python in splash:
             ("S", _("스크린샷 저장.")),
             ]
 
-    def resolve(raw):
+    def saved_layout():
+        """편집기가 저장한 값: 이번 실행 중 저장한 것 → splash_layout.rpy"""
+        if state.saved is not None:
+            return state.saved
+        return cfg("layout") or { }
+
+    def merged(raw, edits=True):
+        """페이지 값 전부: 엔진 기본 → splash.default → 페이지 → 편집기가 저장한 값 → 편집 중인 값"""
         d = dict(BASE)
         d.update(cfg("default"))
         d.update(raw)
+        pid = raw.get("id") if isinstance(raw, dict) else None
+        d.update(saved_layout().get(pid, { }))
+        if edits and state.edits:
+            d.update(state.edits.get(pid, { }))
+        return d
+
+    def resolve(raw):
+        d = merged(raw)
 
         p = Page()
         p.id = d.get("id")

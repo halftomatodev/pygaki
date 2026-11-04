@@ -350,9 +350,8 @@ init -8 python in ui_editor:
         def after_save(self):
             tm = self.tm()
             layout, common = self._merged()
-            tm.layout = layout
-            tm.pause_layout = self._merged("pause")[0]
-            tm.layout_default = common
+            ## store 변수가 아니라 실행 중 값으로 (다시 불러올 때 옛 값이 덮지 않게, 3.17)
+            tm.state.saved = store.python_dict(layout=layout, pause_layout=self._merged("pause")[0], layout_default=common)
             tm.state.edits = { }
             tm.state.pause_edits = { }
             tm.state.default_edits = { }

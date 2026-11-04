@@ -88,9 +88,17 @@ init -10 python in tmenu:
                  "hover_offset", "hover_rotate", "hover_skew", "hover_zoom", "hover_size",
                  "hover_font", "hover_color")
 
+    ## 편집기가 이번 실행 중에 저장한 값으로 대신 읽는 이름 (3.17). store 변수를 바꾸면 다시 불러올 때
+    ## (저장 뒤 저절로, Shift+R) 그 대사가 시작될 때의 옛 값이 새 *_layout.rpy 값을 덮어서 state.saved에 둡니다.
+    SAVED_KEYS = ("layout", "pause_layout", "layout_default")
+
     def cfg(name):
         """설정값을 돌려줍니다. 설정 파일에 없으면 기본값."""
         g = globals()
+        st = g.get("state", None)
+        saved = getattr(st, "saved", None)
+        if saved is not None and name in saved:
+            return saved[name]
         if name in g:
             return g[name]
         return DEFAULTS[name]
@@ -118,6 +126,7 @@ init -10 python in tmenu:
             self.caches = { }           # 메뉴 -> (키, 항목 목록)
             self.default_edits = { }    # {키: 값}  (아직 저장 안 한 공통 값 편집)
             self.edit_serial = 0
+            self.saved = None           # 편집기가 이번 실행 중 저장한 layout, pause_layout, layout_default (3.17)
 
     state = _State()
 

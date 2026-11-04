@@ -5,10 +5,10 @@
 
 ## 0. 지금 어디까지 (먼저 읽기)
 
-- **최신 판**: showpy 4.17 (`ui_kit` 3.16). PyKaki 앱 [showpy] 화면에서 모든 편집기 탭을 고침(타이틀/ESC/커서는 앱 전용 칸, 나머지는 게임 안 패널을 통째로 옮겨 그림). 4.16까지 `main`에 push됨. 4.17이 올라갔는지는 `git log`로 확인
-- **사용자가 확인하는 곳**: `F:\SHOWPY\pygaki-dev-renpy-8.5.3\renpy.exe` (로컬에서 만든 시험용 묶음. 4.17 템플릿 ui_kit/screen_fx 파일과 새 앱으로 바꿔 넣음). 확인 순서는 3장 "확인용 묶음"
-- **사용자가 아직 직접 안 본 것**: 5장 맨 위 줄 (4.17 셰이더, 대사, 선택지, 그림 칸). 4.16 커서/대사 소리 칸, 4.15 앱 연결, 4.14 게임 메뉴 화면은 2026-11-04에 사용자가 확인함(괜찮음)
-- **다음 큰 일**: 스플래시 편집 탭 새로 만들기(6장 맨 위, 만들면 앱에도 저절로 나옴), 타이틀 탭 "다시 불러오면 옛 값" 고치기 (7장)
+- **최신 판**: showpy 4.18 (`ui_kit` 3.17, `splash` 1.2). PyKaki 앱 [showpy] 화면에서 스플래시까지 모든 칸을 고침("게임 안" 표시 없음). 타이틀/ESC/커서는 앱 전용 칸, 나머지는 게임 안 패널을 통째로 옮겨 그림. 4.17까지 `main`에 push됨. 4.18이 올라갔는지는 `git log`로 확인
+- **사용자가 확인하는 곳**: `F:\SHOWPY\pygaki-dev-renpy-8.5.3\renpy.exe` (로컬에서 만든 시험용 묶음. 4.18 템플릿 ui_kit/screen_fx/splash 파일과 새 앱으로 바꿔 넣음). 확인 순서는 3장 "확인용 묶음"
+- **사용자가 아직 직접 안 본 것**: 5장 맨 위 두 줄 (4.17 셰이더, 대사, 선택지, 그림 칸 / 4.18 스플래시 칸). 4.16 커서/대사 소리 칸, 4.15 앱 연결, 4.14 게임 메뉴 화면은 2026-11-04에 사용자가 확인함(괜찮음)
+- **다음 큰 일**: 앱 칸 옮기기는 끝. 사용자 확인 뒤 정식 판(v1.1)과 공개용 구글 문서 (6장)
 - **미뤄 둔 것**: 공개용 구글 문서(아직 4.13 기준)는 앱 칸을 몇 개 더 옮긴 뒤 한 번에. 정식 판(v1.1 태그)도 사용자가 4.15를 확인한 뒤
 
 ## 1. pygaki 한눈에
@@ -29,8 +29,8 @@
 | 렌파이 SDK | `F:\SHOWPY\renpy-8.5.3-sdk` |
 | PyKaki 앱 빌드(받아 둔 것) | `F:\SHOWPY\PyKaki-win` (v1.0 때 받은 예전 판. 최신은 Actions "PyKaki 앱"의 `PyKaki-win`이나 로컬 빌드 `pykaki/app/out/win-unpacked`) |
 | 렌파이 프로젝트 폴더 | `F:\Dropbox\1_DEV\RENPY` |
-| 시험 프로젝트 (showpy 4.17 들어 있음) | `fx_test_25`, `pykaki_sample` |
-| 최신 시험용 묶음 (2026-11-04, showpy 4.17 + 새 앱) | `F:\SHOWPY\pygaki-dev-renpy-8.5.3\renpy.exe` (덧붙임은 `pygaki-dev-addon`). v1.0 폴더는 4.13 그대로 |
+| 시험 프로젝트 (showpy 4.18 들어 있음) | `fx_test_25`, `pykaki_sample` |
+| 최신 시험용 묶음 (2026-11-04, showpy 4.18 + 새 앱) | `F:\SHOWPY\pygaki-dev-renpy-8.5.3\renpy.exe` (덧붙임은 `pygaki-dev-addon`). v1.0 폴더는 4.13 그대로 |
 | 사용자의 진짜 게임 (말할 때만 건드림) | `horror`, `test_plugin` |
 
 예전 `pykaki`, `showpy` 저장소는 "pygaki로 옮겼어요" 안내를 넣고 보관(archive)했습니다(두 저장소의 기록은 모두 이 저장소에 있음). 예전 로컬 폴더 `F:\SHOWPY\pykaki`, `F:\SHOWPY\showpy`는 2026-11-04에 지웠습니다. 지나온 기록과 주요 결정은 [HISTORY.md](HISTORY.md)에 있습니다.
@@ -153,6 +153,13 @@ python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app 'F:\SHOWPY\
 
 ### 2026-11-04 (로컬 세션 4)
 
+00. (맨 뒤에) showpy 4.18 (`splash` 1.2, `ui_kit` 3.17): 스플래시 편집 탭
+   - `splash/editor/editor_splash.rpy`(ui_kit이 있을 때만 등록, 없으면 아무것도 안 함). 페이지 고르기, 바탕색, 바탕·로고 그림(패널 안 격자로 고름), 로고 확대, 제목·본문 색·글꼴·크기·줄 간격, 위치, 넘어가는 때, 시간, 클릭으로 넘기기, 처음 한 번만, [이 페이지 보기](`ShowPage`), [처음부터 보기](`preview`)
+   - 엔진: `merged()` = 엔진 기본 → `splash.default` → 페이지 → `splash.layout`(`splash_layout.rpy`) → 편집 중인 값(`state.edits`). 저장한 값은 `state.saved`. `check()`도 layout까지 봄
+   - 엔진 `check()`가 막는 조합(영상 없이 "영상이 끝날 때", 클릭으로 못 넘기는데 "클릭할 때까지")은 탭에서 미리 막음 (안 막으면 다음에 켤 때 게임이 멈춤)
+   - 함정: 렌파이 글자 안의 `[이름]`은 변수 넣기라 `[이 페이지 보기]` 같은 글은 `[[`로 써야 함 (안 그러면 게임이 오류로 멈춤)
+   - 타이틀 탭 옛 값 문제도 고침(`tmenu.state.saved`, `cfg()`가 layout/pause_layout/layout_default를 거기서 먼저 읽음)
+   - 확인: 시험 클라이언트로 탭 나무, 페이지 고르기, 막대, 그림 고르기, 저장(`splash_layout.rpy`), 다시 켜서 저장값 읽힘, 막는 조합 메시지, 타이틀에서 [이 페이지 보기], 타이틀 위치 + 다시 불러오는 저장. ui_kit 없이 splash만 있는 프로젝트 Lint. 진짜 앱으로 스플래시 칸 찍기. smoke 통과
 0. (뒤에) showpy 4.17 (`ui_kit` 3.16): 남은 탭을 공통 틀로 앱에 (사용자가 4.16 확인 뒤 "전부 앱 안으로")
    - 탭마다 앱 화면을 만들지 않고, 게임이 패널 안쪽(`ui_editor_panel_body`, `editor.rpy`에서 뗌)과 고르기 창(`ui_editor_popup`)을 화면 밖(`ui_editor_live_mirror`, x -40000)에 그려 그 위젯을 읽어 보냄 → 앱 `src/ShowpyMirror.tsx`가 그대로 그림. 누르면 `panel.do`(자리 번호 + 버튼 글). 형식은 `docs/LINK.md` 9장
    - 읽기 규칙(`editor_live.rpy`의 `_mirror`): Button(입력칸을 감싼 버튼은 입력칸), Input, Text, Bar(세로 막대=스크롤바는 뺌), Solid(거의 투명한 것, 무지개 띠는 뺌), Image, MultiBox(h/v), Grid/VPGrid(g), Window는 바탕 빼고 child만
@@ -186,6 +193,7 @@ python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app 'F:\SHOWPY\
 
 사용자는 `pygaki-dev` 묶음의 런처에서 `pykaki_sample`을 [프로젝트 실행]하고 [PyKaki로 대본 쓰기] → [showpy]로 확인합니다.
 
+- [ ] showpy 4.18 스플래시 칸: 페이지 고르기, 값 바꾸고 [이 페이지 보기] → 게임 창에 바뀐 모양, 저장 뒤 게임을 다시 켜도 그 모양, 바탕·로고에 그림 넣기
 - [ ] showpy 4.17 앱 칸: 타이틀 셰이더(타이틀에서), 인게임 화면 셰이더, 대사, 선택지(선택지가 뜬 화면에서), 그림 배치를 앱에서 고르고 누르기/막대/색·글꼴·그림 고르기 창 → 게임에 바로 보이는지, 저장
 - [x] showpy 4.16 커서/대사 소리 칸, 4.15 앱 연결, 4.14 게임 메뉴 화면 (2026-11-04 사용자 확인)
 
@@ -201,8 +209,9 @@ python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app 'F:\SHOWPY\
 - **앱 칸 옮기기 (3단계)**: 지금 "게임 안" 칸을 하나씩 앱 칸으로. 하나 옮길 때마다 게임 쪽 상태/명령(`editor_live.rpy`의 `live_state`, `_live_cmd`), `docs/LINK.md` 9장 표, 앱 칸(`ShowpyView.tsx`의 `SECTIONS`에서 `app: true`), smoke 시험을 같은 커밋에서. 추천 순서:
   1. ~~커서, CTC, 대사 소리~~ (4.16에서 함, 앱 전용 칸)
   2. ~~셰이더 두 탭, 대사, 선택지, 그림 배치~~ (4.17에서 공통 틀로. 게임 탭을 고치면 앱도 저절로)
-  3. **스플래시**: 게임 안 탭이 없어서 편집 탭(`ui_editor.Tab`)부터 새로 만듦. 페이지 목록, 바탕(색/그림/영상), 글, 시간, 넘어가기, `splash_layout.rpy` 저장, 미리 보기. 탭만 만들면 앱에는 공통 틀로 저절로 나옴(앱 `SECTIONS`에서 `tab: 'splash', mirror: true`)
-  4. 타이틀 탭(`tm.layout`, `pause_layout`) 옛 값 문제 고치기
+  3. ~~스플래시~~ (4.18에서 편집 탭을 새로 만듦, 앱에는 공통 틀로)
+  4. ~~타이틀 탭 옛 값 문제~~ (4.18)
+  - 남은 것: 스플래시 글 내용(제목, 본문 문장, 조작 방법 목록)은 번역 글이라 아직 `splash_config.rpy`에서. 새 페이지 더하기/지우기도 설정 파일에서
   - 게임 안 패널은 앱이 없을 때 쓰는 예비로 남김
 - 앱 창을 게임 창 옆에 저절로 붙이기(지금은 사용자가 나란히 놓음)
 - 공개용 구글 문서에 4.14, 4.15 반영 (앱 칸을 몇 개 더 옮긴 뒤 한 번에)
@@ -225,7 +234,7 @@ python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app 'F:\SHOWPY\
 - 내장 브라우저는 구글에 로그인되어 있지 않습니다. 사용자의 크롬은 로그인되어 있습니다.
 - 로컬에서 `npm run dist`(앱 빌드)를 하면 electron-builder가 `winCodeSign`을 풀다 심볼릭 링크 권한 오류가 남. 시험용은 `npx electron-builder --win dir -c.win.signAndEditExecutable=false`로 빌드(실행 파일 아이콘, 버전 정보만 빠짐). 공식 빌드는 Actions가 함
 - 템플릿 프로젝트를 Lint하면 `.rpyc`, `game/cache`, `game/saves`가 생김. 묶음 템플릿에서는 지움
-- **실행 중에 store 변수를 바꾸면, 다시 불러올 때 옛 값으로 돌아감**: 렌파이는 다시 불러오기(저장 뒤 저절로, Shift+R) 직전 상태를 "지금 대사가 시작될 때" 모습으로 저장해. 그래서 그 사이에 바꾼 `define` 값(예: `tm.layout`)은 옛 값으로 돌아오고, 새로 쓴 `*_layout.rpy` 값을 덮음. custom_ui는 4.16에서 `custom_ui.runtime`, 일렁임은 4.17에서 `watermorph.state.saved`(보통 파이썬 객체)로 고침. 화면 효과는 원래 `fx.saved`, `cedit.saved`라 괜찮음. 타이틀(`tm.layout`, `pause_layout`)만 아직 같은 방식이라, 원고 저장처럼 다시 불러오는 저장과 같이 하면 그 세션에서 옛 값으로 보일 수 있음(파일은 맞음)
+- **실행 중에 store 변수를 바꾸면, 다시 불러올 때 옛 값으로 돌아감**: 렌파이는 다시 불러오기(저장 뒤 저절로, Shift+R) 직전 상태를 "지금 대사가 시작될 때" 모습으로 저장해. 그래서 그 사이에 바꾼 `define` 값(예: `tm.layout`)은 옛 값으로 돌아오고, 새로 쓴 `*_layout.rpy` 값을 덮음. custom_ui는 4.16에서 `custom_ui.runtime`, 일렁임은 4.17에서 `watermorph.state.saved`(보통 파이썬 객체)로 고침. 화면 효과는 원래 `fx.saved`, `cedit.saved`라 괜찮음. 타이틀은 4.18에서 `tmenu.state.saved`, 스플래시는 처음부터 `splash.state.saved`. 새 탭을 만들 때도 저장한 값은 store 변수가 아니라 python_object에 둘 것
 - 앱 공통 틀(4.17)은 게임 화면 밖(x -40000)에 패널을 하나 더 그림. 패널 스크린 구조를 바꿔도 앱은 그대로 따라옴. 새 위젯 종류(예: 다른 렌파이 displayable)를 쓰면 `editor_live.rpy`의 `_mirror`에 읽는 법을 더함
 - 시험할 때 게임을 켜는 법: `(./lib/py3-windows-x86_64/pythonw.exe renpy.py <프로젝트> run > /dev/null 2>&1 &)`. PowerShell `Start-Process`나 출력을 잡는 방법은 도구가 게임이 끝날 때까지 기다림. 끌 때는 그 프로젝트 `run` 명령줄을 가진 pythonw만 찾아서 끔
 - 앱(`main.cjs`)은 게임에서 마지막으로 받은 `state`, `files`를 기억했다가 화면이 `liveStatus`를 부르면 넘겨줌. 게임은 바뀔 때만 상태를 보내기 때문
