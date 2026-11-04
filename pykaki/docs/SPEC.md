@@ -238,7 +238,12 @@
 - [열기]는 고른 파일의 내용을 이 프로젝트 대본으로 가져오고, [새로]는 이 프로젝트 대본을 비운다. 저장 파일은 바뀌지 않는다.
 - 왼쪽 "렌파이 프로젝트" 칸: [다시 읽기] [폴더 열기] [다른 프로젝트]. 연결과 끊기는 없다.
 - `showpy_inbox.json`이 바뀌면 0.3초 뒤 받아 적는다(창으로 돌아올 때도).
-- 확인: GitHub Actions "PyKaki 앱"(`.github/workflows/app.yml`)이 리눅스에서 진짜 Electron으로 켜서 `app/smoke.cjs`(자동 저장, 내보내기, 받아 적기, 밖에 쓰기 막기)를 돌리고, 윈도우 `PyKaki.exe` 폴더(`PyKaki-win`)를 만든다. 배포 묶음은 저장소 맨 위 `bundle/`.
+- showpy 화면 (`src/ShowpyView.tsx`, `src/showpyLive.ts`): 툴바 [대본 | showpy]로 바꾼다(앱에서만). 대본 화면은 숨기기만 해서 캔버스 상태가 남는다. 메인 프로세스가 `game/showpy_live.json`을 보고 그 포트로 붙어(지켜보기 + 3초마다 다시 시도) 한 줄 JSON을 `pygaki:live`로 넘기고, 화면은 `liveSend`로 명령을 보낸다(`pygaki:liveSend`). 형식은 저장소 맨 위 docs/LINK.md 9장.
+  - 왼쪽: 고칠 것 목록. 타이틀 메뉴, 게임 내 메뉴(ESC)는 앱 칸이 있고, 나머지는 게임 안 편집기 탭을 패널과 함께 연다.
+  - 가운데: 지금 화면, 원고 위치, 그 앞뒤 9줄(파일이 바뀌면 다시 읽음). 줄 위의 `# @node:` 표시로 PyKaki 상자를 찾아 [상자로] 버튼.
+  - 오른쪽: 저장(게임의 Ctrl+S), 버리기, 편집기 닫기, 게임 안 패널 보이기. 타이틀 칸은 평소/선택됐을 때, 이 항목만/공통, 항목 목록, 숫자 칸. 입력하는 동안은 게임에서 오는 값으로 덮지 않는다.
+  - showpy 화면에서는 저장 단축키가 게임 저장이다.
+- 확인: GitHub Actions "PyKaki 앱"(`.github/workflows/app.yml`)이 리눅스에서 진짜 Electron으로 켜서 `app/smoke.cjs`(자동 저장, 내보내기, 받아 적기, 밖에 쓰기 막기, 가짜 게임으로 showpy 연결)를 돌리고, 윈도우 `PyKaki.exe` 폴더(`PyKaki-win`)를 만든다. 배포 묶음은 저장소 맨 위 `bundle/`.
 
 ## 9-1. 웹앱 설치 (PWA)
 
@@ -254,6 +259,7 @@
 | `src/types.ts` | 데이터 구조 |
 | `src/ops.ts` | 편집 함수 (연결, 상자/그룹 추가, 삭제, 나가는 방식 변경, 화자 변경) |
 | `src/store.ts` | zustand 상태, 실행 취소, 선택, 플레이 상태, 상자 안 편집 상태 |
+| `src/showpyLive.ts`, `src/ShowpyView.tsx` | 데스크톱 앱의 showpy 화면 (게임과 실시간 연결) |
 | `src/sample.ts` | 예제/빈 프로젝트, 불러오기 정규화 |
 | `src/persist.ts` | IndexedDB |
 | `src/files.ts` | 파일 열기/저장/`.rpy` 내보내기 |

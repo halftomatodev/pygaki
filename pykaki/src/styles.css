@@ -650,3 +650,52 @@ fieldset.plain:disabled { opacity: 0.4; }
 .sf-color { display: inline-flex; align-items: center; gap: 1px; }
 .sf-color input[type='color'] { width: 26px; height: 22px; padding: 1px; }
 .sf-pos { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-family: var(--mono); color: var(--muted); margin-right: 8px; }
+
+/* ── showpy 화면 (데스크톱 앱, ShowpyView.tsx) ── */
+.view-switch { display: inline-flex; gap: 2px; margin-right: 6px; padding: 2px; border-radius: 8px; background: var(--faint); }
+.view-switch button.on { background: var(--panel); color: var(--text); box-shadow: 0 0 0 1px var(--line); }
+.live-dot { font-size: 9px; color: var(--muted); opacity: 0.5; }
+.live-dot.on { color: #22c55e; opacity: 1; }
+.sp-view { flex: 1; display: flex; min-height: 0; }
+.sp-nav { width: 240px; flex-shrink: 0; overflow: auto; padding: 10px; background: var(--bg); display: flex; flex-direction: column; gap: 2px; }
+.sp-conn { font-size: 12px; color: var(--muted); padding: 4px 8px 10px; }
+.sp-conn.on { color: var(--ok-text); }
+.sp-conn::before { content: '● '; }
+.sp-nav-item { text-align: left; white-space: normal; padding: 7px 10px; display: flex; justify-content: space-between; gap: 6px; align-items: center; }
+.sp-nav-item.on { background: var(--accent-soft); color: var(--text); }
+.sp-badge { font-size: 10px; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; flex-shrink: 0; }
+.sp-main { flex: 1; min-width: 0; overflow: auto; padding: 14px 18px; display: flex; flex-direction: column; gap: 12px; }
+.sp-panel { width: 380px; flex-shrink: 0; overflow: auto; padding: 12px 16px; background: var(--panel); border-left: 1px solid var(--line); }
+.sp-panel h3 { margin: 2px 0 10px; font-size: 15px; }
+.sp-card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.sp-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
+.sp-row > b { width: 64px; flex-shrink: 0; font-size: 12px; color: var(--muted); font-weight: 600; }
+.sp-row .grow { flex: 1; }
+.sp-chip { font-size: 12px; padding: 1px 8px; border-radius: 10px; background: var(--faint); }
+.sp-mono { font-family: var(--mono); font-size: 12px; }
+.sp-script { margin: 0; font-family: var(--mono); font-size: 12.5px; line-height: 1.55; overflow-x: auto; }
+.sp-script > div { white-space: pre; padding: 0 6px; border-radius: 4px; }
+.sp-script > div.cur { background: var(--accent-soft); }
+.sp-script .ln { display: inline-block; width: 40px; color: var(--muted); user-select: none; }
+.sp-help { max-width: 560px; }
+.sp-help li { margin-bottom: 6px; }
+.sp-bar { border-bottom: 1px solid var(--line); padding-bottom: 8px; margin-bottom: 12px; }
+.sp-check { display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--muted); }
+.sp-msg { white-space: pre-wrap; font-size: 12px; color: var(--ok-text); margin: 6px 0 0; }
+.sp-err, .sp-warn { color: var(--danger); font-size: 12.5px; }
+.sp-info { white-space: pre-wrap; font-size: 12px; background: var(--faint); padding: 8px; border-radius: 6px; }
+.sp-seg { display: flex; gap: 2px; padding: 2px; border-radius: 8px; background: var(--faint); margin-bottom: 6px; }
+.sp-seg button { flex: 1; }
+.sp-seg button.on { background: var(--panel); color: var(--text); box-shadow: 0 0 0 1px var(--line); }
+.sp-items { display: flex; flex-direction: column; gap: 1px; margin: 10px 0; }
+.sp-item { display: flex; gap: 8px; align-items: baseline; text-align: left; }
+.sp-item.on { background: var(--accent-soft); color: var(--text); }
+.sp-item .dirty { color: var(--play); }
+.sp-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; margin-bottom: 10px; }
+.sp-field { display: flex; flex-direction: column; gap: 2px; font-size: 11.5px; color: var(--muted); }
+.sp-field.wide { grid-column: 1 / -1; }
+.sp-field input { padding: 4px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); min-width: 0; }
+.sp-color { flex-direction: row; align-items: flex-end; flex-wrap: wrap; }
+.sp-color > span { width: 100%; }
+.sp-color input[type='color'] { width: 36px; height: 28px; padding: 1px; }
+.sp-color .sp-field { flex: 1; }

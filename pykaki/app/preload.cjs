@@ -9,6 +9,19 @@ contextBridge.exposeInMainWorld('pygaki', {
   write: (rel, data) => ipcRenderer.invoke('pygaki:write', rel, data),
   openFolder: (rel) => ipcRenderer.invoke('pygaki:openFolder', rel),
   choose: () => ipcRenderer.invoke('pygaki:choose'),
+  // showpy 실시간 연결 (docs/LINK.md 9장)
+  liveSend: (msg) => ipcRenderer.invoke('pygaki:liveSend', msg),
+  liveStatus: () => ipcRenderer.invoke('pygaki:liveStatus'),
+  onLive: (fn) => {
+    const h = (_e, msg) => fn(msg);
+    ipcRenderer.on('pygaki:live', h);
+    return () => ipcRenderer.removeListener('pygaki:live', h);
+  },
+  onLiveStatus: (fn) => {
+    const h = (_e, st) => fn(st);
+    ipcRenderer.on('pygaki:liveStatus', h);
+    return () => ipcRenderer.removeListener('pygaki:liveStatus', h);
+  },
   onChange: (fn) => {
     const h = (_e, rel) => fn(rel);
     ipcRenderer.on('pygaki:changed', h);

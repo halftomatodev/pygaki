@@ -6,8 +6,73 @@
 const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const fs = require('node:fs');
 const path = require('node:path');
+const net = require('node:net');
 
-const windows = new Map(); // webContents.id → { win, project, watcher }
+const windows = new Map(); // webContents.id → { win, project, watcher, live, liveTimer }
+
+// ── showpy 실시간 연결 (docs/LINK.md 9장) ──
+// 게임이 개발 모드로 켜지면 game/showpy_live.json에 포트와 토큰을 적는다. 그 포트로 붙어서
+// 한 줄에 JSON 하나씩 주고받고, 받은 것은 화면에 'pygaki:live'로 넘긴다.
+const LIVE_FILE = 'showpy_live.json';
+
+function liveInfo(project) {
+  try {
+    const d = JSON.parse(fs.readFileSync(path.join(project, 'game', LIVE_FILE), 'utf8'));
+    return d && d.port && d.token ? d : null;
+  } catch {
+    return null;
+  }
+}
+
+function liveSendStatus(entry) {
+  if (entry.win.isDestroyed()) return;
+  const l = entry.live;
+  entry.win.webContents.send('pygaki:liveStatus', { on: !!(l && l.ready), showpy: l?.info?.showpy ?? null });
+}
+
+function liveDrop(entry) {
+  const l = entry.live;
+  entry.live = null;
+  if (l) l.sock.destroy();
+  liveSendStatus(entry);
+}
+
+// 파일이 있으면 붙는다. 이미 같은 포트에 붙어 있으면 그대로 둔다.
+function liveConnect(entry) {
+  const info = liveInfo(entry.project);
+  if (!info) return;
+  if (entry.live && entry.live.info.port === info.port && entry.live.info.token === info.token) return;
+  if (entry.live) liveDrop(entry);
+  const sock = net.createConnection({ host: '127.0.0.1', port: info.port });
+  const l = { sock, info, buf: '', ready: false };
+  entry.live = l;
+  sock.setEncoding('utf8');
+  sock.setNoDelay(true);
+  sock.on('connect', () => {
+    sock.write(JSON.stringify({ hello: info.token, client: 'pykaki' }) + '\n');
+    l.ready = true;
+    liveSendStatus(entry);
+  });
+  sock.on('data', (d) => {
+    l.buf += d;
+    let i;
+    while ((i = l.buf.indexOf('\n')) >= 0) {
+      const line = l.buf.slice(0, i);
+      l.buf = l.buf.slice(i + 1);
+      if (!line.trim() || entry.win.isDestroyed()) continue;
+      try {
+        entry.win.webContents.send('pygaki:live', JSON.parse(line));
+      } catch {
+        /* 깨진 줄은 버림 */
+      }
+    }
+  });
+  const done = () => {
+    if (entry.live === l) liveDrop(entry);
+  };
+  sock.on('error', done);
+  sock.on('close', done);
+}
 
 function argProject(argv) {
   const i = argv.indexOf('--project');
@@ -50,18 +115,26 @@ function open(project) {
     webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, sandbox: true },
   });
   const id = win.webContents.id;
-  const entry = { win, project, watcher: null };
+  const entry = { win, project, watcher: null, live: null, liveTimer: null };
   windows.set(id, entry);
   // showpy가 남기는 받아 적기 파일과 미리보기 파일을 지켜본다
   try {
     entry.watcher = fs.watch(path.join(project, 'game'), (_ev, name) => {
       if (name && !win.isDestroyed()) win.webContents.send('pygaki:changed', 'game/' + String(name).replace(/\\/g, '/'));
+      if (name && String(name) === LIVE_FILE) liveConnect(entry);
     });
   } catch {
     /* 지켜보기를 못 해도 창으로 돌아올 때 읽는다 */
   }
+  // 끊겨 있으면 3초마다 다시 붙어 본다 (지켜보기를 놓쳐도)
+  entry.liveTimer = setInterval(() => {
+    if (!entry.live) liveConnect(entry);
+  }, 3000);
+  liveConnect(entry);
   win.on('closed', () => {
     entry.watcher?.close();
+    clearInterval(entry.liveTimer);
+    if (entry.live) entry.live.sock.destroy();
     windows.delete(id);
   });
   // 링크는 기본 브라우저로
@@ -131,6 +204,18 @@ ipcMain.handle('pygaki:write', (e, rel, data) => {
   fs.writeFileSync(tmp, typeof data === 'string' ? data : Buffer.from(data));
   fs.renameSync(tmp, full);
   return true;
+});
+
+ipcMain.handle('pygaki:liveSend', (e, msg) => {
+  const l = windows.get(e.sender.id)?.live;
+  if (!l || !l.ready) return false;
+  l.sock.write(JSON.stringify(msg) + '\n');
+  return true;
+});
+
+ipcMain.handle('pygaki:liveStatus', (e) => {
+  const l = windows.get(e.sender.id)?.live;
+  return { on: !!(l && l.ready), showpy: l?.info?.showpy ?? null };
 });
 
 ipcMain.handle('pygaki:openFolder', (e, rel) => shell.openPath(inside(projectOf(e), rel)));

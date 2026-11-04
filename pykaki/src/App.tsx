@@ -11,6 +11,9 @@ import { exportRpyFile, saveProject } from './files';
 import { addBoxCenter, enterFullPlay, goNextBox, leaveFullPlay, toggleFocus } from './actions';
 import { hit } from './prefs';
 import { isTyping } from './util';
+import { isDesktop } from './desktop';
+import { liveSend, startLive, useLive } from './showpyLive';
+import { ShowpyView } from './ShowpyView';
 
 // 단축키는 환경 설정에서 바꿀 수 있다 (prefs.ts)
 function Keys() {
@@ -19,6 +22,11 @@ function Keys() {
     const onKey = (e: KeyboardEvent) => {
       const s = useStore.getState();
       const run = (fn: () => void) => (e.preventDefault(), fn());
+      // showpy 화면에서는 저장 키가 게임 안 편집기의 저장(Ctrl+S)
+      if (useLive.getState().view === 'showpy') {
+        if (hit(e, 'save')) run(() => liveSend({ cmd: 'save' }));
+        return;
+      }
       if (hit(e, 'fullPlay')) run(() => void (s.fullPlay ? leaveFullPlay() : enterFullPlay()));
       else if (s.fullPlay) return; // 전체화면에서는 플레이 키만 쓴다
       else if (hit(e, 'focus')) run(toggleFocus);
@@ -56,17 +64,23 @@ export function App() {
   const focus = useStore((s) => s.focusMode);
   const showPrefs = useStore((s) => s.showPrefs);
   const flash = useStore((s) => s.flash);
+  const view = useLive((s) => s.view);
+  useEffect(() => {
+    if (isDesktop) startLive();
+  }, []);
 
   return (
     <ReactFlowProvider>
       <Keys />
       <div className={'app' + (focus ? ' focus' : '')}>
         <Toolbar />
-        <div className="main">
+        {/* 대본 화면은 showpy 화면을 보는 동안에도 그대로 둔다 (캔버스 상태 유지) */}
+        <div className="main" hidden={view === 'showpy'}>
           <Sidebar />
           <Canvas />
           <RightPanel />
         </div>
+        {view === 'showpy' && <ShowpyView />}
       </div>
       {flash && <div className="toast">{flash}</div>}
       {/* 일렁임(liquid) 효과가 쓰는 물결 필터 */}
