@@ -119,10 +119,17 @@ python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app 'F:\SHOWPY\
 1. showpy 4.14 (`ui_kit` 3.13): 게임 메뉴 화면(대사록, 저장, 불러오기, 환경설정 등)에서 ESC 메뉴를 왼쪽에 그대로 두고 제목과 내용을 오른편에. `title_menu.rpy`가 `game_menu` 스크린을 대신 정의함. 설정 `tmenu.game_menu_side`, `game_menu_content_x`, `game_menu_gap`, `game_menu_line`. 시험 프로젝트 두 곳에 넣고 Lint, pykaki_sample을 켜서 화면을 찍어 확인(게임 중, 타이틀에서, `game_menu_side = False`)
    - 화면 찍기 방법: 시험 프로젝트에 `config.always_shown_screens`에 타이머 스크린을 넣어 `renpy.run(ShowMenu(...))`, `renpy.screenshot(...)`을 차례로 부르는 임시 파일(끝나면 지움). `config.overlay_screens`는 메인 메뉴에서 안 보여서 안 됨. splash는 클릭을 기다리니 `splash.enabled = False`
    - `tmenu` 설정 이름과 같은 이름의 함수를 만들면 안 됨 (`cfg()`가 전역 이름으로 찾음)
-2. 다음 할 일 후보: showpy 편집기 패널을 PyKaki 앱으로 꺼내기 (게임 안에는 끌어서 옮기는 손잡이만 남기고, 패널은 앱에서. 주고받는 형식을 `docs/LINK.md`에 먼저 정하고 탭 하나부터)
+2. showpy 4.15 (`ui_kit` 3.14) + PyKaki 앱 [showpy] 화면: 게임 안 편집기를 앱에서 조종 (1~2단계)
+   - 게임: `editor/editor_live.rpy`가 개발 모드에서 127.0.0.1 포트를 열고 `game/showpy_live.json`(포트, 토큰)을 씀. 0.1초마다 받은 명령 처리 + 바뀐 상태 보냄. 앱이 붙어 있으면 게임 안 패널 숨김
+   - 앱: `app/main.cjs`가 그 파일을 보고 붙음(지켜보기 + 3초마다). 화면은 `src/ShowpyView.tsx`, `src/showpyLive.ts`. 형식은 `docs/LINK.md` 9장
+   - 앱 칸이 있는 것은 타이틀 메뉴, ESC 메뉴뿐. 나머지(스플래시, 셰이더, 커서/CTC, 대사, 선택지, 그림)는 앱에서 골라 게임 안 패널로 엶 → **다음 단계: 탭을 하나씩 앱 칸으로 옮기기** (스플래시는 게임 안 탭도 없어서 새로 만들어야 함)
+   - 확인: 파이썬 시험 클라이언트로 명령 전부, 진짜 앱 + pykaki_sample을 나란히 켜서 연결, 위치/원고 보기, 타이틀로 가기, 편집 시작, 숫자 바꾸기 → 게임 반영, 저장(`title_menu_layout.rpy`). `app/smoke.cjs`에 가짜 게임 연결 시험 추가(로컬 통과)
+   - 함정: 렌파이 `init python` 안에서 `dict`, `list`, `object`는 되감기용 타입이라 다른 스레드에서 쓰거나 json 값과 isinstance로 비교하면 안 됨 → `python_dict`, `python_list`, `python_object`
+   - 함정: computer-use의 `open_application("Python")`은 게임 창이 아니라 새 파이썬 콘솔을 켬. 창 자리는 PowerShell `SetWindowPos`로 잡음. 게임 창에 보내는 끌기, 휠, 키 입력은 자동 입력으로는 안 먹었음(사람이 확인)
 
 ## 5. 남은 확인 (사람이 눈으로 볼 것)
 
+- [ ] showpy 4.15 앱 연결: 앱이 붙은 채 게임 화면에서 타이틀 항목을 마우스로 끌기, 휠로 돌리기 → 앱 숫자가 따라오는지. 게임에서 Shift+R 뒤 앱이 다시 붙는지. ESC 메뉴 칸
 - [ ] 게임 메뉴 화면 4.14: 마우스로 메뉴 항목 위를 오갈 때 선택 모양이 지금 화면 항목으로 돌아오는지, 키보드 이동, 저장 칸이 넓은 메뉴 배치에서 오른쪽으로 넘치지 않는지
 
 - [ ] `fx_test_25`를 켜서 4.13 등장 효과를 눈으로 보기, 대사 탭 효과 버튼(이제 glsl에서 이름을 읽음)

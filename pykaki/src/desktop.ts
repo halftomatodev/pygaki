@@ -11,6 +11,11 @@ interface PygakiApi {
   openFolder(rel: string): Promise<string>;
   choose(): Promise<boolean>;
   onChange(fn: (rel: string) => void): () => void;
+  // showpy 실시간 연결 (docs/LINK.md 9장)
+  liveSend(msg: object): Promise<boolean>;
+  liveStatus(): Promise<{ on: boolean; showpy: string | null }>;
+  onLive(fn: (msg: any) => void): () => void;
+  onLiveStatus(fn: (st: { on: boolean; showpy: string | null }) => void): () => void;
 }
 
 export const desktop: PygakiApi | null = (window as any).pygaki ?? null;

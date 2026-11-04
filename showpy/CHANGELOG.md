@@ -2,6 +2,11 @@
 
 버전별 자세한 설명은 [docs/READ_ME_FIRST.md](docs/READ_ME_FIRST.md)와 폴더별 `README.md`에 있습니다.
 
+## 4.15 (2026-11-04)
+
+`ui_kit` 3.14:
+- PyKaki 데스크톱 앱과 실시간 연결(`editor/editor_live.rpy`). 개발 모드에서 127.0.0.1 포트를 열고 `game/showpy_live.json`에 적으면, 앱의 [showpy] 화면이 붙어서 게임 위치와 원고 줄을 보여주고 편집기를 조종합니다(타이틀 메뉴, ESC 메뉴는 앱에서 값을 고침). 앱이 붙어 있으면 게임 안 패널은 숨습니다. 형식은 `docs/LINK.md` 9장.
+
 ## 4.14 (2026-11-04)
 
 `ui_kit` 3.13:

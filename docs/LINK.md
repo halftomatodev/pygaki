@@ -166,7 +166,63 @@ PyKaki가 쓰고 showpy가 읽기만 합니다. PyKaki 글자 효과 칸의 [렌
 
 렌파이에 들어 있는 효과(`dissolve` 등 7개)는 렌파이가 등록하므로 showpy 파일에 없고, PyKaki가 미리보기용으로 `src/fx/renpy_textshaders.glsl`에 같은 형식으로 옮겨 둡니다.
 
-## 9. 확인 상태 (showpy 4.13, 렌파이 8.5.3)
+## 9. 실시간 연결 (`game/showpy_live.json`, showpy 4.15)
+
+PyKaki 데스크톱 앱의 showpy 화면이 게임 안 편집기를 바깥에서 조종하는 연결입니다. 게임 창은 그대로 두고, 패널(숫자, 목록, 대본)만 앱에서 봅니다. 게임 화면에는 끌어서 옮기는 표시만 남습니다. 웹 버전 PyKaki에는 없습니다.
+
+**찾기**: 게임이 개발 모드(`config.developer`)로 켜지면 showpy `editor/editor_live.rpy`가 `127.0.0.1`의 빈 포트를 열고 이 파일을 씁니다. 게임을 끄면 지웁니다. 배포판에는 넣지 않습니다.
+
+```json
+{ "version": 1, "port": 51234, "token": "9f2c...", "pid": 1234, "showpy": "3.14" }
+```
+
+앱(`pykaki/app/main.cjs`)은 `game` 폴더를 지켜보다가 이 파일이 생기거나 바뀌면 그 포트로 붙습니다. 끊기면 3초마다 다시 해 봅니다. 게임을 Shift+R로 다시 불러오면 포트가 바뀌어 파일이 다시 써지므로 앱이 따라옵니다.
+
+**주고받기**: TCP, 한 줄에 JSON 하나(UTF-8, 줄 끝 `\n`). 앱이 처음 보내는 줄은 `{"hello": "<token>", "client": "pykaki"}`이고, 토큰이 틀리면 게임이 끊습니다. 붙는 앱은 하나뿐이라 새로 붙으면 앞의 연결을 끊습니다.
+
+게임 → 앱 (`type`):
+
+| type | 언제 | 내용 |
+|---|---|---|
+| `state` | 붙자마자, 그 뒤 바뀔 때마다 (0.1초마다 비교, 같으면 안 보냄) | 아래 |
+
+```json
+{
+  "type": "state",
+  "where": { "file": "game/script_flow.rpy", "line": 18, "screens": ["say", "quick_menu"], "main_menu": false, "menu": false },
+  "editor": { "open": true, "tab": "title", "hide_panel": true, "message": "", "pending": 1,
+              "tabs": [ { "id": "title", "label": "타이틀 메뉴", "ok": true, "why": "" } ],
+              "info": [ "타이틀 메뉴  항목 1/5 ..." ] },
+  "title": { "ok": true, "menu": "title", "sel": 0, "mode": "base", "scope": "item",
+             "items": [ { "id": "start", "text": "시작하기", "x": 77, "y": 302, "anchor": [0.06, 0.42],
+                          "rotate": -4, "skew": 0, "zoom": 1, "size": 36, "font": "...", "color": "#...",
+                          "hover": { "offset": [10, 0], "rotate": -4, "skew": 0, "zoom": 1.15, "size": 36, "font": "...", "color": "#..." },
+                          "edited": true } ] }
+}
+```
+
+- `where.file`은 프로젝트 폴더 기준 경로입니다(렌파이 `get_filename_line`). 앱이 그 파일을 읽어 `line` 앞뒤 줄을 보여줍니다.
+- `title`은 `tmenu`가 없거나 꺼져 있으면 `null`입니다. `menu`는 지금 보이는 메뉴(`"title"` 타이틀 / `"pause"` ESC 메뉴), `x`, `y`는 화면 픽셀입니다.
+
+앱 → 게임 (`cmd`):
+
+| cmd | 값 | 하는 일 |
+|---|---|---|
+| `editor` | `open`(참/거짓), `tab`(선택) | 편집기 열기/닫기. 열 때 그 탭으로 |
+| `tab` | `id` | 탭 바꾸기 (그 화면에서 쓸 수 있을 때) |
+| `panel` | `hide`(참/거짓) | 게임 안 편집기 패널 숨기기. 숨겨도 끌기와 단축키는 그대로 |
+| `goto` | `where`: `"pause"`, `"title"` | ESC 메뉴 열기 / 타이틀로 가기(진행 중인 게임은 끝남) |
+| `title.select` | `index` | 고친 항목 고르기 |
+| `title.mode` | `mode`: `"base"`, `"hover"` | 평소 / 선택됐을 때 |
+| `title.scope` | `scope`: `"item"`, `"all"` | 이 항목만 / 모든 항목 공통 |
+| `title.set` | `key`, `value` | 고른 항목(공통이면 공통 값)의 값. `key`는 `title_menu_layout.rpy`와 같은 이름(`x`, `y`, `rotate`, `skew`, `zoom`, `size`, `font`, `color`, `hover_offset`, `hover_rotate` ...) |
+| `title.reset` | | 고른 항목(공통이면 공통 값)의 저장 안 한 변경 되돌리기 |
+| `save` | | 편집기 Ctrl+S와 같음 (배치 파일과 원고 저장) |
+| `discard` | | 지금 탭의 저장 안 한 변경을 모두 버림 |
+
+저장은 지금처럼 게임이 합니다(`*_layout.rpy`, 원고). 앱은 값을 보내기만 하고 showpy 파일을 직접 쓰지 않습니다.
+
+## 10. 확인 상태 (showpy 4.13, 렌파이 8.5.3)
 
 **자동으로 실행해서 확인함:**
 - 실시간 미리보기: showpy는 미리보기 파일을 바꾸면 창이 새 줄로 바뀌고 `enabled: false`면 닫힘. PyKaki는 스위치를 켜고 고치고 끌 때 파일 내용이 맞음. **둘을 동시에 켜 놓고 확인하지는 않음**

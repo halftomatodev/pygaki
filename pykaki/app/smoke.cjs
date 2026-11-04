@@ -57,6 +57,39 @@ async function until(what, fn, ms = 10000) {
   if (outside === 'written' || fs.existsSync(path.join(path.dirname(proj), 'pykaki-smoke-outside.txt'))) fail('프로젝트 밖에 쓸 수 있음');
   console.log('밖에 쓰기:', outside.slice(0, 40));
 
+  // showpy 실시간 연결 (docs/LINK.md 9장): 가짜 게임을 띄워 앱이 붙고, 상태를 보여주고, 명령을 보내는지
+  const net = require('node:net');
+  const got = [];
+  const state = {
+    type: 'state',
+    where: { file: 'game/script_flow.rpy', line: 3, screens: ['say'], main_menu: false, menu: false },
+    editor: { open: false, tab: null, hide_panel: true, message: '', pending: 0, tabs: [{ id: 'screen_fx', label: '화면 효과', ok: true, why: '' }], info: [] },
+    title: null,
+  };
+  const srv = net.createServer((c) => {
+    c.setEncoding('utf8');
+    let buf = '';
+    c.on('data', (d) => {
+      buf += d;
+      let i;
+      while ((i = buf.indexOf('\n')) >= 0) {
+        got.push(JSON.parse(buf.slice(0, i)));
+        buf = buf.slice(i + 1);
+      }
+    });
+    c.write(JSON.stringify(state) + '\n');
+  });
+  await new Promise((r) => srv.listen(0, '127.0.0.1', r));
+  fs.writeFileSync(path.join(proj, 'game', 'showpy_live.json'), JSON.stringify({ version: 1, port: srv.address().port, token: 'smoketoken', showpy: '3.14' }));
+  await until('게임에 붙지 않음 (hello 없음)', () => got.some((m) => m.hello === 'smoketoken'));
+  await page.click('.view-switch button:nth-child(2)');
+  await page.waitForSelector('.sp-conn.on', { timeout: 10000 });
+  await page.waitForSelector('.sp-script .cur', { timeout: 10000 });
+  await page.click('.sp-nav-item:has-text("인게임 화면 셰이더")');
+  await until('편집기 명령을 보내지 않음', () => got.some((m) => m.cmd === 'editor' && m.tab === 'screen_fx'));
+  console.log('showpy 연결: 됨, 받은 명령', got.length);
+  srv.close();
+
   if (errors.length) fail('화면 오류: ' + errors.join(' / '));
   await app.close();
   console.log('모두 통과');

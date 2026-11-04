@@ -7,6 +7,22 @@ import { addBoxCenter, enterFullPlay, runLayout, toggleFocus } from './actions';
 import { timeStr } from './util';
 import { keyOf } from './prefs';
 import { installApp, useCanInstall } from './pwa';
+import { isDesktop } from './desktop';
+import { useLive } from './showpyLive';
+
+// 데스크톱 앱에서만: 대본 화면 / showpy 화면 바꾸기. 점은 게임과 붙어 있는지
+function ViewSwitch() {
+  const { view, on } = useLive();
+  if (!isDesktop) return null;
+  return (
+    <span className="view-switch">
+      <button className={view === 'script' ? 'on' : ''} onClick={() => useLive.setState({ view: 'script' })}>대본</button>
+      <button className={view === 'showpy' ? 'on' : ''} onClick={() => useLive.setState({ view: 'showpy' })} title={on ? '게임과 연결됨' : '게임 연결 안 됨'}>
+        showpy <b className={'live-dot' + (on ? ' on' : '')}>●</b>
+      </button>
+    </span>
+  );
+}
 
 export function Toolbar() {
   const rf = useReactFlow();
@@ -29,6 +45,7 @@ export function Toolbar() {
   return (
     <div className="toolbar">
       <span className="brand">PyKaki</span>
+      <ViewSwitch />
       <button onClick={newProject}>새로</button>
       <button onClick={openProject}>열기</button>
       <button onClick={() => saveProject()} title={keyOf('save')}>저장</button>

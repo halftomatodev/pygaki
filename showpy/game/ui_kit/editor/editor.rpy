@@ -904,7 +904,7 @@ init -9 python in ui_editor:
         mx, my = store.renpy.get_mouse_pos()
         x, y = state.panel_now
         w, h = panel_size()
-        if not state.peek and x <= mx < x + w and y <= my < y + h:
+        if not state.peek and not live_panel_hidden() and x <= mx < x + w and y <= my < y + h:
             if panel_yadj.range > 0 and not state.mini:
                 panel_yadj.change(panel_yadj.value + sign * panel_yadj.step)
                 store.renpy.restart_interaction()
@@ -1208,7 +1208,8 @@ screen ui_editor_main():
     if _ok and _tab.overlay_screen:
         use expression _tab.overlay_screen
 
-    if not ui_editor.state.peek:
+    ## PyKaki 앱이 붙어 있으면 패널은 앱에서 봅니다 (editor_live.rpy)
+    if not ui_editor.state.peek and not ui_editor.live_panel_hidden():
         use ui_editor_panel
 
     ## 마우스 휠 (패널 위면 패널 스크롤, 밖이면 탭의 휠 기능). 패널보다 위에 둬야 먼저 받습니다.
