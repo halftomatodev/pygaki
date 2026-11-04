@@ -1215,6 +1215,13 @@ screen ui_editor_main():
     ## 마우스 휠 (패널 위면 패널 스크롤, 밖이면 탭의 휠 기능). 패널보다 위에 둬야 먼저 받습니다.
     add ui_editor.wheel_catcher
 
+    ## 앱이 붙어 있으면 고르기 창도 앱에서 봅니다
+    if not ui_editor.live_panel_hidden():
+        use ui_editor_popup
+
+
+## 고르기 창 (글꼴, 색, 그림/영상, 프레임 그림)
+screen ui_editor_popup():
     if ui_editor.state.popup == "font":
         use ui_editor_font_popup
     elif ui_editor.state.popup == "color":
@@ -1301,40 +1308,7 @@ screen ui_editor_panel():
                         yfill False     # 렌파이 기본값은 True(남은 높이를 다 채움)라서 꺼야 내용 높이만큼만 그려집니다
                         child_size (None, 10000)    # 안쪽 내용에 넉넉한 높이를 줘야 넘치는 줄까지 다 재서 끝까지 스크롤됩니다
 
-                        vbox:
-                            spacing 4
-                            xmaximum 620
-
-                            if _tab is None:
-                                text "편집할 탭이 없습니다." style "ui_editor_text"
-                            elif not _ok:
-                                text (_why or "지금은 이 탭을 쓸 수 없습니다.") style "ui_editor_text" color "#ffd23b"
-                            else:
-                                if _tab.uses_mode or _tab.uses_scope:
-                                    hbox:
-                                        spacing 6
-                                        if _tab.uses_mode:
-                                            textbutton ("1 " + _tab.mode_labels[0]) style "ui_editor_button" action Function(_tab.set_mode, "base") selected (_tab.mode() == "base")
-                                            textbutton ("2 " + _tab.mode_labels[1]) style "ui_editor_button" action Function(_tab.set_mode, "hover") selected (_tab.mode() == "hover")
-                                        if _tab.uses_scope:
-                                            textbutton ("3 " + (_tab.scope_labels[0] if _tab.scope() == "item" else _tab.scope_labels[1])) style "ui_editor_button" action Function(_tab.toggle_scope) selected True
-
-                                for _line in _tab.info_lines():
-                                    text _line style "ui_editor_text"
-
-                                if _tab.panel_screen:
-                                    use expression _tab.panel_screen pass (_tab)
-
-                            if ui_editor.state.message:
-                                text ui_editor.state.message style "ui_editor_text" color "#ffd23b"
-
-                            if ui_editor.state.help:
-                                null height 2
-                                if _tab is not None and _ok:
-                                    for _line in _tab.help_lines():
-                                        text _line style "ui_editor_small"
-                                for _line in ui_editor.common_help():
-                                    text _line style "ui_editor_small"
+                        use ui_editor_panel_body
 
                     vbar:
                         adjustment ui_editor.panel_yadj
@@ -1345,6 +1319,49 @@ screen ui_editor_panel():
                         thumb Solid("#ff3b8d")
                         hover_thumb Solid("#ff6aa9")
                         released Function(renpy.restart_interaction)    # 손을 떼면 내용이 따라옵니다
+
+
+## 패널 안쪽 (탭 내용, 메시지, 도움말). PyKaki 앱이 붙어 있으면 editor_live.rpy가
+## 같은 화면을 화면 밖에 그려서 앱으로 보냅니다 (3.16)
+screen ui_editor_panel_body():
+
+    $ _tab = ui_editor.current_tab()
+    $ _ok, _why = ui_editor.tab_available(_tab) if _tab is not None else (False, "")
+
+    vbox:
+        spacing 4
+        xmaximum 620
+
+        if _tab is None:
+            text "편집할 탭이 없습니다." style "ui_editor_text"
+        elif not _ok:
+            text (_why or "지금은 이 탭을 쓸 수 없습니다.") style "ui_editor_text" color "#ffd23b"
+        else:
+            if _tab.uses_mode or _tab.uses_scope:
+                hbox:
+                    spacing 6
+                    if _tab.uses_mode:
+                        textbutton ("1 " + _tab.mode_labels[0]) style "ui_editor_button" action Function(_tab.set_mode, "base") selected (_tab.mode() == "base")
+                        textbutton ("2 " + _tab.mode_labels[1]) style "ui_editor_button" action Function(_tab.set_mode, "hover") selected (_tab.mode() == "hover")
+                    if _tab.uses_scope:
+                        textbutton ("3 " + (_tab.scope_labels[0] if _tab.scope() == "item" else _tab.scope_labels[1])) style "ui_editor_button" action Function(_tab.toggle_scope) selected True
+
+            for _line in _tab.info_lines():
+                text _line style "ui_editor_text"
+
+            if _tab.panel_screen:
+                use expression _tab.panel_screen pass (_tab)
+
+        if ui_editor.state.message:
+            text ui_editor.state.message style "ui_editor_text" color "#ffd23b"
+
+        if ui_editor.state.help:
+            null height 2
+            if _tab is not None and _ok:
+                for _line in _tab.help_lines():
+                    text _line style "ui_editor_small"
+            for _line in ui_editor.common_help():
+                text _line style "ui_editor_small"
 
 
 ## 글꼴·색 줄 (탭 화면에서 씁니다)

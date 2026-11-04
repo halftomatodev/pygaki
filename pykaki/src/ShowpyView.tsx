@@ -6,12 +6,14 @@ import { desktop } from './desktop';
 import { liveSend, useLive, type GameState, type TitleItem, type TitleState } from './showpyLive';
 import { useStore } from './store';
 import { CustomUIPanel } from './ShowpyCustomUI';
+import { MirrorPanel } from './ShowpyMirror';
 
 interface Section {
   id: string;
   label: string;
   tab: string | null; // 게임 안 편집기 탭
-  app: boolean; // 앱 칸이 있음 (없으면 게임 안 패널로)
+  app: boolean; // 앱에 따로 만든 칸이 있음
+  mirror?: boolean; // 게임 안 패널을 통째로 옮겨 그림 (ui_kit 3.16부터)
   note: string;
 }
 
@@ -19,22 +21,24 @@ const SECTIONS: Section[] = [
   { id: 'splash', label: '스플래시 (로고, 경고, 조작 방법)', tab: null, app: false, note: '게임을 켰을 때 타이틀 전에 나오는 페이지예요. 지금은 splash/splash_config.rpy에서 고쳐요.' },
   { id: 'title', label: '타이틀 메뉴', tab: 'title', app: true, note: '' },
   { id: 'pause', label: '게임 내 메뉴 (ESC)', tab: 'title', app: true, note: '' },
-  { id: 'watermorph', label: '타이틀 셰이더 (일렁임)', tab: 'watermorph', app: false, note: '타이틀 배경에만 걸리는 일렁임 효과예요.' },
-  { id: 'screen_fx', label: '인게임 화면 셰이더', tab: 'screen_fx', app: false, note: '게임 화면 전체에 씌우는 효과(VHS, ASCII 등)예요.' },
+  { id: 'watermorph', label: '타이틀 셰이더 (일렁임)', tab: 'watermorph', app: false, mirror: true, note: '타이틀 배경에만 걸리는 일렁임 효과예요.' },
+  { id: 'screen_fx', label: '인게임 화면 셰이더', tab: 'screen_fx', app: false, mirror: true, note: '게임 화면 전체에 씌우는 효과(VHS, ASCII 등)예요.' },
   { id: 'custom_ui', label: '커서, 클릭 대기(CTC), 대사 소리', tab: 'custom_ui', app: true, note: '' },
-  { id: 'say', label: '대사 (위치, 줄마다 화면 효과)', tab: 'say', app: false, note: '' },
-  { id: 'choice', label: '선택지', tab: 'choice', app: false, note: '' },
-  { id: 'stage', label: '그림, 영상 배치', tab: 'stage', app: false, note: '' },
+  { id: 'say', label: '대사 (위치, 줄마다 화면 효과)', tab: 'say', app: false, mirror: true, note: '' },
+  { id: 'choice', label: '선택지', tab: 'choice', app: false, mirror: true, note: '' },
+  { id: 'stage', label: '그림, 영상 배치', tab: 'stage', app: false, mirror: true, note: '' },
 ];
 
 export function ShowpyView() {
   const { on, st, section, err, showpy } = useLive();
   const sec = SECTIONS.find((s) => s.id === section) ?? SECTIONS[1];
+  const mirrorOk = !!st && st.panel !== undefined; // 게임의 showpy가 패널을 통째로 보낼 수 있음
+  const inApp = (s: Section) => s.app || (!!s.mirror && mirrorOk);
 
   const choose = (s: Section) => {
     useLive.setState({ section: s.id });
     if (!s.tab) return;
-    liveSend({ cmd: 'panel', hide: s.app });
+    liveSend({ cmd: 'panel', hide: inApp(s) });
     liveSend({ cmd: 'editor', open: true, tab: s.tab });
   };
 
@@ -47,7 +51,7 @@ export function ShowpyView() {
           return (
             <button key={s.id} className={'sp-nav-item' + (s.id === sec.id ? ' on' : '')} onClick={() => choose(s)} title={t && !t.ok ? t.why : ''}>
               {s.label}
-              {!s.app && <span className="sp-badge">게임 안</span>}
+              {!inApp(s) && <span className="sp-badge">게임 안</span>}
             </button>
           );
         })}
@@ -65,6 +69,8 @@ export function ShowpyView() {
           <CustomUIPanel cu={st.custom_ui} />
         ) : sec.id === 'title' || sec.id === 'pause' ? (
           <TitlePanel st={st} want={sec.id} />
+        ) : sec.mirror && mirrorOk ? (
+          <MirrorSection st={st} sec={sec} />
         ) : (
           <InGamePanel st={st} sec={sec} />
         )}
@@ -211,6 +217,45 @@ function EditorBar({ st }: { st: GameState }) {
         게임 안 패널도 보기
       </label>
       {e.message && <p className="sp-msg">{e.message}</p>}
+    </div>
+  );
+}
+
+// ── 게임 안 패널을 통째로 옮겨 그리는 것 (ui_kit 3.16) ──
+
+function MirrorSection({ st, sec }: { st: GameState; sec: Section }) {
+  const t = sec.tab ? st.editor.tabs.find((x) => x.id === sec.tab) : null;
+  const open = () => (liveSend({ cmd: 'panel', hide: true }), liveSend({ cmd: 'editor', open: true, tab: sec.tab }));
+  if (!t) return <p className="tip">이 게임에는 이 편집기 탭이 없어요. (플러그인이 빠져 있을 수 있어요)</p>;
+  const here = !!st.panel && st.panel.tab === sec.tab;
+
+  // 그 탭을 쓸 수 없는 화면이면 갈 곳 버튼 (대사, 선택지, 그림은 게임 중 / 일렁임은 타이틀)
+  const go = !t.ok && (
+    <p>
+      {sec.id === 'watermorph' ? (
+        !st.where.main_menu && <button onClick={() => confirm('타이틀로 갈까요? 진행 중인 게임은 끝나요.') && liveSend({ cmd: 'goto', where: 'title' })}>타이틀로 가기</button>
+      ) : st.where.main_menu ? (
+        <button onClick={() => liveSend({ cmd: 'goto', where: 'start' })}>게임 시작</button>
+      ) : null}
+    </p>
+  );
+
+  if (here)
+    return (
+      <>
+        {go}
+        <MirrorPanel panel={st.panel!} />
+      </>
+    );
+  return (
+    <div>
+      {sec.note && <p>{sec.note}</p>}
+      {!t.ok && <p className="sp-warn">{t.why || '지금 화면에서는 쓸 수 없어요.'}</p>}
+      {go}
+      <button className="primary" onClick={open}>
+        편집 시작
+      </button>
+      {st.editor.open && !st.editor.hide_panel && st.editor.tab === sec.tab && <p className="tip">지금은 게임 창의 패널에 열려 있어요. [게임 안 패널도 보기]를 끄면 여기로 와요.</p>}
     </div>
   );
 }

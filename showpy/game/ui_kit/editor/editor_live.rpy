@@ -1,5 +1,5 @@
 ################################################################################
-## UI Kit — 편집기: PyKaki 앱과 실시간 연결 (3.14, 커서/대사 소리 3.15)
+## UI Kit — 편집기: PyKaki 앱과 실시간 연결 (3.14, 커서/대사 소리 3.15, 패널 통째로 3.16)
 ##
 ## PyKaki 데스크톱 앱의 showpy 화면이 이 편집기를 바깥에서 조종합니다.
 ## 게임 창에는 끌어서 옮기는 표시만 남고, 숫자, 목록, 대본은 앱에서 봅니다.
@@ -46,6 +46,7 @@ init -8 python in ui_editor:
             self.failed = False
             self.files_due = False      # 파일 목록(소리, 그림)을 보내야 함 (붙을 때, 앱이 달라고 할 때)
             self.listen_until = None    # 앱에서 [들어보기]를 누른 대사 소리를 멈출 시각
+            self.widgets = { }          # 앱으로 보낸 패널의 누를 수 있는 것: 자리 번호 -> 위젯 (3.16)
 
     live = _Live()
 
@@ -269,6 +270,220 @@ init -8 python in ui_editor:
         return dict(type="files", audio=list(uk.audio_files()),
                     images=list(uk.game_files((".png", ".webp", ".jpg", ".jpeg", ".avif"))))
 
+    ## ── 패널 통째로 (3.16) ──
+    ## 앱이 붙어 있으면 게임 안 패널(ui_editor_panel_body)과 고르기 창을 화면 밖에 그려 두고
+    ## (ui_editor_live_mirror), 그 위젯을 읽어 앱으로 보냅니다. 앱은 그 모양대로 그리고, 누르면
+    ## 자리 번호(id)를 돌려보냅니다(panel.do). 탭마다 앱 화면을 따로 만들지 않아도 됩니다.
+
+    def _plain(s):
+        try:
+            return store.renpy.filter_text_tags(s, allow=[ ])
+        except Exception:
+            return s
+
+    def _kids(d):
+        try:
+            return d.visit() or [ ]
+        except Exception:
+            return [ ]
+
+    def _texts_in(d, out, depth=0):
+        import renpy as _r
+        if d is None or depth > 30:
+            return
+        if isinstance(d, _r.text.text.Text) and not isinstance(d, _r.display.behavior.Input):
+            t = _plain(d.get_all_text()).strip()
+            if t:
+                out.append(t)
+            return
+        for k in _kids(d):
+            _texts_in(k, out, depth + 1)
+
+    def _media_in(d, out, depth=0):
+        """버튼 안의 그림과 색 견본 (그림 고르기, 색 고르기 칸)."""
+        import renpy as _r
+        if d is None or depth > 30:
+            return
+        if isinstance(d, _r.display.im.Image):
+            out.append(dict(k="img", p=str(d.filename)))
+            return
+        if isinstance(d, _r.display.imagelike.Solid):
+            if _visible_color(d):
+                out.append(dict(k="col", v=d.color.hexcode))
+            return
+        for k in _kids(d):
+            _media_in(k, out, depth + 1)
+
+    def _visible_color(d):
+        """거의 투명한 바탕(#ffffff18 같은)은 색 견본이 아님"""
+        try:
+            return d.color is not None and d.color.alpha >= 0.4
+        except Exception:
+            return False
+
+    def _input_in(d, out, depth=0):
+        import renpy as _r
+        if d is None or depth > 10:
+            return
+        if isinstance(d, _r.display.behavior.Input):
+            out.append(d)
+            return
+        for k in _kids(d):
+            _input_in(k, out, depth + 1)
+
+    def _color_of(d):
+        try:
+            c = d.style.color
+            if c is None:
+                return None
+            h = store.Color(c).hexcode
+            return None if h in ("#ffffff", "#ffffffff") else h
+        except Exception:
+            return None
+
+    def _button_label(d):
+        label = [ ]
+        _texts_in(d.child, label)
+        return " ".join(label)
+
+    def _mirror(d, path, reg, depth=0):
+        """위젯 하나를 앱이 그릴 모양으로. 누를 수 있는 것은 reg[자리 번호]에 적어 둡니다."""
+        import renpy as _r
+        disp = _r.display
+        if d is None or depth > 60:
+            return None
+
+        if isinstance(d, disp.behavior.Button):
+            ## 입력칸을 감싼 버튼(누르면 입력 시작)은 입력칸으로
+            found = [ ]
+            _input_in(d.child, found)
+            if found:
+                reg[path] = found[0]
+                return dict(k="in", id=path, t=str(found[0].content or ""))
+            label = _button_label(d)
+            extra = [ ]
+            _media_in(d.child, extra)
+            if not label and not extra:
+                return None     # 고르기 창 바깥을 덮는 버튼 같은 것
+            reg[path] = d
+            try:
+                ok = bool(d.is_sensitive()) and d.action is not None
+            except Exception:
+                ok = False
+            try:
+                on = bool(d.is_selected())
+            except Exception:
+                on = False
+            node = dict(k="b", id=path, t=label, on=on, ok=ok)
+            if extra:
+                node["c"] = extra
+            return node
+
+        if isinstance(d, disp.behavior.Input):
+            reg[path] = d
+            return dict(k="in", id=path, t=str(d.content or ""))
+
+        if isinstance(d, _r.text.text.Text):
+            t = _plain(d.get_all_text())
+            if not t.strip():
+                return None
+            node = dict(k="t", t=t)
+            c = _color_of(d)
+            if c:
+                node["c"] = c
+            return node
+
+        if isinstance(d, disp.behavior.Bar):
+            adj = d.adjustment
+            ## 세로 막대는 목록 스크롤바라서 앱에서는 빼기 (앱 칸이 스스로 스크롤)
+            if adj is None or getattr(d.style, "bar_vertical", False):
+                return None
+            reg[path] = d
+            return dict(k="bar", id=path, r=_js(adj.range), v=_js(adj.value), s=_js(adj.step))
+
+        if isinstance(d, disp.imagelike.Solid):
+            if not _visible_color(d):
+                return None
+            return dict(k="col", v=d.color.hexcode)
+
+        if isinstance(d, disp.im.Image):
+            return dict(k="img", p=str(d.filename))
+
+        if isinstance(d, disp.layout.Null):
+            return None
+
+        if isinstance(d, disp.layout.MultiBox):
+            kind = "h" if d.default_layout == "horizontal" else "v"
+            kids = d.children
+        elif isinstance(d, (disp.layout.Grid, disp.viewport.VPGrid)):
+            ## grid, vpgrid: 앱에서는 줄바꿈하는 가로 줄로 (격자처럼 보임)
+            kind = "g"
+            kids = d.children
+        elif isinstance(d, disp.layout.Window):
+            ## frame, window: 바탕 그림은 빼고 안쪽만
+            kind = "v"
+            kids = [ d.child ]
+        else:
+            kind = "v"
+            kids = _kids(d)
+
+        out = [ ]
+        for i, k in enumerate(kids):
+            n = _mirror(k, path + "." + str(i), reg, depth + 1)
+            if n is not None:
+                out.append(n)
+        if not out:
+            return None
+        ## 색 띠(색상 막대 뒤의 무지개 같은 것)는 빼기
+        if len(out) > 4 and all(n["k"] == "col" for n in out):
+            return None
+        if len(out) == 1:
+            return out[0]
+        return dict(k=kind, c=out)
+
+    def _panel_state():
+        if not (state.open and live_panel_hidden()):
+            live.widgets = { }
+            return None
+        reg = { }
+        rv = dict(tab=state.tab, body=None, popup=None, popup_kind=state.popup)
+        for wid, key, pre in (("live_panel", "body", "p"), ("live_popup", "popup", "q")):
+            try:
+                w = store.renpy.get_widget("ui_editor_live_mirror", wid, layer="ui_editor")
+            except Exception:
+                w = None
+            if w is not None:
+                rv[key] = _mirror(w, pre, reg)
+        live.widgets = reg
+        return rv
+
+    def _panel_do(c):
+        import renpy as _r
+        wid = str(c.get("id"))
+        w = live.widgets.get(wid)
+        if w is not None and isinstance(w, _r.display.behavior.Button) and c.get("t") is not None:
+            if _button_label(w) != c.get("t"):
+                w = None
+        if w is None:
+            msg("화면이 바뀌어서 누른 것을 찾지 못했습니다. 다시 눌러 주세요.")
+            return True
+        if isinstance(w, _r.display.behavior.Button):
+            if w.is_sensitive() and w.action is not None:
+                store.renpy.run(w.action)
+        elif isinstance(w, _r.display.behavior.Bar):
+            adj = w.adjustment
+            v = max(0, min(adj.range, float(c.get("value", 0))))
+            if isinstance(adj.range, int):
+                v = int(round(v))
+            adj.change(v)
+        elif isinstance(w, _r.display.behavior.Input):
+            if w.value is None:
+                return False
+            w.value.set_text(str(c.get("value", "")))
+            if c.get("enter"):
+                w.value.enter()
+        return True
+
     def _where_line():
         """게임 진행 위치 (원고 파일, 줄). ESC 메뉴 같은 메뉴 화면에 있어도 게임 쪽 위치."""
         try:
@@ -307,6 +522,7 @@ init -8 python in ui_editor:
                         pending=sum(t.pending() for t in TABS), tabs=tabs, info=info),
             title=_title_state(),
             custom_ui=_custom_ui_state(),
+            panel=_panel_state(),
             )
 
     ## ── 앱이 보낸 명령 ──
@@ -416,6 +632,12 @@ init -8 python in ui_editor:
                 store.renpy.run(store.ShowMenu())
             elif where == "title":
                 store.renpy.run(store.MainMenu(confirm=False))
+            elif where == "start":
+                ## 타이틀에서 게임 시작 (3.16). 게임 중이면 아무것도 안 함
+                if getattr(store, "main_menu", False):
+                    store.renpy.run(store.Start())
+                else:
+                    msg("게임 시작은 타이틀 화면에서 할 수 있습니다.")
             return True
 
         if cmd and cmd.startswith("title."):
@@ -438,6 +660,9 @@ init -8 python in ui_editor:
             elif cmd == "title.reset" and t is not None:
                 t.reset_item()
             return True
+
+        if cmd == "panel.do":
+            return _panel_do(c)
 
         if cmd and cmd.startswith("custom_ui."):
             return _custom_ui_cmd(cmd, c)
@@ -517,6 +742,8 @@ init -8 python in ui_editor:
 init 991 python in ui_editor:
     if store.config.developer and "ui_editor_live" not in store.config.always_shown_screens:
         store.config.always_shown_screens.append("ui_editor_live")
+    if store.config.developer and "ui_editor_live_mirror" not in store.config.always_shown_screens:
+        store.config.always_shown_screens.append("ui_editor_live_mirror")
     if store.config.developer and live_cleanup not in store.config.quit_callbacks:
         store.config.quit_callbacks.append(live_cleanup)
 
@@ -529,3 +756,24 @@ init 990 python in ui_editor:
 ## 연결을 지켜보는 보이지 않는 화면 (개발 모드에서만 띄움)
 screen ui_editor_live():
     timer 0.1 repeat True action Function(ui_editor.live_tick, _update_screens=False)
+
+
+## 앱으로 보낼 패널과 고르기 창 (3.16). 화면 밖에 그려서 보이지도 눌리지도 않습니다.
+screen ui_editor_live_mirror():
+    layer "ui_editor"
+
+    if config.developer and ui_editor.state.open and ui_editor.live_panel_hidden():
+        fixed:
+            pos (-40000, 0)
+            xysize (660, 20000)
+            fixed:
+                id "live_panel"
+                fit_first True
+                use ui_editor_panel_body
+
+        if ui_editor.state.popup is not None:
+            fixed:
+                id "live_popup"
+                pos (-80000, 0)
+                xysize (config.screen_width, config.screen_height)
+                use ui_editor_popup

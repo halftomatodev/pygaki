@@ -285,7 +285,7 @@ function useImage(path: string | null) {
   return url && url.path === path ? url.url : undefined;
 }
 
-function Thumb({ path }: { path: string }) {
+export function Thumb({ path }: { path: string }) {
   const url = useImage(path);
   if (url) return <img src={url} alt="" draggable={false} />;
   return <span className="sp-thumb-name">{url === null ? path.split('/').pop() : ''}</span>;

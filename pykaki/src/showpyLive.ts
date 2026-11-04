@@ -62,6 +62,21 @@ export interface CustomUIState {
   max_frames?: number;
   playing?: boolean;
 }
+// 게임 안 편집기 패널을 통째로 (ui_kit 3.16). k: h 가로 / v 세로 / g 격자 / t 글 / b 버튼 / bar 막대 / in 입력칸 / img 그림 / col 색 견본
+export type MirrorNode =
+  | { k: 'h' | 'v' | 'g'; c: MirrorNode[] }
+  | { k: 't'; t: string; c?: string }
+  | { k: 'b'; id: string; t: string; on: boolean; ok: boolean; c?: MirrorNode[] }
+  | { k: 'bar'; id: string; r: number; v: number; s: number }
+  | { k: 'in'; id: string; t: string }
+  | { k: 'img'; p: string }
+  | { k: 'col'; v: string | null };
+export interface PanelState {
+  tab: string | null;
+  body: MirrorNode | null;
+  popup: MirrorNode | null;
+  popup_kind: string | null;
+}
 export interface GameFiles {
   audio: string[];
   images: string[];
@@ -71,6 +86,7 @@ export interface GameState {
   editor: { open: boolean; tab: string | null; hide_panel: boolean; message: string; pending: number; tabs: EditorTab[]; info: string[] };
   title: TitleState | null;
   custom_ui?: CustomUIState | null; // ui_kit 3.15부터
+  panel?: PanelState | null; // ui_kit 3.16부터. 편집기가 열려 있고 게임 안 패널이 숨어 있을 때만
 }
 
 interface S {

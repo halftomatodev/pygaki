@@ -38,15 +38,25 @@ init -10 python in watermorph:
     class _State(store.python_object):
         def __init__(self):
             self.edits = { }        # 편집기에서 바꾸고 아직 저장 안 한 값
+            ## 편집기가 이번 실행 중에 저장한 값. store 변수(watermorph.layout)를 바꾸면 다시 불러올 때
+            ## (저장 뒤 저절로, Shift+R) 그 대사가 시작될 때의 옛 값이 새 파일 값을 덮어서 여기에 둡니다.
+            self.saved = None
 
     state = _State()
+
+    def saved_layout():
+        """편집기가 저장한 값: 이번 실행 중 저장한 것 → watermorph_layout.rpy"""
+        s = getattr(state, "saved", None)
+        if s is not None:
+            return s
+        return globals().get("layout", None) or { }
 
     def cfg(name):
         """설정값. 편집 중인 값 → 편집기가 저장한 값(watermorph_layout.rpy) → 설정 파일 → 기본값."""
         g = globals()
         if state.edits and name in state.edits and store.screen_fx.editing("watermorph"):
             return state.edits[name]
-        lay = g.get("layout", None) or { }
+        lay = saved_layout()
         if name in lay:
             return lay[name]
         if name in g:
