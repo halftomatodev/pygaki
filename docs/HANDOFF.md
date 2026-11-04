@@ -1,78 +1,78 @@
 # 인수인계 (2026-11-04 로컬 세션 6 → 다음 대화, 세션 7부터)
 
 새 대화에서 pygaki를 쓰거나 고칠 때 이 문서부터 읽습니다. 맨 위 [CLAUDE.md](../CLAUDE.md)의 규칙도 같이 지킵니다.
-새 대화는 "docs/HANDOFF.md 읽고 이어서 하자"로 시작하면 됩니다. 지나온 기록과 주요 결정은 [HISTORY.md](HISTORY.md)에 있습니다.
+새 대화는 "docs/HANDOFF.md 읽고 이어서 하자"로 시작하면 됩니다. 지나온 기록, 판마다 고친 코드, 주요 결정은 [HISTORY.md](HISTORY.md)에 있습니다.
 
 ## 0. 지금 어디까지 (먼저 읽기)
 
-- **최신 판**: showpy 4.22 (`ui_kit` 3.21, `screen_fx` 4.5, `hotkeys` 1.0, `splash` 1.2) + **pygaki 앱**(예전 이름 PyKaki). 4.21은 `main`에 push됨(`fe5e067`). 4.22가 커밋됐는지는 `git log`로 확인
-- **이번 세션(6)에 한 일**: 4.21(세부 속성을 1번/2번 아래로, 줄로 게임 옮기기) → 4.22(이름 pygaki, [대본 편집] [GUI 편집], 원고 칸 스크롤, 셰이더가 바뀌는 줄과 줄마다 전환, 두 자리 같이, 커서와 셰이더 '여기에서부터', 대사 탭 정리, PyKaki 원고에 셰이더 줄 저장, 커서·CTC 샘플과 폴더 안내) (4장 세션 6)
-- **새 시험 프로젝트**: `F:\Dropbox\1_DEV\RENPY\pygaki_sample` (묶음 템플릿 그대로 + 커서·CTC 샘플 + 시험용 짧은 `script.rpy`). 사용자가 "예전 것이 얽혀 있으니 새 샘플로"라고 함. 셰이더, 커서 시험은 여기서. PyKaki 원고 시험은 `showpy/examples/pykaki_sample`(대본 `pykaki/sample.flow.json`)을 임시 폴더에 복사해서 (`pykaki_sample`의 `.flow.json`은 상자 1개뿐이라 시험에 못 씀)
-- **사용자가 확인하는 곳**: `F:\SHOWPY\pygaki-dev-renpy-8.5.3\renpy.exe` (로컬 시험용 묶음. 4.22 템플릿, 런처 버튼, 새 앱 `pygaki\app\pygaki.exe`를 그 자리에서 바꿔 넣음, 런처가 켜져 있어서 묶음을 새로 만들지 않음). 런처를 껐다 켜야 새 버튼 이름이 나옴. 확인 순서는 3장 "확인용 묶음"
-- **다음 대화는 이것부터 물어보기**: 5장 맨 위 4.22 줄, 4.21 줄, 그다음 4.20 세 줄(특히 회전 손잡이 끌기, [여기에서부터 적용] → 저장 → 원고). 그 아래 4.19, 4.18, 4.17 줄도 아직 사용자 확인 전
-- **그다음 할 일**: 사용자가 확인하면 정식 판 v1.1(태그) → 공개용 구글 문서(아직 4.13 기준)를 4.14~4.20으로 한 번에 (6장)
-- **pykaki_sample에 사용자가 저장한 것**: `game/screen_fx/vhs_crt_layout.rpy`, `game/splash/splash_layout.rpy` (2026-11-04 17:04~05). 시험한 뒤 지우지 말 것. 시험으로 생긴 `*_layout.rpy`만 지움
+- **최신 판**: showpy 4.22 (`ui_kit` 3.21, `screen_fx` 4.5, `hotkeys` 1.0, `splash` 1.2) + **pygaki 앱**(예전 이름 PyKaki). 모두 `main`에 push됨(마지막 코드 커밋 `876db68`)
+- **이름**: 묶음과 데스크톱 앱은 **pygaki**, 대본 편집기(웹 버전, 앱의 [대본 편집] 화면)는 **PyKaki**라고 부름. 앱 위쪽은 [대본 편집] / [GUI 편집]
+- **사용자가 확인하는 곳**: `F:\SHOWPY\pygaki-dev-renpy-8.5.3\renpy.exe` (로컬 시험용 묶음, 4.22 템플릿·런처 버튼·새 앱 `pygaki\app\pygaki.exe`를 그 자리에서 바꿔 넣음). 런처를 껐다 켜야 새 버튼 이름이 나옴
+- **새 시험 프로젝트**: `F:\Dropbox\1_DEV\RENPY\pygaki_sample` (묶음 템플릿 그대로 + 커서·CTC 샘플 + 시험용 짧은 `script.rpy`). 사용자가 "예전 것이 얽혀 있으니 새 샘플로"라고 함. 시험은 여기서
+- **다음 대화는 이것부터 물어보기**: 5장 맨 위 4.22 줄과 4.21 줄. 그 아래 4.20~4.17도 아직 사용자 확인 전
+- **공개용 구글 문서**: 4.22 기준으로 고침(세션 6 끝, 수정안 `F:\SHOWPY\구글문서_수정안.md`). 고치는 방법은 6장
+- **그다음 할 일**: 사용자가 확인하면 정식 판 v1.1(태그) (6장)
+- **pykaki_sample에 사용자가 저장한 것**: `game/screen_fx/vhs_crt_layout.rpy`, `game/splash/splash_layout.rpy`. 지우지 말 것
 
 ## 1. pygaki 한눈에
 
 렌파이(Ren'Py)로 게임을 만드는 사람을 위한 도구 묶음입니다. 사용자는 한국어로 대화합니다.
 
-- **PyKaki**: 파이썬을 몰라도 상자와 선으로 렌파이 대본을 쓰는 에디터. 웹 버전과 데스크톱 앱(Electron)
-- **showpy**: 렌파이 플러그인. 게임을 켠 채 그림, 대사 위치, 화면 효과를 마우스로 고치는 편집기와 UI 묶음
-- **pygaki 묶음**: 렌파이 SDK + showpy 템플릿 + 런처 버튼 + PyKaki 앱을 윈도우용 폴더 하나로
+- **PyKaki**: 파이썬을 몰라도 상자와 선으로 렌파이 대본을 쓰는 에디터. 웹 버전과, 앱의 [대본 편집] 화면
+- **showpy**: 렌파이 플러그인. 게임을 켠 채 그림, 대사 위치, 셰이더를 마우스로 고치는 편집기(Shift+M)와 UI 묶음
+- **pygaki 앱**: [대본 편집](PyKaki) + [GUI 편집](실행 중인 게임과 이어져서 showpy 편집기를 앱에서 조종). Electron
+- **pygaki 묶음**: 렌파이 SDK + showpy 템플릿 + 런처 버튼 + pygaki 앱을 윈도우용 폴더 하나로
 
 | 무엇 | 자리 |
 |---|---|
 | 저장소 | https://github.com/halftomatodev/pygaki (`main`) |
 | 배포 파일 (묶음, 덧붙임 zip) | https://github.com/halftomatodev/pygaki/releases (v1.0, showpy 4.13) |
 | 웹 버전 PyKaki | https://halftomatodev.github.io/pygaki/ (`main`에 push하면 자동 배포) |
-| 공개용 사용 안내 (구글 문서, showpy 4.13 기준) | https://docs.google.com/document/d/10kmDFgiQ9JpbgIY6Q7vejf3EjMC06rCJCxjVSeukdes/edit |
+| 공개용 사용 안내 (구글 문서, showpy 4.22 기준) | https://docs.google.com/document/d/10kmDFgiQ9JpbgIY6Q7vejf3EjMC06rCJCxjVSeukdes/edit |
+| 구글 문서 수정안 | `F:\SHOWPY\구글문서_수정안.md` (4.22, 반영함), `구글문서_수정안_4.13_반영함.md` (지난번) |
 | 로컬 저장소 | `F:\SHOWPY\pygaki` (Dropbox 밖) |
-| 렌파이 SDK | `F:\SHOWPY\renpy-8.5.3-sdk` |
-| pygaki 앱 빌드 | 로컬 빌드 `pykaki/app/out/win-unpacked` (최신, `pygaki.exe`), Actions "pygaki 앱"의 `pygaki-win`. `F:\SHOWPY\PyKaki-win`은 v1.0 때 받은 예전 판(PyKaki.exe) |
+| 렌파이 SDK | `F:\SHOWPY\renpy-8.5.3-sdk` (묶음 재료, 손대지 않음) |
+| pygaki 앱 빌드 | 로컬 `pykaki/app/out/win-unpacked` (`pygaki.exe`), Actions "pygaki 앱"의 `pygaki-win`. `F:\SHOWPY\PyKaki-win`은 v1.0 때 받은 예전 판 |
 | 렌파이 프로젝트 폴더 | `F:\Dropbox\1_DEV\RENPY` |
-| 시험 프로젝트 (showpy 4.22 들어 있음) | `pygaki_sample`(새, 세션 6), `fx_test_25`, `pykaki_sample` |
-| 최신 시험용 묶음 (showpy 4.22 + 새 앱 `pygaki\app`) | `F:\SHOWPY\pygaki-dev-renpy-8.5.3\renpy.exe` (덧붙임은 `pygaki-dev-addon`, 4.15 그대로). v1.0 폴더는 4.13 그대로 |
+| 시험 프로젝트 (showpy 4.22) | `pygaki_sample`(새), `pykaki_sample`(PyKaki 원고, 단 `.flow.json`은 상자 1개뿐), `fx_test_25` |
+| PyKaki 원고 시험 재료 | `showpy/examples/pykaki_sample` (원고 + 대본 `pykaki/sample.flow.json`). 임시 폴더에 복사해서 씀 |
+| 확인용 묶음 | `F:\SHOWPY\pygaki-dev-renpy-8.5.3` (덧붙임 `pygaki-dev-addon`은 4.15 그대로). v1.0 폴더는 4.13 그대로 |
 | 사용자의 진짜 게임 (말할 때만 건드림) | `horror`, `test_plugin` |
-
-예전 `pykaki`, `showpy` 저장소는 "pygaki로 옮겼어요" 안내를 넣고 보관(archive)했습니다. 예전 로컬 폴더는 지웠습니다.
 
 ### 저장소 구조
 
 | 폴더 | 내용 | 먼저 읽기 |
 |---|---|---|
-| `pykaki/` | 웹 버전 (React + Vite, `npm run build` → `pykaki/dist/index.html` 한 파일) | `pykaki/CLAUDE.md`, `pykaki/docs/SPEC.md`, `pykaki/docs/GUIDE.md`(사용 안내, 9-2 앱 showpy 화면) |
+| `pykaki/` | 웹 버전 (React + Vite, `npm run build` → `pykaki/dist/index.html` 한 파일) | `pykaki/CLAUDE.md`, `pykaki/docs/SPEC.md`, `pykaki/docs/GUIDE.md`(사용 안내, 9-2 앱) |
 | `pykaki/app/` | 데스크톱 앱. 웹 빌드를 복사해서 켬. `main.cjs`가 게임과 실시간 연결, `smoke.cjs`가 확인 시험 | `pykaki/docs/SPEC.md` 9-2 |
-| `pykaki/src/Showpy*.tsx`, `showpyLive.ts` | 앱 [GUI 편집] 화면. `ShowpyView`(목록, 가운데, 칸), `ShowpyCustomUI`(커서/대사 소리 전용 칸), `ShowpyMirror`(게임 패널을 통째로 그리는 공통 틀) | |
-| `pykaki/src/fx/` | 등장 효과 WebGL 미리보기 | |
+| `pykaki/src/Showpy*.tsx`, `showpyLive.ts` | 앱 [GUI 편집]. `ShowpyView`(목록, 원고 칸, 칸), `ShowpyCustomUI`(커서/대사 소리 칸, 커서와 셰이더), `ShowpyMirror`(게임 패널을 통째로 그리는 공통 틀) | |
+| `pykaki/src/inbox.ts` | showpy가 넣은 줄 받아 적기 (`insert`, `replace`, `remove`, `say_pos`, `say_fx`) | `docs/LINK.md` 3장 |
 | `showpy/game/` | 플러그인 4개: `ui_kit`, `screen_fx`, `hotkeys`, `splash` | `showpy/docs/DEV_RULES.md`, `showpy/docs/SPEC.md`, `showpy/docs/READ_ME_FIRST.md` |
-| `showpy/game/ui_kit/editor/editor_live.rpy` | 앱과 실시간 연결(포트, 상태, 명령, 패널 통째로 읽기, "편집 중" 띠) | `docs/LINK.md` 9장 |
-| `showpy/game/splash/editor/editor_splash.rpy` | 편집기 "스플래시" 탭 (4.18) | |
+| `showpy/game/ui_kit/editor/editor_live.rpy` | 앱과 실시간 연결(상태, 명령, 패널 통째로, "편집 중" 띠, `goto_line`) | `docs/LINK.md` 9장 |
+| `showpy/game/ui_kit/engine/script_edit.rpy` | 원고 쓰기 도구 (줄 괄호, 줄 넣기, PyKaki 원고 규칙 `_pk_prepare`) | |
+| `showpy/game/screen_fx/editor/editor_fx.rpy` | 셰이더 칸(두 자리, 세부 속성, 줄 목록, 셰이더가 바뀌는 줄), 커서와 셰이더 | |
 | `showpy/game/ui_kit/engine/text_effects.glsl` | 등장 효과 셰이더 **하나뿐**. 렌파이와 PyKaki가 같이 씀 | 파일 맨 위 "적는 법" |
-| `docs/LINK.md` | 두 프로그램이 맞추는 형식 (9장 실시간 연결 `showpy_live.json`: state, files, panel, 명령 표) | 형식을 바꿀 때 |
-| `docs/HISTORY.md` | 지나온 기록, 주요 결정과 이유 | 왜 이렇게 됐는지 궁금할 때 |
+| `showpy/samples/gui/` | 커서, CTC 샘플 그림 (묶음이 새 프로젝트 `game/gui`에 넣음) | |
+| `docs/LINK.md` | 두 프로그램이 맞추는 형식 | 형식을 바꿀 때 |
+| `docs/HISTORY.md` | 지나온 기록, 판마다 고친 코드, 결정과 이유 | |
 | `bundle/` | `make_bundle.py`(묶기), `launcher/pygaki_launcher.rpy`(런처 버튼) | `bundle/README.md` |
-| `.github/workflows/` | `deploy.yml` 웹 배포, `app.yml` 앱 확인 + 윈도우 빌드, `release.yml` 태그 → Releases 초안 | |
+| `.github/workflows/` | `deploy.yml` 웹 배포, `app.yml` 앱 확인 + 윈도우 빌드(`pygaki-win`), `release.yml` 태그 → Releases 초안 | |
 
-## 2. 쓰는 법 (사용자 입장)
+## 2. 쓰는 법 (사용자 입장, 4.22)
 
-- **웹 버전**: 크롬이나 엣지로 웹 주소를 열고 왼쪽 [렌파이 프로젝트 연결] → 프로젝트 폴더를 고르면 `game/script_flow.rpy`를 만들고 연결이 켜집니다. 그다음부터 Ctrl+E로 내보냅니다.
-- **묶음**: 묶음 폴더의 `renpy.exe` → 런처 아래쪽
-  - [pygaki로 새 프로젝트]: showpy가 들어간 1280x720 한국어 프로젝트 (VHS 덮개는 처음에 꺼짐)
-  - [pygaki로 편집]: 왼쪽에서 고른 프로젝트를 앱으로 열고, 대본은 `프로젝트이름.flow.json`에 자동 저장
-- **showpy 편집기**: 게임 실행 중 Shift+M (앱 없이 쓸 때)
-- **실시간 미리보기**: PyKaki 글자 효과 칸의 [렌파이에서 보기]
-- **앱의 [GUI 편집] 화면** (4.15~4.20): 앱 툴바 [대본 편집 | GUI 편집]. 런처에서 [프로젝트 실행]으로 게임을 개발 모드로 켜 두면 저절로 붙고 초록 점. 게임 창과 나란히 씀
-  - 왼쪽 목록: 스플래시, 타이틀 메뉴, └ 타이틀 셰이더, 게임 내 메뉴(ESC), └ 게임 내 메뉴 셰이더, 타이틀 일렁임, 인게임 화면 셰이더, 커서/CTC/대사 소리, 대사, 선택지, 그림 배치. 모두 앱 오른쪽 칸에서 고침
-  - 타이틀/ESC 메뉴, 커서/대사 소리: 앱에 따로 만든 칸. 나머지: 게임 안 패널을 통째로 옮겨 그린 칸(버튼, 막대, 입력칸, 색·글꼴·그림 고르기 창까지)
-  - **편집 중에는 게임이 안 넘어감**: 칸을 고르면 게임 안 편집기가 열리고, 그동안 게임 화면의 클릭과 키는 편집기로 감(끌어서 옮기기용). 게임 화면 위에 "편집 중 … Esc로 닫기" 띠가 보이면 그 상태. 게임 창 Esc나 앱의 [편집기 닫기]로 닫음. 커서/대사 소리 칸과 [대본] 화면에서는 편집기가 닫혀 있음
-  - 타이틀에서 대사·그림 칸을 고르면 [게임 시작], 게임 중에 타이틀 셰이더/일렁임을 고르면 [타이틀로 가기], 게임 내 메뉴 셰이더는 [ESC 메뉴 열기]
-  - [저장]은 편집기 Ctrl+S와 같음 (`*_layout.rpy`나 원고)
-- **스플래시 편집** (4.18): 페이지 고르기, 바탕색, 바탕·로고 그림, 글자 색·글꼴·크기, 위치, 넘어가는 때, 시간, [이 페이지 보기]. 저장은 `splash/splash_layout.rpy`. 글 내용(제목, 본문 문장)은 `splash_config.rpy`에서
-- **게임 메뉴 화면** (4.14): 저장, 환경설정 등에서 ESC 메뉴가 왼쪽에 남고 내용은 오른편
-- **셰이더** (4.20, 4.21): 인게임은 "인게임 화면 셰이더" → 바로 1번, 2번(기본/아스키/VHS/단말기/게임보이, "전부 셰이더 적용 취소"), 고른 효과의 세부 속성은 그 줄 바로 아래(접기/펴기) → 세모(▶)가 지금 줄을 따라감(두 번 누르면 그 줄로), 다른 줄을 누르면 게임도 그 줄로 → [여기에서부터 적용] → [저장]하면 원고에 `$ screen_fx.shaders("a", "b")`. "처음 상태, 전환"은 맨 아래 [펴기]. 타이틀과 ESC 메뉴는 "└" 칸에서 따로 두 자리(세부 속성은 인게임과 같은 값)
-- **줄로 게임 옮기기** (4.21): 셰이더 칸 줄 목록, 앱 가운데 원고 칸에서 줄 누르기. 지나온 줄이면 되감기, 처음 가는 줄이면 warp(게임을 다시 시작해서 그 줄까지 scene/show만 따라 함, 변수는 빠질 수 있음)
-- **타이틀/ESC 메뉴 꾸미기** (4.20): 배경(타이틀 기본 검은 화면, ESC 기본 투명, 그림/webm 고르기), 제목/부제 글(목록 맨 아래), 글자 효과, 게임 창에서 분홍 네모 끌어 회전(Shift 15도)
+- **묶음**: `renpy.exe` → 런처 아래쪽 [pygaki로 새 프로젝트](showpy와 커서·CTC 샘플이 든 1280x720 한국어 프로젝트, VHS 덮개는 처음에 꺼짐), [pygaki로 편집](고른 프로젝트를 앱으로, 대본은 `프로젝트이름.flow.json`에 자동 저장)
+- **웹 버전**: 크롬이나 엣지로 웹 주소 → [렌파이 프로젝트 연결] → Ctrl+E로 내보내기
+- **showpy 편집기**: 게임 실행 중 Shift+M (앱 없이 쓸 때. 남겨 두기로 함)
+- **앱 [GUI 편집]**: 런처 [Launch Project]로 게임을 켜 두면 저절로 붙고 초록 점. 게임 창과 나란히
+  - 왼쪽 목록: 스플래시, 타이틀 메뉴(└ 타이틀 셰이더), 게임 내 메뉴(└ 게임 내 메뉴 셰이더), 타이틀 일렁임, 인게임 화면 셰이더, 커서·CTC·대사 소리, 대사(위치, 스타일), 선택지, 그림 배치
+  - 가운데 원고 칸: 파일 전체 스크롤, 게임 줄을 따라감(직접 스크롤하면 멈춤, [지금 줄로]). **줄을 누르면 게임도 그 줄로**(지나온 줄이면 되감기, 처음 가는 줄이면 warp)
+  - 칸을 고르면 게임 안 편집기가 열려서 게임 입력이 편집기로 감("편집 중" 띠, Esc나 [편집기 닫기]). 커서 칸과 [대본 편집]에서는 닫힘
+  - [저장] = 편집기 Ctrl+S
+- **셰이더**: 1번, 2번(기본/아스키/VHS/단말기/게임보이)을 고르면 바로 보이고, 고른 효과의 세부 속성이 그 아래. 줄을 고르고 "적용할 때 전환" → [여기에서부터 적용] → [저장]하면 원고에 `$ screen_fx.shaders("a", "b", transition=…)`. **두 자리는 늘 같이 바뀜**. "셰이더가 바뀌는 줄"에서 줄마다 전환, 예전 한 자리 줄은 [두 자리로 바꾸기]. 맨 아래 [처음 상태]. 타이틀과 ESC 메뉴는 "└" 칸에서 따로 두 자리
+- **커서와 셰이더**: 커서 칸에서 [1번·2번 다 받음 / 2번만 받음 / 셰이더 안 받음] → 줄 고르기 → [여기에서부터 적용] → `$ screen_fx.set_cursor("top")`. 그림 폴더: 커서 `game/gui/cursor/`, CTC `game/gui/ctc/`
+- **대사 탭**: 위치와 스타일만. 글자 등장 효과는 PyKaki에서. 원고에 이미 적힌 괄호(`fx=` 등)는 그대로 돌아감
+- **타이틀/ESC 메뉴 꾸미기** (4.20): 배경(타이틀 기본 검은 화면, ESC 기본 투명), 제목·부제, 글자 효과, 게임 창에서 분홍 네모 끌어 회전
+- **스플래시 편집** (4.18): 바탕, 로고, 글자, 위치, 넘어가는 때, [이 페이지 보기]. 글 내용은 `splash_config.rpy`에서
 
 ## 3. 고치는 법 (개발)
 
@@ -93,178 +93,86 @@ cd pykaki/app && npm run web && node smoke.cjs   # 앱 확인 시험 (진짜 Ele
 cd /f/SHOWPY/renpy-8.5.3-sdk && ./lib/py3-windows-x86_64/python.exe renpy.py <프로젝트 폴더> lint
 ```
 
-배포 파일은 보통 태그를 올리면(`git tag v1.1 && git push origin v1.1`) Actions "배포 파일"이 만들어 Releases에 초안으로 올림. 손으로는 `python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app <앱 폴더> --zip --tag <이름>`. 자세히는 `bundle/README.md`.
+배포 파일은 태그를 올리면(`git tag v1.1 && git push origin v1.1`) Actions "배포 파일"이 Releases 초안으로. 손으로는 `python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app <앱 폴더> --zip --tag <이름>`. 자세히는 `bundle/README.md`.
 
 ### 고칠 때 지킬 순서
 
-- **PyKaki**: 고친 뒤 `npx tsc --noEmit`, `npm run build`. 앱 쪽을 고쳤으면 `npm run web && node smoke.cjs`.
-- **showpy**: 고친 뒤 Lint → 시험 프로젝트(`fx_test_25`, `pykaki_sample`)에 바뀐 파일을 복사하고 `.rpyc` 지우기 → Lint.
-  - 시험 프로젝트에만 있는 것을 살립니다: 편집기로 만든 `*_layout.rpy`(특히 사용자가 저장한 것, 0장), fx_test_25의 `ui_kit/stage_config.rpy`의 `define stage.bg_tag = [ "bg", "fx_bg" ]`.
-  - 버전을 올리면 `showpy/CHANGELOG.md`, `showpy/docs/READ_ME_FIRST.md`, `showpy/docs/SPEC.md`, `showpy/docs/CUSTOM_GUIDE.md` 머리, 플러그인 `README.md`, `ui_kit/engine/ui_kit.rpy`의 `VERSION`(splash는 `splash/engine/splash.rpy`).
-  - 플러그인은 따로 넣어도 돌아야 함. 다른 플러그인에 기대는 파일(예: splash 편집 탭)은 ui_kit 없이 Lint도 봄.
-- **앱 [showpy] 칸**: 새 편집기 탭은 게임 쪽 탭(`ui_editor.Tab`)만 만들면 앱에 공통 틀로 저절로 나옴. 앱 `ShowpyView.tsx`의 `SECTIONS`에 `tab`, `mirror: true`만 더함. 새 렌파이 위젯 종류를 쓰면 `editor_live.rpy`의 `_mirror`에 읽는 법을 더함.
-- **형식을 바꾸면** `docs/LINK.md`와 양쪽 코드를 같은 커밋에서.
-- **문서**: 사용 안내가 바뀌면 `pykaki/docs/GUIDE.md`, `showpy/docs/*`. 공개용 구글 문서는 정식 판 때 한 번에.
-- **커밋**: 작성자 `halftomato <wwonwan@naver.com>` (`git -c user.name=halftomato -c user.email=wwonwan@naver.com commit ...`). 커밋과 push는 사용자에게 물어본 뒤.
-- **작업 방식**: showpy를 고칠 때는 DEV_RULES대로 먼저 할 수 있는지, 짧은 계획, 예상 시간을 말하고 사용자가 "시작"이라고 하면 시작합니다. 답은 한국어 반말.
+- **작업 방식**: showpy를 고칠 때는 DEV_RULES대로 먼저 할 수 있는지(문제나 오류가 있으면 짚기), 짧은 계획, 예상 시간을 말하고 사용자가 "시작"이라고 하면 시작. 답은 한국어 반말
+- **PyKaki**: 고친 뒤 `npx tsc --noEmit`, `npm run build`. 앱 쪽을 고쳤으면 `npm run web && node smoke.cjs`
+- **showpy**: 고친 뒤 시험 프로젝트(`pygaki_sample`, `pykaki_sample`, `fx_test_25`)에 복사하고 `.rpyc` 지우기 → Lint. 플러그인은 따로 넣어도 돌아야 함(ui_kit 없이 screen_fx만, screen_fx 없이 ui_kit만 Lint)
+  - 시험 프로젝트에만 있는 것을 살림: 사용자가 저장한 `*_layout.rpy`(0장), fx_test_25의 `ui_kit/stage_config.rpy`, `pygaki_sample`의 `screen_fx.overlay = False`
+  - 버전을 올리면 `showpy/CHANGELOG.md`, `showpy/docs/READ_ME_FIRST.md`, `SPEC.md`, `CUSTOM_GUIDE.md` 머리, 플러그인 `README.md`, `ui_kit/engine/ui_kit.rpy`·`screen_fx/engine/screen_fx.rpy`의 `VERSION`
+- **앱 [GUI 편집] 칸**: 새 편집기 탭은 게임 쪽 탭(`ui_editor.Tab`)만 만들면 공통 틀로 앱에 저절로 나옴. `ShowpyView.tsx`의 `SECTIONS`에 `tab`, `mirror: true`만 더함
+- **원고에 새 종류의 줄을 넣으면**: PyKaki 원고에서는 `script_edit._pk_prepare`가 허용한 것만 써짐. 길을 더하고 PyKaki `inbox.ts`도 맞춤
+- **형식을 바꾸면** `docs/LINK.md`와 양쪽 코드를 같은 커밋에서
+- **문서**: `pykaki/docs/GUIDE.md`, `showpy/docs/*`, 공개용 구글 문서(6장)
+- **커밋**: 작성자 `halftomato <wwonwan@naver.com>` (`git -c user.name=halftomato -c user.email=wwonwan@naver.com commit ...`). 커밋과 push는 사용자에게 물어본 뒤
 
 ### 확인용 묶음 (`F:\SHOWPY\pygaki-dev-renpy-8.5.3`)
 
-사용자는 이 묶음의 `renpy.exe`로 최신 내용을 확인합니다. **원본은 저장소이고 묶음은 만든 순간의 사본**이라, 고친 뒤 맞춰 줍니다.
+사용자는 이 묶음의 `renpy.exe`로 최신 내용을 확인합니다. **원본은 저장소이고 묶음은 사본**이라 고친 뒤 맞춰 줍니다.
 
 | 고친 것 | 맞출 것 |
 |---|---|
-| showpy 플러그인 | 시험 프로젝트 두 곳에 복사 + `.rpyc` 지우기 + Lint. 묶음 템플릿 `pygaki-dev-renpy-8.5.3\showpy\game`에도 같은 파일 복사 → 템플릿 Lint → Lint가 남긴 `.rpyc`, `cache`, `saves` 지우기 |
-| PyKaki (웹 화면, 앱) | `npm run build` → 앱 빌드 → 묶음의 `pygaki\PyKaki` 폴더를 통째로 바꿔 넣기 (켜져 있는 pygaki.exe를 먼저 끔) |
-| 런처 버튼, 템플릿 설정 | 묶음 다시 만들기 |
+| showpy 플러그인 | 묶음 템플릿 `showpy\game`에 복사 → `screen_fx.overlay = False` 다시 → 템플릿 Lint → `.rpyc`, `cache`, `saves` 지우기. 샘플 그림은 `showpy\game\gui` |
+| 앱 (웹 화면, 앱) | `npm run build` → 앱 빌드 → 묶음의 `pygaki\app` 폴더를 통째로 바꿔 넣기 (켜져 있는 pygaki.exe를 먼저 끔) |
+| 런처 버튼 | `bundle/launcher/pygaki_launcher.rpy`를 묶음 `launcher\game`에 복사, `.rpyc` 지움, 런처 껐다 켜기 |
+| 읽어주세요 | `make_bundle.py`의 `README`로 `pygaki\읽어주세요.txt` 다시 쓰기 |
+| 전부 | 묶음 다시 만들기(5~10분, 있던 `F:\SHOWPY\pygaki-dev-*`를 먼저 지움. **런처가 켜져 있으면 못 함**) |
 
 ```bash
 cd pykaki && npm run build
 cd pykaki/app && rm -rf out && npx electron-builder --win dir -c.win.signAndEditExecutable=false
-# 앱만: out/win-unpacked 를 F:\SHOWPY\pygaki-dev-renpy-8.5.3\pygaki\PyKaki 로 바꿔 넣기
-# 묶음 전체(5~10분, 있던 F:\SHOWPY\pygaki-dev-*를 먼저 지움):
 python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app 'F:\SHOWPY\pygaki\pykaki\app\out\win-unpacked' --out 'F:\SHOWPY' --tag dev
 ```
 
-- 게임은 프로젝트 폴더 안의 showpy를 읽으므로, 어느 런처로 켜든 그 프로젝트에 넣은 판이 돕니다.
-- [pygaki로 새 프로젝트]로 만든 게임은 만들 때 showpy를 복사해 가서 나중 판이 저절로 들어가지 않습니다.
-- 저장소에서 바로 앱을 켜려면 `cd pykaki/app && npm start -- --project "F:\Dropbox\1_DEV\RENPY\pykaki_sample"`.
+- 게임은 프로젝트 폴더 안의 showpy를 읽으므로, 어느 런처로 켜든 그 프로젝트에 넣은 판이 돕니다
+- [pygaki로 새 프로젝트]로 만든 게임은 만들 때 showpy를 복사해 가서 나중 판이 저절로 들어가지 않습니다
+- 저장소에서 바로 앱을 켜려면 `cd pykaki/app && npm start -- --project "F:\Dropbox\1_DEV\RENPY\pygaki_sample"`
 
-### 확인 방법 (세션 4~5에 쓴 것, 도구는 저장소에 없음. 새 세션에서 짧게 다시 만듦)
+### 확인 방법 (도구는 저장소에 없음. 새 세션에서 짧게 다시 만듦)
 
-- **플러그인 복사 스크립트**(파이썬): `showpy/game`의 `ui_kit`, `screen_fx`, `hotkeys`, `splash`를 프로젝트 `game/`에 복사. `.rpyc`, `*_layout.rpy`는 복사 안 함, fx_test_25의 `ui_kit/stage_config.rpy`는 덮지 않음. 복사 뒤 그 폴더들의 `.rpyc` 지움. 게임이 켜져 있으면 먼저 끔
+- **플러그인 복사 스크립트**(파이썬): `showpy/game`의 4개 폴더를 프로젝트 `game/`에 복사. `.rpyc`, `*_layout.rpy`는 복사 안 함, fx_test_25의 `ui_kit/stage_config.rpy`는 덮지 않음, `pygaki_sample`은 `screen_fx.overlay = False` 다시. 복사 뒤 `.rpyc` 지움. 게임이 켜져 있으면 먼저 끔
+- **게임 켜고 끄기**: `cd /f/SHOWPY/renpy-8.5.3-sdk && (./lib/py3-windows-x86_64/pythonw.exe renpy.py <프로젝트> run > /dev/null 2>&1 &)`. 끌 때는 명령줄에 `<프로젝트> run`이 든 pythonw만 찾아서 끔(`Get-CimInstance Win32_Process`). 사용자가 켠 게임과 런처는 끄지 않음
+- **시험 훅** `zz_shot.rpy`(시험 프로젝트에 임시로): `config.always_shown_screens`의 스크린이 0.2초마다 `game/zz_req`를 보면 그 파이썬을 실행하고 결과(`_zz_r`)를 `game/zz_out`에. 화면 찍기는 `renpy.screenshot(경로)`. Dropbox가 파일을 잡고 있으면 읽기/지우기가 실패하니 try로 감쌈. 끝나면 `zz_*` 지움
+- **실시간 연결 시험 클라이언트**(파이썬): `game/showpy_live.json`의 포트로 붙어 `{"hello": token}`, 한 줄 JSON 명령(`editor`, `panel`, `goto`, `panel.do`, `custom_ui.cursor`, `save` …), `state`를 받음. `state.panel.body`에서 `k: "b"` 버튼의 `id`, `t`를 찾아 `panel.do`(누르기 전에 나무를 다시 읽음). 스플래시를 건너뛰려면 `goto` `where: "line"`(warp). 출력은 `PYTHONIOENCODING=utf-8`. **앱이 켜져 있으면 시험 연결을 끊으니 앱을 먼저 끔**
+- **진짜 앱 화면**: 스크립트를 `pykaki/app` 안에 두고 `require('playwright')`의 `_electron.launch({ args: ['--no-sandbox', __dirname, '--project', 프로젝트] })`(밖에 두면 창이 안 뜸). 툴바 버튼은 `/^GUI 편집/`. 게임을 먼저 켜 둠. 타이틀에서는 "대사" 칸을 골라야 [게임 시작]
+- **PyKaki 원고 한 바퀴**: `pykaki_sample`을 임시 폴더에 복사하고 원고와 대본을 `showpy/examples/pykaki_sample`의 것으로 바꿈(`game/script_flow.rpy`, `<폴더이름>.flow.json`) → 게임에서 적용·저장 → `showpy_inbox.json` 확인 → 앱을 켜서 받아 적기 → Ctrl+E로 내보낸 원고 비교
+- computer-use로는 게임 창 입력이 안 먹음(마우스 끌기, 회전 손잡이는 자동 시험 못 함)
 
-- **게임 켜고 끄기**: `cd /f/SHOWPY/renpy-8.5.3-sdk && (./lib/py3-windows-x86_64/pythonw.exe renpy.py <프로젝트> run > /dev/null 2>&1 &)`. PowerShell `Start-Process`나 출력을 잡는 방법은 도구가 게임이 끝날 때까지 기다림. 끌 때는 명령줄에 `<프로젝트> run`이 든 pythonw만 찾아서 끔(`Get-CimInstance Win32_Process`). 사용자가 켠 게임은 끄지 않음.
-- **실시간 연결 시험 클라이언트**(파이썬): `game/showpy_live.json`의 포트로 붙어 `{"hello": token}`을 보내고, 한 줄 JSON으로 명령(`editor`, `panel`, `goto`, `panel.do`, `custom_ui.set`, `save` …)을 보내며 `state`를 받아 봄. `state.panel`의 나무를 글로 찍어 버튼 `id`를 찾아 `panel.do`로 누름. 저장 → 다시 불러오기는 `showpy_live.json`의 토큰이 바뀔 때까지 기다렸다가 다시 붙음. **앱이 켜져 있으면 3초마다 다시 붙어서 시험 연결을 끊으니 앱을 먼저 끔**.
-- **진짜 앱 화면**: Playwright(`pykaki/app/node_modules/playwright`)의 `_electron.launch({ args: [앱 폴더, '--project', 프로젝트] })`로 앱을 켜서 누르고 찍음. 앱보다 게임을 먼저 켜 둠.
-- **게임 화면 찍기**: 시험 프로젝트에 임시 `zz_shot.rpy`(`config.always_shown_screens`에 넣은 스크린의 `timer 0.3 repeat`가 `game/zz_shot_req` 파일을 보면 그 안에 적힌 경로로 `renpy.screenshot`)를 넣고, 끝나면 `zz_shot*`를 지움. computer-use로는 게임 창 입력이 안 먹음(그래서 마우스 끌기, 회전 손잡이는 자동 시험 못 함).
-- **시험 클라이언트로 패널 누르기**: `state.panel.body` 나무에서 `k: "b"` 버튼의 `id`, `t`를 찾아 `{"cmd": "panel.do", "id": …, "t": …}`. 노드 `c`는 상자/버튼이면 자식 목록, 글(`k: "t"`)이면 색 글자라 구별할 것. 출력은 `PYTHONIOENCODING=utf-8`로(아니면 한글 깨짐).
-- **효과 등록 비교**, **효과 모양 비교**, **구글 문서 확인**: HISTORY.md와 예전 판 HANDOFF(git 기록)의 방법 그대로.
+## 4. 지금까지 한 일 (짧게, 자세한 것은 HISTORY.md 2장)
 
-## 4. 지금까지 한 일
-
-### 2026-11-03 (클라우드 세션)
-
-1. 실시간 미리보기 버그 두 개, 등장 효과를 셰이더 한 파일 + PyKaki WebGL로 (showpy 4.13)
-2. 두 저장소를 pygaki 하나로 합침, PyKaki 데스크톱 앱, 런처 버튼 두 개와 묶음 스크립트
-
-### 2026-11-04 (로컬 세션 1~3)
-
-1. showpy 4.13 확인(Lint, 효과 20개 비교), 묶음 시험, 새 프로젝트 템플릿 고침(`a057014`), GitHub Pages, 예전 저장소 보관, 구글 문서를 4.13 기준으로
-2. showpy 4.14 (`ui_kit` 3.13): 게임 메뉴 화면에서 ESC 메뉴를 왼쪽에 (`tmenu.game_menu_side` 등)
-3. showpy 4.15 (`ui_kit` 3.14) + 앱 [GUI 편집] 화면: `editor_live.rpy`가 127.0.0.1 포트를 열고 `game/showpy_live.json`을 씀, 앱 `main.cjs`가 붙음. 타이틀/ESC 메뉴만 앱 칸
-4. 저장소 하나만 유지(`docs/HISTORY.md`), 확인용 묶음 `pygaki-dev-renpy-8.5.3` 만듦
-
-### 2026-11-04 (로컬 세션 4)
-
-1. 사용자가 4.15 앱 연결, 4.14 게임 메뉴 화면을 확인함 (괜찮음)
-2. **showpy 4.16** (`ui_kit` 3.15, `118f09c`): 커서, CTC, 대사 소리를 앱 전용 칸으로
-   - 게임: 상태 `custom_ui`, 파일 목록 메시지 `files`, 명령 `custom_ui.set/reset/listen/stop`, `files`
-   - 앱: `ShowpyCustomUI.tsx` (텍스트 속도, 대사 소리, CTC/커서 그림 12칸과 고르기, 커서 방식·기준점, 퀵메뉴, 24fps 미리보기). 그림은 앱이 `game/`에서 직접 읽음
-   - 고침: 저장 뒤 다시 불러오면 옛 값으로 보이던 것(`custom_ui.runtime`), 앱 화면이 늦게 뜨면 첫 상태를 놓치던 것(`main.cjs`가 마지막 state/files를 기억)
-   - 사용자 확인함 (괜찮음)
-3. **showpy 4.17** (`ui_kit` 3.16, `2f0ffa5`): 남은 탭(셰이더 두 개, 대사, 선택지, 그림 배치)을 공통 틀로 앱에
-   - 게임이 패널 안쪽(`ui_editor_panel_body`, `editor.rpy`에서 뗌)과 고르기 창(`ui_editor_popup`)을 화면 밖(`ui_editor_live_mirror`, x -40000)에 그려 위젯 나무로 보냄(`state.panel`) → 앱 `ShowpyMirror.tsx`가 그대로 그림 → 누르면 `panel.do`(자리 번호 + 버튼 글)
-   - 읽기 규칙(`_mirror`): Button(입력칸을 감싼 버튼은 입력칸), Input, Text, Bar(세로=스크롤바는 뺌), Solid(거의 투명한 것, 무지개 띠는 뺌), Image, MultiBox(h/v), Grid/VPGrid(g), Window는 바탕 빼고 안쪽만
-   - `goto start` 명령, 일렁임 옛 값 고침(`watermorph.state.saved`)
-4. **showpy 4.18** (`splash` 1.2, `ui_kit` 3.17, `8dbff50`): 스플래시 편집 탭을 새로 만듦 + 타이틀 탭 옛 값 고침
-   - `splash/editor/editor_splash.rpy` (ui_kit이 있을 때만 등록). 엔진 `merged()` = 엔진 기본 → `splash.default` → 페이지 → `splash.layout` → 편집 중인 값. `check()`도 layout까지 봄
-   - 엔진 `check()`가 막는 조합(영상 없이 "영상이 끝날 때", 클릭으로 못 넘기는데 "클릭할 때까지")은 탭에서 미리 막음
-   - 타이틀: `tmenu.state.saved`, `cfg()`가 layout/pause_layout/layout_default를 거기서 먼저 읽음
-5. **showpy 4.19** (`ui_kit` 3.18, `068d9bc`): 사용자 제보 "PyKaki가 켜져 있으면 게임 화면이 가끔 클릭/입력이 안 먹음"
-   - 원인: 앱에서 칸을 고르면 게임 안 편집기가 패널 없이 열리는데, 편집기(`EditorInput`)는 열려 있는 동안 마우스 클릭과 키를 전부 가져감(원래 설계). 게임 창에 표시가 없었음. 고르기 창이 열려 있으면 Esc 말고 전부 막힘
-   - 고침: 게임 화면 위 가운데 "편집 중: <탭> (PyKaki 앱) | 클릭과 키는 편집기로 가요 | Esc로 닫기" 띠(글자만이라 입력은 안 막음). 앱은 커서/대사 소리 칸에서 편집기를 열지 않고, [대본] 화면으로 가면 닫고, 편집 중이면 칸 위에 알림 + [편집기 닫기]
-6. 단계마다 확인: 시험 클라이언트, 진짜 앱 화면 찍기, smoke(커서 칸, 패널 버튼 추가), Lint(시험 프로젝트 두 곳, 묶음 템플릿, ui_kit 없이 splash만), 확인용 묶음 바꿔 넣기
+- 2026-11-03: 등장 효과 셰이더 한 파일(4.13), 두 저장소를 pygaki로, 데스크톱 앱, 런처 버튼, 묶음
+- 2026-11-04 세션 1~3: 4.13 확인, 묶음 템플릿 고침, GitHub Pages, 예전 저장소 보관, 구글 문서 4.13, Releases v1.0. 4.14 게임 메뉴 화면, 4.15 앱 연결
+- 세션 4: 4.16 커서 칸, 4.17 게임 패널을 통째로 앱에, 4.18 스플래시 탭, 4.19 "편집 중" 띠
+- 세션 5: 4.20 셰이더 두 자리, 타이틀/메뉴 셰이더, 타이틀·메뉴 꾸미기, 회전 손잡이
+- 세션 6: 4.21 세부 속성을 1번/2번 아래로, 줄로 게임 옮기기(`fe5e067`). 4.22 이름 pygaki, 원고 칸 스크롤, 셰이더가 바뀌는 줄과 줄마다 전환, 두 자리 같이, 커서와 셰이더, 대사 탭 정리, **PyKaki 원고에 셰이더 줄이 저장되지 않던 것 고침**, 커서·CTC 샘플, 새 시험 프로젝트(`876db68`). 공개용 구글 문서를 4.22 기준으로
 
 ## 5. 남은 확인 (사람이 눈으로 볼 것)
 
-사용자는 `pygaki-dev` 묶음의 런처에서 `pykaki_sample`을 [프로젝트 실행]하고 [pygaki로 편집] → [showpy]로 확인합니다.
+사용자는 `pygaki-dev` 묶음의 런처에서 프로젝트를 [Launch Project]로 켜고 [pygaki로 편집] → [GUI 편집]으로 확인합니다.
 
-- [ ] showpy 4.22: 런처 [pygaki로 편집] [pygaki로 새 프로젝트](런처 껐다 켜기), 앱 제목 pygaki와 [대본 편집] [GUI 편집], 예전 PyKaki의 최근 파일·설정이 그대로인지, 원고 칸 스크롤과 [지금 줄로], 셰이더가 바뀌는 줄에서 전환 고르기와 [두 자리로 바꾸기] → 저장, 커서 칸 "커서와 셰이더"(소프트웨어 커서를 켜고 셰이더가 있는 장면에서 세 가지 차이), 커서·CTC 샘플 그림과 바둑판 칸, 대사 탭 안내 줄, **PyKaki 원고에서 [여기에서부터 적용] → 저장 → 대본에 받아 적힘**
-- [ ] showpy 4.21: 인게임 화면 셰이더 칸에 위쪽 페이지 줄이 없고 1번/2번 아래 세부 속성이 보이는지, 막대가 바로 화면에 들어가는지, 줄 목록과 앱 원고 칸에서 줄을 누르면 게임이 그 줄로(되감기/warp) 가는지, warp 뒤 편집기가 다시 열리는지, 타이틀 셰이더 칸 세부 속성, 세부 속성 바꾸고 [저장] → `ascii_layout.rpy` 같은 파일 (저장은 시험에서 안 해 봄)
+- [ ] **4.22**: 런처 [pygaki로 편집] [pygaki로 새 프로젝트](런처 껐다 켜기), 앱 제목 pygaki와 [대본 편집] [GUI 편집], 예전 PyKaki의 최근 파일·설정이 그대로인지, 원고 칸 스크롤과 [지금 줄로], 셰이더가 바뀌는 줄의 전환 고르기와 [두 자리로 바꾸기] → 저장, 커서 칸 "커서와 셰이더"(소프트웨어 커서를 켜고 셰이더가 있는 장면에서 세 가지 차이), 커서·CTC 샘플 그림과 바둑판 칸, 대사 탭 안내 줄, **PyKaki 원고에서 [여기에서부터 적용] → 저장 → 대본에 받아 적힘**
+- [ ] **4.21**: 셰이더 칸 1번/2번 아래 세부 속성, 막대가 바로 화면에, 줄을 누르면 게임이 그 줄로(되감기/warp), warp 뒤 편집기 다시 열림, 타이틀 셰이더 칸 세부 속성, 세부 속성 바꾸고 [저장] → `ascii_layout.rpy` 같은 파일 (저장은 시험에서 안 해 봄)
+- [ ] **4.20**: 타이틀 검은 배경, 배경 그림/webm, 제목/부제와 글자 효과, **회전 손잡이를 마우스로 끌기(자동 시험으로는 못 함)**, ESC 메뉴 투명 배경, "└" 셰이더 두 칸
+- [ ] **4.19**: "편집 중" 띠, Esc나 [편집기 닫기] 뒤 게임이 다시 넘어가는지
+- [ ] **4.18**: 스플래시 값 바꾸고 [이 페이지 보기], 저장 뒤 다시 켜도 그 모양
+- [ ] **4.17**: 선택지 칸(선택지가 뜬 화면에서, 자동으로는 아직 못 봄), 그림 배치 → 저장
+- [x] 4.16 커서/대사 소리 칸, 4.15 앱 연결, 4.14 게임 메뉴 화면 (사용자 확인)
 
-- [ ] showpy 4.20 인게임 화면 셰이더: "셰이더 고르기"에서 1번/2번 고르면 바로 보이는지, 세모(▶)가 게임 줄을 따라가는지, 세모 두 번 누르기, [여기에서부터 적용] → [저장] → 원고에 `$ screen_fx.shaders(…)`, 다시 켜서 그 줄부터 바뀌는지 (원고에 저장은 시험에서 안 해 봄)
-- [ ] showpy 4.20 타이틀: 검은 배경, 배경 그림/webm 고르기, 제목/부제 글과 글자 효과, **회전 손잡이를 마우스로 끌기(자동 시험으로는 못 함)**, "└ 타이틀 셰이더"
-- [ ] showpy 4.20 ESC 메뉴: 투명 배경, 배경 고르기, "└ 게임 내 메뉴 셰이더"(ESC 메뉴 연 채로)
-
-- [ ] showpy 4.19: 앱에서 칸을 고르면 게임 화면 위에 "편집 중" 띠, Esc나 [편집기 닫기] 뒤 게임이 다시 넘어가는지, 커서 칸이나 [대본] 화면에서는 게임 입력이 되는지
-- [ ] showpy 4.18 스플래시 칸: 값 바꾸고 [이 페이지 보기] → 게임 창에 바뀐 모양, 저장 뒤 게임을 다시 켜도 그 모양 (사용자가 warning 페이지 글자 크기를 저장해 봄)
-- [ ] showpy 4.17 앱 칸: 타이틀 셰이더(타이틀에서), 인게임 화면 셰이더, 대사, **선택지(선택지가 뜬 화면에서, 자동으로는 아직 못 봄)**, 그림 배치 → 게임에 바로 보이는지, 저장
-- [x] showpy 4.16 커서/대사 소리 칸, 4.15 앱 연결, 4.14 게임 메뉴 화면 (2026-11-04 사용자 확인)
-
-예전부터 남은 것:
-
-- [ ] `fx_test_25`를 켜서 4.13 등장 효과를 눈으로 보기, 대사 탭 효과 버튼
-- [ ] 런처를 영어로 바꿨을 때 버튼 한글이 보이는지
-- [ ] 앱과 게임을 나란히: showpy 편집기에서 그림 넣기 → 앱에 바로 받아 적힘, 앱에서 Ctrl+E → 게임이 다시 불러옴
-- [ ] 실시간 미리보기([렌파이에서 보기])를 PyKaki와 렌파이를 같이 켜 놓고
-- [ ] 실제 폴더 선택창으로 [렌파이 프로젝트 연결], 크롬에서 F8 전체화면, 소리, 렌파이 대사 탭 저장
-- [ ] 구글 문서: 새로 넣은 목록 글머리, 새 표 줄 글꼴
-
-### 2026-11-04 (로컬 세션 5)
-
-사용자 요청 세 가지(타이틀 꾸미기와 셰이더, 게임 내 메뉴 꾸미기와 셰이더, 인게임 셰이더 단순하게) + 회전 손잡이.
-
-1. **`screen_fx` 4.3** (`engine/screen_fx.rpy`, `editor/editor_fx.rpy`, `screen_fx_config.rpy`)
-   - 두 자리: 1번 = `current`, 2번 = `cur_overlay`. 2번에 효과 이름이 들어감(`overlay_flag`, `_resolve_overlay`, `_check_overlay`). VHS도 1번에 옴(`resolve`, `base_effect`). `use("vhs_crt")`는 `overlay`를 안 적을 때만 예전처럼 "없음 + VHS"
-   - `screen_fx.shaders(a, b)`, `slot_choices()`, `slot_label()`(기본/아스키/VHS/단말기/게임보이), `current_slots()`
-   - 타이틀/메뉴: `menu_context()`(스플래시 아님 + `main_menu` → "title", `_menu` → "pause"), `menu_slots()`, 설정 `title_shaders`, `menu_shaders`. `_shown()`이 그 자리를 화면 전체(글자 빼기 없음)에 씌움. 효과의 `scope`, `auto`는 안 봄
-   - 편집기: FxTab "셰이더 고르기"(page 이름은 `"lines"` 그대로) = 고르기(`picks`, `preview_slots`) + 줄 목록(세모, `follow`, `mark_click`은 0.6초 안에 두 번) + `apply_here` → `{"slots": (a, b)}` → `$ screen_fx.shaders("a", "b")`. MenuFxTab `title_fx`, `pause_fx`(cedit.edits에 넣고 `screen_fx_layout.rpy`로)
-   - 세모는 Neo둥근모(`screen_fx/fonts/neodgm.ttf`)로 그림(기본 글꼴에 없음)
-2. **`ui_kit` 3.19** (`engine/title_menu.rpy`, `editor/editor_title.rpy`, `editor/editor.rpy`, `editor/editor_live.rpy`, `title_menu_config.rpy`)
-   - `background_disp(menu)`: 타이틀은 고른 것이 없으면 검은 Solid, ESC 메뉴는 None(투명). 그림은 `fit="cover"`, 영상은 `Movie`. 일렁임 `target="background"`면 감쌈. `main_menu_frame`, `pause_dim` 기본 끔
-   - `label_items(menu)`: 제목, 부제(`tmenu.labels`, `pause_labels` → `label_layout` → `state.label_edits`). 화면 `tmenu_labels`. 편집 중에는 `tmenu_lbl_N` 버튼, `focused_index()`는 메뉴 항목 수 + N
-   - 글자 효과: `with_effect()` = `textshader` + `slow_cps`(`tmenu.effect_cps`). 크기 재는 sizer에는 안 넣음
-   - TitleTab: `_entries()` = 항목 + 글자, `set_key()`(앱이 씀), 회전 손잡이(`rot_center`, `rot_handle`, 끌기 토큰 `("rot", i)`, 마우스 위치로 각도, Shift 15도), 배경 고르기 창 `background`
-   - 실시간 연결: title에 `kind`, `name`, `effect`, `background`, `effects`. 명령 `title.background`. files에 `movies`. `editor.pending`에 `pending_lines()`도 셈
-3. **PyKaki 앱** (`ShowpyView.tsx`, `showpyLive.ts`): 목록 "└ 타이틀 셰이더", "└ 게임 내 메뉴 셰이더", "타이틀 일렁임"(이름 바꿈). 타이틀 칸에 배경 고르기, 글 칸, 글자 효과
-4. 확인: Lint(pykaki_sample, fx_test_25, 묶음 템플릿, ui_kit만, screen_fx만). 시험 클라이언트로 타이틀 글자/효과, 타이틀 셰이더 VHS+게임보이, 저장 → 다시 켜도 그대로, 인게임 셰이더 고르기 미리 보기, 줄 고르기, 세모 두 번, ESC 메뉴 투명 + 메뉴 셰이더 아스키, 회전 손잡이 그림. smoke 통과, 진짜 앱 화면 찍기. 시험으로 저장한 것은 지움(`pykaki_sample`의 `title_menu_layout.rpy`는 원래 있던 `start` 한 줄만 남김)
-5. 확인용 묶음: 템플릿 `showpy\game`에 4.20 복사(템플릿 `screen_fx.overlay = False` 다시 적용), `pygaki\PyKaki`를 새 앱으로
-
-### 2026-11-04 (로컬 세션 6)
-
-사용자 요청: 인게임 셰이더도 두 개만(위의 "셰이더 고르기" 페이지 줄은 필요 없음), 세부 속성과 옵션은 1번/2번 아래에 각각, 줄을 고르면 게임 화면도 그곳으로, 앱 원고 칸도.
-
-1. **`screen_fx` 4.4** (`editor/editor_fx.rpy`, `engine/screen_fx.rpy`)
-   - `FxView(tab, page)`: 부를 때만 탭의 `page`를 잠시 그 효과(또는 `"tv"`)로 바꿔서 원래 값 함수(val, put, target, rows …)를 그대로 씀. 함수는 `functools.partial`로 캐시(화면의 Function이 매번 같은 것으로 보이게). `tab.view(page)`. 탭의 `page`는 늘 `"lines"`
-   - 막대 `FxBarValue(..., page)`, 색 고르기 창 키는 `"효과:값"`(`get_value`/`set_value`가 나눔)
-   - 화면: `ui_editor_fx_slots`(1번 줄 → 세부 속성 → 2번 줄 → 세부 속성), `ui_editor_fx_detail(v, whole)`, `ui_editor_fx_tv_panel`(맨 아래, `tv_open`). `detail_open`으로 자리마다 접기
-   - `Effect.editing()`: 화면 효과 탭이나 MENU_TABS를 쓰는 동안 모든 효과가 편집 값으로(전에는 그 효과 페이지일 때만). `_sync()`는 효과마다 고른 프리셋을 미리 보기
-   - MenuFxTab: `view`, `detail_open`, `get_value/set_value`, `on_open/on_close`. 저장은 FxTab이 함(효과 값은 FxTab의 pending)
-   - 줄 목록 누르기 = `pick_line`(고르고 `_ed.goto_line`), 줄 번호 칸도. [ ] 키는 고르기만
-2. **`ui_kit` 3.20** (`editor/editor_live.rpy`): `goto_line(fn, line)`
-   - `_node_at`: 빈 줄/주석이면 그 뒤 첫 문장, 아니면 그 줄이나 앞 문장
-   - `_rollback_steps`: 되감기 기록(`renpy.game.log.log`)에서 그 줄이 든 가장 최근 기록을 찾고, 그 뒤 저장 지점 수를 셈. 지금 기록이 저장 지점이 아니면(선택지에서 기다림) +1. 지금 보이는 대사 안이면 0(그대로 둠). `renpy.rollback(force=True, checkpoints=n, defer=True)`
-   - 못 찾으면 `renpy.warp_to_line`(full_restart). 편집기가 열려 있었으면 `state.reopen`에 세션을 넣어, 다시 시작한 뒤 같은 탭으로 다시 엶
-   - 명령 `goto`의 `where: "line"` (`docs/LINK.md` 9장). 되감기 예외(RollbackException)는 BaseException이라 live_tick을 그대로 지나감
-3. **PyKaki 앱** (`ShowpyView.tsx`의 Script, `styles.css`): 원고 칸 줄 누르기 → `goto line`. "줄을 누르면 게임도 그 줄로 가요"
-4. 확인: Lint(pykaki_sample, fx_test_25, 묶음 템플릿, ui_kit·splash 없이 screen_fx만). 시험 클라이언트로 패널 나무(페이지 줄 없음, 세부 속성), 되감기(40→33→31), 지금 대사 안(29는 그대로), warp(38, 앱 명령 22, 주석 21→22), warp 뒤 편집기 다시 열림, 세부 속성 값이 화면에 바로, 타이틀 셰이더 세부 속성, 게임 화면 찍기. smoke 통과, 진짜 앱(Playwright)에서 원고 칸 22번째 줄 누르기 → 게임 18→22. 확인용 묶음 템플릿 4.21(`overlay = False` 다시), `pygaki\PyKaki` 새 앱
-   - 시험 훅 `zz_shot.rpy`: `game/zz_req` 파일의 파이썬을 실행하고 결과를 `zz_out`에. Dropbox가 파일을 잡고 있으면 지우기가 실패하니 try로 감쌀 것. 끝나면 지움
-   - Playwright로 앱 켜기: 스크립트를 `pykaki/app` 안에 두고 `require('playwright')`(밖에 두면 창이 안 뜸). 툴바 버튼 이름은 `showpy ●`라 `/^showpy/`. 타이틀에서는 "대사" 칸을 골라야 [게임 시작]이 나옴
-
-#### 세션 6 뒤쪽: 4.22 (`ui_kit` 3.21, `screen_fx` 4.5, 앱 이름 pygaki)
-
-사용자 요청 여섯 가지 + 추가 두 가지: Shift+M은 남김(앱만으로 하지 않음), 커서와 셰이더는 '여기에서부터', 글자 등장 효과는 대사 탭에서 빼고 "대사 효과는 PyKaki에서", 원고 칸 스크롤, 전환은 셰이더가 바뀌는 줄만 기억하고 그 줄의 효과만 고르게, 이름 pygaki, [대본 편집] [GUI 편집]을 눈에 띄게, "화면 효과를 바꿀 때는 1, 2가 같이 바뀌는 룰", 커서·CTC 샘플(`F:\Dropbox\1_DEV\renpydev\assets\cursor`, `ctc`)과 폴더 안내.
-
-1. **이름**: `package.json` productName/executableName `pygaki`, `main.cjs`가 `app.setPath('userData', …\PyKaki)`로 예전 설정 자리를 씀(단일 실행 잠금보다 먼저), appId는 그대로. 툴바 `brand` pygaki, `.view-switch` 버튼을 크게(켜진 쪽 accent 바탕). 런처 `pygaki/app/pygaki.exe`, 버튼 이름. `make_bundle.py`, Actions 산출물 `pygaki-win`, 문서 이름 일괄 바꿈. 저장 형식(`renpy-flow`, `.flow.json`, `renpy-flow-editor`)과 원고 표시 `# PyKaki가 만든 파일이에요.`(LINK.md 형식)는 그대로
-2. **원고 칸**: 파일 전체 + 스크롤, `follow`(직접 스크롤하면 멈춤, 우리가 스크롤한 이벤트는 0.4초/부드러운 스크롤 0.9초 무시), [지금 줄로]
-3. **셰이더 전환** (`editor_fx.rpy`): `SHADER_HEADS`, `CURSOR_HEADS`. 줄 편집 값 `slots`(None = 지움), `transition`, `cursor_mode`(None = 지움). `gen_lines(e, key)`는 고치지 않은 쪽 줄을 원고에 있던 그대로 다시 씀(셰이더 줄과 커서 줄이 서로 안 지움). `change_rows(fn)`: 파일을 위에서부터 읽어 두 자리를 셈(ast로 `$ screen_fx.…(…)` 읽기, 대사 괄호 `fx=`, `fx_overlay=`), `set_row_tr`, `make_both`(대사 괄호는 대사 탭의 `ss.state.line_edits[key][k] = ss.REMOVE`로 지움). 처음 상태 칸은 처음 1번, 2번과 '설정대로' 전환만
-4. **PyKaki 원고** (`script_edit.rpy` `_fx_insert`): `$ screen_fx.` 줄만 넣는 INSERT는 고른 줄 위의 (표시, 줄) 짝을 찾아 `replace`, 남는 것은 `remove`, 새 것은 `insert`(before 고른 줄 표시). 파일에는 `# @l:` 표시와 같이 씀. PyKaki `inbox.ts`에 `remove`. `_insert`의 `replace`는 사이 빈 줄을 넘어 찾음(빈 줄 때문에 예전 줄이 남고 새 줄이 하나 더 생기던 것)
-5. **커서와 셰이더**: FxTab `cursor_pick`, `set_cursor_pick`(엔진 `rt.cursor_preview`로 미리 보기, 세이브 안 됨), `cursor_apply`, `cursor_remove`, `cursor_rows`, `cursor_state`(앱용). 화면 `ui_editor_fx_line_list`(셰이더, 커서 칸 공용), `ui_editor_fx_cursor_panel`을 UI Kit 커서 탭이 `use expression`으로 (screen_fx 없으면 안 씀). 커서 탭 `on_close` → `cursor_leave`. 실시간 `custom_ui.cursor_lines`, 명령 `custom_ui.cursor`. `CURSOR_LABELS` 이름을 두 자리 말로
-6. **warp 뒤**: `live.after_warp` → `live_tick`이 `fx.warp_restore(fn, line)`(그 앞 마지막 셰이더 줄, 커서 줄대로). `_follow()`는 고른 줄이 다른 파일이면 다시 따라감(스플래시 줄이 남던 것)
-7. **대사 탭**: 효과, 화면 효과, 전환, 덮개, 휘어짐, 커서, 글자 빼기 줄 뺌, 안내 한 줄. 앱 목록 "대사 (위치, 스타일)"
-8. **샘플**: `showpy/samples/gui/cursor`, `ctc`(64x64 6장씩, CTC는 흰색). `make_bundle.py`가 템플릿 `game/gui`에 복사. 앱 그림 칸·고르기·애니 바탕은 바둑판, 미리보기 밝게/어둡게
-9. 확인: Lint(pygaki_sample, pykaki_sample, fx_test_25, screen_fx만, ui_kit만, 묶음 템플릿), 시험 클라이언트로 셰이더가 바뀌는 줄(서서히 → TV, [두 자리로] 두 줄, 대사 괄호 지움) 저장 결과, 커서 적용 → 셰이더 줄과 같이 남음, 같은 줄에 셰이더 다시 적용해도 커서 줄 남음, warp 뒤 상태, PyKaki 원고(예제 복사본): 저장 → inbox 바꾸기 2·넣기 1 → 앱이 대본에 받아 적음 → Ctrl+E 내보내기가 같음. smoke 통과, 진짜 앱 화면(툴바, 커서 칸, 원고 스크롤)
+예전부터 남은 것: `fx_test_25`에서 4.13 등장 효과 눈으로 보기, 런처를 영어로 바꿨을 때 버튼 한글, 앱과 게임을 나란히 그림 넣기 → 받아 적기 → Ctrl+E, 실시간 미리보기([렌파이에서 보기]), 실제 폴더 선택창으로 [렌파이 프로젝트 연결], 구글 문서 새 목록 글머리·표 글꼴.
 
 ## 6. 다음에 할 만한 것
 
-- **정식 판 v1.1**: 사용자가 5장 맨 위 세 줄을 확인한 뒤 `git tag v1.1 && git push origin v1.1` → Actions "배포 파일"이 Releases 초안 → 초안 확인 → 공개. 앱은 서명이 없어서 윈도우가 처음에 경고함(읽어주세요에 안내 있음). 덧붙임 zip을 진짜 런처 화면에서 켜 보기도 그때
-- **공개용 구글 문서**: 4.13 기준 → 4.14~4.20(게임 메뉴 화면, 앱 [GUI 편집] 화면, 스플래시 편집, "편집 중" 띠, 셰이더 두 자리와 타이틀/메뉴 꾸미기)을 한 번에. 고치는 방법과 함정은 7장
-- 4.20, 4.21 더 다듬을 것(사용자가 말하면): 대사 탭의 "화면 효과" 줄(`fx=`, `fx_overlay=` 괄호)은 예전 방식 그대로 남아 있음. 셰이더 고르기 줄 목록에서 세모가 없는 줄은 앱 미러에서 왼쪽 칸이 비어 줄이 조금 어긋남(게임 쪽은 빈 글자로 바꿨지만 미러가 빈 버튼을 뺌). 앱 미러에서는 세부 속성 들여쓰기(16px)가 안 보임. warp는 그 사이 변수(선택지 결과 등)를 따라 하지 않음. 두 자리 순서: 게임보이처럼 층마다 씌우는 효과는 VHS(화면 전체)보다 먼저 그려짐
-- 스플래시 더 하기: 글 내용(제목, 본문 문장, 조작 방법 목록) 고치기, 페이지 더하기/지우기/순서 (지금은 `splash_config.rpy`에서). 글은 번역 문자열 `_()`이라 저장 방식을 먼저 정해야 함
-- 앱 창을 게임 창 옆에 저절로 붙이기 (지금은 사용자가 나란히 놓음)
-- Actions 경고: Node.js 20 액션(`checkout@v4` 등)이 곧 막힘. 새 판으로 올리기
-- 화면 전체 글리치: VHS 덮개 보강, 화면 블록 글리치, 화면 데이터모싱 흉내
+- **공개용 구글 문서**: 판이 바뀌면 수정안 파일을 만들고 반영 (4.22까지 반영함)
+  - 문서는 공개 보기라 `https://docs.google.com/document/d/10kmDFgiQ9JpbgIY6Q7vejf3EjMC06rCJCxjVSeukdes/export?format=md`를 `curl`로 받아 읽음(로그인 없이). 고치기 전과 뒤에 받아서 `diff`
+  - 고치기는 사용자 크롬(Claude in Chrome 확장, 로그인됨). 한 문장은 찾기 및 바꾸기(Ctrl+H, 칸을 세 번 눌러 고르고 입력 → [모두 바꾸기]). 여러 줄 절은 Ctrl+F로 찾고 Esc(찾은 글이 골라진 채) → Home/End/Enter로 자리를 만든 뒤, 페이지 JS로 `.docs-texteventtarget-iframe` 안의 편집 칸에 `ClipboardEvent('paste', {clipboardData})`(text/html)를 보냄. 제목이 굵게 들어오면 줄을 고르고 Ctrl+\ (서식 지우기). 끝에 생긴 빈 줄은 BackSpace
+- **정식 판 v1.1**: 사용자가 5장 4.22, 4.21을 확인한 뒤 `git tag v1.1 && git push origin v1.1` → Actions "배포 파일"이 Releases 초안(앱은 이제 `pygaki-win`, 묶음 안 `pygaki\app\pygaki.exe`) → 확인 → 공개. 앱은 서명이 없어 윈도우가 처음에 경고함
+- 다듬을 것(사용자가 말하면): 셰이더가 바뀌는 줄의 두 자리는 파일을 위에서부터 읽은 대강의 값(분기, jump, 다른 파일은 안 봄). warp는 그 사이 변수(선택지 결과 등)를 따라 하지 않음(셰이더, 커서는 맞춤). 앱 미러에서 세모 없는 줄의 왼쪽 칸이 비어 조금 어긋남, 세부 속성 들여쓰기가 안 보임. 게임보이처럼 층마다 씌우는 효과는 VHS보다 먼저 그려짐
+- 스플래시 글 내용(제목, 본문, 조작 방법) 고치기, 페이지 더하기/지우기 (번역 문자열이라 저장 방식을 먼저 정해야 함)
+- 앱 창을 게임 창 옆에 저절로 붙이기
+- Actions 경고: Node.js 20 액션(`checkout@v4` 등)이 곧 막힘. 새 판으로
+- 화면 전체 글리치: VHS 보강, 화면 블록 글리치, 화면 데이터모싱 흉내
 - 참고자료 `F:\Dropbox\1_DEV\renpydev\assets\참고자료\uRHAHdq1xFNfW-Wc.mp4` 아직 안 봄
 - 시험으로 만든 `F:\Dropbox\1_DEV\RENPY\pygaki_test`(망가짐), `pygaki_test2`는 필요 없으면 사용자가 지움
 
@@ -272,26 +180,27 @@ python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app 'F:\SHOWPY\
 
 **렌파이, showpy**
 
-- **실행 중에 store 변수를 바꾸면, 다시 불러올 때 옛 값으로 돌아감**: 렌파이는 다시 불러오기(저장 뒤 저절로, Shift+R) 직전 상태를 "지금 대사가 시작될 때" 모습으로 저장해서, 그 사이에 바꾼 `define` 값은 옛 값으로 돌아오고 새 `*_layout.rpy` 값을 덮음. 편집기가 저장한 값은 store 변수가 아니라 python_object에 둠: `custom_ui.runtime`, `watermorph.state.saved`, `fx.saved`/`cedit.saved`, `tmenu.state.saved`, `splash.state.saved`. 새 탭도 이렇게
-- 렌파이 `init python` 안에서 `dict`, `list`, `object`는 되감기용 타입. 다른 스레드에서 쓰거나 json 값과 isinstance로 비교하면 안 됨 → `python_dict`, `python_list`, `python_object`
-- 렌파이 글자 안의 `[이름]`은 변수 넣기. `[이 페이지 보기]` 같은 글은 `[[`로 써야 함 (안 그러면 게임이 오류로 멈춤)
-- 편집기 글꼴에 가운뎃점(·)이 없어서 네모로 나옴. 게임 화면에 띄우는 글에는 `|` 같은 것을 씀
-- 편집기가 열려 있으면 게임 입력이 편집기로 감(`EditorInput`). 앱이 붙어 있으면 "편집 중" 띠로 알림 (4.19)
-- `tmenu` 설정 이름과 같은 이름의 함수를 만들면 안 됨 (`cfg()`가 전역 이름으로 찾음). 3.19의 `background`, `labels` 같은 설정 이름도 마찬가지(함수는 `background_disp`, `label_items`)
-- 시험 프로젝트처럼 묶음 템플릿에 플러그인을 복사하면 템플릿의 `screen_fx_config.rpy`가 `overlay = True`로 돌아감. 템플릿에서는 `make_bundle.py`의 `TEMPLATE_SETTINGS`대로 다시 `False`로
-- 실시간 연결 `panel.do`의 `id`는 패널 안내 줄 수가 바뀌면 같이 바뀜(예: `p.0.5…` ↔ `p.0.6…`). 시험 클라이언트는 누르기 전에 나무를 다시 읽음
-- 앱 공통 틀(4.17)은 게임 화면 밖(x -40000)에 패널을 하나 더 그림. 화면 밖이라 눌리지 않음(렌파이 `modal`은 자기 영역 안에서만 막음)
-- 템플릿 프로젝트를 Lint하면 `.rpyc`, `game/cache`, `game/saves`가 생김. 묶음 템플릿에서는 지움
-- 렌파이 SDK의 `gui/game`은 그대로 템플릿으로 쓰면 안 됨(그림 없이 첫 실행 때 만들다 실패)
-- 런처 파일은 런처의 `new_template_project`, `interface.input`, `project.current`, `config.overlay_screens`를 씀(렌파이 8.5.3). 렌파이를 올리면 이 이름들과 `generate_gui`, `gui_images` 명령을 봄
-- 기본 SDK 런처(`renpy-8.5.3-sdk`)에는 pygaki 버튼이 없음(묶음 사본에만). 원본 SDK는 묶음 재료라 손대지 않음
+- **실행 중에 store 변수를 바꾸면, 다시 불러올 때 옛 값으로 돌아감**: 편집기가 저장한 값은 store 변수가 아니라 python_object에 둠(`custom_ui.runtime`, `watermorph.state.saved`, `fx.saved`/`cedit.saved`, `tmenu.state.saved`, `splash.state.saved`). 새 탭도 이렇게
+- 렌파이 `init python` 안에서 `dict`, `list`, `object`는 되감기용 타입 → 다른 스레드나 json 값 비교에는 `python_dict`, `python_list`, `python_object`
+- 렌파이 글자 안의 `[이름]`은 변수 넣기. `[여기에서부터 적용]` 같은 글은 `[[`로 써야 함
+- 편집기 글꼴에 가운뎃점(·)이 없어서 네모로 나옴. 세모(▶)는 Neo둥근모 글꼴로
+- 편집기가 열려 있으면 게임 입력이 편집기로 감(`EditorInput`). 앱이 붙어 있으면 "편집 중" 띠
+- `tmenu` 설정 이름과 같은 이름의 함수를 만들면 안 됨 (`cfg()`가 전역 이름으로 찾음)
+- **PyKaki가 만든 원고**(`# PyKaki가 만든 파일이에요.`)는 원고 쓰기 도구가 허용한 줄만 씀. 화면 효과 줄은 4.22부터 됨. 나머지는 이유를 알리고 저장 안 함
+- **렌파이 warp**는 그 줄까지 `scene`/`show`만 따라 하고 `$` 줄은 실행하지 않음. `live.after_warp`로 셰이더·커서만 맞춤
+- 되감기 예외(RollbackException)는 BaseException이라 `except Exception`에 안 걸림
+- 묶음 템플릿이나 `pygaki_sample`에 플러그인을 복사하면 `screen_fx_config.rpy`가 `overlay = True`로 돌아감 → 다시 `False`
+- 실시간 연결 `panel.do`의 `id`는 패널 안내 줄 수가 바뀌면 같이 바뀜
+- 앱 공통 틀은 게임 화면 밖(x -40000)에 패널을 하나 더 그림. 화면 밖이라 눌리지 않음
+- 템플릿 프로젝트를 Lint하면 `.rpyc`, `game/cache`, `game/saves`가 생김. 묶음 템플릿에서는 지움. 저장소의 `showpy/`는 완전한 프로젝트가 아니라 Lint가 안 됨(시험 프로젝트에서)
+- 렌파이 SDK의 `gui/game`은 그대로 템플릿으로 쓰면 안 됨
+- 런처 파일은 런처의 `new_template_project`, `interface.input`, `project.current`, `config.overlay_screens`를 씀(렌파이 8.5.3)
 
 **앱, 도구**
 
-- 앱(`main.cjs`)은 게임에서 마지막으로 받은 `state`, `files`를 기억했다가 화면이 `liveStatus`를 부르면 넘겨줌. 게임은 바뀔 때만 상태를 보내기 때문
-- 붙는 앱은 하나뿐. 새로 붙으면 앞의 연결이 끊김 (시험 클라이언트와 앱이 서로 끊음)
-- 앱은 Electron 33. 로컬 `npm run dist`는 `winCodeSign` 심볼릭 링크 권한 오류 → 시험용은 `npx electron-builder --win dir -c.win.signAndEditExecutable=false`(아이콘, 버전 정보만 빠짐). 공식 빌드는 Actions
-- Actions "pygaki 앱"은 `pykaki/**`나 `text_effects.glsl`이 바뀌면 돎
-- 긴 셸 명령(여러 줄 파이썬을 heredoc으로)은 도구가 가끔 잘라서 실패함. 그럴 때는 스크립트를 파일로 써서 돌림
-- Dropbox 안 폴더는 지울 때 "사용 중"으로 일부만 지워질 수 있음. 바꾼 뒤 폴더 모양을 다시 봄
-- 크롬 확장으로 구글 문서를 고칠 때: 단축키 창이 열린 것을 화면으로 확인한 뒤 침. 한글이 가끔 깨지고 따옴표가 둥근 따옴표로 바뀜. 끝나면 export로 받아 diff. 제목 스타일은 툴바의 스타일 목록으로. 내장 브라우저는 구글에 로그인 안 됨, 사용자의 크롬은 됨
+- 앱 설정·자동 저장은 `%APPDATA%\PyKaki`(이름을 pygaki로 바꿔도 `main.cjs`의 `app.setPath('userData', …)`로 그대로). appId도 그대로
+- 앱(`main.cjs`)은 게임에서 마지막으로 받은 `state`, `files`를 기억했다가 넘겨줌. 붙는 앱은 하나뿐(시험 클라이언트와 앱이 서로 끊음)
+- 앱은 Electron 33. 로컬 `npm run dist`는 `winCodeSign` 권한 오류 → `npx electron-builder --win dir -c.win.signAndEditExecutable=false`. 공식 빌드는 Actions("pygaki 앱"은 `pykaki/**`나 `text_effects.glsl`이 바뀌면 돎)
+- 긴 셸 명령(여러 줄 파이썬 heredoc)은 가끔 잘리거나 `\` 이스케이프가 꼬임 → 스크립트를 파일로 써서 돌림(경로는 raw 문자열)
+- Dropbox 안 폴더는 지울 때 일부만 지워질 수 있음
+- 구글 문서를 크롬 확장으로 고칠 때: 단축키 창이 열린 것을 화면으로 확인한 뒤 침. 한글이 가끔 깨지고 따옴표가 둥근 따옴표로 바뀜. 끝나면 export로 받아 비교. 제목 스타일은 툴바의 스타일 목록으로. 내장 브라우저는 구글에 로그인 안 됨
