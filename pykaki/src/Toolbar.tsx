@@ -16,9 +16,11 @@ function ViewSwitch() {
   if (!isDesktop) return null;
   return (
     <span className="view-switch">
-      <button className={view === 'script' ? 'on' : ''} onClick={() => useLive.setState({ view: 'script' })}>대본</button>
-      <button className={view === 'showpy' ? 'on' : ''} onClick={() => useLive.setState({ view: 'showpy' })} title={on ? '게임과 연결됨' : '게임 연결 안 됨'}>
-        showpy <b className={'live-dot' + (on ? ' on' : '')}>●</b>
+      <button className={view === 'script' ? 'on' : ''} onClick={() => useLive.setState({ view: 'script' })} title="상자와 선으로 대본을 써요">
+        대본 편집
+      </button>
+      <button className={view === 'showpy' ? 'on' : ''} onClick={() => useLive.setState({ view: 'showpy' })} title={on ? 'GUI 편집: 게임과 연결됨' : 'GUI 편집: 게임 연결 안 됨 (런처에서 프로젝트를 실행하면 붙어요)'}>
+        GUI 편집 <b className={'live-dot' + (on ? ' on' : '')}>●</b>
       </button>
     </span>
   );
@@ -44,7 +46,7 @@ export function Toolbar() {
 
   return (
     <div className="toolbar">
-      <span className="brand">PyKaki</span>
+      <span className="brand">pygaki</span>
       <ViewSwitch />
       <button onClick={newProject}>새로</button>
       <button onClick={openProject}>열기</button>

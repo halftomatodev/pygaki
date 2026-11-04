@@ -24,7 +24,7 @@ Actions 화면에서 손으로 돌리면(Run workflow) Releases에는 안 올리
 
 ## 내 컴퓨터에서 만들기
 
-1. **PyKaki 앱 받기**: GitHub의 Actions → "PyKaki 앱" → 가장 최근 성공한 실행 → 맨 아래 Artifacts의 `PyKaki-win`을 받아 풀어요. (안에 `PyKaki.exe`가 있는 폴더)
+1. **PyKaki 앱 받기**: GitHub의 Actions → "pygaki 앱" → 가장 최근 성공한 실행 → 맨 아래 Artifacts의 `pygaki-win`을 받아 풀어요. (안에 `pygaki.exe`가 있는 폴더)
    직접 만들려면:
    ```bash
    cd pykaki && npm ci && npm run build
@@ -33,7 +33,7 @@ Actions 화면에서 손으로 돌리면(Run workflow) Releases에는 안 올리
    그러면 `pykaki/app/out/win-unpacked`에 생겨요.
 2. **묶기**: 저장소 맨 위에서 (2분쯤)
    ```bash
-   python bundle/make_bundle.py --sdk F:\SHOWPY\renpy-8.5.3-sdk --app 받은폴더\PyKaki-win --zip --tag v1.0
+   python bundle/make_bundle.py --sdk F:\SHOWPY\renpy-8.5.3-sdk --app 받은폴더\pygaki-win --zip --tag v1.0
    ```
    `bundle/out/`에 `pygaki-v1.0-renpy-8.5.3/`, `pygaki-v1.0-addon/`과 같은 이름의 zip이 생겨요. `--tag`를 빼면 이름에 태그가 안 붙어요. 다시 만들 때는 `bundle/out`을 먼저 지워요. (`bundle/out`은 저장소에 안 올라가요)
 
@@ -42,9 +42,9 @@ Actions 화면에서 손으로 돌리면(Run workflow) Releases에는 안 올리
 | 자리 | 무엇 |
 |---|---|
 | `renpy.exe`, `launcher/`, `renpy/` ... | 렌파이 SDK 그대로 (덧붙임에는 없음) |
-| `launcher/game/pygaki_launcher.rpy` | 런처 첫 화면 아래쪽 버튼: [PyKaki로 대본 쓰기], [showpy 새 프로젝트] ([launcher/pygaki_launcher.rpy](launcher/pygaki_launcher.rpy)) |
+| `launcher/game/pygaki_launcher.rpy` | 런처 첫 화면 아래쪽 버튼: [pygaki로 편집], [pygaki로 새 프로젝트] ([launcher/pygaki_launcher.rpy](launcher/pygaki_launcher.rpy)) |
 | `showpy/` | 새 프로젝트 템플릿. 런처의 [새 프로젝트 만들기]와 같은 방법으로 만든 1280x720 한국어 기본 프로젝트(그림까지 다 만듦) + showpy 플러그인(`ui_kit`, `screen_fx`, `hotkeys`, `splash`), `project.json`의 `"type": "template"` |
-| `pygaki/PyKaki/PyKaki.exe` | PyKaki 데스크톱 앱 |
+| `pygaki/app/pygaki.exe` | PyKaki 데스크톱 앱 |
 | `pygaki/읽어주세요.txt` | 쓰는 법 |
 | `pygaki_넣는법.txt` | (덧붙임에만) SDK 폴더에 넣는 법, 빼는 법 |
 
@@ -56,5 +56,5 @@ Actions 화면에서 손으로 돌리면(Run workflow) Releases에는 안 올리
 
 ## 런처 버튼이 하는 일
 
-- **[PyKaki로 대본 쓰기]**: 왼쪽 목록에서 고른 프로젝트로 `PyKaki.exe --project "프로젝트 폴더"`를 실행해요.
-- **[showpy 새 프로젝트]**: 이름을 물어본 뒤 런처의 원래 새 프로젝트 과정(템플릿 쓰기)으로 만들어요. 런처의 [Create New Project]에서 템플릿 "showpy"를 골라도 같아요.
+- **[pygaki로 편집]**: 왼쪽 목록에서 고른 프로젝트로 `pygaki.exe --project "프로젝트 폴더"`를 실행해요.
+- **[pygaki로 새 프로젝트]**: 이름을 물어본 뒤 런처의 원래 새 프로젝트 과정(템플릿 쓰기)으로 만들어요. 런처의 [Create New Project]에서 템플릿 "showpy"를 골라도 같아요.

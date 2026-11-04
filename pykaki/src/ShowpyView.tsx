@@ -1,7 +1,7 @@
 // showpy 화면 (데스크톱 앱 전용). 게임 창은 옆에 그대로 두고, 게임 안 편집기를 여기서 조종한다.
 // 왼쪽: 고칠 것 목록 / 가운데: 지금 게임 위치와 대본 / 오른쪽: 고르는 칸.
 // 값은 게임이 갖고 있고(docs/LINK.md 9장), 여기는 보여주고 바꾸라고 보내기만 한다. 저장도 게임이 한다.
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { desktop } from './desktop';
 import { liveSend, useLive, type GameState, type TitleItem, type TitleState } from './showpyLive';
 import { useStore } from './store';
@@ -26,7 +26,7 @@ const SECTIONS: Section[] = [
   { id: 'watermorph', label: '타이틀 일렁임', tab: 'watermorph', app: false, mirror: true, note: '타이틀 배경에만 걸리는 일렁임 효과예요.' },
   { id: 'screen_fx', label: '인게임 화면 셰이더', tab: 'screen_fx', app: false, mirror: true, note: '게임 화면에 씌우는 셰이더 두 자리(기본, 아스키, VHS, 단말기, 게임보이)예요. 고르고 [여기에서부터 적용]을 누르면 고른 줄부터 바뀌어요.' },
   { id: 'custom_ui', label: '커서, 클릭 대기(CTC), 대사 소리', tab: 'custom_ui', app: true, note: '' },
-  { id: 'say', label: '대사 (위치, 줄마다 화면 효과)', tab: 'say', app: false, mirror: true, note: '' },
+  { id: 'say', label: '대사 (위치, 스타일)', tab: 'say', app: false, mirror: true, note: '' },
   { id: 'choice', label: '선택지', tab: 'choice', app: false, mirror: true, note: '' },
   { id: 'stage', label: '그림, 영상 배치', tab: 'stage', app: false, mirror: true, note: '' },
 ];
@@ -129,11 +129,21 @@ function Where({ st }: { st: GameState }) {
   );
 }
 
-const AROUND = 9;
-
 function Script({ file, line }: { file: string | null; line: number }) {
   const [text, setText] = useState<{ file: string; lines: string[] | null } | null>(null);
   const [rev, setRev] = useState(0);
+  // 게임 줄을 따라 스크롤. 사용자가 직접 스크롤하면 멈추고 [지금 줄로]로 다시 따라감
+  const [follow, setFollow] = useState(true);
+  const box = useRef<HTMLPreElement>(null);
+  const auto = useRef(0); // 우리가 스크롤한 때 (그 스크롤 이벤트는 사용자 것으로 치지 않음)
+
+  const toCurrent = (smooth: boolean) => {
+    const el = box.current?.querySelector<HTMLElement>('div.cur');
+    const b = box.current;
+    if (!el || !b) return;
+    auto.current = Date.now() + (smooth ? 900 : 0);
+    b.scrollTo({ top: el.offsetTop - b.clientHeight / 2 + el.clientHeight / 2, behavior: smooth ? 'smooth' : 'auto' });
+  };
 
   useEffect(() => {
     if (!desktop) return;
@@ -151,13 +161,16 @@ function Script({ file, line }: { file: string | null; line: number }) {
     return () => void (alive = false);
   }, [file, rev]);
 
+  const ready = !!text && text.file === file && !!text.lines;
+  useLayoutEffect(() => {
+    if (ready && follow) toCurrent(false);
+  }, [ready, file, line, follow]);
+
   if (!file) return null;
   if (!text || text.file !== file) return <p className="tip">원고를 읽는 중...</p>;
   if (!text.lines) return <p className="tip">{file}은 프로젝트 밖(렌파이 안쪽) 파일이라 보여줄 수 없어요.</p>;
 
   const lines = text.lines;
-  const from = Math.max(1, line - AROUND);
-  const to = Math.min(lines.length, line + AROUND);
 
   // PyKaki가 내보낸 원고면 줄 위의 "# @node:id 이름" 표시로 상자를 찾는다 (docs/LINK.md 2장)
   let node: { id: string; name: string } | null = null;
@@ -181,14 +194,32 @@ function Script({ file, line }: { file: string | null; line: number }) {
         <b>원고</b>
         {node && (
           <button onClick={goBox} title="대본 화면에서 이 상자를 골라요">
-            PyKaki 상자: {node.name || node.id} →
+            대본 상자: {node.name || node.id} →
           </button>
         )}
         <span className="tip">줄을 누르면 게임도 그 줄로 가요</span>
+        <span className="grow" />
+        {!follow && (
+          <button
+            onClick={() => {
+              setFollow(true);
+              toCurrent(true);
+            }}
+            title="게임의 지금 줄로 스크롤하고, 다시 따라가요"
+          >
+            지금 줄로 ({line})
+          </button>
+        )}
       </div>
-      <pre className="sp-script">
-        {lines.slice(from - 1, to).map((l, i) => {
-          const n = from + i;
+      <pre
+        className="sp-script"
+        ref={box}
+        onScroll={() => {
+          if (Date.now() - auto.current > 400) setFollow(false);
+        }}
+      >
+        {lines.map((l, i) => {
+          const n = i + 1;
           return (
             <div
               key={n}

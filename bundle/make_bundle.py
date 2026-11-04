@@ -1,6 +1,6 @@
 """pygaki 배포 묶음 만들기 (윈도우).
 
-렌파이 SDK + showpy 템플릿 + 런처 버튼 + PyKaki 데스크톱 앱을 폴더 하나(와 zip)로 묶는다.
+렌파이 SDK + showpy 템플릿 + 런처 버튼 + pygaki 데스크톱 앱을 폴더 하나(와 zip)로 묶는다.
 렌파이를 새 버전으로 올릴 때도 새 SDK로 이 스크립트를 다시 돌리면 된다.
 
     python bundle/make_bundle.py
@@ -13,12 +13,12 @@
 
 묶음 안:
     renpy.exe, launcher/ ...          렌파이 SDK 그대로
-    launcher/game/pygaki_launcher.rpy  런처 첫 화면의 [PyKaki로 대본 쓰기] [showpy 새 프로젝트]
+    launcher/game/pygaki_launcher.rpy  런처 첫 화면의 [pygaki로 편집] [pygaki로 새 프로젝트]
     showpy/                            새 프로젝트 템플릿 (런처처럼 만든 1280x720 한국어 기본 프로젝트 + showpy 플러그인, project.json "template")
-    pygaki/PyKaki/PyKaki.exe           PyKaki 데스크톱 앱 (GitHub Actions "PyKaki 앱" 결과물을 풀어 둔 폴더)
+    pygaki/app/pygaki.exe              pygaki 데스크톱 앱 (GitHub Actions "pygaki 앱" 결과물을 풀어 둔 폴더)
     pygaki/읽어주세요.txt
 
-필요한 것: 파이썬 3, 렌파이 SDK 폴더, PyKaki 앱 폴더(win-unpacked).
+필요한 것: 파이썬 3, 렌파이 SDK 폴더, pygaki 앱 폴더(win-unpacked).
 """
 import argparse
 import json
@@ -52,26 +52,28 @@ SKIP = shutil.ignore_patterns("*.rpyc", "*.rpymc", "*_layout.rpy", "showpy_inbox
 
 README = """pygaki ({version})
 
-렌파이 {renpy} + showpy {showpy} + PyKaki 데스크톱 앱
+렌파이 {renpy} + showpy {showpy} + pygaki 데스크톱 앱
 
 1. 이 폴더의 renpy.exe로 렌파이 런처를 켭니다.
    (런처가 영어면 preferences → Language → 한국어)
-2. 런처 아래쪽의 [showpy 새 프로젝트]로 프로젝트를 만듭니다. showpy가 처음부터 들어 있습니다.
+2. 런처 아래쪽의 [pygaki로 새 프로젝트]로 프로젝트를 만듭니다. showpy가 처음부터 들어 있습니다.
    (런처의 원래 [Create New Project]에서 템플릿 "showpy"를 골라도 같습니다)
    VHS 덮개는 처음에는 꺼져 있습니다. 켜려면 game/screen_fx/screen_fx_config.rpy의
    define screen_fx.overlay = False 를 True로 바꿉니다.
-3. 왼쪽 목록에서 프로젝트를 고르고 [PyKaki로 대본 쓰기]를 누르면 PyKaki가 그 프로젝트로 열립니다.
+3. 왼쪽 목록에서 프로젝트를 고르고 [pygaki로 편집]을 누르면 pygaki 앱이 그 프로젝트로 열립니다.
+   위쪽 [대본 편집]에서 대본을 쓰고, [GUI 편집]에서 실행 중인 게임의 화면을 고칩니다.
    - 대본은 프로젝트 폴더 맨 위의 "프로젝트이름.flow.json"에 자동 저장됩니다.
    - Ctrl+E로 game/script_flow.rpy에 내보내면 렌파이가 바로 다시 불러옵니다.
-4. [Launch Project]로 게임을 켜고 Shift+M으로 showpy 편집기를 엽니다.
-   편집기에서 넣은 그림, 소리 줄은 PyKaki 대본에 바로 받아 적힙니다.
+4. [Launch Project]로 게임을 켜면 앱의 [GUI 편집]이 게임에 붙습니다(초록 점).
+   앱 없이 게임 안에서 고치려면 Shift+M으로 showpy 편집기를 엽니다.
+   편집기에서 넣은 그림, 소리 줄은 대본에 바로 받아 적힙니다.
 
-PyKaki만 따로 켜려면 pygaki\\PyKaki\\PyKaki.exe (프로젝트 폴더를 고르는 창이 뜹니다).
+앱만 따로 켜려면 pygaki\\app\\pygaki.exe (프로젝트 폴더를 고르는 창이 뜹니다).
 처음 켤 때 윈도우가 "PC 보호" 창을 띄우면 [추가 정보] → [실행]을 누릅니다 (앱에 서명이 없어서 그렇습니다).
 
 새 버전: https://github.com/halftomatodev/pygaki/releases
 
-라이선스: 렌파이는 MIT (renpy\\LICENSE.txt 등 SDK 안의 파일), showpy와 PyKaki는 MIT.
+라이선스: 렌파이는 MIT (renpy\\LICENSE.txt 등 SDK 안의 파일), showpy와 pygaki 앱은 MIT.
 """
 
 ADDON_README = """pygaki 덧붙임 ({version}) 넣는 법
@@ -84,7 +86,7 @@ ADDON_README = """pygaki 덧붙임 ({version}) 넣는 법
    "같은 이름의 폴더가 있다"고 물으면 [바꾸기]나 [합치기]를 고릅니다.
    렌파이의 원래 파일은 바뀌지 않고 파일만 더해집니다:
    launcher\\game\\pygaki_launcher.rpy, showpy\\, pygaki\\
-3. 런처가 켜져 있었으면 껐다 켭니다. 첫 화면 아래쪽에 [PyKaki로 대본 쓰기] [showpy 새 프로젝트]가 생깁니다.
+3. 런처가 켜져 있었으면 껐다 켭니다. 첫 화면 아래쪽에 [pygaki로 편집] [pygaki로 새 프로젝트]가 생깁니다.
 
 쓰는 법은 pygaki\\읽어주세요.txt를 보세요. 이 파일은 같이 넣어도 되고 지워도 됩니다.
 
@@ -154,9 +156,9 @@ def main():
     if not os.path.isdir(gui_game):
         sys.exit("SDK에 gui/game(새 프로젝트 기본 틀)이 없어요: " + gui_game)
     app = os.path.abspath(a.app)
-    if not os.path.exists(os.path.join(app, "PyKaki.exe")):
-        sys.exit("PyKaki 앱 폴더가 아니에요 (PyKaki.exe가 없음): " + app +
-                 "\nGitHub Actions의 'PyKaki 앱' 결과물(PyKaki-win)을 받아 풀고 --app으로 그 폴더를 주세요.")
+    if not os.path.exists(os.path.join(app, "pygaki.exe")):
+        sys.exit("pygaki 앱 폴더가 아니에요 (pygaki.exe가 없음): " + app +
+                 "\nGitHub Actions의 'pygaki 앱' 결과물(pygaki-win)을 받아 풀고 --app으로 그 폴더를 주세요.")
 
     renpy_ver = version_of(os.path.join(sdk, "renpy", "vc_version.py"), r"version\s*=\s*u?['\"](\d+\.\d+\.\d+)", os.path.basename(sdk))
     showpy_ver = version_of(os.path.join(SHOWPY_GAME, "ui_kit", "engine", "ui_kit.rpy"), r'VERSION = "([\d.]+)"')
@@ -182,6 +184,10 @@ def main():
         if not os.path.isdir(src):
             sys.exit("showpy 플러그인이 없어요: " + src)
         shutil.copytree(src, os.path.join(tdir, "game", name), ignore=SKIP)
+    ## 커서, 클릭 대기 표시(CTC) 샘플 그림 (custom_ui_config.rpy가 가리키는 game/gui/cursor, game/gui/ctc)
+    samples = os.path.join(ROOT, "showpy", "samples", "gui")
+    if os.path.isdir(samples):
+        shutil.copytree(samples, os.path.join(tdir, "game", "gui"), dirs_exist_ok=True)
     for rel, old, new in TEMPLATE_SETTINGS:
         fn = os.path.join(tdir, "game", rel)
         text = open(fn, encoding="utf-8").read()
@@ -192,8 +198,8 @@ def main():
     with open(os.path.join(tdir, "project.json"), "w", encoding="utf-8") as f:
         json.dump({"type": "template"}, f)
 
-    print("4/6 PyKaki 앱 넣기 ...")
-    shutil.copytree(app, os.path.join(out, "pygaki", "PyKaki"))
+    print("4/6 pygaki 앱 넣기 ...")
+    shutil.copytree(app, os.path.join(out, "pygaki", "app"))
     with open(os.path.join(out, "pygaki", "읽어주세요.txt"), "w", encoding="utf-8-sig") as f:
         f.write(README.format(version=prefix, renpy=renpy_ver, showpy=showpy_ver).replace("\n", "\r\n"))
     for lic in ("LICENSE",):

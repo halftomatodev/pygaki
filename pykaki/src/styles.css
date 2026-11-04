@@ -652,10 +652,11 @@ fieldset.plain:disabled { opacity: 0.4; }
 .sf-pos { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-family: var(--mono); color: var(--muted); margin-right: 8px; }
 
 /* ── showpy 화면 (데스크톱 앱, ShowpyView.tsx) ── */
-.view-switch { display: inline-flex; gap: 2px; margin-right: 6px; padding: 2px; border-radius: 8px; background: var(--faint); }
-.view-switch button.on { background: var(--panel); color: var(--text); box-shadow: 0 0 0 1px var(--line); }
+.view-switch { display: inline-flex; gap: 3px; margin-right: 10px; padding: 3px; border-radius: 10px; background: var(--faint); border: 1px solid var(--line); }
+.view-switch button { font-size: 14px; font-weight: 700; padding: 5px 14px; border-radius: 7px; color: var(--muted); }
+.view-switch button.on, .view-switch button.on:hover:not(:disabled) { background: var(--accent); color: #fff; box-shadow: none; }
 .live-dot { font-size: 9px; color: var(--muted); opacity: 0.5; }
-.live-dot.on { color: #22c55e; opacity: 1; }
+.live-dot.on { color: #22c55e; opacity: 1; text-shadow: 0 0 2px #fff; }
 .sp-view { flex: 1; display: flex; min-height: 0; }
 .sp-nav { width: 240px; flex-shrink: 0; overflow: auto; padding: 10px; background: var(--bg); display: flex; flex-direction: column; gap: 2px; }
 .sp-conn { font-size: 12px; color: var(--muted); padding: 4px 8px 10px; }
@@ -673,7 +674,7 @@ fieldset.plain:disabled { opacity: 0.4; }
 .sp-row .grow { flex: 1; }
 .sp-chip { font-size: 12px; padding: 1px 8px; border-radius: 10px; background: var(--faint); }
 .sp-mono { font-family: var(--mono); font-size: 12px; }
-.sp-script { margin: 0; font-family: var(--mono); font-size: 12.5px; line-height: 1.55; overflow-x: auto; }
+.sp-script { position: relative; margin: 0; font-family: var(--mono); font-size: 12.5px; line-height: 1.55; overflow: auto; max-height: calc(100vh - 230px); min-height: 160px; }
 .sp-script > div { white-space: pre; padding: 0 6px; border-radius: 4px; }
 .sp-script > div.cur { background: var(--accent-soft); }
 .sp-script > div.go { cursor: pointer; }
@@ -712,7 +713,10 @@ fieldset.plain:disabled { opacity: 0.4; }
 .sp-undo { font-size: 11px; padding: 0 6px; color: var(--play); }
 .sp-small-num { width: 56px; padding: 3px 5px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); }
 .sp-slots { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin-top: 6px; }
-.sp-slot { aspect-ratio: 1; padding: 2px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); overflow: hidden; }
+/* 그림 칸은 회색 바둑판 (흰 그림, 검은 그림 다 보이게) */
+.sp-slot, .sp-pick-grid button img, .sp-anim { background-color: #9a9a9a; background-image: linear-gradient(45deg, #7c7c7c 25%, transparent 25%, transparent 75%, #7c7c7c 75%), linear-gradient(45deg, #7c7c7c 25%, transparent 25%, transparent 75%, #7c7c7c 75%); background-size: 12px 12px; background-position: 0 0, 6px 6px; }
+.sp-slot { aspect-ratio: 1; padding: 2px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.sp-slot.add, .sp-slot.empty { background: var(--bg); }
 .sp-slot.on { box-shadow: 0 0 0 2px var(--accent); }
 .sp-slot.add { font-size: 18px; color: var(--muted); }
 .sp-slot.missing { border-color: var(--danger); }
@@ -730,6 +734,9 @@ fieldset.plain:disabled { opacity: 0.4; }
 .sp-pick-grid button img { height: 48px; }
 .sp-pick-grid button > span:last-child { font-size: 10px; color: var(--muted); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sp-preview { background: var(--faint); border-radius: 8px; padding: 8px 10px; }
+.sp-preview.dark { background: #1d1f27; color: #f2f2f2; }
+.sp-preview.dark .tip, .sp-preview.dark .sp-cu-lab { color: #b8bcc8; }
+.sp-preview .sp-anim { background: none; }
 .sp-preview-text { min-height: 44px; font-size: 14px; line-height: 1.5; margin-bottom: 6px; }
 .sp-anim { display: inline-flex; width: 28px; height: 28px; vertical-align: bottom; align-items: center; justify-content: center; }
 
@@ -753,3 +760,11 @@ fieldset.plain:disabled { opacity: 0.4; }
 .sp-m-g .sp-m-b > span:last-child { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sp-editing { display: flex; gap: 8px; align-items: center; margin-top: 6px; padding: 6px 8px; border-radius: 8px; background: color-mix(in srgb, var(--play) 14%, var(--panel)); font-size: 12px; }
 .sp-editing span { flex: 1; }
+
+/* 커서 칸의 줄 목록 (screen_fx 4.5) */
+.sp-lines { display: flex; flex-direction: column; gap: 1px; margin: 4px 0 6px; max-height: 220px; overflow: auto; border: 1px solid var(--line); border-radius: 6px; padding: 2px; }
+.sp-line { display: flex; gap: 6px; text-align: left; font-family: var(--mono); font-size: 12px; padding: 1px 6px; border-radius: 4px; white-space: pre; overflow: hidden; text-overflow: ellipsis; }
+.sp-line.on { background: var(--accent-soft); }
+.sp-line .mark { width: 12px; color: #ff3b8d; }
+.sp-line .ln { width: 32px; color: var(--muted); text-align: right; }
+.sp-line.here .ln { color: #ff3b8d; }

@@ -279,7 +279,8 @@ init -6 python in screen_fx:
                 self.follow = True      # 셰이더 고르기: 고른 줄이 ▶(게임의 지금 줄)를 따라감
                 self.mark_t = 0.0       # ▶ 더블 클릭 판정용
                 self.detail_open = [ True, True ]   # 1번, 2번 아래 세부 속성 펴기 (4.4)
-                self.tv_open = False    # 맨 아래 "처음 상태, 전환" 펴기 (4.4)
+                self.tv_open = False    # 맨 아래 "처음 상태" 펴기 (4.4)
+                self.apply_tr = DEFAULT # [여기에서부터 적용]으로 넣는 줄의 전환 (4.5)
                 self._views = { }
 
             def view(self, page):
@@ -567,11 +568,12 @@ init -6 python in screen_fx:
                     return
                 a, b = self.get_picks()
                 e = self._ledit(True)
-                for k in ("remove", "fx", "overlay", "warp", "cursor", "transition"):
+                for k in ("remove", "fx", "overlay", "warp", "cursor"):
                     e.pop(k, None)
                 e["slots"] = (a, b)
-                _ed.msg("{}번째 줄부터 1번 {} + 2번 {}. 저장(Ctrl+S)하면 원고에 들어갑니다.".format(
-                    self.line_sel[1], slot_label(a), slot_label(b)))
+                e["transition"] = self.apply_tr
+                _ed.msg("{}번째 줄부터 1번 {} + 2번 {} (전환 {}). 저장(Ctrl+S)하면 원고에 들어갑니다.".format(
+                    self.line_sel[1], slot_label(a), slot_label(b), self.tr_label(self.apply_tr)))
                 renpy.restart_interaction()
 
             def here_key(self):
@@ -586,7 +588,12 @@ init -6 python in screen_fx:
                 return (n.filename, (after[0] if after else lines[-1]))
 
             def _follow(self):
-                """고른 줄이 ▶를 따라가는 중이면 지금 줄로 맞춤."""
+                """고른 줄이 ▶를 따라가는 중이면 지금 줄로 맞춤.
+                게임이 다른 원고 파일로 가면 다시 따라감 (4.5: 스플래시 같은 다른 파일의 줄이 남지 않게)."""
+                if not self.follow and self.line_sel is not None:
+                    k = self.here_key()
+                    if k is not None and k[0] != self.line_sel[0]:
+                        self.follow = True
                 if self.follow:
                     k = self.here_key()
                     if k is not None:
@@ -617,7 +624,11 @@ init -6 python in screen_fx:
             FOLLOW = "__follow__"
             LIST_ROWS = 7
             ## 이 글자로 시작하는 줄은 편집기가 넣는 줄로 보고, 같은 자리에 다시 넣으면 바꿈
-            OUR_LINES = ("$ screen_fx.shaders(", "$ screen_fx.use(", "$ screen_fx.clear(", "$ screen_fx.set_overlay(", "$ screen_fx.set_warp(", "$ screen_fx.set_cursor(")
+            SHADER_HEADS = ("$ screen_fx.shaders(", "$ screen_fx.use(", "$ screen_fx.clear(", "$ screen_fx.set_overlay(", "$ screen_fx.set_warp(")
+            CURSOR_HEADS = ("$ screen_fx.set_cursor(",)
+            OUR_LINES = SHADER_HEADS + CURSOR_HEADS
+            ## 줄마다 전환 (4.5): 설정대로 / TV / 서서히 / 바로
+            TR_CHOICES = ((DEFAULT, "설정대로"), ("tv", "TV"), ("fade", "서서히"), (None, "바로"))
             WARPS = ((0.0, "0 평평"), (0.5, "0.5"), (1.0, "1 기본"), (2.0, "2"), (3.0, "3"), (5.0, "5 크게"))
 
             def se(self):
@@ -723,7 +734,17 @@ init -6 python in screen_fx:
                 n = key[1] - 1
                 while n >= 1:
                     t = se.read_line(key[0], n)
-                    if t is None or t[:len(t) - len(t.lstrip(" \t"))] != ind or not t.strip().startswith(self.OUR_LINES):
+                    if t is not None and not t.strip():
+                        ## 빈 줄은 건너뜀 (원고 쓰기 도구도 사이의 빈 줄을 넘어 바꿈, 4.5)
+                        n -= 1
+                        continue
+                    if t is None or t[:len(t) - len(t.lstrip(" \t"))] != ind:
+                        break
+                    if t.strip().startswith("# @l:"):
+                        ## PyKaki 원고: 줄마다 붙은 표시 (4.5)
+                        n -= 1
+                        continue
+                    if not t.strip().startswith(self.OUR_LINES):
                         break
                     rv.insert(0, t.strip())
                     n -= 1
@@ -787,11 +808,312 @@ init -6 python in screen_fx:
                 if not self.existing_lines(self.line_sel):
                     _ed.msg("이 줄 위에는 지울 화면 효과 줄이 없습니다.")
                     return
+                if not [ t for t in self.existing_lines(self.line_sel) if t.startswith(self.SHADER_HEADS) ] and \
+                        self.line_edits.get(self.line_sel, { }).get("slots") is None:
+                    _ed.msg("이 줄 위에는 지울 셰이더 줄이 없습니다. (커서 줄은 커서 칸에서)")
+                    return
                 e = self._ledit(True)
-                for k in ("fx", "overlay", "warp", "cursor", "transition"):
+                for k in ("fx", "overlay", "warp", "cursor", "transition", "remove"):
                     e.pop(k, None)
-                e["remove"] = True
+                e["slots"] = None
                 renpy.restart_interaction()
+
+            ## ── 셰이더가 바뀌는 줄 (4.5): 원고를 위에서부터 읽어 두 자리를 셈. 줄마다 전환 ──
+
+            def tr_label(self, tr):
+                return dict(self.TR_CHOICES).get(tr, str(tr))
+
+            def _file_lines(self, fn):
+                se = self.se()
+                if se is None or fn is None:
+                    return [ ]
+                try:
+                    path = se.resolve(fn)
+                    if path is None:
+                        return [ ]
+                    with open(path, encoding="utf-8-sig") as f:
+                        return f.read().split("\n")
+                except Exception:
+                    return [ ]
+
+            def _ov_slot(self, v):
+                f = overlay_flag(v)
+                if f is True or f == DEFAULT:
+                    return OVERLAY if OVERLAY in EFFECTS else NONE
+                if f is False:
+                    return NONE
+                return f if f in EFFECTS else NONE
+
+            def _fx_slot(self, v):
+                if v in (None, NONE):
+                    return NONE
+                if v == DEFAULT:
+                    return self.start_slot(0)
+                return v if v in EFFECTS else NONE
+
+            def _call(self, text):
+                """'$ screen_fx.이름(…)' → (이름, 인자 목록, 이름 붙은 인자). 못 읽으면 None."""
+                import ast
+                try:
+                    node = ast.parse(text.strip()[1:].strip(), mode="eval").body
+                    if not isinstance(node, ast.Call) or not isinstance(node.func, ast.Attribute):
+                        return None
+                    args = [ ast.literal_eval(a) for a in node.args ]
+                    kw = { k.arg : ast.literal_eval(k.value) for k in node.keywords if k.arg }
+                    return (node.func.attr, args, kw)
+                except Exception:
+                    return None
+
+            def _say_kw(self, text):
+                """대사 줄 끝 괄호의 fx=, fx_overlay=, fx_transition= (없으면 None)."""
+                import ast, re
+                m = re.search(r"\(([^()]*)\)\s*$", text)
+                if not m or not re.search(r"\bfx(_overlay)?\s*=", m.group(1)):
+                    return None
+                try:
+                    node = ast.parse("f(" + m.group(1) + ")", mode="eval").body
+                    rv = { }
+                    for k in node.keywords:
+                        if k.arg in ("fx", "fx_overlay", "fx_transition"):
+                            rv[k.arg] = ast.literal_eval(k.value)
+                    return rv or None
+                except Exception:
+                    return None
+
+            def change_rows(self, fn=None):
+                """이 원고 파일에서 셰이더가 바뀌는 줄. [{line, target, text, before, slots, both, tr, kind, pending}]
+                두 자리는 파일을 위에서부터 읽어 셈 (게임 진행 순서가 아니라 줄 순서라 대강의 값)."""
+                fn = fn or self.line_file()
+                lines = self._file_lines(fn)
+                stmts = [ l for l, _n in self.lines_of(fn) ]
+                if not lines or not stmts:
+                    return [ ]
+                state = [ self.start_slot(0), self.start_slot(1) ]
+                rv = [ ]
+                for i, raw in enumerate(lines, 1):
+                    t = raw.strip()
+                    row = None
+                    if t.startswith(self.SHADER_HEADS) and not t.startswith("$ screen_fx.set_warp("):
+                        c = self._call(t)
+                        if c is None:
+                            continue
+                        name, args, kw = c
+                        a, b = state
+                        both = False
+                        if name == "shaders":
+                            a = self._fx_slot(args[0] if args else kw.get("first", NONE))
+                            b = self._fx_slot(args[1] if len(args) > 1 else kw.get("second", NONE))
+                            both = True
+                        elif name == "use":
+                            eff = args[0] if args else kw.get("effect", NONE)
+                            if "overlay" in kw:
+                                a, b, both = self._fx_slot(eff), self._ov_slot(kw["overlay"]), True
+                            elif eff == OVERLAY:
+                                a, b, both = NONE, OVERLAY, True      # 예전 use("vhs_crt") = 없음 + VHS
+                            else:
+                                a = self._fx_slot(eff)
+                        elif name == "clear":
+                            a = self.start_slot(0)
+                            if "overlay" in kw:
+                                b, both = self._ov_slot(kw["overlay"]), True
+                        elif name == "set_overlay":
+                            b = self._ov_slot(args[0] if args else kw.get("on", True))
+                        else:
+                            continue
+                        tgt = [ l for l in stmts if l > i and not (lines[l - 1].strip().startswith(self.OUR_LINES)) ]
+                        if not tgt:
+                            continue
+                        row = dict(line=i, target=(fn, tgt[0]), text=t, kind="code", slots=(a, b), both=both,
+                            tr=kw.get("transition", DEFAULT))
+                    elif i in stmts:
+                        kw = self._say_kw(t)
+                        if kw is None:
+                            continue
+                        a, b = state
+                        if "fx" in kw:
+                            a = self._fx_slot(kw["fx"])
+                        if "fx_overlay" in kw:
+                            b = self._ov_slot(kw["fx_overlay"])
+                        row = dict(line=i, target=(fn, i), text=t, kind="say", slots=(a, b), both=False,
+                            tr=kw.get("fx_transition", DEFAULT))
+                    if row is None:
+                        continue
+                    row["before"] = tuple(state)
+                    e = self.line_edits.get(row["target"]) or { }
+                    row["pending"] = "slots" in e
+                    if row["pending"] and e["slots"] is not None:
+                        row["slots"], row["both"], row["tr"] = tuple(e["slots"]), True, e.get("transition", DEFAULT)
+                    state = list(row["slots"])
+                    if len(t) > 46:
+                        row["text"] = t[:45] + "…"
+                    rv.append(row)
+                return rv
+
+            def _edit_for(self, key):
+                e = self.line_edits.get(key)
+                if e is None:
+                    e = { "expect": (self.line_source(key) or "").strip() }
+                    se = self.se()
+                    if se is not None:
+                        se.remember(key[0], key[1])
+                    self.line_edits[key] = e
+                return e
+
+            def set_row_tr(self, row, tr):
+                """두 자리 줄의 전환만 바꿈 (저장하면 그 줄을 shaders(…, transition=…)로 다시 씀)."""
+                e = self._edit_for(row["target"])
+                for k in ("remove", "fx", "overlay", "warp", "cursor"):
+                    e.pop(k, None)
+                e["slots"] = tuple(row["slots"])
+                e["transition"] = tr
+                _ed.msg("{}번째 줄 전환: {}. 저장(Ctrl+S)하면 원고에 들어갑니다.".format(row["line"], self.tr_label(tr)))
+                renpy.restart_interaction()
+
+            def make_both(self, row):
+                """한 자리만 바꾸는 예전 줄을 두 자리 줄로 (그 줄에서의 1번, 2번으로). 대사 괄호면 괄호의 fx=, fx_overlay=도 지움."""
+                if row["kind"] == "say":
+                    say = _ed.get_tab("say") if hasattr(_ed, "get_tab") else None
+                    ss = say.ss() if say is not None and hasattr(say, "ss") else None
+                    if ss is None:
+                        _ed.msg("대사 탭이 없어서 대사 괄호를 고칠 수 없습니다.")
+                        return
+                    d = ss.state.line_edits.setdefault(row["target"], { })
+                    for k in ("fx", "fx_overlay", "fx_transition"):
+                        d[k] = ss.REMOVE
+                e = self._edit_for(row["target"])
+                for k in ("remove", "fx", "overlay", "warp", "cursor"):
+                    e.pop(k, None)
+                e["slots"] = tuple(row["slots"])
+                e["transition"] = row["tr"]
+                a, b = row["slots"]
+                _ed.msg("{}번째 줄을 두 자리로: 1번 {} + 2번 {}. 저장(Ctrl+S)하면 원고에 들어갑니다.".format(
+                    row["line"], slot_label(a), slot_label(b)))
+                renpy.restart_interaction()
+
+            def slots_text(self, slots):
+                return "1번 {} + 2번 {}".format(slot_label(slots[0]), slot_label(slots[1]))
+
+            ## ── 커서와 셰이더 (4.5): 커서 칸에서 고르고 '여기에서부터 적용' → $ screen_fx.set_cursor("…") ──
+            ## 줄 고르기(line_sel, ▶ 따라가기, 줄 누르면 게임도 그 줄로)는 셰이더 칸과 같이 씀
+
+            CURSOR_CHOICES = CURSOR_LABELS
+            cursor_pick = None
+
+            def cursor_now(self):
+                """칸에 보일 커서 자리: 고른 것, 없으면 게임의 지금 값."""
+                return self.cursor_pick if self.cursor_pick is not None else current_cursor()
+
+            def set_cursor_pick(self, mode):
+                self.cursor_pick = mode
+                rt.cursor_preview = mode
+                renpy.restart_interaction()
+
+            def cursor_leave(self):
+                """커서 칸을 떠남: 미리 보기를 끝내고 게임의 값으로."""
+                self.cursor_pick = None
+                rt.cursor_preview = None
+                renpy.restart_interaction()
+
+            def cursor_apply(self):
+                if self.se() is None:
+                    _ed.msg("원고 쓰기 도구(UI Kit 3.0 이상)가 없습니다.")
+                    return
+                self._follow()
+                if self.line_sel is None:
+                    _ed.msg("줄을 넣을 수 있는 곳을 찾지 못했습니다. 게임을 진행한 뒤 다시 누르세요.")
+                    return
+                mode = self.cursor_now()
+                e = self._ledit(True)
+                e.pop("remove", None)
+                e.pop("cursor", None)
+                e["cursor_mode"] = mode
+                _ed.msg("{}번째 줄부터 커서: {}. 저장(Ctrl+S)하면 원고에 들어갑니다.".format(self.line_sel[1], cursor_label(mode)))
+                renpy.restart_interaction()
+
+            def cursor_remove(self):
+                if self.line_sel is None:
+                    return
+                have = [ t for t in self.existing_lines(self.line_sel) if t.startswith(self.CURSOR_HEADS) ]
+                if not have and self.line_edits.get(self.line_sel, { }).get("cursor_mode") is None:
+                    _ed.msg("이 줄 위에는 지울 커서 줄이 없습니다.")
+                    return
+                e = self._ledit(True)
+                e.pop("remove", None)
+                e["cursor_mode"] = None
+                renpy.restart_interaction()
+
+            def cursor_rows(self, fn=None):
+                """이 원고 파일에서 커서 자리가 바뀌는 줄. [{line, target, mode, kind, pending}]"""
+                fn = fn or self.line_file()
+                lines = self._file_lines(fn)
+                stmts = [ l for l, _n in self.lines_of(fn) ]
+                if not lines or not stmts:
+                    return [ ]
+                rv = [ ]
+                for i, raw in enumerate(lines, 1):
+                    t = raw.strip()
+                    mode = None
+                    kind = "code"
+                    if t.startswith(self.CURSOR_HEADS) or t.startswith("$ screen_fx.use(") or t.startswith("$ screen_fx.clear("):
+                        c = self._call(t)
+                        if c is None:
+                            continue
+                        name, args, kw = c
+                        if name == "set_cursor":
+                            mode = args[0] if args else kw.get("mode")
+                        else:
+                            mode = kw.get("cursor")
+                        if mode is None:
+                            continue
+                        tgt = [ l for l in stmts if l > i and not (lines[l - 1].strip().startswith(self.OUR_LINES)) ]
+                        if not tgt:
+                            continue
+                        key = (fn, tgt[0])
+                    elif i in stmts and "fx_cursor" in t:
+                        import re
+                        m = re.search(r"\bfx_cursor\s*=\s*[\"']([a-z]+)[\"']", t)
+                        if not m:
+                            continue
+                        mode, kind, key = m.group(1), "say", (fn, i)
+                    else:
+                        continue
+                    e = self.line_edits.get(key) or { }
+                    pending = "cursor_mode" in e
+                    if pending and e["cursor_mode"] is not None:
+                        mode = e["cursor_mode"]
+                    rv.append(dict(line=i, target=key, mode=str(mode), label=cursor_label(mode) if mode in CURSOR_MODES else str(mode),
+                        kind=kind, pending=pending))
+                return rv
+
+            def warp_restore(self, fn, line):
+                """warp(게임을 다시 시작해서 그 줄로 건너뜀)는 $ 줄을 실행하지 않아서, 원고에서 그 줄 앞의
+                마지막 셰이더 줄, 커서 줄을 찾아 맞춤 (4.5). 같은 파일 안에서 줄 순서로만 봄."""
+                rows = [ r for r in self.change_rows(fn) if r["line"] < line ]
+                if rows:
+                    a, b = rows[-1]["slots"]
+                    shaders(a, b, transition=None)
+                crs = [ r for r in self.cursor_rows(fn) if r["line"] < line and r["mode"] in CURSOR_MODES ]
+                if crs:
+                    set_cursor(crs[-1]["mode"])
+
+            def cursor_state(self):
+                """앱 커서 칸이 그릴 것 (실시간 연결, 4.5)."""
+                self._follow()
+                hk = self.here_key()
+                fn = self.line_file()
+                rows = [ dict(line=l, text=(self.line_source((fn, l)) or "").strip()[:60], sel=on, here=here, dirty=dirty)
+                    for l, _t, on, here, dirty in self.nearby_lines() ]
+                sel = self.line_sel
+                return dict(
+                    choices=[ [ m, l ] for m, l in self.CURSOR_CHOICES ],
+                    now=self.cursor_now(), game=current_cursor() if self.cursor_pick is None else None,
+                    picked=self.cursor_pick is not None,
+                    file=(sel[0] if sel else self.line_file()), line=(sel[1] if sel else None), follow=self.follow,
+                    here=(list(hk) if hk else None), rows=rows,
+                    have=[ t for t in self.existing_lines(sel) if t.startswith(self.CURSOR_HEADS) ] if sel else [ ],
+                    pending=(sel in self.line_edits and "cursor_mode" in self.line_edits[sel]) if sel else False,
+                    changes=[ dict(line=r["line"], target=list(r["target"]), label=r["label"], kind=r["kind"], pending=r["pending"]) for r in self.cursor_rows() ],
+                    )
 
             def lreset(self):
                 if self.line_sel is not None:
@@ -801,11 +1123,30 @@ init -6 python in screen_fx:
             def _q(self, v):
                 return "None" if v is None else '"{}"'.format(v)
 
-            def gen_lines(self, e):
-                """편집 값 → 넣을 줄 목록 (앞 공백 없이)."""
-                if "slots" in e:
-                    a, b = e["slots"]
-                    return [ '$ screen_fx.shaders("{}", "{}")'.format(a, b) ]
+            def _tr_arg(self, tr):
+                if tr == DEFAULT:
+                    return ""
+                return ", transition={}".format(self._q(tr))
+
+            def gen_lines(self, e, key=None):
+                """편집 값 → 넣을 줄 목록 (앞 공백 없이).
+                4.5: "slots"(두 자리, None이면 지움)와 "cursor_mode"(None이면 지움)는 서로 따로라,
+                한쪽만 고치면 다른 쪽 줄은 원고에 있던 그대로 남깁니다."""
+                if "slots" in e or "cursor_mode" in e:
+                    have = self.existing_lines(key) if key is not None else [ ]
+                    rv = [ ]
+                    if "slots" in e:
+                        if e["slots"] is not None:
+                            a, b = e["slots"]
+                            rv.append('$ screen_fx.shaders("{}", "{}"{})'.format(a, b, self._tr_arg(e.get("transition", DEFAULT))))
+                    else:
+                        rv += [ t for t in have if t.startswith(self.SHADER_HEADS) ]
+                    if "cursor_mode" in e:
+                        if e["cursor_mode"] is not None:
+                            rv.append('$ screen_fx.set_cursor("{}")'.format(e["cursor_mode"]))
+                    else:
+                        rv += [ t for t in have if t.startswith(self.CURSOR_HEADS) ]
+                    return rv
                 F = self.FOLLOW
                 fx, ov, warp, tr = (e.get(k, F) for k in ("fx", "overlay", "warp", "transition"))
                 cur = e.get("cursor", F)
@@ -842,7 +1183,7 @@ init -6 python in screen_fx:
                     return None
                 if e.get("remove"):
                     return [ ]
-                return self.gen_lines(e)
+                return self.gen_lines(e, self.line_sel)
 
             def apply_to_lines(self):
                 """효과 페이지의 '이 줄부터 이 효과': 줄에 넣기 페이지로 가서 이 효과를 고름."""
@@ -873,8 +1214,8 @@ init -6 python in screen_fx:
                 for key, e in list(self.line_edits.items()):
                     if not e:
                         continue
-                    lines = [ ] if e.get("remove") else self.gen_lines(e)
-                    if not lines and not e.get("remove"):
+                    lines = [ ] if e.get("remove") else self.gen_lines(e, key)
+                    if not lines and not e.get("remove") and not (e.get("slots", 0) is None or e.get("cursor_mode", 0) is None):
                         continue
                     rv.append(se.Edit(key[0], key[1], se.INSERT,
                         { "lines": lines, "replace": self.OUR_LINES }, expect=e.get("expect") or None))
@@ -1593,12 +1934,13 @@ screen ui_editor_screen_fx_panel(tab):
         else:
             text "원고 쓰기 도구(UI Kit 3.0 이상)가 없어서 줄 고르기와 [[여기에서부터 적용]은 못 씁니다." style "ui_editor_small"
 
-        textbutton ("처음 상태, 전환 접기" if tab.tv_open else "처음 상태, 전환 펴기") style "ui_editor_button" text_size 13 action ToggleField(tab, "tv_open")
+        textbutton ("처음 상태 접기" if tab.tv_open else "처음 상태 펴기") style "ui_editor_button" text_size 13 action ToggleField(tab, "tv_open")
         if tab.tv_open:
             use ui_editor_fx_tv_panel(tab, tab.view("tv"))
 
 
-## 처음 상태(게임을 시작할 때 두 자리)와 바꿀 때 전환
+## 처음 상태 (4.5): 게임을 시작할 때 두 자리와, 줄에 '설정대로'라고 둔 전환
+## (TV 시간, 기다림, 건너뛰기는 screen_fx_config.rpy의 screen_fx.tv 등에서)
 screen ui_editor_fx_tv_panel(tab, tv):
 
     use ui_editor_fx_slot_row("처음 1번", 0, tab.start_slot(0), tab.set_start_slot)
@@ -1606,28 +1948,20 @@ screen ui_editor_fx_tv_panel(tab, tv):
 
     hbox:
         spacing 6
-        use ui_editor_fx_name("바꿀 때 전환")
+        use ui_editor_fx_name("'설정대로' 전환")
         for _t, _tl in tab.TRANSITION_LABELS:
             textbutton _tl style "ui_editor_fx_button" action Function(tab.cfg_put, "transition", _t) selected (tab.cfg_val("transition") == _t)
-
-    for _row in tv.rows():
-        use ui_editor_fx_row(tv, _row)
-
-    hbox:
-        spacing 6
-        use ui_editor_fx_name("전환을 기다림")
-        textbutton ("기다림" if tab.cfg_val("wait") else "안 기다림") style "ui_editor_fx_button" action Function(tab.cfg_put, "wait", not tab.cfg_val("wait")) selected bool(tab.cfg_val("wait"))
-        use ui_editor_fx_name("클릭으로 건너뛰기")
-        textbutton ("됨" if tab.cfg_val("skippable") else "안 됨") style "ui_editor_fx_button" action Function(tab.cfg_put, "skippable", not tab.cfg_val("skippable")) selected bool(tab.cfg_val("skippable"))
-
-    hbox:
-        spacing 6
-        textbutton "미리 보기: TV" style "ui_editor_button" action Function(tab.preview, "tv")
-        textbutton "미리 보기: 서서히" style "ui_editor_button" action Function(tab.preview, "fade")
 
 
 ## 줄 목록 (4.3): 고른 줄부터 적용 ($ screen_fx.shaders(…) 줄을 넣음). 줄을 누르면 게임도 그 줄로 (4.4)
 screen ui_editor_fx_lines_panel(tab):
+
+    use ui_editor_fx_line_list(tab)
+    use ui_editor_fx_shader_apply(tab)
+
+
+## 줄 고르기 (셰이더 칸, 커서 칸이 같이 씀, 4.5). 세모(▶)가 게임의 지금 줄, 줄을 누르면 게임도 그 줄로
+screen ui_editor_fx_line_list(tab):
 
     hbox:
         spacing 4
@@ -1686,10 +2020,43 @@ screen ui_editor_fx_lines_panel(tab):
                         text "▶" font tab.mark_font() size 14 color "#ff3b8d" xalign 0.5
                     text ("지금 줄: {} {}번째 (세모를 두 번 누르면 그 줄로)".format(_hk[0].replace("\\", "/").replace("game/", "", 1), _hk[1])) style "ui_editor_small" yalign 0.5
 
+
+## 셰이더 칸: 적용, 지우기, 셰이더가 바뀌는 줄
+screen ui_editor_fx_shader_apply(tab):
+
+    hbox:
+        spacing 4
+        box_wrap True
+        box_wrap_spacing 4
+        xmaximum 632
+        use ui_editor_fx_name("적용할 때 전환")
+        for _t, _tl in tab.TR_CHOICES:
+            textbutton _tl style "ui_editor_fx_button" action SetField(tab, "apply_tr", _t) selected (tab.apply_tr == _t)
+
     hbox:
         spacing 6
         textbutton "여기에서부터 적용" style "ui_editor_button" action Function(tab.apply_here)
         textbutton "이 줄 위의 셰이더 줄 지우기" style "ui_editor_button" action Function(tab.lremove)
+
+    ## 셰이더가 바뀌는 줄 (4.5): 1번, 2번은 늘 같이 바뀜. 줄마다 전환만 고름
+    $ _ch = tab.change_rows()
+    text ("셰이더가 바뀌는 줄 (이 파일 {}곳)".format(len(_ch)) if _ch else "이 파일에는 셰이더가 바뀌는 줄이 없습니다.") style "ui_editor_small" color "#cccccc"
+    vbox:
+        spacing 2
+        for _r in _ch:
+            hbox:
+                spacing 4
+                box_wrap True
+                box_wrap_spacing 2
+                xmaximum 632
+                textbutton ("{}{:>4}".format("* " if _r["pending"] else "", _r["line"])) style "ui_editor_fx_button" action Function(tab.pick_line, _r["target"]) selected (tab.line_sel == _r["target"])
+                text tab.slots_text(_r["slots"]) style "ui_editor_small" color "#ffffff" yalign 0.5
+                if _r["both"]:
+                    for _t, _tl in tab.TR_CHOICES:
+                        textbutton _tl style "ui_editor_fx_button" action Function(tab.set_row_tr, _r, _t) selected (_r["tr"] == _t)
+                else:
+                    text ("(대사 괄호, 한 자리만)" if _r["kind"] == "say" else "(한 자리만)") style "ui_editor_small" color "#ffd23b" yalign 0.5
+                    textbutton "두 자리로 바꾸기" style "ui_editor_fx_button" action Function(tab.make_both, _r)
 
 
 ## 타이틀 셰이더 / 게임 내 메뉴 셰이더 탭 (4.3). 세부 속성은 1번, 2번 아래 (4.4, 인게임과 같은 값)
@@ -1699,3 +2066,29 @@ screen ui_editor_menu_fx_panel(tab):
         spacing 6
         $ _a, _b = tab.slots()
         use ui_editor_fx_slots(tab, _a, _b, tab.set_slot, tab.clear, True)
+
+
+## 커서 칸 (UI Kit "커서/대사 소리" 탭 아래, 4.5): 커서가 셰이더를 받을지 '여기에서부터'
+screen ui_editor_fx_cursor_panel(tab):
+
+    vbox:
+        spacing 6
+        text "커서와 셰이더 (여기에서부터)" style "ui_editor_row_label"
+        hbox:
+            spacing 4
+            box_wrap True
+            xmaximum 632
+            for _m, _ml in tab.CURSOR_CHOICES:
+                textbutton _ml style "ui_editor_fx_button" action Function(tab.set_cursor_pick, _m) selected (tab.cursor_now() == _m)
+        use ui_editor_fx_line_list(tab)
+        hbox:
+            spacing 6
+            textbutton "여기에서부터 적용" style "ui_editor_button" action Function(tab.cursor_apply)
+            textbutton "이 줄 위의 커서 줄 지우기" style "ui_editor_button" action Function(tab.cursor_remove)
+        $ _cr = tab.cursor_rows()
+        text ("커서가 바뀌는 줄 (이 파일 {}곳)".format(len(_cr)) if _cr else "이 파일에는 커서가 바뀌는 줄이 없습니다. (처음 값은 설정 screen_fx.cursor)") style "ui_editor_small" color "#cccccc"
+        for _r in _cr:
+            hbox:
+                spacing 4
+                textbutton ("{}{:>4}".format("* " if _r["pending"] else "", _r["line"])) style "ui_editor_fx_button" action Function(tab.pick_line, _r["target"]) selected (tab.line_sel == _r["target"])
+                text (_r["label"] + (" (대사 괄호)" if _r["kind"] == "say" else "")) style "ui_editor_small" color "#ffffff" yalign 0.5

@@ -42,7 +42,7 @@ init -110 python in screen_fx:
 
     import store
 
-    VERSION = "4.4"
+    VERSION = "4.5"
 
     ## ── 플러그인 폴더 위치 ──
     ## 이 파일은 <플러그인 폴더>/engine/screen_fx.rpy 에 있습니다.
@@ -1107,6 +1107,7 @@ init -110 python in screen_fx:
             self.anim = None            # 진행 중인 전환
             self.last_say = None        # 마지막 대사 줄: (파일, 줄, 바뀌기 전 효과, 바뀐 뒤 효과, 괄호 fx 값, 바뀌기 전 상태, 바뀐 뒤 상태)
             self.editor_preview = None  # 편집기를 연 동안 효과를 보여줄지 (None = 설정 파일대로, V 키로 바꿈)
+            self.cursor_preview = None  # 커서 칸에서 고른 커서 자리 미리 보기 (4.5, 세이브에 안 들어감)
 
     rt = _Runtime()
 
@@ -1282,13 +1283,15 @@ init -110 python in screen_fx:
 
     def current_cursor():
         """지금 커서 자리: "effect" / "overlay" / "top"."""
+        if rt.cursor_preview in CURSOR_MODES:
+            return rt.cursor_preview
         try:
             f = _cursor_flag(globals().get("cur_cursor", DEFAULT))
         except Exception:
             f = DEFAULT
         return config_cursor() if f == DEFAULT else f
 
-    CURSOR_LABELS = (("effect", "효과까지"), ("overlay", "덮개 밑"), ("top", "효과 안 받음"))
+    CURSOR_LABELS = (("effect", "1번, 2번 다 받음"), ("overlay", "2번만 받음"), ("top", "셰이더 안 받음"))
 
     def cursor_label(mode):
         if mode == DEFAULT:

@@ -66,6 +66,20 @@ export interface CustomUIState {
   fps?: number;
   max_frames?: number;
   playing?: boolean;
+  cursor_lines?: CursorLines | null; // ui_kit 3.21 + screen_fx 4.5: 커서와 셰이더 '여기에서부터'
+}
+export interface CursorLines {
+  choices: [string, string][]; // [자리, 이름] effect / overlay / top
+  now: string; // 칸에 보이는 자리 (고른 것, 없으면 게임의 지금 값)
+  picked: boolean;
+  file: string | null;
+  line: number | null; // 고른 줄
+  follow: boolean;
+  here: [string, number] | null; // 게임의 지금 줄
+  rows: { line: number; text: string; sel: boolean; here: boolean; dirty: boolean }[];
+  have: string[]; // 고른 줄 위에 이미 있는 커서 줄
+  pending: boolean;
+  changes: { line: number; target: [string, number]; label: string; kind: 'code' | 'say'; pending: boolean }[];
 }
 // 게임 안 편집기 패널을 통째로 (ui_kit 3.16). k: h 가로 / v 세로 / g 격자 / t 글 / b 버튼 / bar 막대 / in 입력칸 / img 그림 / col 색 견본
 export type MirrorNode =

@@ -1,6 +1,6 @@
-# PyKaki 데스크톱 앱: 리눅스에서 진짜 Electron으로 켜서 확인하고, 윈도우용 PyKaki.exe 폴더를 만든다.
-# 결과물 "PyKaki-win"을 받아 풀고 bundle/make_bundle.py --app 으로 그 폴더를 주면 배포 묶음이 된다.
-name: PyKaki 앱
+# pygaki 데스크톱 앱: 리눅스에서 진짜 Electron으로 켜서 확인하고, 윈도우용 pygaki.exe 폴더를 만든다.
+# 결과물 "pygaki-win"을 받아 풀고 bundle/make_bundle.py --app 으로 그 폴더를 주면 배포 묶음이 된다.
+name: pygaki 앱
 
 on:
   push:
@@ -58,5 +58,5 @@ jobs:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
       - uses: actions/upload-artifact@v4
         with:
-          name: PyKaki-win
+          name: pygaki-win
           path: pykaki/app/out/win-unpacked

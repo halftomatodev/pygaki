@@ -6,7 +6,7 @@ const POS_KEYS = ['x', 'y', 'name_x', 'name_y'] as const;
 
 export interface InboxOp {
   id: string; // 새 줄 id (insert), 또는 이 기록 자체의 id
-  op: 'insert' | 'replace' | 'say_pos' | 'say_fx';
+  op: 'insert' | 'replace' | 'remove' | 'say_pos' | 'say_fx';
   code?: string; // 렌파이 명령 한 줄 (insert, replace)
   pos?: Partial<Record<(typeof POS_KEYS)[number], number | null>>; // say_pos: 대사 위치. null이면 지움
   box?: string; // 그 줄이 있던 상자. 기준 줄이 사라졌을 때 쓴다
@@ -116,6 +116,15 @@ export function applyInbox(p: Project, ops: InboxOp[]): { applied: number; moved
       continue;
     }
     const code = op.code ?? '';
+    if (op.op === 'remove') {
+      // showpy가 지운 줄 (화면 효과 줄을 다시 적용하거나 지울 때, LINK.md 3장)
+      const at = op.line ? findLine(p, op.line) : null;
+      if (at) {
+        at.box.lines.splice(at.i, 1);
+        applied++;
+      }
+      continue;
+    }
     if (op.op === 'replace') {
       const at = op.line ? findLine(p, op.line) : null;
       if (!at) {
