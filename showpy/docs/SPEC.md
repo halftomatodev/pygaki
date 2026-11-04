@@ -2,7 +2,7 @@
 
 코드를 고치는 사람과 AI가 읽는 문서입니다. 사용법은 [CUSTOM_GUIDE.md](CUSTOM_GUIDE.md)에 있습니다.
 
-- 묶음 버전 4.13 (`ui_kit` 3.12, `screen_fx` 4.2, `hotkeys` 1.0, `splash` 1.1)
+- 묶음 버전 4.14 (`ui_kit` 3.13, `screen_fx` 4.2, `hotkeys` 1.0, `splash` 1.1)
 - 렌파이 8.5.3 기준
 - 작업 규칙: [DEV_RULES.md](DEV_RULES.md)
 - PyKaki 연결 형식: [LINK.md](../../docs/LINK.md)
@@ -22,7 +22,7 @@
 
 | 폴더 | 버전 | 하는 일 |
 |---|---|---|
-| `game/ui_kit` | 3.12 | 타이틀 메뉴, ESC 메뉴, 선택지, 커서, 클릭 대기 표시, 대사 소리, 대사 스타일, 그림과 영상 배치(`stage`), 편집기(개발 모드 Shift+M), 원고 쓰기 도구(`script_edit`) |
+| `game/ui_kit` | 3.13 | 타이틀 메뉴, ESC 메뉴, 선택지, 커서, 클릭 대기 표시, 대사 소리, 대사 스타일, 그림과 영상 배치(`stage`), 편집기(개발 모드 Shift+M), 원고 쓰기 도구(`script_edit`) |
 | `game/screen_fx` | 4.2 | 기본 효과(없음, ASCII, 레트로 터미널, 게임보이) + VHS 덮개, TV 전환, 글자 빼기, 커서 자리, 타이틀 일렁임 |
 | `game/hotkeys` | 1.0 | 단축키, 조작방법 화면 |
 | `game/splash` | 1.1 | 타이틀 전 로고, 경고, 조작 방법 페이지 |
@@ -35,7 +35,7 @@
 
 | 종류 | 내용 |
 |---|---|
-| 스크린 교체 | `choice`, `main_menu`, `navigation`, `keyboard_help` |
+| 스크린 교체 | `choice`, `main_menu`, `navigation`, `game_menu`, `keyboard_help` |
 | 새 스크린 | `tmenu_pause`, `title_menu`, `cmenu_choice`, `splash_page`, `ui_editor_*` (`ui_editor_pk_watch`, `ui_editor_pk_preview`: PyKaki 실시간 미리보기) |
 | 층 | `sfx_say`, `sfx_choice` (screens 아래), `ui_editor` (top_layers) |
 | config | `say_arguments_callback`(`screen_fx` → `say_style` 순서로 이어짐), `layer_transforms`, `say_layer`, `choice_layer`, `nvl_layer`, `nvl_choice_layer`, `context_clear_layers`, `mouse`, `mouse_displayable`, `always_shown_screens`, `top_layers`, `label_overrides["splashscreen"]`, `end_splash_transition`, `all_character_callbacks`, `start_callbacks`, `after_load_callbacks`, `after_default_callbacks`, `default_text_cps`, `keymap`, `underlay`, `language_callbacks`, `lint_hooks`, `show`, `hide`, `scene`, `with_callback`, `start_interact_callbacks`, `label_callbacks` |

@@ -114,7 +114,16 @@ python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app 'F:\SHOWPY\
 7. 시험 프로젝트 두 곳에 showpy 4.13 넣음 (Lint 깨끗). 바꾸기 전 폴더 백업은 임시 폴더에 있었음(세션이 끝나면 없어질 수 있음)
 8. 구글 문서를 4.13 기준으로 고침 (1장 표와 바뀐 점, 2장 글자 효과 칸·F8·데스크톱 앱 절, 3장 준비 순서, 4장 cps, 링크 전부). 원안은 `F:\SHOWPY\구글문서_수정안.md`
 
+### 2026-11-04 (로컬 세션 2)
+
+1. showpy 4.14 (`ui_kit` 3.13): 게임 메뉴 화면(대사록, 저장, 불러오기, 환경설정 등)에서 ESC 메뉴를 왼쪽에 그대로 두고 제목과 내용을 오른편에. `title_menu.rpy`가 `game_menu` 스크린을 대신 정의함. 설정 `tmenu.game_menu_side`, `game_menu_content_x`, `game_menu_gap`, `game_menu_line`. 시험 프로젝트 두 곳에 넣고 Lint, pykaki_sample을 켜서 화면을 찍어 확인(게임 중, 타이틀에서, `game_menu_side = False`)
+   - 화면 찍기 방법: 시험 프로젝트에 `config.always_shown_screens`에 타이머 스크린을 넣어 `renpy.run(ShowMenu(...))`, `renpy.screenshot(...)`을 차례로 부르는 임시 파일(끝나면 지움). `config.overlay_screens`는 메인 메뉴에서 안 보여서 안 됨. splash는 클릭을 기다리니 `splash.enabled = False`
+   - `tmenu` 설정 이름과 같은 이름의 함수를 만들면 안 됨 (`cfg()`가 전역 이름으로 찾음)
+2. 다음 할 일 후보: showpy 편집기 패널을 PyKaki 앱으로 꺼내기 (게임 안에는 끌어서 옮기는 손잡이만 남기고, 패널은 앱에서. 주고받는 형식을 `docs/LINK.md`에 먼저 정하고 탭 하나부터)
+
 ## 5. 남은 확인 (사람이 눈으로 볼 것)
+
+- [ ] 게임 메뉴 화면 4.14: 마우스로 메뉴 항목 위를 오갈 때 선택 모양이 지금 화면 항목으로 돌아오는지, 키보드 이동, 저장 칸이 넓은 메뉴 배치에서 오른쪽으로 넘치지 않는지
 
 - [ ] `fx_test_25`를 켜서 4.13 등장 효과를 눈으로 보기, 대사 탭 효과 버튼(이제 glsl에서 이름을 읽음)
 - [ ] 런처를 영어로 바꿨을 때 버튼 한글이 보이는지

@@ -1,6 +1,6 @@
 # showpy (먼저 읽기)
 
-버전 4.13
+버전 4.14
 
 예전 이름은 "렌파이 UI 플러그인 묶음"이었습니다.
 
@@ -21,6 +21,20 @@
 - `screen_fx`는 예전의 `watermorph`, `vhs_crt` 두 플러그인을 합친 것입니다.
 - 합친 기능들은 각자 설정 파일의 스위치(`enabled`)로 따로 끌 수 있고, 끄면 렌파이 기본(효과 없음)과 똑같이 보입니다.
 - `screen_fx`는 넣자마자 VHS 덮개가 화면 전체에 켜집니다. 처음에는 깨끗한 화면으로 보고 싶다면 `screen_fx/screen_fx_config.rpy`의 `screen_fx.overlay`를 `False`로(평소엔 깨끗하고 `use()`나 `fx_overlay=True`로 켤 때만 효과), 타이틀 일렁임은 `screen_fx/watermorph_config.rpy`의 `watermorph.enabled`를 `False`로 바꾸세요.
+
+## 4.14에서 바뀐 점
+
+### `ui_kit` 3.13: 게임 메뉴 화면을 ESC 메뉴 옆으로
+
+ESC 메뉴에서 환경설정이나 저장하기를 고르면, 왼쪽의 ESC 메뉴가 그 자리에 그대로 남고 제목과 내용이 그 오른편에 나옵니다. 지금 열린 화면의 항목은 선택된 모양으로 보입니다. 타이틀에서 연 환경설정, 불러오기 화면은 타이틀 메뉴 항목이 왼쪽에 남습니다.
+
+```renpy
+define tmenu.game_menu_side = False          ## 예전 모양(렌파이 기본)으로
+define tmenu.game_menu_content_x = 400       ## 내용 시작 자리를 직접 (픽셀)
+define tmenu.game_menu_line = "#ffffff33"    ## 메뉴와 내용 사이 세로줄
+```
+
+옮기기: `ui_kit` 폴더를 바꿔 넣고 `.rpyc`를 지웁니다. 프로젝트의 `screens.rpy`에서 `game_menu` 스크린을 고쳐 썼다면, 이제 `ui_kit`의 것이 쓰이니 확인하세요.
 
 ## 4.13에서 바뀐 점
 
