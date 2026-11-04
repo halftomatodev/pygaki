@@ -457,6 +457,13 @@ init -8 python in ui_editor:
         live.widgets = reg
         return rv
 
+    def live_badge():
+        t = current_tab()
+        name = t.label if t is not None else ""
+        if state.popup is not None:
+            return "PyKaki 앱에 고르기 창이 열려 있어요 | 닫을 때까지 게임 입력이 막혀요 (Esc로 닫기)"
+        return "편집 중: {} (PyKaki 앱) | 클릭과 키는 편집기로 가요 | Esc로 닫기".format(name)
+
     def _panel_do(c):
         import renpy as _r
         wid = str(c.get("id"))
@@ -763,6 +770,17 @@ screen ui_editor_live_mirror():
     layer "ui_editor"
 
     if config.developer and ui_editor.state.open and ui_editor.live_panel_hidden():
+
+        ## 게임 창에 보이는 표시 (3.18): 편집기가 열려 있으면 클릭과 키가 게임으로 가지 않아서,
+        ## 패널이 앱에 있을 때도 지금 편집 중인 것을 알 수 있게. 글자만 있어서 입력을 막지 않습니다.
+        frame:
+            style "empty"
+            background "#000000b0"
+            padding (12, 4)
+            xalign 0.5
+            ypos 6
+            text ui_editor.live_badge() style "ui_editor_small" color "#ffd23b" size 15
+
         fixed:
             pos (-40000, 0)
             xysize (660, 20000)

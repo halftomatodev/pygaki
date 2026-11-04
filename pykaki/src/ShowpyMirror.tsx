@@ -14,6 +14,7 @@ export function MirrorPanel({ panel }: { panel: PanelState }) {
       {/* 고르기 창(글꼴, 색, 그림)은 맨 위에. 닫기 전에는 게임에서 다른 것을 누를 수 없어요 */}
       {panel.popup && (
         <div className="sp-mirror-popup">
+          <p className="sp-warn">고르기 창이 열려 있는 동안은 게임 화면이 눌리지 않아요. 고른 뒤 확인이나 닫기를 눌러요.</p>
           <Node n={panel.popup} />
         </div>
       )}

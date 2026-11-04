@@ -38,6 +38,11 @@ export function ShowpyView() {
   const choose = (s: Section) => {
     useLive.setState({ section: s.id });
     if (!s.tab) return;
+    // 편집기가 열려 있으면 게임 화면의 클릭과 키가 편집기로 간다. 앱 칸만으로 되는 곳은 열지 않음
+    if (s.id === 'custom_ui' && st?.custom_ui?.values) {
+      if (st.editor.open && st.editor.hide_panel) liveSend({ cmd: 'editor', open: false });
+      return;
+    }
     liveSend({ cmd: 'panel', hide: inApp(s) });
     liveSend({ cmd: 'editor', open: true, tab: s.tab });
   };
@@ -216,6 +221,14 @@ function EditorBar({ st }: { st: GameState }) {
         <input type="checkbox" checked={!e.hide_panel} onChange={(ev) => liveSend({ cmd: 'panel', hide: !ev.target.checked })} />
         게임 안 패널도 보기
       </label>
+      {e.open && e.hide_panel && (
+        <div className="sp-editing">
+          <span>
+            편집 중이라 게임 화면의 클릭과 키는 편집기로 가요(끌어서 옮기기용). 게임을 진행하려면 편집기를 닫아요. (게임 창에서 Esc)
+          </span>
+          <button onClick={() => liveSend({ cmd: 'editor', open: false })}>편집기 닫기</button>
+        </div>
+      )}
       {e.message && <p className="sp-msg">{e.message}</p>}
     </div>
   );

@@ -110,6 +110,10 @@ let started = false;
 export function startLive() {
   if (!desktop || started) return;
   started = true;
+  // [대본] 화면으로 가면 앱에서 연 편집기를 닫는다 (열려 있으면 게임 입력이 편집기로 가서 게임이 안 넘어감)
+  useLive.subscribe((s, prev) => {
+    if (prev.view === 'showpy' && s.view !== 'showpy' && s.st?.editor.open && s.st.editor.hide_panel) liveSend({ cmd: 'editor', open: false });
+  });
   const status = (s: { on: boolean; showpy: string | null }) =>
     useLive.setState(s.on ? { on: s.on, showpy: s.showpy } : { on: false, showpy: s.showpy, st: null, files: null });
   const take = (m: any) => {
