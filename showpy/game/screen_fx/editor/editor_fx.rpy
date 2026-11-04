@@ -114,7 +114,7 @@ init -6 python in screen_fx:
             def base(self, key):
                 """편집 전 값 (저장된 배치 → 설정 파일 → 기본값)."""
                 wm = self.wm()
-                lay = getattr(wm, "layout", None) or { }
+                lay = wm.saved_layout()
                 if key in lay:
                     return lay[key]
                 missing = object()
@@ -151,7 +151,7 @@ init -6 python in screen_fx:
                 return len(wm.state.edits) if wm is not None else 0
 
             def _merged(self):
-                lay = dict(getattr(self.wm(), "layout", None) or { })
+                lay = dict(self.wm().saved_layout())
                 lay.update(self.wm().state.edits)
                 return lay
 
@@ -172,7 +172,8 @@ init -6 python in screen_fx:
             def after_save(self):
                 wm = self.wm()
                 changed = set(wm.state.edits)
-                wm.layout = self._merged()
+                ## store 변수가 아니라 실행 중 값으로 (다시 불러올 때 옛 값이 덮지 않게, 3.16)
+                wm.state.saved = store.python_dict(self._merged())
                 wm.state.edits = { }
                 return bool(changed & set(self.RELOAD_KEYS))
 

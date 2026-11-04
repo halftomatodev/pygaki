@@ -70,6 +70,11 @@ async function until(what, fn, ms = 10000) {
       values: { text_cps: null, typing_sound: null, typing_volume: 1, ctc: false, ctc_frames: ['gui/ctc/ctc1.png'], ctc_hold: 2,
                 cursor: false, cursor_frames: [], cursor_hold: 2, cursor_mode: 'software', cursor_hotspot: [0, 0], quick_menu: true },
     },
+    // 게임 안 패널을 통째로 (ui_kit 3.16)
+    panel: {
+      tab: 'screen_fx', popup: null, popup_kind: null,
+      body: { k: 'v', c: [{ k: 't', t: '시험 패널' }, { k: 'h', c: [{ k: 't', t: '효과:' }, { k: 'b', id: 'p.1', t: 'ASCII', on: false, ok: true }] }, { k: 'bar', id: 'p.2', r: 1, v: 0.5, s: 0.01 }] },
+    },
   };
   const srv = net.createServer((c) => {
     c.setEncoding('utf8');
@@ -93,6 +98,11 @@ async function until(what, fn, ms = 10000) {
   await page.waitForSelector('.sp-script .cur', { timeout: 10000 });
   await page.click('.sp-nav-item:has-text("인게임 화면 셰이더")');
   await until('편집기 명령을 보내지 않음', () => got.some((m) => m.cmd === 'editor' && m.tab === 'screen_fx'));
+  // 게임 안 패널을 통째로 그린 칸 (ui_kit 3.16): 버튼을 누르면 그 자리 번호를 보내는지
+  await page.waitForSelector('.sp-mirror .sp-m-b', { timeout: 10000 });
+  await page.locator('.sp-mirror .sp-m-b', { hasText: 'ASCII' }).click();
+  await until('패널 버튼 명령을 보내지 않음', () => got.some((m) => m.cmd === 'panel.do' && m.id === 'p.1' && m.t === 'ASCII'));
+  console.log('패널 통째로: 됨');
   // 커서, 클릭 대기, 대사 소리 칸 (ui_kit 3.15): 앱 칸이 나오고 값을 보내는지
   await page.click('.sp-nav-item:has-text("커서, 클릭 대기")');
   await page.waitForSelector('.sp-cu select', { timeout: 10000 });
