@@ -31,6 +31,16 @@ async function until(what, fn, ms = 10000) {
   const page = await app.firstWindow();
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
+  // 확인 창: 기본은 [취소]. acceptNext를 켜면 다음 하나만 [확인]
+  const dialogs = [];
+  let acceptNext = false;
+  page.on('dialog', (d) => {
+    dialogs.push(d.message());
+    if (acceptNext) {
+      acceptNext = false;
+      void d.accept();
+    } else void d.dismiss();
+  });
   await page.waitForSelector('.link-panel', { timeout: 20000 });
   const panel = await page.locator('.link-panel').innerText();
   if (!panel.includes(name)) fail('왼쪽 칸에 프로젝트 이름이 없음: ' + panel);
@@ -52,6 +62,29 @@ async function until(what, fn, ms = 10000) {
   fs.writeFileSync(path.join(proj, 'game', 'showpy_inbox.json'), JSON.stringify({ format: 'showpy-inbox', version: 1, ops: [{ id: 'spsmoke1', op: 'insert', code: 'show ghost', box, end: box }] }));
   await until('showpy 기록을 받아 적지 않음', () => fs.readFileSync(flow, 'utf8').includes('spsmoke1'));
   console.log('받아 적기: 됨');
+
+  // 쓴 판 표시 (SPEC 9-3)
+  const stamped = JSON.parse(fs.readFileSync(flow, 'utf8'));
+  if (stamped.app?.by !== 'pygaki 앱' || !(stamped.app.needs >= 1) || !stamped.app.build) fail('쓴 판 표시가 없음: ' + JSON.stringify(stamped.app));
+  console.log('쓴 판:', JSON.stringify(stamped.app));
+  if (dialogs.some((m) => m.includes('다른 곳'))) fail('앱이 쓴 파일을 밖에서 바뀐 것으로 봄');
+
+  // 밖(웹 PyKaki)에서 대본 파일을 고치면 다시 읽을지 묻고, [확인]이면 다시 읽음
+  await wait(1500);
+  const web = { ...stamped, project: { ...stamped.project, title: '웹에서 고친 제목' }, app: { by: 'PyKaki 웹', build: 'smoke', needs: 1 } };
+  acceptNext = true;
+  fs.writeFileSync(flow, JSON.stringify(web, null, 2));
+  await until('밖에서 바뀐 대본을 다시 읽지 않음', () => dialogs.some((m) => m.includes('다른 곳')));
+  await page.waitForFunction(() => document.querySelector('.ptitle')?.value === '웹에서 고친 제목', null, { timeout: 10000 });
+  console.log('밖에서 바뀐 대본 다시 읽기: 됨');
+
+  // 더 새 판에서 쓴 대본이면 경고
+  const n0 = dialogs.length;
+  acceptNext = true;
+  fs.writeFileSync(flow, JSON.stringify({ ...web, app: { by: 'PyKaki 웹', build: 'future', needs: 99 } }, null, 2));
+  await until('더 새 판 대본을 다시 읽지 않음', () => dialogs.length > n0);
+  await page.waitForSelector('.link-panel .warn-text:has-text("더 새 판")', { timeout: 10000 });
+  console.log('더 새 판 경고: 됨');
 
   const outside = await page.evaluate(() => window.pygaki.write('../pykaki-smoke-outside.txt', 'x').then(() => 'written', (e) => 'blocked: ' + e.message));
   if (outside === 'written' || fs.existsSync(path.join(path.dirname(proj), 'pykaki-smoke-outside.txt'))) fail('프로젝트 밖에 쓸 수 있음');
@@ -118,5 +151,21 @@ async function until(what, fn, ms = 10000) {
 
   if (errors.length) fail('화면 오류: ' + errors.join(' / '));
   await app.close();
+
+  // 대본 파일이 여러 개면 고르게 하고, 고른 파일을 연다
+  const proj2 = fs.mkdtempSync(path.join(os.tmpdir(), 'pykaki-smoke2-'));
+  fs.mkdirSync(path.join(proj2, 'game'), { recursive: true });
+  fs.writeFileSync(path.join(proj2, 'game', 'gui.rpy'), 'init python:\n    gui.init(1280, 720)\n');
+  for (const [f, title] of [['a.flow.json', '대본 가'], ['b.flow.json', '대본 나']])
+    fs.writeFileSync(path.join(proj2, f), JSON.stringify({ ...stamped, project: { ...stamped.project, title } }, null, 2));
+  const app2 = await electron.launch({ args: ['--no-sandbox', __dirname, '--project', proj2] });
+  const page2 = await app2.firstWindow();
+  await page2.waitForSelector('.flow-pick button', { timeout: 20000 });
+  if ((await page2.locator('.flow-pick button').count()) !== 2) fail('대본 고르기 칸 수가 다름');
+  await page2.locator('.flow-pick button', { hasText: 'b.flow.json' }).click();
+  await page2.waitForFunction(() => document.querySelector('.ptitle')?.value === '대본 나', null, { timeout: 20000 });
+  if (!(await page2.locator('.link-panel').innerText()).includes('b.flow.json')) fail('왼쪽 칸에 고른 대본 파일 이름이 없음');
+  await app2.close();
+  console.log('대본 파일 고르기: 됨');
   console.log('모두 통과');
 })().catch((e) => fail(e.stack || e.message));

@@ -214,6 +214,7 @@
 | `.rpy` | 내보내기, 핸들 기억 → Ctrl+E로 같은 곳. 연결을 켜면 연결한 폴더의 `script_flow.rpy` | 게임 `game/` 폴더 권장 |
 
 - 파일로 저장하지 않은 변경이 있으면 탭을 닫을 때 경고한다.
+- 파일에 쓸 때 `app: { by, build, needs }`를 붙인다(9-3).
 - 사이트와 로컬 `dist/index.html`은 출처(origin)가 달라서 자동 저장 공간이 따로다.
 
 ## 9-0. showpy 연결 (`src/gameFolder.ts`, `src/inbox.ts`)
@@ -227,6 +228,7 @@
 - 받아 적기 `pullInbox`: 창이 다시 focus될 때, 앱을 켤 때, [다시 읽기], 내보내기 직전. 받을 것이 있으면 저장본을 먼저 남기고 `applyInbox`로 넣은 뒤, 읽은 기록만 파일에서 지운다.
 - 내보내기: 폴더를 연결했거나 연결을 켜면 먼저 받아 적고 `script_flow.rpy`에 쓴다. 받아 적기가 실패하면 쓰지 않는다. 폴더 권한을 못 쓰는 브라우저에서는 예전처럼 내려받기.
 - 연결을 켜면 show 줄의 위치 칸을 숨긴다(값이 이미 있을 때만 보임). 위치는 showpy가 저장한다.
+- 프로젝트 폴더(game 위)를 고르면 그 손잡이도 IndexedDB `kv.projectDir`에 두고, 대본을 그 폴더의 `.flow.json`에 둔다(9-3). 권한은 프로젝트 폴더에 받는다(안의 game까지 같이 됨). game 폴더를 바로 골랐으면 `projectDir`은 null이고 예전처럼 대본 파일은 따로.
 
 ## 9-2. 데스크톱 앱 (`app/`, `src/desktop.ts`)
 
@@ -234,8 +236,9 @@
 - 렌파이 프로젝트 폴더 하나를 연다. `pygaki.exe --project "폴더"`(렌파이 런처 버튼), 없으면 폴더 고르는 창. 같은 프로젝트를 다시 열면 있던 창을 앞으로, 다른 프로젝트는 새 창.
 - 파일은 메인 프로세스(`app/main.cjs`)가 다룬다: `info` `list` `stat` `read` `write`(임시 파일에 쓰고 바꿔 끼움) `openFolder` `choose`. 경로는 프로젝트 폴더 기준이고 밖은 막는다. `game/` 폴더를 `fs.watch`로 지켜보고 바뀐 파일 이름을 `pygaki:changed`로 알린다.
 - `src/desktop.ts`의 `AppDir`, `AppFile`이 이 기능을 브라우저 폴더 손잡이(`FileSystemDirectoryHandle`)와 같은 모양으로 감싼다. 그래서 `gameFolder.ts`, `files.ts`는 웹과 같은 코드로 돈다. 권한은 늘 `granted`.
-- 대본: 프로젝트 폴더 맨 위의 `*.flow.json`(이름순 첫 번째)을 연다. 없으면 `프로젝트이름.flow.json`으로 빈 대본을 만들고, showpy(`game/ui_kit`)가 있으면 `renpyLink`를 켠다. 바뀌면 0.7초 뒤 그 파일에 자동 저장(`saveQuiet`). 브라우저 저장소의 `current`는 읽지 않는다. 버전 목록(IndexedDB)은 앱 전체가 같이 쓴다.
-- [열기]는 고른 파일의 내용을 이 프로젝트 대본으로 가져오고, [새로]는 이 프로젝트 대본을 비운다. 저장 파일은 바뀌지 않는다.
+- 대본: 프로젝트 폴더 맨 위의 `*.flow.json`을 연다. 여러 개면 처음 열 때 고르게 하고(`src/flowPick.ts`, 상자 수·줄 수·고친 때, 가장 최근 것을 강조), 고른 이름을 `localStorage['pygaki-flow:<프로젝트 경로>']`에 둔다. 왼쪽 칸 [다른 대본 파일]은 이 기억을 지우고 창을 다시 연다. 없으면 `프로젝트이름.flow.json`으로 빈 대본을 만들고, showpy(`game/ui_kit`)가 있으면 `renpyLink`를 켠다. 바뀌면 0.7초 뒤 그 파일에 자동 저장(`saveQuiet`). 브라우저 저장소의 `current`는 읽지 않는다. 버전 목록(IndexedDB)은 앱 전체가 같이 쓴다.
+- [열기]는 두 대본의 요약을 보여 주고 확인을 받은 뒤 고른 파일의 내용을 이 프로젝트 대본으로 가져오고, [새로]는 이 프로젝트 대본을 비운다. 저장 파일은 바뀌지 않는다.
+- 메인 프로세스는 프로젝트 폴더 맨 위도 지켜보고 `*.flow.json`이 바뀌면 `pygaki:changed`로 이름을 알린다. 연 대본 파일이면 0.3초 뒤 `checkExternal`(9-3).
 - 왼쪽 "렌파이 프로젝트" 칸: [다시 읽기] [폴더 열기] [다른 프로젝트]. 연결과 끊기는 없다.
 - `showpy_inbox.json`이 바뀌면 0.3초 뒤 받아 적는다(창으로 돌아올 때도).
 - showpy 화면 (`src/ShowpyView.tsx`, `src/showpyLive.ts`): 툴바 [대본 편집 | GUI 편집]로 바꾼다(앱에서만). 대본 화면은 숨기기만 해서 캔버스 상태가 남는다. 메인 프로세스가 `game/showpy_live.json`을 보고 그 포트로 붙어(지켜보기 + 3초마다 다시 시도) 한 줄 JSON을 `pygaki:live`로 넘기고, 화면은 `liveSend`로 명령을 보낸다(`pygaki:liveSend`). 형식은 저장소 맨 위 docs/LINK.md 9장.
@@ -243,7 +246,19 @@
   - 가운데: 지금 화면, 원고 위치, 그 앞뒤 9줄(파일이 바뀌면 다시 읽음). 줄 위의 `# @node:` 표시로 PyKaki 상자를 찾아 [상자로] 버튼.
   - 오른쪽: 저장(게임의 Ctrl+S), 버리기, 편집기 닫기, 게임 안 패널 보이기. 타이틀 칸은 배경(그림/영상 고르기, `title.background`), 평소/선택됐을 때, 이 항목만/공통, 항목 목록(메뉴 항목 + 제목, 부제), 글 칸, 숫자 칸, 글자 효과. 입력하는 동안은 게임에서 오는 값으로 덮지 않는다.
   - showpy 화면에서는 저장 단축키가 게임 저장이다.
-- 확인: GitHub Actions "pygaki 앱"(`.github/workflows/app.yml`)이 리눅스에서 진짜 Electron으로 켜서 `app/smoke.cjs`(자동 저장, 내보내기, 받아 적기, 밖에 쓰기 막기, 가짜 게임으로 showpy 연결)를 돌리고, 윈도우 `pygaki.exe` 폴더(`pygaki-win`)를 만든다. 배포 묶음은 저장소 맨 위 `bundle/`.
+- 확인: GitHub Actions "pygaki 앱"(`.github/workflows/app.yml`)이 리눅스에서 진짜 Electron으로 켜서 `app/smoke.cjs`(자동 저장, 내보내기, 받아 적기, 쓴 판 표시, 밖에서 바뀐 대본 다시 읽기, 더 새 판 경고, 대본 파일 고르기, 밖에 쓰기 막기, 가짜 게임으로 showpy 연결)를 돌리고, 윈도우 `pygaki.exe` 폴더(`pygaki-win`)를 만든다. 배포 묶음은 저장소 맨 위 `bundle/`.
+
+## 9-3. 프로젝트 대본 파일과 쓴 판 (`src/files.ts`, `src/version.ts`)
+
+웹에서 쓰고 앱에서 이어 쓰기 위한 약속. 앱은 늘, 웹은 프로젝트 폴더를 연결했을 때 "프로젝트 대본 파일"(`bound`)을 쓴다.
+
+- **파일 이름**: 앱은 위(9-2)대로. 웹은 연결할 때 `폴더이름.flow.json`이 있으면 그것, `.flow.json`이 하나뿐이면 그것, 아니면 `폴더이름.flow.json`. 이름은 `kv.flowName`.
+- **연결할 때 (웹)**: 폴더에 그 파일이 있고 지금 대본과 다르면(쓴 판 표시는 빼고 비교) 요약을 보여 주고 묻는다. [확인] 그 파일을 열기(지금 대본은 버전 목록에 백업), [취소] 지금 대본을 쓰고 다음 저장 때 덮어쓰기. 받아 적기(`showpy_inbox.json`)는 대본을 정한 뒤에 한다.
+- **저장**: 앱은 바뀌고 0.7초 뒤 자동으로, 웹은 Ctrl+S와 Ctrl+E 때(자동 저장은 지금처럼 IndexedDB). [다른 이름]은 프로젝트 대본 파일을 바꾸지 않고 사본만 쓴다. 웹은 다시 켜면 `kv.flowName`이 지금 `fileName`과 같을 때 다시 잇는다.
+- **밖에서 바뀜**: 이 창이 마지막으로 읽거나 쓴 글의 지문(`seen`, 웹은 `kv.flowSeen`)과 파일이 다르면 다른 곳이 고친 것. 이 창이 최근에 쓴 지문 20개와 쓰는 중에 읽은 것은 빼고 본다. 쓰기 전과, 창으로 돌아올 때, 앱은 파일 바뀜 알림 때 본다. 묻기: [확인] 파일을 다시 읽기(지금 대본은 백업), [취소] 지금 대본을 쓰고 덮어쓰기. 빈 파일, 읽을 수 없는 글(쓰는 중)은 다음에 다시 본다.
+- **쓴 판** (`app`): 파일에 쓸 때 `{ by: "PyKaki 웹" | "pygaki 앱", build: "2026-11-05 1713d9f", needs }`를 붙인다. `build`는 `vite.config.ts`가 빌드 날짜와 커밋으로 넣는다. `needs`는 `max(파일의 needs, FEATURE)`라서 내려가지 않는다. `FEATURE`(지금 1)는 예전 판이 모르는 줄 종류나 값을 대본에 더할 때만 올린다. 예전 파일은 `app`이 없다(needs 0).
+- `needs`가 이 판의 `FEATURE`보다 크면 열 때 알리고, 왼쪽 "렌파이 프로젝트" 칸에 경고를 둔다. 모르는 값은 지우지 않고 그대로 저장한다.
+- `format`, `version`, `.flow.json`, IndexedDB 이름은 바꾸지 않는다.
 
 ## 9-1. 웹앱 설치 (PWA)
 
@@ -262,7 +277,9 @@
 | `src/showpyLive.ts`, `src/ShowpyView.tsx` | 데스크톱 앱의 showpy 화면 (게임과 실시간 연결) |
 | `src/sample.ts` | 예제/빈 프로젝트, 불러오기 정규화 |
 | `src/persist.ts` | IndexedDB |
-| `src/files.ts` | 파일 열기/저장/`.rpy` 내보내기 |
+| `src/files.ts` | 파일 열기/저장/`.rpy` 내보내기, 프로젝트 대본 파일과 밖에서 바뀜(9-3) |
+| `src/version.ts` | 쓴 판 표시 (`FEATURE`, `BUILD`) |
+| `src/flowPick.ts` | 앱: 대본 파일이 여러 개일 때 고르기 |
 | `src/exportRpy.ts` | `.rpy` 변환과 검사 |
 | `src/gameFolder.ts` | 렌파이 game 폴더 연결, 목록, 받아 적기 파일 읽기와 쓰기 |
 | `src/inbox.ts` | showpy가 남긴 줄을 대본에 넣기 |

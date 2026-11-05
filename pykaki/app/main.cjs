@@ -121,7 +121,7 @@ function open(project) {
     webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, sandbox: true },
   });
   const id = win.webContents.id;
-  const entry = { win, project, watcher: null, live: null, liveTimer: null };
+  const entry = { win, project, watcher: null, rootWatcher: null, live: null, liveTimer: null };
   windows.set(id, entry);
   // showpy가 남기는 받아 적기 파일과 미리보기 파일을 지켜본다
   try {
@@ -132,6 +132,14 @@ function open(project) {
   } catch {
     /* 지켜보기를 못 해도 창으로 돌아올 때 읽는다 */
   }
+  // 대본 파일(프로젝트 폴더 맨 위의 *.flow.json)을 웹 PyKaki 등 밖에서 고치면 알린다
+  try {
+    entry.rootWatcher = fs.watch(project, (_ev, name) => {
+      if (name && /\.flow\.json$/i.test(String(name)) && !win.isDestroyed()) win.webContents.send('pygaki:changed', String(name));
+    });
+  } catch {
+    /* 창으로 돌아올 때 읽는다 */
+  }
   // 끊겨 있으면 3초마다 다시 붙어 본다 (지켜보기를 놓쳐도)
   entry.liveTimer = setInterval(() => {
     if (!entry.live) liveConnect(entry);
@@ -139,6 +147,7 @@ function open(project) {
   liveConnect(entry);
   win.on('closed', () => {
     entry.watcher?.close();
+    entry.rootWatcher?.close();
     clearInterval(entry.liveTimer);
     if (entry.live) entry.live.sock.destroy();
     windows.delete(id);
