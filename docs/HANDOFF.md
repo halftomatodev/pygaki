@@ -1,15 +1,17 @@
-# 인수인계 (2026-11-04 로컬 세션 6 → 다음 대화, 세션 7부터)
+# 인수인계 (2026-11-05 로컬 세션 7 → 다음 대화, 세션 8부터)
 
 새 대화에서 pygaki를 쓰거나 고칠 때 이 문서부터 읽습니다. 맨 위 [CLAUDE.md](../CLAUDE.md)의 규칙도 같이 지킵니다.
 새 대화는 "docs/HANDOFF.md 읽고 이어서 하자"로 시작하면 됩니다. 지나온 기록, 판마다 고친 코드, 주요 결정은 [HISTORY.md](HISTORY.md)에 있습니다.
 
 ## 0. 지금 어디까지 (먼저 읽기)
 
-- **최신 판**: showpy 4.22 (`ui_kit` 3.21, `screen_fx` 4.5, `hotkeys` 1.0, `splash` 1.2) + **pygaki 앱**(예전 이름 PyKaki). 모두 `main`에 push됨(마지막 코드 커밋 `876db68`)
+- **최신 판**: showpy 4.22 (`ui_kit` 3.21, `screen_fx` 4.5, `hotkeys` 1.0, `splash` 1.2) + **pygaki 앱**(예전 이름 PyKaki). 모두 `main`에 push됨(마지막 코드 커밋 `03ffe1c`, showpy는 `876db68` 그대로)
+- **세션 7에서 한 것**: **웹에서 쓰고 앱에서 이어 쓰기**(`03ffe1c`, PyKaki만). 웹을 렌파이 프로젝트 폴더에 연결하면 대본이 그 폴더의 `.flow.json`에 저장되고 앱이 그 파일을 엶. 대본 파일에 쓴 판 표시, 밖에서 바뀐 대본 다시 읽기, 대본 파일 고르기. 명세는 `pykaki/docs/SPEC.md` 9-3. 웹 배포와 Actions "pygaki 앱" 통과, 확인용 묶음 앱도 바꿔 넣음
 - **이름**: 묶음과 데스크톱 앱은 **pygaki**, 대본 편집기(웹 버전, 앱의 [대본 편집] 화면)는 **PyKaki**라고 부름. 앱 위쪽은 [대본 편집] / [GUI 편집]
 - **사용자가 확인하는 곳**: `F:\SHOWPY\pygaki-dev-renpy-8.5.3\renpy.exe` (로컬 시험용 묶음, 4.22 템플릿·런처 버튼·새 앱 `pygaki\app\pygaki.exe`를 그 자리에서 바꿔 넣음). 런처를 껐다 켜야 새 버튼 이름이 나옴
 - **새 시험 프로젝트**: `F:\Dropbox\1_DEV\RENPY\pygaki_sample` (묶음 템플릿 그대로 + 커서·CTC 샘플 + 시험용 짧은 `script.rpy`). 사용자가 "예전 것이 얽혀 있으니 새 샘플로"라고 함. 시험은 여기서
-- **다음 대화는 이것부터 물어보기**: 5장 맨 위 4.22 줄과 4.21 줄. 그 아래 4.20~4.17도 아직 사용자 확인 전
+- **다음 대화는 이것부터 물어보기**: 5장 맨 위 "웹에서 쓰고 앱에서 이어 쓰기", 그다음 4.22 줄과 4.21 줄. 그 아래 4.20~4.17도 아직 사용자 확인 전
+- **다음 정식 판(v1.2)에 들어갈 것**: 웹에서 쓰고 앱에서 이어 쓰기 (v1.1 앱은 웹이 폴더에 저장한 대본을 열 수는 있지만 판 표시, 밖에서 바뀜, 고르기가 없음)
 - **공개용 구글 문서**: 4.22 기준으로 고침(세션 6 끝, 수정안 `F:\SHOWPY\구글문서_수정안.md`). 고치는 방법은 6장
 - **정식 판 v1.1 공개함** (2026-11-04, https://github.com/halftomatodev/pygaki/releases/tag/v1.1 = showpy 4.22 + pygaki 앱). 묶음 zip을 받아 구성과 안의 앱 켜기는 확인함. 런처 버튼 눌러 보기와 덧붙임 zip은 사람이 확인할 것(5장 맨 위)
 - **pykaki_sample에 사용자가 저장한 것**: `game/screen_fx/vhs_crt_layout.rpy`, `game/splash/splash_layout.rpy`. 지우지 말 것
@@ -47,6 +49,7 @@
 | `pykaki/app/` | 데스크톱 앱. 웹 빌드를 복사해서 켬. `main.cjs`가 게임과 실시간 연결, `smoke.cjs`가 확인 시험 | `pykaki/docs/SPEC.md` 9-2 |
 | `pykaki/src/Showpy*.tsx`, `showpyLive.ts` | 앱 [GUI 편집]. `ShowpyView`(목록, 원고 칸, 칸), `ShowpyCustomUI`(커서/대사 소리 칸, 커서와 셰이더), `ShowpyMirror`(게임 패널을 통째로 그리는 공통 틀) | |
 | `pykaki/src/inbox.ts` | showpy가 넣은 줄 받아 적기 (`insert`, `replace`, `remove`, `say_pos`, `say_fx`) | `docs/LINK.md` 3장 |
+| `pykaki/src/files.ts`, `version.ts`, `flowPick.ts` | 저장/열기, 프로젝트 대본 파일과 밖에서 바뀜, 쓴 판(`FEATURE`), 앱 대본 고르기 | `pykaki/docs/SPEC.md` 9-3 |
 | `showpy/game/` | 플러그인 4개: `ui_kit`, `screen_fx`, `hotkeys`, `splash` | `showpy/docs/DEV_RULES.md`, `showpy/docs/SPEC.md`, `showpy/docs/READ_ME_FIRST.md` |
 | `showpy/game/ui_kit/editor/editor_live.rpy` | 앱과 실시간 연결(상태, 명령, 패널 통째로, "편집 중" 띠, `goto_line`) | `docs/LINK.md` 9장 |
 | `showpy/game/ui_kit/engine/script_edit.rpy` | 원고 쓰기 도구 (줄 괄호, 줄 넣기, PyKaki 원고 규칙 `_pk_prepare`) | |
@@ -61,7 +64,8 @@
 ## 2. 쓰는 법 (사용자 입장, 4.22)
 
 - **묶음**: `renpy.exe` → 런처 아래쪽 [pygaki로 새 프로젝트](showpy와 커서·CTC 샘플이 든 1280x720 한국어 프로젝트, VHS 덮개는 처음에 꺼짐), [pygaki로 편집](고른 프로젝트를 앱으로, 대본은 `프로젝트이름.flow.json`에 자동 저장)
-- **웹 버전**: 크롬이나 엣지로 웹 주소 → [렌파이 프로젝트 연결] → Ctrl+E로 내보내기
+- **웹 버전**: 크롬이나 엣지로 웹 주소 → [렌파이 프로젝트 연결] → Ctrl+E로 내보내기. 프로젝트 폴더(game 위)를 골랐으면 Ctrl+S, Ctrl+E 때 대본이 그 폴더의 `프로젝트이름.flow.json`에도 저장됨
+- **웹에서 쓰고 앱에서 이어 쓰기** (세션 7): 웹에서 연결하고 Ctrl+S → 런처 [pygaki로 편집]이면 그 대본이 열림. 앱이 켜진 채 웹에서 저장하면 앱이 "다른 곳에서 바뀌었어요"([확인] 다시 읽기, [취소] 앱 것으로 덮어쓰기). 웹도 창으로 돌아올 때 앱에서 고친 것을 알아챔. 대본 파일이 여러 개면 앱이 처음에 고르게 함(왼쪽 칸 [다른 대본 파일]). [열기]로 가져오기 전에 두 대본 비교. 더 새 판에서 쓴 대본이면 왼쪽 칸에 경고
 - **showpy 편집기**: 게임 실행 중 Shift+M (앱 없이 쓸 때. 남겨 두기로 함)
 - **앱 [GUI 편집]**: 런처 [Launch Project]로 게임을 켜 두면 저절로 붙고 초록 점. 게임 창과 나란히
   - 왼쪽 목록: 스플래시, 타이틀 메뉴(└ 타이틀 셰이더), 게임 내 메뉴(└ 게임 내 메뉴 셰이더), 타이틀 일렁임, 인게임 화면 셰이더, 커서·CTC·대사 소리, 대사(위치, 스타일), 선택지, 그림 배치
@@ -103,6 +107,7 @@ cd /f/SHOWPY/renpy-8.5.3-sdk && ./lib/py3-windows-x86_64/python.exe renpy.py <�
   - 시험 프로젝트에만 있는 것을 살림: 사용자가 저장한 `*_layout.rpy`(0장), fx_test_25의 `ui_kit/stage_config.rpy`, `pygaki_sample`의 `screen_fx.overlay = False`
   - 버전을 올리면 `showpy/CHANGELOG.md`, `showpy/docs/READ_ME_FIRST.md`, `SPEC.md`, `CUSTOM_GUIDE.md` 머리, 플러그인 `README.md`, `ui_kit/engine/ui_kit.rpy`·`screen_fx/engine/screen_fx.rpy`의 `VERSION`
 - **앱 [GUI 편집] 칸**: 새 편집기 탭은 게임 쪽 탭(`ui_editor.Tab`)만 만들면 공통 틀로 앱에 저절로 나옴. `ShowpyView.tsx`의 `SECTIONS`에 `tab`, `mirror: true`만 더함
+- **대본(`.flow.json`)에 예전 판이 모르는 줄 종류나 값을 더하면**: `pykaki/src/version.ts`의 `FEATURE`를 1 올림(옛 앱이 "더 새 판" 경고를 띄움). 형식 이름, `version`, 파일 이름, IndexedDB 이름은 그대로
 - **원고에 새 종류의 줄을 넣으면**: PyKaki 원고에서는 `script_edit._pk_prepare`가 허용한 것만 써짐. 길을 더하고 PyKaki `inbox.ts`도 맞춤
 - **형식을 바꾸면** `docs/LINK.md`와 양쪽 코드를 같은 커밋에서
 - **문서**: `pykaki/docs/GUIDE.md`, `showpy/docs/*`, 공개용 구글 문서(6장)
@@ -115,7 +120,7 @@ cd /f/SHOWPY/renpy-8.5.3-sdk && ./lib/py3-windows-x86_64/python.exe renpy.py <�
 | 고친 것 | 맞출 것 |
 |---|---|
 | showpy 플러그인 | 묶음 템플릿 `showpy\game`에 복사 → `screen_fx.overlay = False` 다시 → 템플릿 Lint → `.rpyc`, `cache`, `saves` 지우기. 샘플 그림은 `showpy\game\gui` |
-| 앱 (웹 화면, 앱) | `npm run build` → 앱 빌드 → 묶음의 `pygaki\app` 폴더를 통째로 바꿔 넣기 (켜져 있는 pygaki.exe를 먼저 끔) |
+| 앱 (웹 화면, 앱) | `npm run build` → 앱 빌드 → 묶음의 `pygaki\app` 폴더를 통째로 바꿔 넣기 (켜져 있는 pygaki.exe를 먼저 끔). 세션 7에 바꿔 넣음(`03ffe1c`), 예전 것은 `pygaki\app_old`(괜찮으면 지움) |
 | 런처 버튼 | `bundle/launcher/pygaki_launcher.rpy`를 묶음 `launcher\game`에 복사, `.rpyc` 지움, 런처 껐다 켜기 |
 | 읽어주세요 | `make_bundle.py`의 `README`로 `pygaki\읽어주세요.txt` 다시 쓰기 |
 | 전부 | 묶음 다시 만들기(5~10분, 있던 `F:\SHOWPY\pygaki-dev-*`를 먼저 지움. **런처가 켜져 있으면 못 함**) |
@@ -137,6 +142,8 @@ python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app 'F:\SHOWPY\
 - **시험 훅** `zz_shot.rpy`(시험 프로젝트에 임시로): `config.always_shown_screens`의 스크린이 0.2초마다 `game/zz_req`를 보면 그 파이썬을 실행하고 결과(`_zz_r`)를 `game/zz_out`에. 화면 찍기는 `renpy.screenshot(경로)`. Dropbox가 파일을 잡고 있으면 읽기/지우기가 실패하니 try로 감쌈. 끝나면 `zz_*` 지움
 - **실시간 연결 시험 클라이언트**(파이썬): `game/showpy_live.json`의 포트로 붙어 `{"hello": token}`, 한 줄 JSON 명령(`editor`, `panel`, `goto`, `panel.do`, `custom_ui.cursor`, `save` …), `state`를 받음. `state.panel.body`에서 `k: "b"` 버튼의 `id`, `t`를 찾아 `panel.do`(누르기 전에 나무를 다시 읽음). 스플래시를 건너뛰려면 `goto` `where: "line"`(warp). 출력은 `PYTHONIOENCODING=utf-8`. **앱이 켜져 있으면 시험 연결을 끊으니 앱을 먼저 끔**
 - **진짜 앱 화면**: 스크립트를 `pykaki/app` 안에 두고 `require('playwright')`의 `_electron.launch({ args: ['--no-sandbox', __dirname, '--project', 프로젝트] })`(밖에 두면 창이 안 뜸). 툴바 버튼은 `/^GUI 편집/`. 게임을 먼저 켜 둠. 타이틀에서는 "대사" 칸을 골라야 [게임 시작]
+- **웹 폴더 연결 흉내** (세션 7): 내장 브라우저로 `npm run dev`를 열고, 페이지 JS로 OPFS(`navigator.storage.getDirectory()`)에 `proj/game/gui.rpy`를 만든 뒤 `window.showDirectoryPicker = async () => proj`, `window.confirm`을 바꿔치기하고 [렌파이 프로젝트 연결]을 누름. 끝나면 OPFS와 IndexedDB `kv`의 `gameDir`, `projectDir`, `flowName`, `flowSeen`을 지움. 소스를 고치면 HMR로 페이지가 다시 켜져서 바꿔치기가 풀림
+- **묶음 안 앱 켜 보기**: 로컬에서 빌드한 `pygaki.exe`에는 Playwright `executablePath`가 붙지 않음("Process failed to launch", 세션 7). 임시 프로젝트로 exe를 직접 켜고 생긴 `.flow.json`의 `app.build`를 봄. 끝나면 그 명령줄의 pygaki.exe만 끔
 - **PyKaki 원고 한 바퀴**: `pykaki_sample`을 임시 폴더에 복사하고 원고와 대본을 `showpy/examples/pykaki_sample`의 것으로 바꿈(`game/script_flow.rpy`, `<폴더이름>.flow.json`) → 게임에서 적용·저장 → `showpy_inbox.json` 확인 → 앱을 켜서 받아 적기 → Ctrl+E로 내보낸 원고 비교
 - computer-use로는 게임 창 입력이 안 먹음(마우스 끌기, 회전 손잡이는 자동 시험 못 함)
 
@@ -146,13 +153,14 @@ python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app 'F:\SHOWPY\
 - 2026-11-04 세션 1~3: 4.13 확인, 묶음 템플릿 고침, GitHub Pages, 예전 저장소 보관, 구글 문서 4.13, Releases v1.0. 4.14 게임 메뉴 화면, 4.15 앱 연결
 - 세션 4: 4.16 커서 칸, 4.17 게임 패널을 통째로 앱에, 4.18 스플래시 탭, 4.19 "편집 중" 띠
 - 세션 5: 4.20 셰이더 두 자리, 타이틀/메뉴 셰이더, 타이틀·메뉴 꾸미기, 회전 손잡이
+- 세션 7 (2026-11-05): 웹에서 쓰고 앱에서 이어 쓰기, 쓴 판 표시, 밖에서 바뀐 대본, 대본 파일 고르기(`03ffe1c`). 확인용 묶음 앱 바꿔 넣음
 - 세션 6: 4.21 세부 속성을 1번/2번 아래로, 줄로 게임 옮기기(`fe5e067`). 4.22 이름 pygaki, 원고 칸 스크롤, 셰이더가 바뀌는 줄과 줄마다 전환, 두 자리 같이, 커서와 셰이더, 대사 탭 정리, **PyKaki 원고에 셰이더 줄이 저장되지 않던 것 고침**, 커서·CTC 샘플, 새 시험 프로젝트(`876db68`). 공개용 구글 문서를 4.22 기준으로
 
 ## 5. 남은 확인 (사람이 눈으로 볼 것)
 
 사용자는 `pygaki-dev` 묶음의 런처에서 프로젝트를 [Launch Project]로 켜고 [pygaki로 편집] → [GUI 편집]으로 확인합니다.
 
-- [ ] **웹에서 쓰고 앱에서 이어 쓰기** (2026-11-05, 커밋 전): 웹 PyKaki [렌파이 프로젝트 연결]로 `pygaki_sample` 폴더 → Ctrl+S → 폴더에 `pygaki_sample.flow.json` → 런처 [pygaki로 편집]에서 열림. 앱이 켜진 채 웹에서 저장하면 "다른 곳에서 바뀌었어요". 대본 파일이 두 개면 고르는 창. 진짜 폴더 선택창과 크롬 권한은 사람이 볼 것 (SPEC 9-3)
+- [ ] **웹에서 쓰고 앱에서 이어 쓰기** (세션 7, `03ffe1c`): 웹 PyKaki [렌파이 프로젝트 연결]로 `pygaki_sample` 폴더 → Ctrl+S → 폴더에 `pygaki_sample.flow.json` → 런처 [pygaki로 편집]에서 열림. 앱이 켜진 채 웹에서 저장하면 "다른 곳에서 바뀌었어요". 대본 파일이 두 개면 고르는 창. 진짜 폴더 선택창과 크롬 권한은 사람이 볼 것 (SPEC 9-3)
 - [ ] **v1.1 배포 파일**: Releases의 묶음 zip을 탐색기로 풀고 런처 [pygaki로 새 프로젝트] → [pygaki로 편집], 덧붙임 zip을 렌파이 SDK에 넣어 보기
 - [ ] **4.22**: 런처 [pygaki로 편집] [pygaki로 새 프로젝트](런처 껐다 켜기), 앱 제목 pygaki와 [대본 편집] [GUI 편집], 예전 PyKaki의 최근 파일·설정이 그대로인지, 원고 칸 스크롤과 [지금 줄로], 셰이더가 바뀌는 줄의 전환 고르기와 [두 자리로 바꾸기] → 저장, 커서 칸 "커서와 셰이더"(소프트웨어 커서를 켜고 셰이더가 있는 장면에서 세 가지 차이), 커서·CTC 샘플 그림과 바둑판 칸, 대사 탭 안내 줄, **PyKaki 원고에서 [여기에서부터 적용] → 저장 → 대본에 받아 적힘**
 - [ ] **4.21**: 셰이더 칸 1번/2번 아래 세부 속성, 막대가 바로 화면에, 줄을 누르면 게임이 그 줄로(되감기/warp), warp 뒤 편집기 다시 열림, 타이틀 셰이더 칸 세부 속성, 세부 속성 바꾸고 [저장] → `ascii_layout.rpy` 같은 파일 (저장은 시험에서 안 해 봄)
@@ -172,6 +180,8 @@ python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app 'F:\SHOWPY\
 - **다음 정식 판(v1.2 등)**: v1.1처럼. `git tag v1.2 && git push origin v1.2` → Actions "배포 파일"이 Releases 초안(앱 `pygaki-win`, 묶음 안 `pygaki\app\pygaki.exe`) → `gh release download`로 묶음 zip을 받아 구성 확인, 묶음 안 `pygaki.exe`를 Playwright `executablePath`로 켜 보기 → 안내 글에 "바뀐 점" 더하기(`gh release edit --notes-file`) → 사용자에게 물은 뒤 `gh release edit v1.2 --draft=false --latest`. 앱은 서명이 없어 윈도우가 처음에 경고함
 - v1.1에서 남은 것: Actions가 만든 템플릿의 `script.rpy`가 렌파이 영어 기본 대본(`scene bg room`, `show eileen happy`, Lint 경고 2줄, 게임은 빈 자리 그림으로 돎, v1.0도 같음). 로컬에서 만든 묶음은 한국어 대본. 고치려면 `make_bundle.py`가 템플릿 `script.rpy`를 직접 써 넣게
 - 다듬을 것(사용자가 말하면): 셰이더가 바뀌는 줄의 두 자리는 파일을 위에서부터 읽은 대강의 값(분기, jump, 다른 파일은 안 봄). warp는 그 사이 변수(선택지 결과 등)를 따라 하지 않음(셰이더, 커서는 맞춤). 앱 미러에서 세모 없는 줄의 왼쪽 칸이 비어 조금 어긋남, 세부 속성 들여쓰기가 안 보임. 게임보이처럼 층마다 씌우는 효과는 VHS보다 먼저 그려짐
+- **대본 파일이 망가졌을 때 화면이 멈춤**: 상자의 다음 흐름이 없는 상자를 가리키면 `exportRpy.ts`의 `ref`(75줄 근처)가 오류를 내고 화면이 하얗게 됨(세션 7 시험에서 상자를 잘라 낸 대본으로 봄). `normalizeProject`에서 없는 상자를 가리키는 흐름을 정리하거나 `ref`가 견디게. 손으로 고친 파일이나 더 새 판 파일에서 날 수 있음
+- 웹에서 쓰고 앱에서 이어 쓰기 다듬기(사용자가 말하면): 웹 자동 저장은 지금처럼 IndexedDB이고 폴더 파일은 Ctrl+S/Ctrl+E 때만. 웹에서 대본 파일이 여러 개면 묻지 않고 하나를 고름(`폴더이름.flow.json` → 하나뿐인 것). `needs`는 쓴 판 번호라 새 기능을 안 써도 경고가 뜰 수 있음
 - 스플래시 글 내용(제목, 본문, 조작 방법) 고치기, 페이지 더하기/지우기 (번역 문자열이라 저장 방식을 먼저 정해야 함)
 - 앱 창을 게임 창 옆에 저절로 붙이기
 - Actions 경고: Node.js 20 액션(`checkout@v4` 등)이 곧 막힘. 새 판으로
@@ -201,9 +211,12 @@ python bundle/make_bundle.py --sdk 'F:\SHOWPY\renpy-8.5.3-sdk' --app 'F:\SHOWPY\
 
 **앱, 도구**
 
+- **프로젝트 대본 파일** (SPEC 9-3): 웹은 손잡이를 얻을 때 빈 파일이 생김 → 빈 글은 없는 파일로 봄. 이 창이 쓴 글의 지문으로 "밖에서 바뀜"을 가름(앱 자동 저장이 빨라 쓰는 도중에 읽어도 묻지 않게 최근 20개를 둠). 앱의 지문은 IndexedDB에 두지 않음(앱 창들이 저장소를 같이 씀). 웹 권한은 프로젝트 폴더에 받으면 game까지 됨
+- 앱 대본 고르기 기억은 앱 `localStorage['pygaki-flow:<경로>']`
 - 앱 설정·자동 저장은 `%APPDATA%\PyKaki`(이름을 pygaki로 바꿔도 `main.cjs`의 `app.setPath('userData', …)`로 그대로). appId도 그대로
 - 앱(`main.cjs`)은 게임에서 마지막으로 받은 `state`, `files`를 기억했다가 넘겨줌. 붙는 앱은 하나뿐(시험 클라이언트와 앱이 서로 끊음)
 - 앱은 Electron 33. 로컬 `npm run dist`는 `winCodeSign` 권한 오류 → `npx electron-builder --win dir -c.win.signAndEditExecutable=false`. 공식 빌드는 Actions("pygaki 앱"은 `pykaki/**`나 `text_effects.glsl`이 바뀌면 돎)
-- 긴 셸 명령(여러 줄 파이썬 heredoc)은 가끔 잘리거나 `\` 이스케이프가 꼬임 → 스크립트를 파일로 써서 돌림(경로는 raw 문자열)
+- 긴 셸 명령(여러 줄 파이썬 heredoc)은 가끔 잘리거나 `\` 이스케이프가 꼬임 → 스크립트를 파일로 써서 돌림(경로는 raw 문자열). 세션 7에도 heredoc 안의 `\\n`이 진짜 줄바꿈으로 들어감. 고칠 글이 길면 Write로 파이썬 파일을 만들어 돌림
+- 저장소 파일은 git이 LF로 두고 작업 폴더는 CRLF가 섞여 있음. 파이썬으로 고칠 때 텍스트로 읽고 `newline=''`로 LF로 쓰면 diff가 깨끗함
 - Dropbox 안 폴더는 지울 때 일부만 지워질 수 있음
 - 구글 문서를 크롬 확장으로 고칠 때: 단축키 창이 열린 것을 화면으로 확인한 뒤 침. 한글이 가끔 깨지고 따옴표가 둥근 따옴표로 바뀜. 끝나면 export로 받아 비교. 제목 스타일은 툴바의 스타일 목록으로. 내장 브라우저는 구글에 로그인 안 됨
