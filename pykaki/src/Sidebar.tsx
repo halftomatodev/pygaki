@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { disconnectFolder, hasDirPicker, pullInbox, scanFolder, useGameFolder } from './gameFolder';
-import { desktop, isDesktop } from './desktop';
-import { linkProject } from './files';
+import { hasDirPicker, hasProjectFolder, pullInbox, scanFolder, useGameFolder } from './gameFolder';
+import { desktop, isDesktop, projectInfo } from './desktop';
+import { disconnectProject, linkProject, newerThanMe, projectFileName } from './files';
+import { forgetFlow } from './flowPick';
 import { useStore } from './store';
 import * as ops from './ops';
 import type { Character, LabelGroup } from './types';
@@ -77,10 +78,38 @@ export function Sidebar() {
 function LinkPanel() {
   const f = useGameFolder();
   const hasStart = useStore((v) => v.project.labels.some((l) => l.name === 'start'));
+  const fileName = useStore((v) => v.fileName); // 대본 파일이 바뀌면 다시 그린다
+  const app = useStore((v) => v.project.app);
+  const flowFile = fileName && projectFileName();
+  const newer = app && newerThanMe(useStore.getState().project) && (
+    <p className="tip warn-text">
+      이 대본은 더 새 판({app.by} {app.build})에서 저장했어요. {isDesktop ? '앱을 새 판으로 바꾸세요.' : '페이지를 새로 고쳐 새 판으로 여세요.'} 이 판으로 내보내면 일부 줄이 빠질 수 있어요.
+    </p>
+  );
+  const [info, setInfo] = useState<{ project: string; flows: string[] } | null>(null);
+  useEffect(() => void (isDesktop && projectInfo().then(setInfo)), []);
   if (isDesktop)
     return (
       <div className="link-panel">
         <p className="tip">렌파이 프로젝트: {f.name}</p>
+        <p className="tip">
+          대본 파일: {flowFile}
+          {info && info.flows.length > 1 && (
+            <>
+              {' '}
+              <button
+                onClick={() => {
+                  if (useStore.getState().dirty && !confirm('아직 파일에 저장하지 않은 변경이 있어요. 그래도 다른 대본 파일을 고를까요?')) return;
+                  forgetFlow(info.project);
+                  location.reload();
+                }}
+              >
+                다른 대본 파일
+              </button>
+            </>
+          )}
+        </p>
+        {newer}
         <div className="row">
           <button onClick={() => void pullInbox(true).then(() => scanFolder())}>다시 읽기</button>
           <button onClick={() => void desktop!.openFolder('')}>폴더 열기</button>
@@ -98,8 +127,11 @@ function LinkPanel() {
       <div className="row">
         <button className={f.name ? '' : 'primary'} onClick={() => void linkProject()}>{f.name ? '폴더 바꾸기' : '렌파이 프로젝트 연결'}</button>
         {f.name && <button onClick={() => void pullInbox(true).then(() => scanFolder())}>다시 읽기</button>}
-        {f.name && <button onClick={() => void disconnectFolder()}>끊기</button>}
+        {f.name && <button onClick={() => void disconnectProject()}>끊기</button>}
       </div>
+      {f.name && flowFile && <p className="tip">대본 파일: {flowFile} (프로젝트 폴더). Ctrl+S, Ctrl+E 때 저장돼요. 런처의 [pygaki로 편집]으로 앱에서 이 대본을 이어 쓸 수 있어요.</p>}
+      {f.name && !hasProjectFolder() && <p className="tip">game 폴더를 바로 골라서 대본 파일은 프로젝트 폴더에 저장하지 않아요. 앱에서 이어 쓰려면 [폴더 바꾸기]로 game 위의 프로젝트 폴더를 고르세요.</p>}
+      {newer}
       {f.name && <p className="tip">그림과 영상 {f.media.images.length}개, 소리 {f.media.audio.length}개를 찾았어요.</p>}
       {f.name && !f.hasShowpy && f.media.images.length + f.media.audio.length + f.media.fonts.length > 0 && (
         <p className="tip">

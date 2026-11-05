@@ -478,6 +478,8 @@ pre.rpy { background: #17191f; color: #d4d6dd; padding: 12px; border-radius: 8px
 .modal-bg { position: fixed; inset: 0; background: color-mix(in srgb, var(--bg) 55%, transparent); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; z-index: 100; }
 .modal { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; width: min(560px, 92vw); max-height: 84vh; overflow: auto; padding: 18px 20px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12); }
 .modal h3 { margin: 0 0 4px; font-size: 15px; }
+.flow-pick button { display: block; width: 100%; text-align: left; margin-top: 8px; padding: 8px 10px; }
+.flow-pick small { opacity: 0.75; }
 .ver { display: flex; gap: 8px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--line); }
 .ver .when { color: var(--muted); font-size: 12px; white-space: nowrap; }
 .ver .memo { flex: 1; font-weight: 600; }

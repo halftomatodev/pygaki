@@ -7,18 +7,20 @@ import { AUTO_MEMO, kvGet, kvSet, snapAuto } from './persist';
 import { folderReady, INBOX_FILE, pullInbox, restoreFolder, useGameFolder } from './gameFolder';
 import { createEmpty, createSample, normalizeProject } from './sample';
 import { desktop, flowFile, isDesktop, projectInfo } from './desktop';
-import { saveQuiet, setProjectFile } from './files';
+import { checkExternal, restoreProjectFile, saveQuiet, setProjectFile, warnNewer } from './files';
+import { chooseFlow } from './flowPick';
 
-// 데스크톱 앱: 프로젝트 폴더 맨 위의 .flow.json을 연다. 없으면 프로젝트 이름으로 새 대본을 만들어 바로 저장한다
+// 데스크톱 앱: 프로젝트 폴더 맨 위의 .flow.json을 연다(여러 개면 고름). 없으면 프로젝트 이름으로 새 대본을 만들어 바로 저장한다
 async function bootDesktop() {
   const inf = await projectInfo();
-  const name = inf.flows[0] ?? `${inf.name}.flow.json`;
+  const name = await chooseFlow(inf);
   const file = flowFile(name);
-  setProjectFile(file);
   let project;
   let fresh = false;
+  let text: string | null = null;
   try {
-    project = normalizeProject(JSON.parse(await (await file.getFile()).text()));
+    text = await (await file.getFile()).text();
+    project = normalizeProject(JSON.parse(text));
   } catch (e: any) {
     if (inf.flows[0]) {
       alert(`대본 파일 ${name}을 읽지 못했어요: ${e.message}\n파일을 고치거나 지우고 다시 열어 주세요.`);
@@ -27,8 +29,11 @@ async function bootDesktop() {
     project = createEmpty();
     project.project.title = inf.name;
     fresh = true;
+    text = null;
   }
+  setProjectFile(file, text);
   useStore.getState().load(project, { fileName: name, dirty: fresh });
+  warnNewer(project);
   document.title = `pygaki - ${inf.name}`;
 
   // 자동 저장: 바뀌고 0.7초 뒤 그 파일에
@@ -68,6 +73,15 @@ async function bootDesktop() {
   window.addEventListener('focus', pull);
   pull();
 
+  // 대본 파일이 밖(웹 PyKaki, 다른 창)에서 바뀌면 다시 읽을지 묻는다
+  let extTimer: ReturnType<typeof setTimeout> | undefined;
+  const ext = () => {
+    clearTimeout(extTimer);
+    extTimer = setTimeout(() => void checkExternal().catch((e) => console.warn('대본 파일 확인 실패', e)), 300);
+  };
+  desktop!.onChange((rel) => rel === name && ext());
+  window.addEventListener('focus', ext);
+
   createRoot(document.getElementById('root')!).render(<App />);
 }
 
@@ -88,6 +102,7 @@ async function boot() {
     project = createSample();
   }
   useStore.getState().load(project, { fileName: meta?.fileName ?? null, dirty: meta?.dirty ?? false });
+  warnNewer(project);
 
   // 자동 저장: 바뀌고 0.7초 뒤 IndexedDB에
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -117,8 +132,14 @@ async function boot() {
 
   // 렌파이에서 돌아오면 showpy가 넣은 줄을 바로 대본에 보여 준다
   await restoreFolder();
+  // 연결한 프로젝트 폴더의 대본 파일: 앱에서 고쳤으면 다시 읽을지 묻는다 (폴더 권한이 남아 있을 때)
+  await restoreProjectFile().catch((e) => console.warn('대본 파일 확인 실패', e));
   const pull = () => void (folderReady() && pullInbox().catch((e) => console.warn('받아 적기 실패', e)));
-  window.addEventListener('focus', pull);
+  const ext = () => void checkExternal().catch((e) => console.warn('대본 파일 확인 실패', e));
+  window.addEventListener('focus', () => {
+    ext();
+    pull();
+  });
   pull();
 
   window.addEventListener('beforeunload', (e) => {

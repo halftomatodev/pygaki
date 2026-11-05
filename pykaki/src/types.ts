@@ -99,6 +99,8 @@ export interface Settings {
 export interface Project {
   format: 'renpy-flow';
   version: 1;
+  // 쓴 판 (저장할 때 붙임, 없으면 예전 파일). needs: 이 대본을 읽는 데 필요한 기능 판 (src/version.ts FEATURE)
+  app?: { by: string; build: string; needs: number };
   project: { title: string; startNode: string | null };
   characters: Character[];
   variables: unknown[];

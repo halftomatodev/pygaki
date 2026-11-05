@@ -66,6 +66,8 @@ export const useGameFolder = create<F>((set) => ({
 }));
 
 let dir: any = null;
+// 웹: 프로젝트 폴더(game 폴더 위)를 골랐을 때 그 손잡이. 대본 파일(.flow.json)을 여기에 둔다. game 폴더를 바로 골랐으면 null
+let proj: any = null;
 let pictures = new Map<string, { path: string; video: boolean }>(); // 렌파이 그림 이름 → game 폴더 기준 경로
 const urls = new Map<string, string>(); // 경로 → 읽어 둔 주소
 
@@ -237,24 +239,28 @@ export async function scanFolder() {
   setTimeout(() => oldUrls.forEach((u) => URL.revokeObjectURL(u)), 5000);
 }
 
+// 권한은 프로젝트 폴더에 받으면 안의 game 폴더까지 같이 된다
 const allowed = async (ask: boolean) => {
-  if (!dir) return false;
+  const root = proj ?? dir;
+  if (!root) return false;
   const o = { mode: 'readwrite' };
-  if ((await dir.queryPermission(o)) === 'granted') return true;
-  return ask ? (await dir.requestPermission(o)) === 'granted' : false;
+  if ((await root.queryPermission(o)) === 'granted') return true;
+  return ask ? (await root.requestPermission(o)) === 'granted' : false;
 };
 
 // 고른 폴더가 프로젝트 폴더면 그 안의 game을 쓴다
-export async function connectFolder() {
+export async function connectFolder(pull = true) {
   try {
     const picked = await w.showDirectoryPicker({ id: 'pykaki-game', mode: 'readwrite' });
     const inner = await sub(picked, 'game');
     dir = inner ?? picked;
+    proj = inner ? picked : null;
     await kvSet('gameDir', dir);
+    await kvSet('projectDir', proj);
     await scanFolder();
     await kvSet('gameName', inner ? picked.name : dir.name);
     useGameFolder.getState().set({ name: inner ? picked.name : dir.name });
-    await pullInbox();
+    if (pull) await pullInbox();
     useStore.getState().say(`렌파이 폴더 "${useGameFolder.getState().name}"를 연결했어요`);
     return true;
   } catch (e: any) {
@@ -265,7 +271,9 @@ export async function connectFolder() {
 
 export async function disconnectFolder() {
   dir = null;
+  proj = null;
   await kvSet('gameDir', null);
+  await kvSet('projectDir', null);
   pictures = new Map();
   useGameFolder.getState().set({ name: null, media: NO_MEDIA, look: DEFAULT_LOOK, startClash: null, hasShowpy: false });
 }
@@ -284,6 +292,7 @@ export async function restoreFolder() {
   if (!hasDirPicker) return;
   try {
     dir = (await kvGet('gameDir')) ?? null;
+    proj = (await kvGet('projectDir')) ?? null;
     if (!dir) return;
     const name = (await kvGet('gameName')) ?? dir.name;
     useGameFolder.getState().set({ name });
@@ -291,10 +300,21 @@ export async function restoreFolder() {
     useGameFolder.getState().set({ name });
   } catch {
     dir = null;
+    proj = null;
   }
 }
 
 export const folderReady = () => !!dir;
+
+// 웹: 연결한 프로젝트 폴더의 대본 파일 (SPEC 9-3). 권한은 부르는 쪽이 먼저 얻는다
+export const hasProjectFolder = () => !isDesktop && !!proj;
+export async function projectFlows(): Promise<string[]> {
+  if (!proj) return [];
+  const out: string[] = [];
+  for await (const [name, h] of proj.entries()) if (h.kind === 'file' && /\.flow\.json$/i.test(name)) out.push(name);
+  return out.sort();
+}
+export const projectFlowHandle = (name: string) => proj.getFileHandle(name, { create: true });
 
 // 받아 적기. 받은 것이 있으면 저장본을 먼저 남기고, 다 적은 기록은 파일에서 지운다
 export async function pullInbox(ask = false) {

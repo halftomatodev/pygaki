@@ -1,8 +1,19 @@
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { execSync } from 'node:child_process';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { viteSingleFile } from 'vite-plugin-singlefile';
+
+// 대본 파일의 "쓴 판" 표시에 넣을 빌드 날짜와 커밋
+const commit = (() => {
+  try {
+    return execSync('git rev-parse --short HEAD').toString().trim();
+  } catch {
+    return '';
+  }
+})();
+const build = new Date().toISOString().slice(0, 10) + (commit ? ' ' + commit : '');
 
 // 빌드 결과를 dist/index.html 한 파일로 묶는다 (더블클릭 실행, GitHub Pages 배포 둘 다 가능)
 export default defineConfig({
@@ -10,6 +21,7 @@ export default defineConfig({
   // Dropbox 폴더 안에 캐시를 두면 동기화가 파일을 잠가서 개발 서버가 멈춘다
   cacheDir: join(tmpdir(), 'pykaki-vite'),
   plugins: [react(), viteSingleFile()],
+  define: { __BUILD__: JSON.stringify(build) },
   // 등장 효과 셰이더를 옆의 showpy 폴더에서 가져온다 (../showpy/game/ui_kit/engine/text_effects.glsl)
   server: { fs: { allow: ['..'] } },
 });
