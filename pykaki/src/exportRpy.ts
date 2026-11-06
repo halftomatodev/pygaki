@@ -3,6 +3,7 @@ import type { BoxNode, LabelGroup, Line, Project, Settings } from './types';
 import { exitLinks, fallTarget } from './ops';
 import { IDENT, PLUGIN_NAMES, RESERVED } from './util';
 import { RENPY_EFFECTS, badImageName, fxArgs, isStage, sayArgs, stageCode } from './stage';
+import { checkTags } from './tagEdit';
 
 export interface Warn { level: 'error' | 'warn'; msg: string; nodeId?: string }
 
@@ -141,6 +142,8 @@ export function generateRpy(p: Project): { code: string; warnings: Warn[] } {
       const body: string[] = [];
       const pct = (t: string, where: string) => {
         if (!S.escapePercent && loosePercent(t)) W.push({ level: 'error', msg: `${where}의 %에서 렌파이가 멈춰요. 설정에서 "% 를 글자 그대로"를 켜 주세요 (${b.title || b.id})`, nodeId: b.id });
+        // 텍스트 태그 짝 (렌파이 check_text_tags와 같은 규칙)
+        if (S.allowTextTags) for (const w of checkTags(t)) W.push({ level: w.level, msg: `${where}: ${w.msg} (${b.title || b.id})`, nodeId: b.id });
       };
       const lineOut = (l: Line) => {
         if (S.renpyLink) body.push(`# @l:${l.id}`); // showpy가 줄을 찾는 표시

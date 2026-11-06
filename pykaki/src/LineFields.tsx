@@ -6,6 +6,7 @@ import type { ImageKind, Line, LineFx, SayStyle } from './types';
 import { EFFECTS, FX_BASE, FX_CURSOR, FX_OVERLAY, FX_TRANS, FX_WARP, POSITIONS, STAGE_LABEL, STAGE_TYPES, TRANSITIONS, fxArgs, lineCps, stageCode } from './stage';
 import { useGameFolder, writePreview, type PreviewResult } from './gameFolder';
 import { LinePreview } from './PlayStage';
+import { TagBar, useTagTarget } from './TagBar';
 
 type SetLine = (fn: (x: Line) => void, key?: string) => void;
 
@@ -175,6 +176,7 @@ const readLive = () => {
 export function LineLook({ l, set }: { l: Line; set: SetLine }) {
   const fx = fxArgs(l.fx);
   const tagsOn = useStore((s) => s.project.settings.allowTextTags);
+  const tagHere = useTagTarget((s) => s.id === 'ed-' + l.id);
   const folder = useGameFolder((f) => f.name);
   const [live, setLive] = useState(readLive);
   const [sent, setSent] = useState<PreviewResult>('ok'); // 마지막으로 미리보기 파일에 쓴 결과
@@ -211,6 +213,7 @@ export function LineLook({ l, set }: { l: Line; set: SetLine }) {
   return (
     <div className="look">
       <div className="look-title">글자 모양, 속도, 등장 효과</div>
+      {tagHere && <TagBar targetId={'ed-' + l.id} className="tagbar-look" />}
       <LinePreview line={l} tagsOn={tagsOn} />
       {l.say?.effect && <EffectClip effect={l.say.effect} />}
       {folder && (

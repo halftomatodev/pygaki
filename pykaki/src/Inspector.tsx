@@ -172,7 +172,7 @@ function LineRow({ l, i, upd, drag }: { l: Line; i: number; upd: Upd; drag: Retu
         {isStage(l.type) ? (
           <StageFields l={l} set={set} />
         ) : (
-          <textarea id={'ed-' + l.id} ref={ref} rows={1} value={l.text} placeholder={placeholder} onFocus={() => useStore.setState({ activeLine: l.id })} onKeyDown={onKey} onChange={(e) => upd((x) => void (x.lines[i].text = e.target.value), 'text' + l.id)} />
+          <textarea id={'ed-' + l.id} ref={ref} rows={1} value={l.text} placeholder={placeholder} data-tags={l.type === 'say' || l.type === 'narration' ? '1' : undefined} onFocus={() => useStore.setState({ activeLine: l.id })} onKeyDown={onKey} onChange={(e) => upd((x) => void (x.lines[i].text = e.target.value), 'text' + l.id)} />
         )}
       </div>
     </div>

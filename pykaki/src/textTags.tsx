@@ -1,5 +1,6 @@
 // 렌파이 텍스트 태그 일부를 흉내 내서 보여 준다: {b} {i} {u} {s} {color=} {size=} {p} {w} {nw} {fast} {a=}
 import type { CSSProperties, ReactNode } from 'react';
+import { tokenize } from './tagEdit';
 
 // 플레이 화면용: 글자 하나씩으로 나눈다. 언제 멈출지(stops)와 글자별 속도도 함께
 export interface Glyph { ch: string; style: CSSProperties; rate: number } // rate: 글자 속도 배율, 또는 fixed면 글자/초
@@ -124,4 +125,33 @@ export function renderTagged(text: string, tagsOn: boolean): ReactNode[] {
   }
   flush();
   return out;
+}
+
+// 상자 보기 화면용: 태그 글자는 흐리게 그대로 두고, 안쪽 글에 모양을 입힌다.
+// 고칠 때(textarea)와 같은 자리, 같은 크기여야 해서 글자 수와 크기는 바꾸지 않는다 (굵게는 폭이 안 변하는 그림자로)
+const VIEW_STYLE: Record<string, (v: string) => CSSProperties> = {
+  b: () => ({ textShadow: '0.4px 0 0 currentColor, -0.4px 0 0 currentColor' }),
+  i: () => ({ fontStyle: 'italic' }),
+  u: () => ({ textDecoration: 'underline' }),
+  a: () => ({ textDecoration: 'underline' }),
+  s: () => ({ textDecoration: 'line-through' }),
+  color: (v) => ({ color: v }),
+};
+
+export function TagView({ text }: { text: string }) {
+  const out: ReactNode[] = [];
+  const stack: { name: string; style: CSSProperties }[] = [];
+  tokenize(text).forEach((t, k) => {
+    const raw = text.slice(t.s, t.e);
+    if (t.k === 'text' || t.k === 'esc') {
+      const deco = stack.map((x) => x.style.textDecoration).filter(Boolean).join(' ');
+      const style = Object.assign({}, ...stack.map((x) => x.style), deco ? { textDecoration: deco } : {});
+      out.push(<span key={k} style={style}>{raw}</span>);
+      return;
+    }
+    out.push(<span key={k} className={'tg' + (t.k === 'self' ? ' tg-stop' : '')}>{raw}</span>);
+    if (t.k === 'open') stack.push({ name: t.name, style: VIEW_STYLE[t.name]?.(t.val) ?? {} });
+    else if (t.k === 'close') stack.pop();
+  });
+  return <>{out}</>;
 }

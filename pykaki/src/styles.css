@@ -770,3 +770,44 @@ fieldset.plain:disabled { opacity: 0.4; }
 .sp-line .mark { width: 12px; color: #ff3b8d; }
 .sp-line .ln { width: 32px; color: var(--muted); text-align: right; }
 .sp-line.here .ln { color: #ff3b8d; }
+
+/* 태그 상자: 대사 글 칸에 커서가 있을 때. 상자 안 편집에서는 상자 오른쪽 위 바깥, 편집 탭에서는 글자 효과 칸 안 */
+.tagbar {
+  display: flex; flex-direction: column; gap: 3px; padding: 6px; font-size: 11px; cursor: default;
+  background: color-mix(in srgb, var(--panel) 86%, transparent);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2); backdrop-filter: blur(10px) saturate(1.2);
+  border: 1px solid color-mix(in srgb, var(--text) 12%, transparent); border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12); animation: side-in 0.18s ease; --from: 0;
+}
+.tagbar-box { position: absolute; left: calc(100% + 14px); bottom: calc(100% - 28px); z-index: 6; width: max-content; max-width: 330px; }
+.tagbar-look { box-shadow: none; margin: 2px 0; }
+.tb-row { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; }
+.tb-label { color: var(--muted); font-size: 10.5px; min-width: 28px; }
+.tb-sep { width: 1px; align-self: stretch; margin: 0 3px; background: var(--line); }
+.tagbar button { font-size: 11px; padding: 1px 6px; line-height: 1.5; }
+.tb-btn.on { background: color-mix(in srgb, var(--accent) 22%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent); }
+.tb-b { font-weight: 800; min-width: 24px; }
+.tb-i { font-style: italic; font-family: Georgia, serif; min-width: 24px; }
+.tb-u { text-decoration: underline; min-width: 24px; }
+.tb-s { text-decoration: line-through; min-width: 24px; }
+.tb-size { width: 44px; font-size: 11px; padding: 1px 4px; text-align: center; font-family: var(--mono); }
+.tb-size.on { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent); }
+.tb-color { display: inline-flex; align-items: center; gap: 4px; }
+.tb-dot { width: 11px; height: 11px; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--text) 25%, transparent); }
+.tb-msg { color: var(--danger); font-size: 10.5px; }
+.tb-off { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; color: var(--muted); }
+.tb-palette { display: flex; flex-direction: column; gap: 4px; margin-top: 3px; padding-top: 5px; border-top: 1px solid var(--line); }
+.tb-grid { display: flex; flex-direction: column; gap: 4px; outline: none; border-radius: 6px; }
+.tb-grid:focus-visible { box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent); }
+.tb-prow { display: flex; align-items: flex-start; gap: 6px; }
+.tb-pname { width: 52px; flex: none; color: var(--muted); font-size: 10.5px; padding-top: 2px; }
+.tb-swatches { display: grid; grid-template-columns: repeat(8, 20px); gap: 3px; }
+.tagbar .tb-sw { width: 20px; height: 20px; padding: 0; border-radius: 5px; border: 1px solid color-mix(in srgb, var(--text) 18%, transparent); }
+.tagbar .tb-sw.cur { outline: 2px solid var(--accent); outline-offset: 1px; }
+.tagbar .tb-sw.on { box-shadow: inset 0 0 0 2px var(--panel); }
+.tb-hexrow { align-items: center; flex-wrap: wrap; }
+.tb-hex { width: 76px; font-size: 11px; padding: 1px 4px; font-family: var(--mono); }
+.tb-pick { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); cursor: pointer; }
+/* 상자 보기 화면의 태그 글자: 흐리게. 고칠 때와 같은 글자라 자리가 안 바뀐다 */
+.pl-text .tg { opacity: 0.4; }
+.pl-text .tg-stop { opacity: 0.55; color: var(--accent); }
