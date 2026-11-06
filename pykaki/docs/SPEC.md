@@ -116,6 +116,7 @@
     - 시작에서 도달할 수 없는 상자
     - call 대상에서 return에 도달하지 않음
     - `escapePercent`가 꺼졌는데 대사나 선택지에 `%`가 있음 (오류. 렌파이가 실행 중 멈춘다)
+    - 텍스트 태그를 켰을 때 대사나 선택지의 태그 짝 (`checkTags`, 렌파이 `check_text_tags`와 같은 규칙): 여는 태그 없는 닫는 태그는 오류(렌파이가 실행 중 멈춘다), 엇갈려 닫힘·닫지 않음·모르는 태그는 경고
     - 연결을 켰는데 캐릭터 id가 showpy 이름과 겹침 (오류, `PLUGIN_NAMES`)
 11. **showpy 연결(`renpyLink`)을 켜면 달라지는 것**. 끄면 예전과 똑같이 내보낸다.
     - 모든 상자에 `label 그룹.상자id:`를 쓴다. 첫 상자는 `label 그룹:` 바로 아래에 이어 쓴다.
@@ -170,6 +171,14 @@
 - **줄 순서**: ⠿ 손잡이를 끌어 다른 줄의 위/아래 절반에 놓는다(HTML 드래그 앤 드롭, `useLineDrag`). 상자 안 편집과 편집 탭 모두.
 - **편집 탭 줄 모양**: 줄마다 2칸 격자. 왼쪽 칸(136px)에 손잡이·줄 종류·✕와 대사 속성, 오른쪽 칸에 글(또는 연출 입력칸)을 두고 사이에 세로 선을 긋는다.
 - **글자 효과 칸** (`LineLook`, 연결과 상관없이): 글 칸에는 글만 둔다. 오른쪽 편집 탭 위쪽에 붙어 있고(`.look-panel`, sticky), 지금 쓰는 줄(`store.activeLine`, 상자 안 편집과 편집 탭이 같이 씀)을 따라간다. 그 줄이 대사가 아니면 상자의 첫 대사 줄을 보여 준다. 집중 모드에서는 패널과 함께 숨는다. 글자 모양, 속도, 등장 효과가 들어 있고, 받아 적은 좌표와 화면 효과는 보여 주기만 한다. 맨 위 미리보기(`LinePreview`)는 플레이 화면과 같은 코드(`useReveal`, `Glyphs`, `FxCanvas`)로 글자만 그린다. 글자는 칸에 들어가는 가장 큰 크기(11~60px)로 맞추고, 효과나 글자/초를 바꾸면 다시 재생한다.
+- **태그 상자** (`src/TagBar.tsx`, `src/tagEdit.ts`): 대사·내레이션 글 칸(`textarea[data-tags]`)에 포커스가 있으면 뜬다. 지금 칸은 `useTagTarget`(document `focusin`으로 따라가고, 태그 상자 안으로 포커스가 가도 그대로, 빈 곳으로 포커스가 사라지면 닫음). 상자 안 편집(`in-줄id`)이면 `BoxView`가 상자 오른쪽 위 바깥(`.tagbar-box`)에, 편집 탭(`ed-줄id`)이면 `LineLook`이 글자 효과 칸 제목 아래(`.tagbar-look`)에 그린다.
+  - 단추를 눌러도 글 칸의 포커스와 고른 곳이 남게 `mousedown`을 막는다(입력 칸, 팔레트 칸 빼고). 고친 글은 `HTMLTextAreaElement` value setter + `input` 이벤트로 넣어서 React `onChange`를 그대로 탄다(실행 취소 묶음도 타이핑과 같음).
+  - `tagEdit.ts`: `tokenize`(렌파이처럼 `{{`, `{#…}`, 짝 태그와 혼자 쓰는 태그는 렌파이 8.5.3 `text_tags` 목록), `pairTags`(닫는 태그는 가장 안쪽을 닫음). 고치기: `toggleTag`(b i u s: 같은 태그 안이면 빼기, 고른 곳이 안쪽 일부면 그 부분만 끊어서 밖으로, 아니면 감싸기), `setTagValue`(color size cps: 안이면 값만 바꾸기), `stepSize`(+10/-10, `+n`은 더하고 0이 되면 빼기, 숫자는 더하기, `*x`는 1.25배/0.8배), `removeTag`, `insertTag`(커서 자리, `{nw}`는 글 끝, `{w=0.5}`는 숫자를 골라 둠), `tagsAt`(단추 켜짐). 커서가 태그 글자 한가운데면 태그 밖으로 옮기고, 고른 곳 안의 태그 짝이 안 맞으면 넣지 않고 알린다.
+  - 팔레트: 8색 × 밝게/보통/어둡게 + 회색 8칸, 이 프로젝트 색(`gui.rpy` `text_color`, 캐릭터 색), 최근 8칸(`localStorage["pykaki-recent-colors"]`), `#rrggbb` 칸, 브라우저 색 고르기. 화살표 8칸씩, Enter, Esc.
+  - 단축키 `tagBold` `tagItalic` `tagUnderline`(기본 Ctrl+B/I/U, 글 칸에 포커스가 있을 때만 잡음).
+  - 텍스트 태그가 꺼져 있으면(`allowTextTags`) [켜기]만 보인다.
+  - 형식은 그대로다. 글 안의 태그일 뿐이라 `.flow.json`, LINK.md, `FEATURE`는 안 바뀐다.
+- **상자 보기 화면의 태그** (`TagView`): 고칠 때(textarea)와 자리가 같아야 해서 글자는 그대로 두고 태그 글자만 흐리게(`.tg`, 멈춤 태그는 `.tg-stop`), 안쪽 글에 굵게(폭이 안 변하는 그림자), 기울임, 밑줄, 취소선, 색만 입힌다. 크기는 바꾸지 않는다.
 - **렌파이 견본** (`EffectClip`): 효과를 고르면 미리보기 아래에 `public/effects/<효과>.webm`을 반복 재생한다. 렌파이에서 예시 대사를 재생하며 찍은 2.4초 영상이다. `tools/record_effect_clips.py`가 효과 목록을 `stage.ts`에서 읽어 렌파이 SDK와 ffmpeg로 만든다. 효과를 새로 넣으면 다시 돌린다.
 - **렌파이에서 보기** (폴더를 연결했을 때): 켜 두면 줄이나 값을 바꿀 때마다 0.3초 뒤 `game/pykaki_preview.json`을 쓴다(`writePreview`). 개발 모드로 켜 둔 게임이 화면 위에 그 줄을 진짜 효과로 다시 보여 준다. 형식은 [LINK.md](../../docs/LINK.md) 7장. 켰는지는 `localStorage["pykaki-live-preview"]`. 스위치를 켜고 끌 때는 클릭 안이라 폴더 권한을 물어보고, 그 뒤 자동으로 쓰다가 권한이 없으면(`'denied'`) 스위치 옆에 안내와 [권한 허용], 쓰기가 실패하면(`'error'`) [다시 쓰기]를 보여 준다.
 - **글자/초 기본값** (`lineCps`, `DEFAULT_CPS` 30): 글자가 하나씩 나와야 보이는 효과(`wave`, `jitter`, `glow`, `liquid`, `vhs`를 뺀 모든 효과)에서 `cps`가 비면 30으로 재생하고 내보낸다. 효과가 없거나 `wave`, `jitter`이면 비운 채로 두고 게임 설정을 따른다.
@@ -179,7 +188,7 @@
 - **선 더블클릭**: next ↔ call을 전환한다.
 - **Delete**: 상자나 선을 삭제한다.
 - **Shift+드래그**: 여러 상자를 선택한다.
-- **단축키(기본값)**: Ctrl+\\ 집중 모드, Ctrl+Enter 새 줄, Ctrl+Shift+Enter 다음 상자로 이어 쓰기, Alt+Enter 다음 흐름 창, Ctrl+S 저장, Ctrl+Shift+S 다른 이름으로 저장, Ctrl+E 같은 곳에 다시 내보내기, Ctrl+Z/Y 실행 취소/다시 실행(입력칸 밖에서), Alt+N 새 상자, Alt+P 플레이, F8 편집 화면과 전체화면 플레이 바꾸기(F5는 새로고침과 겹쳐서 쓰지 않음). 8-1 참고.
+- **단축키(기본값)**: Ctrl+\\ 집중 모드, Ctrl+Enter 새 줄, Ctrl+Shift+Enter 다음 상자로 이어 쓰기, Alt+Enter 다음 흐름 창, Ctrl+S 저장, Ctrl+Shift+S 다른 이름으로 저장, Ctrl+E 같은 곳에 다시 내보내기, Ctrl+Z/Y 실행 취소/다시 실행(입력칸 밖에서), Ctrl+B/I/U 대사 글 칸에서 굵게/기울임/밑줄 태그, Alt+N 새 상자, Alt+P 플레이, F8 편집 화면과 전체화면 플레이 바꾸기(F5는 새로고침과 겹쳐서 쓰지 않음). 8-1 참고.
 - 실행 취소: 같은 key로 1.2초 안에 이어지는 변경(타이핑)은 한 번으로 묶는다. 최대 100단계.
 
 ## 8-1. 화면, 집중 모드, 환경 설정

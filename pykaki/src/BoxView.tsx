@@ -9,6 +9,8 @@ import { FlowMenu } from './FlowMenu';
 import { SpeakerSelect, StageFields, useLineDrag } from './LineFields';
 import { isStage, stageCode } from './stage';
 import { hit, keyOf } from './prefs';
+import { TagBar, useTagTarget } from './TagBar';
+import { TagView } from './textTags';
 
 // 볼 때와 글을 고칠 때 상자 모양이 같다. 고칠 때는 글자 자리가 입력칸으로 바뀌고,
 // 줄 종류·순서·삭제 단추는 상자 왼쪽 바깥에, 연출 입력칸은 오른쪽 바깥에 붙는다
@@ -17,8 +19,11 @@ export const BoxView = memo(function BoxView({ id, selected }: NodeProps) {
   const play = useStore((s) => s.play);
   const editing = useStore((s) => s.inlineEdit === id);
   const update = useStore((s) => s.update);
+  const tagTarget = useTagTarget((s) => s.id);
   const b = project.nodes.find((n) => n.id === id);
   if (!b) return null;
+  // 태그 상자: 이 상자에서 대사·내레이션 글 칸에 커서가 있을 때
+  const tagLine = editing && tagTarget?.startsWith('in-') ? b.lines.find((l) => 'in-' + l.id === tagTarget && isSayLine(l)) : undefined;
   const g = project.labels.find((l) => l.id === b.group);
   const isEntry = g?.entry === b.id;
   const isStart = project.project.startNode === b.id;
@@ -29,6 +34,7 @@ export const BoxView = memo(function BoxView({ id, selected }: NodeProps) {
   return (
     <div className={cls + (b.color ? ' own-color' : '')} style={{ '--g': b.color ?? g?.color ?? 'var(--panel)', ...(b.color && { '--own-bt': isLight(b.color) ? '#1c1c1e' : '#ffffff' }) } as React.CSSProperties}>
       {editing && <FlowMenu b={b} />}
+      {tagLine && <TagBar targetId={'in-' + tagLine.id} className="tagbar-box" />}
       <Handle type="target" id="in" position={tb ? Position.Top : Position.Left} />
       <div className="box-head">
         <span className="badge" title="렌파이 label">
@@ -101,6 +107,8 @@ export const BoxView = memo(function BoxView({ id, selected }: NodeProps) {
     </div>
   );
 });
+
+const isSayLine = (l: Line) => l.type === 'say' || l.type === 'narration';
 
 const STAGE_ICON: Record<string, string> = { scene: '🖼', show: '🧍', hide: '🙈', music: '🎵', sound: '🔊', fx: '✨' };
 
@@ -201,6 +209,7 @@ interface RowProps {
 // 줄 하나. 볼 때와 고칠 때 같은 자리에 같은 크기로 그린다
 function LineRow({ l, editing, active, cls, rowProps, onFocus, onKey, onText }: RowProps) {
   const ch = useStore((s) => (l.type === 'say' ? s.project.characters.find((c) => c.id === l.who) : undefined));
+  const tagsOn = useStore((s) => s.project.settings.allowTextTags);
   const stage = isStage(l.type);
   const kind = stage ? 'pl-stage' : l.type === 'command' ? 'cmd' : l.type === 'note' ? 'note' : l.type === 'narration' ? 'narr' : 'say';
   const empty = { narration: '(빈 내레이션)', say: '(빈 대사)', command: '(빈 명령)', note: '(빈 메모)' }[l.type as 'say'];
@@ -221,11 +230,12 @@ function LineRow({ l, editing, active, cls, rowProps, onFocus, onKey, onText }: 
         rows={1}
         value={l.text}
         placeholder={empty}
+        data-tags={isSayLine(l) ? '1' : undefined}
         onKeyDown={onKey}
         onChange={(e) => onText(e.target.value)}
       />
     );
-  else body = <span className="pl-text">{l.text || <i className="todo">{empty}</i>}</span>;
+  else body = <span className="pl-text">{!l.text ? <i className="todo">{empty}</i> : tagsOn && isSayLine(l) && l.text.includes('{') ? <TagView text={l.text} /> : l.text}</span>;
 
   return (
     <div
