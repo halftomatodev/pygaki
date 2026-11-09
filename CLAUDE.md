@@ -24,6 +24,7 @@
 - PyKaki를 고치면 `pykaki/`에서 `npm run build`로 `pykaki/dist/index.html`도 다시 만든다.
 - showpy를 고치면 Lint를 돌리고, 시험 프로젝트에 복사한 뒤 `.rpyc`를 지운다. 사용자의 진짜 게임((docs/LOCAL.md에 적힌 것))은 말할 때만 건드린다.
 - 저장 형식 이름 `"format": "renpy-flow"`, `.flow.json`, IndexedDB `renpy-flow-editor`는 바꾸지 않는다.
+- **정보가 새지 않게**: 저장소는 공개이고 묶음은 남에게 배포한다. 사용자가 허락하지 않은 정보(내 컴퓨터 경로, 계정, 사용자가 보여 준 참고 자료의 파일 이름·출처 계정, 메일 주소)를 코드, 묶음, 커밋하는 문서와 커밋 메시지에 넣지 않는다. 참고 자료는 모양만 말로 적는다. 프로그램은 사용자 허락 없이 밖으로 통신하지 않는다(실시간 연결은 `127.0.0.1`만, 앱·웹은 외부 요청 없음). 개발용 파일(`showpy_live.json`, `showpy_inbox.json`, `pykaki_preview.json`, `ui_kit_backup/`, `*.flow.json`)은 게임 배포판과 묶음에서 뺀다. 묶음은 `bundle/make_bundle.py`의 `privacy_check`가 만든 사람 컴퓨터 경로를 찾으면 멈춘다.
 
 ## 명령
 

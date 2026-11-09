@@ -46,9 +46,47 @@ TEMPLATE_SETTINGS = [
      "define screen_fx.overlay = False    # pygaki 템플릿: 처음에는 끔. 켜려면 True"),
 ]
 
-## 복사하지 않는 것 (컴파일 결과, 개인 배치, 시험 찌꺼기)
+## 복사하지 않는 것 (컴파일 결과, 개인 배치, 대본, 시험 찌꺼기, 실시간 연결 파일)
 SKIP = shutil.ignore_patterns("*.rpyc", "*.rpymc", "*_layout.rpy", "showpy_inbox.json", "pykaki_preview.json",
-                              "cache", "saves", "__pycache__", "*.bak", "errors.txt", "traceback.txt", "log.txt", "lint.txt")
+                              "showpy_live.json", "*.flow.json", "ui_kit_backup", "persistent",
+                              "cache", "saves", "__pycache__", "*.bak", "errors.txt", "traceback.txt", "log.txt", "lint.txt",
+                              "zz_*", "*_debug.txt", "*.log")
+
+## SDK를 복사할 때 빼는 것 (렌파이가 SDK 폴더에 남기는 것, 시험 찌꺼기)
+SDK_SKIP = shutil.ignore_patterns("tmp", "__pycache__", "log.txt", "errors.txt", "traceback.txt",
+                                  "zz_*", "*_debug.txt", "*.log", "saves")
+
+
+def privacy_check(dirs):
+    """만든 사람 컴퓨터의 정보(홈 폴더, 저장소·SDK 경로, Dropbox)가 묶음에 들어가지 않았는지 봅니다.
+    찾으면 그 파일을 알려 주고 멈춥니다. (내 허락 없이 정보가 밖으로 나가지 않게)"""
+    import re
+    words = set()
+    for w in (os.path.expanduser("~"), ROOT, os.environ.get("RENPY_SDK", "")):
+        if w and len(w) > 6:
+            words.add(w)
+            words.add(w.replace("\\", "/"))
+    pats = [ re.compile(re.escape(w).encode("utf-8"), re.I) for w in words ]
+    pats.append(re.compile(rb"[A-Za-z]:[\\/]+(Dropbox|Users[\\/]+[^\\/\s\"']+[\\/]+(Downloads|Desktop|Documents|Dropbox))", re.I))
+    exts = (".rpy", ".py", ".txt", ".json", ".md", ".cjs", ".js", ".html", ".asar", ".csv", ".ini", ".cfg")
+    bad = [ ]
+    for d in dirs:
+        for base, _ds, fs in os.walk(d):
+            for fn in fs:
+                if not fn.lower().endswith(exts):
+                    continue
+                full = os.path.join(base, fn)
+                try:
+                    data = open(full, "rb").read()
+                except OSError:
+                    continue
+                for pat in pats:
+                    m = pat.search(data)
+                    if m:
+                        bad.append("{}: {}".format(os.path.relpath(full, d), m.group(0)[:80].decode("utf-8", "replace")))
+                        break
+    if bad:
+        sys.exit("묶음에 만든 사람 컴퓨터의 정보가 들어 있어요. 지우고 다시 만들어 주세요:\n  " + "\n  ".join(bad[:40]))
 
 README = """pygaki ({version})
 
@@ -171,7 +209,7 @@ def main():
             sys.exit("이미 있어요. 지우고 다시 돌려 주세요: " + d)
 
     print("1/6 렌파이 SDK 복사 ...")
-    shutil.copytree(sdk, out, ignore=shutil.ignore_patterns("tmp", "__pycache__", "log.txt", "errors.txt", "traceback.txt"))
+    shutil.copytree(sdk, out, ignore=SDK_SKIP)
 
     print("2/6 런처 버튼 넣기 ...")
     shutil.copy(os.path.join(HERE, "launcher", "pygaki_launcher.rpy"), os.path.join(out, "launcher", "game"))
@@ -221,6 +259,9 @@ def main():
             shutil.copy(src, dst)
     with open(os.path.join(addon, "pygaki_넣는법.txt"), "w", encoding="utf-8-sig") as f:
         f.write(ADDON_README.format(version=prefix, renpy=renpy_ver).replace("\n", "\r\n"))
+
+    print("정보 새는지 검사 ...")
+    privacy_check([ os.path.join(out, "showpy"), os.path.join(out, "pygaki"), os.path.join(out, "launcher", "game"), addon ])
 
     if a.zip:
         print("6/6 zip 만들기 ...")
