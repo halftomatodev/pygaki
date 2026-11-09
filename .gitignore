@@ -4,3 +4,6 @@ docs/LOCAL.md
 # 개발 메모 (인수인계, 지나온 기록) — 로컬 전용
 docs/HANDOFF.md
 docs/HISTORY.md
+
+# Claude Code 개인 권한 설정 (로컬 전용)
+.claude/settings.local.json
