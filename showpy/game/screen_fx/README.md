@@ -23,12 +23,22 @@
 
 `ui_kit` 플러그인이 같이 있으면 그 편집기(개발 모드에서 Shift+M)에 **"화면 효과", "타이틀 일렁임" 탭**이 생기고, **대사 탭에서 "이 대사부터 이 효과", 덮개 켬/끔, 덮개 휘어짐을 골라 원고에 바로 저장**할 수 있습니다. 대사가 아닌 줄(show, scene, with, $ 줄 등)에서 바꾸고 싶으면 **"화면 효과" 탭의 "줄에 넣기"** 로 그 줄 바로 위에 `$ screen_fx.use(…)` 줄을 넣습니다(4.1). `ui_kit`이 없어도 효과는 설정 파일과 스크립트로 그대로 동작합니다.
 
-버전 4.5 · 렌파이 8.5.3에서 만들고 테스트했습니다.
+버전 5.0 · 렌파이 8.5.3에서 만들고 테스트했습니다.
 
 VHS 셰이더 원본: [VHS and CRT monitor effect](https://godotshaders.com/shader/vhs-and-crt-monitor-effect/) (Godot Shaders, CC0). 렌파이용으로 옮기면서 채도·대비·전체 세기를 바꿀 수 있게 추가했습니다.
 레트로 터미널은 [cool-retro-term](https://github.com/Swordfish90/cool-retro-term)의 모습과 설정 목록을 참고해 새로 썼습니다(코드는 가져오지 않음).
 게임보이는 [Retro dither](https://godotshaders.com/shader/retro-dither/) (tcmug, CC0)의 4×4 디더링 무늬와 [Gameboy Classic Shader](https://github.com/HarlequinVG/shaders/tree/master/gameboy_shader) (Harlequin, GPL v3)의 LCD 모습(점 격자·점 그림자)을 참고해 새로 썼습니다(코드는 가져오지 않음).
 ASCII 효과는 [ASCII shader](https://godotshaders.com/shader/ascii-shader/) (Daniel Bologna, Acerola의 아이디어, MIT)를 참고해 렌파이용으로 새로 썼습니다. 글꼴은 [Neo둥근모](https://neodgm.dalgona.dev/) (SIL OFL 1.1)입니다.
+
+### 5.0에서 바뀐 점
+
+- **이미지 하나에 거는 효과**: 화면 효과 두 자리와 상관없이 그 이미지에만 씌웁니다. 값을 안 적으면 그 효과의 설정 파일 값. 화면 전체 효과와 겹쳐 쓸 수 있습니다.
+  ```renpy
+  show ghost at screen_fx.image_fx("gameboy")
+  show ghost at screen_fx.image_fx("ascii", strength=0.6)
+  ```
+- **게임 중에 효과 값 바꾸기**: `$ screen_fx.set_values("vhs_crt", warp_amount=2.0)` (`vhs_crt.set(...)`과 같음. 값 없이 부르면 설정대로). 세이브·되감기에 저장됩니다.
+- **셰이더 장면 전환 틀**: `screen_fx.ShaderSwap("셰이더 이름", 시간, u_값=…)`. 셰이더는 `tex0`(옛 장면), `tex1`(새 장면), `u_sfx_swap`(0 → 1), `u_sfx_swap_size`를 받습니다. 이 틀로 만든 전환은 새 효과와 함께 들어옵니다.
 
 ### 4.5에서 바뀐 점
 

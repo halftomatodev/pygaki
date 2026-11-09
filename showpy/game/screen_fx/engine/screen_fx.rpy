@@ -3,7 +3,7 @@
 ##
 ## 이 파일은 고칠 필요가 없습니다. 설정은 플러그인 폴더의 *_config.rpy에서 하세요.
 ##
-## 버전 4.3 · Ren'Py 8.5.3에서 제작·테스트
+## 버전 5.0 · Ren'Py 8.5.3에서 제작·테스트
 ## 설치·설정 방법: 플러그인 폴더의 README.md
 ##
 ## 하는 일
@@ -42,7 +42,7 @@ init -110 python in screen_fx:
 
     import store
 
-    VERSION = "4.5"
+    VERSION = "5.0"
 
     ## ── 플러그인 폴더 위치 ──
     ## 이 파일은 <플러그인 폴더>/engine/screen_fx.rpy 에 있습니다.
@@ -499,6 +499,15 @@ init -110 python in screen_fx:
             """트랜스폼에 셰이더와 값을 넣습니다. mix는 전환 중 섞는 정도(0~1)."""
 
             v, tweening = self._current()
+            return self._apply_values(trans, v, mix, tweening)
+
+        def apply_values(self, trans, values, mix=1.0):
+            """지금 값에 values를 얹어서 씌웁니다. (이미지 하나에 거는 효과, 5.0)"""
+            v = self.values()
+            v.update(values or { })
+            return self._apply_values(trans, v, mix, False)
+
+        def _apply_values(self, trans, v, mix, tweening):
             strength = float(v.get("strength", 1.0)) * float(mix)
 
             if strength <= 0.0:
@@ -1243,6 +1252,22 @@ init -110 python in screen_fx:
         use(globals().get("current", None), transition=transition, duration=duration, wait=wait,
             overlay=overlay, exclude=globals().get("cur_target", DEFAULT))
 
+    def set_values(name, duration=0.0, **values):
+        """
+        게임 중에 효과 하나의 값을 바꿉니다. 세이브·되감기에 저장됩니다. (5.0)
+            $ screen_fx.set_values("vhs_crt", warp_amount=2.0)
+            $ screen_fx.set_values("vhs_crt", strength=0.5, duration=1.0)   # 1초 동안 부드럽게
+            $ screen_fx.set_values("vhs_crt")                               # 값 없이: 설정대로
+        (<이름>.set(...)과 같습니다. 이름을 글자로 받는 것만 다름)
+        """
+        fx = EFFECTS.get(name)
+        if fx is None:
+            raise Exception("screen_fx.set_values: {!r}라는 효과가 없습니다. 쓸 수 있는 이름: {}".format(name, ", ".join(names())))
+        if values:
+            fx.set(duration=duration, **values)
+        else:
+            fx.reset(duration=duration)
+
     ## ── 커서 자리 (4.2) ──
     ## UI Kit의 소프트웨어 커서를 화면 효과의 어디에 그릴지:
     ##   "effect"   기본 효과(ASCII 등)와 덮개(VHS)를 다 받음
@@ -1819,6 +1844,93 @@ init -110 python in screen_fx:
             return store.Transform(d, function=_make_layer_function("ovl", "image"))
 
     scene = _SceneFX()
+
+    ## ── 이미지 하나에 거는 효과 (5.0) ──
+    ##     show ghost at screen_fx.image_fx("hologram")
+    ##     show ghost at screen_fx.image_fx("halftone", cell=6.0)     # 값을 바꿔서
+    ## 화면 효과 자리와 상관없이 그 이미지에만 씌웁니다. 값을 안 적으면 그 효과의 설정 파일 값.
+
+    class _ImageFX(store.python_object):
+        def __init__(self, name, values):
+            self.name = name
+            self.values = dict(values)
+
+        def __call__(self, trans, st, at):
+            fx = EFFECTS.get(self.name)
+            if fx is None or not fx.is_enabled():
+                trans.shader = None
+                trans.mesh = None
+                return None
+            rv = fx.apply_values(trans, self.values)
+            trans.u_sfx_base = 1.0
+            trans.u_sfx_text = 0.0
+            return rv
+
+    def image_fx(name, **values):
+        """이미지에 거는 효과. show ... at screen_fx.image_fx("이름", 값=…)"""
+        fx = EFFECTS.get(name)
+        if fx is None:
+            raise Exception("screen_fx.image_fx: {!r}라는 효과가 없습니다. 쓸 수 있는 이름: {}".format(name, ", ".join(names())))
+        if values:
+            fx.check(values, "screen_fx.image_fx({!r})".format(name))
+        return store.Transform(function=_ImageFX(name, values))
+
+    ## ── 셰이더로 그리는 장면 전환 (5.0) ──
+    ##     scene bg2 with screen_fx.TileSwap(1.0)        (조각 어긋남 효과가 만드는 전환)
+    ## 셰이더는 tex0(옛 장면), tex1(새 장면), u_sfx_swap(0 → 1 진행)을 받습니다.
+    ## 새 전환을 만들 때: register_shader로 셰이더를 등록하고 ShaderSwap("셰이더 이름", 시간, u_값=…)
+
+    import renpy.display.transition as _rtrans
+
+    class _SwapDisp(_rtrans.Transition):
+
+        def __init__(self, shader, time, uniforms, old_widget=None, new_widget=None, **properties):
+            super(_SwapDisp, self).__init__(time, **properties)
+            self.shader = shader
+            self.time = time
+            self.uniforms = uniforms
+            self.old_widget = old_widget
+            self.new_widget = new_widget
+            self.events = False
+
+        def render(self, width, height, st, at):
+            if st >= self.time:
+                self.events = True
+                return renpy.render(self.new_widget, width, height, st, at)
+
+            complete = min(1.0, st / self.time) if self.time > 0 else 1.0
+            bottom = renpy.render(self.old_widget, width, height, st, at)
+            top = renpy.render(self.new_widget, width, height, st, at)
+            w = max(top.width, bottom.width)
+            h = max(top.height, bottom.height)
+
+            rv = renpy.Render(w, h)
+            if top.get_size() != (w, h):
+                top = top.subsurface((0, 0, w, h))
+            if bottom.get_size() != (w, h):
+                bottom = bottom.subsurface((0, 0, w, h))
+
+            rv.mesh = True
+            rv.add_shader(self.shader)
+            rv.add_uniform("u_sfx_swap", complete)
+            rv.add_uniform("u_sfx_swap_size", (float(w), float(h)))
+            for k, v in self.uniforms.items():
+                rv.add_uniform(k, v)
+            rv.blit(bottom, (0, 0), focus=False, main=False)
+            rv.blit(top, (0, 0), focus=True, main=True)
+            renpy.redraw(self, 0)
+            return rv
+
+    class ShaderSwap(store.python_object):
+        """셰이더로 그리는 장면 전환. scene bg with screen_fx.ShaderSwap("셰이더", 1.0, u_값=…)"""
+
+        def __init__(self, shader, time=1.0, **uniforms):
+            self.shader = shader
+            self.time = float(time)
+            self.uniforms = { k : (tuple(float(x) for x in v) if isinstance(v, (tuple, list)) else float(v)) for k, v in uniforms.items() }
+
+        def __call__(self, old_widget=None, new_widget=None):
+            return _SwapDisp(self.shader, self.time, self.uniforms, old_widget, new_widget)
 
     ## ── 세이브를 불러왔을 때 ──
 
