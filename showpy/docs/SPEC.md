@@ -3,6 +3,7 @@
 코드를 고치는 사람과 AI가 읽는 문서입니다. 사용법은 [CUSTOM_GUIDE.md](CUSTOM_GUIDE.md)에 있습니다.
 
 - 묶음 버전 5.0 (`ui_kit` 4.0, `screen_fx` 5.1, `hotkeys` 1.0, `splash` 2.0) = pygaki v1.3 (2026-11-09)
+- 만드는 중: `screen_fx` 5.2 줄기표 (9장)
 - 5.0에 들어간 것: `screen_fx` 5.1 (새 화면 효과 일곱), `ui_kit` 3.23 (GUI 편집기 이름, UI 글 탭, 폴더 열기, F9), `ui_kit` 4.0 (글자 효과 11개, 글 상자 `bubble` `pill`)
 - 렌파이 8.5.3 기준
 - 작업 규칙: [DEV_RULES.md](DEV_RULES.md)
@@ -349,3 +350,20 @@ $ screen_fx.set_values("shards", count=80, colors=2, color="#d22", color2="#811"
 ### 8-8. 사람이 볼 것
 
 한글 입력기로 스플래시 제목 고치기, 회전한 글 고치기, 새 페이지가 게임을 껐다 켜도 순서대로 나오는지, 번역 만들기에 고친 글이 잡히는지, 효과마다 참고 그림과 비슷한지(특히 망점 CMYK, 홀로그램, 조각 어긋남), 두 자리와 이미지 효과를 다 켠 속도, 지글거림이 참고 영상처럼 손그림 느낌인지, 말풍선 꼬리 방향, PyKaki 미리보기와 게임이 같은지.
+
+## 9. 줄기표 (`screen_fx` 5.2, 2026-11-09)
+
+파일: `screen_fx/editor/editor_flow.rpy` (`FlowTreeMixin`, `FlowTreeView`, 스크린 `ui_editor_fx_tree_overlay`, `ui_editor_fx_tree_panel`). `FxTab`이 `FlowTreeMixin`을 먼저 이어받음(편집기 `Tab`의 `drag_begin`, `wheel`보다 앞서게).
+
+- **원고 읽기**: `renpy.game.script.namemap`에서 이 파일의 `Label`을 줄 순서로 돌며 블록을 걸음. `Menu`는 선택지마다, `If`는 조건마다, `While`은 한 가지. 가지 머리 줄(선택지 글, `elif`, `else`)은 블록 첫 줄보다 덜 들여쓴 바로 위 줄. 행마다 `path`(지나온 (가지 노드 id, 몇 번째)), `guides`(세로선 깊이). 원고 글은 렌파이가 원고를 읽은 때 한 번만 읽어 둠(캐시 키: script, namemap).
+- **덮인 셰이더**: 행을 걸으며 두 자리를 셈. `$ screen_fx.shaders/use/clear/set_overlay` 줄(`call_slots`), 대사 괄호 `fx=`(`say_slots`), 저장 안 한 `line_edits`의 `slots`(그 대상 줄 위의 셰이더 줄은 무시). 가지는 갈라진 곳의 값으로 시작하고, `jump`/`return`으로 끝나지 않는 가지들의 값이 모두 같으면 합쳐진 뒤 그 값(아니면 갈라지기 전 값). 행마다 `point`(전환 점: target, slots, tr, both, kind).
+- **입력**: 편집기 입력층(`EditorInput`)이 `drag_begin/drag_move/drag_end`, 휠은 `panel_wheel` → `tab.wheel`. 서랍 오른쪽 `TREE_DOT` 폭은 전환 점 고르기. 움직이지 않고 떼면 `pick_line`.
+- **[이 구간에 적용]** (`tree_range_plan`, `tree_apply_range`): 시작 = 구간 첫 행부터 처음 나오는 넣을 수 있는 문장. 끝 = 구간 안 마지막 문장. 되돌리기 자리 = 끝 노드의 `.next`(우리 셰이더 줄과 `Label` 머리는 건너뜀)가 이 파일의 label 안 줄이면 그 줄. 끝이 시작과 다른 가지면 바깥쪽 가지 노드의 `.next`(합쳐지는 곳)를 고를 수 있음. 되돌리는 값 = 시작 줄 위 셰이더 줄 앞의 두 자리. 되돌리기 자리에 이미 셰이더 줄(저장 전 포함)이 있으면 넣지 않음. 결과는 FxTab의 `line_edits`(줄에 넣기와 같은 길, `script_edit.INSERT`)라 PyKaki 원고에도 그대로 저장됨.
+- 앱 (ui_kit 4.1): `editor_live.rpy`가 `state.flow`에 `FxTab.flow_state()`를 싣고, `flow` 명령을 `FxTab.flow_cmd()`로 넘김(LINK.md 9장). 행 글과 색은 게임 서랍과 같은 `tree_row_text`. 앱(`pykaki/src/ShowpyFlow.tsx`)이 원고 칸 옆에 그림. 앱이 패널을 가져가 있으면(`live_panel_hidden`) 게임 창 서랍은 그리지 않음. 패널 칸(적용, 전환)은 공통 틀로 앱에 나옴.
+- **지우기** (`tree_delete`, Delete 키, `flow` `delete`): 구간이면 구간 행 안의 점 + 대상이 구간 안 문장인 점(바로 위 셰이더 줄) + 되돌리기 자리(`tree_range_plan`의 `restore`)의 점, 그리고 고른 전환 점. 원고에 있는 셰이더 줄은 `line_edits`의 `slots = None`(저장할 때 지움), 저장 전 적용은 그 편집을 버림, 대사 괄호는 대사 탭 `line_edits`에 `fx`, `fx_overlay`, `fx_transition` = `REMOVE`(덮인 셰이더 계산도 이것을 봄). 앞에서 이어진 값은 그대로(사용자와 정함, 기본 줄을 새로 넣지 않음).
+- 캐시 키: (파일, 렌파이가 읽은 줄 번호 목록, 원고 파일 수정 시간). script 객체 id는 다시 불러온 뒤 같은 값이 다시 쓰여서 못 씀.
+- 저장 뒤 `FxTab.after_script_save`는 `Edit.key`(처음 고른 줄)로 편집을 지움. PyKaki 원고는 `_pk_prepare`가 `linenumber`를 표시 줄로 옮기기 때문. 원고가 바뀐 파일의 남은 편집도 버림.
+- PyKaki 원고는 `# @l:` 표시가 바로 위에 있는 줄 앞에만 넣음(`_tree_can_insert`).
+- 렌파이 8.5의 대사는 `TranslateSay` 노드. `call` 뒤 같은 줄의 `Pass`는 건너뜀.
+- 세션: `tree_open`만 기억(저장 → 다시 불러오기 뒤에도 펴진 채). 구간과 고른 전환 점은 저장하면 지움.
+- 한계: 다른 파일로 가는 `jump`/`call`은 따라가지 않음. `while` 안은 한 번 도는 것으로 봄.

@@ -248,6 +248,14 @@ PyKaki 데스크톱 앱의 showpy 화면이 게임 안 편집기를 바깥에서
   `id`는 위젯 자리 번호라 화면이 바뀌면 다른 것을 가리킬 수 있습니다. 버튼은 `t`를 같이 보내서 글이 다르면 게임이 누르지 않습니다. 창 바탕, 세로 스크롤바, 거의 투명한 색, 무지개 띠 같은 꾸밈은 보내지 않습니다.
 - `title`은 `tmenu`가 없거나 꺼져 있으면 `null`입니다. `menu`는 지금 보이는 메뉴(`"title"` 타이틀 / `"pause"` ESC 메뉴), `x`, `y`는 화면 픽셀입니다.
   - 3.19부터: `items`의 메뉴 항목 뒤에 제목, 부제가 `"kind": "label"`, `"name": "제목"`으로 붙습니다(`sel` 번호도 이어짐). 항목마다 `"kind": "item"`, `"effect"`(글자 효과 이름 또는 `null`). `title`에 `"background"`(이 메뉴의 배경 그림/영상 경로, 없으면 `null` = 타이틀 검은 화면 / ESC 메뉴 투명), `"effects"`(고를 수 있는 글자 효과 `[[이름, 표시], ...]`, 첫째는 `[null, "없음"]`).
+- `flow`(ui_kit 4.1 + screen_fx 5.2)는 화면 효과 탭의 **줄기표**입니다. Screen FX가 없거나 예전 판이면 `null`(또는 없음), 접혀 있으면 `{"open": false}`.
+  ```json
+  "flow": { "open": true, "file": "game/script.rpy", "range": [5, 9], "sel": 15, "here": 10,
+            "points": [ ["game/script.rpy", 16] ],
+            "rows": [ { "l": 12, "k": "fx", "d": 0, "g": [0], "t": "셰이더: 1번 아스키 + 2번 기본 (설정대로)", "c": "#ff8fbf",
+                        "a": "#4fc3f7", "b": null, "s": "1번 아스키 + 2번 기본", "p": ["game/script.rpy", 13], "i": false } ] }
+  ```
+  행(`rows`)은 원고 줄 순서이고 가지(선택지, `if`)는 그 블록이 이어서 나옵니다. `l` 원고 줄, `k` 종류(`label`, `branch` 선택지/조건 머리, `say`, `stmt`, `fx` 셰이더 줄, `jump`(return 포함), `call`, `show`(scene/show/hide/with), `menu`(menu/if/while)), `d` 깊이, `g` 이 행을 지나는 세로선 깊이, `t` 보일 글, `c` 글자색(어두운 바탕용), `a`/`b` 그 줄에 덮인 1번/2번 셰이더 색(없으면 `null`), `s` 두 자리 이름, `p` 전환 점이면 그 대상 [파일, 줄](전환을 바꾸면 이 줄 위의 셰이더 줄이 바뀜), `i` 고를 수 있는 줄. `range`는 고른 구간(행 번호), `sel` 고른 줄, `here` 게임의 지금 줄, `points` 고른 전환 점. [이 구간에 적용], 되돌리는 곳, 전환 고르기는 `panel`의 버튼입니다.
 - `editor.pending`은 저장할 것의 수입니다. 3.19부터 원고에 넣을 줄(화면 효과 "여기에서부터 적용" 등)도 셉니다.
 
 앱 → 게임 (`cmd`):
@@ -270,6 +278,7 @@ PyKaki 데스크톱 앱의 showpy 화면이 게임 안 편집기를 바깥에서
 | `custom_ui.listen` | | 지금 고른 대사 소리를 게임에서 1.5초 들려줌 (`playing`이 참) |
 | `custom_ui.stop` | | 들려주던 소리 멈춤 |
 | `custom_ui.cursor` | `do`: `mode`(+ `mode`) / `pick`(+ `file`, `line`, 게임도 그 줄로) / `step`(+ `n`) / `here` / `apply` / `remove` / `leave` | 커서와 셰이더 '여기에서부터' (3.21). `mode`는 미리 보기도 함, `apply`는 고른 줄 위에 `$ screen_fx.set_cursor("…")`(저장하면 원고에), `leave`는 미리 보기 끝 |
+| `flow` | `do`: `open` / `close` / `toggle` / `range`(+ `a`, `b` 행 번호, `a`가 `null`이면 구간 풀기) / `pick`(+ `row`, 그 행부터 처음 고를 수 있는 줄을 고르고 게임도 그 줄로) / `point`(+ `target` [파일, 줄], 전환 점 고르기/풀기) / `delete`(고른 구간 안과 끝 다음 '원래대로' 줄, 고른 전환 점의 셰이더 줄을 지우기로 함. 대사 괄호면 `fx=`를 뺌. 저장하면 원고에서 빠짐) | 줄기표 (ui_kit 4.1 + screen_fx 5.2). 앱이 패널을 가져가 있으면 게임 창의 줄기표 서랍은 숨음 |
 | `files` | | 파일 목록(`files`)을 다시 보내 달라고 함 |
 | `save` | | 편집기 Ctrl+S와 같음 (배치 파일과 원고 저장) |
 | `discard` | | 지금 탭의 저장 안 한 변경을 모두 버림 |

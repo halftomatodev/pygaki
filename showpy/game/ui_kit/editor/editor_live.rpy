@@ -286,6 +286,17 @@ init -8 python in ui_editor:
             cursor_lines=_cursor_lines(),
             )
 
+    def _flow_state():
+        """화면 효과 탭의 줄기표 (Screen FX 5.2가 있을 때). 없으면 None."""
+        fx = get_tab("screen_fx")
+        f = getattr(fx, "flow_state", None)
+        if f is None:
+            return None
+        try:
+            return _js(f())
+        except Exception:
+            return None
+
     def _cursor_lines():
         """커서와 셰이더 '여기에서부터' (Screen FX 4.5가 있을 때, 3.21)."""
         fx = get_tab("screen_fx")
@@ -574,6 +585,7 @@ init -8 python in ui_editor:
             title=_title_state(),
             custom_ui=_custom_ui_state(),
             panel=_panel_state(),
+            flow=_flow_state(),
             )
 
     ## ── 앱이 보낸 명령 ──
@@ -861,6 +873,13 @@ init -8 python in ui_editor:
 
         if cmd == "panel.do":
             return _panel_do(c)
+
+        if cmd == "flow":
+            ## 줄기표 (Screen FX 5.2): do = open / close / toggle / range(a, b) / pick(row) / point(target)
+            fx = get_tab("screen_fx")
+            if fx is None or not hasattr(fx, "flow_cmd"):
+                return False
+            return fx.flow_cmd(c)
 
         if cmd and cmd.startswith("custom_ui."):
             return _custom_ui_cmd(cmd, c)

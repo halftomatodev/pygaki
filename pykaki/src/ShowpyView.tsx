@@ -8,6 +8,7 @@ import { keyOf } from './prefs';
 import { useStore } from './store';
 import { CustomUIPanel } from './ShowpyCustomUI';
 import { MirrorPanel } from './ShowpyMirror';
+import { FlowTree } from './ShowpyFlow';
 
 interface Section {
   id: string;
@@ -67,7 +68,7 @@ export function ShowpyView() {
         })}
       </nav>
       <div className="sp-main">
-        {!on ? <NotConnected /> : st ? <Where st={st} /> : <p className="tip">게임 상태를 기다리는 중...</p>}
+        {!on ? <NotConnected /> : st ? <Where st={st} sec={sec.id} /> : <p className="tip">게임 상태를 기다리는 중...</p>}
       </div>
       <div className="sp-panel">
         <h3>{sec.label}</h3>
@@ -111,8 +112,13 @@ const SCREEN_NAMES: Record<string, string> = {
 };
 const HIDDEN_SCREENS = new Set(['ui_editor_live', 'ui_editor_pk_watch', 'ui_editor_root']);
 
-function Where({ st }: { st: GameState }) {
+function Where({ st, sec }: { st: GameState; sec: string }) {
   const w = st.where;
+  // 줄기표 (screen_fx 5.2): 인게임 화면 셰이더 칸에서 원고 옆에 펴고 접음. 펴진 것은 게임이 기억함
+  const flow = sec === 'screen_fx' ? st.flow : undefined;
+  const flowOpen = !!flow?.open;
+  // 줄기표에서 누른 줄: 원고 칸도 그 줄로 스크롤 (대조용)
+  const [peek, setPeek] = useState<{ line: number; n: number } | null>(null);
   const screens = w.screens.filter((s) => !HIDDEN_SCREENS.has(s));
   return (
     <>
@@ -125,14 +131,33 @@ function Where({ st }: { st: GameState }) {
           <b>원고 위치</b>
           <span className="sp-mono">{w.file ? `${w.file}:${w.line}` : '-'}</span>
           {w.main_menu && <span className="tip">(타이틀에 있어요)</span>}
+          {sec === 'screen_fx' && (
+            <>
+              <span className="grow" />
+              {flow === undefined || flow === null ? (
+                <span className="tip">줄기표는 showpy screen_fx 5.2부터 있어요</span>
+              ) : (
+                <button className={flowOpen ? 'on' : ''} onClick={() => liveSend({ cmd: 'flow', do: 'toggle' })} title="원고를 마디와 가지로 그린 줄기표를 원고 옆에 펴고 접어요">
+                  {flowOpen ? '줄기표 접기' : '줄기표 펴기'}
+                </button>
+              )}
+            </>
+          )}
         </div>
       </div>
-      <Script file={w.file} line={w.line} />
+      {flowOpen ? (
+        <div className="sp-flow-split">
+          <Script file={flow!.file ?? w.file} line={flow!.file && flow!.file !== w.file ? 0 : w.line} peek={peek} />
+          <FlowTree flow={flow!} onLine={(line) => setPeek({ line, n: Date.now() })} />
+        </div>
+      ) : (
+        <Script file={w.file} line={w.line} />
+      )}
     </>
   );
 }
 
-function Script({ file, line }: { file: string | null; line: number }) {
+function Script({ file, line, peek }: { file: string | null; line: number; peek?: { line: number; n: number } | null }) {
   const [text, setText] = useState<{ file: string; lines: string[] | null } | null>(null);
   const [rev, setRev] = useState(0);
   // 게임 줄을 따라 스크롤. 사용자가 직접 스크롤하면 멈추고 [지금 줄로]로 다시 따라감
@@ -165,6 +190,17 @@ function Script({ file, line }: { file: string | null; line: number }) {
   }, [file, rev]);
 
   const ready = !!text && text.file === file && !!text.lines;
+  // 줄기표에서 누른 줄로 스크롤하고, 게임 줄 따라가기는 멈춤 ([지금 줄로]로 다시)
+  useLayoutEffect(() => {
+    if (!peek || !ready) return;
+    const el = box.current?.querySelector<HTMLElement>(`div[data-n="${peek.line}"]`);
+    const b = box.current;
+    if (!el || !b) return;
+    setFollow(false);
+    auto.current = Date.now() + 900;
+    b.scrollTo({ top: el.offsetTop - b.clientHeight / 3, behavior: 'smooth' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [peek?.n, ready]);
   useLayoutEffect(() => {
     if (ready && follow) toCurrent(false);
   }, [ready, file, line, follow]);
@@ -226,7 +262,8 @@ function Script({ file, line }: { file: string | null; line: number }) {
           return (
             <div
               key={n}
-              className={n === line ? 'cur' : 'go'}
+              data-n={n}
+              className={(n === line ? 'cur' : 'go') + (peek && peek.line === n ? ' peek' : '')}
               onClick={n === line ? undefined : () => liveSend({ cmd: 'goto', where: 'line', file, line: n })}
               title={n === line ? '게임의 지금 줄' : '게임을 이 줄로 옮겨요 (지나온 줄이면 되감기, 아니면 게임을 다시 시작해서 건너뜀)'}
             >

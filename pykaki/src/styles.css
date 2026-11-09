@@ -682,6 +682,29 @@ fieldset.plain:disabled { opacity: 0.4; }
 .sp-script > div.go { cursor: pointer; }
 .sp-script > div.go:hover { background: var(--hover, rgba(127, 127, 127, 0.12)); }
 .sp-script .ln { display: inline-block; width: 40px; color: var(--muted); user-select: none; }
+.sp-script > div.peek { outline: 1px solid #ff3b8d; background: rgba(255, 59, 141, 0.12); }
+/* 줄기표 (screen_fx 5.2): 원고 | 줄기표 두 칸. 줄기표는 게임 서랍과 같은 어두운 바탕 */
+.sp-flow-split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; min-height: 0; }
+.sp-flow-split > .sp-card { min-width: 0; }
+.sp-flow { background: #14141c; color: #ddd; border: 1px solid var(--line); border-top: 2px solid #ff3b8d; border-radius: 10px; padding: 8px 8px 4px; min-width: 0; }
+.sp-flow .sp-row > b { color: #ff8fbf; width: auto; }
+.sp-flow .sp-mono { color: #bbb; }
+.sp-flow .tip { color: #999; font-size: 11px; margin: 4px 0 0; }
+.sp-flow-list:focus { outline: none; }
+.sp-flow-list { position: relative; overflow: auto; max-height: calc(100vh - 230px); min-height: 160px; user-select: none; touch-action: none; }
+.sp-flow-row { display: flex; align-items: center; font-size: 12px; white-space: nowrap; cursor: pointer; border-radius: 3px; }
+.sp-flow-row:hover { background: rgba(255, 255, 255, 0.06); }
+.sp-flow-row.sel { background: rgba(255, 255, 255, 0.13); }
+.sp-flow-row.rg { background: rgba(255, 59, 141, 0.27); }
+.sp-flow-row .ln { width: 34px; flex-shrink: 0; text-align: right; padding-right: 6px; color: #888; font-family: var(--mono); font-size: 11px; border-left: 3px solid transparent; }
+.sp-flow-row .ln.here { color: #ff3b8d; border-left-color: #ff3b8d; }
+.sp-flow-row svg { flex-shrink: 0; }
+.sp-flow-row .tx { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.sp-flow-row .band { display: flex; gap: 1px; height: 100%; flex-shrink: 0; margin: 0 4px; }
+.sp-flow-row .band i { width: 5px; height: 100%; }
+.sp-flow-row .dot, .sp-flow-row .dot-sp { width: 14px; height: 14px; flex-shrink: 0; margin-right: 2px; }
+.sp-flow-row .dot { padding: 0; border: 3px solid #ff3b8d; background: #14141c; border-radius: 1px; cursor: pointer; }
+.sp-flow-row .dot.on { border-color: #fff; background: #ff3b8d; }
 .sp-help { max-width: 560px; }
 .sp-help li { margin-bottom: 6px; }
 .sp-bar { border-bottom: 1px solid var(--line); padding-bottom: 8px; margin-bottom: 12px; }

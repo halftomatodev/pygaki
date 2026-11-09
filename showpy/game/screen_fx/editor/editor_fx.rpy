@@ -291,12 +291,12 @@ init -6 python in screen_fx:
                 fns[name] = w
                 return w
 
-        class FxTab(FxTabBase):
+        class FxTab(FlowTreeMixin, FxTabBase):
 
             id = TAB_ID
             label = "화면 효과"
             panel_screen = "ui_editor_screen_fx_panel"
-            overlay_screen = None
+            overlay_screen = "ui_editor_fx_tree_overlay"     # 5.2: 줄기표 서랍 (editor_flow.rpy)
 
             SCOPES = (("all", "항상"), ("game", "게임 중에만"), ("main_menu", "타이틀에서만"))
 
@@ -927,6 +927,49 @@ init -6 python in screen_fx:
                 except Exception:
                     return None
 
+            def call_slots(self, t, state):
+                """'$ screen_fx.shaders(…)' 같은 줄 하나를 지난 뒤의 두 자리.
+                ((1번, 2번), 두 자리 줄인지, 전환) 또는 None (셰이더 줄이 아님). 5.2: 줄기표도 씀"""
+                c = self._call(t)
+                if c is None:
+                    return None
+                name, args, kw = c
+                a, b = state
+                both = False
+                if name == "shaders":
+                    a = self._fx_slot(args[0] if args else kw.get("first", NONE))
+                    b = self._fx_slot(args[1] if len(args) > 1 else kw.get("second", NONE))
+                    both = True
+                elif name == "use":
+                    eff = args[0] if args else kw.get("effect", NONE)
+                    if "overlay" in kw:
+                        a, b, both = self._fx_slot(eff), self._ov_slot(kw["overlay"]), True
+                    elif eff == OVERLAY:
+                        a, b, both = NONE, OVERLAY, True      # 예전 use("vhs_crt") = 없음 + VHS
+                    else:
+                        a = self._fx_slot(eff)
+                elif name == "clear":
+                    a = self.start_slot(0)
+                    if "overlay" in kw:
+                        b, both = self._ov_slot(kw["overlay"]), True
+                elif name == "set_overlay":
+                    b = self._ov_slot(args[0] if args else kw.get("on", True))
+                else:
+                    return None
+                return ((a, b), both, kw.get("transition", DEFAULT))
+
+            def say_slots(self, t, state):
+                """대사 줄 괄호의 fx=, fx_overlay= 를 지난 뒤의 두 자리. 없으면 None."""
+                kw = self._say_kw(t)
+                if kw is None:
+                    return None
+                a, b = state
+                if "fx" in kw:
+                    a = self._fx_slot(kw["fx"])
+                if "fx_overlay" in kw:
+                    b = self._ov_slot(kw["fx_overlay"])
+                return ((a, b), False, kw.get("fx_transition", DEFAULT))
+
             def change_rows(self, fn=None):
                 """이 원고 파일에서 셰이더가 바뀌는 줄. [{line, target, text, before, slots, both, tr, kind, pending}]
                 두 자리는 파일을 위에서부터 읽어 셈 (게임 진행 순서가 아니라 줄 순서라 대강의 값)."""
@@ -941,48 +984,18 @@ init -6 python in screen_fx:
                     t = raw.strip()
                     row = None
                     if t.startswith(self.SHADER_HEADS) and not t.startswith("$ screen_fx.set_warp("):
-                        c = self._call(t)
+                        c = self.call_slots(t, state)
                         if c is None:
-                            continue
-                        name, args, kw = c
-                        a, b = state
-                        both = False
-                        if name == "shaders":
-                            a = self._fx_slot(args[0] if args else kw.get("first", NONE))
-                            b = self._fx_slot(args[1] if len(args) > 1 else kw.get("second", NONE))
-                            both = True
-                        elif name == "use":
-                            eff = args[0] if args else kw.get("effect", NONE)
-                            if "overlay" in kw:
-                                a, b, both = self._fx_slot(eff), self._ov_slot(kw["overlay"]), True
-                            elif eff == OVERLAY:
-                                a, b, both = NONE, OVERLAY, True      # 예전 use("vhs_crt") = 없음 + VHS
-                            else:
-                                a = self._fx_slot(eff)
-                        elif name == "clear":
-                            a = self.start_slot(0)
-                            if "overlay" in kw:
-                                b, both = self._ov_slot(kw["overlay"]), True
-                        elif name == "set_overlay":
-                            b = self._ov_slot(args[0] if args else kw.get("on", True))
-                        else:
                             continue
                         tgt = [ l for l in stmts if l > i and not (lines[l - 1].strip().startswith(self.OUR_LINES)) ]
                         if not tgt:
                             continue
-                        row = dict(line=i, target=(fn, tgt[0]), text=t, kind="code", slots=(a, b), both=both,
-                            tr=kw.get("transition", DEFAULT))
+                        row = dict(line=i, target=(fn, tgt[0]), text=t, kind="code", slots=c[0], both=c[1], tr=c[2])
                     elif i in stmts:
-                        kw = self._say_kw(t)
-                        if kw is None:
+                        c = self.say_slots(t, state)
+                        if c is None:
                             continue
-                        a, b = state
-                        if "fx" in kw:
-                            a = self._fx_slot(kw["fx"])
-                        if "fx_overlay" in kw:
-                            b = self._ov_slot(kw["fx_overlay"])
-                        row = dict(line=i, target=(fn, i), text=t, kind="say", slots=(a, b), both=False,
-                            tr=kw.get("fx_transition", DEFAULT))
+                        row = dict(line=i, target=(fn, i), text=t, kind="say", slots=c[0], both=False, tr=c[2])
                     if row is None:
                         continue
                     row["before"] = tuple(state)
@@ -1264,16 +1277,25 @@ init -6 python in screen_fx:
                     lines = [ ] if e.get("remove") else self.gen_lines(e, key)
                     if not lines and not e.get("remove") and not (e.get("slots", 0) is None or e.get("cursor_mode", 0) is None):
                         continue
-                    rv.append(se.Edit(key[0], key[1], se.INSERT,
-                        { "lines": lines, "replace": self.OUR_LINES }, expect=e.get("expect") or None))
+                    ed = se.Edit(key[0], key[1], se.INSERT,
+                        { "lines": lines, "replace": self.OUR_LINES }, expect=e.get("expect") or None)
+                    ## 처음 고른 줄. PyKaki 원고는 저장할 때 linenumber를 표시 줄로 옮기므로 이것으로 지움 (5.2)
+                    ed.key = key
+                    rv.append(ed)
                 return rv
 
             def after_script_save(self, edits):
+                ## 5.2 고침: 예전에는 (파일, linenumber)로 지워서, PyKaki 원고(저장할 때 linenumber가 한 줄 위로 바뀜)에서는
+                ## 저장한 편집이 남아 다음 저장 때 예전 줄 번호로 또 써졌음(셰이더 줄이 겹치거나 지운 줄이 되살아남)
+                changed = set(ed.filename for ed in edits if ed.ok and getattr(ed, "changed", False))
                 for ed in edits:
-                    if ed.ok:
-                        self.line_edits.pop((ed.filename, ed.linenumber), None)
+                    key = getattr(ed, "key", None) or (ed.filename, ed.linenumber)
+                    ## 저장된 것, 그리고 줄 번호가 바뀐 파일의 남은 편집은 버림 (다시 불러오면 줄 번호가 맞지 않음)
+                    if ed.ok or ed.filename in changed:
+                        self.line_edits.pop(key, None)
                 ## 줄이 늘어서 줄 번호가 바뀌므로, 다시 불러온 뒤 지금 줄로 다시 고름
                 self.line_sel = None
+                self.tree_after_save()
 
             def key(self, k, shift):
                 if not self.is_lines():
@@ -1290,6 +1312,10 @@ init -6 python in screen_fx:
                 elif k == pg.K_l:
                     self.list_open = not self.list_open
                     renpy.restart_interaction()
+                elif k == pg.K_g and self.se() is not None:
+                    self.tree_toggle()
+                elif k == pg.K_DELETE and self.tree_open:
+                    self.tree_delete()
                 else:
                     return False
                 return True
@@ -1633,6 +1659,7 @@ init -6 python in screen_fx:
                     return [
                         "1번, 2번을 고르면 화면에 바로 보이고, 그 아래에서 효과의 세부 속성을 고칩니다.",
                         "목록에서 줄 누르기: 그 줄을 고르고 게임도 그 줄로 | [[ ] 앞뒤 줄 | 세모 두 번: 지금 줄로 | Ctrl+S 저장",
+                        "G 줄기표: 마디를 끌어 구간 고르기 → [[이 구간에 적용] | 오른쪽 네모 점으로 전환 점 고르기 | Delete 구간/고른 점의 셰이더 지우기",
                         ]
                 if self.is_tv():
                     return [
@@ -1652,7 +1679,8 @@ init -6 python in screen_fx:
 
             def session(self):
                 return dict(page=self.page, groups=dict(self.groups), targets=dict(self.targets),
-                    line_edits={ k : dict(v) for k, v in self.line_edits.items() })
+                    line_edits={ k : dict(v) for k, v in self.line_edits.items() },
+                    tree_open=bool(self.tree_open))
 
             def restore(self, d):
                 if d:
@@ -1660,6 +1688,7 @@ init -6 python in screen_fx:
                     self.groups = dict(d.get("groups") or { })
                     self.targets = dict(d.get("targets") or { })
                     self.line_edits = { tuple(k) : dict(v) for k, v in (d.get("line_edits") or { }).items() }
+                    self.tree_open = bool(d.get("tree_open", False))
 
         ## ── 타이틀 셰이더 / 게임 내 메뉴 셰이더 (4.3) ──
         ## 그 화면에만 씌우는 셰이더 두 자리. 저장하면 screen_fx_layout.rpy의 title_shaders / menu_shaders.
@@ -1991,6 +2020,7 @@ screen ui_editor_screen_fx_panel(tab):
         use ui_editor_fx_slots(tab, _a, _b, tab.set_pick, tab.clear_picks)
 
         if tab.se() is not None:
+            use ui_editor_fx_tree_panel(tab)
             use ui_editor_fx_lines_panel(tab)
         else:
             text "원고 쓰기 도구(UI Kit 3.0 이상)가 없어서 줄 고르기와 [[여기에서부터 적용]은 못 씁니다." style "ui_editor_small"

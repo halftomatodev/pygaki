@@ -96,6 +96,29 @@ export interface PanelState {
   popup: MirrorNode | null;
   popup_kind: string | null;
 }
+// 줄기표 (screen_fx 5.2): 원고를 줄 번호 순서대로 마디와 가지로. docs/LINK.md 9장 state.flow
+export interface FlowRow {
+  l: number; // 원고 줄 번호
+  k: 'label' | 'branch' | 'say' | 'stmt' | 'fx' | 'jump' | 'call' | 'show' | 'menu';
+  d: number; // 깊이 (가지 안으로 들어갈수록 1씩)
+  g: number[]; // 이 행을 지나는 세로선 깊이
+  t: string; // 보일 글
+  c: string; // 글자색 (어두운 바탕용)
+  a: string | null; // 1번 셰이더 색 (없으면 null)
+  b: string | null; // 2번 셰이더 색
+  s: string; // "1번 … + 2번 …"
+  p: [string, number] | null; // 전환 점이면 그 대상 [파일, 줄]
+  i: boolean; // 고를 수 있는 줄 (셰이더 줄을 넣을 수 있음)
+}
+export interface FlowState {
+  open: boolean;
+  file?: string | null;
+  rows?: FlowRow[];
+  range?: [number, number] | null; // 고른 구간 (행 번호)
+  sel?: number | null; // 고른 줄
+  here?: number | null; // 게임의 지금 줄
+  points?: [string, number][]; // 고른 전환 점
+}
 export interface GameFiles {
   audio: string[];
   images: string[];
@@ -107,6 +130,7 @@ export interface GameState {
   title: TitleState | null;
   custom_ui?: CustomUIState | null; // ui_kit 3.15부터
   panel?: PanelState | null; // ui_kit 3.16부터. 편집기가 열려 있고 게임 안 패널이 숨어 있을 때만
+  flow?: FlowState | null; // screen_fx 5.2부터 (줄기표). 없으면 예전 판
 }
 
 interface S {
