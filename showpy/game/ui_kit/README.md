@@ -15,6 +15,44 @@
 
 버전 3.23 · 렌파이 8.5.3 기준으로 만들었습니다.
 
+### 4.0을 만드는 중 (글자 효과)
+
+- **등장 효과 11개 추가** (`engine/text_effects.glsl`). PyKaki 효과 목록과 미리보기, 렌파이 견본 영상에도 나옵니다.
+
+  | 이름 | 모습 |
+  |---|---|
+  | `slidein` | 미끄러져 멈춤: 한쪽에서 빠르게 들어와 살짝 지나쳤다가 돌아와 멈춤. 글자마다 차례로, 또는 줄 통째로 |
+  | `shake` | 살짝 흔들림: 다 나온 뒤에도 글자마다 조금씩 떨림. 다른 효과와 겹쳐 쓰기 좋음 |
+  | `inkfill` | 외곽선 채우기: 외곽선만 먼저 다 보이고, 속은 글자가 나오는 차례대로 아래에서 위로 차오름 |
+  | `glyphbox` | 글자마다 상자: 글자 뒤에 네모 상자가 먼저 튀어나오고 글자가 찍힘. 띄어쓰기에도 상자가 생김 |
+  | `stamp` | 도장: 크게, 기운 채 찍히며 줄어들고 잉크 번진 결이 남음 (기본 붉은 잉크) |
+  | `punch` | 튀어나오는 줌: 화면 깊은 곳에서 커지며 튀어나오고 뒤로 잔상이 끌림 |
+  | `squash` | 찌그러졌다 튕김: 납작하게 눌렸다가 고무처럼 튕기며 원래 모양 |
+  | `extrude` | 입체 글자: 같은 글자를 비스듬히 여러 겹 깔아 두께를 만듦. 나올 때 두께가 자라남 |
+  | `flipin` | 뒤집으며 나오기: 글자가 판처럼 위아래(또는 좌우)로 뒤집히며 자리 잡음. 렌파이의 `flip`과 다른 효과 |
+  | `led` | LED 전광판: 글자를 점으로 된 전광판 글자로, 꺼진 점도 흐리게 보임 |
+  | `split` | 위아래 갈라짐: 글자 위 절반과 아래 절반이 위아래에서 와서 맞물림 |
+
+  ```renpy
+  e "미끄러져 들어온다." (cps=30, effect="slidein")
+  e "위에서 줄 통째로." (cps=30, effect="slidein:u__dir=90:u__stagger=0")
+  e "들어와서 계속 떨린다." (cps=30, effect="slidein|shake")      # 두 효과 겹치기는 |
+  e "외곽선부터." (cps=30, effect="inkfill")                       # 외곽선이 없으면 흰 2픽셀 외곽선을 깖
+  e "한 번에 채우기." (cps=30, effect="inkfill:u__mode=0")
+  e "상자 글자." (cps=30, effect="glyphbox:u__box=#ffe14d:u__ink=#111111")
+  e "쾅, 도장." (cps=20, effect="stamp:u__color=#1b2a8f")          # 파란 잉크. 원래 색은 u__color=#00000000
+  e "입체 글자." (cps=30, effect="extrude:u__depth=12:u__angle=135")  # 두께 방향 135 = 왼쪽 아래
+  e "좌우로 뒤집기." (cps=30, effect="flipin:u__axis=1")
+  e "전광판." (cps=30, effect="led:u__cell=6")
+  ```
+  값: `slidein` `u__dir`(도, 0 오른쪽에서), `u__distance`(픽셀), `u__overshoot`(지나치는 정도), `u__stagger`(1 글자마다, 0 줄 통째로), `u__duration` /
+  `shake` `u__amount`(픽셀), `u__speed`(1초에 바뀌는 수), `u__rotate`(도) /
+  `inkfill` `u__mode`(0 한 번에, 1 아래에서 위로), `u__line`(외곽선 굵기) /
+  `glyphbox` `u__box`(상자 색), `u__ink`(글자 색, `#00000000`이면 원래 색), `u__pad`, `u__round`, `u__jitter`(기울기 도), `u__pop`(튀어나옴) /
+  `stamp` `u__zoom`, `u__rotate`, `u__color`, `u__grain` / `punch` `u__zoom`(튀어나오는 크기), `u__trail`(잔상) / `squash` `u__amount`, `u__bounce` /
+  `extrude` `u__depth`(픽셀), `u__angle`(도), `u__shade`, `u__color` / `flipin` `u__axis` / `led` `u__cell`, `u__dot`, `u__off`, `u__offcolor`, `u__glow` / `split` `u__distance`, `u__gap`.
+  `extrude`의 두께가 옆 글자 칸으로 넘어가는 부분은 옆 글자가 나와야 보입니다.
+
 ### 3.23에서 바뀐 점
 
 - 편집기 이름을 화면에서 **GUI 편집기**로 (pygaki에 합쳐서). 코드 이름(`ui_editor`)과 단축키(Shift+M)는 그대로.
@@ -974,7 +1012,7 @@ e "어디 갔었어?" (name_x=820, name_y=-60, speed=0.5, effect="jitter")
 | `align` | 줄 정렬 (0.0 왼쪽 ~ 1.0 오른쪽) | `align=0.5` |
 | `speed` | 나오는 속도 배율 (플레이어 텍스트 속도에 곱함. 0.5 = 절반 속도). 텍스트 속도가 "즉시"면 효과가 없음 | `speed=0.5` |
 | `cps` | 나오는 속도, 1초에 나오는 글자 수. 플레이어 텍스트 속도와 상관없이 이 값 | `cps=20` |
-| `effect` | 등장 효과: `"dissolve"` 서서히, `"typewriter"` 타자기, `"slowalpha"` 흐리게 대기, `"flip"` 뒤집히며, `"zoom"` 커지며, `"jitter"` 떨림, `"wave"` 물결. showpy 효과(3.5~3.6): `"scatter"` 흩어졌다 모이기, `"drop"` 떨어지기, `"spin"` 회전하며, `"shuffle"` 무작위 순서, `"flash"` 색 번쩍, `"slam"` 크게 찍히기, `"typecursor"` 커서 타자기, `"echo"` 색 잔상, `"glitch"` 글리치, `"glow"` 빛 번짐, `"blurin"` 흐렸다 또렷해지기, `"wipe"` 위에서 그려지기, `"blockglitch"` 블록 글리치, `"melt"` 녹아내림, `"mosh"` 데이터모싱 흉내, `"liquid"` 일렁임, `"vhs"` VHS 지직거림, `"rise"` 떠오르기, `"lean"` 기울며 들어오기, `"stretch"` 늘어나며 들어오기 | `effect="wave"` |
+| `effect` | 등장 효과: `"dissolve"` 서서히, `"typewriter"` 타자기, `"slowalpha"` 흐리게 대기, `"flip"` 뒤집히며, `"zoom"` 커지며, `"jitter"` 떨림, `"wave"` 물결. showpy 효과(3.5~3.6): `"scatter"` 흩어졌다 모이기, `"drop"` 떨어지기, `"spin"` 회전하며, `"shuffle"` 무작위 순서, `"flash"` 색 번쩍, `"slam"` 크게 찍히기, `"typecursor"` 커서 타자기, `"echo"` 색 잔상, `"glitch"` 글리치, `"glow"` 빛 번짐, `"blurin"` 흐렸다 또렷해지기, `"wipe"` 위에서 그려지기, `"blockglitch"` 블록 글리치, `"melt"` 녹아내림, `"mosh"` 데이터모싱 흉내, `"liquid"` 일렁임, `"vhs"` VHS 지직거림, `"rise"` 떠오르기, `"lean"` 기울며 들어오기, `"stretch"` 늘어나며 들어오기, `"slidein"` 미끄러져 멈춤, `"shake"` 살짝 흔들림, `"inkfill"` 외곽선 채우기, `"glyphbox"` 글자마다 상자, `"stamp"` 도장, `"punch"` 튀어나오는 줌, `"squash"` 찌그러졌다 튕김, `"extrude"` 입체 글자, `"flipin"` 뒤집으며 나오기, `"led"` LED 전광판, `"split"` 위아래 갈라짐. 두 효과 겹치기는 `|` | `effect="wave"` |
 | `name_x`, `name_y` | 이름 상자 위치 (대사 창 왼쪽 위 기준. 이름 배경 그림째 움직임) | `name_x=820, name_y=-60` |
 | `name_font`, `name_size`, `name_color` | 이름 글꼴, 크기, 색 | `name_size=34` |
 | `fx` | (`screen_fx`가 있을 때) 이 대사부터 켤 화면 효과. `"default"` = 선택취소. 다음에 바꿀 때까지 이어짐 | `fx="ascii"` |

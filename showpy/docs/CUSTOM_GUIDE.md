@@ -781,7 +781,7 @@ define n2 = Character(kind=t, what_xpos=400, what_ypos=210)   # 위치 프리셋
 | `width` | `what_xmaximum` | 한 줄 최대 너비 |
 | `align` | `what_text_align` | 줄 정렬 0.0 ~ 1.0 |
 | `speed` | `what_slow_cps_multiplier` | 나오는 속도 배율 (플레이어 텍스트 속도에 곱함. 0.5 = 절반) |
-| `effect` | `what_textshader` | 등장 효과: `"dissolve"` 서서히, `"typewriter"` 타자기, `"slowalpha"` 흐리게 대기, `"flip"` 뒤집히며, `"zoom"` 커지며, `"jitter"` 떨림, `"wave"` 물결. showpy 효과: `"scatter"` 흩어졌다 모이기, `"drop"` 떨어지기, `"spin"` 회전하며, `"shuffle"` 무작위 순서, `"flash"` 색 번쩍, `"slam"` 크게 찍히기, `"typecursor"` 커서 타자기, `"echo"` 색 잔상, `"glitch"` 글리치, `"glow"` 빛 번짐, `"blurin"` 흐렸다 또렷해지기, `"wipe"` 위에서 그려지기, `"blockglitch"` 블록 글리치, `"melt"` 녹아내림, `"mosh"` 데이터모싱 흉내, `"liquid"` 일렁임, `"vhs"` VHS 지직거림, `"rise"` 떠오르기, `"lean"` 기울며 들어오기, `"stretch"` 늘어나며 들어오기 |
+| `effect` | `what_textshader` | 등장 효과: `"dissolve"` 서서히, `"typewriter"` 타자기, `"slowalpha"` 흐리게 대기, `"flip"` 뒤집히며, `"zoom"` 커지며, `"jitter"` 떨림, `"wave"` 물결. showpy 효과: `"scatter"` 흩어졌다 모이기, `"drop"` 떨어지기, `"spin"` 회전하며, `"shuffle"` 무작위 순서, `"flash"` 색 번쩍, `"slam"` 크게 찍히기, `"typecursor"` 커서 타자기, `"echo"` 색 잔상, `"glitch"` 글리치, `"glow"` 빛 번짐, `"blurin"` 흐렸다 또렷해지기, `"wipe"` 위에서 그려지기, `"blockglitch"` 블록 글리치, `"melt"` 녹아내림, `"mosh"` 데이터모싱 흉내, `"liquid"` 일렁임, `"vhs"` VHS 지직거림, `"rise"` 떠오르기, `"lean"` 기울며 들어오기, `"stretch"` 늘어나며 들어오기, `"slidein"` 미끄러져 멈춤, `"shake"` 살짝 흔들림, `"inkfill"` 외곽선 채우기, `"glyphbox"` 글자마다 상자, `"stamp"` 도장, `"punch"` 튀어나오는 줌, `"squash"` 찌그러졌다 튕김, `"extrude"` 입체 글자, `"flipin"` 뒤집으며 나오기, `"led"` LED 전광판, `"split"` 위아래 갈라짐. 두 효과 겹치기는 `effect="slidein|shake"` |
 | `name_x`, `name_y` | `namebox_xpos`, `namebox_ypos` | 이름 상자 위치 (대사 창 왼쪽 위 기준, 이름 배경째 움직임) |
 | `name_font`, `name_size`, `name_color` | `who_font`, `who_size`, `who_color` | 이름 글꼴, 크기, 색 |
 

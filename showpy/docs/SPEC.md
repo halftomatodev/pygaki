@@ -300,7 +300,9 @@ $ screen_fx.set_values("shards", count=80, colors=["#d22", "#811"], size=(3, 9),
 | `led` | LED 전광판 | 글자를 점으로 된 전광판 글자로, 꺼진 점도 흐리게 보임 | `u__cell`, `u__off`(꺼진 점 밝기) |
 | `split` | 위아래로 갈라지며 맞물림 | 글자 위 절반과 아래 절반이 양쪽에서 와서 맞물림 | `u__distance`, `u__gap` |
 
-- 여러 효과 겹치기(`effect="slidein,shake"`)는 렌파이 글자 셰이더가 원래 됩니다. PyKaki 미리보기도 이미 겹친 효과를 그립니다.
+- 5단계 1차에서 만든 것 (2026-11-09): `slidein`, `shake`, `inkfill`, `glyphbox`. 겹치기 문법은 쉼표가 아니라 `|`(`effect="slidein|shake"`, 렌파이 `parse_textshader`). `glyphbox`는 줄 끝 빈 칸(가짜 글자 `a_text_pseudo_glyph`)은 빼고, 띄어쓰기에는 상자가 생김. `inkfill`의 외곽선 겹은 굵어진 글자에서 원래 모양을 빼서(8방향 erode, `u__line`) 테두리만 남김. 글자 자리는 `a_text_pos_rect`(x, y, 폭, 높이). 렌파이에 같은 이름 `flip` 효과가 있어서 뒤집기는 `flipin`으로.
+- 5단계 2차에서 만든 것 (2026-11-09): `stamp`, `punch`, `squash`, `extrude`, `flipin`(표의 `flip`), `led`, `split`. 공용 조각 `ROTATE`가 `l__p`를 쓰므로 효과 안에서 같은 이름을 쓰지 않음. `led`는 줄 전체에 꺼진 점판이 깔림(아직 안 나온 글자 자리 포함).
+- 여러 효과 겹치기(`effect="slidein|shake"`)는 렌파이 글자 셰이더가 원래 됩니다. PyKaki 미리보기도 이미 겹친 효과를 그립니다.
 - `glyphbox`는 띄어쓰기에도 상자가 생깁니다(글자 네모가 띄어쓰기 폭만큼 있음). 만들 때 확인해서, 띄어쓰기 칸을 알아낼 수 없으면 "띄어쓰기에도 상자" 그대로 두고 안내에 적습니다.
 - PyKaki 미리보기(`pykaki/src/fx/`)가 `u_text_main`, `u_text_depth`, 외곽선 겹(`@outline`)을 렌파이와 같게 그리는지 확인합니다. `inkfill`, `glyphbox`, `extrude`가 이것에 기댑니다.
 - 글자 움직임 참고 그림 중 고르지 않은 것: 글자 띠·3D 터널·원기둥·소용돌이·숫자 굴림·제목 바꾸기는 대사 한 줄 효과가 아니라서 이번에는 뺍니다. 그중 띠(12 사선 띠, 14 전광판 흐름, 16 출입 금지 테이프)는 공포 게임에 잘 맞아서 다음 판 "글자 띠 장식"으로 남깁니다.

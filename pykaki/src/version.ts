@@ -1,5 +1,5 @@
 // 대본 파일에 남기는 "쓴 판" 표시 (SPEC 9-3)
 // FEATURE: 대본 파일을 제대로 읽는 데 필요한 기능 판 번호. 예전 판이 모르는 줄 종류나 값을 대본에 더할 때만 1 올린다
-export const FEATURE = 1;
+export const FEATURE = 2; // 2: 글자 효과 slidein, shake, inkfill, glyphbox (showpy ui_kit 4.0)
 // 빌드한 날과 커밋 (vite.config.ts가 넣음)
 export const BUILD: string = __BUILD__;
