@@ -2,8 +2,8 @@
 
 코드를 고치는 사람과 AI가 읽는 문서입니다. 사용법은 [CUSTOM_GUIDE.md](CUSTOM_GUIDE.md)에 있습니다.
 
-- 묶음 버전 4.23 (`ui_kit` 3.22, `screen_fx` 5.0, `hotkeys` 1.0, `splash` 2.0) = pygaki v1.2
-- 만드는 중(v2.0): `screen_fx` 5.1 (새 화면 효과 여섯, 2026-11-09), `ui_kit` 3.23 (GUI 편집기 이름, UI 글 탭, 폴더 열기, F9), `ui_kit` 4.0 (글자 효과 11개, 글 상자 `bubble` `pill`)
+- 묶음 버전 5.0 (`ui_kit` 4.0, `screen_fx` 5.1, `hotkeys` 1.0, `splash` 2.0) = pygaki v1.3 (2026-11-09)
+- 5.0에 들어간 것: `screen_fx` 5.1 (새 화면 효과 일곱), `ui_kit` 3.23 (GUI 편집기 이름, UI 글 탭, 폴더 열기, F9), `ui_kit` 4.0 (글자 효과 11개, 글 상자 `bubble` `pill`)
 - 렌파이 8.5.3 기준
 - 작업 규칙: [DEV_RULES.md](DEV_RULES.md)
 - PyKaki 연결 형식: [LINK.md](../../docs/LINK.md)
@@ -24,7 +24,7 @@
 | 폴더 | 버전 | 하는 일 |
 |---|---|---|
 | `game/ui_kit` | 4.0 | 타이틀 메뉴(배경, 제목, 부제, 글자 효과), ESC 메뉴, 선택지, 커서, 클릭 대기 표시, 대사 소리, 대사 스타일, 글 상자(`text_box`), 그림과 영상 배치(`stage`), 확인 창 글과 버튼 글자(`ui_text`), GUI 편집기(개발 모드 Shift+M, 화면 이름 "GUI 편집기"), 원고 쓰기 도구(`script_edit`) |
-| `game/screen_fx` | 5.1 | 셰이더 두 자리(기본, 아스키, VHS, 단말기, 게임보이, 글리치, 지글거림, 망점, 홀로그램, 나이트비전, 조각 어긋남 중 둘), 타이틀과 게임 내 메뉴 셰이더(따로 두 자리), TV 전환, 글자 빼기, 커서 자리, 타이틀 일렁임, 이미지 하나에 거는 효과, 셰이더 전환 틀 |
+| `game/screen_fx` | 5.1 | 셰이더 두 자리(기본, 아스키, VHS, 단말기, 게임보이, 글리치, 지글거림, 망점, 홀로그램, 나이트비전, 조각 어긋남, 파편 흩날림 중 둘), 타이틀과 게임 내 메뉴 셰이더(따로 두 자리), TV 전환, 글자 빼기, 커서 자리, 타이틀 일렁임, 이미지 하나에 거는 효과, 셰이더 전환 틀 |
 | `game/hotkeys` | 1.0 | 단축키, 조작방법 화면 |
 | `game/splash` | 2.0 | 타이틀 전 로고, 경고, 조작 방법 페이지, 편집기 "스플래시" 탭(ui_kit이 있을 때, 화면에서 끌고 돌리고 글 고치기, 페이지 더하기) |
 
@@ -134,7 +134,7 @@ renpy.exe <프로젝트> lint
 
 `examples/pykaki_sample`이 시험장입니다. 사용법은 그 폴더의 `README.md`에 있습니다.
 
-## 8. 다음 큰 판: pygaki 2.0 (계획, 아직 안 만듦)
+## 8. 큰 판: pygaki 2.0 계획 → v1.3으로 냄 (2026-11-09)
 
 2026-11-09 사용자와 정한 것. 스플래시를 화면에서 고치기, 새 화면 효과 여덟 가지(파편 흩날림, 지글거림 포함), 새 글자 효과와 글자 꾸미기를 한 판에 넣습니다. 만들기 전에 이 장을 먼저 읽고, 만든 것은 각 플러그인 README와 위쪽 장으로 옮깁니다.
 
@@ -142,13 +142,14 @@ renpy.exe <프로젝트> lint
 
 | 무엇 | 지금 | 다음 |
 |---|---|---|
-| pygaki 묶음·앱 (Releases 태그) | v1.2 (2026-11-09) | **v2.0** |
+| pygaki 묶음·앱 (Releases 태그) | v1.2 (2026-11-09) | **v1.3** (계획은 v2.0) |
 | showpy 묶음 | 4.23 | **5.0** |
 | `ui_kit` | 3.22 | **4.0** (글자 효과, 글 상자 꾸미기, 편집기 입력·회전 틀) |
-| `screen_fx` | 5.1 (새 효과 여섯 만듦, 트레이싱지는 뺌, 파편은 아직) | **5.1** (새 효과 여덟) |
+| `screen_fx` | 5.1 (새 효과 일곱 만듦, 트레이싱지는 뺌) | **5.1** |
 | `splash` | 2.0 (화면에서 고치기, 페이지 더하기, 만듦) | 2.0 |
 | `hotkeys` | 1.0 | 1.0 |
 
+- 2026-11-09 사용자와 정해서 이 장의 것을 다 모아 **v1.3**(showpy 5.0)으로 냄(이름만 v2.0 대신 v1.3).
 - 2026-11-09 사용자가 확인하려고 중간 판 **v1.2**(showpy 4.23)를 냄: 태그 상자, 웹에서 쓰고 앱에서 이어 쓰기, splash 2.0, screen_fx 5.0 바탕. 새 화면 효과·글자 효과는 v2.0에.
 - 한 번에 다 만들지 않고 8-7의 순서대로 나눠 커밋합니다. 단계마다 Lint, 시험 프로젝트 복사, `.rpyc` 지우기, PyKaki 빌드를 지킵니다.
 
@@ -269,13 +270,14 @@ renpy.exe <프로젝트> lint
 - 새 효과는 모두 `with_overlay = False`(쓰는 동안 VHS 덮개를 기본으로 켜지 않음)
 - 셰이더 함수(`fragment_functions`)에서는 효과 유니폼을 바로 못 읽음 → 인자로 넘김. 전환 셰이더(`ShaderSwap`)에서는 `u_lod_bias`도 못 읽음. GLSL에서 `gl_`로 시작하는 이름은 못 씀
 
-**파편을 쓰는 예**
+**파편을 쓰는 예** (4단계에서 만듦, 2026-11-09)
 
 ```renpy
 $ screen_fx.shaders("shards", "vhs_crt")
-$ screen_fx.set_values("shards", count=80, colors=["#d22", "#811"], size=(3, 9), direction=200)
+$ screen_fx.set_values("shards", count=80, colors=2, color="#d22", color2="#811", size_min=3, size_max=9, direction=200)
 ```
 
+- 만든 것이 위 계획과 다른 점: 색은 목록 대신 `colors`(색 수 1~3) + `color`, `color2`, `color3`(편집기 색 칸이 값 하나씩이라), 크기는 `size_min`, `size_max`. 더한 값: `thin`(가늘기), `opacity`, `dim`(바탕 어둡게). 조각은 한쪽이 더 뾰족한 길쭉한 마름모, 돌기와 함께 판처럼 뒤집히며 빛이 바뀜. 칸의 1/4은 비워서 고르게 보이지 않게. 프리셋 `embers`, `ash`, `storm`, `dread`. `order` 59.
 - 편집기 화면 효과 탭에서 고르면 양·색(세 칸)·크기·속도·방향 막대가 나옵니다. 값은 다른 효과처럼 `shards_config.rpy`에 적고, 편집기로 바꾸면 `shards_layout.rpy`에 저장됩니다.
 - `screen_fx.set_values(이름, …)`는 새로 만드는 함수입니다. 게임 중에 효과 값을 바꾸고(세이브·되감기에 저장), `screen_fx.set_values(이름)`처럼 값 없이 부르면 설정대로 돌아갑니다. 모든 효과에 씁니다.
 - 파편과 지글거림은 대사창 빼기(`exclude`)도 다른 효과와 같게 됩니다.
@@ -338,11 +340,11 @@ $ screen_fx.set_values("shards", count=80, colors=["#d22", "#811"], size=(3, 9),
 1. `splash` 2.0: 가운데 화면, 끌기·회전·늘리기, 화면에서 글 고치기, 페이지 더하기·지우기·순서, 저장.
 2. `screen_fx` 5.0 바탕: 이미지에 거는 효과, 값 바꾸기, 셰이더 전환 틀 (만듦).
 3. 화면 효과: `glitch`, `boil`, `halftone`, `hologram`, `nightvision`(+화면 글), `tiles` (만듦, `screen_fx` 5.1). `tracepaper`는 뺌.
-4. 파편 흩날림(`shards`).
+4. 파편 흩날림(`shards`) (만듦, 2026-11-09).
 5. 글자 효과: `slidein`, `shake`, `inkfill`, `glyphbox`, 그다음 `stamp`, `punch`, `squash`, `extrude`, `flip`, `led`, `split`.
 6. 글 상자 `bubble`, `pill` (만듦, `ui_kit` 4.0).
 7. PyKaki 목록·미리보기·LINK.md, 편집기 칸, README, `CUSTOM_GUIDE.md`, 공개용 구글 문서 수정안. (2026-11-09: PyKaki 상자 칸·효과 겹치기·`FX_BASE`·LINK.md 2장·`FEATURE` 3, 이미지 탭 [효과] 칸 만듦)
-8. 묶음 v2.0 태그.
+8. 묶음 태그: 사용자와 정해서 **v1.3**으로 (2026-11-09).
 
 ### 8-8. 사람이 볼 것
 

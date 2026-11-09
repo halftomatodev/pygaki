@@ -2,12 +2,13 @@
 
 버전별 자세한 설명은 [docs/READ_ME_FIRST.md](docs/READ_ME_FIRST.md)와 폴더별 `README.md`에 있습니다.
 
-## 5.0 (만드는 중) = pygaki v2.0
+## 5.0 (2026-11-09) = pygaki v1.3
 
 `screen_fx` 5.1 (2026-11-09):
-- 새 화면 효과 여섯 가지: 글리치(`glitch`), 지글거림(`boil`), 망점(`halftone`, 한 색/CMYK), 홀로그램(`hologram`), 나이트비전(`nightvision`, 화면 글과 녹화 시간), 조각 어긋남(`tiles`). 1번·2번 자리, 대사 괄호, 이미지 하나에 거는 효과(`image_fx`), 프리셋, 편집기 막대가 다 됩니다.
+- 새 화면 효과 일곱 가지: 글리치(`glitch`), 지글거림(`boil`), 망점(`halftone`, 한 색/CMYK), 홀로그램(`hologram`), 나이트비전(`nightvision`, 화면 글과 녹화 시간), 조각 어긋남(`tiles`), 파편 흩날림(`shards`). 1번·2번 자리, 대사 괄호, 이미지 하나에 거는 효과(`image_fx`), 프리셋, 편집기 막대가 다 됩니다.
 - 장면 전환 `screen_fx.TileSwap(시간)`: 칸마다 다른 때에 새 장면으로 바뀝니다.
 - 나이트비전 화면 글을 하나씩 켜고 끔(왼쪽 위 글, REC, 숫자 시간, [ZOOM]), 글 내용 고치기, 화면 이미지 얹기(`hud_image`, 편집기에서 그림 고르기, 크기 `hud_image_zoom`, 회전 `hud_image_rotate`, 자리 `hud_image_x`, `hud_image_y`). 세부 속성에 글 칸(`"text"`)과 그림 고르기(`"image"`) 줄 종류.
+- 파편 흩날림(`shards`): 화면 위로 작은 뾰족한 조각이 바람에 날림. 깊이 세 겹, 조각마다 돌고 뒤집히고 깜빡임. 양(`count`), 색 1~3개(`colors`, `color`, `color2`, `color3`), 크기(`size_min`, `size_max`), 가늘기, 속도, 방향, 흔들림, 바탕 어둡게(`dim`). 프리셋 `embers`(불티), `ash`(재), `storm`(폭풍), `dread`(어두운 화면에 붉은 파편). 그림 파일 없이 셰이더 한 번.
 - 트레이싱지(`tracepaper`)는 만들었다가 뺐습니다.
 
 `ui_kit` 3.23:
@@ -16,7 +17,7 @@
 - 이미지/영상 탭과 그림 고르기 창에 폴더 열기 버튼(탐색기). 고르기 창을 열 때와 [새로 읽기]로 파일 목록을 다시 읽어서, 게임을 켠 뒤 넣은 그림도 나옴(새 그림은 그림 이름도 만듦).
 - pygaki 앱과 이어져 있을 때 F9로 게임 창의 GUI 편집기 보이기/숨기기.
 
-`ui_kit` 4.0 (글 상자): 대사 괄호 `box="bubble"`(만화 말풍선, 꼬리, 튀어나오며 나타남), `box="pill"`(둥근 테두리, 속 채우기, 기울이기). `tail`, `box_rotate`, `bubble_…`, `pill_…` 값, 기본 모양은 `say_style.box_styles`. 편집기 대사 탭 "상자" 칸. 이미지/영상 탭에 [효과] 칸(고른 그림에 `screen_fx.image_fx`). PyKaki: 글 상자 칸, 등장 효과 두 개 겹치기, 화면 효과 목록에 새 효과 여섯, 대본 판 번호 `FEATURE` 3.
+`ui_kit` 4.0 (글 상자): 대사 괄호 `box="bubble"`(만화 말풍선, 꼬리, 튀어나오며 나타남), `box="pill"`(둥근 테두리, 속 채우기, 기울이기). `tail`, `box_rotate`, `bubble_…`, `pill_…` 값, 기본 모양은 `say_style.box_styles`. 편집기 대사 탭 "상자" 칸. 이미지/영상 탭에 [효과] 칸(고른 그림에 `screen_fx.image_fx`). PyKaki: 글 상자 칸, 등장 효과 두 개 겹치기, 화면 효과 목록에 새 효과 일곱, 대본 판 번호 `FEATURE` 3.
 
 `ui_kit` 4.0 (글자 효과): 등장 효과 `slidein` 미끄러져 멈춤, `shake` 살짝 흔들림, `inkfill` 외곽선 채우기, `glyphbox` 글자마다 상자, `stamp` 도장, `punch` 튀어나오는 줌, `squash` 찌그러졌다 튕김, `extrude` 입체 글자, `flipin` 뒤집으며 나오기, `led` LED 전광판, `split` 위아래 갈라짐. PyKaki 효과 목록, 미리보기, 렌파이 견본 영상에도 들어감. PyKaki 대본 판 번호 `FEATURE` 2.
 
