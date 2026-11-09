@@ -132,16 +132,29 @@ init -10 python in say_style:
                         kwargs[k] = v
                 info.injected = True
 
+        ## 글 상자 값(box, tail, bubble_..., pill_...)은 렌파이 속성이 아니라서 먼저 꺼냅니다 (text_box.rpy)
+        box_args, kwargs = split_box_args(kwargs)
+
         if is_on():
             kwargs = { a.get(k, k) : v for k, v in kwargs.items() }
         else:
             kwargs = { k : v for k, v in kwargs.items() if k not in a }
+            box_args = { }
 
         ## 색 잔상(echo)은 외곽선 겹으로 복사본을 그립니다. 외곽선을 따로 적지 않았으면 넣어 줍니다.
         ## (text_effects.glsl의 @outline. text_effects.rpy가 읽어 TFX_OUTLINES에 둠)
         ts = kwargs.get("what_textshader")
         if isinstance(ts, str) and ts.split(":")[0] in TFX_OUTLINES and "what_outlines" not in kwargs:
             kwargs["what_outlines"] = list(TFX_OUTLINES[ts.split(":")[0]])
+
+        ## 글 상자: 대사 글의 background에 넣으면 text_box.rpy가 글 둘레에 그립니다.
+        tb = box_from_args(box_args) if box_args else None
+        if tb is not None:
+            kwargs["what_background"] = tb
+            if tb.opts.get("text_color") is not None and "what_color" not in kwargs:
+                kwargs["what_color"] = tb.opts["text_color"]
+            if tb.opts.get("text_outlines") is not None and "what_outlines" not in kwargs:
+                kwargs["what_outlines"] = list(tb.opts["text_outlines"])
 
         ## 이름 상자 위치(name_x, name_y)는 screens.rpy의 이 줄이 있어야 동작합니다.
         if any(k.startswith("namebox_") for k in kwargs) and "namebox" not in store.config.character_id_prefixes:

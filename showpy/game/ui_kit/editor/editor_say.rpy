@@ -470,6 +470,51 @@ init -8 python in ui_editor:
             self._set_or_default("effect", name)
             self.replay()
 
+        ## ── 글 상자 (engine/text_box.rpy, 바꾸면 그 줄을 다시 보여줌) ──
+
+        BOXES = ((None, "없음"), ("bubble", "말풍선"), ("pill", "둥근 테두리"))
+        TAILS = (("bottom", "아래"), ("top", "위"), ("left", "왼쪽"), ("right", "오른쪽"), ("none", "없음"))
+        BOX_ROTATES = (-8, -4, 0, 4, 8)
+
+        def box_kind(self):
+            has, v = self._line_value("box")
+            return v if has and v in ("bubble", "pill") else None
+
+        def set_box(self, kind):
+            self._set_or_default("box", kind)
+            if kind is None:
+                for k in ("tail", "box_rotate"):
+                    self._set_or_default(k, None)
+            self.replay()
+
+        def box_tail(self):
+            has, v = self._line_value("tail")
+            if not has:
+                t = self.ss().box_style(self.box_kind() or "bubble").get("tail")
+                return "none" if t is None else t
+            if v is None:
+                return "none"
+            return v if isinstance(v, str) else "xy"
+
+        def set_box_tail(self, t):
+            default = self.ss().box_style(self.box_kind() or "bubble").get("tail")
+            if t == "none":
+                self._set_or_default("tail", None if default is None else "none")
+            else:
+                self._set_or_default("tail", None if t == default else t)
+            self.replay()
+
+        def box_rotate(self):
+            has, v = self._line_value("box_rotate")
+            try:
+                return float(v) if has and v is not None else 0.0
+            except Exception:
+                return 0.0
+
+        def set_box_rotate(self, deg):
+            self._set_or_default("box_rotate", deg or None)
+            self.replay()
+
         ## ── 화면 효과 (screen_fx 플러그인이 있을 때) ──
         ## fx는 그 대사가 나오기 전에 화면 효과를 바꾸고, 다음에 바꿀 때까지 유지됩니다.
 
@@ -846,7 +891,8 @@ init -8 python in ui_editor:
             if self.pk():
                 rv.append("PyKaki 원고입니다. 여기서는 위치를 고치고, 글자 모양, 속도, 등장 효과는 PyKaki에서 고칩니다.")
             else:
-                rv.append("속도 ×{:g}   효과 {}".format(self.speed(), self.effect_label()))
+                rv.append("속도 ×{:g}   효과 {}   상자 {}".format(self.speed(), self.effect_label(),
+                    dict(self.BOXES).get(self.box_kind(), "없음")))
 
             fxi = self.fx_info()
             if fxi:
@@ -921,6 +967,25 @@ screen ui_editor_say_panel(tab):
             text "속도:" style "ui_editor_text" yalign 0.5
             for _v in tab.SPEEDS:
                 textbutton ("×{:g}".format(_v)) style "ui_editor_button" text_size 13 action Function(tab.set_speed, _v) selected (abs(tab.speed() - _v) < 0.001)
+
+        hbox:
+            spacing 4
+            text "상자:" style "ui_editor_text" yalign 0.5
+            for _v, _l in tab.BOXES:
+                textbutton _l style "ui_editor_button" text_size 13 action Function(tab.set_box, _v) selected (tab.box_kind() == _v)
+
+        if tab.box_kind() is not None:
+            hbox:
+                spacing 4
+                box_wrap True
+                box_wrap_spacing 4
+                xmaximum 632
+                text "꼬리:" style "ui_editor_text" yalign 0.5
+                for _v, _l in tab.TAILS:
+                    textbutton _l style "ui_editor_button" text_size 13 action Function(tab.set_box_tail, _v) selected (tab.box_tail() == _v)
+                text "  기울기:" style "ui_editor_text" yalign 0.5
+                for _v in tab.BOX_ROTATES:
+                    textbutton ("{:+d}".format(_v) if _v else "0") style "ui_editor_button" text_size 13 action Function(tab.set_box_rotate, _v) selected (abs(tab.box_rotate() - _v) < 0.01)
 
     ## 3.21: 글자 등장 효과, 줄마다 화면 효과·덮개·휘어짐·커서는 이 탭에서 뺌.
     ## 원고에 이미 적힌 괄호(fx=, fx_overlay=, fx_warp=, fx_cursor=, 등장 효과)는 그대로 돌아감

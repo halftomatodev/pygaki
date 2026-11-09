@@ -3,7 +3,7 @@
 코드를 고치는 사람과 AI가 읽는 문서입니다. 사용법은 [CUSTOM_GUIDE.md](CUSTOM_GUIDE.md)에 있습니다.
 
 - 묶음 버전 4.23 (`ui_kit` 3.22, `screen_fx` 5.0, `hotkeys` 1.0, `splash` 2.0) = pygaki v1.2
-- 만드는 중(v2.0): `screen_fx` 5.1 (새 화면 효과 여섯, 2026-11-09), `ui_kit` 3.23 (GUI 편집기 이름, UI 글 탭, 폴더 열기, F9)
+- 만드는 중(v2.0): `screen_fx` 5.1 (새 화면 효과 여섯, 2026-11-09), `ui_kit` 3.23 (GUI 편집기 이름, UI 글 탭, 폴더 열기, F9), `ui_kit` 4.0 (글자 효과 11개, 글 상자 `bubble` `pill`)
 - 렌파이 8.5.3 기준
 - 작업 규칙: [DEV_RULES.md](DEV_RULES.md)
 - PyKaki 연결 형식: [LINK.md](../../docs/LINK.md)
@@ -23,7 +23,7 @@
 
 | 폴더 | 버전 | 하는 일 |
 |---|---|---|
-| `game/ui_kit` | 3.23 | 타이틀 메뉴(배경, 제목, 부제, 글자 효과), ESC 메뉴, 선택지, 커서, 클릭 대기 표시, 대사 소리, 대사 스타일, 그림과 영상 배치(`stage`), 확인 창 글과 버튼 글자(`ui_text`), GUI 편집기(개발 모드 Shift+M, 화면 이름 "GUI 편집기"), 원고 쓰기 도구(`script_edit`) |
+| `game/ui_kit` | 4.0 | 타이틀 메뉴(배경, 제목, 부제, 글자 효과), ESC 메뉴, 선택지, 커서, 클릭 대기 표시, 대사 소리, 대사 스타일, 글 상자(`text_box`), 그림과 영상 배치(`stage`), 확인 창 글과 버튼 글자(`ui_text`), GUI 편집기(개발 모드 Shift+M, 화면 이름 "GUI 편집기"), 원고 쓰기 도구(`script_edit`) |
 | `game/screen_fx` | 5.1 | 셰이더 두 자리(기본, 아스키, VHS, 단말기, 게임보이, 글리치, 지글거림, 망점, 홀로그램, 나이트비전, 조각 어긋남 중 둘), 타이틀과 게임 내 메뉴 셰이더(따로 두 자리), TV 전환, 글자 빼기, 커서 자리, 타이틀 일렁임, 이미지 하나에 거는 효과, 셰이더 전환 틀 |
 | `game/hotkeys` | 1.0 | 단축키, 조작방법 화면 |
 | `game/splash` | 2.0 | 타이틀 전 로고, 경고, 조작 방법 페이지, 편집기 "스플래시" 탭(ui_kit이 있을 때, 화면에서 끌고 돌리고 글 고치기, 페이지 더하기) |
@@ -318,6 +318,7 @@ $ screen_fx.set_values("shards", count=80, colors=["#d22", "#811"], size=(3, 9),
 - 상자 크기는 글 전체 크기에 맞춥니다(글이 다 나오기 전에도 상자는 다 큰 크기로 나타남). 둥근 네모는 그림 없이 셰이더로 그립니다(모서리 둥글기, 선, 꼬리).
 - 참고 영상처럼 낱말마다 다른 자리의 상자는 대사 여러 줄을 각자 자리에 띄우는 것으로 합니다(대사 탭 위치 + `box`). 낱말마다 자동으로 나누기는 이번에는 안 합니다.
 - PyKaki 미리보기: 상자는 CSS로 비슷하게 그립니다. 형식이 바뀌므로(`box=` 괄호 값) `docs/LINK.md` 2장과 `pykaki/src/types.ts`를 같은 커밋에서 고칩니다.
+- 6단계에서 만든 것 (2026-11-09, `ui_kit/engine/text_box.rpy`): 렌파이 글(`Text`)은 background 스타일을 쓰지 않아서, 대사 괄호의 상자 값을 `what_background`의 `TextBox`로 넣고 `Text.render`를 감싸 그 값이 있을 때만 글 둘레에 상자를 깝니다(글 크기는 그대로라 배치가 안 바뀜). 상자는 `ui_kit.textbox` 셰이더(둥근 네모와 꼬리 세모의 거리 함수). 기울기는 상자와 글을 같이 돌림. 꼬리는 말하는 사람을 저절로 찾지 않고 방향이나 `(x, y)`로(글 그림은 화면 자리를 모름). 글자마다 움직이는 효과는 상자가 따라가지 않음. 값 이름은 `bubble_color`, `bubble_border`, `pill_line`, `pill_fill` 등 위 표 그대로, 더해서 `tail`, `box_rotate`, `*_tail_pos`, `*_tail_size`, `*_tail_width`, `*_text_color`. 기본 모양은 `say_style.box_styles`. 편집기 대사 탭 "상자" 칸(없음/말풍선/둥근 테두리, 꼬리, 기울기). PyKaki 원고 줄에서는 칸을 숨김(7단계에서 PyKaki와 같이).
 
 ### 8-5. 편집기와 앱
 
@@ -339,7 +340,7 @@ $ screen_fx.set_values("shards", count=80, colors=["#d22", "#811"], size=(3, 9),
 3. 화면 효과: `glitch`, `boil`, `halftone`, `hologram`, `nightvision`(+화면 글), `tiles` (만듦, `screen_fx` 5.1). `tracepaper`는 뺌.
 4. 파편 흩날림(`shards`).
 5. 글자 효과: `slidein`, `shake`, `inkfill`, `glyphbox`, 그다음 `stamp`, `punch`, `squash`, `extrude`, `flip`, `led`, `split`.
-6. 글 상자 `bubble`, `pill`.
+6. 글 상자 `bubble`, `pill` (만듦, `ui_kit` 4.0).
 7. PyKaki 목록·미리보기·LINK.md, 편집기 칸, README, `CUSTOM_GUIDE.md`, 공개용 구글 문서 수정안.
 8. 묶음 v2.0 태그.
 

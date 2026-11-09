@@ -13,9 +13,16 @@
 그리고 이 기능들을 **게임을 실행한 채로 마우스로 고치는 편집기**가 들어 있습니다. (개발 모드에서 Shift+M)
 대사, 선택지, show·hide·scene 줄은 편집기에서 고친 값이 **원고(.rpy)의 그 줄에 바로 저장**됩니다.
 
-버전 3.23 · 렌파이 8.5.3 기준으로 만들었습니다.
+버전 4.0 · 렌파이 8.5.3 기준으로 만들었습니다.
 
-### 4.0을 만드는 중 (글자 효과)
+### 4.0에서 바뀐 점 (글자 효과, 글 상자)
+
+- **글 상자** (`engine/text_box.rpy`): 대사 괄호 `box="bubble"`이면 만화 말풍선(흰 상자, 검은 선, 꼬리, 튀어나오며 나타남), `box="pill"`이면 글 둘레 둥근 테두리. `tail`로 꼬리 방향, `box_rotate`로 기울기. 편집기 대사 탭에 "상자" 칸. 자세히는 [8-1. 글 상자](#8-1-글-상자-40).
+
+  ```renpy
+  e "안녕!" (box="bubble")
+  e "쾅!" (box="pill", box_rotate=-4)
+  ```
 
 - **등장 효과 11개 추가** (`engine/text_effects.glsl`). PyKaki 효과 목록과 미리보기, 렌파이 견본 영상에도 나옵니다.
 
@@ -418,6 +425,8 @@ game/ui_kit/
 │   ├── choice_menu.rpy
 │   ├── custom_ui.rpy
 │   ├── say_style.rpy
+│   ├── text_effects.rpy, .glsl  등장 효과
+│   ├── text_box.rpy             글 상자 (말풍선, 둥근 테두리) (4.0)
 │   ├── stage.rpy                영상 등록, bg 맨 뒤, stage.pos·stage.move 등
 │   ├── script_edit.rpy          원고(.rpy)의 대사·선택지·show/hide/scene 줄 고치기
 │   └── ui_text.rpy              확인 창 글, 버튼 글자 바꾸기 (3.23)
@@ -1029,6 +1038,40 @@ e "어디 갔었어?" (name_x=820, name_y=-60, speed=0.5, effect="jitter")
 - `effect`에는 렌파이 텍스트 셰이더 문법을 그대로 쓸 수 있습니다. 예: `effect="wave:u__amplitude=10"`(물결 높이 10), `effect="dissolve|wave"`(서서히 나타나며 물결)
 - `name_x`, `name_y`는 렌파이 새 프로젝트의 `screens.rpy`에 들어 있는 `config.character_id_prefixes.append('namebox')` 줄이 있어야 동작합니다. 없으면 무엇을 넣어야 하는지 오류로 알려줍니다.
 - 예전 편집기가 저장한 캐릭터 기본값(`say_style_layout.rpy`)이 있으면 계속 적용됩니다. 2.2부터는 캐릭터 정의에서 직접 고칩니다.
+
+### 8-1. 글 상자 (4.0)
+
+`box`를 적으면 대사 글을 상자가 둘러쌉니다. 상자는 그림 없이 셰이더로 그리고, 글 전체 크기에 맞춰서 글이 다 나오기 전에도 다 큰 크기로 나타납니다.
+
+```renpy
+e "안녕!" (box="bubble")                                   # 흰 말풍선, 검은 선, 꼬리 아래, 튀어나오며 나타남
+e "어디?" (box="bubble", tail="top")                        # 꼬리 "bottom" "top" "left" "right" None
+e "저기." (box="bubble", tail=(-40, 120))                   # 꼬리 끝 자리 (글 왼쪽 위 기준 픽셀)
+e "빨간 말풍선." (box="bubble", bubble_color="#ffeeee", bubble_border=(5, "#aa0000"))
+e "쾅!" (box="pill", box_rotate=-4)                         # 둥근 테두리, 상자와 글을 같이 4도 기울임
+e "속까지." (box="pill", pill_fill="#ffd23b", pill_line=None, color="#000000")
+```
+
+| 이름 | 뜻 | 예 |
+|---|---|---|
+| `box` | `"bubble"` 만화 말풍선, `"pill"` 글 둘레 둥근 테두리 | `box="bubble"` |
+| `tail` | 꼬리 방향 `"bottom"` `"top"` `"left"` `"right"` `None`, 또는 꼬리 끝 `(x, y)` | `tail="left"` |
+| `box_rotate` | 상자와 글을 같이 기울임 (도). 자리는 그대로 | `box_rotate=-4` |
+| `bubble_color`, `pill_fill` | 속 색. `pill_fill=None`이면 속이 빔 | `bubble_color="#ffffff"` |
+| `bubble_border`, `pill_line` | 선 (굵기, 색). `None`이면 선 없음 | `pill_line=(2, "#ff0000")` |
+| `bubble_radius`, `pill_radius` | 모서리 둥글기 (픽셀). pill 기본은 양 끝이 반원 | `bubble_radius=8` |
+| `bubble_padding`, `pill_padding` | 글과 상자 사이: 숫자, (가로, 세로), (왼, 위, 오른, 아래) | `bubble_padding=(30, 20)` |
+| `bubble_tail_pos` | 꼬리가 붙는 자리 (변을 따라 0.0 ~ 1.0) | `bubble_tail_pos=0.8` |
+| `bubble_tail_size`, `bubble_tail_width` | 꼬리 길이, 밑동 폭 (픽셀) | `bubble_tail_size=40` |
+| `bubble_pop` | 튀어나오며 나타남 (`True`, `False`, 걸리는 초) | `bubble_pop=False` |
+| `bubble_text_color` | 상자를 쓸 때 글 색 (말풍선 기본 `#222222`. 괄호에 `color`를 적으면 그것) | `bubble_text_color="#003366"` |
+
+- 모두에 쓸 기본 모양은 `say_style_config.rpy`의 `say_style.box_styles`에서 고칩니다.
+- 캐릭터마다 늘 상자를 쓰려면 `define e = Character("에일린", what_background=say_style.box("bubble", tail="left"))`.
+- 대사 위치(`x`, `y`)나 화면 흔들림처럼 **줄 전체**가 움직이면 상자도 같이 움직입니다. `shake`, `slidein`처럼 **글자마다** 움직이는 등장 효과는 글자만 움직이고 상자는 제자리입니다.
+- 꼬리는 말하는 사람을 저절로 찾지 않습니다. 방향이나 `(x, y)`로 정해 주세요.
+- 낱말마다 다른 자리의 상자는 대사를 여러 줄로 나눠 각자 위치(`x`, `y`)와 `box`를 적습니다.
+- 편집기 대사 탭의 "상자" 칸에서 없음/말풍선/둥근 테두리, 꼬리 방향, 기울기를 고르고 Ctrl+S로 원고에 씁니다. PyKaki 원고에서는 아직 못 고칩니다.
 
 ---
 

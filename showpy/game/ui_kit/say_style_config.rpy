@@ -54,8 +54,35 @@ define n3 = Character(kind=t, what_xpos=400, what_ypos=264)
 ##                   e "화면이 휜다." (fx_warp=3.0)                    # 덮개 휘어짐. "default"면 설정값
 ##                   e "전부 글자로." (fx="ascii", fx_exclude=())       # 글자 빼기: () 안 뺌 / ("say",) 대사·이름 빼기
 ##                   e "대사만 또렷." (fx="gameboy", fx_exclude=("say", "choice"))  # "say" 대사·이름, "choice" 선택지, "screens" 메뉴·화면
+##   글 상자     box ("bubble" 말풍선, "pill" 둥근 테두리), tail, box_rotate, bubble_..., pill_...
+##                   e "안녕!" (box="bubble")                          # 흰 말풍선, 꼬리 아래
+##                   e "어디?" (box="bubble", tail="top")               # 꼬리 "top" "left" "right" None
+##                   e "쾅!" (box="pill", box_rotate=-4)                # 둥근 테두리, 살짝 기울임
 ## 여기에 새 이름을 더하거나 바꿀 수 있어요.  "짧은이름": "렌파이 속성"
 
 define say_style.alias = {
     # "alpha": "what_alpha",
+}
+
+
+## ── 글 상자 기본 모양 (선택) ────────────────────────────────────────────────
+## 대사 괄호에 box="bubble"이나 box="pill"을 적으면 글을 상자가 둘러쌉니다.
+## 괄호에 적지 않은 값은 여기 값을 씁니다. 지우면 엔진의 기본값을 씁니다.
+##   color / fill    속 색 ("#ffffff"). pill의 fill이 None이면 속이 빔
+##   border / line   선 (굵기, 색). None이면 선 없음
+##   radius          모서리 둥글기 (픽셀). None이면 양 끝이 반원
+##   padding         글과 상자 사이: 숫자 하나, (가로, 세로), (왼, 위, 오른, 아래)
+##   tail            꼬리 "bottom" "top" "left" "right" None, 또는 (x, y) 꼬리 끝 (글 왼쪽 위 기준)
+##   tail_pos        꼬리가 붙는 자리 (변을 따라 0.0 ~ 1.0), tail_size 길이, tail_width 밑동 폭
+##   pop             튀어나오며 나타남 (True / False, 또는 걸리는 초)
+##   rotate          기울기 (도)
+##   text_color      상자를 쓸 때 글 색 (괄호에 color를 적으면 그것). None이면 그대로
+##   text_outlines   상자를 쓸 때 글 외곽선. [ ]이면 없앰, None이면 그대로
+## 한 줄만 바꾸려면 괄호에 bubble_color="#ffeeee", pill_line=(2, "#ff0000")처럼 적습니다.
+
+define say_style.box_styles = {
+    "bubble": dict(color="#ffffff", border=(3, "#000000"), radius=18, padding=(22, 14),
+                   tail="bottom", tail_pos=0.25, tail_size=24, tail_width=26, pop=True,
+                   text_color="#222222", text_outlines=[ ]),
+    "pill":   dict(fill=None, line=(3, "#ffffff"), radius=None, padding=(18, 6), rotate=0),
 }
