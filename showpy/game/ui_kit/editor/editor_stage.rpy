@@ -101,7 +101,7 @@ init -8 python in ui_editor:
 
         def layout_file(self):
             uk = store.ui_kit
-            lines = uk.file_header("showpy 편집기가 저장한 그림 자리입니다.", [
+            lines = uk.file_header("GUI 편집기가 저장한 그림 자리입니다.", [
                 "PyKaki에서 다시 내보내도 지워지지 않습니다.",
                 '"ghost"는 어디서나, ("n4", "ghost")는 상자 n4에서만 쓰는 자리입니다.',
                 "이 파일을 지우면 그림이 렌파이 기본 자리로 돌아갑니다.",
@@ -734,6 +734,14 @@ init -8 python in ui_editor:
                         rv.append((fn, fn, "audio", '"' not in fn))
             return rv
 
+        def media_folder(self):
+            """고른 파일이 있는 폴더 (game 안 경로). 고른 게 없으면 None."""
+            import os
+            for r in self.media_list():
+                if r[0] == self.media_sel:
+                    return os.path.dirname(r[1]) or None
+            return None
+
         def media_kind(self):
             for r in self.media_list():
                 if r[0] == self.media_sel:
@@ -774,6 +782,7 @@ init -8 python in ui_editor:
 
         def open_media(self):
             self.media_sel = None
+            refresh_files(True)
             state.popup = "media"
             store.renpy.restart_interaction()
 
@@ -1079,6 +1088,7 @@ screen ui_editor_stage_panel(tab):
             input value ui_editor.line_input style "ui_editor_text" length 6 allow "0123456789"
         textbutton "지금 장면으로" style "ui_editor_button" text_size 13 action Function(tab.to_current)
         textbutton "그림/영상/소리 고르기" style "ui_editor_button" text_size 13 action Function(tab.open_media)
+        textbutton "images 폴더 열기" style "ui_editor_button" text_size 13 action Function(ui_editor.open_folder, "images")
         textbutton "그 줄로 가기" style "ui_editor_button" text_size 13 action Function(tab.warp) sensitive (tab.sel is not None)
         textbutton ("L 목록 접기" if tab.list_open else "L 목록 펴기") style "ui_editor_button" text_size 13 action ToggleField(tab, "list_open")
 
@@ -1188,10 +1198,21 @@ screen ui_editor_media_popup():
                 for _f, _fl in (("all", "전부"), ("image", "그림"), ("movie", "영상"), ("audio", "소리")):
                     textbutton _fl style "ui_editor_button" text_size 13 action Function(_tab.set_media_filter, _f) selected (_tab.media_filter == _f)
 
+            ## 폴더 열기: 탐색기로 열어서 파일을 넣거나 바꿈 (넣은 뒤에는 Shift+R로 다시 불러오면 목록에 나옴)
+            hbox:
+                spacing 4
+                text "폴더 열기" style "ui_editor_small" yalign 0.5
+                for _d in ("images", "movies", "audio"):
+                    textbutton _d style "ui_editor_button" text_size 13 action Function(ui_editor.open_folder, _d)
+                textbutton "새로 읽기" style "ui_editor_button" text_size 13 action Function(ui_editor.refresh_files, True)
+                $ _mf = _tab.media_folder()
+                if _mf:
+                    textbutton "고른 파일 폴더" style "ui_editor_button" text_size 13 action Function(ui_editor.open_folder, _mf)
+
             viewport:
                 scrollbars "vertical"
                 mousewheel True
-                ysize 380
+                ysize 340
 
                 vpgrid:
                     cols 5

@@ -13,7 +13,20 @@
 그리고 이 기능들을 **게임을 실행한 채로 마우스로 고치는 편집기**가 들어 있습니다. (개발 모드에서 Shift+M)
 대사, 선택지, show·hide·scene 줄은 편집기에서 고친 값이 **원고(.rpy)의 그 줄에 바로 저장**됩니다.
 
-버전 3.22 · 렌파이 8.5.3 기준으로 만들었습니다.
+버전 3.23 · 렌파이 8.5.3 기준으로 만들었습니다.
+
+### 3.23에서 바뀐 점
+
+- 편집기 이름을 화면에서 **GUI 편집기**로 (pygaki에 합쳐서). 코드 이름(`ui_editor`)과 단축키(Shift+M)는 그대로.
+- **"UI 글" 탭** (`ui_text`): 종료 확인 창("종료하겠습니까?") 같은 확인 창 글, 확인 창 [네] [아니오], 퀵메뉴 버튼, 메인 메뉴·게임 메뉴 버튼 글자를 screens.rpy를 고치지 않고 바꿉니다. 렌파이 번역표(기본 언어)에 "원래 글 → 새 글"을 넣는 방식. 확인 창은 [이 창 보기]로 바로 보고, 버튼 글자는 저장하면 다시 불러온 뒤 바뀝니다. 저장은 `ui_text_layout.rpy`, 직접 적을 때는 `ui_text_config.rpy`.
+  ```renpy
+  define ui_text.texts = { "quit": _("정말 게임을 끝낼까요?"), "q_skip": _("빨리 넘기기") }
+  ```
+- 이미지/영상 탭: [images 폴더 열기], 그림/영상/소리 고르기 창에 [images] [movies] [audio] [고른 파일 폴더] 열기 버튼(탐색기, 없으면 만듦).
+- pygaki 앱과 이어져 있을 때 편집기에서 **F9**: 게임 창의 GUI 편집기 패널 보이기/숨기기(앱의 F9, [게임 창의 GUI 편집기] 버튼과 같음). 실시간 연결에 게임 → 앱 알림 `{"type": "panel", "hide": …}`.
+- 그림/영상/소리 고르기 창, 그림 고르기 창(배경, 프레임, 글꼴)을 열 때와 [새로 읽기]를 누를 때 game 폴더의 파일 목록을 다시 읽습니다(렌파이는 켤 때 한 번만 읽음). `images/`에 새로 넣은 그림은 그 자리에서 그림 이름도 만들어서 바로 `show`할 수 있습니다(개발 모드에서만, `ui_editor.refresh_files()`). 새 영상(webm)은 다시 불러와야 등록됩니다.
+- pygaki 앱이 넓은 글 칸(스플래시 글, UI 글 등)을 패널 폭 가득, 세 줄 칸으로 그립니다(실시간 연결 입력칸 `w`).
+- 옮기기: `editor/`, `engine/`을 `.rpyc`까지 지우고 새것을 넣고, `ui_text_config.rpy`를 넣습니다.
 
 ### 3.21에서 바뀐 점
 
@@ -359,6 +372,7 @@ game/ui_kit/
 ├── custom_ui_config.rpy     설정: 커스텀 UI       ← 여기만 고침
 ├── say_style_config.rpy     설정: 대사 스타일      ← 여기만 고침
 ├── stage_config.rpy         설정: 이미지·영상 배치  ← 여기만 고침
+├── ui_text_config.rpy       설정: 확인 창 글, 버튼 글자 (3.23)  ← 여기만 고침
 ├── *_layout.rpy             편집기에서 저장하면 생기는 파일 (처음에는 없음. 대사·선택지는 원고에 바로 저장)
 ├── engine/                  엔진 (고치지 않음)
 │   ├── ui_kit.rpy               공통
@@ -367,14 +381,16 @@ game/ui_kit/
 │   ├── custom_ui.rpy
 │   ├── say_style.rpy
 │   ├── stage.rpy                영상 등록, bg 맨 뒤, stage.pos·stage.move 등
-│   └── script_edit.rpy          원고(.rpy)의 대사·선택지·show/hide/scene 줄 고치기
+│   ├── script_edit.rpy          원고(.rpy)의 대사·선택지·show/hide/scene 줄 고치기
+│   └── ui_text.rpy              확인 창 글, 버튼 글자 바꾸기 (3.23)
 ├── editor/                  편집기 (개발 모드에서만 동작)
 │   ├── editor.rpy               본체·글꼴/색 고르기
 │   ├── editor_title.rpy         타이틀 메뉴 탭
 │   ├── editor_choice.rpy        선택지 탭
 │   ├── editor_say.rpy           대사 탭
 │   ├── editor_stage.rpy         이미지/영상 탭
-│   └── editor_custom_ui.rpy     커서/대사 소리 탭
+│   ├── editor_custom_ui.rpy     커서/대사 소리 탭
+│   └── editor_ui_text.rpy       UI 글 탭 (3.23)
 └── README.md                이 설명서 (배포판에는 자동으로 빠짐)
 ```
 

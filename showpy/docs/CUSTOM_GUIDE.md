@@ -919,6 +919,12 @@ define hotkeys.keyboard_help = [
 | `"ascii"` | 화면을 글자로 다시 그림. 글자 하나 = 픽셀 하나 (기본은 장면에만. 대사는 그대로 읽힘) | `ascii_config.rpy` |
 | `"retro_term"` | 레트로 터미널: 형광체 단색 모니터, 자체 곡면 CRT·VHS. **쓰는 동안 덮개는 기본으로 꺼짐** | `retro_term_config.rpy` |
 | `"gameboy"` | 게임보이: 큰 점과 4색 LCD 화면, 디더링 / 픽셀화 | `gameboy_config.rpy` |
+| `"glitch"` | 글리치 (5.1): 가끔 무작위로 화면이 찢기고 블록이 밀리고 색이 갈라짐 | `glitch_config.rpy` |
+| `"boil"` | 지글거림 (5.1): 손그림 애니메이션처럼 테두리가 뚝뚝 떨림 | `boil_config.rpy` |
+| `"halftone"` | 망점 (5.1): 인쇄물 같은 점 무늬, 한 색 / 네 색 | `halftone_config.rpy` |
+| `"hologram"` | 홀로그램 (5.1): 한 색, 흐르는 주사선, 번진 복사본. 인물 하나에 `show 이름 at screen_fx.image_fx("hologram")` | `hologram_config.rpy` |
+| `"nightvision"` | 나이트비전 (5.1): 초록 야간 투시경, 화면 글과 녹화 시간 | `nightvision_config.rpy` |
+| `"tiles"` | 조각 어긋남 (5.1): 네모 칸마다 어긋남. 장면 전환 `scene bg with screen_fx.TileSwap(1.0)` | `tiles_config.rpy` |
 | `"default"` | 기본 효과로 돌아가기 (= 선택취소) | `screen_fx_config.rpy`의 `screen_fx.base` |
 | (덮개) | VHS. 켬 / 끔만 고르고 모양은 `vhs_crt.settings` | `vhs_crt_config.rpy` |
 

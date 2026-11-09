@@ -3,6 +3,7 @@
 코드를 고치는 사람과 AI가 읽는 문서입니다. 사용법은 [CUSTOM_GUIDE.md](CUSTOM_GUIDE.md)에 있습니다.
 
 - 묶음 버전 4.23 (`ui_kit` 3.22, `screen_fx` 5.0, `hotkeys` 1.0, `splash` 2.0) = pygaki v1.2
+- 만드는 중(v2.0): `screen_fx` 5.1 (새 화면 효과 여섯, 2026-11-09), `ui_kit` 3.23 (GUI 편집기 이름, UI 글 탭, 폴더 열기, F9)
 - 렌파이 8.5.3 기준
 - 작업 규칙: [DEV_RULES.md](DEV_RULES.md)
 - PyKaki 연결 형식: [LINK.md](../../docs/LINK.md)
@@ -22,8 +23,8 @@
 
 | 폴더 | 버전 | 하는 일 |
 |---|---|---|
-| `game/ui_kit` | 3.22 | 타이틀 메뉴(배경, 제목, 부제, 글자 효과), ESC 메뉴, 선택지, 커서, 클릭 대기 표시, 대사 소리, 대사 스타일, 그림과 영상 배치(`stage`), 편집기(개발 모드 Shift+M), 원고 쓰기 도구(`script_edit`) |
-| `game/screen_fx` | 5.0 | 셰이더 두 자리(기본, 아스키, VHS, 단말기, 게임보이 중 둘), 타이틀과 게임 내 메뉴 셰이더(따로 두 자리), TV 전환, 글자 빼기, 커서 자리, 타이틀 일렁임, 이미지 하나에 거는 효과, 셰이더 전환 틀 |
+| `game/ui_kit` | 3.23 | 타이틀 메뉴(배경, 제목, 부제, 글자 효과), ESC 메뉴, 선택지, 커서, 클릭 대기 표시, 대사 소리, 대사 스타일, 그림과 영상 배치(`stage`), 확인 창 글과 버튼 글자(`ui_text`), GUI 편집기(개발 모드 Shift+M, 화면 이름 "GUI 편집기"), 원고 쓰기 도구(`script_edit`) |
+| `game/screen_fx` | 5.1 | 셰이더 두 자리(기본, 아스키, VHS, 단말기, 게임보이, 글리치, 지글거림, 망점, 홀로그램, 나이트비전, 조각 어긋남 중 둘), 타이틀과 게임 내 메뉴 셰이더(따로 두 자리), TV 전환, 글자 빼기, 커서 자리, 타이틀 일렁임, 이미지 하나에 거는 효과, 셰이더 전환 틀 |
 | `game/hotkeys` | 1.0 | 단축키, 조작방법 화면 |
 | `game/splash` | 2.0 | 타이틀 전 로고, 경고, 조작 방법 페이지, 편집기 "스플래시" 탭(ui_kit이 있을 때, 화면에서 끌고 돌리고 글 고치기, 페이지 더하기) |
 
@@ -144,7 +145,7 @@ renpy.exe <프로젝트> lint
 | pygaki 묶음·앱 (Releases 태그) | v1.2 (2026-11-09) | **v2.0** |
 | showpy 묶음 | 4.23 | **5.0** |
 | `ui_kit` | 3.22 | **4.0** (글자 효과, 글 상자 꾸미기, 편집기 입력·회전 틀) |
-| `screen_fx` | 5.0 (이미지 효과, 전환 틀) | **5.1** (새 효과 여덟) |
+| `screen_fx` | 5.1 (새 효과 여섯 만듦, 트레이싱지는 뺌, 파편은 아직) | **5.1** (새 효과 여덟) |
 | `splash` | 2.0 (화면에서 고치기, 페이지 더하기, 만듦) | 2.0 |
 | `hotkeys` | 1.0 | 1.0 |
 
@@ -259,6 +260,15 @@ renpy.exe <프로젝트> lint
 
 2단계에서 만든 것 (2026-11-09): `screen_fx.image_fx()`, `screen_fx.set_values()`, `screen_fx.ShaderSwap` 전환 틀(`TileSwap`은 `tiles` 효과와 같이 3단계에서).
 
+3단계에서 만든 것 (2026-11-09, `screen_fx` 5.1): `glitch`, `boil`, `halftone`, `hologram`, `nightvision`(+화면 글 스크린 `nightvision_hud`), `tiles`(+`screen_fx.TileSwap`). **`tracepaper`(트레이싱지)는 만들었다가 2026-11-09 사용자와 정해서 뺌** (위 표의 줄은 기록으로 남김). 위 표와 다른 점:
+- `glitch`의 세기 값 이름은 `amount`(`strength`는 모든 효과의 전체 세기라서). 편집기에서 모양을 보며 고르게 `always`(늘 망가짐)를 더함. 코드는 VHS·글자 효과와 나누지 않고 `glitch.rpy` 안에 따로 씀(플러그인을 따로 넣어도 돌게)
+- `hologram`의 번짐 거리는 `smear`, `smear2` 두 값. 이미지에 걸 때 쓰는 `opacity`를 더함
+- `nightvision`의 화면 글은 `hud_text`(줄바꿈 `
+`), `zoom_text`, 글꼴은 `nightvision.hud_font`, `hud_size`. 동그란 테두리 `scope`를 더함
+- `tiles`의 다른 그림 칸 비율은 `swap`, 선 두께·색 `line_width`, `line_color`를 더함
+- 새 효과는 모두 `with_overlay = False`(쓰는 동안 VHS 덮개를 기본으로 켜지 않음)
+- 셰이더 함수(`fragment_functions`)에서는 효과 유니폼을 바로 못 읽음 → 인자로 넘김. 전환 셰이더(`ShaderSwap`)에서는 `u_lod_bias`도 못 읽음. GLSL에서 `gl_`로 시작하는 이름은 못 씀
+
 **파편을 쓰는 예**
 
 ```renpy
@@ -324,7 +334,7 @@ $ screen_fx.set_values("shards", count=80, colors=["#d22", "#811"], size=(3, 9),
 
 1. `splash` 2.0: 가운데 화면, 끌기·회전·늘리기, 화면에서 글 고치기, 페이지 더하기·지우기·순서, 저장.
 2. `screen_fx` 5.0 바탕: 이미지에 거는 효과, 값 바꾸기, 셰이더 전환 틀 (만듦).
-3. 화면 효과: `glitch`, `boil`, `halftone`, `hologram`, `nightvision`(+화면 글), `tracepaper`, `tiles`.
+3. 화면 효과: `glitch`, `boil`, `halftone`, `hologram`, `nightvision`(+화면 글), `tiles` (만듦, `screen_fx` 5.1). `tracepaper`는 뺌.
 4. 파편 흩날림(`shards`).
 5. 글자 효과: `slidein`, `shake`, `inkfill`, `glyphbox`, 그다음 `stamp`, `punch`, `squash`, `extrude`, `flip`, `led`, `split`.
 6. 글 상자 `bubble`, `pill`.

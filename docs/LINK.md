@@ -189,6 +189,7 @@ PyKaki 데스크톱 앱의 showpy 화면이 게임 안 편집기를 바깥에서
 | `state` | 붙자마자, 그 뒤 바뀔 때마다 (0.1초마다 비교, 같으면 안 보냄) | 아래 |
 | `files` | 붙자마자 한 번, 앱이 `files`를 보낼 때 (3.15) | `{"type": "files", "audio": ["audio/type.ogg"], "images": ["gui/ctc/ctc1.png", ...], "movies": ["movies/title.webm"]}` 게임 폴더 기준(`movies`는 3.19부터). 렌파이 `list_files`라 `.rpa` 안 파일도 들어감 |
 | `error` | 명령 처리가 실패했을 때 | `{"type": "error", "text": "..."}` |
+| `panel` | 게임 창에서 F9로 게임 안 편집기 패널을 보이게/숨기게 했을 때 (ui_kit 3.23) | `{"type": "panel", "hide": true}`. 앱은 이 값을 기억했다가(`localStorage` `pygaki-game-panel`) 다음에 붙을 때 `panel` 명령으로 보냄. 앱의 F9(단축키 `gamePanel`)도 같은 명령 |
 
 ```json
 {
@@ -227,7 +228,7 @@ PyKaki 데스크톱 앱의 showpy 화면이 게임 안 편집기를 바깥에서
   | `t` | 글 | `t`, 회색이 아닌 글자색이면 `c` |
   | `b` | 버튼 | `id`, `t`(글), `on`(고른 상태), `ok`(누를 수 있음), 안에 그림/색이 있으면 `c` |
   | `bar` | 막대 | `id`, `r`(범위, 0부터), `v`(지금 값), `s`(간격) |
-  | `in` | 입력칸 | `id`, `t`(지금 글) |
+  | `in` | 입력칸 | `id`, `t`(지금 글), `w`(1이면 넓은 글 칸: 게임 쪽 `xmaximum`이 300 이상. 앱은 패널 폭 가득, 세 줄 칸으로 그림, ui_kit 3.23) |
   | `img` | 그림 | `p`(game 기준 경로) |
   | `col` | 색 견본 | `v`(#rrggbbaa) |
 

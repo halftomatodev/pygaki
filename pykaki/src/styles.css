@@ -753,6 +753,11 @@ fieldset.plain:disabled { opacity: 0.4; }
 .sp-m-b.media { padding: 2px; }
 .sp-m-bar { flex: 1; min-width: 120px; }
 .sp-m-in { width: 90px; padding: 2px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); }
+.sp-m-inwrap { display: inline-flex; gap: 4px; align-items: center; }
+.sp-m-inwrap.wide { display: flex; width: 100%; align-items: flex-start; }
+.sp-m-inwrap.wide .sp-m-in { flex: 1; }
+.sp-m-wide { padding: 1px 6px; font-size: 11px; opacity: 0.75; }
+.sp-m-in.wide { display: block; width: 100%; min-width: 260px; box-sizing: border-box; resize: vertical; font: inherit; line-height: 1.4; white-space: pre-wrap; overflow-wrap: anywhere; }
 .sp-m-img { display: inline-flex; width: 56px; height: 56px; align-items: center; justify-content: center; overflow: hidden; }
 .sp-m-img img { max-width: 100%; max-height: 100%; object-fit: contain; }
 .sp-m-col { display: inline-block; width: 16px; height: 16px; border-radius: 3px; border: 1px solid var(--line); }

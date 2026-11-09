@@ -304,7 +304,7 @@ export async function openProject() {
       if (
         !confirm(
           `${file.name}의 내용으로 이 프로젝트 대본(${boundName})을 바꿀까요?\n\n가져올 대본: ${summary(p, file.lastModified)}\n지금 대본: ${summary(s.project)}\n\n` +
-            `지금 대본은 버전 목록에 백업돼요. showpy에서 받아 적은 줄도 가져올 대본의 것으로 바뀌어요.`,
+            `지금 대본은 버전 목록에 백업돼요. GUI 편집기에서 받아 적은 줄도 가져올 대본의 것으로 바뀌어요.`,
         )
       )
         return;
@@ -382,7 +382,7 @@ export async function exportRpyFile(again = false) {
       await pullInbox(true);
       await scanFolder();
     } catch (e: any) {
-      alert('showpy가 넣은 줄을 받아 적지 못해서 내보내기를 멈췄어요: ' + e.message);
+      alert('GUI 편집기가 넣은 줄을 받아 적지 못해서 내보내기를 멈췄어요: ' + e.message);
       return;
     }
     s = useStore.getState();

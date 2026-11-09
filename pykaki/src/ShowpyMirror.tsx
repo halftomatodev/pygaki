@@ -115,28 +115,76 @@ function Bar({ n }: { n: Extract<MirrorNode, { k: 'bar' }> }) {
   );
 }
 
+// 글 칸마다 넓은 칸(세 줄)/좁은 칸을 고른 것. 이 앱에 붙는 설정이라 localStorage에 둔다
+const WIDE_KEY = 'pygaki-wide-inputs';
+const loadWide = (): Record<string, boolean> => {
+  try {
+    return JSON.parse(localStorage.getItem(WIDE_KEY) || '{}') ?? {};
+  } catch {
+    return {};
+  }
+};
+
 function Input({ n }: { n: Extract<MirrorNode, { k: 'in' }> }) {
   const [txt, setTxt] = useState<string | null>(null);
+  const [wideMap, setWideMap] = useState(loadWide);
+  const wide = wideMap[n.id] ?? !!n.w;
+  const toggleWide = () => {
+    const m = { ...loadWide(), [n.id]: !wide };
+    try {
+      localStorage.setItem(WIDE_KEY, JSON.stringify(m));
+    } catch {
+      // 못 적어도 이번에는 바뀜
+    }
+    setWideMap(m);
+  };
+  const wideBtn = (
+    <button className="sp-m-wide" onClick={toggleWide} title={wide ? '한 줄 좁은 칸으로' : '패널 폭 가득, 세 줄 넓은 칸으로'}>
+      {wide ? '좁게' : '넓게'}
+    </button>
+  );
   const send = (enter: boolean) => {
     if (txt !== null) liveSend({ cmd: 'panel.do', id: n.id, value: txt, enter });
     setTxt(null);
   };
+  const keys = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+      e.preventDefault();
+      send(true);
+      e.currentTarget.blur();
+    } else if (e.key === 'Escape') {
+      setTxt(null);
+      e.currentTarget.blur();
+    }
+  };
+  // 넓은 글 칸(스플래시 글, UI 글 등): 패널 폭 가득, 세 줄이 보이게. 줄바꿈은 게임처럼 \n으로 적음
+  if (wide)
+    return (
+      <div className="sp-m-inwrap wide">
+        <textarea
+          className="sp-m-in wide"
+          rows={3}
+          value={txt ?? n.t}
+          onFocus={() => setTxt(n.t)}
+          onChange={(e) => setTxt(e.target.value.replace(/\n/g, '\\n'))}
+          onBlur={() => send(false)}
+          onKeyDown={keys}
+          title="Enter 끝내기, Esc 취소. 줄바꿈은 \n"
+        />
+        {wideBtn}
+      </div>
+    );
   return (
-    <input
-      className="sp-m-in"
-      value={txt ?? n.t}
-      onFocus={() => setTxt(n.t)}
-      onChange={(e) => setTxt(e.target.value)}
-      onBlur={() => send(false)}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter') {
-          send(true);
-          (e.target as HTMLInputElement).blur();
-        } else if (e.key === 'Escape') {
-          setTxt(null);
-          (e.target as HTMLInputElement).blur();
-        }
-      }}
-    />
+    <span className="sp-m-inwrap">
+      <input
+        className="sp-m-in"
+        value={txt ?? n.t}
+        onFocus={() => setTxt(n.t)}
+        onChange={(e) => setTxt(e.target.value)}
+        onBlur={() => send(false)}
+        onKeyDown={keys}
+      />
+      {wideBtn}
+    </span>
   );
 }

@@ -295,7 +295,7 @@ init -9 python in ui_editor:
                 t = best
 
         if t is None:
-            store.renpy.notify("showpy 편집기: 지금 화면에서 편집할 수 있는 것이 없습니다.")
+            store.renpy.notify("GUI 편집기: 지금 화면에서 편집할 수 있는 것이 없습니다.")
             return
 
         state.open = True
@@ -497,6 +497,8 @@ init -9 python in ui_editor:
         t = current_tab()
         if t is None:
             return
+        if kind in ("background", "frame", "font"):
+            refresh_files(True)
         state.popup = kind
         state.popup_key = key
         if kind == "color":
@@ -778,6 +780,9 @@ init -9 python in ui_editor:
                 state.panel_xy = None
             elif k == pygame.K_F1:
                 state.help = not state.help
+            elif k == pygame.K_F9 and live_connected():
+                ## pygaki 앱과 이어져 있을 때: 게임 안 패널 보이기/숨기기 (3.23, 앱의 F9와 같음)
+                live_toggle_panel()
             elif k == pygame.K_x:
                 state.mini = not state.mini
             elif k == pygame.K_b:
@@ -1025,7 +1030,7 @@ init -9 python in ui_editor:
 
         def render(self, width, height, st, at):
             if self.child is None:
-                self.child = store.Text("= showpy 편집기", style="ui_editor_title")
+                self.child = store.Text("= GUI 편집기", style="ui_editor_title")
             cr = store.renpy.render(self.child, width, height, st, at)
             self.size = cr.get_size()
             rv = store.renpy.Render(self.size[0], self.size[1])
@@ -1069,6 +1074,72 @@ init -9 python in ui_editor:
         if not fn:
             return "(기본)"
         return fn
+
+    _files_seen = [ 0.0 ]
+
+    def refresh_files(force=False):
+        """game 폴더의 파일 목록을 다시 읽습니다 (개발 모드 편집기에서만, 3.23).
+        렌파이는 게임을 켤 때 목록을 한 번만 읽어서, 켠 뒤에 넣은 그림이 고르기 창에 안 나오기 때문.
+        images 폴더에 새로 들어온 그림은 그림 이름(파일 이름)도 만들어서 바로 show할 수 있게 합니다.
+        새 파일이 있으면 True."""
+        import os, time
+        import renpy.loader as _ld
+        if not store.config.developer:
+            return False
+        now = time.time()
+        if not force and now - _files_seen[0] < 2.0:
+            return False
+        _files_seen[0] = now
+        try:
+            before = set(fn for _d, fn in _ld.listdirfiles(False))
+            del _ld.game_files[:]
+            del _ld.common_files[:]
+            _ld.loadable_cache.clear()
+            _ld.scandirfiles()
+            after = set(fn for _d, fn in _ld.listdirfiles(False))
+        except Exception as e:
+            print("GUI 편집기: 파일 목록을 다시 읽지 못했습니다:", e)
+            return False
+        new = sorted(after - before)
+        if not new:
+            return False
+        exts = tuple(e.lower() for e in getattr(store.config, "image_extensions", (".png", ".jpg", ".jpeg", ".webp")))
+        for fn in new:
+            if not fn.startswith("images/") or not fn.lower().endswith(exts):
+                continue
+            base = os.path.splitext(os.path.basename(fn))[0].lower().partition("@")[0].strip()
+            name = tuple(base.split())
+            if name and not store.renpy.has_image(" ".join(name), exact=True):
+                try:
+                    import renpy as _r
+                    _r.display.image.register_image(name, _r.easy.displayable(fn))
+                except Exception as e:
+                    print("GUI 편집기: 그림 이름을 만들지 못했습니다:", fn, e)
+        ## pygaki 앱에도 새 파일 목록을 보냄
+        lv = globals().get("live")
+        if lv is not None:
+            lv.files_due = True
+        msg("새 파일 {}개를 찾았습니다.".format(len(new)))
+        return True
+
+    def open_folder(rel):
+        """game 폴더 안의 rel 폴더를 탐색기(맥은 Finder)로 엽니다. 없으면 만듭니다. (개발 모드 편집기에서만)"""
+        import os, sys, subprocess
+        if not store.config.developer:
+            return
+        path = os.path.normpath(os.path.join(store.config.gamedir, rel))
+        try:
+            if not os.path.isdir(path):
+                os.makedirs(path)
+            if sys.platform.startswith("win"):
+                os.startfile(path)
+            elif sys.platform == "darwin":
+                subprocess.Popen([ "open", path ])
+            else:
+                subprocess.Popen([ "xdg-open", path ])
+            store.renpy.notify("폴더를 열었습니다: game/" + rel.replace("\\", "/"))
+        except Exception as e:
+            store.renpy.notify("폴더를 열지 못했습니다: {}".format(e))
 
     ## ── 스크립트 괄호 만들기 (선택지·대사 탭) ──
 
@@ -1280,7 +1351,7 @@ screen ui_editor_background_popup():
 
         vbox:
             spacing 6
-            text ("배경 고르기 - 그림이나 영상(webm)") style "ui_editor_title"
+            text (getattr(_tab, "background_title", None) or "배경 고르기 - 그림이나 영상(webm)") style "ui_editor_title"
             text ("지금: " + (ui_editor.short_path(_cur) if _cur else "없음")) style "ui_editor_small"
 
             viewport:
@@ -1290,7 +1361,7 @@ screen ui_editor_background_popup():
 
                 vbox:
                     spacing 4
-                    textbutton "없음 (타이틀은 검은 화면, ESC 메뉴는 투명)":
+                    textbutton (getattr(_tab, "background_none_label", None) or "없음 (타이틀은 검은 화면, ESC 메뉴는 투명)"):
                         style "ui_editor_button"
                         xfill True
                         action Function(ui_editor.pick_font, None)
@@ -1305,7 +1376,10 @@ screen ui_editor_background_popup():
                     if not _files:
                         text "game 폴더에 그림(.png, .jpg, .webp)이나 영상(.webm)이 없습니다." style "ui_editor_text"
 
-            textbutton "취소 (Esc)" style "ui_editor_button" action Function(ui_editor.close_popup)
+            hbox:
+                spacing 6
+                textbutton "취소 (Esc)" style "ui_editor_button" action Function(ui_editor.close_popup)
+                textbutton "새로 읽기 (폴더에 넣은 파일)" style "ui_editor_button" action Function(ui_editor.refresh_files, True)
 
 
 screen ui_editor_panel():

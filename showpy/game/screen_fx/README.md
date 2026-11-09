@@ -1,4 +1,4 @@
-# Screen FX 플러그인 (기본 효과 + VHS 덮개 + ASCII + 레트로 터미널 + 게임보이 + 타이틀 일렁임)
+# Screen FX 플러그인 (기본 효과 + VHS 덮개 + ASCII + 레트로 터미널 + 게임보이 + 새 효과 여섯 + 타이틀 일렁임)
 
 화면 전체에 씌우는 렌파이 셰이더 플러그인입니다. 화면은 **셰이더 두 개를 겹쳐** 그립니다.
 
@@ -17,18 +17,40 @@
 | ASCII (`ascii`) | 화면을 글자 칸으로 나눠 밝기에 맞는 글자로 다시 그림. 글자 하나가 픽셀 하나 (옛날 텍스트 화면, 로그라이크 콘솔). 글꼴은 Neo둥근모 | `ascii_config.rpy` |
 | 레트로 터미널 (`retro_term`) | 옛날 단색 모니터. 밝기를 형광체 색으로 칠함, 빛 번짐, 주사선, 깜빡임, 자체 곡면 CRT(테두리 포함)와 자체 VHS. **쓰는 동안 덮개는 기본으로 꺼짐** | `retro_term_config.rpy` |
 | 게임보이 (`gameboy`) | 옛날 휴대용 게임기의 LCD 화면. 큰 점, 4색(또는 2색). **디더링**(점 무늬로 섞기)과 **픽셀화**(딱 끊기). 글자는 색만 입혀서 읽히게 | `gameboy_config.rpy` |
+| 글리치 (`glitch`) | 평소에는 깨끗하다가 가끔 무작위로 가로 띠 찢김, 블록 밀림, 색 갈라짐 (5.1) | `glitch_config.rpy` |
+| 지글거림 (`boil`) | 손그림 애니메이션처럼 테두리가 1초에 12번쯤 뚝뚝 떨리고 고운 알갱이가 바뀜 (5.1) | `boil_config.rpy` |
+| 망점 (`halftone`) | 인쇄물처럼 점(또는 줄)으로. 한 색 또는 CMYK 네 색 (5.1) | `halftone_config.rpy` |
+| 홀로그램 (`hologram`) | 한 색 + 흐르는 주사선 + 옆으로 번진 복사본 두 겹 + 빛 번짐 + 깜빡임. 인물 하나에 걸기 좋음 (5.1) | `hologram_config.rpy` |
+| 나이트비전 (`nightvision`) | 초록 한 색으로 밝게, 노이즈, 가장자리 어둡게, 동그란 테두리, **화면 글**(왼쪽 위 글, REC, 숫자 시간, [ZOOM]을 하나씩 켜고 끔)과 **화면 이미지**(테두리, 조준선 그림) (5.1) | `nightvision_config.rpy` |
+| 조각 어긋남 (`tiles`) | 크기가 다른 네모 칸으로 나눠 칸마다 밀림·확대·물들임·다른 그림. 장면 전환 `screen_fx.TileSwap`도 (5.1) | `tiles_config.rpy` |
 | 타이틀 일렁임 (`watermorph`) | 타이틀 화면을 투명한 액체 너머로 보는 것처럼. 바꾸기 기능과 상관없이 타이틀에서만 따로 켜짐 | `watermorph_config.rpy` |
 
 효과마다 **글자 빼기**로 대사, 이름 / 선택지 / 메뉴, 화면 중 효과를 씌우지 않을 글자를 골라서 뺄 수 있습니다. (기본은 글자까지 전부 씌움. ASCII만 글자를 전부 빼는 게 기본)
 
 `ui_kit` 플러그인이 같이 있으면 그 편집기(개발 모드에서 Shift+M)에 **"화면 효과", "타이틀 일렁임" 탭**이 생기고, **대사 탭에서 "이 대사부터 이 효과", 덮개 켬/끔, 덮개 휘어짐을 골라 원고에 바로 저장**할 수 있습니다. 대사가 아닌 줄(show, scene, with, $ 줄 등)에서 바꾸고 싶으면 **"화면 효과" 탭의 "줄에 넣기"** 로 그 줄 바로 위에 `$ screen_fx.use(…)` 줄을 넣습니다(4.1). `ui_kit`이 없어도 효과는 설정 파일과 스크립트로 그대로 동작합니다.
 
-버전 5.0 · 렌파이 8.5.3에서 만들고 테스트했습니다.
+버전 5.1 · 렌파이 8.5.3에서 만들고 테스트했습니다.
 
 VHS 셰이더 원본: [VHS and CRT monitor effect](https://godotshaders.com/shader/vhs-and-crt-monitor-effect/) (Godot Shaders, CC0). 렌파이용으로 옮기면서 채도·대비·전체 세기를 바꿀 수 있게 추가했습니다.
 레트로 터미널은 [cool-retro-term](https://github.com/Swordfish90/cool-retro-term)의 모습과 설정 목록을 참고해 새로 썼습니다(코드는 가져오지 않음).
 게임보이는 [Retro dither](https://godotshaders.com/shader/retro-dither/) (tcmug, CC0)의 4×4 디더링 무늬와 [Gameboy Classic Shader](https://github.com/HarlequinVG/shaders/tree/master/gameboy_shader) (Harlequin, GPL v3)의 LCD 모습(점 격자·점 그림자)을 참고해 새로 썼습니다(코드는 가져오지 않음).
 ASCII 효과는 [ASCII shader](https://godotshaders.com/shader/ascii-shader/) (Daniel Bologna, Acerola의 아이디어, MIT)를 참고해 렌파이용으로 새로 썼습니다. 글꼴은 [Neo둥근모](https://neodgm.dalgona.dev/) (SIL OFL 1.1)입니다.
+
+### 5.1에서 바뀐 점
+
+- **새 화면 효과 여섯 가지**: 글리치(`glitch`), 지글거림(`boil`), 망점(`halftone`), 홀로그램(`hologram`), 나이트비전(`nightvision`), 조각 어긋남(`tiles`). 다른 효과처럼 1번, 2번 자리 어디에나 고르고, 대사 괄호 `fx=`, `image_fx`, `set_values`, 프리셋, 편집기 막대가 다 됩니다. 효과마다 설정 파일(`<이름>_config.rpy`)에 쓰는 법과 예시가 있습니다.
+  ```renpy
+  $ screen_fx.shaders("glitch")                        # 1번 글리치
+  $ screen_fx.shaders("halftone", "boil")              # 망점 + 지글거림 겹치기
+  show eileen at screen_fx.image_fx("hologram")        # 인물 하나만 홀로그램
+  $ nightvision.set(hud_text="CAM 03")                 # 나이트비전 화면 글 바꾸기
+  scene bg room with screen_fx.TileSwap(1.0)           # 칸마다 바뀌는 장면 전환
+  ```
+- 새 효과는 쓰는 동안 덮개(VHS)를 기본으로 켜지 않습니다(`<이름>.overlay = False`). 같이 쓰려면 2번 자리에 `"vhs_crt"`.
+- 나이트비전 화면 글은 `hud_label`(왼쪽 위 글), `rec`(REC 글자), `timer`(숫자 시간), `zoom`([ZOOM] 글)로 하나씩 켜고 끕니다. 글 내용(`hud_text`, `zoom_text`)과 화면 이미지(`hud_image`)는 편집기 세부 속성 "화면 글"에서 고치고 고를 수 있습니다(글 칸, [그림 고르기] 창). `hud_image`에 그림 파일(예: `"gui/nv_frame.png"`)을 적으면 화면에 얹습니다(`hud_image_fit` `"full"` 화면 가득 / `"center"` 가운데, `hud_image_alpha` 진하기, `hud_image_zoom` 크기, `hud_image_rotate` 회전, `hud_image_x`·`hud_image_y` 가운데 기준 자리).
+- 나이트비전 화면 글은 셰이더가 아니라 이 효과가 보일 때만 뜨는 스크린(`nightvision_hud`, `config.overlay_screens`에 저절로 들어감)입니다. 1번이든 2번이든 나이트비전이 보이면 뜹니다.
+
+옮기기: `screen_fx/engine/`을 `.rpyc`까지 지우고 새것을 넣고, 새 설정 파일 여섯 개(`glitch_config.rpy` …)를 넣습니다. 있던 설정 파일은 그대로 둬도 됩니다.
 
 ### 5.0에서 바뀐 점
 
@@ -176,6 +198,12 @@ game/screen_fx/
 ├── retro_term_config.rpy    설정: 레트로 터미널 효과                       ← 여기를 고침
 ├── gameboy_config.rpy       설정: 게임보이 효과                            ← 여기를 고침
 ├── watermorph_config.rpy    설정: 타이틀 일렁임                            ← 여기를 고침
+├── glitch_config.rpy        설정: 글리치 (5.1)                            ← 여기를 고침
+├── boil_config.rpy          설정: 지글거림 (5.1)                          ← 여기를 고침
+├── halftone_config.rpy      설정: 망점 (5.1)                              ← 여기를 고침
+├── hologram_config.rpy      설정: 홀로그램 (5.1)                          ← 여기를 고침
+├── nightvision_config.rpy   설정: 나이트비전과 화면 글 (5.1)               ← 여기를 고침
+├── tiles_config.rpy         설정: 조각 어긋남, TileSwap 전환 (5.1)        ← 여기를 고침
 ├── *_layout.rpy             편집기에서 저장하면 생기는 파일 (처음에는 없음)
 ├── engine/                  엔진 (고치지 않음. 새 효과를 넣을 때만 여기에 파일 추가)
 │   ├── screen_fx.rpy            공통: 효과 목록, 바꾸기, 전환, 대사 괄호 fx
@@ -183,7 +211,10 @@ game/screen_fx/
 │   ├── ascii.rpy                ASCII 셰이더 (글자 그림을 게임 중에 만듦)
 │   ├── retro_term.rpy           레트로 터미널 셰이더
 │   ├── gameboy.rpy              게임보이 셰이더
-│   └── watermorph.rpy           타이틀 일렁임 셰이더
+│   ├── watermorph.rpy           타이틀 일렁임 셰이더
+│   ├── glitch.rpy, boil.rpy, halftone.rpy, hologram.rpy   새 효과 셰이더 (5.1)
+│   ├── nightvision.rpy          나이트비전 셰이더 + 화면 글 스크린 (5.1)
+│   └── tiles.rpy                조각 어긋남 셰이더, TileSwap 전환 (5.1)
 ├── editor/
 │   └── editor_fx.rpy            UI Kit 편집기 탭 (UI Kit이 없으면 아무것도 안 함)
 ├── fonts/

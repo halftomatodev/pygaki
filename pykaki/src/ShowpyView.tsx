@@ -1,9 +1,10 @@
-// showpy 화면 (데스크톱 앱 전용). 게임 창은 옆에 그대로 두고, 게임 안 편집기를 여기서 조종한다.
+// showpy 화면 (데스크톱 앱 전용). 게임 창은 옆에 그대로 두고, 게임 창의 GUI 편집기를 여기서 조종한다.
 // 왼쪽: 고칠 것 목록 / 가운데: 지금 게임 위치와 대본 / 오른쪽: 고르는 칸.
 // 값은 게임이 갖고 있고(docs/LINK.md 9장), 여기는 보여주고 바꾸라고 보내기만 한다. 저장도 게임이 한다.
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { desktop } from './desktop';
-import { liveSend, useLive, type GameState, type TitleItem, type TitleState } from './showpyLive';
+import { liveSend, setGamePanel, useLive, type GameState, type TitleItem, type TitleState } from './showpyLive';
+import { keyOf } from './prefs';
 import { useStore } from './store';
 import { CustomUIPanel } from './ShowpyCustomUI';
 import { MirrorPanel } from './ShowpyMirror';
@@ -11,7 +12,7 @@ import { MirrorPanel } from './ShowpyMirror';
 interface Section {
   id: string;
   label: string;
-  tab: string | null; // 게임 안 편집기 탭
+  tab: string | null; // 게임 창의 GUI 편집기 탭
   app: boolean; // 앱에 따로 만든 칸이 있음
   mirror?: boolean; // 게임 안 패널을 통째로 옮겨 그림 (ui_kit 3.16부터)
   note: string;
@@ -24,11 +25,12 @@ const SECTIONS: Section[] = [
   { id: 'pause', label: '게임 내 메뉴 (ESC)', tab: 'title', app: true, note: '' },
   { id: 'pause_fx', label: '└ 게임 내 메뉴 셰이더', tab: 'pause_fx', app: false, mirror: true, note: 'ESC 메뉴와 거기서 연 화면에만 걸리는 셰이더 두 자리예요. 메뉴가 열려 있는 동안 뒤 게임 화면도 이 셰이더로 보여요.' },
   { id: 'watermorph', label: '타이틀 일렁임', tab: 'watermorph', app: false, mirror: true, note: '타이틀 배경에만 걸리는 일렁임 효과예요.' },
-  { id: 'screen_fx', label: '인게임 화면 셰이더', tab: 'screen_fx', app: false, mirror: true, note: '게임 화면에 씌우는 셰이더 두 자리(기본, 아스키, VHS, 단말기, 게임보이)예요. 고르고 [여기에서부터 적용]을 누르면 고른 줄부터 바뀌어요.' },
+  { id: 'screen_fx', label: '인게임 화면 셰이더', tab: 'screen_fx', app: false, mirror: true, note: '게임 화면에 씌우는 셰이더 두 자리(기본, 아스키, VHS, 단말기, 게임보이, 글리치, 지글거림, 망점, 홀로그램, 나이트비전, 조각 어긋남)예요. 고르고 [여기에서부터 적용]을 누르면 고른 줄부터 바뀌어요.' },
   { id: 'custom_ui', label: '커서, 클릭 대기(CTC), 대사 소리', tab: 'custom_ui', app: true, note: '' },
   { id: 'say', label: '대사 (위치, 스타일)', tab: 'say', app: false, mirror: true, note: '' },
   { id: 'choice', label: '선택지', tab: 'choice', app: false, mirror: true, note: '' },
   { id: 'stage', label: '그림, 영상 배치', tab: 'stage', app: false, mirror: true, note: '' },
+  { id: 'ui_text', label: '확인 창, UI 글 (종료 메시지, 버튼)', tab: 'ui_text', app: false, mirror: true, note: '종료 확인 창, 퀵메뉴 버튼 같은 글을 바꿔요. showpy ui_kit 3.23부터 있어요.' },
 ];
 
 export function ShowpyView() {
@@ -45,7 +47,8 @@ export function ShowpyView() {
       if (st.editor.open && st.editor.hide_panel) liveSend({ cmd: 'editor', open: false });
       return;
     }
-    liveSend({ cmd: 'panel', hide: inApp(s) });
+    // 게임 창에도 보이기로 해 두었으면(F9) 숨기지 않음
+    liveSend({ cmd: 'panel', hide: inApp(s) && !useLive.getState().gamePanel });
     liveSend({ cmd: 'editor', open: true, tab: s.tab });
   };
 
@@ -244,7 +247,7 @@ function EditorBar({ st }: { st: GameState }) {
   return (
     <div className="sp-bar">
       <div className="sp-row">
-        <button className="primary" disabled={!e.pending} onClick={() => liveSend({ cmd: 'save' })} title="게임 안 편집기의 Ctrl+S와 같아요">
+        <button className="primary" disabled={!e.pending} onClick={() => liveSend({ cmd: 'save' })} title="게임 창의 GUI 편집기의 Ctrl+S와 같아요">
           저장 {e.pending ? `(${e.pending})` : ''}
         </button>
         <button
@@ -256,10 +259,15 @@ function EditorBar({ st }: { st: GameState }) {
         <span className="grow" />
         {e.open ? <button onClick={() => liveSend({ cmd: 'editor', open: false })}>편집기 닫기</button> : <span className="tip">편집기 꺼짐</span>}
       </div>
-      <label className="sp-check">
-        <input type="checkbox" checked={!e.hide_panel} onChange={(ev) => liveSend({ cmd: 'panel', hide: !ev.target.checked })} />
-        게임 안 패널도 보기
-      </label>
+      <div className="sp-row">
+        <button
+          className={e.hide_panel ? '' : 'on'}
+          onClick={() => setGamePanel(e.hide_panel)}
+          title={`게임 창에도 GUI 편집기 패널을 보일지 바꿔요. 보이게 하면 고치는 칸이 게임 창으로 가요. 단축키 ${keyOf('gamePanel')} (게임 창에서도 됨)`}
+        >
+          게임 창의 GUI 편집기: {e.hide_panel ? '숨김' : '보임'} ({keyOf('gamePanel')})
+        </button>
+      </div>
       {e.open && e.hide_panel && (
         <div className="sp-editing">
           <span>
@@ -315,7 +323,7 @@ function MirrorSection({ st, sec }: { st: GameState; sec: Section }) {
       <button className="primary" onClick={open}>
         편집 시작
       </button>
-      {st.editor.open && !st.editor.hide_panel && st.editor.tab === sec.tab && <p className="tip">지금은 게임 창의 패널에 열려 있어요. [게임 안 패널도 보기]를 끄면 여기로 와요.</p>}
+      {st.editor.open && !st.editor.hide_panel && st.editor.tab === sec.tab && <p className="tip">지금은 게임 창의 패널에 열려 있어요. [게임 창의 GUI 편집기]를 숨김으로 바꾸면({keyOf('gamePanel')}) 여기로 와요.</p>}
     </div>
   );
 }
@@ -328,7 +336,7 @@ function InGamePanel({ st, sec }: { st: GameState; sec: Section }) {
   return (
     <div>
       {sec.note && <p>{sec.note}</p>}
-      <p className="tip">이 칸은 아직 앱으로 옮기지 않았어요. 지금은 게임 안 편집기 패널에서 고쳐요.</p>
+      <p className="tip">이 칸은 아직 앱으로 옮기지 않았어요. 지금은 게임 창의 GUI 편집기 패널에서 고쳐요.</p>
       {sec.tab &&
         (!t ? (
           <p className="tip">이 게임에는 이 편집기 탭이 없어요. (플러그인이 빠져 있을 수 있어요)</p>
@@ -337,7 +345,7 @@ function InGamePanel({ st, sec }: { st: GameState; sec: Section }) {
         ) : here ? (
           <p className="tip">게임 창에 이 탭 패널이 열려 있어요.</p>
         ) : (
-          <button onClick={() => (liveSend({ cmd: 'panel', hide: false }), liveSend({ cmd: 'editor', open: true, tab: sec.tab }))}>게임 안 편집기에서 열기</button>
+          <button onClick={() => (liveSend({ cmd: 'panel', hide: false }), liveSend({ cmd: 'editor', open: true, tab: sec.tab }))}>게임 창의 GUI 편집기에서 열기</button>
         ))}
       {here && st.editor.info.length > 0 && (
         <pre className="sp-info">{st.editor.info.join('\n')}</pre>
@@ -391,7 +399,7 @@ function TitlePanel({ st, want }: { st: GameState; want: 'title' | 'pause' }) {
   if (!st.editor.open || st.editor.tab !== 'title') {
     return (
       <div>
-        <p className="tip">게임 안 편집기의 타이틀 메뉴 탭을 열어야 끌어서 옮길 수 있어요.</p>
+        <p className="tip">게임 창의 GUI 편집기의 타이틀 메뉴 탭을 열어야 끌어서 옮길 수 있어요.</p>
         <button className="primary" onClick={() => (liveSend({ cmd: 'panel', hide: true }), liveSend({ cmd: 'editor', open: true, tab: 'title' }))}>
           편집 시작
         </button>

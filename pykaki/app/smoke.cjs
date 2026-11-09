@@ -106,10 +106,11 @@ async function until(what, fn, ms = 10000) {
     // 게임 안 패널을 통째로 (ui_kit 3.16)
     panel: {
       tab: 'screen_fx', popup: null, popup_kind: null,
-      body: { k: 'v', c: [{ k: 't', t: '시험 패널' }, { k: 'h', c: [{ k: 't', t: '효과:' }, { k: 'b', id: 'p.1', t: 'ASCII', on: false, ok: true }] }, { k: 'bar', id: 'p.2', r: 1, v: 0.5, s: 0.01 }] },
+      body: { k: 'v', c: [{ k: 't', t: '시험 패널' }, { k: 'h', c: [{ k: 't', t: '효과:' }, { k: 'b', id: 'p.1', t: 'ASCII', on: false, ok: true }] }, { k: 'bar', id: 'p.2', r: 1, v: 0.5, s: 0.01 }, { k: 'in', id: 'p.3', t: 'long text', w: 1 }] },
     },
   };
   const srv = net.createServer((c) => {
+    (srv._conns ??= []).push(c);
     c.setEncoding('utf8');
     let buf = '';
     c.on('data', (d) => {
@@ -135,7 +136,23 @@ async function until(what, fn, ms = 10000) {
   await page.waitForSelector('.sp-mirror .sp-m-b', { timeout: 10000 });
   await page.locator('.sp-mirror .sp-m-b', { hasText: 'ASCII' }).click();
   await until('패널 버튼 명령을 보내지 않음', () => got.some((m) => m.cmd === 'panel.do' && m.id === 'p.1' && m.t === 'ASCII'));
+  // 넓은 글 칸 (ui_kit 3.23): 세 줄 칸으로 그리는지
+  const rows = await page.locator('.sp-mirror textarea.sp-m-in.wide').getAttribute('rows', { timeout: 10000 });
+  if (rows !== '3') fail('넓은 글 칸이 세 줄 칸이 아님: ' + rows);
   console.log('패널 통째로: 됨');
+  // 게임 창의 GUI 편집기 보이기/숨기기 (ui_kit 3.23): 버튼과 F9가 panel 명령을 보내고, 게임 쪽 알림을 기억하는지
+  const nPanel = () => got.filter((m) => m.cmd === 'panel' && m.hide === false).length;
+  const p0 = nPanel();
+  await page.locator('.sp-bar button', { hasText: '게임 창의 GUI 편집기' }).click();
+  await until('보이기 버튼이 panel 명령을 보내지 않음', () => nPanel() > p0);
+  if ((await page.evaluate(() => localStorage.getItem('pygaki-game-panel'))) !== 'show') fail('보이기를 기억하지 않음');
+  await page.keyboard.press('F9');
+  await until('F9가 숨기기 명령을 보내지 않음', () => got.some((m, i) => m.cmd === 'panel' && m.hide === true && i > 0));
+  await page.waitForFunction(() => localStorage.getItem('pygaki-game-panel') === 'hide', null, { timeout: 5000 });
+  for (const c of srv._conns ?? []) c.write(JSON.stringify({ type: 'panel', hide: false }) + '\n');
+  if (srv._conns?.length) await page.waitForFunction(() => localStorage.getItem('pygaki-game-panel') === 'show', null, { timeout: 5000 });
+  await page.evaluate(() => localStorage.setItem('pygaki-game-panel', 'hide'));
+  console.log('게임 창 편집기 토글: 됨');
   // 커서, 클릭 대기, 대사 소리 칸 (ui_kit 3.15): 앱 칸이 나오고 값을 보내는지
   await page.click('.sp-nav-item:has-text("커서, 클릭 대기")');
   await page.waitForSelector('.sp-cu select', { timeout: 10000 });

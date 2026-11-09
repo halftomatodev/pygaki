@@ -152,6 +152,29 @@ def renpy_python(sdk):
     sys.exit("SDK 안의 파이썬을 찾지 못했어요: " + os.path.join(sdk, "lib"))
 
 
+def add_common_translation(sdk, tdir):
+    """렌파이 공통 문구("Are you sure you want to quit?" 같은 확인 창 글)를 한국어로.
+
+    런처의 [새 프로젝트 만들기]는 game/tl/None/common.rpym에 공통 문구 번역을 만든다(update_renpy_strings_common).
+    generate_gui만 쓰면 이 단계가 빠져서 종료 확인 같은 창이 영어로 나온다. 런처와 같은 순서로 만든다:
+    런처의 한국어 번역을 json으로 뽑고 → 프로젝트에 빈 공통 번역을 만들고 → json으로 채운다.
+    """
+    py = renpy_python(sdk)
+    run = lambda args: subprocess.run([py, os.path.join(sdk, "renpy.py")] + args, cwd=sdk, check=True)
+    js = os.path.join(tdir, "_common_strings.json")
+    try:
+        run(["launcher", "extract_strings", LANGUAGE, js])
+        run([tdir, "translate", "None", "--common-only", "--strings-only", "--max-priority", "399", "--no-todo"])
+        run([tdir, "merge_strings", "None", js])
+    finally:
+        if os.path.exists(js):
+            os.remove(js)
+    fn = os.path.join(tdir, "game", "tl", "None", "common.rpym")
+    with open(fn, encoding="utf-8") as f:
+        if "종료하겠습니까?" not in f.read():
+            sys.exit("공통 문구 한국어 번역을 만들지 못했어요: " + fn)
+
+
 def make_base_project(sdk, tdir):
     """런처의 [새 프로젝트 만들기]와 같은 방법으로 그림까지 다 만든 기본 프로젝트를 만든다.
 
@@ -165,6 +188,7 @@ def make_base_project(sdk, tdir):
          "--language", LANGUAGE, "--template", os.path.join(sdk, "gui")])
     run([tdir, "gui_images"], {"RENPY_VARIANT": "small phone"})
     run([tdir, "gui_images"])
+    add_common_translation(sdk, tdir)
     for fn in ("log.txt", "errors.txt", "traceback.txt"):
         if os.path.exists(os.path.join(tdir, fn)):
             os.remove(os.path.join(tdir, fn))

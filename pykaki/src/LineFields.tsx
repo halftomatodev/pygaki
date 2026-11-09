@@ -111,7 +111,7 @@ export function SayFields({ l, set }: { l: Line; set: SetLine }) {
   );
   const pos = (x: 'x' | 'name_x', y: 'y' | 'name_y', what: string) =>
     s[x] !== undefined || s[y] !== undefined ? (
-      <span className="sf-pos" title={`showpy 편집기에서 정한 ${what} 위치예요. 대사창 왼쪽 위 기준이에요.`}>
+      <span className="sf-pos" title={`GUI 편집기에서 정한 ${what} 위치예요. 대사창 왼쪽 위 기준이에요.`}>
         {what} 위치 {s[x] ?? '-'}, {s[y] ?? '-'}
         <button
           title="위치 지우기"

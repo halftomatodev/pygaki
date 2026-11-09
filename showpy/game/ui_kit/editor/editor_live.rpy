@@ -170,6 +170,13 @@ init -8 python in ui_editor:
     def live_connected():
         return live.client is not None
 
+    def live_toggle_panel():
+        """게임 안 패널 보이기/숨기기를 바꾸고 앱에 알립니다(앱이 기억해 둠). (3.23)"""
+        live.hide_panel = not live.hide_panel
+        _live_send(dict(type="panel", hide=live.hide_panel))
+        msg("게임 안 GUI 편집기 " + ("숨김 (pygaki 앱에서 고침)" if live.hide_panel else "보임"))
+        store.renpy.restart_interaction()
+
     def live_panel_hidden():
         """앱이 붙어 있고 패널 숨기기가 켜져 있으면 게임 안 패널을 그리지 않습니다."""
         return live.client is not None and live.hide_panel
@@ -372,6 +379,17 @@ init -8 python in ui_editor:
         _texts_in(d.child, label)
         return " ".join(label)
 
+    def _in_node(inp, path):
+        """입력칸 → 앱이 그릴 모양. 게임 쪽 칸이 넓으면(xmaximum 300 이상) 앱도 여러 줄 넓은 칸으로 (3.23)."""
+        node = dict(k="in", id=path, t=str(inp.content or ""))
+        try:
+            m = inp.style.xmaximum
+            if isinstance(m, (int, float)) and not isinstance(m, bool) and m >= 300:
+                node["w"] = 1
+        except Exception:
+            pass
+        return node
+
     def _mirror(d, path, reg, depth=0):
         """위젯 하나를 앱이 그릴 모양으로. 누를 수 있는 것은 reg[자리 번호]에 적어 둡니다."""
         import renpy as _r
@@ -385,7 +403,7 @@ init -8 python in ui_editor:
             _input_in(d.child, found)
             if found:
                 reg[path] = found[0]
-                return dict(k="in", id=path, t=str(found[0].content or ""))
+                return _in_node(found[0], path)
             label = _button_label(d)
             extra = [ ]
             _media_in(d.child, extra)
@@ -407,7 +425,7 @@ init -8 python in ui_editor:
 
         if isinstance(d, disp.behavior.Input):
             reg[path] = d
-            return dict(k="in", id=path, t=str(d.content or ""))
+            return _in_node(d, path)
 
         if isinstance(d, _r.text.text.Text):
             t = _plain(d.get_all_text())
@@ -487,8 +505,8 @@ init -8 python in ui_editor:
         t = current_tab()
         name = t.label if t is not None else ""
         if state.popup is not None:
-            return "PyKaki 앱에 고르기 창이 열려 있어요 | 닫을 때까지 게임 입력이 막혀요 (Esc로 닫기)"
-        return "편집 중: {} (PyKaki 앱) | 클릭과 키는 편집기로 가요 | Esc로 닫기".format(name)
+            return "pygaki 앱에 고르기 창이 열려 있어요 | 닫을 때까지 게임 입력이 막혀요 (Esc로 닫기)"
+        return "GUI 편집 중: {} (pygaki 앱) | 클릭과 키는 편집기로 가요 | F9 게임 창에도 보이기 | Esc로 닫기".format(name)
 
     def _panel_do(c):
         import renpy as _r

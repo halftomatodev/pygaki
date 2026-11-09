@@ -54,6 +54,10 @@ Actions 화면에서 손으로 돌리면(Run workflow) Releases에는 안 올리
 
 새 SDK 폴더로 `make_bundle.py`를 다시 돌리면 돼요(Releases는 `RENPY_VERSION`만 바꾸고 태그). 런처의 원래 파일은 고치지 않고 `pygaki_launcher.rpy` 하나만 더하기 때문에, 런처가 바뀌어도 대개 그대로 돼요. 런처 화면이 크게 바뀌면 버튼 자리(`ypos`)만 맞춰요.
 
+## 한국어 공통 문구
+
+템플릿을 만들 때 런처의 [새 프로젝트 만들기]처럼 렌파이 공통 문구(종료 확인 창 같은 글)의 한국어 번역 `game/tl/None/common.rpym`을 만듭니다(`add_common_translation`: 런처에서 `extract_strings korean` → 프로젝트에서 `translate None --common-only` → `merge_strings`). 이 파일이 없으면 확인 창이 영어로 나옵니다.
+
 ## 런처 버튼이 하는 일
 
 - **[pygaki로 편집]**: 왼쪽 목록에서 고른 프로젝트로 `pygaki.exe --project "프로젝트 폴더"`를 실행해요.

@@ -87,7 +87,7 @@ export type MirrorNode =
   | { k: 't'; t: string; c?: string }
   | { k: 'b'; id: string; t: string; on: boolean; ok: boolean; c?: MirrorNode[] }
   | { k: 'bar'; id: string; r: number; v: number; s: number }
-  | { k: 'in'; id: string; t: string }
+  | { k: 'in'; id: string; t: string; w?: number } // w: 넓은 글 칸 (여러 줄, ui_kit 3.23)
   | { k: 'img'; p: string }
   | { k: 'col'; v: string | null };
 export interface PanelState {
@@ -111,6 +111,7 @@ export interface GameState {
 
 interface S {
   view: 'script' | 'showpy';
+  gamePanel: boolean; // 게임 창에도 GUI 편집기 패널을 보일지 (앱이 기억함, F9)
   on: boolean; // 게임과 붙어 있음
   showpy: string | null; // 게임의 ui_kit 버전
   st: GameState | null;
@@ -119,12 +120,42 @@ interface S {
   section: string;
 }
 
-export const useLive = create<S>(() => ({ view: 'script', on: false, showpy: null, st: null, files: null, err: null, section: 'title' }));
+// 게임 창의 GUI 편집기 보이기/숨기기. 이 앱(창)에 붙는 설정이라 localStorage에 둔다
+const PANEL_KEY = 'pygaki-game-panel';
+const loadGamePanel = () => {
+  try {
+    return localStorage.getItem(PANEL_KEY) === 'show';
+  } catch {
+    return false;
+  }
+};
+const keepGamePanel = (show: boolean) => {
+  useLive.setState({ gamePanel: show });
+  try {
+    localStorage.setItem(PANEL_KEY, show ? 'show' : 'hide');
+  } catch {
+    // 못 적어도 이번 창에서는 그대로
+  }
+};
+
+export const useLive = create<S>(() => ({ view: 'script', gamePanel: loadGamePanel(), on: false, showpy: null, st: null, files: null, err: null, section: 'title' }));
 
 export const liveSend = (cmd: Record<string, unknown>) => {
   if (!desktop || !useLive.getState().on) return;
   void desktop.liveSend(cmd);
 };
+
+// 게임 창의 GUI 편집기를 보이게/숨기게 하고 기억한다. 알림 글을 돌려준다 (F9, [GUI 편집] 버튼)
+export function setGamePanel(show: boolean) {
+  keepGamePanel(show);
+  liveSend({ cmd: 'panel', hide: !show });
+}
+export function toggleGamePanel() {
+  const s = useLive.getState();
+  if (!s.on) return '게임이 연결되지 않았어요. 런처에서 게임을 켜 두면 저절로 붙어요.';
+  setGamePanel(!s.gamePanel);
+  return !s.gamePanel ? '게임 창의 GUI 편집기를 보여요 (앱의 칸은 게임 창으로 가요)' : '게임 창의 GUI 편집기를 숨겨요 (앱에서 고쳐요)';
+}
 
 let started = false;
 export function startLive() {
@@ -134,12 +165,18 @@ export function startLive() {
   useLive.subscribe((s, prev) => {
     if (prev.view === 'showpy' && s.view !== 'showpy' && s.st?.editor.open && s.st.editor.hide_panel) liveSend({ cmd: 'editor', open: false });
   });
-  const status = (s: { on: boolean; showpy: string | null }) =>
+  const status = (s: { on: boolean; showpy: string | null }) => {
+    const was = useLive.getState().on;
     useLive.setState(s.on ? { on: s.on, showpy: s.showpy } : { on: false, showpy: s.showpy, st: null, files: null });
+    // 새로 붙으면 기억해 둔 보이기/숨기기를 게임에 알려 줌 (게임은 붙을 때마다 숨김으로 시작)
+    if (s.on && !was) liveSend({ cmd: 'panel', hide: !useLive.getState().gamePanel });
+  };
   const take = (m: any) => {
     if (m?.type === 'state') useLive.setState({ st: m as GameState, err: null });
     else if (m?.type === 'files') useLive.setState({ files: { audio: m.audio ?? [], images: m.images ?? [], movies: m.movies ?? [] } });
     else if (m?.type === 'error') useLive.setState({ err: String(m.text) });
+    // 게임 창에서 F9로 바꿈 (ui_kit 3.23)
+    else if (m?.type === 'panel') keepGamePanel(!m.hide);
   };
   desktop.onLiveStatus(status);
   desktop.onLive(take);

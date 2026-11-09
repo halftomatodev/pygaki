@@ -22,7 +22,7 @@ init -20 python in ui_kit:
     import store
     from store import DictEquality, TransformMatrix, Matrix, Movie, python_object
 
-    VERSION = "3.22"
+    VERSION = "3.23"
 
     ## ── 플러그인 폴더 위치 ──
     ## 이 파일은 <플러그인 폴더>/engine/ui_kit.rpy 에 있습니다.

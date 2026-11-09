@@ -12,7 +12,7 @@ import { addBoxCenter, enterFullPlay, goNextBox, leaveFullPlay, toggleFocus } fr
 import { hit } from './prefs';
 import { isTyping } from './util';
 import { isDesktop } from './desktop';
-import { liveSend, startLive, useLive } from './showpyLive';
+import { liveSend, startLive, toggleGamePanel, useLive } from './showpyLive';
 import { ShowpyView } from './ShowpyView';
 
 // 단축키는 환경 설정에서 바꿀 수 있다 (prefs.ts)
@@ -22,6 +22,8 @@ function Keys() {
     const onKey = (e: KeyboardEvent) => {
       const s = useStore.getState();
       const run = (fn: () => void) => (e.preventDefault(), fn());
+      // 게임 창의 GUI 편집기 보이기/숨기기는 어느 화면에서나 (데스크톱 앱)
+      if (isDesktop && hit(e, 'gamePanel')) return run(() => s.say(toggleGamePanel()));
       // showpy 화면에서는 저장 키가 게임 안 편집기의 저장(Ctrl+S)
       if (useLive.getState().view === 'showpy') {
         if (hit(e, 'save')) run(() => liveSend({ cmd: 'save' }));

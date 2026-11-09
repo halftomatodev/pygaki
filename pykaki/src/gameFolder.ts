@@ -344,7 +344,7 @@ export async function pullInbox(ask = false) {
   await writeText(dir, INBOX_FILE, JSON.stringify({ format: 'showpy-inbox', version: 1, ops: rest }, null, 2));
 
   const extra = [res.moved.length ? `기준 줄이 없어 상자 끝에 넣음 ${res.moved.length}개` : '', res.dropped.length ? `넣을 곳이 없어 뺌: ${res.dropped.join(', ')}` : ''].filter(Boolean).join(' / ');
-  s.say(`showpy에서 고친 ${res.applied}곳을 받아 적었어요${extra ? ' (' + extra + ')' : ''}`);
+  s.say(`GUI 편집기에서 고친 ${res.applied}곳을 받아 적었어요${extra ? ' (' + extra + ')' : ''}`);
   return res.applied;
 }
 

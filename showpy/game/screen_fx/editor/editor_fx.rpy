@@ -84,6 +84,53 @@ init -6 python in screen_fx:
             def file_path(self, filename):
                 return root_path(filename)
 
+            ## 그림 고르기 창(UI Kit의 "background" 창)에서 쓰는 것 (5.1, 나이트비전 화면 이미지)
+            background_title = "그림 고르기 - game 폴더의 그림"
+            background_none_label = "없음"
+
+            def background_files(self):
+                return store.ui_kit.game_files((".png", ".webp", ".jpg", ".jpeg", ".avif"))
+
+        ## ── 세부 속성의 글 칸 (5.1): 줄 종류 "text" ──
+
+        class FxTextInput(store.InputValue, store.DictEquality):
+            default = False
+            editable = True
+            returnable = False
+
+            def __init__(self, tab, key):
+                self.tab = tab
+                self.key = key
+                self.text = None
+
+            def get_text(self):
+                if self.text is None:
+                    return str(self.tab.val(self.key) or "").replace("\n", "\\n")
+                return self.text
+
+            def set_text(self, s):
+                self.text = s
+                renpy.restart_interaction()
+
+            def enter(self):
+                s = (self.text if self.text is not None else self.get_text()).replace("\\n", "\n")
+                self.tab.put(self.key, s)
+                self.text = None
+                renpy.run(self.Disable())
+                raise renpy.IgnoreEvent()
+
+            def cancel(self):
+                self.text = None
+                renpy.run(self.Disable())
+
+        _fx_text_inputs = { }
+
+        def fx_text_input(tab, key):
+            k = (id(tab), key)
+            if k not in _fx_text_inputs:
+                _fx_text_inputs[k] = FxTextInput(tab, key)
+            return _fx_text_inputs[k]
+
         ## ── 타이틀 일렁임 ──
 
         class WatermorphTab(FxTabBase):
@@ -1795,6 +1842,20 @@ screen ui_editor_fx_row(tab, row):
                 xmaximum 470
                 for _v, _vl in row[3]:
                     textbutton _vl style "ui_editor_fx_button" action Function(tab.put, _k, _v) selected (tab.val(_k) == _v)
+        elif row[2] == "text":
+            ## 글 칸 (5.1): 누르고 고친 뒤 Enter. 줄바꿈은 \\n
+            button:
+                style "ui_editor_fx_button"
+                xsize 470
+                yminimum 56
+                action screen_fx.fx_text_input(tab, _k).Toggle()
+                input value screen_fx.fx_text_input(tab, _k) style "ui_editor_fx_button_text" length 200 xmaximum 450
+        elif row[2] == "image":
+            ## 그림 고르기 (5.1)
+            $ _img = tab.val(_k) or ""
+            textbutton (ui_editor.short_path(_img) if _img else "없음") style "ui_editor_fx_button" action Function(ui_editor.open_popup, "background", getattr(tab, "key_prefix", "") + _k)
+            if _img:
+                textbutton "빼기" style "ui_editor_fx_button" action Function(tab.put, _k, "")
         elif row[2] == "color":
             $ _c = tab.get_value(_k) or "#ffffff"
             button:

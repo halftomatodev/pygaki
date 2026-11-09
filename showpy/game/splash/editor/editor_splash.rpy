@@ -333,7 +333,7 @@ init -6 python in splash:
                 ("xalign", "가로 (왼쪽 0 ~ 오른쪽 1)", 0.0, 1.0, 0.01, 2),
                 ("yalign", "세로 (위 0 ~ 아래 1)", 0.0, 1.0, 0.01, 2),
                 ("width", "글 폭 (픽셀)", 200, 1920, 10, 0),
-                ("spacing", "그림·제목·본문 사이", 0, 120, 1, 0),
+                ("spacing", "그림, 제목, 본문 사이", 0, 120, 1, 0),
                 )
             TIME_ROWS = (
                 ("fade_in", "나타나는 시간 (초)", 0.0, 3.0, 0.05, 2),
@@ -1190,9 +1190,9 @@ init -6 python in splash:
                     "이 파일을 지우면 설정 파일 값과 순서로 돌아갑니다.",
                     ]
                 if header is not None:
-                    lines = header("UI Kit 편집기가 저장한 스플래시 페이지 값입니다.", notes)
+                    lines = header("GUI 편집기가 저장한 스플래시 페이지 값입니다.", notes)
                 else:
-                    lines = [ "## UI Kit 편집기가 저장한 스플래시 페이지 값입니다. (자동 생성)", "" ]
+                    lines = [ "## GUI 편집기가 저장한 스플래시 페이지 값입니다. (자동 생성)", "" ]
                 if order is not None:
                     lines.append("## 페이지 순서. 여기 없는 splash_config.rpy의 페이지는 보여 주지 않습니다.")
                     lines.append("define splash.page_order = [ " + ", ".join(json.dumps(pid) for pid in order) + " ]")
@@ -1291,11 +1291,13 @@ screen ui_editor_splash_overlay():
             padding (6, 4)
             pos (int(_cx), int(_cy))
             anchor (0.5, 0.5)
-            xminimum int(_w) + 12
+            ## 칸이 작은 글(안내, 표 칸)도 넉넉히 보이게 최소 폭과 높이
+            xminimum max(int(_w), 420) + 12
+            yminimum max(int(_h), 40) + 8
             input:
                 value splash.text_input
                 multiline True
-                xmaximum max(200, int(_tab.val("width") or 960))
+                xmaximum max(420, int(_w), int(_tab.val("width") or 960))
                 properties _tab.input_props(_props)
         add Solid("#ff3b8d", xysize=(int(_w) + 16, 2)) pos (int(_cx), int(_cy + _h / 2.0) + 8) anchor (0.5, 0.0)
 
@@ -1400,13 +1402,15 @@ screen ui_editor_splash_panel(tab):
                 hbox:
                     spacing 6
                     text _label style "ui_editor_text" yalign 0.5 min_width 110
-                    button:
-                        style "ui_editor_button"
-                        xsize 330
-                        action splash.panel_input(_what).Toggle()
-                        input value splash.panel_input(_what) style "ui_editor_text" size 14 length 400
                     if tab.text_from_editor(_what):
                         textbutton "설정 파일 글로" style "ui_editor_button" text_size 12 action Function(tab.revert_text, _what)
+                ## 글 칸: 패널 폭 가득, 긴 글은 칸 안에서 줄을 바꿔 다 보임
+                button:
+                    style "ui_editor_button"
+                    xsize 620
+                    yminimum 78
+                    action splash.panel_input(_what).Toggle()
+                    input value splash.panel_input(_what) style "ui_editor_text" size 16 length 1000 xmaximum 596
                 hbox:
                     spacing 6
                     text ("  편집기 글" if tab.text_from_editor(_what) else "  ") style "ui_editor_small" yalign 0.5 min_width 110
@@ -1452,14 +1456,16 @@ screen ui_editor_splash_panel(tab):
                         textbutton str(_i + 1) style "ui_editor_button" text_size 12 action SetField(tab, "keys_sel", _i) selected (tab.keys_sel == _i)
                         button:
                             style "ui_editor_button"
-                            xsize 200
+                            xsize 210
+                            yminimum 36
                             action splash.panel_input("keys", _i, 0).Toggle()
-                            input value splash.panel_input("keys", _i, 0) style "ui_editor_text" size 13 length 200
+                            input value splash.panel_input("keys", _i, 0) style "ui_editor_text" size 15 length 200 xmaximum 190
                         button:
                             style "ui_editor_button"
-                            xsize 330
+                            xsize 370
+                            yminimum 36
                             action splash.panel_input("keys", _i, 1).Toggle()
-                            input value splash.panel_input("keys", _i, 1) style "ui_editor_text" size 13 length 300
+                            input value splash.panel_input("keys", _i, 1) style "ui_editor_text" size 15 length 300 xmaximum 350
                 hbox:
                     spacing 4
                     textbutton "줄 더하기" style "ui_editor_button" text_size 13 action Function(tab.add_row)
@@ -1473,7 +1479,7 @@ screen ui_editor_splash_panel(tab):
                 text tab.num("keys_rotate", 0) style "ui_editor_small" yalign 0.5
 
         ## 위치
-        text "위치 (그림·제목·본문 묶음)" style "ui_editor_text"
+        text "위치 (그림, 제목, 본문 묶음)" style "ui_editor_text"
         for _k, _l, _lo, _hi, _st, _dg in tab.PLACE_ROWS:
             hbox:
                 spacing 6
