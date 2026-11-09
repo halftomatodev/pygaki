@@ -16,7 +16,7 @@
 - 이미지/영상 탭과 그림 고르기 창에 폴더 열기 버튼(탐색기). 고르기 창을 열 때와 [새로 읽기]로 파일 목록을 다시 읽어서, 게임을 켠 뒤 넣은 그림도 나옴(새 그림은 그림 이름도 만듦).
 - pygaki 앱과 이어져 있을 때 F9로 게임 창의 GUI 편집기 보이기/숨기기.
 
-`ui_kit` 4.0 (글 상자): 대사 괄호 `box="bubble"`(만화 말풍선, 꼬리, 튀어나오며 나타남), `box="pill"`(둥근 테두리, 속 채우기, 기울이기). `tail`, `box_rotate`, `bubble_…`, `pill_…` 값, 기본 모양은 `say_style.box_styles`. 편집기 대사 탭 "상자" 칸.
+`ui_kit` 4.0 (글 상자): 대사 괄호 `box="bubble"`(만화 말풍선, 꼬리, 튀어나오며 나타남), `box="pill"`(둥근 테두리, 속 채우기, 기울이기). `tail`, `box_rotate`, `bubble_…`, `pill_…` 값, 기본 모양은 `say_style.box_styles`. 편집기 대사 탭 "상자" 칸. 이미지/영상 탭에 [효과] 칸(고른 그림에 `screen_fx.image_fx`). PyKaki: 글 상자 칸, 등장 효과 두 개 겹치기, 화면 효과 목록에 새 효과 여섯, 대본 판 번호 `FEATURE` 3.
 
 `ui_kit` 4.0 (글자 효과): 등장 효과 `slidein` 미끄러져 멈춤, `shake` 살짝 흔들림, `inkfill` 외곽선 채우기, `glyphbox` 글자마다 상자, `stamp` 도장, `punch` 튀어나오는 줌, `squash` 찌그러졌다 튕김, `extrude` 입체 글자, `flipin` 뒤집으며 나오기, `led` LED 전광판, `split` 위아래 갈라짐. PyKaki 효과 목록, 미리보기, 렌파이 견본 영상에도 들어감. PyKaki 대본 판 번호 `FEATURE` 2.
 

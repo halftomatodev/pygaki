@@ -530,6 +530,46 @@ init -8 python in ui_editor:
                 self.live_show()
             store.renpy.restart_interaction()
 
+        ## 이미지 효과 (screen_fx 5.0 image_fx, ui_kit 4.0): show … at screen_fx.image_fx("hologram")
+
+        import re as _re
+        IMG_FX_RE = _re.compile(r'^\s*screen_fx\.image_fx\(\s*["\']([A-Za-z0-9_]+)["\']')
+
+        def sfx(self):
+            m = getattr(store, "screen_fx", None)
+            return m if m is not None and hasattr(m, "image_fx") and hasattr(m, "base_names") else None
+
+        def img_fx_choices(self):
+            m = self.sfx()
+            if m is None:
+                return [ ]
+            return [ (None, "없음") ] + [ (n, m.EFFECTS[n].label) for n in m.base_names() ]
+
+        def img_fx(self):
+            """고른 줄 at 목록의 이미지 효과 이름. 없으면 None"""
+            for e in self.cur_at():
+                mt = self.IMG_FX_RE.match(e)
+                if mt:
+                    return mt.group(1)
+            return None
+
+        def set_img_fx(self, name):
+            if not self._editable():
+                return
+            if self.kind() == "hide":
+                msg("hide 줄에는 효과를 걸 수 없습니다.")
+                return
+            st = self.st()
+            p, rest = st.split_at(self.cur_at())
+            ## 값을 따로 적은 효과(image_fx("x", 값=…))도 이 버튼으로 바꾸면 값은 빠집니다
+            rest = [ e for e in rest if not self.IMG_FX_RE.match(e) ]
+            if name:
+                rest.append('screen_fx.image_fx("{}")'.format(name))
+            self.edit(True)["at"] = st.join_at(p, rest)
+            self._tidy()
+            self.live_show()
+            store.renpy.restart_interaction()
+
         def live_show(self):
             """고른 줄이 띄운 그림을 지금 화면에서 바로 옮겨 보여줍니다."""
             s = self.sel_shown()
@@ -1132,6 +1172,17 @@ screen ui_editor_stage_panel(tab):
                 textbutton "기본" style "ui_editor_button" text_size 13 action Function(tab.set_pos, None) selected (_p is None)
                 for _n, _l in stage.cfg("positions"):
                     textbutton _l style "ui_editor_button" text_size 13 action Function(tab.set_pos, _n) selected (_p == _n)
+
+    if _kind is not None and _kind != "hide" and not tab.pk() and tab.img_fx_choices():
+        $ _fxn = tab.img_fx()
+        hbox:
+            spacing 4
+            box_wrap True
+            box_wrap_spacing 4
+            xmaximum 632
+            text "효과:" style "ui_editor_text" yalign 0.5
+            for _n, _l in tab.img_fx_choices():
+                textbutton _l style "ui_editor_button" text_size 13 action Function(tab.set_img_fx, _n) selected (_fxn == _n)
 
     if _kind is not None:
         $ _spec = tab.with_spec()

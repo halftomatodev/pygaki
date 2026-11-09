@@ -785,6 +785,29 @@ define n2 = Character(kind=t, what_xpos=400, what_ypos=210)   # 위치 프리셋
 | `name_x`, `name_y` | `namebox_xpos`, `namebox_ypos` | 이름 상자 위치 (대사 창 왼쪽 위 기준, 이름 배경째 움직임) |
 | `name_font`, `name_size`, `name_color` | `who_font`, `who_size`, `who_color` | 이름 글꼴, 크기, 색 |
 
+**글 상자** (ui_kit 4.0): 괄호에 `box`를 적으면 대사 글을 상자가 둘러쌉니다. 기본 모양은 설정 파일의 `say_style.box_styles`.
+
+```py
+e "안녕!" (box="bubble")                                    # 흰 말풍선, 검은 선, 꼬리 아래, 튀어나오며 나타남
+e "어디?" (box="bubble", tail="top")                         # 꼬리: "bottom" "top" "left" "right" None, 또는 (x, y)
+e "빨간 말풍선." (box="bubble", bubble_color="#ffeeee", bubble_border=(5, "#aa0000"))
+e "쾅!" (box="pill", box_rotate=-4)                          # 둥근 테두리, 상자와 글을 4도 기울임
+e "속까지." (box="pill", pill_fill="#ffd23b", pill_line=None, color="#000000")
+```
+
+| 이름 | 뜻 |
+| --- | --- |
+| `box` | `"bubble"` 말풍선, `"pill"` 둥근 테두리 |
+| `tail` | 꼬리 방향 또는 꼬리 끝 `(x, y)` (글 왼쪽 위 기준 픽셀) |
+| `box_rotate` | 상자와 글 기울기 (도) |
+| `bubble_color` / `pill_fill` | 속 색 (`pill_fill=None`이면 속이 빔) |
+| `bubble_border` / `pill_line` | 선 `(굵기, 색)`, `None`이면 없음 |
+| `bubble_radius`, `bubble_padding`, `bubble_tail_pos`, `bubble_tail_size`, `bubble_tail_width`, `bubble_pop`, `bubble_text_color` | 모서리, 글과 상자 사이, 꼬리 자리·길이·폭, 튀어나오기, 글 색 (`pill_…`도 같음) |
+
+- 상자는 글 전체 크기에 맞춰서, 글이 다 나오기 전에도 다 큰 크기로 나옵니다. 줄 전체가 움직이면(위치, 화면 흔들림) 상자도 같이 움직이고, `shake`처럼 글자마다 움직이는 효과는 글자만 움직입니다.
+- 꼬리는 말하는 사람을 저절로 찾지 않습니다. 방향이나 `(x, y)`로 정합니다.
+- 편집기 대사 탭의 "상자" 칸, PyKaki 글자 효과 칸의 [상자]에서도 고릅니다.
+
 - 새 짧은 이름이 필요하면 설정 파일의 `say_style.alias`에 `"alpha": "what_alpha",`처럼 추가합니다.
 - 보통 캐릭터는 대사 창이 화면 아래에 있어서, 이름을 창 위로 올리면 `name_y`가 음수가 됩니다. 편집기 패널에는 화면 기준 위치도 같이 나옵니다.
 - 텍스트 속도가 "즉시"(렌파이 새 프로젝트 기본값)면 `speed`와 서서히·타자기 같은 효과가 안 보입니다. 물결·떨림은 보입니다. `custom_ui.text_cps`를 정하거나 환경설정에서 속도를 낮추세요.
@@ -856,6 +879,7 @@ show ghost with Dissolve(1.0)                     # 서서히 1초
 | 위치 | 그림 끌기, 방향키, 위치 버튼(기본·왼쪽·가운데·오른쪽·정중앙·화면 밖). **배경(bg)은 고정**(3.0): 원고에 위치가 적혀 있으면 "기본 위치로 되돌리기"만 나옴 |
 | 전환 | 없음, 서서히, 검게 페이드, 픽셀, 이동, 부드럽게 이동, 닦아내기, 미끄러지기, 밀어내기, 확대/축소, 흔들기 + 방향 + 시간 |
 | 그림 바꾸기, 새 줄 (3.0) | "그림/영상 고르기" → `game/images`, `game/movies`의 파일을 고르고 [이 줄의 그림 바꾸기] 또는 [아래에 show 넣기] / [아래에 scene 넣기] |
+| 효과 (4.0) | "효과:"에서 글리치, 홀로그램 같은 화면 효과를 그 그림 하나에만 겁니다. 원고에는 `show ghost at truecenter, screen_fx.image_fx("hologram")` (`screen_fx`가 있을 때, PyKaki 원고는 안 됨) |
 | 저장 | Ctrl+S → 그 줄의 at·with 부분(그림을 바꿨으면 이름도)만 원고에 적힘, 새 줄은 그 줄 아래에 (고치기 전 원본은 `ui_kit_backup/`) |
 
 ```renpy

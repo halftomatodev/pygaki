@@ -341,7 +341,7 @@ $ screen_fx.set_values("shards", count=80, colors=["#d22", "#811"], size=(3, 9),
 4. 파편 흩날림(`shards`).
 5. 글자 효과: `slidein`, `shake`, `inkfill`, `glyphbox`, 그다음 `stamp`, `punch`, `squash`, `extrude`, `flip`, `led`, `split`.
 6. 글 상자 `bubble`, `pill` (만듦, `ui_kit` 4.0).
-7. PyKaki 목록·미리보기·LINK.md, 편집기 칸, README, `CUSTOM_GUIDE.md`, 공개용 구글 문서 수정안.
+7. PyKaki 목록·미리보기·LINK.md, 편집기 칸, README, `CUSTOM_GUIDE.md`, 공개용 구글 문서 수정안. (2026-11-09: PyKaki 상자 칸·효과 겹치기·`FX_BASE`·LINK.md 2장·`FEATURE` 3, 이미지 탭 [효과] 칸 만듦)
 8. 묶음 v2.0 태그.
 
 ### 8-8. 사람이 볼 것

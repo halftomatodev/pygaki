@@ -19,7 +19,10 @@ export interface SayStyle {
   font?: string; // game 폴더 기준 글꼴 파일
   color?: string; // #rrggbb
   cps?: number; // 1초에 나오는 글자 수
-  effect?: string; // 등장 효과 (EFFECTS)
+  effect?: string; // 등장 효과 (EFFECTS). 두 개를 겹치면 "slidein|shake"
+  box?: string; // 글 상자 (BOXES): bubble 말풍선 | pill 둥근 테두리 (showpy ui_kit 4.0)
+  tail?: string; // 말풍선 꼬리 (TAILS): bottom | top | left | right | none. 비우면 상자 기본
+  box_rotate?: number; // 상자와 글 기울기 (도)
   name_size?: number;
   name_font?: string;
   name_color?: string;

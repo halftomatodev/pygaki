@@ -75,7 +75,7 @@
   - `fx` `{ fx: { fx, transition, overlay, warp, cursor } }`: showpy 화면 효과 명령. 값은 `src/stage.ts`의 `FX_*`. 화면 효과는 렌파이 편집기에서 고치므로 줄 종류 목록에서 뺐고, 예전 파일의 이 줄만 그대로 보여 주고 내보낸다.
   - `trans`는 `dissolve` | `fade` | 비움, 또는 showpy에서 받아 적은 식(`stage.move("inleft", 0.8)` 등). 모두 선택 칸이라 예전 파일은 그대로 열린다.
 - **대사 줄의 `fx`**: `say`, `narration` 줄도 같은 `fx` 값(`exclude` 포함)을 가질 수 있다. showpy 대사 탭에서 받아 적고, PyKaki에서는 고치지 않는다. 연결을 켜면 대사 괄호로 내보낸다.
-- **대사 줄의 `say`** (`SayStyle`): `size` `font` `color` `cps` `effect` `name_size` `name_font` `name_color`는 PyKaki에서 고친다. `x` `y` `name_x` `name_y`는 showpy에서 받아 적은 값을 보여 주고 지우기만 한다. 연결을 켜면 짧은 이름으로(`sayArgs`), 끄면 플러그인 없이 동작하는 렌파이 원래 이름(`what_size`, `what_slow_cps`, `what_textshader` 등)으로 내보낸다. 모두 선택 칸이라 예전 파일은 그대로 열린다.
+- **대사 줄의 `say`** (`SayStyle`): `size` `font` `color` `cps` `effect` `box` `tail` `box_rotate` `name_size` `name_font` `name_color`는 PyKaki에서 고친다. `effect`는 두 효과를 `|`로 겹칠 수 있다(`slidein|shake`). `box`는 글 상자(`bubble` 말풍선, `pill` 둥근 테두리, showpy `ui_kit` 4.0)이고 연결을 켰을 때만 내보낸다. 미리보기와 플레이 화면은 CSS로 비슷하게 그린다(`.sbox`, 셰이더 효과일 때는 기울기를 안 보여 줌). `x` `y` `name_x` `name_y`는 showpy에서 받아 적은 값을 보여 주고 지우기만 한다. 연결을 켜면 짧은 이름으로(`sayArgs`), 끄면 플러그인 없이 동작하는 렌파이 원래 이름(`what_size`, `what_slow_cps`, `what_textshader` 등)으로 내보낸다. 모두 선택 칸이라 예전 파일은 그대로 열린다.
 - **나가는 방식(exit)**:
   - `next` `{ target }`: 다음 상자로
   - `menu` `{ choices: [{ id, text, target, mode:"jump", condition:null, actions:[] }] }`: 선택지
@@ -265,7 +265,7 @@
 - **연결할 때 (웹)**: 폴더에 그 파일이 있고 지금 대본과 다르면(쓴 판 표시는 빼고 비교) 요약을 보여 주고 묻는다. [확인] 그 파일을 열기(지금 대본은 버전 목록에 백업), [취소] 지금 대본을 쓰고 다음 저장 때 덮어쓰기. 받아 적기(`showpy_inbox.json`)는 대본을 정한 뒤에 한다.
 - **저장**: 앱은 바뀌고 0.7초 뒤 자동으로, 웹은 Ctrl+S와 Ctrl+E 때(자동 저장은 지금처럼 IndexedDB). [다른 이름]은 프로젝트 대본 파일을 바꾸지 않고 사본만 쓴다. 웹은 다시 켜면 `kv.flowName`이 지금 `fileName`과 같을 때 다시 잇는다.
 - **밖에서 바뀜**: 이 창이 마지막으로 읽거나 쓴 글의 지문(`seen`, 웹은 `kv.flowSeen`)과 파일이 다르면 다른 곳이 고친 것. 이 창이 최근에 쓴 지문 20개와 쓰는 중에 읽은 것은 빼고 본다. 쓰기 전과, 창으로 돌아올 때, 앱은 파일 바뀜 알림 때 본다. 묻기: [확인] 파일을 다시 읽기(지금 대본은 백업), [취소] 지금 대본을 쓰고 덮어쓰기. 빈 파일, 읽을 수 없는 글(쓰는 중)은 다음에 다시 본다.
-- **쓴 판** (`app`): 파일에 쓸 때 `{ by: "PyKaki 웹" | "pygaki 앱", build: "2026-11-05 dc3ac85", needs }`를 붙인다. `build`는 `vite.config.ts`가 빌드 날짜와 커밋으로 넣는다. `needs`는 `max(파일의 needs, FEATURE)`라서 내려가지 않는다. `FEATURE`(지금 1)는 예전 판이 모르는 줄 종류나 값을 대본에 더할 때만 올린다. 예전 파일은 `app`이 없다(needs 0).
+- **쓴 판** (`app`): 파일에 쓸 때 `{ by: "PyKaki 웹" | "pygaki 앱", build: "2026-11-05 dc3ac85", needs }`를 붙인다. `build`는 `vite.config.ts`가 빌드 날짜와 커밋으로 넣는다. `needs`는 `max(파일의 needs, FEATURE)`라서 내려가지 않는다. `FEATURE`(지금 3: 2 글자 효과 11개, 3 글 상자·효과 겹치기·새 화면 효과 이름)는 예전 판이 모르는 줄 종류나 값을 대본에 더할 때만 올린다. 예전 파일은 `app`이 없다(needs 0).
 - `needs`가 이 판의 `FEATURE`보다 크면 열 때 알리고, 왼쪽 "렌파이 프로젝트" 칸에 경고를 둔다. 모르는 값은 지우지 않고 그대로 저장한다.
 - `format`, `version`, `.flow.json`, IndexedDB 이름은 바꾸지 않는다.
 

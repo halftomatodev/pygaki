@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useStore } from './store';
 import * as ops from './ops';
 import type { ImageKind, Line, LineFx, SayStyle } from './types';
-import { EFFECTS, FX_BASE, FX_CURSOR, FX_OVERLAY, FX_TRANS, FX_WARP, POSITIONS, STAGE_LABEL, STAGE_TYPES, TRANSITIONS, fxArgs, lineCps, stageCode } from './stage';
+import { BOXES, EFFECTS, FX_BASE, TAILS, FX_CURSOR, FX_OVERLAY, FX_TRANS, FX_WARP, POSITIONS, STAGE_LABEL, STAGE_TYPES, TRANSITIONS, fxArgs, lineCps, stageCode } from './stage';
 import { useGameFolder, writePreview, type PreviewResult } from './gameFolder';
 import { LinePreview } from './PlayStage';
 import { TagBar, useTagTarget } from './TagBar';
@@ -85,6 +85,22 @@ export function SayFields({ l, set }: { l: Line; set: SetLine }) {
       if (Object.keys(say).length) x.say = say;
       else delete x.say;
     }, mergeKey);
+  // 등장 효과 두 개 겹치기: "앞|뒤" (렌파이 텍스트 셰이더 문법)
+  const [fx1 = '', fx2 = ''] = (s.effect ?? '').split('|');
+  const putFx = (a: string, b: string) => put('effect', a ? (b ? `${a}|${b}` : a) : undefined);
+  // 상자를 없애면 꼬리, 기울기도 지운다
+  const putBox = (b: string) =>
+    set((x) => {
+      const say: SayStyle = { ...(x.say ?? {}) };
+      if (b) say.box = b;
+      else {
+        delete say.box;
+        delete say.tail;
+        delete say.box_rotate;
+      }
+      if (Object.keys(say).length) x.say = say;
+      else delete x.say;
+    });
   const num = (key: 'size' | 'cps' | 'name_size', placeholder: string, title: string, max: number) => (
     <input
       type="number"
@@ -134,13 +150,51 @@ export function SayFields({ l, set }: { l: Line; set: SetLine }) {
       <div className="sf-row">
         {num('size', '크기', '글자 크기', 200)}
         {num('cps', lineCps(s) !== undefined ? String(lineCps(s)) : '글자/초', '1초에 나오는 글자 수. 효과를 고르면 기본값을 써요. 효과가 없고 비워 두면 게임 설정을 따라요', 500)}
-        <select title="등장 효과" value={s.effect ?? ''} onChange={(e) => put('effect', e.target.value)}>
+        <select title="등장 효과" value={fx1} onChange={(e) => putFx(e.target.value, e.target.value ? fx2 : '')}>
           {EFFECTS.map(([k, t]) => (
             <option key={k} value={k}>{t}</option>
           ))}
+          {fx1 && !EFFECTS.some(([k]) => k === fx1) && <option value={fx1}>{fx1}</option>}
         </select>
+        {fx1 && (
+          <select title="겹칠 효과: 두 효과가 같이 돌아요 (렌파이 effect=&quot;앞|뒤&quot;)" value={fx2} onChange={(e) => putFx(fx1, e.target.value)}>
+            {EFFECTS.map(([k, t]) => (
+              <option key={k} value={k}>{k ? '+ ' + t : '겹치기 없음'}</option>
+            ))}
+            {fx2 && !EFFECTS.some(([k]) => k === fx2) && <option value={fx2}>+ {fx2}</option>}
+          </select>
+        )}
         {color('color', '글자 색')}
         {font('font', '글꼴 파일')}
+      </div>
+      <div className="sf-row">
+        <select title="글 상자: 대사 글을 둘러싸는 상자 (showpy가 있어야 내보내요)" value={s.box ?? ''} onChange={(e) => putBox(e.target.value)}>
+          {BOXES.map(([k, t]) => (
+            <option key={k} value={k}>{t}</option>
+          ))}
+        </select>
+        {s.box && (
+          <>
+            <select title="말풍선 꼬리 방향" value={s.tail ?? ''} onChange={(e) => put('tail', e.target.value)}>
+              {TAILS.map(([k, t]) => (
+                <option key={k} value={k}>{t}</option>
+              ))}
+            </select>
+            <input
+              type="number"
+              className="sf-num"
+              min={-45}
+              max={45}
+              title="상자와 글 기울기 (도). 0이면 똑바로"
+              placeholder="기울기"
+              value={s.box_rotate ?? ''}
+              onChange={(e) => {
+                const n = Math.round(Number(e.target.value));
+                put('box_rotate', n ? Math.max(-45, Math.min(45, n)) : undefined, 'box_rotate' + l.id);
+              }}
+            />
+          </>
+        )}
       </div>
       {l.type === 'say' && (
         <div className="sf-row">
@@ -242,7 +296,7 @@ export function LineLook({ l, set }: { l: Line; set: SetLine }) {
 // 렌파이 견본: 효과마다 렌파이에서 찍어 둔 짧은 영상 (public/effects, tools/record_effect_clips.py로 만듦)
 function EffectClip({ effect }: { effect: string }) {
   const [missing, setMissing] = useState<string | null>(null);
-  const name = effect.split(':')[0];
+  const name = effect.split('|')[0].split(':')[0];
   if (missing === name) return null;
   return (
     <div className="clip" title="렌파이에서 찍은 견본이에요. 문장은 예시예요">

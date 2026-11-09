@@ -3,7 +3,8 @@ import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useMemo, u
 import type { Line } from './types';
 import type { PStage, Sprite } from './playEngine';
 import { transInfo } from './playEngine';
-import { lineCps } from './stage';
+import { boxTail, lineCps } from './stage';
+import type { SayStyle } from './types';
 import { parseTagged, type Tagged } from './textTags';
 import { gameFont, pictureOf, useGameFolder, type GameLook } from './gameFolder';
 import { FxCanvas, webglOk } from './fx/FxCanvas';
@@ -182,6 +183,11 @@ function Glyphs({ parsed, shown }: { parsed: Tagged; shown: number }) {
 // 등장 효과의 길이는 글자 수로 정해져 있어서, 한 글자 시간을 CSS에 넘긴다
 const charTime = (cps: number) => ({ '--cd': cps > 0 ? `${1 / cps}s` : '0s' }) as React.CSSProperties;
 const fxClass = (effect: string | undefined, fast: boolean) => 'fx-' + (effect || 'none') + (fast ? ' fast' : '');
+// 글 상자 (showpy text_box.rpy 흉내): 말풍선, 둥근 테두리. 셰이더로 그릴 때는 글자 자리가 어긋나서 기울이지 않는다
+const boxClass = (s: SayStyle) => (s.box ? ` sbox sbox-${s.box} tail-${boxTail(s)}` : '');
+const boxTilt = (s: SayStyle, gl: boolean): React.CSSProperties => (s.box && s.box_rotate && !gl ? { transform: `rotate(${s.box_rotate}deg)` } : {});
+// 말풍선은 글 색을 따로 안 적으면 어두운 글 (showpy bubble text_color 기본)
+const boxColor = (s: SayStyle, base: string) => s.color ?? (s.box === 'bubble' ? '#222222' : base);
 
 // 등장 효과를 WebGL로 그릴 수 있으면 셰이더를, 아니면 null (CSS 흉내로 그림)
 function useShader(effect: string | undefined) {
@@ -236,7 +242,7 @@ function PreviewBody({ line, tagsOn, cps, look, onReplay }: { line: Line; tagsOn
       else hi = mid - 1;
     }
     t.style.fontSize = lo + 'px';
-  }, [text, style.font, tagsOn]);
+  }, [text, style.font, style.box, tagsOn]);
 
   return (
     <div
@@ -248,8 +254,8 @@ function PreviewBody({ line, tagsOn, cps, look, onReplay }: { line: Line; tagsOn
     >
       <div
         ref={inner}
-        className={'preview-text ' + (ts ? 'fx-gl' : fxClass(style.effect, fast))}
-        style={{ color: style.color ?? look.textColor, '--txt': style.color ?? look.textColor, fontFamily: fontStack(style.font), ...charTime(cps) } as React.CSSProperties}
+        className={'preview-text ' + (ts ? 'fx-gl' : fxClass(style.effect, fast)) + boxClass(style)}
+        style={{ color: boxColor(style, look.textColor), '--txt': boxColor(style, look.textColor), fontFamily: fontStack(style.font), ...charTime(cps), ...boxTilt(style, !!ts) } as React.CSSProperties}
       >
         <Glyphs parsed={parsed} shown={shown} />
       </div>
@@ -315,16 +321,18 @@ export const SayBox = forwardRef<SayBoxHandle, {
       )}
       <div
         ref={sayRef}
-        className={'say ' + (ts ? 'fx-gl' : fxClass(style.effect, fast))}
+        className={'say ' + (ts ? 'fx-gl' : fxClass(style.effect, fast)) + boxClass(style)}
         style={{
           left: style.x ?? look.dialogueX,
           top: style.y ?? look.dialogueY,
-          width: look.dialogueWidth,
+          width: style.box ? undefined : look.dialogueWidth,
+          maxWidth: style.box ? look.dialogueWidth : undefined,
           fontSize: size,
-          color: style.color ?? look.textColor,
-          '--txt': style.color ?? look.textColor,
+          color: boxColor(style, look.textColor),
+          '--txt': boxColor(style, look.textColor),
           fontFamily: fontStack(style.font),
           ...charTime(cps),
+          ...boxTilt(style, !!ts),
         } as React.CSSProperties}
       >
         <Glyphs parsed={parsed} shown={shown} />

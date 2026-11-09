@@ -889,7 +889,7 @@ init -8 python in ui_editor:
                 what, x, y, where, self.cur(self.k("size")) or "-"))
 
             if self.pk():
-                rv.append("PyKaki 원고입니다. 여기서는 위치를 고치고, 글자 모양, 속도, 등장 효과는 PyKaki에서 고칩니다.")
+                rv.append("PyKaki 원고입니다. 여기서는 위치를 고치고, 글자 모양, 속도, 등장 효과, 상자는 PyKaki에서 고칩니다.")
             else:
                 rv.append("속도 ×{:g}   효과 {}   상자 {}".format(self.speed(), self.effect_label(),
                     dict(self.BOXES).get(self.box_kind(), "없음")))

@@ -53,6 +53,19 @@ label ward.n1:
 | `# @l:ID` | 바로 다음 줄이 그 id의 대본 줄 | 줄 넣기, 줄 바꾸기의 기준 |
 | `# @end:ID` | 여기부터 상자의 나가는 부분(선택지, jump, return) | 선택지 앞에 줄을 넣을 때 |
 
+대사 줄 괄호에는 PyKaki의 `say` 값(`SayStyle`)이 짧은 이름으로 붙습니다. showpy `say_style`이 받습니다.
+
+| 괄호 | PyKaki 값 | 뜻 |
+|---|---|---|
+| `size=30`, `font="…"`, `color="#…"`, `cps=30` | `size`, `font`, `color`, `cps` | 글자 모양과 속도 |
+| `effect="slidein"`, `effect="slidein|shake"` | `effect` | 등장 효과. 두 효과 겹치기는 `|` (pygaki 2.0, `FEATURE` 3) |
+| `box="bubble"`, `box="pill"` | `box` | 글 상자: 말풍선, 둥근 테두리 (showpy `ui_kit` 4.0 `text_box.rpy`, `FEATURE` 3) |
+| `tail="top"`, `tail=None` | `tail` (`bottom` `top` `left` `right` `none`) | 말풍선 꼬리. 비우면 상자 기본(말풍선은 아래, 둥근 테두리는 없음) |
+| `box_rotate=-4` | `box_rotate` | 상자와 글 기울기 (도) |
+| `x=…`, `y=…`, `name_x=…`, `name_y=…` | 위치 | showpy가 정해서 PyKaki가 받아 적음 (3장) |
+
+상자의 나머지 값(`bubble_color`, `pill_line` 등)은 showpy 원고나 `say_style.box_styles`에서만 고칩니다. 연결을 끈 파일에는 상자와 showpy 효과를 내보내지 않습니다(검사 탭에 경고).
+
 `renpyLink`를 끈 파일에는 `# @l:`이 없습니다. showpy는 이런 원고에 그림 줄을 저장하지 않고, 연결을 켜고 다시 내보내라고 안내합니다.
 
 ## 3. `game/showpy_inbox.json`

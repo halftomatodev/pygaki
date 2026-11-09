@@ -19,7 +19,18 @@ export const TRANSITIONS: [string, string][] = [['', '바로'], ['dissolve', '�
 export const POSITIONS: [string, string][] = [['', '가운데'], ['left', '왼쪽'], ['right', '오른쪽']];
 
 // showpy 화면 효과 칸의 값들
-export const FX_BASE: [string, string][] = [['', '그대로'], ['ascii', 'ASCII'], ['retro_term', '레트로 터미널'], ['gameboy', '게임보이'], ['none', '효과 없음'], ['default', '기본으로']];
+export const FX_BASE: [string, string][] = [
+  ['', '그대로'], ['ascii', 'ASCII'], ['retro_term', '레트로 터미널'], ['gameboy', '게임보이'],
+  // showpy screen_fx 5.1
+  ['glitch', '글리치'], ['boil', '지글거림'], ['halftone', '망점'], ['hologram', '홀로그램'], ['nightvision', '나이트비전'], ['tiles', '조각 어긋남'],
+  ['none', '효과 없음'], ['default', '기본으로'],
+];
+
+// 글 상자 (showpy ui_kit 4.0, engine/text_box.rpy)
+export const BOXES: [string, string][] = [['', '상자 없음'], ['bubble', '말풍선'], ['pill', '둥근 테두리']];
+export const TAILS: [string, string][] = [['', '꼬리 기본'], ['bottom', '꼬리 아래'], ['top', '꼬리 위'], ['left', '꼬리 왼쪽'], ['right', '꼬리 오른쪽'], ['none', '꼬리 없음']];
+// 상자마다 꼬리 기본 (showpy say_style.box_styles 기본값과 같게)
+export const boxTail = (s?: SayStyle) => (s?.box ? s.tail || (s.box === 'bubble' ? 'bottom' : 'none') : 'none');
 export const FX_TRANS: [string, string][] = [['', '전환 기본'], ['tv', 'TV'], ['fade', '페이드'], ['none', '바로']];
 export const FX_OVERLAY: [string, string][] = [['', '덮개 기본'], ['on', '덮개 켬'], ['off', '덮개 끔']];
 export const FX_WARP: [string, string][] = [['', '휘어짐 그대로'], ['0', '0'], ['1', '1'], ['2', '2'], ['3', '3'], ['4', '4'], ['5', '5'], ['default', '기본값']];
@@ -46,15 +57,20 @@ export function fxArgs(f?: LineFx): string[] {
 export const EFFECTS: [string, string][] = [['', '효과 없음'], ...[...RENPY_SHADERS, ...SHOWPY_SHADERS].map((e): [string, string] => [e.name, e.label])];
 // 렌파이에 들어 있는 효과. 나머지는 showpy가 있어야 한다
 export const RENPY_EFFECTS = RENPY_SHADERS.map((e) => e.name);
+// 효과 값의 이름들: "slidein:u__dir=90|shake" → ["slidein", "shake"]
+export const effectNames = (e: string) => e.split('|').map((p) => p.split(':')[0].trim()).filter(Boolean);
+// 렌파이에 원래 있는 효과만 썼는지 (showpy 없이 내보낼 수 있는지)
+export const renpyOnlyEffect = (e: string) => effectNames(e).every((n) => RENPY_EFFECTS.includes(n));
 
 // 글자가 하나씩 나올 때만 보이는 효과(@cps). 글자/초를 비워도 효과가 보이게 기본값을 쓴다 (물결, 떨림, 빛 번짐, 일렁임, VHS는 한 번에 나와도 보여서 뺀다)
 export const DEFAULT_CPS = 30;
 const TYPED_EFFECTS = [...RENPY_SHADERS, ...SHOWPY_SHADERS].filter((e) => e.cps).map((e) => e.name);
-export const lineCps = (s?: SayStyle) => s?.cps ?? (s?.effect && TYPED_EFFECTS.includes(s.effect.split(':')[0]) ? DEFAULT_CPS : undefined);
+export const lineCps = (s?: SayStyle) => s?.cps ?? (s?.effect && effectNames(s.effect).some((n) => TYPED_EFFECTS.includes(n)) ? DEFAULT_CPS : undefined);
 
 // showpy가 없는 게임에서는 렌파이 원래 이름으로 내보낸다. 그러면 플러그인 없이도 오류가 나지 않는다
 const NATIVE: Record<keyof SayStyle, string> = {
   size: 'what_size', font: 'what_font', color: 'what_color', cps: 'what_slow_cps', effect: 'what_textshader',
+  box: '', tail: '', box_rotate: '', // 글 상자는 showpy가 있어야 해서 원래 이름이 없다 (내보내지 않음)
   name_size: 'who_size', name_font: 'who_font', name_color: 'who_color',
   x: 'what_xpos', y: 'what_ypos', name_x: 'namebox_xpos', name_y: 'namebox_ypos',
 };
@@ -65,13 +81,18 @@ export function sayArgs(s?: SayStyle, native = false): string[] {
   const a: string[] = [];
   const name = (k: keyof SayStyle) => (native ? NATIVE[k] : k);
   const num = (k: keyof SayStyle) => s[k] !== undefined && a.push(`${name(k)}=${s[k]}`);
-  const str = (k: keyof SayStyle) => s[k] && !(native && k === 'effect' && !RENPY_EFFECTS.includes(String(s[k]))) && a.push(`${name(k)}=${pyStr(String(s[k]))}`);
+  const str = (k: keyof SayStyle) => s[k] && !(native && k === 'effect' && !renpyOnlyEffect(String(s[k]))) && a.push(`${name(k)}=${pyStr(String(s[k]))}`);
   num('size');
   str('font');
   str('color');
   const cps = lineCps(s);
   if (cps !== undefined) a.push(`${name('cps')}=${cps}`);
   str('effect');
+  if (!native && s.box) {
+    a.push(`box=${pyStr(s.box)}`);
+    if (s.tail) a.push(`tail=${s.tail === 'none' ? 'None' : pyStr(s.tail)}`);
+    if (s.box_rotate) a.push(`box_rotate=${s.box_rotate}`);
+  }
   num('name_size');
   str('name_font');
   str('name_color');

@@ -816,3 +816,21 @@ fieldset.plain:disabled { opacity: 0.4; }
 /* 상자 보기 화면의 태그 글자: 흐리게. 고칠 때와 같은 글자라 자리가 안 바뀐다 */
 .pl-text .tg { opacity: 0.4; }
 .pl-text .tg-stop { opacity: 0.55; color: var(--accent); }
+
+/* 글 상자 (showpy ui_kit 4.0 text_box.rpy 흉내). 렌파이처럼 글 자리는 그대로 두고 둘레에 상자를 깐다 */
+.sbox { box-sizing: content-box; }
+.preview-text.sbox { width: fit-content; max-width: calc(100% - 60px); margin: 0 auto; position: relative; }
+.sbox-bubble { background: #fff; border: 3px solid #000; border-radius: 18px; padding: 14px 22px; }
+.sbox-pill { border: 3px solid #fff; border-radius: 999px; padding: 6px 18px; }
+.textbox .say.sbox-bubble { margin: -17px 0 0 -25px; }
+.textbox .say.sbox-pill { margin: -9px 0 0 -21px; }
+.sbox-bubble::before, .sbox-bubble::after { content: ''; position: absolute; width: 0; height: 0; border: solid transparent; }
+.sbox-bubble.tail-none::before, .sbox-bubble.tail-none::after { display: none; }
+.sbox-bubble.tail-bottom::before { left: 25%; top: 100%; border-width: 24px 13px 0; border-top-color: #000; }
+.sbox-bubble.tail-bottom::after { left: calc(25% + 4px); top: calc(100% - 1px); border-width: 18px 9px 0; border-top-color: #fff; }
+.sbox-bubble.tail-top::before { left: 25%; bottom: 100%; border-width: 0 13px 24px; border-bottom-color: #000; }
+.sbox-bubble.tail-top::after { left: calc(25% + 4px); bottom: calc(100% - 1px); border-width: 0 9px 18px; border-bottom-color: #fff; }
+.sbox-bubble.tail-left::before { top: 25%; right: 100%; border-width: 13px 24px 13px 0; border-right-color: #000; }
+.sbox-bubble.tail-left::after { top: calc(25% + 4px); right: calc(100% - 1px); border-width: 9px 18px 9px 0; border-right-color: #fff; }
+.sbox-bubble.tail-right::before { top: 25%; left: 100%; border-width: 13px 0 13px 24px; border-left-color: #000; }
+.sbox-bubble.tail-right::after { top: calc(25% + 4px); left: calc(100% - 1px); border-width: 9px 0 9px 18px; border-left-color: #fff; }
