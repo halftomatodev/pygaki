@@ -665,6 +665,28 @@ init -9 python in ui_editor:
 
             tab = current_tab()
 
+            ## 글 입력 칸이 켜져 있으면 (ui_kit 4.0): 글자 키는 입력 칸이 먼저 받았고,
+            ## 여기서는 Esc(입력 취소), Ctrl+S(입력 끝내고 저장)만 하고 나머지 단축키는 끔
+            if ev.type in (pygame.KEYDOWN, pygame.KEYUP) and state.popup is None:
+                try:
+                    iv, active = store.renpy.get_editable_input_value()
+                except Exception:
+                    iv, active = None, False
+                if iv is not None and active:
+                    if ev.type == pygame.KEYDOWN:
+                        mods_ = getattr(ev, "mod", 0) or pygame.key.get_mods()
+                        if ev.key == pygame.K_ESCAPE:
+                            if hasattr(iv, "cancel"):
+                                iv.cancel()
+                            else:
+                                store.renpy.run(iv.Disable())
+                            store.renpy.restart_interaction()
+                        elif ev.key == pygame.K_s and (mods_ & (pygame.KMOD_CTRL | pygame.KMOD_META)):
+                            if hasattr(iv, "commit"):
+                                iv.commit()
+                            save_all()
+                    raise store.renpy.IgnoreEvent()
+
             if ev.type in (pygame.KEYDOWN, pygame.KEYUP):
                 if store.renpy.map_event(ev, editor_key()):
                     return None

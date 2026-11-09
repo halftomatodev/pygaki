@@ -3,7 +3,7 @@
 ##
 ## 이 파일은 고칠 필요가 없습니다. 설정은 splash_config.rpy에서 하세요.
 ##
-## 버전 1.1 · Ren'Py 8.5.3에서 제작·테스트
+## 버전 2.0 · Ren'Py 8.5.3에서 제작·테스트
 ## 설치·설정 방법: 플러그인 폴더의 README.md
 ##
 ## 게임을 켰을 때 타이틀 화면 전에 나오는 페이지(로고, 경고, 조작 방법 등)를
@@ -33,7 +33,7 @@ init -10 python in splash:
     import store
     from store import Action, DictEquality, Movie, Solid, Text, Transform, python_object
 
-    VERSION = "1.2"
+    VERSION = "2.0"
 
     def scene_fx():
         """screen_fx 플러그인의 '장면만' 효과를 페이지의 바탕·로고 그림에도 씌우는 트랜스폼.
@@ -47,6 +47,7 @@ init -10 python in splash:
         pages=[ ],
         default={ },
         layout={ },     # 편집기가 저장한 페이지별 값 (splash_layout.rpy, 1.2)
+        page_order=None,  # 편집기가 정한 페이지 순서 (splash_layout.rpy, 2.0). None이면 splash.pages 순서
         start_delay=0.3,
         gap=0.3,
         end_transition=None,
@@ -67,7 +68,14 @@ init -10 python in splash:
         "sound", "music",
         "xalign", "yalign", "spacing", "width",
         "key_width", "key_gap", "keys_spacing", "keys_xalign",
+        ## 편집기에서 끌고 돌린 값 (2.0)
+        "image_offset", "title_offset", "body_offset", "keys_offset",
+        "image_rotate", "title_rotate", "body_rotate", "keys_rotate", "prompt_rotate",
         }
+
+    ## 끌어서 옮기고 돌릴 수 있는 것 (2.0). 묶음 안에 있는 것은 *_offset으로 비켜 그립니다.
+    GROUP_ITEMS = ("image", "title", "body", "keys")
+    ROTATE_ITEMS = ("image", "title", "body", "keys", "prompt")
 
     ## 앞에 붙여서 그 글자의 스타일을 정하는 이름.
     ##   title_  제목      body_  본문      key_  조작 방법의 키      desc_  그 설명
@@ -146,6 +154,11 @@ init -10 python in splash:
             ## 편집기 (1.2): 페이지 id -> { 값 이름: 값 }
             self.edits = { }            # 고치고 아직 저장 안 한 값
             self.saved = None           # 이번 실행 중 저장한 값 (다시 불러오기 전까지 splash.layout 대신)
+            ## 페이지 순서 (2.0): None이면 바꾸지 않음
+            self.order = None           # 고치고 아직 저장 안 한 순서
+            self.saved_order = None     # 이번 실행 중 저장한 순서
+            self.order_saved = False    # saved_order를 쓸지 (저장한 순서가 None일 수도 있어서)
+            self.drops = { }            # 페이지 id -> 설정 파일 값으로 되돌릴 값 이름 (저장하면 splash_layout.rpy에서 빠짐)
 
     state = _State()
 
@@ -260,8 +273,30 @@ init -10 python in splash:
             if key not in RESERVED:
                 _check_style("splash.default", key, out)
 
-        for i, raw in enumerate(pages):
+        order = saved_order()
+        if order is not None:
+            if not isinstance(order, (list, tuple)):
+                out.append("splash.page_order는 [ \"logo\", \"warning\" ] 모양의 목록이어야 합니다. (splash_layout.rpy)")
+                order = None
+            else:
+                known = set(r.get("id") for r in pages if isinstance(r, dict)) | set(saved_layout())
+                seen = set()
+                for pid in order:
+                    if pid in seen:
+                        out.append("splash.page_order: '{}'가 두 번 들어 있습니다. (splash_layout.rpy)".format(pid))
+                    seen.add(pid)
+                    if pid not in known:
+                        out.append("splash.page_order: '{}'라는 페이지가 splash.pages에도 splash_layout.rpy에도 없습니다.".format(pid))
+
+        extra = [ ]
+        if order is not None:
+            cfg_ids = set(r.get("id") for r in pages if isinstance(r, dict))
+            extra = [ { "id": pid } for pid in order if pid not in cfg_ids and pid in saved_layout() ]
+
+        for i, raw in enumerate(list(pages) + extra):
             where = "splash.pages {} 페이지".format(_page_name(i, raw))
+            if i >= len(pages):
+                where = "splash_layout.rpy '{}' 페이지".format(raw["id"])
 
             if not isinstance(raw, dict):
                 out.append("{}: {{ … }} 덩어리여야 합니다.".format(where))
@@ -277,6 +312,11 @@ init -10 python in splash:
             for key in raw:
                 if key not in RESERVED:
                     _check_style(where, key, out)
+
+            for key in ("image_offset", "title_offset", "body_offset", "keys_offset"):
+                v = merged(raw, edits=False).get(key)
+                if v is not None and not (isinstance(v, (list, tuple)) and len(v) == 2):
+                    out.append("{} '{}': (x, y) 모양이어야 합니다.".format(where, key))
 
             for key in saved_layout().get(pid, { }):
                 if key not in RESERVED:
@@ -364,13 +404,47 @@ init -10 python in splash:
             return state.saved
         return cfg("layout") or { }
 
+    def saved_order():
+        """편집기가 저장한 페이지 순서: 이번 실행 중 저장한 것 → splash_layout.rpy의 splash.page_order. 없으면 None."""
+        if state.order_saved:
+            return state.saved_order
+        return cfg("page_order")
+
+    def config_ids():
+        return [ r["id"] for r in (cfg("pages") or [ ]) if isinstance(r, dict) and r.get("id") ]
+
+    def order_ids(edits=True):
+        """보여 줄 페이지 id 순서. (편집 중인 순서 → 저장한 순서 → splash.pages 순서)"""
+        if edits and state.order is not None:
+            return list(state.order)
+        o = saved_order()
+        if o is None:
+            return config_ids()
+        return [ pid for pid in o if isinstance(pid, str) ]
+
+    def page_raws(edits=True):
+        """순서대로 페이지 덩어리. splash_layout.rpy에만 있는 새 페이지는 { "id": … }로."""
+        by_id = { }
+        for r in (cfg("pages") or [ ]):
+            if isinstance(r, dict) and r.get("id") and r["id"] not in by_id:
+                by_id[r["id"]] = r
+        return [ by_id.get(pid) or { "id": pid } for pid in order_ids(edits) ]
+
+    def hidden_config_ids(edits=True):
+        """splash.pages에 있지만 순서에서 뺀(편집기에서 지운) 페이지."""
+        shown = set(order_ids(edits))
+        return [ pid for pid in config_ids() if pid not in shown ]
+
     def merged(raw, edits=True):
         """페이지 값 전부: 엔진 기본 → splash.default → 페이지 → 편집기가 저장한 값 → 편집 중인 값"""
         d = dict(BASE)
         d.update(cfg("default"))
         d.update(raw)
         pid = raw.get("id") if isinstance(raw, dict) else None
-        d.update(saved_layout().get(pid, { }))
+        drops = state.drops.get(pid, ( ))
+        for k, v in saved_layout().get(pid, { }).items():
+            if k not in drops:
+                d[k] = v
         if edits and state.edits:
             d.update(state.edits.get(pid, { }))
         return d
@@ -395,6 +469,13 @@ init -10 python in splash:
         p.image_zoom = float(d.get("image_zoom") or 1.0)
         p.image_loop = d.get("image_loop")
         p.image_pos = d.get("image_pos")
+
+        ## 끌어서 옮긴 값, 돌린 값 (2.0)
+        p.offsets = { }
+        for name in GROUP_ITEMS:
+            v = d.get(name + "_offset")
+            p.offsets[name] = (float(v[0]), float(v[1])) if isinstance(v, (list, tuple)) and len(v) == 2 else (0.0, 0.0)
+        p.rotates = { name : float(d.get(name + "_rotate") or 0.0) for name in ROTATE_ITEMS }
 
         p.title = d.get("title")
         p.body = d.get("body")
@@ -457,12 +538,15 @@ init -10 python in splash:
         return p
 
     def all_pages():
-        return [ resolve(raw) for raw in cfg("pages") ]
+        return [ resolve(raw) for raw in page_raws() ]
 
     def find_page(page_id):
         for p in all_pages():
             if p.id == page_id:
                 return p
+        for raw in cfg("pages") or [ ]:
+            if isinstance(raw, dict) and raw.get("id") == page_id:
+                return resolve(raw)     # 편집기에서 순서에서 뺀 페이지도 ShowPage로는 보여 줌
         raise Exception("[splash] '{}'라는 id의 페이지가 splash.pages에 없습니다.".format(page_id))
 
     def should_show(p):
@@ -474,8 +558,14 @@ init -10 python in splash:
 
     ## ── 화면 요소 만들기 ──
 
-    def _media(v, side_mask, loop, size):
-        """색 · 이미지 · 영상 경로를 화면에 넣을 수 있는 것으로."""
+    def _media(v, side_mask, loop, size, cache=None):
+        """색 · 이미지 · 영상 경로를 화면에 넣을 수 있는 것으로.
+        cache(dict)를 주면 같은 값이면 같은 것을 돌려줌 (편집기: 값을 바꿀 때마다 영상이 처음부터 다시 돌지 않게)"""
+        if cache is not None:
+            key = (repr(v), bool(side_mask), bool(loop), repr(size))
+            if key not in cache:
+                cache[key] = _media(v, side_mask, loop, size)
+            return cache[key]
         if v is None:
             return None
         if not isinstance(v, str):
@@ -489,10 +579,189 @@ init -10 python in splash:
             return Movie(**kw)
         return store.renpy.displayable(v)
 
+    ## ── 화면 배치 (2.0) ──
+    ## 그림·제목·본문·조작 방법 표를 세로로 쌓는 것은 예전 vbox와 같고, 여기에 더해
+    ## 하나씩 비켜 그리기(*_offset), 돌리기(*_rotate)를 합니다. 편집기는 그린 자리(rects)를 읽어
+    ## 끌기·손잡이·글 고치기 칸을 같은 자리에 놓습니다.
+
+    class KeysTable(store.renpy.Displayable):
+        """조작 방법 표. 줄마다 (키, 설명). 칸 자리(cells)를 기억합니다."""
+
+        def __init__(self, rows, gap, spacing, **properties):
+            super(KeysTable, self).__init__(**properties)
+            self.rows = rows
+            self.gap = gap
+            self.spacing = spacing
+            self.cells = { }        # ("key"|"desc", 줄 번호) -> (x, y, w, h) 표 안 자리
+
+        def visit(self):
+            rv = [ ]
+            for k, d in self.rows:
+                rv.append(k)
+                rv.append(d)
+            return rv
+
+        def render(self, width, height, st, at):
+            placed = [ ]
+            y = 0
+            tw = 0
+            cells = { }
+            for i, (k, d) in enumerate(self.rows):
+                rk = store.renpy.render(k, width, height, st, at)
+                kw, kh = rk.get_size()
+                rd = store.renpy.render(d, max(1, width - kw - self.gap), height, st, at)
+                dw, dh = rd.get_size()
+                h = max(kh, dh)
+                placed.append((rk, 0, y))
+                placed.append((rd, kw + self.gap, y))
+                cells[("key", i)] = (0, y, kw, kh)
+                cells[("desc", i)] = (kw + self.gap, y, dw, dh)
+                tw = max(tw, kw + self.gap + dw)
+                y += h + (self.spacing if i < len(self.rows) - 1 else 0)
+            rv = store.renpy.Render(int(tw), int(y))
+            for r, x, yy in placed:
+                rv.blit(r, (int(x), int(yy)))
+            self.cells = cells
+            return rv
+
+    class SplashLayout(store.renpy.Displayable):
+        """페이지의 그림·제목·본문·표 묶음 (+ 편집 중이면 안내 글과 보지 않기 버튼).
+        edit: 편집기가 주는 값. None이면 게임에서 보여 주는 진짜 페이지.
+          edit["hide"]      그리지 않을 것 이름 (글을 고치는 중)
+          edit["straight"]  돌리지 않고 그릴 것 이름
+        rects: 이름 -> (가운데 x, 가운데 y, 폭, 높이, 회전) 화면 픽셀. 표 칸은 cells에."""
+
+        def __init__(self, run, edit=None, **properties):
+            super(SplashLayout, self).__init__(**properties)
+            self.run = run
+            self.edit = edit
+            self.rects = { }
+            self.cells = { }
+            self._rot = { }
+            self._extra = None
+
+        def _items(self):
+            run = self.run
+            p = run.page
+            rv = [ ]
+            if run.image is not None and p.image_pos is None:
+                rv.append(("image", run.image_drawn, 0.5))
+            if run.title is not None:
+                rv.append(("title", run.title, p.title_props.get("xalign", 0.5)))
+            if run.body is not None:
+                rv.append(("body", run.body, p.body_props.get("xalign", 0.5)))
+            if run.keys_table is not None:
+                rv.append(("keys", run.keys_table, p.keys_xalign))
+            return rv
+
+        def _edit_extra(self):
+            """편집 중에만 그리는 안내 글과 보지 않기 버튼 (게임에서는 스크린이 그림)."""
+            if self._extra is None:
+                p = self.run.page
+                ex = [ ]
+                if self.run.prompt is not None:
+                    ex.append(("prompt", self.run.prompt))
+                if p.dont_show_again:
+                    box = store.Fixed(
+                        Solid(p.option_box),
+                        Transform(Solid("#000000cc"), xysize=(14, 14), align=(0.5, 0.5)),
+                        xysize=(18, 18), yalign=0.5)
+                    t = Text(p.dont_show_again, style="splash_option", **p.option_text)
+                    ex.append(("option", store.HBox(box, t, spacing=10)))
+                self._extra = ex
+            return self._extra
+
+        def visit(self):
+            rv = [ d for _n, d, _a in self._items() ]
+            if self.run.image is not None and self.run.page.image_pos is not None:
+                rv.append(self.run.image_drawn)
+            if self.edit is not None:
+                rv.extend(d for _n, d in self._edit_extra())
+            return rv
+
+        def _rotated(self, name, d, rot):
+            c = self._rot.get(name)
+            if c is None or c[0] != rot or c[1] is not d:
+                c = (rot, d, Transform(d, rotate=rot, rotate_pad=False, subpixel=True))
+                self._rot[name] = c
+            return c[2]
+
+        def _place(self, rv, name, d, r, cx, cy, rot, st, at, width, height):
+            w, h = r.get_size()
+            ed = self.edit or { }
+            self.rects[name] = (cx, cy, w, h, rot)
+            if name in ed.get("hide", ( )):
+                return
+            if rot and name not in ed.get("straight", ( )):
+                rr = store.renpy.render(self._rotated(name, d, rot), width, height, st, at)
+                rw, rh = rr.get_size()
+                rv.blit(rr, (int(round(cx - rw / 2.0)), int(round(cy - rh / 2.0))))
+            else:
+                rv.blit(r, (int(round(cx - w / 2.0)), int(round(cy - h / 2.0))))
+
+        def render(self, width, height, st, at):
+            run = self.run
+            p = run.page
+            rv = store.renpy.Render(width, height)
+            self.rects = { }
+
+            items = self._items()
+            rs = [ store.renpy.render(d, p.width, height, st, at) for _n, d, _a in items ]
+            sizes = [ r.get_size() for r in rs ]
+
+            vw = max([ w for w, _h in sizes ] or [ 0 ])
+            vh = sum(h for _w, h in sizes) + p.spacing * max(0, len(items) - 1)
+            gx = p.xalign * (width - vw)
+            gy = p.yalign * (height - vh)
+
+            y = gy
+            for (name, d, xa), r, (w, h) in zip(items, rs, sizes):
+                ox, oy = p.offsets.get(name, (0.0, 0.0))
+                cx = gx + xa * (vw - w) + w / 2.0 + ox
+                cy = y + h / 2.0 + oy
+                self._place(rv, name, d, r, cx, cy, p.rotates.get(name, 0.0), st, at, width, height)
+                y += h + p.spacing
+
+            self.rects["group"] = (gx + vw / 2.0, gy + vh / 2.0, vw, vh, 0.0)
+
+            ## 표 칸 자리 (돌리지 않았을 때만 화면 자리로 셈)
+            self.cells = { }
+            t = run.keys_table
+            if t is not None and "keys" in self.rects:
+                kcx, kcy, kw, kh, krot = self.rects["keys"]
+                if not krot or "keys" in (self.edit or { }).get("straight", ( )):
+                    for k, (x, yy, w, h) in t.cells.items():
+                        self.cells[k] = (kcx - kw / 2.0 + x, kcy - kh / 2.0 + yy, w, h)
+
+            ## 자리를 정해 둔 그림 (image_pos)
+            if run.image is not None and p.image_pos is not None:
+                r = store.renpy.render(run.image_drawn, width, height, st, at)
+                ix, iy = p.image_pos
+                self._place(rv, "image", run.image_drawn, r, float(ix), float(iy), p.rotates.get("image", 0.0), st, at, width, height)
+
+            ## 편집 중: 안내 글과 보지 않기 버튼도 같은 자리에
+            if self.edit is not None:
+                for name, d in self._edit_extra():
+                    r = store.renpy.render(d, width, height, st, at)
+                    w, h = r.get_size()
+                    if name == "prompt":
+                        xa = p.prompt_props.get("xalign", 0.5)
+                        ya = p.prompt_props.get("yalign", 0.95)
+                        rot = p.rotates.get("prompt", 0.0)
+                    else:
+                        xa = p.option_button.get("xalign", 0.96)
+                        ya = p.option_button.get("yalign", 0.95)
+                        rot = 0.0
+                    cx = xa * (width - w) + w / 2.0
+                    cy = ya * (height - h) + h / 2.0
+                    self._place(rv, name, d, r, cx, cy, rot, st, at, width, height)
+
+            return rv
+
     class PageRun(python_object):
         """페이지를 한 번 보여 주는 동안의 상태. 스크린 splash_page가 씁니다."""
 
-        def __init__(self, page, skip_min=False):
+        def __init__(self, page, skip_min=False, media_cache=None):
             self.page = page
             self.leaving = False
             self.ready = False
@@ -508,6 +777,7 @@ init -10 python in splash:
                 page.background_side_mask,
                 False if (watch_movie and not _is_movie(page.image)) else page.background_loop,
                 screen,
+                media_cache,
                 )
 
             ## 가운데 그림·영상
@@ -516,10 +786,13 @@ init -10 python in splash:
                 page.image_side_mask,
                 False if watch_movie and _is_movie(page.image) else page.image_loop,
                 page.image_size,
+                media_cache,
                 )
             if img is not None and page.image_zoom != 1.0:
                 img = Transform(img, zoom=page.image_zoom)
             self.image = img
+            fx = scene_fx()
+            self.image_drawn = fx(img) if (img is not None and fx is not None) else img
 
             ## 끝날 때까지 지켜볼 영상
             self.watch = None
@@ -544,6 +817,8 @@ init -10 python in splash:
                 (Text(k, style="splash_key", **page.key_props), Text(v, style="splash_desc", **page.desc_props))
                 for k, v in (keys or [ ])
                 ]
+            self.keys_table = KeysTable(self.keys, page.key_gap, page.keys_spacing) if self.keys else None
+            self.layout = SplashLayout(self)
 
         ## 스크린에서 부르는 동작
         ## (screen의 timer는 화면이 갱신될 때 처음부터 다시 셀 수 있어서,
@@ -772,6 +1047,11 @@ transform splash_option_box:
     on idle:
         linear 0.1 alpha 0.7
 
+## 돌린 안내 글 (2.0)
+transform splash_rotate(r):
+    rotate r
+    rotate_pad False
+
 ## "클릭하면 계속" 안내: 서서히 나타난 뒤 깜빡임
 transform splash_prompt_blink:
     alpha 0.0
@@ -805,37 +1085,14 @@ screen splash_page(run):
             if run.bg is not None:
                 add run.bg align (0.5, 0.5) at splash.scene_fx()
 
-            if run.image is not None and _p.image_pos is not None:
-                add run.image pos _p.image_pos anchor (0.5, 0.5) at splash.scene_fx()
-
-            vbox:
-                xalign _p.xalign
-                yalign _p.yalign
-                xmaximum _p.width
-                spacing _p.spacing
-
-                if run.image is not None and _p.image_pos is None:
-                    add run.image xalign 0.5 at splash.scene_fx()
-
-                if run.title is not None:
-                    add run.title
-
-                if run.body is not None:
-                    add run.body
-
-                if run.keys:
-                    vbox:
-                        xalign _p.keys_xalign
-                        spacing _p.keys_spacing
-
-                        for _k, _d in run.keys:
-                            hbox:
-                                spacing _p.key_gap
-                                add _k
-                                add _d
+            ## 그림·제목·본문·표 묶음 (2.0: 하나씩 비키고 돌릴 수 있게 직접 배치)
+            add run.layout
 
             if run.prompt is not None and run.ready and _p.skippable:
-                add run.prompt at splash_prompt_blink
+                if _p.rotates.get("prompt"):
+                    add run.prompt at splash_prompt_blink, splash_rotate(_p.rotates["prompt"])
+                else:
+                    add run.prompt at splash_prompt_blink
 
             if _p.dont_show_again:
                 $ _on = _p.id in persistent.splash_hidden
