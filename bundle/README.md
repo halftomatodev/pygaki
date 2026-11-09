@@ -33,7 +33,7 @@ Actions 화면에서 손으로 돌리면(Run workflow) Releases에는 안 올리
    그러면 `pykaki/app/out/win-unpacked`에 생겨요.
 2. **묶기**: 저장소 맨 위에서 (2분쯤)
    ```bash
-   python bundle/make_bundle.py --sdk <렌파이 SDK> --app 받은폴더\pygaki-win --zip --tag v1.0
+   python bundle/make_bundle.py --sdk 렌파이SDK폴더 --app 받은폴더\pygaki-win --zip --tag v1.0
    ```
    `bundle/out/`에 `pygaki-v1.0-renpy-8.5.3/`, `pygaki-v1.0-addon/`과 같은 이름의 zip이 생겨요. `--tag`를 빼면 이름에 태그가 안 붙어요. 다시 만들 때는 `bundle/out`을 먼저 지워요. (`bundle/out`은 저장소에 안 올라가요)
 

@@ -180,13 +180,15 @@ def make_base_project(sdk, tdir):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--sdk", default=os.environ.get("RENPY_SDK", r"<렌파이 SDK>"))
+    ap.add_argument("--sdk", default=os.environ.get("RENPY_SDK"), help="렌파이 SDK 폴더 (또는 환경 변수 RENPY_SDK)")
     ap.add_argument("--app", default=os.path.join(ROOT, "pykaki", "app", "out", "win-unpacked"))
     ap.add_argument("--out", default=os.path.join(HERE, "out"), help="만들 자리 (묶음과 덧붙임 폴더가 여기 생김)")
     ap.add_argument("--zip", action="store_true", help="폴더를 zip으로도 묶는다")
     ap.add_argument("--tag", default="", help="이름에 붙일 판 (예: v1.0)")
     a = ap.parse_args()
 
+    if not a.sdk:
+        sys.exit("렌파이 SDK 폴더를 --sdk로 주세요. 예: --sdk D:\renpy-8.5.3-sdk (또는 환경 변수 RENPY_SDK)")
     sdk = os.path.abspath(a.sdk)
     if not os.path.exists(os.path.join(sdk, "renpy.exe")) or not os.path.isdir(os.path.join(sdk, "launcher", "game")):
         sys.exit("렌파이 SDK 폴더가 아니에요 (renpy.exe, launcher/game이 없음): " + sdk)

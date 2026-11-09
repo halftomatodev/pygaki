@@ -19,9 +19,9 @@ import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PYKAKI = os.path.dirname(HERE)
-SDK = os.environ.get("RENPY_SDK", r"<렌파이 SDK>")
+SDK = os.environ["RENPY_SDK"]          # 렌파이 SDK 폴더 (환경 변수로 줌)
 SHOWPY = os.environ.get("SHOWPY_DIR", os.path.join(os.path.dirname(PYKAKI), "showpy"))
-BASE = os.environ.get("BASE_GAME", r"<렌파이 프로젝트 폴더>\pykaki_sample\game")
+BASE = os.environ["BASE_GAME"]         # 시험 프로젝트의 game 폴더 (환경 변수로 줌)
 OUT = os.path.join(PYKAKI, "public", "effects")
 
 FPS = 15
