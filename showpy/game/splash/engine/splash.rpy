@@ -33,7 +33,7 @@ init -10 python in splash:
     import store
     from store import Action, DictEquality, Movie, Solid, Text, Transform, python_object
 
-    VERSION = "2.0"
+    VERSION = "2.1"
 
     def scene_fx():
         """screen_fx 플러그인의 '장면만' 효과를 페이지의 바탕·로고 그림에도 씌우는 트랜스폼.
@@ -60,7 +60,7 @@ init -10 python in splash:
     ## 페이지에 바로 적는 값. 여기 없는 이름은 아래 PREFIXES로 시작하는
     ## 글자 스타일 속성이어야 합니다.
     RESERVED = {
-        "id", "show_if", "once", "skippable",
+        "id", "show", "show_if", "once", "skippable",
         "color", "background", "background_side_mask", "background_loop",
         "image", "image_side_mask", "image_size", "image_zoom", "image_loop", "image_pos",
         "title", "body", "keys", "prompt", "dont_show_again",
@@ -98,6 +98,7 @@ init -10 python in splash:
         "duration": None,
         "min_time": 0.5,
         "skippable": True,
+        "show": True,
         "once": False,
         "xalign": 0.5,
         "yalign": 0.45,
@@ -456,6 +457,7 @@ init -10 python in splash:
         p.id = d.get("id")
         p.raw = raw
         p.show_if = d.get("show_if")
+        p.show = bool(d.get("show", True))
         p.once = bool(d.get("once"))
         p.skippable = bool(d.get("skippable", True))
 
@@ -549,12 +551,36 @@ init -10 python in splash:
                 return resolve(raw)     # 편집기에서 순서에서 뺀 페이지도 ShowPage로는 보여 줌
         raise Exception("[splash] '{}'라는 id의 페이지가 splash.pages에 없습니다.".format(page_id))
 
+    def why_hidden(p):
+        """이 페이지가 게임을 켤 때 안 나오는 까닭(글). 나오면 None. (2.1, 편집기가 보여 줌)"""
+        if not cfg("enabled"):
+            return "splash.enabled = False (스플래시 전체가 꺼짐)"
+        if store.config.developer and cfg("developer_skip"):
+            return "splash.developer_skip = True (개발 모드에서 전체 건너뜀)"
+        if not p.show:
+            return "안 보이기로 둠"
+        if p.id in hidden_pages():
+            return "플레이어가 '다음부터 보지 않기'를 체크함"
+        if p.once and p.id in seen_pages():
+            return "'처음 한 번만'인데 이미 봄"
+        if not _cond(p.show_if):
+            return "show_if 조건이 거짓"
+        return None
+
     def should_show(p):
+        if not p.show:
+            return False
         if p.id in hidden_pages():
             return False
         if p.once and p.id in seen_pages():
             return False
         return _cond(p.show_if)
+
+    def show_again(page_id):
+        """이 페이지의 '다음부터 보지 않기'와 한 번 본 기록을 지웁니다. (2.1)"""
+        hidden_pages().discard(page_id)
+        seen_pages().discard(page_id)
+        store.renpy.save_persistent()
 
     ## ── 화면 요소 만들기 ──
 

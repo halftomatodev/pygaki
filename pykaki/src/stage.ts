@@ -1,6 +1,6 @@
 // 연출 줄(scene/show/hide/music/sound): 칸에 적은 값 → 렌파이 명령 한 줄
 import type { Line, LineFx, LineType, SayStyle } from './types';
-import { RENPY_SHADERS, SHOWPY_SHADERS } from './fx/textShaders';
+import { IMAGE_FX, RENPY_SHADERS, SHOWPY_SHADERS, shaderEffect } from './fx/textShaders';
 
 export const STAGE_TYPES: LineType[] = ['scene', 'show', 'hide', 'music', 'sound', 'fx'];
 export const isStage = (t: LineType) => STAGE_TYPES.includes(t);
@@ -15,7 +15,10 @@ export const STAGE_LABEL: Record<string, string> = {
   fx: '✨ 화면 효과',
 };
 
-export const TRANSITIONS: [string, string][] = [['', '바로'], ['dissolve', '서서히'], ['fade', '검게 페이드']];
+// 뒤쪽은 효과 폴더의 그림 전환 (showpy img_fx.use). refreshEffects가 채운다
+const BASE_TRANSITIONS: [string, string][] = [['', '바로'], ['dissolve', '서서히'], ['fade', '검게 페이드']];
+export const TRANSITIONS: [string, string][] = [...BASE_TRANSITIONS];
+export const imageFxCode = (name: string) => `img_fx.use("${name}")`;
 export const POSITIONS: [string, string][] = [['', '가운데'], ['left', '왼쪽'], ['right', '오른쪽']];
 
 // showpy 화면 효과 칸의 값들
@@ -54,18 +57,86 @@ export function fxArgs(f?: LineFx): string[] {
 // 대사 등장 효과. 이름과 한글 이름은 셰이더 파일에서 온다 (src/fx/*.glsl, @effect 줄)
 // - 렌파이에 들어 있는 효과: src/fx/renpy_textshaders.glsl
 // - showpy가 등록하는 효과: showpy/game/ui_kit/engine/text_effects.glsl (빌드할 때 그대로 가져옴). showpy가 없는 게임에서는 내보내지 않는다
-export const EFFECTS: [string, string][] = [['', '효과 없음'], ...[...RENPY_SHADERS, ...SHOWPY_SHADERS].map((e): [string, string] => [e.name, e.label])];
+// 효과 폴더(showpy ui_kit/effects)의 파일을 다시 읽으면 refreshEffects로 목록을 새로 채운다 (같은 배열을 고쳐 씀)
+export const EFFECTS: [string, string][] = [];
+export function refreshEffects() {
+  EFFECTS.splice(0, EFFECTS.length, ['', '효과 없음'], ...[...RENPY_SHADERS, ...SHOWPY_SHADERS].map((e): [string, string] => [e.name, e.label || e.name]));
+  TRANSITIONS.splice(0, TRANSITIONS.length, ...BASE_TRANSITIONS, ...IMAGE_FX.map((e): [string, string] => [imageFxCode(e.name), e.label || e.name]));
+}
+refreshEffects();
+// 목록에서 뺀 효과 (ui_kit 4.2). 예전 대본에 남은 값은 그대로 두고 내보낸다
+// - typewriter, slowalpha: 렌파이에 그대로 있어서 showpy 없이도 돎
+// - melt, mosh, flipin, led, split: showpy가 한 글자씩 나오기로 받아 줌 (text_effects.rpy REMOVED_EFFECTS)
+const REMOVED_RENPY = ['typewriter', 'slowalpha'];
+export const REMOVED_EFFECTS = [...REMOVED_RENPY, 'melt', 'mosh', 'flipin', 'led', 'split'];
 // 렌파이에 들어 있는 효과. 나머지는 showpy가 있어야 한다
-export const RENPY_EFFECTS = RENPY_SHADERS.map((e) => e.name);
+export const RENPY_EFFECTS = [...RENPY_SHADERS.map((e) => e.name), ...REMOVED_RENPY];
 // 효과 값의 이름들: "slidein:u__dir=90|shake" → ["slidein", "shake"]
 export const effectNames = (e: string) => e.split('|').map((p) => p.split(':')[0].trim()).filter(Boolean);
+// 효과 값을 자리(1번, 2번)와 값으로 나눠 읽고 다시 쓴다: "slidein:u__dir=90|shake" ↔ [{slidein, [[u__dir, 90]]}, {shake, []}]
+// 이름 없이 순서로 적은 값("scatter:200")은 [['', '200']]으로 그대로 둔다
+export interface EffectPart { name: string; args: [string, string][] }
+export function parseEffect(e?: string): EffectPart[] {
+  return (e ?? '')
+    .split('|')
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .map((p) => {
+      const [name, ...rest] = p.split(':');
+      return {
+        name: name.trim(),
+        args: rest.map((a): [string, string] => {
+          const i = a.indexOf('=');
+          return i < 0 ? ['', a.trim()] : [a.slice(0, i).trim(), a.slice(i + 1).trim()];
+        }),
+      };
+    });
+}
+export const formatEffect = (parts: EffectPart[]) =>
+  parts
+    .filter((p) => p.name)
+    .map((p) => [p.name, ...p.args.map(([k, v]) => (k ? `${k}=${v}` : v))].join(':'))
+    .join('|') || undefined;
+
+// 효과의 고칠 수 있는 값(막대, 색 칸). 효과 파일에 @param이 있으면 그 범위와 이름, 없으면 기본값에서 어림한다
+export interface EffectKnob { key: string; label: string; kind: 'num' | 'color'; min: number; max: number; step: number; def: string }
+const KNOB_LABEL: Record<string, string> = {
+  duration: '걸리는 시간', color: '색', zoom: '확대', shift: '밀림', angle: '각도', split: '갈라짐', speed: '속도', rotate: '기울기', rate: '빠르기',
+  radius: '번짐 크기', distance: '거리', depth: '깊이', band: '띠', amount: '정도', strength: '세기', stagger: '차례 간격', spread: '벌어짐',
+  overshoot: '넘침', hold: '계속하기', jitter: '흔들림', dir: '방향(도)', fade: '사라짐', noise: '노이즈', bounce: '튕김', amplitude: '높이',
+  wavelength: '물결 길이', trail: '잔상', grain: '결', shake: '흔들림', pad: '여백', round: '둥글기', box: '상자 색', ink: '글자 색', tint: '색조',
+  x: '가로', y: '세로', lag: '늦기', height: '높이', block: '칸 크기', line: '줄', scan: '주사선', tear: '찢김', offset: '어긋남', thick: '굵기',
+  shade: '그늘', rise: '오름', pop: '튀어나옴', slide: '미끄러짐', span: '범위', mode: '방식', dim: '어둡기', width: '폭', from: '처음 크기',
+};
+const niceStep = (span: number) => (span >= 50 ? 1 : span >= 5 ? 0.1 : 0.01);
+export function effectKnobs(name: string): EffectKnob[] {
+  const e = shaderEffect(name);
+  if (!e) return [];
+  const ranges = new Map(e.params.map(([k, lo, hi, label]) => [k, { lo, hi, label }]));
+  return e.uniforms.map(([key, def]): EffectKnob => {
+    const short = key.replace(/^u__/, '');
+    const r = ranges.get(key);
+    const label = r?.label ?? KNOB_LABEL[short] ?? short;
+    if (def.startsWith('#')) return { key, label, kind: 'color', min: 0, max: 0, step: 0, def };
+    const d = Number(def);
+    let lo = 0;
+    let hi = 1;
+    if (r) [lo, hi] = [r.lo, r.hi];
+    else if (['dir', 'angle'].includes(short)) [lo, hi] = [0, 360];
+    else if (short === 'rotate') [lo, hi] = [-180, 180];
+    else if (d < 0) [lo, hi] = [d * 3, -d * 3];
+    else if (d > 0) hi = d <= 1 ? Math.max(1, d * 2) : d * 3;
+    return { key, label, kind: 'num', min: lo, max: hi, step: niceStep(hi - lo), def };
+  });
+}
+
 // 렌파이에 원래 있는 효과만 썼는지 (showpy 없이 내보낼 수 있는지)
 export const renpyOnlyEffect = (e: string) => effectNames(e).every((n) => RENPY_EFFECTS.includes(n));
 
 // 글자가 하나씩 나올 때만 보이는 효과(@cps). 글자/초를 비워도 효과가 보이게 기본값을 쓴다 (물결, 떨림, 빛 번짐, 일렁임, VHS는 한 번에 나와도 보여서 뺀다)
 export const DEFAULT_CPS = 30;
-const TYPED_EFFECTS = [...RENPY_SHADERS, ...SHOWPY_SHADERS].filter((e) => e.cps).map((e) => e.name);
-export const lineCps = (s?: SayStyle) => s?.cps ?? (s?.effect && effectNames(s.effect).some((n) => TYPED_EFFECTS.includes(n)) ? DEFAULT_CPS : undefined);
+const typed = (n: string) => REMOVED_EFFECTS.includes(n) || [...RENPY_SHADERS, ...SHOWPY_SHADERS].some((e) => e.cps && e.name === n);
+export const lineCps = (s?: SayStyle) => s?.cps ?? (s?.effect && effectNames(s.effect).some(typed) ? DEFAULT_CPS : undefined);
 
 // showpy가 없는 게임에서는 렌파이 원래 이름으로 내보낸다. 그러면 플러그인 없이도 오류가 나지 않는다
 const NATIVE: Record<keyof SayStyle, string> = {

@@ -23,8 +23,6 @@
 ##   wipe        위에서 아래로 그려지기 (글자가 크면 effect="wipe:u__span=80")
 ##   blockglitch 블록 글리치: 네모 칸마다 밀리거나 늘어나거나 색이 바뀌었다가 섬
 ##               (effect="blockglitch:u__hold=0.3"이면 다 나온 뒤에도 계속 깨짐)
-##   melt        녹아내림: 흘러내린 색이 모여 글자가 됨 (u__hold로 계속 녹기)
-##   mosh        데이터모싱 흉내: 네모 칸이 한쪽으로 끌리며 번졌다가 돌아옴 (u__hold로 계속)
 ##   liquid      일렁임: 물에 비친 것처럼 계속 출렁임 (한 번에 나와도 보임)
 ##   vhs         지직거리는 VHS: 주사선, 띠 찢김, 색 어긋남, 색조 바뀜, 노이즈가 계속 (한 번에 나와도 보임)
 ##   rise        떠오르기: 글자마다 다른 깊이에서 떠올라 제자리로
@@ -39,9 +37,6 @@
 ##   punch       튀어나오는 줌: 깊은 곳에서 커지며 튀어나오고 잔상이 끌림 (u__zoom, u__trail)
 ##   squash      찌그러졌다 튕김: 납작하게 눌렸다가 고무처럼 튕기며 원래 모양 (u__amount, u__bounce)
 ##   extrude     입체 글자: 비스듬히 여러 겹 깔아 두께, 나올 때 두께가 자람 (u__depth, u__angle, u__shade)
-##   flipin      뒤집으며 나오기: 판처럼 뒤집히며 자리 잡음 (u__axis 0 위아래, 1 좌우. 렌파이 flip과 다름)
-##   led         LED 전광판: 점으로 된 전광판 글자, 꺼진 점도 흐리게 (u__cell 점 간격, u__off, u__offcolor)
-##   split       위아래 갈라짐: 위 절반과 아래 절반이 위아래에서 와서 맞물림 (u__distance, u__gap)
 ##
 ## 효과 두 개를 겹치려면 | 로 잇습니다: effect="slidein|shake"
 ##
@@ -54,6 +49,11 @@
 ## 셰이더 코드는 같은 폴더의 text_effects.glsl에 있습니다. 이 파일은 그것을 읽어 등록만 합니다.
 ## PyKaki의 미리보기도 같은 파일로 그려서, 새 효과는 text_effects.glsl에 한 번만 쓰면 됩니다.
 ## 적는 법은 text_effects.glsl 맨 위에 있습니다.
+##
+## 효과 폴더 (ui_kit 4.3): ui_kit/effects/ 폴더에 .glsl 파일을 넣으면 그 안의 효과도 같이 등록합니다.
+## 효과 하나에 파일 하나. 파일을 넣거나 빼면 그 효과가 생기거나 없어집니다(게임을 껐다 켜기).
+## 적는 법과 샘플은 ui_kit/effects/README.md에 있습니다. 파일을 읽다가 틀린 곳을 만나면
+## 그 파일만 건너뛰고 say_style.TFX_ERRORS에 이유를 적습니다(개발 모드에서는 화면에도 알림).
 ################################################################################
 
 init -10 python in say_style:
@@ -69,9 +69,12 @@ init -10 python in say_style:
                 return fn
         raise Exception("[say_style] text_effects.glsl을 찾지 못했습니다. ui_kit/engine 폴더에 같이 넣어 주세요.")
 
-    def tfx_parse(text):
-        """text_effects.glsl → 효과 목록. PyKaki src/fx/textShaders.ts의 parseShaders와 같은 규칙입니다."""
-        parts = { }
+    def tfx_parse(text, parts=None):
+        """text_effects.glsl → 효과 목록. PyKaki src/fx/textShaders.ts의 parseShaders와 같은 규칙입니다.
+        parts를 주면 거기 든 조각(@part)을 @use로 쓸 수 있고, 이 글의 조각도 거기에 더합니다.
+        목록에는 글자 효과(kind "effect")와 그림 전환(kind "transition")이 같이 들어 있습니다."""
+        if parts is None:
+            parts = { }
         effects = [ ]
         cur = None
         eff = None
@@ -89,10 +92,10 @@ init -10 python in say_style:
             if word == "part":
                 cur = parts[rest] = [ ]
                 eff = None
-            elif word == "effect":
+            elif word == "effect" or word == "transition":
                 name, _, label = rest.partition(" ")
-                eff = { "name": name, "label": label.strip(), "cps": False, "slow": None, "redraw": None,
-                        "outlines": [ ], "uniforms": [ ], "code": [ ] }
+                eff = { "kind": word, "name": name, "label": label.strip(), "cps": False, "slow": None, "redraw": None,
+                        "outlines": [ ], "uniforms": [ ], "params": [ ], "time": 1.0, "code": [ ] }
                 effects.append(eff)
                 cur = None
             elif eff is None:
@@ -118,7 +121,15 @@ init -10 python in say_style:
                 except ValueError:
                     pass
                 eff["uniforms"].append((k, v))
-            elif word == "variables" or word.startswith("vertex_") or word.startswith("fragment_"):
+            elif word == "param":
+                ## @param u__이름 최소 최대 한글 이름  (효과 관리, 편집기의 막대)
+                w = rest.split(None, 3)
+                if len(w) < 3:
+                    raise Exception("[say_style] text_effects.glsl: " + s)
+                eff["params"].append((w[0], float(w[1]), float(w[2]), w[3].strip() if len(w) > 3 else w[0]))
+            elif word == "time":
+                eff["time"] = float(rest)
+            elif word == "variables" or word == "fragment" or word.startswith("vertex_") or word.startswith("fragment_"):
                 cur = [ ]
                 eff["code"].append((word, cur))
             else:
@@ -159,9 +170,46 @@ init -10 python in say_style:
     ## 등록한 효과 목록 (편집기 대사 탭의 효과 버튼이 씀)
     TFX_EFFECTS = [ ]
 
+    ## 효과 폴더에서 읽은 그림 전환 (image_effects.rpy가 등록)
+    TFX_TRANSITIONS = [ ]
+
+    ## 효과 폴더의 파일을 읽다가 만난 문제: (파일, 이유)
+    TFX_ERRORS = [ ]
+
+    def _tfx_folder(main):
+        """효과 폴더(text_effects.glsl이 있는 engine 폴더 옆의 effects)의 .glsl 파일들."""
+        base = main.rsplit("/", 2)[0] + "/effects/" if main.count("/") >= 2 else "effects/"
+        return sorted(fn for fn in store.renpy.list_files() if fn.startswith(base) and fn.endswith(".glsl"))
+
+    def _tfx_name_ok(name):
+        import re
+        return re.match(r"^[a-z][a-z0-9_]*$", name) is not None
+
     def _tfx_register():
-        with store.renpy.open_file(_tfx_find(), encoding="utf-8") as f:
-            effects = tfx_parse(f.read())
+        main = _tfx_find()
+        parts = { }
+        with store.renpy.open_file(main, encoding="utf-8") as f:
+            effects = [ e for e in tfx_parse(f.read(), parts) if e["kind"] == "effect" ]
+        have = set(e["name"] for e in effects)
+        del TFX_ERRORS[:]
+        del TFX_TRANSITIONS[:]
+        for fn in _tfx_folder(main):
+            try:
+                with store.renpy.open_file(fn, encoding="utf-8") as f:
+                    more = tfx_parse(f.read(), dict(parts))
+                for e in more:
+                    if not _tfx_name_ok(e["name"]):
+                        raise Exception("이름은 영어 소문자, 숫자, _만 씁니다: " + e["name"])
+                    if e["name"] in have:
+                        raise Exception("이미 있는 이름입니다: " + e["name"])
+                    if not e["code"]:
+                        raise Exception("셰이더 코드가 없습니다: " + e["name"])
+                for e in more:
+                    have.add(e["name"])
+                    e["file"] = fn
+                    (effects if e["kind"] == "effect" else TFX_TRANSITIONS).append(e)
+            except Exception as ex:
+                TFX_ERRORS.append((fn, str(ex)))
         TFX_EFFECTS[:] = effects
         for e in effects:
             kw = dict(e["code"])
@@ -175,5 +223,37 @@ init -10 python in say_style:
 
     _tfx_register()
 
+    ## 지운 효과 (ui_kit 4.2). 예전 원고의 effect="melt", "led:u__cell=6" 같은 줄이 오류 없이 돌게
+    ## 한 글자씩 나오기(렌파이 typewriter와 같음)로 등록합니다. 예전 값 이름도 받기만 합니다
+    REMOVED_EFFECTS = {
+        "melt": (("u__duration", 14.0), ("u__length", 28.0), ("u__width", 3.0), ("u__hold", 0.0)),
+        "mosh": (("u__duration", 14.0), ("u__block", 16.0), ("u__length", 24.0), ("u__rate", 5.0), ("u__hold", 0.0)),
+        "flipin": (("u__duration", 6.0), ("u__axis", 0.0)),
+        "led": (("u__duration", 2.0), ("u__cell", 5.0), ("u__dot", 0.8), ("u__off", 0.35), ("u__offcolor", "#3a1408"), ("u__glow", 1.3)),
+        "split": (("u__duration", 6.0), ("u__distance", 24.0), ("u__gap", 0.0)),
+        }
+
+    def _tfx_register_removed():
+        have = set(e["name"] for e in TFX_EFFECTS)
+        for name, values in REMOVED_EFFECTS.items():
+            if name in have:
+                continue
+            decl = "".join("uniform %s %s;\n" % ("vec4" if isinstance(v, str) else "float", k) for k, v in values)
+            kw = dict(values)
+            store.renpy.register_textshader(name, include_default=False,
+                variables=decl + "uniform float u_text_slow_time;\nattribute float a_text_min_time;\nvarying float v__min_time;\n",
+                vertex_200="v__min_time = a_text_min_time;\n",
+                fragment_350="gl_FragColor = gl_FragColor * (v__min_time <= u_text_slow_time ? 1.0 : 0.0);\n",
+                **kw)
+
+    _tfx_register_removed()
+
     ## 색 잔상의 복사본 (외곽선 굵기 0, 색, 가로, 세로). 예전 이름이라 남겨 둡니다
     ECHO_OUTLINES = TFX_OUTLINES.get("echo", [ ])
+
+    ## 효과 폴더의 파일에 틀린 곳이 있으면 개발 모드에서 한 번 알립니다
+    def _tfx_report():
+        if TFX_ERRORS and store.config.developer:
+            store.renpy.notify("효과 폴더: " + " / ".join("%s (%s)" % (fn.rsplit("/", 1)[-1], why) for fn, why in TFX_ERRORS)[:300])
+
+    store.config.start_callbacks.append(_tfx_report)

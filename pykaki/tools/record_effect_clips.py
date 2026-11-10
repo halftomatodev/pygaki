@@ -5,7 +5,7 @@ PyKaki 글자 효과 칸의 "렌파이 견본"이 이 영상을 보여 준다.
 showpy에 효과를 새로 넣으면 이 스크립트를 다시 돌린다.
 
     python tools/record_effect_clips.py
-    python tools/record_effect_clips.py scatter melt      # 몇 개만
+    python tools/record_effect_clips.py scatter drop      # 몇 개만
 
 필요한 것: 렌파이 SDK, ffmpeg(libvpx-vp9), showpy 저장소, 대사창 그림이 있는 시험 프로젝트.
 경로는 아래 값이나 같은 이름의 환경 변수로 바꾼다.

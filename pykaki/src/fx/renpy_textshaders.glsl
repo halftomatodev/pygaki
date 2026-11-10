@@ -25,29 +25,6 @@
     }
     gl_FragColor = gl_FragColor * l__done;
 
-@effect typewriter 타자기
-@cps
-@variables
-    uniform float u_text_slow_time;
-    attribute float a_text_min_time;
-    varying float v_text_min_time;
-@vertex_200
-    v_text_min_time = a_text_min_time;
-@fragment_350
-    float l__done = v_text_min_time <= u_text_slow_time ? 1.0 : 0.0;
-    gl_FragColor = gl_FragColor * l__done;
-
-// slowalpha는 다른 효과와 함께 쓰라고 만든 것이라, 혼자 쓰면 글자가 처음부터 다 보입니다 (렌파이도 같음)
-@effect slowalpha 흐리게 대기
-@cps
-@set u__alpha 0.2
-@variables
-    uniform float u__alpha
-@fragment_325
-    vec4 l__color = gl_FragColor;
-@fragment_375
-    gl_FragColor = mix(gl_FragColor, l__color, u__alpha);
-
 @effect flip 뒤집히며
 @cps
 @slow u__duration

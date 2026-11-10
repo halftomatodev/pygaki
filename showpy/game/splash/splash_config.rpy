@@ -167,6 +167,7 @@ define splash.pages = [
         "skippable": True,
 
         "dont_show_again": _("다음부터 보지 않기"),   # 오른쪽 아래 체크 버튼. 체크하면 다음 실행부터 건너뜀
+        "show": True,                            # False면 이 페이지를 건너뜀 (편집기 스플래시 탭의 [보이기 / 안 보이기], 2.1)
         "once": False,                           # True면 처음 실행할 때 한 번만
         "show_if": None,                         # 보일 조건. 예: "not persistent.cleared" (엔딩을 본 뒤로는 안 보임)
     },

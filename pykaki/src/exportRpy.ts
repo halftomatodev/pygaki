@@ -159,6 +159,11 @@ export function generateRpy(p: Project): { code: string; warnings: Warn[] } {
             W.push({ level: 'warn', msg: `화면 효과 줄은 showpy 연결을 켜야 내보내요 (${b.title || b.id})`, nodeId: b.id });
             return body.push(`# showpy 연결 꺼짐: ${(code ?? '').split('\n')[0]}`);
           }
+          // 효과 폴더의 그림 전환(img_fx.use)은 showpy가 등록한다. 연결이 꺼져 있으면 서서히 바뀌기로 내보낸다
+          if (!S.renpyLink && code && l.trans?.startsWith('img_fx.')) {
+            W.push({ level: 'warn', msg: `이 그림 전환은 showpy가 있어야 해서 "서서히"로 내보냈어요 (${b.title || b.id})`, nodeId: b.id });
+            return body.push(code.replace(' with ' + l.trans, ' with dissolve'));
+          }
           return body.push(...(code ?? `# TODO: ${problem}`).split('\n'));
         }
         if (!l.text.trim()) W.push({ level: 'warn', msg: `빈 대사가 있어요 (${b.title || b.id})`, nodeId: b.id });

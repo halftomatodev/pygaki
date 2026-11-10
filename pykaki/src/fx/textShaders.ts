@@ -1,6 +1,6 @@
 // 등장 효과 셰이더: showpy와 같은 셰이더 파일을 읽고, 렌파이가 셰이더 조각을 합치는 방식 그대로 합친다.
 // - text_effects.glsl: showpy의 셰이더 파일을 그대로 가져옴 (저장소의 showpy/game/ui_kit/engine/text_effects.glsl)
-// - renpy_textshaders.glsl: 렌파이에 들어 있는 효과 (dissolve, typewriter ...)
+// - renpy_textshaders.glsl: 렌파이에 들어 있는 효과 (dissolve, flip ...)
 // 합치는 방식은 렌파이 8.5.3 renpy/gl2/gl2shadercache.py와 renpy/text/shader.py를 따른다.
 import showpySource from '../../../showpy/game/ui_kit/engine/text_effects.glsl?raw';
 import renpySource from './renpy_textshaders.glsl?raw';
@@ -15,11 +15,16 @@ export interface ShaderEffect {
   uniforms: [string, string][]; // u__이름, 기본값 (적힌 그대로)
   code: [string, string][]; // variables, vertex_N, fragment_N
   showpy: boolean;
+  kind: 'effect' | 'transition'; // 글자 등장 효과 / 그림 전환 (효과 폴더의 @transition)
+  params: [string, number, number, string][]; // @param: u__이름, 최소, 최대, 한글 이름 (막대)
+  time: number; // 전환이 걸리는 초 (@time)
+  file?: string; // 효과 폴더에서 읽었으면 파일 이름
 }
 
 // text_effects.glsl 읽기. showpy text_effects.rpy의 tfx_parse와 같은 규칙
-export function parseShaders(text: string, showpy: boolean): ShaderEffect[] {
-  const parts: Record<string, string[]> = {};
+// shared를 주면 거기 든 조각(@part)을 @use로 쓸 수 있고, 이 글의 조각도 거기에 더한다
+export function parseShaders(text: string, showpy: boolean, shared?: Record<string, string[]>): ShaderEffect[] {
+  const parts: Record<string, string[]> = shared ?? {};
   const effects: ShaderEffect[] = [];
   const raw: [string, string[]][][] = [];
   let cur: string[] | null = null;
@@ -37,9 +42,9 @@ export function parseShaders(text: string, showpy: boolean): ShaderEffect[] {
     if (word === 'part') {
       cur = parts[rest] = [];
       eff = null;
-    } else if (word === 'effect') {
+    } else if (word === 'effect' || word === 'transition') {
       const k = rest.indexOf(' ');
-      eff = { name: k < 0 ? rest : rest.slice(0, k), label: k < 0 ? '' : rest.slice(k + 1).trim(), cps: false, slow: null, redraw: null, outlines: [], uniforms: [], code: [], showpy };
+      eff = { name: k < 0 ? rest : rest.slice(0, k), label: k < 0 ? '' : rest.slice(k + 1).trim(), cps: false, slow: null, redraw: null, outlines: [], uniforms: [], code: [], showpy, kind: word, params: [], time: 1 };
       effects.push(eff);
       raw.push([]);
       cur = null;
@@ -57,7 +62,12 @@ export function parseShaders(text: string, showpy: boolean): ShaderEffect[] {
     } else if (word === 'set') {
       const k = rest.indexOf(' ');
       eff.uniforms.push([rest.slice(0, k), rest.slice(k + 1).trim()]);
-    } else if (word === 'variables' || word.startsWith('vertex_') || word.startsWith('fragment_')) {
+    } else if (word === 'param') {
+      const w = rest.split(/\s+/);
+      if (w.length < 3 || isNaN(Number(w[1])) || isNaN(Number(w[2]))) throw new Error('셰이더 파일: ' + s);
+      eff.params.push([w[0], Number(w[1]), Number(w[2]), w.slice(3).join(' ') || w[0]]);
+    } else if (word === 'time') eff.time = Number(rest) || 1;
+    else if (word === 'variables' || word === 'fragment' || word.startsWith('vertex_') || word.startsWith('fragment_')) {
       cur = [];
       raw[raw.length - 1].push([word, cur]);
     } else throw new Error('셰이더 파일: 모르는 표시 ' + s);
@@ -69,10 +79,79 @@ export function parseShaders(text: string, showpy: boolean): ShaderEffect[] {
 // RAND(1.0) → 글자마다 다른 값(0~1)
 const expandRand = (code: string) => code.replace(/RAND\(([^()]*)\)/g, 'fract(sin(a_text_index * 12.9898 + $1) * 43758.5453)');
 
-export const SHOWPY_SHADERS = parseShaders(showpySource, true);
+// showpy 기본 효과(text_effects.glsl)와 조각. 효과 폴더의 파일도 이 조각을 @use로 쓴다
+const SHOWPY_PARTS: Record<string, string[]> = {};
+export const SHOWPY_SHADERS = parseShaders(showpySource, true, SHOWPY_PARTS).filter((e) => e.kind === 'effect');
 export const RENPY_SHADERS = parseShaders(renpySource, false);
+// 그림 전환 (효과 폴더의 @transition). showpy img_fx.use("이름")
+export const IMAGE_FX: ShaderEffect[] = [];
 const BY_NAME = new Map([...RENPY_SHADERS, ...SHOWPY_SHADERS].map((e) => [e.name, e]));
 export const shaderEffect = (name: string) => BY_NAME.get(name);
+
+// ── 효과 폴더 (showpy ui_kit/effects/*.glsl, ui_kit 4.3) ──
+// showpy에 든 샘플은 빌드할 때 같이 가져오고, 연결한 게임 폴더의 파일은 폴더를 읽을 때 더한다.
+// 읽는 규칙은 showpy text_effects.rpy의 _tfx_register와 같다: 틀린 파일은 그 파일만 건너뛰고, 이미 있는 이름은 쓰지 않는다
+const NAME_OK = /^[a-z][a-z0-9_]*$/;
+function readPack(file: string, text: string, have: Set<string>): ShaderEffect[] {
+  const more = parseShaders(text, true, { ...SHOWPY_PARTS });
+  for (const e of more) {
+    if (!NAME_OK.test(e.name)) throw new Error('이름은 영어 소문자, 숫자, _만 써요: ' + e.name);
+    if (have.has(e.name)) throw new Error('이미 있는 이름이에요: ' + e.name);
+    if (!e.code.length) throw new Error('셰이더 코드가 없어요: ' + e.name);
+  }
+  more.forEach((e) => (e.file = file));
+  return more;
+}
+
+const samples = import.meta.glob('../../../showpy/game/ui_kit/effects/*.glsl', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+for (const path of Object.keys(samples).sort()) {
+  const file = path.split('/').pop()!;
+  try {
+    for (const e of readPack(file, samples[path], new Set(BY_NAME.keys()))) {
+      BY_NAME.set(e.name, e);
+      (e.kind === 'effect' ? SHOWPY_SHADERS : IMAGE_FX).push(e);
+    }
+  } catch (e) {
+    console.warn('효과 파일을 못 읽었어요', file, e);
+  }
+}
+const BUILT_IN = new Set(BY_NAME.keys());
+const BUILT_IN_FILES = new Set([...BY_NAME.values()].map((e) => e.file).filter(Boolean));
+
+// 연결한 폴더의 효과 파일을 다시 읽는다. 돌려주는 값은 못 읽은 파일과 이유. 바뀐 것이 있으면 effectEpoch가 오른다 (미리보기 셰이더 다시 만들기)
+export let effectEpoch = 0;
+let folderSeen = '[]';
+let folderErrors: [string, string][] = [];
+export function setFolderEffects(files: { name: string; text: string }[]): [string, string][] {
+  const sorted = [...files].sort((a, b) => (a.name < b.name ? -1 : 1));
+  const seen = JSON.stringify(sorted);
+  if (seen === folderSeen) return folderErrors;
+  folderSeen = seen;
+  effectEpoch++;
+  for (const name of [...BY_NAME.keys()])
+    if (!BUILT_IN.has(name)) {
+      BY_NAME.delete(name);
+      PARTS.delete('textshader.' + name);
+    }
+  for (const list of [SHOWPY_SHADERS, IMAGE_FX])
+    for (let i = list.length - 1; i >= 0; i--) if (!BUILT_IN.has(list[i].name)) list.splice(i, 1);
+  folderErrors = [];
+  for (const f of sorted) {
+    if (BUILT_IN_FILES.has(f.name)) continue; // showpy에 든 샘플과 같은 파일
+    try {
+      for (const e of readPack(f.name, f.text, new Set(BY_NAME.keys()))) {
+        BY_NAME.set(e.name, e);
+        if (e.kind === 'effect') {
+          SHOWPY_SHADERS.push(e);
+          PARTS.set('textshader.' + e.name, makePart('textshader.' + e.name, e.code));
+        } else IMAGE_FX.push(e);
+      }
+    } catch (e: any) {
+      folderErrors.push([f.name, String(e?.message ?? e)]);
+    }
+  }
+  return folderErrors;
+}
 
 // ── 렌파이 셰이더 조각 (renpy/gl2/gl2shadercache.py의 ShaderPart) ──────────────────
 
@@ -143,7 +222,7 @@ PARTS.set('renpy.texture', makePart('renpy.texture', [
   ['vertex_200', '\n    v_tex_coord = a_tex_coord;\n'],
   ['fragment_200', '\n    gl_FragColor = texture2D(tex0, v_tex_coord.xy, u_lod_bias);\n'],
 ]));
-for (const e of BY_NAME.values()) PARTS.set('textshader.' + e.name, makePart('textshader.' + e.name, e.code));
+for (const e of BY_NAME.values()) if (e.kind === 'effect') PARTS.set('textshader.' + e.name, makePart('textshader.' + e.name, e.code));
 
 // 셰이더 코드 만들기 (gl2shadercache.py의 source). WebGL1은 조각 셰이더에 정밀도가 있어야 한다
 function source(vars: Variable[], parts: [number, string, string][], fragment: boolean) {
@@ -173,7 +252,7 @@ export function shaderSource(partnames: string[]) {
     vp.push(...p.vertex);
     fp.push(...p.fragment);
   }
-  return { key: names.join('|'), vertex: source(vv, vp, false), fragment: source(fv, fp, true) };
+  return { key: names.join('|') + '@' + effectEpoch, vertex: source(vv, vp, false), fragment: source(fv, fp, true) };
 }
 
 // ── 텍스트 셰이더 (renpy/text/shader.py의 TextShader) ──────────────────────────────
@@ -218,14 +297,14 @@ function evalSlow(expr: string, kw: Record<string, UniformValue>) {
   return total;
 }
 
-// "scatter", "scatter:u__distance=200", "scatter:200", "typewriter|slowalpha" → 텍스트 셰이더. 모르는 효과면 null
+// "scatter", "scatter:u__distance=200", "scatter:200", "slidein|shake" → 텍스트 셰이더. 모르는 효과면 null
 export function parseTextShader(effect: string): TextShader | null {
   let rv: TextShader | null = null;
   for (const one of effect.split('|')) {
     const [name0, ...args] = one.split(':');
     const name = name0.trim();
     const e = shaderEffect(name);
-    if (!e) return null;
+    if (!e || e.kind !== 'effect') return null;
     const part = PARTS.get('textshader.' + name)!;
     const prefix = 'u_textshader_' + name.replace(/\./g, '_');
     const orig = new Map(e.uniforms.map(([k, v]) => [prefix + k.slice(2), [k, v] as [string, string]]));

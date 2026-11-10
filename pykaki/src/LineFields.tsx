@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useStore } from './store';
 import * as ops from './ops';
 import type { ImageKind, Line, LineFx, SayStyle } from './types';
-import { BOXES, EFFECTS, FX_BASE, TAILS, FX_CURSOR, FX_OVERLAY, FX_TRANS, FX_WARP, POSITIONS, STAGE_LABEL, STAGE_TYPES, TRANSITIONS, fxArgs, lineCps, stageCode } from './stage';
+import { BOXES, EFFECTS, effectKnobs, formatEffect, parseEffect, type EffectPart, FX_BASE, TAILS, FX_CURSOR, FX_OVERLAY, FX_TRANS, FX_WARP, POSITIONS, STAGE_LABEL, STAGE_TYPES, TRANSITIONS, fxArgs, lineCps, stageCode } from './stage';
 import { useGameFolder, writePreview, type PreviewResult } from './gameFolder';
 import { LinePreview } from './PlayStage';
 import { TagBar, useTagTarget } from './TagBar';
@@ -76,6 +76,7 @@ export function FxFields({ l, set, nd = '' }: { l: Line; set: SetLine; nd?: stri
 export function SayFields({ l, set }: { l: Line; set: SetLine }) {
   const s = l.say ?? {};
   const fonts = useGameFolder((f) => f.media.fonts);
+  useGameFolder((f) => f.fxSeq); // 효과 폴더를 다시 읽으면 효과 목록도 다시 그린다
   const linked = useStore((v) => !!v.project.settings.renpyLink);
   const put = (key: keyof SayStyle, v: string | number | undefined, mergeKey?: string) =>
     set((x) => {
@@ -85,9 +86,73 @@ export function SayFields({ l, set }: { l: Line; set: SetLine }) {
       if (Object.keys(say).length) x.say = say;
       else delete x.say;
     }, mergeKey);
-  // 등장 효과 두 개 겹치기: "앞|뒤" (렌파이 텍스트 셰이더 문법)
-  const [fx1 = '', fx2 = ''] = (s.effect ?? '').split('|');
-  const putFx = (a: string, b: string) => put('effect', a ? (b ? `${a}|${b}` : a) : undefined);
+  // 등장 효과 1번, 2번: 두 효과가 같이 돈다 ("앞|뒤", 렌파이 텍스트 셰이더 문법). 값은 "이름:u__값=…"
+  const parts = parseEffect(s.effect);
+  const [openKnobs, setOpenKnobs] = useState<Record<number, boolean>>({});
+  const putParts = (next: EffectPart[], mergeKey?: string) => put('effect', formatEffect(next), mergeKey);
+  const pickFx = (i: number, name: string) => {
+    const next = parts.slice(0, 2);
+    if (!name) next.splice(i, 1);
+    else next[i] = { name, args: [] };
+    putParts(next);
+  };
+  // v가 undefined면 그 값을 지워 기본값으로
+  const putArg = (i: number, key: string, v: string | undefined) => {
+    const next = parts.map((p) => ({ ...p, args: [...p.args] }));
+    const args = next[i].args.filter(([k]) => k !== key);
+    if (v !== undefined) args.push([key, v]);
+    next[i].args = args;
+    putParts(next, `fx${i}${key}${l.id}`);
+  };
+  const fxSlot = (i: number) => {
+    const p = parts[i];
+    if (i === 1 && !parts[0]) return null;
+    const other = parts[1 - i]?.name;
+    const knobs = p ? effectKnobs(p.name) : [];
+    const changed = p ? p.args.filter(([k]) => k).length : 0;
+    return (
+      <div className="fx-slot" key={i}>
+        <div className="fx-head">
+          <span className="fx-no">{i + 1}번</span>
+          <select title={i ? '2번 효과: 1번과 같이 돌아요 (렌파이 effect="앞|뒤")' : '등장 효과'} value={p?.name ?? ''} onChange={(e) => pickFx(i, e.target.value)}>
+            <option value="">{i ? '없음 (겹치지 않음)' : '효과 없음'}</option>
+            {EFFECTS.filter(([k]) => k && k !== other).map(([k, t]) => (
+              <option key={k} value={k}>{t}</option>
+            ))}
+            {p && !EFFECTS.some(([k]) => k === p.name) && <option value={p.name}>{p.name}</option>}
+          </select>
+          {p && knobs.length > 0 && (
+            <button className={'fx-more' + (openKnobs[i] ? ' on' : '')} title="이 효과의 세부 값을 막대로 고쳐요" onClick={() => setOpenKnobs((o) => ({ ...o, [i]: !o[i] }))}>
+              세부 값{changed ? ` (${changed})` : ''}
+            </button>
+          )}
+          {p && <button className="fx-x" title={`${i + 1}번 효과 빼기`} onClick={() => pickFx(i, '')}>✕</button>}
+        </div>
+        {p && openKnobs[i] && knobs.length > 0 && (
+          <div className="fx-knobs">
+            {knobs.map((k) => {
+              const set = p.args.find(([key]) => key === k.key)?.[1];
+              const v = set ?? k.def;
+              return (
+                <label key={k.key} className={set !== undefined ? 'set' : ''}>
+                  <span className="fx-kn" title={k.key}>{k.label}</span>
+                  {k.kind === 'color' ? (
+                    <input type="color" value={v.slice(0, 7)} onChange={(e) => putArg(i, k.key, e.target.value)} />
+                  ) : (
+                    <>
+                      <input type="range" min={k.min} max={k.max} step={k.step} value={Number(v)} onChange={(e) => putArg(i, k.key, String(Number(e.target.value)))} />
+                      <span className="fx-kv">{Number(v)}</span>
+                    </>
+                  )}
+                  <button className="fx-x" style={{ visibility: set !== undefined ? 'visible' : 'hidden' }} title="기본값으로" onClick={(e) => (e.preventDefault(), putArg(i, k.key, undefined))}>↺</button>
+                </label>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
   // 상자를 없애면 꼬리, 기울기도 지운다
   const putBox = (b: string) =>
     set((x) => {
@@ -150,22 +215,12 @@ export function SayFields({ l, set }: { l: Line; set: SetLine }) {
       <div className="sf-row">
         {num('size', '크기', '글자 크기', 200)}
         {num('cps', lineCps(s) !== undefined ? String(lineCps(s)) : '글자/초', '1초에 나오는 글자 수. 효과를 고르면 기본값을 써요. 효과가 없고 비워 두면 게임 설정을 따라요', 500)}
-        <select title="등장 효과" value={fx1} onChange={(e) => putFx(e.target.value, e.target.value ? fx2 : '')}>
-          {EFFECTS.map(([k, t]) => (
-            <option key={k} value={k}>{t}</option>
-          ))}
-          {fx1 && !EFFECTS.some(([k]) => k === fx1) && <option value={fx1}>{fx1}</option>}
-        </select>
-        {fx1 && (
-          <select title="겹칠 효과: 두 효과가 같이 돌아요 (렌파이 effect=&quot;앞|뒤&quot;)" value={fx2} onChange={(e) => putFx(fx1, e.target.value)}>
-            {EFFECTS.map(([k, t]) => (
-              <option key={k} value={k}>{k ? '+ ' + t : '겹치기 없음'}</option>
-            ))}
-            {fx2 && !EFFECTS.some(([k]) => k === fx2) && <option value={fx2}>+ {fx2}</option>}
-          </select>
-        )}
         {color('color', '글자 색')}
         {font('font', '글꼴 파일')}
+      </div>
+      <div className="fx-slots">
+        {fxSlot(0)}
+        {fxSlot(1)}
       </div>
       <div className="sf-row">
         <select title="글 상자: 대사 글을 둘러싸는 상자 (showpy가 있어야 내보내요)" value={s.box ?? ''} onChange={(e) => putBox(e.target.value)}>
@@ -309,6 +364,7 @@ function EffectClip({ effect }: { effect: string }) {
 // 연결한 game 폴더의 파일 이름을 칸의 추천 목록으로
 function useSuggest(l: Line) {
   const media = useGameFolder((s) => s.media);
+  useGameFolder((s) => s.fxSeq);
   const chars = useStore((s) => s.project.characters);
   const words = (n: string) => n.split(' ');
   const bg = media.images.filter((n) => words(n)[0] === 'bg' && words(n).length > 1).map((n) => words(n).slice(1).join(' '));

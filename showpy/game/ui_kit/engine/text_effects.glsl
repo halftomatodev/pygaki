@@ -15,8 +15,12 @@
 //   @redraw u__hold         u__hold가 0보다 크면 계속 다시 그림
 //   @outline 굵기 색 x y     글자 뒤에 깔 외곽선 겹 (echo의 복사본). 대사에 외곽선을 따로 안 적었을 때만
 //   @set u__이름 값          값의 기본값. 대사에서 effect="이름:u__이름=값"으로 바꿈
+//   @param u__이름 최소 최대 한글이름   그 값을 막대로 고칠 때의 범위와 이름 (ui_kit 4.3)
 //   @variables              uniform, attribute, varying 줄
 //   @vertex_30, @fragment_350 ...   렌파이 셰이더 조각. 숫자가 작은 것부터 이어 붙음
+//
+// 효과를 더할 때는 이 파일을 고치는 대신 ui_kit/effects/ 폴더에 파일을 하나 넣어도 됩니다 (ui_kit 4.3).
+// 그 파일들은 이 파일의 @part 조각을 @use로 쓸 수 있습니다. 적는 법은 ui_kit/effects/README.md.
 //
 // 코드 안의 RAND(1.0)은 글자마다 다른 0~1 값입니다 (글자 번호로 정해져서 볼 때마다 같음).
 // u__, l__, v__로 시작하는 이름은 렌파이가 효과마다 다른 이름으로 바꿔 줍니다.
@@ -38,14 +42,6 @@
     float l__c = cos(l__ang);
     float l__s = sin(l__ang);
     gl_Position.xy = a_text_center + vec2(l__p.x * l__c - l__p.y * l__s, l__p.x * l__s + l__p.y * l__c);
-
-@part STREAK
-    vec4 l__best = texture2D(tex0, l__uv);
-    for (int l__k = 1; l__k <= 10; l__k++) {
-        vec4 l__s = texture2D(tex0, l__uv - l__dir * float(l__k) / 10.0);
-        l__best = l__s.a > l__best.a ? mix(l__s, l__best, float(l__k) / 14.0) : l__best;
-    }
-    gl_FragColor = l__best;
 
 // scatter: 흩어졌다 모이기: 여기저기 돌아간 채 흩어져 있다가 제자리로
 @effect scatter 흩어졌다 모이기
@@ -480,101 +476,6 @@
     }
 @fragment_350
     gl_FragColor = gl_FragColor * (v_tfx_block > 0.0 ? 1.0 : 0.0);
-
-// melt: 녹아내림: 흘러내린 색이 모여 글자가 됨 (u__hold로 계속 녹기)
-@effect melt 녹아내림
-@cps
-@slow u__duration
-@redraw u__hold
-@set u__duration 14.0
-@set u__length 28.0
-@set u__width 3.0
-@set u__hold 0.0
-@variables
-    uniform float u__duration;
-    uniform float u__length;
-    uniform float u__width;
-    uniform float u__hold;
-    uniform float u_text_slow_duration;
-    uniform float u_text_slow_time;
-    uniform float u_text_to_drawable;
-    uniform float u_text_main;
-    uniform float u_time;
-    uniform sampler2D tex0;
-    uniform vec2 res0;
-    attribute float a_text_min_time;
-    varying vec2 v_tex_coord;
-    varying float v_tfx_melt;
-@vertex_30
-@use T
-    v_tfx_melt = l__t;
-@fragment_340
-    if (v_tfx_melt > 0.0 && u_text_main > 0.5) {
-        float l__e = 1.0 - pow(1.0 - v_tfx_melt, 2.0);
-        float l__x = gl_FragCoord.x / (u__width * u_text_to_drawable);
-        float l__i = floor(l__x);
-        float l__a = fract(sin(l__i * 12.9898) * 43758.5453);
-        float l__b = fract(sin((l__i + 1.0) * 12.9898) * 43758.5453);
-        float l__n = mix(l__a, l__b, smoothstep(0.0, 1.0, fract(l__x)));
-        float l__wave = 0.5 + 0.5 * sin(u_time * 1.7 + l__i * 2.3);
-        float l__amt = max(1.0 - l__e, u__hold * l__wave);
-        float l__drip = u__length * u_text_to_drawable * l__n * l__n * l__amt;
-        vec2 l__uv = v_tex_coord;
-        vec2 l__dir = vec2(0.0, l__drip) / res0;
-@use STREAK
-    }
-@fragment_350
-    gl_FragColor = gl_FragColor * (v_tfx_melt > 0.0 ? 1.0 : 0.0);
-
-// mosh: 데이터모싱 흉내: 네모 칸이 한쪽으로 끌리며 번졌다가 돌아옴 (u__hold로 계속)
-@effect mosh 데이터모싱
-@cps
-@slow u__duration
-@redraw u__hold
-@set u__duration 14.0
-@set u__block 16.0
-@set u__length 24.0
-@set u__rate 5.0
-@set u__hold 0.0
-@variables
-    uniform float u__duration;
-    uniform float u__block;
-    uniform float u__length;
-    uniform float u__rate;
-    uniform float u__hold;
-    uniform float u_text_slow_duration;
-    uniform float u_text_slow_time;
-    uniform float u_text_to_drawable;
-    uniform float u_text_main;
-    uniform float u_time;
-    uniform sampler2D tex0;
-    uniform vec2 res0;
-    attribute float a_text_min_time;
-    varying vec2 v_tex_coord;
-    varying float v_tfx_mosh;
-@vertex_30
-@use T
-    v_tfx_mosh = l__t;
-@fragment_340
-    float l__amt = max(1.0 - v_tfx_mosh, u__hold);
-    if (v_tfx_mosh > 0.0 && l__amt > 0.0 && u_text_main > 0.5) {
-        vec2 l__cell = floor(gl_FragCoord.xy / (u__block * u_text_to_drawable));
-        float l__tick = floor(u_time * u__rate);
-        float l__r1 = fract(sin(dot(l__cell + l__tick, vec2(12.9898, 78.233))) * 43758.5453);
-        float l__r2 = fract(sin(dot(l__cell + l__tick, vec2(39.346, 11.135))) * 43758.5453);
-        float l__r3 = fract(sin(dot(l__cell + l__tick, vec2(73.156, 52.235))) * 43758.5453);
-        vec2 l__uv = v_tex_coord;
-        vec2 l__dir = vec2(0.0);
-        if (l__r1 > 1.0 - 0.6 * l__amt) {
-            // 칸마다 흐르는 방향. 아래쪽으로 조금 더 흐르게
-            vec2 l__v = normalize(vec2(l__r2 - 0.5, l__r3 - 0.2) + 0.001);
-            l__dir = l__v * u__length * u_text_to_drawable * l__amt / res0;
-            l__uv -= l__dir * 0.5;
-        }
-@use STREAK
-    }
-@fragment_350
-    gl_FragColor = gl_FragColor * (v_tfx_mosh > 0.0 ? 1.0 : 0.0);
 
 // liquid: 일렁임: 물에 비친 것처럼 계속 출렁임 (한 번에 나와도 보임)
 @effect liquid 일렁임
@@ -1105,126 +1006,3 @@
     }
 @fragment_350
     gl_FragColor = gl_FragColor * clamp(v_tfx_extrude * 4.0, 0.0, 1.0);
-
-// flipin: 뒤집으며 나오기: 글자가 판처럼 뒤집히며 자리 잡음 (렌파이의 flip과 다름)
-// u__axis: 0 위아래로 뒤집기, 1 좌우로 뒤집기
-@effect flipin 뒤집으며 나오기
-@cps
-@slow u__duration
-@set u__duration 6.0
-@set u__axis 0.0
-@variables
-    uniform float u__duration;
-    uniform float u__axis;
-    uniform float u_text_slow_duration;
-    uniform float u_text_slow_time;
-    attribute float a_text_min_time;
-    attribute vec2 a_text_center;
-    attribute vec4 a_text_pos_rect;
-    varying float v_tfx_flipin;
-    varying float v_tfx_flipin_c;
-@vertex_30
-@use T
-    float l__k = l__t - 1.0;
-    float l__e = 1.0 + 2.2 * l__k * l__k * l__k + 1.2 * l__k * l__k;
-    float l__c = cos((1.0 - l__e) * 3.14159 * 0.5);
-    vec2 l__piv = vec2(a_text_center.x, a_text_pos_rect.y + a_text_pos_rect.w * 0.5);
-    vec2 l__s = u__axis < 0.5 ? vec2(1.0, l__c) : vec2(l__c, 1.0);
-    gl_Position.xy = l__piv + (gl_Position.xy - l__piv) * l__s;
-    v_tfx_flipin = l__t;
-    v_tfx_flipin_c = abs(l__c);
-@fragment_350
-    gl_FragColor.rgb = gl_FragColor.rgb * mix(0.45, 1.0, v_tfx_flipin_c);
-    gl_FragColor = gl_FragColor * (v_tfx_flipin > 0.0 ? 1.0 : 0.0);
-
-// led: LED 전광판: 글자를 점으로 된 전광판 글자로. 꺼진 점도 흐리게 보임
-// u__cell: 점 간격(픽셀). u__dot: 점 크기(0~1). u__off: 꺼진 점 진하기. u__offcolor: 꺼진 점 색. u__glow: 켜진 점 밝기
-@effect led LED 전광판
-@cps
-@slow u__duration
-@set u__duration 2.0
-@set u__cell 5.0
-@set u__dot 0.8
-@set u__off 0.35
-@set u__offcolor #3a1408
-@set u__glow 1.3
-@variables
-    uniform float u__duration;
-    uniform float u__cell;
-    uniform float u__dot;
-    uniform float u__off;
-    uniform vec4 u__offcolor;
-    uniform float u__glow;
-    uniform float u_text_slow_duration;
-    uniform float u_text_slow_time;
-    uniform float u_text_to_drawable;
-    uniform float u_text_main;
-    uniform sampler2D tex0;
-    uniform vec2 res0;
-    attribute float a_text_min_time;
-    varying vec2 v_tex_coord;
-    varying float v_tfx_led;
-@vertex_30
-@use T
-    v_tfx_led = l__t;
-@fragment_340
-    if (u_text_main > 0.5) {
-        float l__cs = max(u__cell, 2.0) * u_text_to_drawable;
-        vec2 l__px = v_tex_coord * res0;
-        vec2 l__cell = floor(l__px / l__cs);
-        vec2 l__ctr = (l__cell + 0.5) * l__cs;
-        vec4 l__s = texture2D(tex0, l__ctr / res0);
-        float l__r = length(l__px - l__ctr) / (l__cs * 0.5);
-        float l__dot = 1.0 - smoothstep(u__dot - 0.15, u__dot + 0.05, l__r);
-        float l__on = smoothstep(0.25, 0.6, l__s.a) * (v_tfx_led > 0.0 ? 1.0 : 0.0);
-        vec3 l__lit = (l__s.a > 0.001 ? l__s.rgb / l__s.a : vec3(0.0)) * u__glow;
-        vec4 l__litc = vec4(min(l__lit, vec3(1.0)), 1.0) * l__on;
-        vec4 l__offc = vec4(u__offcolor.rgb, 1.0) * u__off * u__offcolor.a;
-        gl_FragColor = (l__litc + l__offc * (1.0 - l__on)) * l__dot;
-    }
-@fragment_350
-    if (u_text_main < 0.5) {
-        gl_FragColor = vec4(0.0);
-    }
-
-// split: 위아래로 갈라지며 맞물림: 글자 위 절반과 아래 절반이 위아래에서 와서 맞물림
-// u__distance: 처음 떨어진 거리(픽셀). u__gap: 다 맞물린 뒤에도 남기는 틈(픽셀)
-@effect split 위아래 갈라짐
-@cps
-@slow u__duration
-@set u__duration 6.0
-@set u__distance 24.0
-@set u__gap 0.0
-@variables
-    uniform float u__duration;
-    uniform float u__distance;
-    uniform float u__gap;
-    uniform float u_text_slow_duration;
-    uniform float u_text_slow_time;
-    uniform float u_text_to_drawable;
-    uniform sampler2D tex0;
-    uniform vec2 res0;
-    attribute float a_text_min_time;
-    attribute vec4 a_text_pos_rect;
-    varying vec2 v_tex_coord;
-    varying float v_tfx_split;
-    varying float v_tfx_split_mid;
-@vertex_30
-@use T
-    v_tfx_split = l__t;
-    v_tfx_split_mid = (a_text_pos_rect.y + a_text_pos_rect.w * 0.55) / res0.y;
-@fragment_340
-    float l__e = 1.0 - pow(1.0 - v_tfx_split, 3.0);
-    float l__o = (u__distance * (1.0 - l__e) + u__gap * 0.5) * u_text_to_drawable / res0.y;
-    vec2 l__top = v_tex_coord + vec2(0.0, l__o);
-    vec2 l__bot = v_tex_coord - vec2(0.0, l__o);
-    vec4 l__c = vec4(0.0);
-    if (l__top.y < v_tfx_split_mid) {
-        l__c += texture2D(tex0, l__top);
-    }
-    if (l__bot.y >= v_tfx_split_mid) {
-        l__c += texture2D(tex0, l__bot);
-    }
-    gl_FragColor = l__c;
-@fragment_350
-    gl_FragColor = gl_FragColor * clamp(v_tfx_split * 4.0, 0.0, 1.0);

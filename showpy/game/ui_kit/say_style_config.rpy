@@ -42,7 +42,7 @@ define n3 = Character(kind=t, what_xpos=400, what_ypos=264)
 ##   대사 글자   x, y, pos, font, size, color, outline, spacing,
 ##               bold, italic, kerning, width, align
 ##   속도·효과   speed (속도 배율. 0.5 = 절반 속도), effect (등장 효과: "dissolve",
-##               "typewriter", "slowalpha", "flip", "zoom", "jitter", "wave")
+##               "flip", "zoom", "jitter", "wave")
 ##   이름        name_x, name_y (이름 상자 위치, 대사 창 기준), name_font, name_size, name_color
 ##   화면 효과   fx, fx_transition, fx_overlay, fx_warp, fx_exclude (screen_fx 플러그인이 있을 때.
 ##               이 줄만이 아니라 다음에 바꿀 때까지 이어짐)

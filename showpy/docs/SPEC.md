@@ -24,7 +24,7 @@
 
 | 폴더 | 버전 | 하는 일 |
 |---|---|---|
-| `game/ui_kit` | 4.2 | 타이틀 메뉴(배경, 제목, 부제, 글자 효과), ESC 메뉴, 선택지, 커서, 클릭 대기 표시, 대사 소리, 대사 스타일, 글 상자(`text_box`), 그림과 영상 배치(`stage`), 확인 창 글과 버튼 글자(`ui_text`), GUI 편집기(개발 모드 Shift+M, 화면 이름 "GUI 편집기"), 원고 쓰기 도구(`script_edit`) |
+| `game/ui_kit` | 4.3 | 타이틀 메뉴(배경, 제목, 부제, 글자 효과), ESC 메뉴, 선택지, 커서, 클릭 대기 표시, 대사 소리, 대사 스타일, 글 상자(`text_box`), 그림과 영상 배치(`stage`), 확인 창 글과 버튼 글자(`ui_text`), GUI 편집기(개발 모드 Shift+M, 화면 이름 "GUI 편집기"), 원고 쓰기 도구(`script_edit`) |
 | `game/screen_fx` | 5.3 | 셰이더 두 자리(기본, 아스키, VHS, 단말기, 게임보이, 글리치, 지글거림, 망점, 홀로그램, 나이트비전, 포토 콜라주, 파편 흩날림 중 둘), 타이틀과 게임 내 메뉴 셰이더(따로 두 자리), TV 전환, 글자 빼기, 커서 자리, 타이틀 일렁임, 이미지 하나에 거는 효과, 셰이더 전환 틀 |
 | `game/hotkeys` | 1.0 | 단축키, 조작방법 화면 |
 | `game/splash` | 2.0 | 타이틀 전 로고, 경고, 조작 방법 페이지, 편집기 "스플래시" 탭(ui_kit이 있을 때, 화면에서 끌고 돌리고 글 고치기, 페이지 더하기) |
@@ -66,7 +66,7 @@ PyKaki가 내보내는 문법이기도 합니다.
 | `size` `font` `color` `outline` `spacing` `bold` `italic` `kerning` `width` `align` | | 글자 모양 |
 | `speed` | 배율 | 나오는 속도. 플레이어 설정에 곱함 (설정이 "즉시"면 효과 없음) |
 | `cps` | 숫자 | 나오는 속도, 1초에 나오는 글자 수. 플레이어 설정과 상관없음 |
-| `effect` | `"dissolve"` `"typewriter"` `"slowalpha"` `"flip"` `"zoom"` `"jitter"` `"wave"`, showpy가 등록한 `"scatter"` `"drop"` `"spin"` `"shuffle"` `"flash"` `"slam"` `"typecursor"` `"echo"` `"glitch"` `"glow"` `"blurin"` `"wipe"` `"blockglitch"` `"melt"` `"mosh"` `"liquid"` `"vhs"` `"rise"` `"lean"` `"stretch"` (셰이더는 `ui_kit/engine/text_effects.glsl`, `text_effects.rpy`가 init에서 읽어 등록. PyKaki도 같은 파일의 사본으로 미리보기를 그림. `echo`는 `outlines`가 없으면 `say_style`이 파일의 `@outline` 겹을 넣음) | 등장 효과 |
+| `effect` | `"dissolve"` `"flip"` `"zoom"` `"jitter"` `"wave"`, showpy가 등록한 `"scatter"` `"drop"` `"spin"` `"shuffle"` `"flash"` `"slam"` `"typecursor"` `"echo"` `"glitch"` `"glow"` `"blurin"` `"wipe"` `"blockglitch"` `"liquid"` `"vhs"` `"rise"` `"lean"` `"stretch"` `"slidein"` `"shake"` `"inkfill"` `"glyphbox"` `"stamp"` `"punch"` `"squash"` `"extrude"` (셰이더는 `ui_kit/engine/text_effects.glsl`, `text_effects.rpy`가 init에서 읽어 등록. PyKaki도 같은 파일의 사본으로 미리보기를 그림. `echo`는 `outlines`가 없으면 `say_style`이 파일의 `@outline` 겹을 넣음) | 등장 효과 |
 | `name_x` `name_y` `name_font` `name_size` `name_color` | | 이름 |
 
 `screen_fx` 값은 다시 바꿀 때까지 유지되고 세이브에 저장됩니다. 플러그인을 빼면 이 괄호에서 오류가 납니다.
@@ -300,12 +300,11 @@ $ screen_fx.set_values("shards", count=80, colors=2, color="#d22", color2="#811"
 | `punch` | 튀어나오는 줌 | 화면 깊은 곳에서 커지며 튀어나오고 뒤로 잔상이 끌림 | `u__zoom`, `u__trail` |
 | `squash` | 찌그러졌다 튕김 | 납작하게 눌렸다가 고무처럼 튕기며 원래 모양 | `u__amount`, `u__bounce` |
 | `extrude` | 입체 글자 | 같은 글자를 비스듬히 여러 겹 깔아 두께를 만듦, 나올 때 두께가 자라남 | `u__depth`, `u__angle`, `u__shade` |
-| `flip` | 뒤집으며 나오기 | 글자가 판처럼 위아래로 뒤집히며 자리 잡음 | `u__axis`(가로/세로), `u__duration` |
-| `led` | LED 전광판 | 글자를 점으로 된 전광판 글자로, 꺼진 점도 흐리게 보임 | `u__cell`, `u__off`(꺼진 점 밝기) |
-| `split` | 위아래로 갈라지며 맞물림 | 글자 위 절반과 아래 절반이 양쪽에서 와서 맞물림 | `u__distance`, `u__gap` |
 
 - 5단계 1차에서 만든 것 (2026-11-09): `slidein`, `shake`, `inkfill`, `glyphbox`. 겹치기 문법은 쉼표가 아니라 `|`(`effect="slidein|shake"`, 렌파이 `parse_textshader`). `glyphbox`는 줄 끝 빈 칸(가짜 글자 `a_text_pseudo_glyph`)은 빼고, 띄어쓰기에는 상자가 생김. `inkfill`의 외곽선 겹은 굵어진 글자에서 원래 모양을 빼서(8방향 erode, `u__line`) 테두리만 남김. 글자 자리는 `a_text_pos_rect`(x, y, 폭, 높이). 렌파이에 같은 이름 `flip` 효과가 있어서 뒤집기는 `flipin`으로.
-- 5단계 2차에서 만든 것 (2026-11-09): `stamp`, `punch`, `squash`, `extrude`, `flipin`(표의 `flip`), `led`, `split`. 공용 조각 `ROTATE`가 `l__p`를 쓰므로 효과 안에서 같은 이름을 쓰지 않음. `led`는 줄 전체에 꺼진 점판이 깔림(아직 안 나온 글자 자리 포함).
+- 5단계 2차에서 만든 것 (2026-11-09): `stamp`, `punch`, `squash`, `extrude`, `flipin`, `led`, `split`(`flipin`, `led`, `split`은 ui_kit 4.2에서 뺌). 공용 조각 `ROTATE`가 `l__p`를 쓰므로 효과 안에서 같은 이름을 쓰지 않음.
+- ui_kit 4.3 (2026-11-10) **효과 폴더**: `text_effects.rpy`의 `_tfx_register`가 기본 파일 다음에 `ui_kit/effects/*.glsl`을 파일 이름 순서로 읽음(기본 파일의 `@part`를 물려받음). 파일마다 따로 읽어서 틀리면 그 파일만 건너뛰고 `TFX_ERRORS`에 (파일, 이유). 이름은 `[a-z][a-z0-9_]*`, 이미 있는 이름은 못 씀. `@effect`는 `TFX_EFFECTS`에 더해져 편집기 목록에도 나오고, `@transition`은 `TFX_TRANSITIONS`에 모여 `image_effects.rpy`(`init -9 python in img_fx`)가 셰이더 `ui_kit.imgfx.<이름>`으로 등록함(`u__`, `l__` 이름은 `u_imgfx_<이름>_`로 바꿈, 앞 그림 `tex0`, 새 그림 `tex1`, 진행 `u_imgfx_t`, 크기 `u_imgfx_size`). `img_fx.use(이름, 시간, 값=…)`이 전환 객체를 돌려줌. 없는 이름은 개발 모드에서 오류, 배포판에서 `dissolve`. GLSL이 틀리면 처음 그릴 때 렌파이 오류 화면(등록할 때는 못 잡음).
+- ui_kit 4.2 (2026-11-10)에서 뺀 효과: `melt`, `mosh`, `flipin`, `led`, `split`(셰이더를 지움), 렌파이 기본 `typewriter`, `slowalpha`(목록에서만). 예전 원고의 지운 이름은 `text_effects.rpy`의 `REMOVED_EFFECTS`가 한 글자씩 나오기로 등록해서 오류가 나지 않음(예전 `u__` 값도 받기만 함).
 - 여러 효과 겹치기(`effect="slidein|shake"`)는 렌파이 글자 셰이더가 원래 됩니다. PyKaki 미리보기도 이미 겹친 효과를 그립니다.
 - `glyphbox`는 띄어쓰기에도 상자가 생깁니다(글자 네모가 띄어쓰기 폭만큼 있음). 만들 때 확인해서, 띄어쓰기 칸을 알아낼 수 없으면 "띄어쓰기에도 상자" 그대로 두고 안내에 적습니다.
 - PyKaki 미리보기(`pykaki/src/fx/`)가 `u_text_main`, `u_text_depth`, 외곽선 겹(`@outline`)을 렌파이와 같게 그리는지 확인합니다. `inkfill`, `glyphbox`, `extrude`가 이것에 기댑니다.

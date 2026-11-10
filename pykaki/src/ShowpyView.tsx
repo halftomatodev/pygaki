@@ -162,6 +162,14 @@ function Script({ file, line, peek }: { file: string | null; line: number; peek?
   const [rev, setRev] = useState(0);
   // 게임 줄을 따라 스크롤. 사용자가 직접 스크롤하면 멈추고 [지금 줄로]로 다시 따라감
   const [follow, setFollow] = useState(true);
+  // PyKaki 표시 줄(# @l:, # @node:, # @end:) 숨기기. 줄 번호는 그대로 둔다 (이 창에만 기억)
+  const [hideMarks, setHideMarks] = useState(() => {
+    try {
+      return localStorage.getItem('pygaki-hide-marks') !== 'off';
+    } catch {
+      return true;
+    }
+  });
   const box = useRef<HTMLPreElement>(null);
   const auto = useRef(0); // 우리가 스크롤한 때 (그 스크롤 이벤트는 사용자 것으로 치지 않음)
 
@@ -237,6 +245,22 @@ function Script({ file, line, peek }: { file: string | null; line: number; peek?
           </button>
         )}
         <span className="tip">줄을 누르면 게임도 그 줄로 가요</span>
+        {lines.some((l) => /^\s*#\s*@(l|node|end):/.test(l)) && (
+          <button
+            className={hideMarks ? 'on' : ''}
+            title="PyKaki가 줄을 찾으려고 넣은 표시 줄(# @l: 등)을 숨겨요. 파일은 그대로예요"
+            onClick={() => {
+              try {
+                localStorage.setItem('pygaki-hide-marks', hideMarks ? 'off' : 'on');
+              } catch {
+                /* 이번만 */
+              }
+              setHideMarks(!hideMarks);
+            }}
+          >
+            표시 숨기기: {hideMarks ? '켬' : '끔'}
+          </button>
+        )}
         <span className="grow" />
         {!follow && (
           <button
@@ -259,6 +283,7 @@ function Script({ file, line, peek }: { file: string | null; line: number; peek?
       >
         {lines.map((l, i) => {
           const n = i + 1;
+          if (hideMarks && n !== line && /^\s*#\s*@(l|node|end):/.test(l)) return null;
           return (
             <div
               key={n}

@@ -57,8 +57,6 @@ init -8 python in ui_editor:
         EFFECTS = (
             (None, "없음"),
             ("dissolve", "서서히"),
-            ("typewriter", "타자기"),
-            ("slowalpha", "흐리게 대기"),
             ("flip", "뒤집히며"),
             ("zoom", "커지며"),
             ("jitter", "떨림"),

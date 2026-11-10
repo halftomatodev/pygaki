@@ -20,7 +20,7 @@
 
 - 커밋 작성자는 `halftomato <wwonwan@naver.com>`, GitHub 계정은 `halftomatodev`.
 - 두 프로그램이 맞추는 형식을 바꾸면 `docs/LINK.md`와 양쪽 코드를 같은 커밋에서 고친다.
-- 등장 효과 셰이더는 `showpy/game/ui_kit/engine/text_effects.glsl` 하나다. PyKaki는 빌드할 때 그대로 가져간다(사본 없음).
+- 등장 효과 셰이더의 기본 효과는 `showpy/game/ui_kit/engine/text_effects.glsl` 하나에, 더하는 효과는 `showpy/game/ui_kit/effects/`에 파일 하나씩 둔다(글자 효과와 그림 전환, 형식은 그 폴더 README와 LINK.md 8장). PyKaki는 빌드할 때 그대로 가져가고(사본 없음), 연결한 게임 폴더의 효과 파일도 읽는다.
 - PyKaki를 고치면 `pykaki/`에서 `npm run build`로 `pykaki/dist/index.html`도 다시 만든다.
 - showpy를 고치면 Lint를 돌리고, 시험 프로젝트에 복사한 뒤 `.rpyc`를 지운다. 사용자의 진짜 게임(이름은 `docs/LOCAL.md`)은 말할 때만 건드린다.
 - 저장 형식 이름 `"format": "renpy-flow"`, `.flow.json`, IndexedDB `renpy-flow-editor`는 바꾸지 않는다.

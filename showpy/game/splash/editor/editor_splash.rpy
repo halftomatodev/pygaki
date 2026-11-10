@@ -529,6 +529,24 @@ init -6 python in splash:
                     e[key] = value
                 store.renpy.restart_interaction()
 
+            def hidden_why(self):
+                """고른 페이지가 게임을 켤 때 안 나오는 까닭. 나오면 None."""
+                pid = self.cur()
+                if pid is None:
+                    return None
+                try:
+                    p = find_page(pid)
+                except Exception:
+                    return None
+                p.show = self.val("show") is not False
+                p.once = bool(self.val("once"))
+                return why_hidden(p)
+
+            def show_again(self):
+                show_again(self.cur())
+                _ed.msg("이 페이지의 '다음부터 보지 않기'와 본 기록을 지웠습니다. 다음에 켤 때 다시 나옵니다.")
+                store.renpy.restart_interaction()
+
             def toggle(self, key):
                 if key == "skippable" and self.val("skippable") and self.val("duration") is None:
                     _ed.msg("'클릭할 때까지' 넘어가는 페이지는 클릭으로 넘기기를 끌 수 없습니다. 넘어가는 때를 먼저 바꾸세요.")
@@ -1349,6 +1367,23 @@ screen ui_editor_splash_panel(tab):
                 text "숨긴 페이지:" style "ui_editor_small" yalign 0.5
                 for _h in tab.hidden():
                     textbutton ("되살리기 " + _h) style "ui_editor_button" text_size 12 action Function(tab.restore_page, _h)
+
+        ## 이 페이지를 게임 켤 때 보일지 (2.1)
+        $ _show = tab.val("show") is not False
+        $ _why = tab.hidden_why()
+        hbox:
+            spacing 6
+            text "게임 켤 때" style "ui_editor_text" yalign 0.5 min_width 110
+            textbutton "보이기" style "ui_editor_button" text_size 13 action Function(tab.put, "show", True) selected _show
+            textbutton "안 보이기" style "ui_editor_button" text_size 13 action Function(tab.put, "show", False) selected (not _show)
+        if _why:
+            hbox:
+                spacing 6
+                text ("  지금은 안 나옴: " + _why.replace("[", "[[")) style "ui_editor_small" yalign 0.5 color "#ffb74d"
+                if "다음부터" in _why or "이미 봄" in _why:
+                    textbutton "다시 보이게" style "ui_editor_button" text_size 13 action Function(tab.show_again)
+        else:
+            text "  지금은 게임을 켤 때 나옴" style "ui_editor_small"
 
         hbox:
             spacing 6

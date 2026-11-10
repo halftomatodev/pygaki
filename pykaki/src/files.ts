@@ -4,7 +4,7 @@ import { createEmpty, normalizeProject } from './sample';
 import { generateRpy } from './exportRpy';
 import { kvGet, kvSet, snapAdd, snapAuto } from './persist';
 import { isDesktop } from './desktop';
-import { connectFolder, disconnectFolder, folderAllowed, folderReady, hasDirPicker, hasProjectFolder, looksLikeGame, projectFlowHandle, projectFlows, pullInbox, readRpyFromFolder, RPY_FILE, scanFolder, useGameFolder, writeRpyToFolder } from './gameFolder';
+import { backupRpy, connectFolder, disconnectFolder, folderAllowed, folderReady, hasDirPicker, hasProjectFolder, looksLikeGame, projectFlowHandle, projectFlows, pullInbox, readRpyFromFolder, RPY_FILE, scanFolder, useGameFolder, writeRpyToFolder } from './gameFolder';
 import { BUILD, FEATURE } from './version';
 import type { Project } from './types';
 
@@ -395,6 +395,14 @@ export async function exportRpyFile(again = false) {
   }
   try {
     if (toFolder) {
+      // 다른 대본으로 만든 원고면 묻고, 덮어쓰기 전 원고는 script_flow.rpy.bak으로 남긴다
+      if (lastAuto === null) {
+        const old = await readRpyFromFolder();
+        const lost = foreignBoxes(old, s.project);
+        if (lost && !confirm(`${RPY_FILE}에 지금 대본에 없는 상자가 ${lost}개 있어요. 다른 대본으로 만든 원고 같아요.
+지금 대본으로 덮어쓸까요? (지금 원고는 ${RPY_FILE}.bak으로 남겨요)`)) return;
+        if (old && old !== code) await backupRpy(old);
+      }
       await snapAuto('내보내기', s.project).catch(() => {});
       await writeRpyToFolder(code, { line: followLine() ? codeLineOf(code, editingLineId()) : null });
       lastAuto = code;
@@ -461,6 +469,17 @@ function editingLineId(): string | null {
 let lastAuto: string | null = null;
 let autoBusy = false;
 let autoWarned = false;
+let autoHeld = false;
+
+// 원고에 적힌 상자(# @node:id) 가운데 지금 대본에 없는 것의 수. 절반 넘게 없으면 다른 대본으로 만든 원고로 본다 (아니면 0)
+export function foreignBoxes(old: string | null, project: { nodes: { id: string }[] }): number {
+  if (!old) return 0;
+  const ids = [...old.matchAll(/# @node:(\S+)/g)].map((m) => m[1]);
+  if (ids.length < 2) return 0;
+  const have = new Set(project.nodes.map((n) => n.id));
+  const lost = ids.filter((id) => !have.has(id)).length;
+  return lost * 2 > ids.length ? lost : 0;
+}
 export async function autoExport() {
   const s = useStore.getState();
   if (autoBusy || !s.project.settings.renpyLink || !folderReady()) return;
@@ -476,9 +495,20 @@ export async function autoExport() {
     }
     autoWarned = false;
     if (code === lastAuto) return;
-    if (lastAuto === null && code === (await readRpyFromFolder())) {
-      lastAuto = code;
-      return;
+    if (lastAuto === null) {
+      const old = await readRpyFromFolder();
+      if (code === old) {
+        lastAuto = code;
+        return;
+      }
+      // 이 창에서 처음 쓰는데 원고가 다른 대본 것이면 덮어쓰지 않는다 (Ctrl+E로 물어보고 내보내면 그때부터 다시 자동)
+      const lost = foreignBoxes(old, useStore.getState().project);
+      if (lost) {
+        if (!autoHeld) useStore.getState().say(`${RPY_FILE}에 지금 대본에 없는 상자가 ${lost}개 있어서 자동 내보내기를 멈췄어요. 이 대본으로 덮어쓰려면 Ctrl+E`);
+        autoHeld = true;
+        return;
+      }
+      if (old) await backupRpy(old);
     }
     await writeRpyToFolder(code, { line: followLine() ? codeLineOf(code, editingLineId()) : null });
     lastAuto = code;

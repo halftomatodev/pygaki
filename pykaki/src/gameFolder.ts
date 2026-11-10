@@ -5,6 +5,8 @@ import { kvGet, kvSet, snapAdd } from './persist';
 import { applyInbox, type InboxOp } from './inbox';
 import { useStore } from './store';
 import { gameDir, isDesktop, projectInfo } from './desktop';
+import { setFolderEffects } from './fx/textShaders';
+import { refreshEffects } from './stage';
 
 const w = window as any;
 export const hasDirPicker = typeof w.showDirectoryPicker === 'function' || isDesktop;
@@ -52,6 +54,8 @@ interface F {
   look: GameLook;
   startClash: string | null; // label start가 있는 다른 파일
   hasShowpy: boolean; // game 폴더에 ui_kit이 있는지
+  fxErrors: [string, string][]; // 효과 폴더(ui_kit/effects)에서 못 읽은 파일과 이유
+  fxSeq: number; // 효과 목록이 바뀔 때마다 오른다 (목록을 쓰는 화면이 다시 그리게)
   set(v: Partial<F>): void;
 }
 
@@ -63,6 +67,8 @@ export const useGameFolder = create<F>((set) => ({
   look: DEFAULT_LOOK,
   startClash: null,
   hasShowpy: false,
+  fxErrors: [],
+  fxSeq: 0,
   set: (v) => set(v),
 }));
 
@@ -235,8 +241,20 @@ export async function scanFolder() {
       break;
     }
   }
-  const hasShowpy = !!(await sub(dir, 'ui_kit'));
-  useGameFolder.getState().set({ name: useGameFolder.getState().name ?? dir.name, media, look, startClash, hasShowpy });
+  const uiKit = await sub(dir, 'ui_kit');
+  const hasShowpy = !!uiKit;
+  // 효과 폴더: ui_kit/effects/*.glsl (showpy text_effects.rpy가 읽는 것과 같은 파일)
+  const packs: { name: string; text: string }[] = [];
+  const fxDir = uiKit ? await sub(uiKit, 'effects') : null;
+  if (fxDir)
+    for await (const [name, h] of fxDir.entries())
+      if (h.kind === 'file' && /\.glsl$/i.test(name)) packs.push({ name, text: await (await h.getFile()).text() });
+  const fxErrors = setFolderEffects(packs);
+  refreshEffects();
+  const g = useGameFolder.getState();
+  if (fxErrors.length && JSON.stringify(fxErrors) !== JSON.stringify(g.fxErrors))
+    useStore.getState().say('효과 폴더에서 못 읽은 파일: ' + fxErrors.map(([f, why]) => `${f} (${why})`).join(' / '));
+  g.set({ name: g.name ?? dir.name, media, look, startClash, hasShowpy, fxErrors, fxSeq: g.fxSeq + 1 });
   setTimeout(() => oldUrls.forEach((u) => URL.revokeObjectURL(u)), 5000);
 }
 
@@ -276,7 +294,9 @@ export async function disconnectFolder() {
   await kvSet('gameDir', null);
   await kvSet('projectDir', null);
   pictures = new Map();
-  useGameFolder.getState().set({ name: null, media: NO_MEDIA, look: DEFAULT_LOOK, startClash: null, hasShowpy: false });
+  setFolderEffects([]);
+  refreshEffects();
+  useGameFolder.getState().set({ name: null, media: NO_MEDIA, look: DEFAULT_LOOK, startClash: null, hasShowpy: false, fxErrors: [], fxSeq: useGameFolder.getState().fxSeq + 1 });
 }
 
 // 앱을 다시 열 때: 연결은 기억하지만, 권한은 사용자가 한 번 눌러야 다시 생긴다
@@ -373,5 +393,8 @@ export async function writeRpyToFolder(code: string, goto?: { line: number | nul
   if (goto) await writeText(dir, GOTO_FILE, JSON.stringify({ format: 'pykaki-goto', version: 1, file: 'game/' + RPY_FILE, line: goto.line, time: Date.now() }));
   await writeText(dir, RPY_FILE, code);
 }
+
+// 덮어쓰기 전 원고를 남긴다. 렌파이는 .bak을 읽지 않고 배포판에도 넣지 않는다
+export const backupRpy = (old: string) => writeText(dir, RPY_FILE + '.bak', old).catch((e) => console.warn('원고 백업 실패', e));
 
 export { allowed as folderAllowed };

@@ -511,7 +511,7 @@ init -10 python in tmenu:
 
     def effect_names():
         """고를 수 있는 글자 효과 [(이름, 표시)]. 대사 등장 효과와 같은 목록."""
-        rv = [ (None, "없음"), ("dissolve", "서서히"), ("typewriter", "타자기"), ("wave", "물결"), ("jitter", "떨림") ]
+        rv = [ (None, "없음"), ("dissolve", "서서히"), ("wave", "물결"), ("jitter", "떨림") ]
         ss = getattr(store, "say_style", None)
         for e in getattr(ss, "TFX_EFFECTS", [ ]):
             rv.append((e["name"], e["label"]))

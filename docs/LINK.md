@@ -181,6 +181,7 @@ PyKaki는 렌파이 연결(`renpyLink`)을 켜고 폴더를 연결했으면, 대
 - 다시 불러오기 전에 `line`을 `renpy.session`에 두고, 다시 불러온 뒤 그 줄로 옮깁니다(앱 원고 칸의 줄 누르기와 같은 `goto_line`: 지나온 줄이면 되감기, 아니면 warp). 원고보다 5초 넘게 먼저 쓴 파일은 지난번 것이라 쓰지 않습니다
 - `line`이 `null`이면 게임은 있던 자리에 남습니다. 렌파이는 warp로 들어간 게임을 다시 불러오면 타이틀로 가 버리므로, 그때는 보던 줄의 `# @l:` 표시를 새 원고에서 찾아 그 줄로 되돌립니다(다시 불러온 뒤 10초 안에 타이틀에 닿으면)
 - 배포판에서 빠집니다
+- **원고 덮어쓰기 막기**: PyKaki는 창을 열고 처음 `script_flow.rpy`를 쓰기 전에 있던 원고의 `# @node:<상자 id>` 표시를 봅니다. 표시가 둘 이상이고 그 절반 넘게가 지금 대본에 없는 상자면 다른 대본으로 만든 원고로 보고, 자동 내보내기는 쓰지 않고 알리며 Ctrl+E는 물어봅니다. 처음 덮어쓰기 전의 원고는 `game/script_flow.rpy.bak`으로 남깁니다(렌파이는 읽지 않고 배포판에서 빠짐)
 
 ## 8. 등장 효과 셰이더 (`text_effects.glsl`)
 
@@ -192,6 +193,20 @@ PyKaki는 렌파이 연결(`renpyLink`)을 켜고 폴더를 연결했으면, 대
 | PyKaki `src/fx/textShaders.ts`, `src/fx/FxCanvas.tsx` | 같은 코드를 렌파이가 셰이더 조각을 합치는 방식대로 합쳐 WebGL로 미리보기를 그림. 효과 목록, 한글 이름, 글자/초 기본값(`@cps`)도 여기서 |
 
 적는 법은 파일 맨 위에 있습니다. `@effect 이름 한글이름`, `@cps`, `@slow 식`, `@redraw`, `@outline`, `@set u__이름 값`, `@variables`, `@vertex_N`, `@fragment_N`, `@part`/`@use`, `RAND(n)`. 두 프로그램의 읽는 코드(showpy `tfx_parse`, PyKaki `parseShaders`)는 같은 규칙이라 표시를 새로 만들면 둘 다 고칩니다.
+
+### 8-1. 효과 폴더 (`ui_kit/effects/*.glsl`, ui_kit 4.3)
+
+기본 효과는 위의 한 파일에 그대로 두고, 더하는 효과는 `showpy/game/ui_kit/effects/`(게임에서는 `game/ui_kit/effects/`)에 파일 하나씩 둡니다. 같은 형식이고 기본 파일의 `@part`를 `@use`로 씁니다.
+
+| 누가 | 어떻게 읽나 |
+|---|---|
+| showpy `engine/text_effects.rpy` | 기본 파일 다음에 폴더의 `.glsl`을 이름 순서로. 틀린 파일은 건너뛰고 `say_style.TFX_ERRORS`에 이유 |
+| showpy `engine/image_effects.rpy` | 그 가운데 `@transition`을 장면 전환으로 등록. 원고에는 `with img_fx.use("이름"[, 초][, 값=…])` |
+| PyKaki `src/fx/textShaders.ts` | 저장소의 샘플은 빌드할 때 같이 가져옴(`import.meta.glob`). 연결한 게임 폴더의 파일은 폴더를 읽을 때 `setFolderEffects`로 더함(샘플과 같은 파일 이름은 건너뜀). 못 읽은 파일은 알림 |
+
+새 표시: `@transition 이름 한글이름`, `@time 초`, `@fragment`(전환의 색 코드. `l__t`, `l__uv`, `l__size`, `l__old`, `l__new`를 씀), `@param u__이름 최소 최대 한글이름`(막대). 두 프로그램의 읽는 규칙(이름은 `[a-z][a-z0-9_]*`, 이미 있는 이름은 못 씀, 코드가 없으면 틀린 파일)은 같아야 합니다.
+
+대본에는 글자 효과가 이름 그대로(`say.effect`), 그림 전환이 `trans` 칸에 `img_fx.use("이름")`로 들어갑니다. showpy 연결이 꺼진 대본은 그림 전환을 `dissolve`로 내보냅니다. 적는 법 전체는 `showpy/game/ui_kit/effects/README.md`.
 
 렌파이에 들어 있는 효과(`dissolve` 등 7개)는 렌파이가 등록하므로 showpy 파일에 없고, PyKaki가 미리보기용으로 `src/fx/renpy_textshaders.glsl`에 같은 형식으로 옮겨 둡니다.
 

@@ -3,6 +3,7 @@
 import type { Choice, Line, Project } from './types';
 import { imageName, isStage, stageCode } from './stage';
 import { codeToLine } from './inbox';
+import { IMAGE_FX } from './fx/textShaders';
 import { exitLinks } from './ops';
 
 export interface Sprite {
@@ -50,6 +51,9 @@ export function transInfo(t?: string): { kind: string; dur: number } | null {
   if (!t) return null;
   if (t === 'dissolve') return { kind: 'dissolve', dur: 0.5 };
   if (t === 'fade') return { kind: 'fade', dur: 1 };
+  // 효과 폴더의 그림 전환: 플레이 화면에서는 같은 시간의 서서히 바뀌기로 보여 준다
+  const fx = /^img_fx\.use\(\s*"(\w+)"(?:\s*,\s*([\d.]+))?/.exec(t);
+  if (fx) return { kind: 'dissolve', dur: fx[2] ? Number(fx[2]) : IMAGE_FX.find((e) => e.name === fx[1])?.time ?? 1 };
   const m = /^stage\.(move|ease|zoom)\(\s*"(\w*)"(?:\s*,\s*([\d.]+))?/.exec(t);
   if (!m) return null;
   const dur = m[3] ? Number(m[3]) : 0.5;
