@@ -60,6 +60,18 @@ export function moveLine(b: BoxNode, from: number, to: number) {
   b.lines.splice(to > from ? to - 1 : to, 0, l);
 }
 
+// 새 상자 id: n01, n02 … (만든 순서). 원고의 label 이름(label 장면.n03)이고 세이브와 showpy가 상자를 찾는 열쇠라
+// 한번 붙으면 안 바꾼다. 지운 번호도 다시 쓰지 않게 지금 있는 가장 큰 번호 다음을 준다. 99를 넘으면 n100
+// 예전 상자의 id(n + 글자 여섯 개)는 그대로 둔다
+export function nextBoxId(p: Project) {
+  let max = 0;
+  for (const n of p.nodes) {
+    const m = /^n(\d+)$/.exec(n.id);
+    if (m) max = Math.max(max, Number(m[1]));
+  }
+  return 'n' + String(max + 1).padStart(2, '0');
+}
+
 export const findBox =(p: Project, id: string) => p.nodes.find((n) => n.id === id);
 
 export function connect(p: Project, src: string, handle: string | null | undefined, target: string | null) {
@@ -83,7 +95,7 @@ export function addBox(p: Project, pos: { x: number; y: number }, groupId?: stri
   let gid = groupId && p.labels.some((l) => l.id === groupId) ? groupId : p.labels[0]?.id;
   if (!gid) gid = addGroup(p);
   const b: BoxNode = {
-    id: uid('n'),
+    id: nextBoxId(p),
     group: gid,
     title: '',
     pos: { x: Math.round(pos.x), y: Math.round(pos.y) },

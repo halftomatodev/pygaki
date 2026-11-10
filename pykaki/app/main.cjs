@@ -212,12 +212,31 @@ ipcMain.handle('pygaki:read', (e, rel) => {
 });
 
 // 다 쓴 뒤 바꿔 끼워서, 쓰는 도중에 렌파이가 반쯤 쓴 파일을 읽지 않게 한다
-ipcMain.handle('pygaki:write', (e, rel, data) => {
+// 동기화 프로그램, 백신, 렌파이가 그 파일을 잠깐 잡고 있으면 윈도우에서 바꿔 끼우기가 EPERM/EBUSY/EACCES로 실패한다.
+// 조금씩 기다리며 다시 해 보고, 끝내 안 되면 그 파일에 바로 쓴다 (저장을 놓치는 것보다 낫다)
+const BUSY = new Set(['EPERM', 'EBUSY', 'EACCES']);
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+ipcMain.handle('pygaki:write', async (e, rel, data) => {
   const full = inside(projectOf(e), rel);
   fs.mkdirSync(path.dirname(full), { recursive: true });
   const tmp = full + '.pykaki-tmp';
-  fs.writeFileSync(tmp, typeof data === 'string' ? data : Buffer.from(data));
-  fs.renameSync(tmp, full);
+  const buf = typeof data === 'string' ? data : Buffer.from(data);
+  fs.writeFileSync(tmp, buf);
+  for (const ms of [0, 40, 80, 160, 320, 640]) {
+    if (ms) await sleep(ms);
+    try {
+      fs.renameSync(tmp, full);
+      return true;
+    } catch (err) {
+      if (!BUSY.has(err.code)) throw err;
+    }
+  }
+  fs.writeFileSync(full, buf);
+  try {
+    fs.unlinkSync(tmp);
+  } catch {
+    // 남은 임시 파일은 다음 저장 때 덮어쓴다
+  }
   return true;
 });
 
