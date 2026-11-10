@@ -13,7 +13,7 @@
 
 묶음 안:
     renpy.exe, launcher/ ...          렌파이 SDK 그대로
-    launcher/game/pygaki_launcher.rpy  런처 첫 화면의 [pygaki로 편집] [pygaki로 새 프로젝트]
+    launcher/game/pygaki_launcher.rpy  런처 첫 화면의 [pygaki로 편집], 새 프로젝트 만들기의 기본(Vanilla)/Pygaki 고르기
     showpy/                            새 프로젝트 템플릿 (런처처럼 만든 1280x720 한국어 기본 프로젝트 + showpy 플러그인, project.json "template")
     pygaki/app/pygaki.exe              pygaki 데스크톱 앱 (GitHub Actions "pygaki 앱" 결과물을 풀어 둔 폴더)
     pygaki/읽어주세요.txt
@@ -94,8 +94,8 @@ README = """pygaki ({version})
 
 1. 이 폴더의 renpy.exe로 렌파이 런처를 켭니다.
    (런처가 영어면 preferences → Language → 한국어)
-2. 런처 아래쪽의 [pygaki로 새 프로젝트]로 프로젝트를 만듭니다. showpy가 처음부터 들어 있습니다.
-   (런처의 원래 [Create New Project]에서 템플릿 "showpy"를 골라도 같습니다)
+2. 런처 왼쪽 아래의 [+ Create New Project](새 프로젝트 만들기)를 누르고 "Pygaki"를 골라 프로젝트를 만듭니다.
+   showpy가 처음부터 들어 있습니다. "기본 (Vanilla)"을 고르면 렌파이 원래 새 프로젝트가 만들어집니다(showpy 없음).
    VHS 덮개는 처음에는 꺼져 있습니다. 켜려면 game/screen_fx/screen_fx_config.rpy의
    define screen_fx.overlay = False 를 True로 바꿉니다.
 3. 왼쪽 목록에서 프로젝트를 고르고 [pygaki로 편집]을 누르면 pygaki 앱이 그 프로젝트로 열립니다.
@@ -124,7 +124,8 @@ ADDON_README = """pygaki 덧붙임 ({version}) 넣는 법
    "같은 이름의 폴더가 있다"고 물으면 [바꾸기]나 [합치기]를 고릅니다.
    렌파이의 원래 파일은 바뀌지 않고 파일만 더해집니다:
    launcher\\game\\pygaki_launcher.rpy, showpy\\, pygaki\\
-3. 런처가 켜져 있었으면 껐다 켭니다. 첫 화면 아래쪽에 [pygaki로 편집] [pygaki로 새 프로젝트]가 생깁니다.
+3. 런처가 켜져 있었으면 껐다 켭니다. 첫 화면 아래쪽에 [pygaki로 편집]이 생기고,
+   [+ Create New Project](새 프로젝트 만들기)에서 "기본 (Vanilla)"과 "Pygaki"를 고를 수 있습니다.
 
 쓰는 법은 pygaki\\읽어주세요.txt를 보세요. 이 파일은 같이 넣어도 되고 지워도 됩니다.
 

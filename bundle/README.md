@@ -42,7 +42,7 @@ Actions 화면에서 손으로 돌리면(Run workflow) Releases에는 안 올리
 | 자리 | 무엇 |
 |---|---|
 | `renpy.exe`, `launcher/`, `renpy/` ... | 렌파이 SDK 그대로 (덧붙임에는 없음) |
-| `launcher/game/pygaki_launcher.rpy` | 런처 첫 화면 아래쪽 버튼: [pygaki로 편집], [pygaki로 새 프로젝트] ([launcher/pygaki_launcher.rpy](launcher/pygaki_launcher.rpy)) |
+| `launcher/game/pygaki_launcher.rpy` | 런처 첫 화면 아래쪽 버튼 [pygaki로 편집], [+ Create New Project](새 프로젝트 만들기)의 "기본 (Vanilla)" / "Pygaki" 고르기 ([launcher/pygaki_launcher.rpy](launcher/pygaki_launcher.rpy)) |
 | `showpy/` | 새 프로젝트 템플릿. 런처의 [새 프로젝트 만들기]와 같은 방법으로 만든 1280x720 한국어 기본 프로젝트(그림까지 다 만듦) + showpy 플러그인(`ui_kit`, `screen_fx`, `hotkeys`, `splash`), `project.json`의 `"type": "template"` |
 | `pygaki/app/pygaki.exe` | PyKaki 데스크톱 앱 |
 | `pygaki/읽어주세요.txt` | 쓰는 법 |
@@ -52,7 +52,7 @@ Actions 화면에서 손으로 돌리면(Run workflow) Releases에는 안 올리
 
 ## 렌파이를 올릴 때
 
-새 SDK 폴더로 `make_bundle.py`를 다시 돌리면 돼요(Releases는 `RENPY_VERSION`만 바꾸고 태그). 런처의 원래 파일은 고치지 않고 `pygaki_launcher.rpy` 하나만 더하기 때문에, 런처가 바뀌어도 대개 그대로 돼요. 런처 화면이 크게 바뀌면 버튼 자리(`ypos`)만 맞춰요.
+새 SDK 폴더로 `make_bundle.py`를 다시 돌리면 돼요(Releases는 `RENPY_VERSION`만 바꾸고 태그). 런처의 원래 파일은 고치지 않고 `pygaki_launcher.rpy` 하나만 더하기 때문에, 런처가 바뀌어도 대개 그대로 돼요. 런처 화면이 크게 바뀌면 버튼 자리(`ypos`)를 맞추고, 런처의 `new_project.rpy`가 바뀌었으면 `pygaki_new_project`를 그 순서에 맞춰요.
 
 ## 한국어 공통 문구
 
@@ -61,4 +61,7 @@ Actions 화면에서 손으로 돌리면(Run workflow) Releases에는 안 올리
 ## 런처 버튼이 하는 일
 
 - **[pygaki로 편집]**: 왼쪽 목록에서 고른 프로젝트로 `pygaki.exe --project "프로젝트 폴더"`를 실행해요.
-- **[pygaki로 새 프로젝트]**: 이름을 물어본 뒤 런처의 원래 새 프로젝트 과정(템플릿 쓰기)으로 만들어요. 런처의 [Create New Project]에서 템플릿 "showpy"를 골라도 같아요.
+- **[+ Create New Project](새 프로젝트 만들기)**: 런처의 원래 버튼을 누르면 먼저 둘 중 하나를 골라요(`config.label_overrides`로 런처의 `new_project`를 `pygaki_new_project`로 돌림. 런처 파일은 그대로).
+  - **기본 (Vanilla)**: 렌파이 원래 새 프로젝트(언어 안내 → 이름 → 해상도, 색). showpy는 안 들어가요.
+  - **Pygaki**: 이름을 물어본 뒤 런처의 원래 템플릿 과정(`new_template_project`)으로 `showpy/` 템플릿을 복사해요. 처음에 골라져 있어요.
+  - 따로 둔 다른 템플릿 프로젝트가 있으면 그 아래에 이어서 나와요. `showpy/` 폴더가 없으면 런처 원래 흐름 그대로예요.

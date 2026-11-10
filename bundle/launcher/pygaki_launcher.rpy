@@ -1,9 +1,10 @@
 ################################################################################
 ## pygaki — 렌파이 런처에 붙이는 파일 (launcher/game/에 복사)
 ##
-## 런처 첫 화면 아래쪽에 버튼 두 개를 띄웁니다.
-##   [pygaki로 편집]         지금 고른 프로젝트를 pygaki 앱으로 엽니다 (대본 편집, GUI 편집)
-##   [pygaki로 새 프로젝트]  showpy가 들어간 템플릿(SDK 폴더의 showpy)으로 새 프로젝트를 만듭니다
+## 런처에 두 가지를 더합니다.
+##   [pygaki로 편집]        첫 화면 아래쪽 버튼. 지금 고른 프로젝트를 pygaki 앱으로 엽니다 (대본 편집, GUI 편집)
+##   [+ Create New Project]  누르면 "기본 (Vanilla)"과 "Pygaki" 가운데 고릅니다.
+##                           기본 = 렌파이 원래 새 프로젝트, Pygaki = showpy가 들어간 템플릿(SDK 폴더의 showpy)
 ##
 ## 런처의 원래 파일은 고치지 않고 이 파일 하나만 더합니다. 렌파이를 올리면 이 파일을 다시 복사합니다.
 ## (bundle/make_bundle.py가 넣어 줍니다)
@@ -35,6 +36,11 @@ init python:
     def pygaki_can_new():
         return os.path.isdir(os.path.join(PYGAKI_TEMPLATE, "game"))
 
+    ## 런처의 [+ Create New Project](label new_project)를 아래 pygaki_new_project로 돌린다.
+    ## 템플릿이 없으면(showpy 폴더를 뺐으면) 런처 원래 흐름 그대로.
+    if pygaki_can_new():
+        config.label_overrides["new_project"] = "pygaki_new_project"
+
     if "pygaki_buttons" not in config.overlay_screens:
         config.overlay_screens.append("pygaki_buttons")
 
@@ -58,13 +64,6 @@ screen pygaki_buttons():
                 text_color "#F96854"
                 action Jump("pygaki_open")
 
-            if pygaki_can_new():
-                textbutton "pygaki로 새 프로젝트":
-                    style "l_link"
-                    text_font "SourceHanSansLite.ttf"
-                    text_size 16
-                    action Jump("pygaki_new_project")
-
 
 ## 버튼 동작은 label에서 한다 (안내 창을 띄우려면 화면 동작 밖이어야 함)
 label pygaki_open:
@@ -72,7 +71,8 @@ label pygaki_open:
     jump front_page
 
 
-## showpy 템플릿으로 새 프로젝트 만들기 (런처의 new_project와 같은 순서, 템플릿만 정해 둠)
+## 새 프로젝트 만들기: 런처의 new_project와 같은 순서이고, 템플릿 고르기만 "기본 (Vanilla)" / "Pygaki"로 바꿈.
+## (config.label_overrides로 런처의 [+ Create New Project]가 여기로 온다)
 label pygaki_new_project:
 
     if persistent.projects_directory is None:
@@ -80,6 +80,30 @@ label pygaki_new_project:
 
     if persistent.projects_directory is None:
         $ interface.error(_("The projects directory could not be set. Giving up."))
+
+    python:
+        new_project_language = __("{#language name and font}")
+
+        ## 사용자가 따로 둔 다른 템플릿도 그대로 고를 수 있게 뒤에 붙인다 (showpy 자신은 "Pygaki"로 이미 있음)
+        pygaki_others = [
+            ( ("new_template_project", p.path), p.name)
+            for p in project.manager.templates
+            if os.path.normcase(os.path.abspath(p.path)) != os.path.normcase(os.path.abspath(PYGAKI_TEMPLATE))
+        ]
+
+        gui_kind, gui_template_path = interface.choice(
+            KO("어떤 프로젝트를 만들까요?"),
+            [
+                ( ("new_gui_project", None), KO("기본 (Vanilla): 렌파이 원래 새 프로젝트") ),
+                ( ("new_template_project", PYGAKI_TEMPLATE), KO("Pygaki: showpy가 들어 있는 1280x720 한국어 프로젝트") ),
+            ] + pygaki_others,
+            ("new_template_project", PYGAKI_TEMPLATE),
+            cancel=Jump("front_page"),
+        )
+
+        ## 기본은 런처 언어로 만들어지므로 런처가 하던 대로 알려 준다
+        if gui_kind == "new_gui_project":
+            interface.info(_("You will be creating an [new_project_language]{#this substitution may be localized} language project. Change the launcher language in preferences to create a project in another language."), cancel=Jump("front_page"))
 
     python:
         project_name = ""
@@ -108,6 +132,4 @@ label pygaki_new_project:
                 continue
             break
 
-        gui_template_path = PYGAKI_TEMPLATE
-
-    jump new_template_project
+    jump expression gui_kind
