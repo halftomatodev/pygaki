@@ -7,7 +7,7 @@ import { AUTO_MEMO, kvGet, kvSet, snapAuto } from './persist';
 import { folderReady, INBOX_FILE, pullInbox, restoreFolder, useGameFolder } from './gameFolder';
 import { createEmpty, createSample, normalizeProject } from './sample';
 import { desktop, flowFile, isDesktop, projectInfo } from './desktop';
-import { checkExternal, restoreProjectFile, saveQuiet, setProjectFile, warnNewer } from './files';
+import { autoExport, checkExternal, restoreProjectFile, saveQuiet, setProjectFile, warnNewer } from './files';
 import { chooseFlow } from './flowPick';
 
 // 데스크톱 앱: 프로젝트 폴더 맨 위의 .flow.json을 연다(여러 개면 고름). 없으면 프로젝트 이름으로 새 대본을 만들어 바로 저장한다
@@ -45,7 +45,8 @@ async function bootDesktop() {
     timer = setTimeout(() => {
       saveQuiet()
         .then(() => useStore.setState({ localSavedAt: Date.now() }))
-        .catch((e) => useStore.getState().say('대본을 저장하지 못했어요: ' + e.message));
+        .catch((e) => useStore.getState().say('대본을 저장하지 못했어요: ' + e.message))
+        .then(() => autoExport());
     }, 700);
   });
 
@@ -118,6 +119,7 @@ async function boot() {
       } catch (e) {
         console.warn('자동 저장 실패', e);
       }
+      void autoExport();
     }, 700);
   });
 

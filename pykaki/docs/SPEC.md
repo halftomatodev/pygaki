@@ -245,7 +245,7 @@
 - 렌파이 프로젝트 폴더 하나를 연다. `pygaki.exe --project "폴더"`(렌파이 런처 버튼), 없으면 폴더 고르는 창. 같은 프로젝트를 다시 열면 있던 창을 앞으로, 다른 프로젝트는 새 창.
 - 파일은 메인 프로세스(`app/main.cjs`)가 다룬다: `info` `list` `stat` `read` `write`(임시 파일에 쓰고 바꿔 끼움) `openFolder` `choose`. 경로는 프로젝트 폴더 기준이고 밖은 막는다. `game/` 폴더를 `fs.watch`로 지켜보고 바뀐 파일 이름을 `pygaki:changed`로 알린다.
 - `src/desktop.ts`의 `AppDir`, `AppFile`이 이 기능을 브라우저 폴더 손잡이(`FileSystemDirectoryHandle`)와 같은 모양으로 감싼다. 그래서 `gameFolder.ts`, `files.ts`는 웹과 같은 코드로 돈다. 권한은 늘 `granted`.
-- 대본: 프로젝트 폴더 맨 위의 `*.flow.json`을 연다. 여러 개면 처음 열 때 고르게 하고(`src/flowPick.ts`, 상자 수·줄 수·고친 때, 가장 최근 것을 강조), 고른 이름을 `localStorage['pygaki-flow:<프로젝트 경로>']`에 둔다. 왼쪽 칸 [다른 대본 파일]은 이 기억을 지우고 창을 다시 연다. 없으면 `프로젝트이름.flow.json`으로 빈 대본을 만들고, showpy(`game/ui_kit`)가 있으면 `renpyLink`를 켠다. 바뀌면 0.7초 뒤 그 파일에 자동 저장(`saveQuiet`). 브라우저 저장소의 `current`는 읽지 않는다. 버전 목록(IndexedDB)은 앱 전체가 같이 쓴다.
+- 대본: 프로젝트 폴더 맨 위의 `*.flow.json`을 연다. 여러 개면 처음 열 때 고르게 하고(`src/flowPick.ts`, 상자 수·줄 수·고친 때, 가장 최근 것을 강조), 고른 이름을 `localStorage['pygaki-flow:<프로젝트 경로>']`에 둔다. 왼쪽 칸 [다른 대본 파일]은 이 기억을 지우고 창을 다시 연다. 없으면 `프로젝트이름.flow.json`으로 빈 대본을 만들고, showpy(`game/ui_kit`)가 있으면 `renpyLink`를 켠다. 바뀌면 0.7초 뒤 그 파일에 자동 저장(`saveQuiet`)하고 이어서 자동 내보내기(`autoExport`, 웹 자동 저장도 같음): `renpyLink`이고 폴더가 연결돼 있으면 받아 적기 → `generateRpy` → 오류가 없고 지난번과 다르면 `pykaki_goto.json`(지금 쓰는 줄 `activeLine`, 없으면 고른 상자의 첫 줄, [게임 줄 따라가기]를 끄면 `null`) → `script_flow.rpy`. 형식은 LINK.md 7-1. 끄기 버튼 상태는 `localStorage['pykaki-follow-line']`. 브라우저 저장소의 `current`는 읽지 않는다. 버전 목록(IndexedDB)은 앱 전체가 같이 쓴다.
 - [열기]는 두 대본의 요약을 보여 주고 확인을 받은 뒤 고른 파일의 내용을 이 프로젝트 대본으로 가져오고, [새로]는 이 프로젝트 대본을 비운다. 저장 파일은 바뀌지 않는다.
 - 메인 프로세스는 프로젝트 폴더 맨 위도 지켜보고 `*.flow.json`이 바뀌면 `pygaki:changed`로 이름을 알린다. 연 대본 파일이면 0.3초 뒤 `checkExternal`(9-3).
 - 왼쪽 "렌파이 프로젝트" 칸: [다시 읽기] [폴더 열기] [다른 프로젝트]. 연결과 끊기는 없다.

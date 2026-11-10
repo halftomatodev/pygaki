@@ -11,6 +11,7 @@ export const hasDirPicker = typeof w.showDirectoryPicker === 'function' || isDes
 export const INBOX_FILE = 'showpy_inbox.json';
 export const RPY_FILE = 'script_flow.rpy';
 export const PREVIEW_FILE = 'pykaki_preview.json'; // 렌파이 실시간 미리보기 (showpy ui_kit/editor/editor_preview.rpy가 읽음)
+export const GOTO_FILE = 'pykaki_goto.json'; // 자동 내보내기 뒤 게임이 옮겨 갈 줄 (showpy editor_preview.rpy가 읽음, LINK.md 7-1)
 
 export interface Media {
   images: string[]; // "bg hall", "mina scared", "ghost", 영상도 같은 이름 규칙
@@ -367,7 +368,9 @@ export async function writePreview(data: object, ask = false): Promise<PreviewRe
   }
 }
 
-export async function writeRpyToFolder(code: string) {
+export async function writeRpyToFolder(code: string, goto?: { line: number | null }) {
+  // 옮겨 갈 줄을 먼저 적는다. 게임은 원고가 바뀐 것을 보고 이 파일을 읽는다
+  if (goto) await writeText(dir, GOTO_FILE, JSON.stringify({ format: 'pykaki-goto', version: 1, file: 'game/' + RPY_FILE, line: goto.line, time: Date.now() }));
   await writeText(dir, RPY_FILE, code);
 }
 

@@ -47,7 +47,7 @@ TEMPLATE_SETTINGS = [
 ]
 
 ## 복사하지 않는 것 (컴파일 결과, 개인 배치, 대본, 시험 찌꺼기, 실시간 연결 파일)
-SKIP = shutil.ignore_patterns("*.rpyc", "*.rpymc", "*_layout.rpy", "showpy_inbox.json", "pykaki_preview.json",
+SKIP = shutil.ignore_patterns("*.rpyc", "*.rpymc", "*_layout.rpy", "showpy_inbox.json", "pykaki_preview.json", "pykaki_goto.json",
                               "showpy_live.json", "*.flow.json", "ui_kit_backup", "persistent",
                               "cache", "saves", "__pycache__", "*.bak", "errors.txt", "traceback.txt", "log.txt", "lint.txt",
                               "zz_*", "*_debug.txt", "*.log")

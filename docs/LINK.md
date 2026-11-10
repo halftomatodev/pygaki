@@ -168,6 +168,20 @@ PyKaki가 쓰고 showpy가 읽기만 합니다. PyKaki 글자 효과 칸의 [렌
 
 게임을 켤 때 이미 있던 파일은 띄우지 않습니다. 켤 때 파일이 없었으면 PyKaki가 처음 쓴 파일부터 띄웁니다. 폴더 권한이 없어 쓰지 못하면 PyKaki가 스위치 옆에 안내와 [권한 허용] 버튼을 보여 줍니다. 배포판에서 빠집니다.
 
+### 7-1. 자동 내보내기와 `game/pykaki_goto.json` (ui_kit 4.2)
+
+PyKaki는 렌파이 연결(`renpyLink`)을 켜고 폴더를 연결했으면, 대본이 바뀌고 자동 저장할 때(0.7초 뒤) `script_flow.rpy`를 다시 씁니다(Ctrl+E와 같은 원고, 바뀐 것이 없거나 검사 오류가 있으면 쓰지 않음). 쓰기 바로 전에 `pykaki_goto.json`을 씁니다. Ctrl+E로 내보낼 때도 같습니다.
+
+```json
+{ "format": "pykaki-goto", "version": 1, "file": "game/script_flow.rpy", "line": 12, "time": 1794282904000 }
+```
+
+- `line`: 지금 쓰는 줄(`# @l:<줄 id>` 표시 다음의 첫 문장)의 원고 줄 번호. 쓰는 줄이 없으면 고른 상자의 첫 줄. 툴바 [게임 줄 따라가기]를 끄면(`localStorage["pykaki-follow-line"] = "off"`) `null`
+- showpy(개발 모드)는 0.25초마다 `script_flow.rpy`의 고친 시각과 크기를 보고, 같은 값을 두 번 보면 다시 불러옵니다(`renpy.reload_script`, Shift+R과 같음). 첫 줄에 "PyKaki가 만든 파일이에요"가 없으면 다시 불러오지 않습니다. GUI 편집기에 저장 안 한 값이 있으면 다시 불러오지 않고 알립니다
+- 다시 불러오기 전에 `line`을 `renpy.session`에 두고, 다시 불러온 뒤 그 줄로 옮깁니다(앱 원고 칸의 줄 누르기와 같은 `goto_line`: 지나온 줄이면 되감기, 아니면 warp). 원고보다 5초 넘게 먼저 쓴 파일은 지난번 것이라 쓰지 않습니다
+- `line`이 `null`이면 게임은 있던 자리에 남습니다. 렌파이는 warp로 들어간 게임을 다시 불러오면 타이틀로 가 버리므로, 그때는 보던 줄의 `# @l:` 표시를 새 원고에서 찾아 그 줄로 되돌립니다(다시 불러온 뒤 10초 안에 타이틀에 닿으면)
+- 배포판에서 빠집니다
+
 ## 8. 등장 효과 셰이더 (`text_effects.glsl`)
 
 등장 효과의 셰이더 코드는 `showpy/game/ui_kit/engine/text_effects.glsl` 하나에 있습니다. PyKaki는 사본 없이 이 파일을 바로 가져다 빌드합니다(`pykaki/src/fx/textShaders.ts`의 `?raw` 가져오기).

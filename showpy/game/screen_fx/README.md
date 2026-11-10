@@ -22,7 +22,7 @@
 | 망점 (`halftone`) | 인쇄물처럼 점(또는 줄)으로. 한 색 또는 CMYK 네 색 (5.1) | `halftone_config.rpy` |
 | 홀로그램 (`hologram`) | 한 색 + 흐르는 주사선 + 옆으로 번진 복사본 두 겹 + 빛 번짐 + 깜빡임. 인물 하나에 걸기 좋음 (5.1) | `hologram_config.rpy` |
 | 나이트비전 (`nightvision`) | 초록 한 색으로 밝게, 노이즈, 가장자리 어둡게, 동그란 테두리, **화면 글**(왼쪽 위 글, REC, 숫자 시간, [ZOOM]을 하나씩 켜고 끔)과 **화면 이미지**(테두리, 조준선 그림) (5.1) | `nightvision_config.rpy` |
-| 조각 어긋남 (`tiles`) | 크기가 다른 네모 칸으로 나눠 칸마다 밀림·확대·물들임·다른 그림. 장면 전환 `screen_fx.TileSwap`도 (5.1) | `tiles_config.rpy` |
+| 포토 콜라주 (`collage`) | 한 장면을 사진으로 여러 번 찍어 겹쳐 붙인 것처럼. 화면 가운데에만 크기가 제각각인 네모 조각(최대 10장)이 겹치고, 조각마다 조금 밀리고 확대됨. 하얀 테두리, 그림자. 장면 전환 `screen_fx.TileSwap`도 (5.3, 예전 조각 어긋남 `tiles`를 바꿈) | `collage_config.rpy` |
 | 파편 흩날림 (`shards`) | 화면 위로 작은 뾰족한 조각이 바람에 날림. 깊이 세 겹, 돌고 뒤집히고 깜빡임. 색 1~3개, 바탕 어둡게 (5.1) | `shards_config.rpy` |
 | 타이틀 일렁임 (`watermorph`) | 타이틀 화면을 투명한 액체 너머로 보는 것처럼. 바꾸기 기능과 상관없이 타이틀에서만 따로 켜짐 | `watermorph_config.rpy` |
 
@@ -50,7 +50,7 @@ ASCII 효과는 [ASCII shader](https://godotshaders.com/shader/ascii-shader/) (D
 
 ### 5.1에서 바뀐 점
 
-- **새 화면 효과 일곱 가지**: 글리치(`glitch`), 지글거림(`boil`), 망점(`halftone`), 홀로그램(`hologram`), 나이트비전(`nightvision`), 조각 어긋남(`tiles`), 파편 흩날림(`shards`). 다른 효과처럼 1번, 2번 자리 어디에나 고르고, 대사 괄호 `fx=`, `image_fx`, `set_values`, 프리셋, 편집기 막대가 다 됩니다. 효과마다 설정 파일(`<이름>_config.rpy`)에 쓰는 법과 예시가 있습니다.
+- **새 화면 효과 일곱 가지**: 글리치(`glitch`), 지글거림(`boil`), 망점(`halftone`), 홀로그램(`hologram`), 나이트비전(`nightvision`), 조각 어긋남(`tiles`, 5.3에서 포토 콜라주 `collage`로 바뀜), 파편 흩날림(`shards`). 다른 효과처럼 1번, 2번 자리 어디에나 고르고, 대사 괄호 `fx=`, `image_fx`, `set_values`, 프리셋, 편집기 막대가 다 됩니다. 효과마다 설정 파일(`<이름>_config.rpy`)에 쓰는 법과 예시가 있습니다.
   ```renpy
   $ screen_fx.shaders("glitch")                        # 1번 글리치
   $ screen_fx.shaders("halftone", "boil")              # 망점 + 지글거림 겹치기
@@ -219,7 +219,7 @@ game/screen_fx/
 ├── halftone_config.rpy      설정: 망점 (5.1)                              ← 여기를 고침
 ├── hologram_config.rpy      설정: 홀로그램 (5.1)                          ← 여기를 고침
 ├── nightvision_config.rpy   설정: 나이트비전과 화면 글 (5.1)               ← 여기를 고침
-├── tiles_config.rpy         설정: 조각 어긋남, TileSwap 전환 (5.1)        ← 여기를 고침
+├── collage_config.rpy       설정: 포토 콜라주, TileSwap 전환 (5.3)         ← 여기를 고침
 ├── shards_config.rpy        설정: 파편 흩날림 (5.1)                       ← 여기를 고침
 ├── *_layout.rpy             편집기에서 저장하면 생기는 파일 (처음에는 없음)
 ├── engine/                  엔진 (고치지 않음. 새 효과를 넣을 때만 여기에 파일 추가)
@@ -232,7 +232,7 @@ game/screen_fx/
 │   ├── glitch.rpy, boil.rpy, halftone.rpy, hologram.rpy   새 효과 셰이더 (5.1)
 │   ├── nightvision.rpy          나이트비전 셰이더 + 화면 글 스크린 (5.1)
 │   ├── shards.rpy               파편 흩날림 셰이더 (5.1)
-│   └── tiles.rpy                조각 어긋남 셰이더, TileSwap 전환 (5.1)
+│   └── collage.rpy              포토 콜라주 셰이더, TileSwap 전환 (5.3, 예전 tiles.rpy)
 ├── editor/
 │   └── editor_fx.rpy            UI Kit 편집기 탭 (UI Kit이 없으면 아무것도 안 함)
 ├── fonts/

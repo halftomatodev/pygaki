@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import { useStore } from './store';
-import { exportRpyFile, hasRpyTarget, newProject, openProject, saveProject } from './files';
+import { exportRpyFile, followLine, hasRpyTarget, newProject, openProject, saveProject, setFollowLine } from './files';
+import { useGameFolder } from './gameFolder';
 import { snapAdd, snapDelete, snapList, type Snapshot } from './persist';
 import { addBoxCenter, enterFullPlay, runLayout, toggleFocus } from './actions';
 import { timeStr } from './util';
@@ -76,6 +77,7 @@ export function Toolbar() {
       <button onClick={() => void enterFullPlay()} title={`고른 상자부터 전체화면으로 플레이 (${keyOf('fullPlay')})`}>⛶ 전체화면</button>
       <button onClick={() => exportRpyFile(false)}>.rpy 내보내기</button>
       {hasRpyTarget() && <button onClick={() => exportRpyFile(true)} title={keyOf('export')}>같은 곳에 다시</button>}
+      <FollowLine />
       <span className="grow" />
       <span className="status">
         {s.fileName ?? '파일로 저장 안 됨'}
@@ -87,6 +89,29 @@ export function Toolbar() {
       <button onClick={() => useStore.setState({ showPrefs: true })} title="화면 색, 단축키">설정</button>
       {showVersions && <Versions onClose={() => setShowVersions(false)} />}
     </div>
+  );
+}
+
+// 렌파이 폴더를 연결했을 때: 고치면 저절로 내보내고, 게임을 지금 쓰는 줄로 옮길지
+function FollowLine() {
+  const link = useStore((s) => s.project.settings.renpyLink);
+  const name = useGameFolder((g) => g.name);
+  const [on, setOn] = useState(followLine);
+  if (!link || !name) return null;
+  return (
+    <button
+      className={on ? 'on' : ''}
+      onClick={() => {
+        setFollowLine(!on);
+        setOn(!on);
+      }}
+      title={
+        '고치고 잠깐 멈추면 script_flow.rpy로 저절로 내보내고, 켜 둔 게임이 다시 불러와요. ' +
+        (on ? '켬: 게임을 지금 쓰는 줄로 옮겨요. 여러 곳을 고친 뒤 처음부터 훑어보려면 꺼요.' : '끔: 게임은 있던 자리에 그대로 있어요.')
+      }
+    >
+      게임 줄 따라가기: {on ? '켬' : '끔'}
+    </button>
   );
 }
 

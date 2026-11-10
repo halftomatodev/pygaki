@@ -26,7 +26,7 @@ const SECTIONS: Section[] = [
   { id: 'pause', label: '게임 내 메뉴 (ESC)', tab: 'title', app: true, note: '' },
   { id: 'pause_fx', label: '└ 게임 내 메뉴 셰이더', tab: 'pause_fx', app: false, mirror: true, note: 'ESC 메뉴와 거기서 연 화면에만 걸리는 셰이더 두 자리예요. 메뉴가 열려 있는 동안 뒤 게임 화면도 이 셰이더로 보여요.' },
   { id: 'watermorph', label: '타이틀 일렁임', tab: 'watermorph', app: false, mirror: true, note: '타이틀 배경에만 걸리는 일렁임 효과예요.' },
-  { id: 'screen_fx', label: '인게임 화면 셰이더', tab: 'screen_fx', app: false, mirror: true, note: '게임 화면에 씌우는 셰이더 두 자리(기본, 아스키, VHS, 단말기, 게임보이, 글리치, 지글거림, 망점, 홀로그램, 나이트비전, 조각 어긋남, 파편 흩날림)예요. 고르고 [여기에서부터 적용]을 누르면 고른 줄부터 바뀌어요.' },
+  { id: 'screen_fx', label: '인게임 화면 셰이더', tab: 'screen_fx', app: false, mirror: true, note: '게임 화면에 씌우는 셰이더 두 자리(기본, 아스키, VHS, 단말기, 게임보이, 글리치, 지글거림, 망점, 홀로그램, 나이트비전, 포토 콜라주, 파편 흩날림)예요. 고르고 [여기에서부터 적용]을 누르면 고른 줄부터 바뀌어요.' },
   { id: 'custom_ui', label: '커서, 클릭 대기(CTC), 대사 소리', tab: 'custom_ui', app: true, note: '' },
   { id: 'say', label: '대사 (위치, 스타일)', tab: 'say', app: false, mirror: true, note: '' },
   { id: 'choice', label: '선택지', tab: 'choice', app: false, mirror: true, note: '' },

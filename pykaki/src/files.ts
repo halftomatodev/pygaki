@@ -396,11 +396,12 @@ export async function exportRpyFile(again = false) {
   try {
     if (toFolder) {
       await snapAuto('내보내기', s.project).catch(() => {});
-      await writeRpyToFolder(code);
+      await writeRpyToFolder(code, { line: followLine() ? codeLineOf(code, editingLineId()) : null });
+      lastAuto = code;
       // 웹: 대본 파일도 같이 (앱에서 이어 쓰게)
       if (bound && !isDesktop && (await writeBound(serialize(s.project), true)) && useStore.getState().project === s.project)
         useStore.setState({ dirty: false, fileName: boundName });
-      s.say(`${RPY_FILE}로 내보냈어요. 렌파이가 바로 다시 불러와요 (자동 불러오기는 렌파이에서 Shift+R)`);
+      s.say(`${RPY_FILE}로 내보냈어요. 게임이 켜져 있으면 저절로 다시 불러와요 (showpy 예전 판이면 게임에서 Shift+R)`);
     } else if (hasFS) {
       if (!rpyHandle || !again)
         rpyHandle = await w.showSaveFilePicker({
@@ -415,5 +416,75 @@ export async function exportRpyFile(again = false) {
     }
   } catch (e: any) {
     if (!aborted(e)) alert('내보내기 실패: ' + e.message);
+  }
+}
+
+// ── 자동 내보내기 (앱에서 대본을 고치고 멈추면) ──
+// 렌파이 연결을 켜고 폴더가 연결돼 있으면 script_flow.rpy를 다시 쓴다. 켜 둔 게임(showpy ui_kit 4.2+)이 저절로 다시 불러오고,
+// "게임 줄 따라가기"가 켜져 있으면 지금 쓰는 줄로 게임을 옮긴다(pykaki_goto.json).
+const FOLLOW_KEY = 'pykaki-follow-line';
+export function followLine() {
+  try {
+    return localStorage.getItem(FOLLOW_KEY) !== 'off';
+  } catch {
+    return true;
+  }
+}
+export function setFollowLine(on: boolean) {
+  try {
+    localStorage.setItem(FOLLOW_KEY, on ? 'on' : 'off');
+  } catch {
+    /* 이번만 */
+  }
+}
+
+// 지금 쓰는 줄(없으면 고른 상자의 첫 줄)이 내보낸 원고의 몇째 줄인지 (1부터)
+export function codeLineOf(code: string, lineId: string | null): number | null {
+  if (!lineId) return null;
+  const rows = code.split(/\r?\n/);
+  const at = rows.findIndex((r) => r.trim() === `# @l:${lineId}`);
+  if (at < 0) return null;
+  for (let i = at + 1; i < rows.length; i++) {
+    const t = rows[i].trim();
+    if (t && !t.startsWith('#')) return i + 1;
+  }
+  return null;
+}
+
+function editingLineId(): string | null {
+  const s = useStore.getState();
+  if (s.activeLine) return s.activeLine;
+  const node = s.project.nodes.find((n) => n.id === s.selectedIds[0]);
+  return node?.lines[0]?.id ?? null;
+}
+
+let lastAuto: string | null = null;
+let autoBusy = false;
+let autoWarned = false;
+export async function autoExport() {
+  const s = useStore.getState();
+  if (autoBusy || !s.project.settings.renpyLink || !folderReady()) return;
+  autoBusy = true;
+  try {
+    if (!(await folderAllowed(false))) return;
+    await pullInbox(false).catch(() => 0);
+    const { code, warnings } = generateRpy(useStore.getState().project);
+    if (warnings.some((x) => x.level === 'error')) {
+      if (!autoWarned) useStore.getState().say('오류가 있어서 렌파이로 자동 내보내기를 멈췄어요 (검사 탭). 고치면 다시 내보내요');
+      autoWarned = true;
+      return;
+    }
+    autoWarned = false;
+    if (code === lastAuto) return;
+    if (lastAuto === null && code === (await readRpyFromFolder())) {
+      lastAuto = code;
+      return;
+    }
+    await writeRpyToFolder(code, { line: followLine() ? codeLineOf(code, editingLineId()) : null });
+    lastAuto = code;
+  } catch (e) {
+    console.warn('자동 내보내기 실패', e);
+  } finally {
+    autoBusy = false;
   }
 }

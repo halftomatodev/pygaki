@@ -42,7 +42,7 @@ init -110 python in screen_fx:
 
     import store
 
-    VERSION = "5.2"
+    VERSION = "5.3"
 
     ## ── 플러그인 폴더 위치 ──
     ## 이 파일은 <플러그인 폴더>/engine/screen_fx.rpy 에 있습니다.
@@ -594,6 +594,14 @@ init -110 python in screen_fx:
 
     EFFECTS = { }
     ORDER = [ ]
+    ## 예전 효과 이름 → 지금 이름 ("tiles" → "collage", 5.3)
+    ALIASES = { }
+
+    def alias(name):
+        try:
+            return ALIASES.get(name, name)
+        except TypeError:
+            return name
 
     ## 특별한 이름
     NONE = "none"           # 효과 없음 (깨끗한 화면)
@@ -798,7 +806,7 @@ init -110 python in screen_fx:
     def resolve(name):
         if name is None or name == DEFAULT:
             return base_effect()
-        return name
+        return alias(name)
 
     def current_effect():
         """지금 켜져 있는 효과 이름. (기본 효과면 그 이름, 예: "vhs_crt")"""
@@ -837,7 +845,7 @@ init -110 python in screen_fx:
 
     def current_overlay():
         """지금 위에 덮인 효과 이름 ("vhs_crt"). 덮개가 꺼져 있으면 None."""
-        return _resolve_overlay(globals().get("cur_overlay", DEFAULT), current_effect())
+        return _resolve_overlay(alias(globals().get("cur_overlay", DEFAULT)), current_effect())
 
     def overlay_on():
         """지금 덮개가 켜져 있으면 True."""
@@ -939,6 +947,7 @@ init -110 python in screen_fx:
             a, b = v
         except Exception:
             a, b = NONE, NONE
+        a, b = alias(a), alias(b)
         a = a if a in EFFECTS else NONE
         b = b if b in EFFECTS else NONE
         return (a, b)
@@ -955,8 +964,8 @@ init -110 python in screen_fx:
             $ screen_fx.shaders("none", "none")         # 전부 셰이더 적용 취소 (아무것도 안 함)
         이름: "none"(기본) "ascii"(아스키) "vhs_crt"(VHS) "retro_term"(단말기) "gameboy"(게임보이)
         """
-        first = first or NONE
-        second = second or NONE
+        first = alias(first or NONE)
+        second = alias(second or NONE)
         _check_name(first)
         _check_overlay(second, "shaders()의 2번")
         use(first, transition=transition, duration=duration, wait=wait,
@@ -1187,6 +1196,8 @@ init -110 python in screen_fx:
         cursor: 커서를 그릴 자리 (set_cursor와 같음). 안 적으면 그대로 둠 (4.2)
         """
 
+        effect = alias(effect)
+        overlay = alias(overlay)
         _check_name(effect)
         if cursor != _KEEP:
             set_cursor(cursor, restart=False)
@@ -1248,6 +1259,7 @@ init -110 python in screen_fx:
             $ screen_fx.set_overlay(False, transition="fade")       # 덮개만 서서히 걷어냄
             $ screen_fx.set_overlay("default")                      # 설정(screen_fx.overlay)대로
         """
+        overlay = alias(overlay)
         _check_overlay(overlay)
         use(globals().get("current", None), transition=transition, duration=duration, wait=wait,
             overlay=overlay, exclude=globals().get("cur_target", DEFAULT))
@@ -1260,6 +1272,7 @@ init -110 python in screen_fx:
             $ screen_fx.set_values("vhs_crt")                               # 값 없이: 설정대로
         (<이름>.set(...)과 같습니다. 이름을 글자로 받는 것만 다름)
         """
+        name = alias(name)
         fx = EFFECTS.get(name)
         if fx is None:
             raise Exception("screen_fx.set_values: {!r}라는 효과가 없습니다. 쓸 수 있는 이름: {}".format(name, ", ".join(names())))
@@ -1868,6 +1881,7 @@ init -110 python in screen_fx:
 
     def image_fx(name, **values):
         """이미지에 거는 효과. show ... at screen_fx.image_fx("이름", 값=…)"""
+        name = alias(name)
         fx = EFFECTS.get(name)
         if fx is None:
             raise Exception("screen_fx.image_fx: {!r}라는 효과가 없습니다. 쓸 수 있는 이름: {}".format(name, ", ".join(names())))
@@ -1876,7 +1890,7 @@ init -110 python in screen_fx:
         return store.Transform(function=_ImageFX(name, values))
 
     ## ── 셰이더로 그리는 장면 전환 (5.0) ──
-    ##     scene bg2 with screen_fx.TileSwap(1.0)        (조각 어긋남 효과가 만드는 전환)
+    ##     scene bg2 with screen_fx.TileSwap(1.0)        (포토 콜라주 효과 파일에 든 전환)
     ## 셰이더는 tex0(옛 장면), tex1(새 장면), u_sfx_swap(0 → 1 진행)을 받습니다.
     ## 새 전환을 만들 때: register_shader로 셰이더를 등록하고 ShaderSwap("셰이더 이름", 시간, u_값=…)
 
