@@ -23,7 +23,9 @@ export function Canvas() {
   const inlineEdit = useStore((s) => s.inlineEdit);
   const focusMode = useStore((s) => s.focusMode);
   const update = useStore((s) => s.update);
-  const dark = usePrefs((p) => isDark(colorsOf(p)));
+  const hideLeft = useStore((s) => s.hideLeft);
+  const hideRight = useStore((s) => s.hideRight);
+  const dark =usePrefs((p) => isDark(colorsOf(p)));
   const mono = usePrefs((p) => (isMono(p) ? colorsOf(p) : null));
   const gradBox = usePrefs((p) => (gradOf(p) ? colorsOf(p).box : null));
   const rf = useReactFlow();
@@ -216,7 +218,7 @@ export function Canvas() {
           const g = (n.data as any).groupId;
           useStore.getState().select(useStore.getState().project.nodes.filter((b) => b.group === g).map((b) => b.id));
         }}
-        onPaneClick={() => useStore.setState({ inlineEdit: null })}
+        onPaneClick={() => useStore.setState({ inlineEdit: null, shaderOf: null })}
         zoomOnDoubleClick={false}
         deleteKeyCode={['Delete']}
         multiSelectionKeyCode={['Control', 'Meta', 'Shift']}
@@ -235,6 +237,13 @@ export function Canvas() {
           bgColor="var(--panel)"
         />
       </ReactFlow>
+      {/* 좌우 칸 접기/펴기 */}
+      <button className={'side-toggle l' + (hideLeft ? ' off' : '')} title={hideLeft ? '왼쪽 칸 펴기' : '왼쪽 칸 접기'} onClick={() => useStore.getState().togglePanel('left')}>
+        {hideLeft ? '›' : '‹'}
+      </button>
+      <button className={'side-toggle r' + (hideRight ? ' off' : '')} title={hideRight ? '오른쪽 칸 펴기' : '오른쪽 칸 접기'} onClick={() => useStore.getState().togglePanel('right')}>
+        {hideRight ? '‹' : '›'}
+      </button>
       <div className="canvas-hint">빈 곳 더블클릭: 새 상자 · 상자 더블클릭: 글 쓰기 · 선을 빈 곳에 놓기: 새 상자로 연결 · 선 더블클릭: jump↔call · Shift+드래그: 여러 개 선택 · Delete: 삭제</div>
     </div>
   );

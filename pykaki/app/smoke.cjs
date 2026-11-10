@@ -130,7 +130,7 @@ async function until(what, fn, ms = 10000) {
   await page.click('.view-switch button:nth-child(2)');
   await page.waitForSelector('.sp-conn.on', { timeout: 10000 });
   await page.waitForSelector('.sp-script .cur', { timeout: 10000 });
-  await page.click('.sp-nav-item:has-text("인게임 화면 셰이더")');
+  await page.click('.sp-nav-item >> text=/^셰이더/');
   await until('편집기 명령을 보내지 않음', () => got.some((m) => m.cmd === 'editor' && m.tab === 'screen_fx'));
   // 게임 안 패널을 통째로 그린 칸 (ui_kit 3.16): 버튼을 누르면 그 자리 번호를 보내는지
   await page.waitForSelector('.sp-mirror .sp-m-b', { timeout: 10000 });
@@ -140,36 +140,16 @@ async function until(what, fn, ms = 10000) {
   const rows = await page.locator('.sp-mirror textarea.sp-m-in.wide').getAttribute('rows', { timeout: 10000 });
   if (rows !== '3') fail('넓은 글 칸이 세 줄 칸이 아님: ' + rows);
   console.log('패널 통째로: 됨');
-  // 줄기표 (screen_fx 5.2): [줄기표 펴기] → flow toggle, 행을 끌면 range, 누르면 pick, 네모 점은 point
+  // 셰이더를 거는 자리는 [대본 편집]의 상자·label로 옮김: 앱에서는 줄기표를 펴지 않음 (게임이 flow를 보내도)
   const sendState = (extra) => {
     Object.assign(state, extra);
     for (const c of srv._conns ?? []) c.write(JSON.stringify(state) + '\n');
   };
-  sendState({ flow: { open: false } });
-  await page.locator('.sp-main button', { hasText: '줄기표 펴기' }).click({ timeout: 10000 });
-  await until('줄기표 펴기 명령을 보내지 않음', () => got.some((m) => m.cmd === 'flow' && m.do === 'toggle'));
-  const fr = (l, k, d, t, p = null) => ({ l, k, d, g: [0, ...(d > 0 ? [d] : [])], t, c: '#ffffff', a: k === 'fx' ? '#4fc3f7' : null, b: null, s: '1번 기본 + 2번 기본', p, i: k !== 'fx' && k !== 'label' && k !== 'branch' });
-  sendState({ flow: { open: true, file: 'game/script_flow.rpy', range: null, sel: 3, here: 3, points: [], rows: [
-    fr(1, 'label', 0, 'label start:'), fr(2, 'fx', 0, '셰이더: 1번 아스키', ['game/script_flow.rpy', 3]), fr(3, 'say', 0, 'e "하나"'),
-    fr(4, 'menu', 0, 'menu:'), fr(5, 'branch', 1, '"가":'), fr(6, 'say', 1, 'e "둘"'), fr(7, 'jump', 1, 'jump start') ] } });
-  await page.waitForSelector('.sp-flow-split .sp-flow-row', { timeout: 10000 });
-  const rowBox = async (i) => page.locator('.sp-flow-row').nth(i).locator('.tx').boundingBox();
-  const r1 = await rowBox(2), r3 = await rowBox(5);
-  await page.mouse.move(r1.x + 10, r1.y + r1.height / 2);
-  await page.mouse.down();
-  await page.mouse.move(r1.x + 10, r3.y + r3.height / 2, { steps: 6 });
-  await page.mouse.up();
-  await until('줄기표 끌기가 구간 명령을 보내지 않음', () => got.some((m) => m.cmd === 'flow' && m.do === 'range' && m.a === 2 && m.b === 5));
-  await page.locator('.sp-flow-row .dot').first().click();
-  await until('전환 점 명령을 보내지 않음', () => got.some((m) => m.cmd === 'flow' && m.do === 'point' && m.target?.[1] === 3));
-  await page.locator('.sp-flow-row').nth(5).locator('.tx').click();
-  await until('줄기표 누르기가 pick 명령을 보내지 않음', () => got.some((m) => m.cmd === 'flow' && m.do === 'pick' && m.row === 5));
-  const nodesBefore = JSON.parse(fs.readFileSync(flow, 'utf8')).nodes.length;
-  await page.keyboard.press('Delete');
-  await until('줄기표 Delete가 지우기 명령을 보내지 않음', () => got.some((m) => m.cmd === 'flow' && m.do === 'delete'));
-  await wait(2500);
-  if (JSON.parse(fs.readFileSync(flow, 'utf8')).nodes.length !== nodesBefore) fail('줄기표 Delete가 대본 상자를 지움');
-  console.log('줄기표: 됨');
+  sendState({ flow: { open: true, file: 'game/script_flow.rpy', range: null, sel: 3, here: 3, points: [], rows: [] } });
+  await wait(800);
+  if (await page.locator('.sp-main button', { hasText: '줄기표' }).count()) fail('앱에 줄기표 버튼이 남아 있음');
+  if (await page.locator('.sp-flow-split').count()) fail('앱에 줄기표가 펴짐');
+  console.log('줄기표 감춤: 됨');
   // 게임 창의 GUI 편집기 보이기/숨기기 (ui_kit 3.23): 버튼과 F9가 panel 명령을 보내고, 게임 쪽 알림을 기억하는지
   const nPanel = () => got.filter((m) => m.cmd === 'panel' && m.hide === false).length;
   const p0 = nPanel();

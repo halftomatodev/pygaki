@@ -26,13 +26,15 @@ const SECTIONS: Section[] = [
   { id: 'pause', label: '게임 내 메뉴 (ESC)', tab: 'title', app: true, note: '' },
   { id: 'pause_fx', label: '└ 게임 내 메뉴 셰이더', tab: 'pause_fx', app: false, mirror: true, note: 'ESC 메뉴와 거기서 연 화면에만 걸리는 셰이더 두 자리예요. 메뉴가 열려 있는 동안 뒤 게임 화면도 이 셰이더로 보여요.' },
   { id: 'watermorph', label: '타이틀 일렁임', tab: 'watermorph', app: false, mirror: true, note: '타이틀 배경에만 걸리는 일렁임 효과예요.' },
-  { id: 'screen_fx', label: '인게임 화면 셰이더', tab: 'screen_fx', app: false, mirror: true, note: '게임 화면에 씌우는 셰이더 두 자리(기본, 아스키, VHS, 단말기, 게임보이, 글리치, 지글거림, 망점, 홀로그램, 나이트비전, 포토 콜라주, 파편 흩날림)예요. 고르고 [여기에서부터 적용]을 누르면 고른 줄부터 바뀌어요.' },
+  { id: 'screen_fx', label: '셰이더', tab: 'screen_fx', app: false, mirror: true, note: '게임 화면에 씌우는 셰이더 두 자리예요. 여기서는 고른 셰이더의 모양(세부 값)을 게임 화면을 보면서 고쳐요. 어느 장면에 걸지는 [대본 편집]에서 상자나 label 오른쪽 위의 ◐ 셰이더로 정해요.' },
   { id: 'custom_ui', label: '커서, 클릭 대기(CTC), 대사 소리', tab: 'custom_ui', app: true, note: '' },
   { id: 'say', label: '대사 (위치, 스타일)', tab: 'say', app: false, mirror: true, note: '' },
   { id: 'choice', label: '선택지', tab: 'choice', app: false, mirror: true, note: '' },
   { id: 'stage', label: '그림, 영상 배치', tab: 'stage', app: false, mirror: true, note: '' },
   { id: 'ui_text', label: '확인 창, UI 글 (종료 메시지, 버튼)', tab: 'ui_text', app: false, mirror: true, note: '종료 확인 창, 퀵메뉴 버튼 같은 글을 바꿔요. showpy ui_kit 3.23부터 있어요.' },
 ];
+
+const FLOW_IN_APP = false;
 
 export function ShowpyView() {
   const { on, st, section, err, showpy } = useLive();
@@ -114,8 +116,9 @@ const HIDDEN_SCREENS = new Set(['ui_editor_live', 'ui_editor_pk_watch', 'ui_edit
 
 function Where({ st, sec }: { st: GameState; sec: string }) {
   const w = st.where;
-  // 줄기표 (screen_fx 5.2): 인게임 화면 셰이더 칸에서 원고 옆에 펴고 접음. 펴진 것은 게임이 기억함
-  const flow = sec === 'screen_fx' ? st.flow : undefined;
+  // 줄기표 (screen_fx 5.2): 셰이더 칸에서 원고 옆에 펴고 접음. 펴진 것은 게임이 기억함
+  // 셰이더를 거는 자리는 [대본 편집]의 상자·label로 옮겨서, 앱에서는 줄기표를 펴지 않는다 (게임 창의 편집기에는 그대로 있음)
+  const flow = FLOW_IN_APP && sec === 'screen_fx' ? st.flow : undefined;
   const flowOpen = !!flow?.open;
   // 줄기표에서 누른 줄: 원고 칸도 그 줄로 스크롤 (대조용)
   const [peek, setPeek] = useState<{ line: number; n: number } | null>(null);
@@ -131,7 +134,7 @@ function Where({ st, sec }: { st: GameState; sec: string }) {
           <b>원고 위치</b>
           <span className="sp-mono">{w.file ? `${w.file}:${w.line}` : '-'}</span>
           {w.main_menu && <span className="tip">(타이틀에 있어요)</span>}
-          {sec === 'screen_fx' && (
+          {FLOW_IN_APP && sec === 'screen_fx' && (
             <>
               <span className="grow" />
               {flow === undefined || flow === null ? (

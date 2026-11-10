@@ -2,7 +2,8 @@ import { memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { useStore } from './store';
 import * as ops from './ops';
-import type { BoxNode, Line } from './types';
+import type { BoxNode, BoxShader, Line } from './types';
+import { shaderLabel } from './shader';
 import { isLight, uid } from './util';
 import { changeThenFocus } from './actions';
 import { FlowMenu } from './FlowMenu';
@@ -54,6 +55,7 @@ export const BoxView = memo(function BoxView({ id, selected }: NodeProps) {
         ) : (
           <span className="box-title" data-part="title">{b.title || '(제목 없음)'}</span>
         )}
+        <ShaderButton kind="box" id={b.id} own={b.shader} inherited={g?.shader} />
       </div>
       <Lines b={b} editing={editing} />
       <div className="box-exit">
@@ -109,6 +111,27 @@ export const BoxView = memo(function BoxView({ id, selected }: NodeProps) {
 });
 
 const isSayLine = (l: Line) => l.type === 'say' || l.type === 'narration';
+
+// 상자와 label 오른쪽 위의 [셰이더] 버튼. 누르면 오른쪽 편집 칸이 셰이더 고르기로 바뀐다
+// 정해 둔 셰이더가 있으면 켜진 색, label 것을 따르는 상자는 흐린 테두리
+function ShaderButton({ kind, id, own, inherited }: { kind: 'box' | 'label'; id: string; own?: BoxShader; inherited?: BoxShader }) {
+  const open = useStore((s) => s.shaderOf?.kind === kind && s.shaderOf.id === id);
+  const eff = own ?? inherited ?? null;
+  const title = (own ? `셰이더: ${shaderLabel(own)}` : inherited ? `셰이더: label을 따름 (${shaderLabel(inherited)})` : '셰이더: 정하지 않음') + '\n눌러서 오른쪽에서 골라요';
+  return (
+    <button
+      className={'nodrag sh-btn' + (own ? ' set' : inherited ? ' inh' : '') + (open ? ' open' : '')}
+      title={title}
+      onClick={(e) => {
+        e.stopPropagation();
+        useStore.getState().openShader(kind, id);
+      }}
+      onDoubleClick={(e) => e.stopPropagation()}
+    >
+      {eff ? `◐ ${shaderLabel(eff)}` : '◐ 셰이더'}
+    </button>
+  );
+}
 
 const STAGE_ICON: Record<string, string> = { scene: '🖼', show: '🧍', hide: '🙈', music: '🎵', sound: '🔊', fx: '✨' };
 
@@ -271,6 +294,7 @@ export function GroupFrame({ data }: NodeProps) {
         {g.title ? `${g.title} · ` : ''}
         <code>{g.name}</code>
       </span>
+      <ShaderButton kind="label" id={g.id} own={g.shader} />
     </div>
   );
 }

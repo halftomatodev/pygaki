@@ -854,3 +854,39 @@ fieldset.plain:disabled { opacity: 0.4; }
 .sbox-bubble.tail-left::after { top: calc(25% + 4px); right: calc(100% - 1px); border-width: 9px 18px 9px 0; border-right-color: #fff; }
 .sbox-bubble.tail-right::before { top: 25%; left: 100%; border-width: 13px 0 13px 24px; border-left-color: #000; }
 .sbox-bubble.tail-right::after { top: calc(25% + 4px); left: calc(100% - 1px); border-width: 9px 0 9px 18px; border-left-color: #fff; }
+
+/* 상자·label의 [셰이더] 버튼 (BoxView ShaderButton)과 오른쪽 셰이더 고르기 칸 (ShaderPanel) */
+.sh-btn {
+  margin-left: auto; flex: none; font-size: 10px; line-height: 1.5; padding: 0 6px; border-radius: 8px; white-space: nowrap;
+  max-width: 120px; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
+  background: transparent; color: var(--muted); border: 1px solid transparent; opacity: 0.55;
+}
+.box:hover .sh-btn, .frame:hover .sh-btn, .sh-btn:hover, .sh-btn.open { opacity: 1; }
+.sh-btn:hover:not(:disabled) { background: var(--hover); }
+.sh-btn.inh { border: 1px dashed color-mix(in srgb, var(--accent) 55%, transparent); opacity: 0.8; }
+.sh-btn.set { background: var(--accent); color: #fff; opacity: 1; }
+.sh-btn.set:hover:not(:disabled) { background: var(--accent); filter: brightness(1.1); }
+.sh-btn.open { outline: 2px solid var(--accent); outline-offset: 1px; }
+.frame .sh-btn { position: absolute; top: 3px; right: 12px; pointer-events: auto; color: var(--gt); font-size: 11px; }
+.frame .sh-btn.set { color: #fff; }
+.grow { flex: 1; }
+.shader-panel .row > label { flex: 0 0 64px; color: var(--muted); }
+.shader-panel .row > select { flex: 1; min-width: 0; }
+.shader-panel .row h4 { margin: 0; }
+.seg { display: flex; gap: 2px; margin: 8px 0; padding: 2px; border-radius: 8px; background: var(--hover); }
+.seg button { flex: 1; background: transparent; }
+.seg button.on { background: var(--panel); color: var(--text); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12); }
+pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* 좌우 칸 접기/펴기 (캔버스 위쪽 양 끝의 작은 버튼) */
+.main.no-left .sidebar, .main.no-right .right-panel { display: none; }
+.side-toggle {
+  position: absolute; top: 6px; z-index: 6; width: 18px; height: 22px; padding: 0; line-height: 1; font-size: 14px;
+  border-radius: 6px; background: var(--panel); border: 1px solid var(--line); color: var(--muted); opacity: 0.6;
+}
+.side-toggle:hover, .side-toggle.off { opacity: 1; }
+.side-toggle.off { color: var(--accent); border-color: var(--accent); }
+.side-toggle.l { left: 6px; }
+.side-toggle.r { right: 6px; }
+.canvas-hint { left: 32px; right: 32px; }
+.app.focus .side-toggle { display: none; }

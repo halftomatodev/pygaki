@@ -5,6 +5,7 @@ import { imageName, isStage, stageCode } from './stage';
 import { codeToLine } from './inbox';
 import { IMAGE_FX } from './fx/textShaders';
 import { exitLinks } from './ops';
+import { shaderOfBox, shaderShown, usesShaders } from './shader';
 
 export interface Sprite {
   key: string; // 화면에 새로 나올 때마다 달라진다. 효과를 다시 돌리는 기준
@@ -189,6 +190,8 @@ export function advance(p: Project, s0: PState): PState {
     if (!s.node) return { ...s, ended: 'broken' };
     const b = byId.get(s.node);
     if (!b) return { ...s, ended: 'missing' };
+    // 상자에 들어오면 그 상자의 셰이더로 (shader.ts)
+    if (s.line === 0 && usesShaders(p)) s.stage.fx = shaderShown(shaderOfBox(p, b));
     if (s.line < b.lines.length) {
       const l = b.lines[s.line++];
       if (l.type === 'note') continue;
@@ -247,6 +250,7 @@ function seedStage(p: Project, box: string, lineIndex: number): PStage {
   const path: string[] = [];
   if (prev.has(box)) for (let c: string | null = prev.get(box)!; c; c = prev.get(c) ?? null) path.unshift(c);
   const take = (id: string, lines: Line[]) => {
+    if (usesShaders(p) && byId.has(id)) st.fx = shaderShown(shaderOfBox(p, byId.get(id)!));
     for (const l of lines) {
       if (l.type === 'note') continue;
       if (l.type === 'command' || isStage(l.type)) applyAny(st, l, id, p);

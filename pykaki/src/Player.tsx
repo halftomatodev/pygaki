@@ -183,7 +183,7 @@ export function Player({ active }: { active: boolean }) {
       onClick={next}
       top={
         <div className="ptop">
-          {st.stage.fx && <span title="화면 효과는 렌파이에서 실제로 보여요">화면 효과: {st.stage.fx}</span>}
+          {st.stage.fx && <span title="화면 효과는 렌파이에서 실제로 보여요">셰이더: {st.stage.fx}</span>}
           {st.commands.map((c, i) => (
             <span key={i} title="플레이 화면에서 실행하지 않는 명령이에요">{c}</span>
           ))}

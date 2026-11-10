@@ -6,6 +6,7 @@ import { uid } from './util';
 import { LineLook, SpeakerSelect, StageFields, useLineDrag } from './LineFields';
 import { isStage } from './stage';
 import { hit, keyOf, usePrefs } from './prefs';
+import { ShaderPanel } from './ShaderPanel';
 
 export type Upd = (fn: (b: BoxNode, p: Project) => void, key?: string) => void;
 
@@ -13,6 +14,8 @@ export function Inspector() {
   const ids = useStore((s) => s.selectedIds);
   const project = useStore((s) => s.project);
   usePrefs((p) => p.keys); // 단축키를 바꾸면 안내도 다시 그린다
+  const shaderOf = useStore((s) => s.shaderOf);
+  if (shaderOf) return <ShaderPanel />;
   if (!ids.length)
     return (
       <div className="hint">
@@ -24,6 +27,7 @@ export function Inspector() {
           <li>상자 아래 점(●)을 끌어 다른 상자에 놓으면 연결돼요. 빈 곳에 놓으면 새 상자가 생기며 연결돼요.</li>
           <li>선을 <b>더블클릭</b>하면 jump ↔ call이 바뀌어요.</li>
           <li>같은 label(장면)의 상자는 같은 색이에요. label은 왼쪽 목록에서 관리해요.</li>
+          <li>상자나 label 오른쪽 위의 <b>◐ 셰이더</b>를 누르면 여기서 화면 셰이더를 골라요. 상자에 정하면 그 상자에서만, label에 정하면 그 label 전체에 걸려요.</li>
           <li>대사 칸에서 <b>{keyOf('newLine')}</b>: 같은 화자로 다음 줄 추가.</li>
           <li><b>{keyOf('focus')}</b>: 집중 모드. 캔버스만 남기고 나머지를 숨겨요. 한 번 더 누르면 돌아와요.</li>
           <li>{keyOf('save')} 파일 저장 · {keyOf('undo')} 실행 취소 · {keyOf('export')} .rpy 다시 내보내기</li>

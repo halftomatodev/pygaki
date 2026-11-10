@@ -68,10 +68,19 @@ export type Exit =
 
 export type ExitType = Exit['type'];
 
+// 상자나 label에 거는 셰이더 두 자리 (showpy screen_fx.shaders). 상자에 없으면 label 것을, label에도 없으면 게임 설정대로
+export interface BoxShader {
+  a: string; // 1번: none | ascii | vhs_crt | retro_term | gameboy | ...
+  b: string; // 2번
+  in?: string; // 이 셰이더가 시작할 때 전환: tv | fade | none (비우면 게임 설정대로)
+  out?: string; // 이 셰이더가 끝날 때 전환
+}
+
 export interface BoxNode {
   id: string;
   group: string; // LabelGroup.id
   color?: string; // 상자 색. 없으면 label 색을 따른다
+  shader?: BoxShader; // 이 상자의 셰이더. 없으면 label 것을 따른다
   title: string;
   pos: { x: number; y: number };
   lines: Line[];
@@ -90,6 +99,7 @@ export interface LabelGroup {
   title: string; // 화면 표시용
   color: string;
   entry: string | null;
+  shader?: BoxShader; // 이 label의 상자 모두에 거는 셰이더
 }
 
 export interface Settings {

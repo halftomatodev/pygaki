@@ -31,6 +31,11 @@ interface S {
   focusMode: boolean; // 집중 모드: 캔버스만 남기고 나머지 화면을 숨긴다
   showPrefs: boolean; // 환경 설정 창
   flowMenu: boolean; // 다음 흐름 창을 키보드로 고르는 중
+  shaderOf: { kind: 'box' | 'label'; id: string } | null; // 오른쪽 칸에서 셰이더를 고르는 중인 상자나 label
+  hideLeft: boolean; // 왼쪽 칸 접음
+  hideRight: boolean; // 오른쪽 칸 접음
+  openShader(kind: 'box' | 'label', id: string): void;
+  togglePanel(side: 'left' | 'right'): void;
   update(fn: (p: Project) => void, key?: string): void;
   load(p: Project, o?: { fileName?: string | null; dirty?: boolean }): void;
   undo(): void;
@@ -42,7 +47,15 @@ interface S {
   say(msg: string): void;
 }
 
-let flashTimer: ReturnType<typeof setTimeout> | undefined;
+const readFlag = (k: string) => {
+  try {
+    return localStorage.getItem(k) === '1';
+  } catch {
+    return false;
+  }
+};
+
+let flashTimer:ReturnType<typeof setTimeout> | undefined;
 
 export const useStore = create<S>((set, get) => ({
   project: null as unknown as Project,
@@ -71,6 +84,28 @@ export const useStore = create<S>((set, get) => ({
   focusMode: false,
   showPrefs: false,
   flowMenu: false,
+  shaderOf: null,
+  hideLeft: readFlag('pygaki-hide-left'),
+  hideRight: readFlag('pygaki-hide-right'),
+
+  // 상자나 label의 [셰이더] 버튼: 오른쪽 편집 칸을 셰이더 고르기로 (접혀 있으면 편다)
+  openShader: (kind, id) => {
+    const cur = get().shaderOf;
+    if (cur?.kind === kind && cur.id === id) return set({ shaderOf: null });
+    get().select(kind === 'box' ? [id] : []);
+    set({ shaderOf: { kind, id }, tab: 'edit', hideRight: false });
+  },
+
+  togglePanel: (side) =>
+    set((s) => {
+      const k = side === 'left' ? 'hideLeft' : 'hideRight';
+      try {
+        localStorage.setItem(side === 'left' ? 'pygaki-hide-left' : 'pygaki-hide-right', s[k] ? '0' : '1');
+      } catch {
+        // 못 적어도 이번에는 바뀜
+      }
+      return { [k]: !s[k] } as Partial<S>;
+    }),
 
   // 같은 key로 빠르게 이어지는 변경(타이핑)은 실행 취소 한 번으로 묶는다
   update: (fn, key) =>
@@ -99,6 +134,7 @@ export const useStore = create<S>((set, get) => ({
       fileName: o.fileName === undefined ? get().fileName : o.fileName,
       selectedIds: [],
       inlineEdit: null,
+      shaderOf: null,
       playing: false,
       play: null,
       fullPlay: false,
@@ -122,7 +158,10 @@ export const useStore = create<S>((set, get) => ({
     const cur = get().selectedIds;
     if (cur.length === ids.length && ids.every((x) => cur.includes(x))) return;
     const ie = get().inlineEdit;
-    set({ selectedIds: ids, inlineEdit: ie && ids.includes(ie) ? ie : null });
+    // 셰이더 고르기는 그 상자만 골라져 있는 동안(label은 아무 상자도 안 고른 동안)만 열어 둔다
+    const so = get().shaderOf;
+    const keep = so && (so.kind === 'box' ? ids.length === 1 && ids[0] === so.id : !ids.length);
+    set({ selectedIds: ids, inlineEdit: ie && ids.includes(ie) ? ie : null, shaderOf: keep ? so : null });
   },
 
   focusNodes: (ids) => set({ focusReq: { ids, t: Date.now() } }),

@@ -66,6 +66,8 @@ export function App() {
   const focus = useStore((s) => s.focusMode);
   const showPrefs = useStore((s) => s.showPrefs);
   const flash = useStore((s) => s.flash);
+  const hideLeft = useStore((s) => s.hideLeft);
+  const hideRight = useStore((s) => s.hideRight);
   const view = useLive((s) => s.view);
   useEffect(() => {
     if (isDesktop) startLive();
@@ -77,7 +79,7 @@ export function App() {
       <div className={'app' + (focus ? ' focus' : '')}>
         <Toolbar />
         {/* 대본 화면은 showpy 화면을 보는 동안에도 그대로 둔다 (캔버스 상태 유지) */}
-        <div className="main" hidden={view === 'showpy'}>
+        <div className={'main' + (hideLeft ? ' no-left' : '') + (hideRight ? ' no-right' : '')} hidden={view === 'showpy'}>
           <Sidebar />
           <Canvas />
           <RightPanel />

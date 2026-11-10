@@ -4,6 +4,7 @@ import { exitLinks, fallTarget } from './ops';
 import { IDENT, PLUGIN_NAMES, RESERVED } from './util';
 import { badImageName, renpyOnlyEffect, fxArgs, isStage, sayArgs, stageCode } from './stage';
 import { checkTags } from './tagEdit';
+import { enterTrans, shaderCode, shaderOfBox, usesShaders } from './shader';
 
 export interface Warn { level: 'error' | 'warn'; msg: string; nodeId?: string }
 
@@ -122,8 +123,16 @@ export function generateRpy(p: Project): { code: string; warnings: Warn[] } {
     );
   }
 
+  // 상자·label 셰이더: 상자마다 첫 줄에 그 상자의 셰이더를 적는다 (shader.ts). showpy가 있어야 한다
+  const shaders = usesShaders(p);
+  if (shaders && !S.renpyLink) W.push({ level: 'warn', msg: '상자와 label의 셰이더는 showpy 연결을 켜야 내보내요' });
+  const shaderLine = (b: BoxNode, enter: boolean) => {
+    const from = enter ? (incoming.get(b.id) ?? []).map((x) => byId.get(x.from)).filter((x): x is BoxNode => !!x) : [];
+    return shaderCode(shaderOfBox(p, b), enter ? enterTrans(p, b, from) : shaderOfBox(p, b)?.in);
+  };
+
   const I = '    ';
-  const q = (t: string) => '"' + escapeText(t, S) + '"';
+  const q =(t: string) => '"' + escapeText(t, S) + '"';
 
   for (const g of p.labels) {
     const o = orders.get(g.id)!;
@@ -140,7 +149,8 @@ export function generateRpy(p: Project): { code: string; warnings: Warn[] } {
       if (S.renpyLink || (i !== 0 && !onlyFall)) out.push(`label ${g.name}.${b.id}:`);
 
       const body: string[] = [];
-      const pct = (t: string, where: string) => {
+      if (shaders && S.renpyLink) body.push(shaderLine(b, true));
+      const pct =(t: string, where: string) => {
         if (!S.escapePercent && loosePercent(t)) W.push({ level: 'error', msg: `${where}의 %에서 렌파이가 멈춰요. 설정에서 "% 를 글자 그대로"를 켜 주세요 (${b.title || b.id})`, nodeId: b.id });
         // 텍스트 태그 짝 (렌파이 check_text_tags와 같은 규칙)
         if (S.allowTextTags) for (const w of checkTags(t)) W.push({ level: w.level, msg: `${where}: ${w.msg} (${b.title || b.id})`, nodeId: b.id });
@@ -209,6 +219,8 @@ export function generateRpy(p: Project): { code: string; warnings: Warn[] } {
           body.push('return  # TODO: call 대상 없음');
         } else {
           body.push(`call ${ref(e.target)}`);
+          // 불러온 장면이 셰이더를 바꿨으면 돌아와서 이 상자 것으로 되돌린다
+          if (shaders && S.renpyLink) body.push(shaderLine(b, false));
           body.push(...(e.then ? flow(e.then) : ['return']));
         }
       } else body.push('return');
