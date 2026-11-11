@@ -20,6 +20,22 @@ export const STAGE_LABEL: Record<string, string> = {
 const BASE_TRANSITIONS: [string, string][] = [['', '바로'], ['dissolve', '서서히'], ['fade', '검게 페이드']];
 export const TRANSITIONS: [string, string][] = [...BASE_TRANSITIONS];
 export const imageFxCode = (name: string) => `img_fx.use("${name}")`;
+// 그림 효과와 고친 값: img_fx.use("bands", 1.2, count=10, color="#c2185b") ↔ { name, time, args }. 값 이름은 u__ 없이 적는다
+export interface ImageFxUse { name: string; time?: string; args: [string, string][] }
+export function parseImageFx(trans?: string): ImageFxUse | null {
+  const m = /^img_fx\.use\(\s*"(\w+)"\s*(.*)\)\s*$/.exec(trans ?? '');
+  if (!m) return null;
+  const out: ImageFxUse = { name: m[1], args: [] };
+  for (const part of m[2].split(',').map((p) => p.trim()).filter(Boolean)) {
+    const i = part.indexOf('=');
+    const [k, v] = i < 0 ? ['time', part] : [part.slice(0, i).trim(), part.slice(i + 1).trim()];
+    if (k === 'time') out.time = v;
+    else out.args.push([k, v.replace(/^(["'])(.*)\1$/, '$2')]);
+  }
+  return out;
+}
+export const formatImageFx = (u: ImageFxUse) =>
+  `img_fx.use(${[`"${u.name}"`, ...(u.time ? [u.time] : []), ...u.args.map(([k, v]) => `${k}=${/^-?\d+(\.\d+)?$/.test(v) ? v : `"${v}"`}`)].join(', ')})`;
 export const POSITIONS: [string, string][] = [['', '가운데'], ['left', '왼쪽'], ['right', '오른쪽']];
 
 // showpy 화면 효과 칸의 값들

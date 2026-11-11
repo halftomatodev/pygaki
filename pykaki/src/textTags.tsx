@@ -85,49 +85,21 @@ export function parseTagged(text: string, tagsOn: boolean, fontOf: (path: string
   return out;
 }
 
-export function renderTagged(text: string, tagsOn: boolean): ReactNode[] {
+// 선택지 글처럼 한 번에 보이는 글: 대사와 같은 읽기(parseTagged)로 모양만 입힌다. 멈춤, 속도, 효과 태그는 뜻이 없어 넘긴다
+export function renderTagged(text: string, tagsOn: boolean, fontOf: (path: string) => string | undefined = () => undefined): ReactNode[] {
   if (!tagsOn) return [text];
   const out: ReactNode[] = [];
-  const stack: CSSProperties[] = [];
   let buf = '';
+  let style: CSSProperties | undefined;
   let k = 0;
   const flush = () => {
-    if (!buf) return;
-    out.push(<span key={k++} style={Object.assign({}, ...stack)}>{buf}</span>);
+    if (buf) out.push(<span key={k++} style={style}>{buf}</span>);
     buf = '';
   };
-  for (let i = 0; i < text.length; ) {
-    if (text.startsWith('{{', i)) {
-      buf += '{';
-      i += 2;
-      continue;
-    }
-    if (text[i] !== '{') {
-      buf += text[i++];
-      continue;
-    }
-    const j = text.indexOf('}', i);
-    if (j < 0) {
-      buf += text.slice(i);
-      break;
-    }
-    const tag = text.slice(i + 1, j);
-    i = j + 1;
-    const [name, val] = [tag.split('=')[0], tag.slice(tag.indexOf('=') + 1)];
-    const style: CSSProperties | null =
-      name === 'b' ? { fontWeight: 'bold' }
-      : name === 'i' ? { fontStyle: 'italic' }
-      : name === 'u' || name === 'a' ? { textDecoration: 'underline' }
-      : name === 's' ? { textDecoration: 'line-through' }
-      : name === 'color' ? { color: val }
-      : name === 'size' && /^\d+$/.test(val) ? { fontSize: Number(val) * 0.6 }
-      : name === 'size' ? {}
-      : null;
-    flush();
-    if (style) stack.push(style);
-    else if (tag.startsWith('/')) stack.pop();
-    else if (name === 'p') out.push(<br key={k++} />);
-    else if (!['w', 'nw', 'fast'].includes(name)) buf += '{' + tag + '}';
+  for (const g of parseTagged(text, true, fontOf).glyphs) {
+    if (g.style !== style) (flush(), (style = g.style));
+    if (g.ch === '\n') (flush(), out.push(<br key={k++} />));
+    else buf += g.ch;
   }
   flush();
   return out;

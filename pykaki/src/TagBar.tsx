@@ -5,9 +5,9 @@ import { create } from 'zustand';
 import { useStore } from './store';
 import { useGameFolder } from './gameFolder';
 import { hit, keyOf } from './prefs';
-import { EFFECTS } from './stage';
+import { EFFECTS, effectKnobs, formatEffect, parseEffect } from './stage';
 import { shaderEffect } from './fx/textShaders';
-import { RUBY_NOTE, insertRuby, insertTag, removeTag, setTagValue, stepK, stepSize, tagsAt, toggleTag, type Edit } from './tagEdit';
+import { RUBY_NOTE, insertRuby, insertTag, removeTag, retag, setTagValue, stepK, stepSize, tagsAt, toggleTag, type Edit } from './tagEdit';
 
 // 지금 태그를 넣을 글 칸(textarea id). 태그 상자 안으로 포커스가 옮겨 가도 그대로 둔다
 export const useTagTarget = create<{ id: string | null }>(() => ({ id: null }));
@@ -77,6 +77,31 @@ const readMore = () => {
     return false;
   }
 };
+
+const KNOBS_KEY = 'pykaki-tag-knobs';
+const readKnobs = () => {
+  try {
+    return localStorage.getItem(KNOBS_KEY) === '1';
+  } catch {
+    return false;
+  }
+};
+
+// 색 칸: 고르는 동안에는 값만 보여 주고, 색 창을 닫을 때(change) 한 번만 글에 넣는다
+function ColorKnob({ value, onPick }: { value: string; onPick: (c: string) => void }) {
+  const ref = useRef<HTMLInputElement>(null);
+  const pick = useRef(onPick);
+  pick.current = onPick;
+  const [v, setV] = useState<string | null>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const on = () => (setV(null), pick.current(el.value));
+    el.addEventListener('change', on);
+    return () => el.removeEventListener('change', on);
+  }, []);
+  return <input ref={ref} type="color" value={v ?? value} onChange={(e) => setV(e.target.value)} />;
+}
 
 interface Swatch { c: string; title: string }
 
@@ -182,6 +207,8 @@ export function TagBar({ targetId, className = '' }: { targetId: string; classNa
   const [more, setMore] = useState(readMore);
   const [kern, setKern] = useState<string | null>(null); // 자간 칸에 치는 중인 값
   const [alpha, setAlpha] = useState<number | null>(null); // 투명도 막대를 끄는 중인 값
+  const [knobsOpen, setKnobsOpen] = useState(readKnobs); // 고른 글에만 효과의 [세부 값]
+  const [knob, setKnob] = useState<{ i: number; key: string; v: string } | null>(null); // 세부 값 막대를 끄는 중인 값
   const media = useGameFolder((f) => f.media);
   const linked = useGameFolder((f) => !!f.name);
   useGameFolder((f) => f.fxSeq); // 효과 목록이 바뀌면 다시 그린다
@@ -273,6 +300,30 @@ export function TagBar({ targetId, className = '' }: { targetId: string; classNa
   const curFx = at.get('shader');
   // 고른 글에만 거는 효과: 켜 둔 글자 효과 가운데 외곽선 겹을 쓰는 것(색 잔상 등)은 뺀다. 외곽선은 줄 전체에 걸려서 일부에만 넣을 수 없다
   const partFx = EFFECTS.filter(([n]) => n && !shaderEffect(n)?.outlines.length);
+  // 태그 안 효과의 세부 값: {shader=wave:u__amplitude=8}. 막대는 끄는 동안 값만 보여 주고 놓을 때 한 번만 글에 넣는다
+  const fxParts = curFx ? parseEffect(curFx) : [];
+  const fxSel = fxParts.length === 1 ? fxParts[0].name : curFx; // 목록에는 값을 뗀 이름으로 보인다
+  const fxKnobs = fxParts.map((p) => effectKnobs(p.name));
+  const fxChanged = fxParts.reduce((n, p) => n + p.args.filter(([k]) => k).length, 0);
+  const putKnob = (i: number, key: string, v: string | undefined) => {
+    setKnob(null);
+    run((x, s, e) => {
+      const parts = parseEffect(tagsAt(x, s, e).get('shader'));
+      if (!parts[i]) return { error: '효과 태그 안에 있지 않아요' };
+      parts[i].args = parts[i].args.filter(([k]) => k !== key);
+      if (v !== undefined) parts[i].args.push([key, v]);
+      return retag(x, s, e, 'shader', formatEffect(parts) ?? '', '효과');
+    });
+  };
+  const applyKnob = () => knob && putKnob(knob.i, knob.key, knob.v);
+  const toggleKnobs = () => {
+    try {
+      localStorage.setItem(KNOBS_KEY, knobsOpen ? '0' : '1');
+    } catch {
+      /* 이번 창에서만 */
+    }
+    setKnobsOpen(!knobsOpen);
+  };
   const curAlpha = at.has('alpha') ? Number(at.get('alpha')) : NaN;
   const alphaNow = alpha ?? (curAlpha >= 0 && curAlpha <= 1 ? curAlpha : 1);
   const toggleMore = () => {
@@ -410,18 +461,58 @@ export function TagBar({ targetId, className = '' }: { targetId: string; classNa
             <span className="tb-label">효과</span>
             <select
               className={'tb-sel' + (curFx !== undefined ? ' on' : '')}
-              value={curFx ?? ''}
-              title="고른 글에만 등장 효과 {shader=}: 줄의 다른 글자는 줄의 효과(없으면 한 글자씩 나오기)로 나와요. 세부 값은 {shader=이름:u__값=3}처럼 손으로 적어요"
+              value={fxSel ?? ''}
+              title="고른 글에만 등장 효과 {shader=}: 줄의 다른 글자는 줄의 효과(없으면 한 글자씩 나오기)로 나와요. 효과를 고르면 [세부 값]에서 막대로 고쳐요"
               onChange={(e) => {
                 const v = e.target.value;
                 run((x, s, en) => (v ? setTagValue(x, s, en, 'shader', v) : removeTag(x, s, en, 'shader', '효과')));
               }}
             >
               <option value="">{curFx !== undefined ? '효과 태그 빼기' : '고른 글에만 효과'}</option>
-              {curFx !== undefined && !partFx.some(([n]) => n === curFx) && <option value={curFx}>{curFx}</option>}
+              {fxSel !== undefined && !partFx.some(([n]) => n === fxSel) && <option value={fxSel}>{fxSel}</option>}
               {partFx.map(([n, label]) => <option key={n} value={n}>{label}</option>)}
             </select>
+            {fxKnobs.some((k) => k.length > 0) && (
+              <button className={'tb-btn tb-knobs-btn' + (knobsOpen ? ' on' : '')} title="이 태그 효과의 세부 값을 막대로 고쳐요 ({shader=이름:u__값=3})" onClick={toggleKnobs}>
+                세부 값{fxChanged ? ` (${fxChanged})` : ''}
+              </button>
+            )}
           </div>
+          {knobsOpen && fxParts.map((p, i) => fxKnobs[i].length > 0 && (
+            <div className="fx-knobs tb-knobs" key={i + p.name}>
+              {fxParts.length > 1 && <span className="tb-hint">{EFFECTS.find(([n]) => n === p.name)?.[1] ?? p.name}</span>}
+              {fxKnobs[i].map((k) => {
+                const set = p.args.find(([key]) => key === k.key)?.[1];
+                const drag = knob && knob.i === i && knob.key === k.key ? knob.v : undefined;
+                const v = drag ?? set ?? k.def;
+                return (
+                  <label key={k.key} className={set !== undefined ? 'set' : ''}>
+                    <span className="fx-kn" title={k.key}>{k.label}</span>
+                    {k.kind === 'color' ? (
+                      <ColorKnob value={v.slice(0, 7)} onPick={(c) => putKnob(i, k.key, c)} />
+                    ) : (
+                      <>
+                        <input
+                          type="range"
+                          min={k.min}
+                          max={k.max}
+                          step={k.step}
+                          value={Number(v)}
+                          data-knob={k.key}
+                          onChange={(e) => setKnob({ i, key: k.key, v: String(Number(e.target.value)) })}
+                          onPointerUp={applyKnob}
+                          onKeyUp={applyKnob}
+                          onBlur={applyKnob}
+                        />
+                        <span className="fx-kv">{Number(v)}</span>
+                      </>
+                    )}
+                    <button className="fx-x" style={{ visibility: set !== undefined ? 'visible' : 'hidden' }} title="기본값으로" onClick={(e) => (e.preventDefault(), putKnob(i, k.key, undefined))}>↺</button>
+                  </label>
+                );
+              })}
+            </div>
+          ))}
           <div className="tb-row">
             <span className="tb-label">넣기</span>
             {ins('{space=30}', '가로 띄우기', '여기에 가로로 빈 자리를 넣어요 (숫자는 픽셀, 바꿀 수 있어요)', '30')}

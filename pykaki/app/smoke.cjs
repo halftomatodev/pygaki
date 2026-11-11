@@ -221,6 +221,19 @@ async function until(what, fn, ms = 10000) {
     if (await fxSel.locator('option[value="echo"]').count()) fail('외곽선 겹을 쓰는 효과(echo)가 고른 글에만 효과 목록에 있음');
     await fxSel.selectOption('shake');
     await taIs('효과 태그', '{shader=shake}가나{/shader}다라');
+    // 태그 효과의 [세부 값] 막대: 움직이면 태그 안에 값이 적히고, ↺로 지워지는지
+    if (!(await bar.locator('.tb-knobs').count())) await bar.locator('.tb-knobs-btn').click();
+    const knob = bar.locator('.tb-knobs input[type=range]').first();
+    await knob.waitFor({ timeout: 10000 });
+    await knob.focus();
+    await knob.press('ArrowRight');
+    for (let i = 0; ; i++) {
+      if (/^\{shader=shake:u__\w+=-?[\d.]+\}가나\{\/shader\}다라$/.test(await ta.inputValue())) break;
+      if (i > 50) fail('태그 효과 세부 값: ' + (await ta.inputValue()));
+      await wait(200);
+    }
+    await bar.locator('.tb-knobs label.set .fx-x').first().click();
+    await taIs('태그 효과 세부 값 되돌리기', '{shader=shake}가나{/shader}다라');
     await ta.fill('가{shader=shake}나{/shader}다{shader=wave}라마{/shader}');
     await page.locator('.preview canvas.fx-canvas').first().waitFor({ state: 'attached', timeout: 10000 });
     await wait(1200);

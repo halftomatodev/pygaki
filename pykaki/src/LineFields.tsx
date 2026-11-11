@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 import { useStore } from './store';
 import * as ops from './ops';
 import type { ImageKind, Line, LineFx, SayStyle } from './types';
-import { BOXES, EFFECTS, effectKnobs, formatEffect, parseEffect, type EffectPart, FX_BASE, TAILS, FX_CURSOR, FX_OVERLAY, FX_TRANS, FX_WARP, POSITIONS, STAGE_LABEL, STAGE_TYPES, TRANSITIONS, fxArgs, lineCps, stageCode } from './stage';
+import { shaderEffect } from './fx/textShaders';
+import { BOXES, EFFECTS, effectKnobs, formatEffect, formatImageFx, imageFxCode, parseEffect, parseImageFx, type EffectKnob, type EffectPart, FX_BASE, TAILS, FX_CURSOR, FX_OVERLAY, FX_TRANS, FX_WARP, POSITIONS, STAGE_LABEL, STAGE_TYPES, TRANSITIONS, fxArgs, lineCps, stageCode } from './stage';
 import { useGameFolder } from './gameFolder';
 import { LinePreview } from './PlayStage';
 import { TagBar, useTagTarget } from './TagBar';
@@ -318,6 +319,7 @@ export function StageFields({ l, set, firstId, nd = '' }: { l: Line; set: SetLin
   const chars = useStore((s) => s.project.characters);
   const linked = useStore((s) => !!s.project.settings.renpyLink);
   const sug = useSuggest(l);
+  const [picOpen, setPicOpen] = useState(false);
   const kind = l.kind ?? 'char';
   const { code, problem } = stageCode(l);
   const listId = (k: string) => (useGameFolder.getState().name ? `sug-${k}-${l.id}` : undefined);
@@ -352,7 +354,57 @@ export function StageFields({ l, set, firstId, nd = '' }: { l: Line; set: SetLin
       {l.who && !chars.some((c) => c.id === l.who) && <option value={l.who}>? {l.who}</option>}
     </select>
   );
-  const trans = pick(TRANSITIONS, l.trans, (x, v) => void (x.trans = v || undefined), '나타나는 방식');
+  // 그림 효과(img_fx.use)는 목록에 값을 뗀 이름으로 보이고, 걸리는 시간과 세부 값은 [세부 값] 막대로 고친다
+  const picUse = parseImageFx(l.trans);
+  const picFx = picUse ? shaderEffect(picUse.name) : undefined;
+  const picKnobs: EffectKnob[] = picUse && picFx?.kind === 'transition'
+    ? [{ key: 'time', label: '걸리는 시간(초)', kind: 'num', min: 0.1, max: 3, step: 0.1, def: String(picFx.time) }, ...effectKnobs(picUse.name).map((k) => ({ ...k, key: k.key.replace(/^u__/, '') }))]
+    : [];
+  const picSet = (key: string) => (key === 'time' ? picUse?.time : picUse?.args.find(([k]) => k === key)?.[1]);
+  const picChanged = picKnobs.filter((k) => picSet(k.key) !== undefined).length;
+  const putPic = (key: string, v: string | undefined) =>
+    set((x) => {
+      const u = parseImageFx(x.trans);
+      if (!u) return;
+      if (key === 'time') u.time = v;
+      else {
+        u.args = u.args.filter(([k]) => k !== key);
+        if (v !== undefined) u.args.push([key, v]);
+      }
+      x.trans = formatImageFx(u);
+    }, `pic${key}${l.id}`);
+  const trans = (
+    <>
+      {pick(TRANSITIONS, picUse ? imageFxCode(picUse.name) : l.trans, (x, v) => void (x.trans = v || undefined), '나타나는 방식')}
+      {picKnobs.length > 0 && (
+        <button className={nd + ' fx-more' + (picOpen ? ' on' : '')} title="이 그림 효과의 걸리는 시간과 세부 값을 막대로 고쳐요" onClick={() => setPicOpen(!picOpen)}>
+          세부 값{picChanged ? ` (${picChanged})` : ''}
+        </button>
+      )}
+    </>
+  );
+  const picPanel = picOpen && picKnobs.length > 0 && (
+    <div className={'fx-knobs sf-knobs ' + nd}>
+      {picKnobs.map((k) => {
+        const cur = picSet(k.key);
+        const v = cur ?? k.def;
+        return (
+          <label key={k.key} className={cur !== undefined ? 'set' : ''}>
+            <span className="fx-kn" title={k.key}>{k.label}</span>
+            {k.kind === 'color' ? (
+              <input type="color" value={v.slice(0, 7)} onChange={(e) => putPic(k.key, e.target.value)} />
+            ) : (
+              <>
+                <input type="range" min={k.min} max={k.max} step={k.step} value={Number(v)} data-knob={k.key} onChange={(e) => putPic(k.key, String(Number(e.target.value)))} />
+                <span className="fx-kv">{Number(v)}</span>
+              </>
+            )}
+            <button className="fx-x" style={{ visibility: cur !== undefined ? 'visible' : 'hidden' }} title="기본값으로" onClick={(e) => (e.preventDefault(), putPic(k.key, undefined))}>↺</button>
+          </label>
+        );
+      })}
+    </div>
+  );
 
   let body;
   if (l.type === 'scene') body = <>{field('image', '배경 이름 (예: room) · 비우면 검은 화면', firstId, 'wide')}{trans}</>;
@@ -387,6 +439,7 @@ export function StageFields({ l, set, firstId, nd = '' }: { l: Line; set: SetLin
   return (
     <div className="sf">
       <div className="sf-row">{body}</div>
+      {(l.type === 'scene' || l.type === 'show' || l.type === 'hide') && picPanel}
       <code className={'sf-code' + (code ? '' : ' todo')} title="내보낼 렌파이 명령">{code ?? problem}</code>
     </div>
   );

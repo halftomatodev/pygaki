@@ -59,6 +59,7 @@ export function pairTags(toks: Tok[]): { pairs: Pair[]; problems: TagProblem[] }
   const pairs: Pair[] = [];
   const problems: TagProblem[] = [];
   const stack: Tok[] = [];
+  let crossed = false; // 엇갈려 닫힌 태그는 닫는 쪽마다 걸려서, 첫 번째만 알린다
   for (const t of toks) {
     if (t.k === 'open') {
       if (!(t.name in RENPY_TAGS)) problems.push({ level: 'warn', msg: `{${t.name}}는 렌파이가 모르는 태그예요` });
@@ -68,7 +69,7 @@ export function pairTags(toks: Tok[]): { pairs: Pair[]; problems: TagProblem[] }
       const o = stack.pop();
       if (!o) problems.push({ level: 'error', msg: `{/${t.name}}를 여는 태그가 없어서 렌파이가 멈춰요` });
       else {
-        if (o.name !== t.name) problems.push({ level: 'warn', msg: `{${o.name}}보다 {/${t.name}}가 먼저 닫혀요 (렌파이 Lint 오류)` });
+        if (o.name !== t.name && !crossed && (crossed = true)) problems.push({ level: 'warn', msg: `{${o.name}}보다 {/${t.name}}가 먼저 닫혀요 (렌파이 Lint 오류)` });
         pairs.push({ o, c: t });
       }
     }
@@ -180,6 +181,16 @@ export function setTagValue(text: string, s0: number, e0: number, name: string, 
     return { text: t, s: m(s), e: m(e) };
   }
   return wrap(text, toks, s, e, open, `{/${name}}`);
+}
+
+// 고른 곳을 품은 그 태그의 값만 바꾼다 (효과 세부 값 막대). 태그 안의 일부만 골랐어도 새로 감싸지 않는다
+export function retag(text: string, s0: number, e0: number, name: string, val: string, what: string): Edit {
+  const { pairs, s, e } = prep(text, s0, e0);
+  const p = inner(pairs, name, s, e);
+  if (!p) return { error: `${what} 태그 안에 있지 않아요` };
+  const open = `{${name}=${val}}`;
+  const m = (x: number) => (x >= p.o.e ? x + open.length - (p.o.e - p.o.s) : x);
+  return { text: text.slice(0, p.o.s) + open + text.slice(p.o.e), s: m(s), e: m(e) };
 }
 
 // 그 태그를 벗긴다 (색 빼기)

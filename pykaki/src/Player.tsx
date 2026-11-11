@@ -5,7 +5,7 @@ import { advance, choose, start, type PState } from './playEngine';
 import { renderTagged } from './textTags';
 import type { Choice } from './types';
 import { isTyping } from './util';
-import { soundUrl, useGameFolder } from './gameFolder';
+import { gameFont, soundUrl, useGameFolder } from './gameFolder';
 import { GameFrame, SayBox, Scene, type SayBoxHandle } from './PlayStage';
 import { enterFullPlay, leaveFullPlay } from './actions';
 import { keyOf } from './prefs';
@@ -209,7 +209,7 @@ export function Player({ active }: { active: boolean }) {
         <div className="pmenu" style={{ fontSize: look.textSize }}>
           {st.menu.map((c) => (
             <button key={c.id} onClick={(e) => (e.stopPropagation(), pick(c))} className={c.target ? '' : 'broken'}>
-              {renderTagged(c.text || '(빈 선택지)', tagsOn)}
+              {renderTagged(c.text || '(빈 선택지)', tagsOn, gameFont)}
             </button>
           ))}
         </div>
