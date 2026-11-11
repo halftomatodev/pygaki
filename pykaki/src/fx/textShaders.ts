@@ -85,7 +85,23 @@ export const SHOWPY_SHADERS = parseShaders(showpySource, true, SHOWPY_PARTS).fil
 export const RENPY_SHADERS = parseShaders(renpySource, false);
 // 그림 전환 (효과 폴더의 @transition). showpy img_fx.use("이름")
 export const IMAGE_FX: ShaderEffect[] = [];
-const BY_NAME = new Map([...RENPY_SHADERS, ...SHOWPY_SHADERS].map((e) => [e.name, e]));
+// 한 글자씩 나오기 (렌파이 typewriter). 고르는 목록에는 없고, 글의 일부에만 효과를 건 줄({shader=})의 나머지 글자를 그릴 때 쓴다
+const HIDDEN_SHADERS = parseShaders(
+  `@effect typewriter 한 글자씩
+@cps
+@variables
+    uniform float u_text_slow_time;
+    attribute float a_text_min_time;
+    varying float v_text_min_time;
+@vertex_200
+    v_text_min_time = a_text_min_time;
+@fragment_350
+    float l__done = v_text_min_time <= u_text_slow_time ? 1.0 : 0.0;
+    gl_FragColor = gl_FragColor * l__done;
+`,
+  false,
+);
+const BY_NAME = new Map([...HIDDEN_SHADERS, ...RENPY_SHADERS, ...SHOWPY_SHADERS].map((e) => [e.name, e]));
 // 샘플로만 돌려 보는 효과: 효과 모음에 있지만 아직 게임에 넣지 않은 것 ([효과] 화면). 고르는 목록과 플레이에는 안 나온다
 const PREVIEW = new Map<string, ShaderEffect>();
 export const shaderEffect = (name: string, preview = false) => BY_NAME.get(name) ?? (preview ? PREVIEW.get(name) : undefined);

@@ -4,11 +4,12 @@ import type { Line } from './types';
 import type { PStage, Sprite } from './playEngine';
 import { transInfo } from './playEngine';
 import { boxTail, lineCps } from './stage';
+import { shaderTags } from './tagEdit';
 import type { SayStyle } from './types';
 import { parseTagged, type Tagged } from './textTags';
 import { gameFont, pictureOf, useGameFolder, type GameLook } from './gameFolder';
 import { FxCanvas, webglOk } from './fx/FxCanvas';
-import { IMAGE_FX, parseTextShader, type ShaderEffect } from './fx/textShaders';
+import { IMAGE_FX, parseTextShader, type ShaderEffect, type TextShader } from './fx/textShaders';
 import { TransitionCanvas, type Picture } from './fx/TransitionCanvas';
 
 // 줄마다 고른 글꼴. 못 읽으면 게임 기본 글꼴로 보인다
@@ -336,30 +337,47 @@ const boxTilt = (s: SayStyle, gl: boolean): React.CSSProperties => (s.box && s.b
 const boxColor = (s: SayStyle, base: string) => s.color ?? (s.box === 'bubble' ? '#222222' : base);
 
 // 등장 효과를 WebGL로 그릴 수 있으면 셰이더를, 아니면 null (CSS 흉내로 그림)
-function useShader(effect: string | undefined) {
+// 글의 일부에만 건 효과({shader=이름})가 있으면 그 글자들만 그 효과로 그린다. 줄에 효과가 없으면 나머지 글자는 한 글자씩 나오기로
+function useShader(effect: string | undefined, parsed: Tagged) {
   const [failed, setFailed] = useState<string | null>(null);
-  const ts = useMemo(() => {
-    if (!effect || !webglOk || failed === effect) return null;
+  const tags = useMemo(() => [...new Set(parsed.glyphs.map((g) => g.shader).filter((v): v is string => !!v))].sort().join('\n'), [parsed]);
+  const key = (effect ?? '') + '\n' + tags;
+  const fxSeq = useGameFolder((s) => s.fxSeq); // 효과 폴더를 다시 읽으면 태그의 효과도 다시 찾는다
+  const { ts, tagTs } = useMemo(() => {
+    const none = { ts: null, tagTs: undefined };
+    const base = effect || (tags ? 'typewriter' : '');
+    if (!base || !webglOk || failed === key) return none;
     try {
-      return parseTextShader(effect);
+      const ts = parseTextShader(base);
+      if (!ts) return none;
+      const tagTs = new Map<string, TextShader>();
+      for (const v of tags ? tags.split('\n') : []) {
+        try {
+          const t = parseTextShader(v);
+          if (t) tagTs.set(v, t);
+        } catch {
+          // 값이 틀린 태그는 줄의 효과로 그린다 (검사 탭이 알려 준다)
+        }
+      }
+      return { ts, tagTs: tagTs.size ? tagTs : undefined };
     } catch {
-      return null;
+      return none;
     }
-  }, [effect, failed]);
+  }, [key, failed, fxSeq]);
   const onFail = (e: unknown) => {
     console.warn('WebGL 효과를 못 그려서 CSS로 보여요', e);
-    if (effect) setFailed(effect);
+    setFailed(key);
   };
-  return { ts, onFail };
+  return { ts, tagTs, onFail };
 }
 
 // 설정 카드의 미리보기: 렌파이를 켜지 않고 이 줄의 글자 효과를 본다. 글자는 칸에 꽉 차게 맞춘다
 export function LinePreview({ line, tagsOn }: { line: Line; tagsOn: boolean }) {
   const look = useGameFolder((s) => s.look);
   const [replay, setReplay] = useState(0);
-  const cps = lineCps(line.say) ?? look.textCps;
+  const cps = lineCps(line.say, tagsOn ? line.text : undefined) ?? look.textCps;
   // 값을 바꾸면 처음부터 다시 나온다
-  return <PreviewBody key={[line.id, line.say?.effect, cps, replay].join('|')} line={line} tagsOn={tagsOn} cps={cps} look={look} onReplay={() => setReplay((v) => v + 1)} />;
+  return <PreviewBody key={[line.id, line.say?.effect, cps, replay, tagsOn ? shaderTags(line.text).join('|') : ''].join('|')} line={line} tagsOn={tagsOn} cps={cps} look={look} onReplay={() => setReplay((v) => v + 1)} />;
 }
 
 const PREVIEW_MIN = 11;
@@ -369,7 +387,7 @@ function PreviewBody({ line, tagsOn, cps, look, onReplay }: { line: Line; tagsOn
   const text = line.text.trim() ? line.text : '효과 미리보기';
   const parsed = useMemo(() => parseTagged(text, tagsOn, gameFont), [text, tagsOn]);
   const { shown, click, fast, limit, holding } = useReveal(parsed, cps);
-  const { ts, onFail } = useShader(line.say?.effect);
+  const { ts, tagTs, onFail } = useShader(line.say?.effect, parsed);
   const box = useRef<HTMLDivElement>(null);
   const inner = useRef<HTMLDivElement>(null);
   const style = line.say ?? {};
@@ -405,7 +423,7 @@ function PreviewBody({ line, tagsOn, cps, look, onReplay }: { line: Line; tagsOn
       >
         <Glyphs parsed={parsed} shown={shown} />
       </div>
-      {ts && <FxCanvas target={inner} ts={ts} parsed={parsed} shown={shown} limit={limit} holding={holding} fast={fast} cps={cps} onFail={onFail} />}
+      {ts && <FxCanvas target={inner} ts={ts} tagTs={tagTs} parsed={parsed} shown={shown} limit={limit} holding={holding} fast={fast} cps={cps} onFail={onFail} />}
       <button className="preview-again" title="다시 보기" onClick={(e) => (e.stopPropagation(), onReplay())}>↺</button>
     </div>
   );
@@ -424,9 +442,9 @@ export const SayBox = forwardRef<SayBoxHandle, {
 }>(function SayBox({ line, who, look, tagsOn, wait, onDone, onNoWait, onEdit }, ref) {
   const style = line.say ?? {};
   const parsed = useMemo(() => parseTagged(line.text, tagsOn, gameFont), [line.text, tagsOn]);
-  const cps = lineCps(style) ?? look.textCps;
+  const cps = lineCps(style, tagsOn ? line.text : undefined) ?? look.textCps;
   const { shown, done, click, fast, limit, holding } = useReveal(parsed, cps, wait);
-  const { ts, onFail } = useShader(style.effect);
+  const { ts, tagTs, onFail } = useShader(style.effect, parsed);
   const sayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -483,7 +501,7 @@ export const SayBox = forwardRef<SayBoxHandle, {
       >
         <Glyphs parsed={parsed} shown={shown} />
       </div>
-      {ts && <FxCanvas target={sayRef} ts={ts} parsed={parsed} shown={shown} limit={limit} holding={holding} fast={fast} cps={cps} onFail={onFail} />}
+      {ts && <FxCanvas target={sayRef} ts={ts} tagTs={tagTs} parsed={parsed} shown={shown} limit={limit} holding={holding} fast={fast} cps={cps} onFail={onFail} />}
     </div>
   );
 });

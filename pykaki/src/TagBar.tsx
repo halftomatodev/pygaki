@@ -5,6 +5,8 @@ import { create } from 'zustand';
 import { useStore } from './store';
 import { useGameFolder } from './gameFolder';
 import { hit, keyOf } from './prefs';
+import { EFFECTS } from './stage';
+import { shaderEffect } from './fx/textShaders';
 import { RUBY_NOTE, insertRuby, insertTag, removeTag, setTagValue, stepK, stepSize, tagsAt, toggleTag, type Edit } from './tagEdit';
 
 // 지금 태그를 넣을 글 칸(textarea id). 태그 상자 안으로 포커스가 옮겨 가도 그대로 둔다
@@ -182,6 +184,7 @@ export function TagBar({ targetId, className = '' }: { targetId: string; classNa
   const [alpha, setAlpha] = useState<number | null>(null); // 투명도 막대를 끄는 중인 값
   const media = useGameFolder((f) => f.media);
   const linked = useGameFolder((f) => !!f.name);
+  useGameFolder((f) => f.fxSeq); // 효과 목록이 바뀌면 다시 그린다
   const el = () => document.getElementById(targetId) as HTMLTextAreaElement | null;
 
   // 커서가 움직이면 단추 켜짐을 다시 본다
@@ -267,6 +270,9 @@ export function TagBar({ targetId, className = '' }: { targetId: string; classNa
   const outline = at.get('outlinecolor');
   const curK = at.get('k');
   const curFont = at.get('font');
+  const curFx = at.get('shader');
+  // 고른 글에만 거는 효과: 켜 둔 글자 효과 가운데 외곽선 겹을 쓰는 것(색 잔상 등)은 뺀다. 외곽선은 줄 전체에 걸려서 일부에만 넣을 수 없다
+  const partFx = EFFECTS.filter(([n]) => n && !shaderEffect(n)?.outlines.length);
   const curAlpha = at.has('alpha') ? Number(at.get('alpha')) : NaN;
   const alphaNow = alpha ?? (curAlpha >= 0 && curAlpha <= 1 ? curAlpha : 1);
   const toggleMore = () => {
@@ -333,7 +339,7 @@ export function TagBar({ targetId, className = '' }: { targetId: string; classNa
         <button className={'tb-btn' + (at.get('cps') === '*2' ? ' on' : '')} title="고른 글만 빠르게 {cps=*2}" onClick={() => run((x, s, e) => setTagValue(x, s, e, 'cps', '*2'))}>빠르게</button>
         {at.has('cps') && <button className="tb-btn" title="속도 태그 빼기" onClick={() => run((x, s, e) => removeTag(x, s, e, 'cps', '속도'))}>보통</button>}
         <span className="tb-fill" />
-        <button className={'tb-btn tb-more' + (more ? ' on' : '')} title="투명도, 자간, 글꼴, 외곽선 색, 띄우기, 루비, 글 속 그림" onClick={toggleMore}>{more ? '접기 ▴' : '더 보기 ▾'}</button>
+        <button className={'tb-btn tb-more' + (more ? ' on' : '')} title="투명도, 자간, 글꼴, 외곽선 색, 고른 글에만 효과, 띄우기, 루비, 글 속 그림" onClick={toggleMore}>{more ? '접기 ▴' : '더 보기 ▾'}</button>
       </div>
       {more && (
         <>
@@ -399,6 +405,22 @@ export function TagBar({ targetId, className = '' }: { targetId: string; classNa
             ) : (
               <span className="tb-hint">{linked ? 'game 폴더나 game/fonts에 글꼴 파일(.ttf, .otf)이 없어요' : '게임 폴더를 연결하면 그 안의 글꼴을 골라요'}</span>
             )}
+          </div>
+          <div className="tb-row">
+            <span className="tb-label">효과</span>
+            <select
+              className={'tb-sel' + (curFx !== undefined ? ' on' : '')}
+              value={curFx ?? ''}
+              title="고른 글에만 등장 효과 {shader=}: 줄의 다른 글자는 줄의 효과(없으면 한 글자씩 나오기)로 나와요. 세부 값은 {shader=이름:u__값=3}처럼 손으로 적어요"
+              onChange={(e) => {
+                const v = e.target.value;
+                run((x, s, en) => (v ? setTagValue(x, s, en, 'shader', v) : removeTag(x, s, en, 'shader', '효과')));
+              }}
+            >
+              <option value="">{curFx !== undefined ? '효과 태그 빼기' : '고른 글에만 효과'}</option>
+              {curFx !== undefined && !partFx.some(([n]) => n === curFx) && <option value={curFx}>{curFx}</option>}
+              {partFx.map(([n, label]) => <option key={n} value={n}>{label}</option>)}
+            </select>
           </div>
           <div className="tb-row">
             <span className="tb-label">넣기</span>

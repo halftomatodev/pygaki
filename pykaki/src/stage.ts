@@ -1,6 +1,7 @@
 // 연출 줄(scene/show/hide/music/sound): 칸에 적은 값 → 렌파이 명령 한 줄
 import type { Line, LineFx, LineType, SayStyle } from './types';
 import { IMAGE_FX, RENPY_SHADERS, SHOWPY_SHADERS, shaderEffect } from './fx/textShaders';
+import { shaderTags } from './tagEdit';
 
 export const STAGE_TYPES: LineType[] = ['scene', 'show', 'hide', 'music', 'sound', 'fx'];
 export const isStage = (t: LineType) => STAGE_TYPES.includes(t);
@@ -147,7 +148,10 @@ export const renpyOnlyEffect = (e: string) => effectNames(e).every((n) => RENPY_
 // 글자가 하나씩 나올 때만 보이는 효과(@cps). 글자/초를 비워도 효과가 보이게 기본값을 쓴다 (물결, 떨림, 빛 번짐, 일렁임, VHS는 한 번에 나와도 보여서 뺀다)
 export const DEFAULT_CPS = 30;
 const typed = (n: string) => REMOVED_EFFECTS.includes(n) || [...RENPY_SHADERS, ...SHOWPY_SHADERS].some((e) => e.cps && e.name === n);
-export const lineCps = (s?: SayStyle) => s?.cps ?? (s?.effect && effectNames(s.effect).some(typed) ? DEFAULT_CPS : undefined);
+// 글의 일부에만 건 효과({shader=이름}글{/shader})의 이름들. text는 텍스트 태그를 켰을 때만 넘긴다
+export const tagEffectNames = (text?: string) => (text ? shaderTags(text).flatMap(effectNames) : []);
+export const lineCps = (s?: SayStyle, text?: string) =>
+  s?.cps ?? ((s?.effect && effectNames(s.effect).some(typed)) || tagEffectNames(text).some(typed) ? DEFAULT_CPS : undefined);
 
 // showpy가 없는 게임에서는 렌파이 원래 이름으로 내보낸다. 그러면 플러그인 없이도 오류가 나지 않는다
 const NATIVE: Record<keyof SayStyle, string> = {
@@ -158,8 +162,10 @@ const NATIVE: Record<keyof SayStyle, string> = {
 };
 
 // 대사 줄의 괄호 안 값: size=30, cps=20 ... 위치는 showpy가 뒤에 덧붙이는 순서와 맞춰 맨 뒤에 둔다
-export function sayArgs(s?: SayStyle, native = false): string[] {
-  if (!s) return [];
+export function sayArgs(s0?: SayStyle, native = false, text?: string): string[] {
+  const tagged = tagEffectNames(text).length > 0;
+  if (!s0 && !tagged) return [];
+  const s: SayStyle = s0 ?? {};
   const a: string[] = [];
   const name = (k: keyof SayStyle) => (native ? NATIVE[k] : k);
   const num = (k: keyof SayStyle) => s[k] !== undefined && a.push(`${name(k)}=${s[k]}`);
@@ -167,9 +173,12 @@ export function sayArgs(s?: SayStyle, native = false): string[] {
   num('size');
   str('font');
   str('color');
-  const cps = lineCps(s);
+  const cps = lineCps(s, text);
   if (cps !== undefined) a.push(`${name('cps')}=${cps}`);
+  const before = a.length;
   str('effect');
+  // 글의 일부에만 효과({shader=})를 쓴 줄: 줄에 등장 효과가 없으면 렌파이가 그 줄에서 멈춰서, 한 글자씩 나오기를 넣는다
+  if (tagged && a.length === before) a.push(`${name('effect')}="typewriter"`);
   if (!native && s.box) {
     a.push(`box=${pyStr(s.box)}`);
     if (s.tail) a.push(`tail=${s.tail === 'none' ? 'None' : pyStr(s.tail)}`);

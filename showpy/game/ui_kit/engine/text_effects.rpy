@@ -44,6 +44,10 @@
 ##     effect="scatter:u__distance=200"      더 멀리서 모임
 ##     effect="flash:u__color=#ff4081"        번쩍이는 색
 ##
+## 글의 일부에만 걸려면 텍스트 태그로 씁니다. (줄에 effect가 없으면 나머지는 한 글자씩 나옵니다)
+##     e "앞 글 {shader=shake}흔들리는 글{/shader} 뒤 글"
+##   echo, inkfill처럼 외곽선 겹을 쓰는 효과는 줄 전체(effect=)에만 됩니다.
+##
 ## 글자가 하나씩 나올 때만 움직입니다. 텍스트 속도가 "즉시"면 cps를 적으세요.
 ##
 ## 셰이더 코드는 같은 폴더의 text_effects.glsl에 있습니다. 이 파일은 그것을 읽어 등록만 합니다.

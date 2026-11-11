@@ -3,22 +3,25 @@ import type { CSSProperties, ReactNode } from 'react';
 import { tokenize } from './tagEdit';
 
 // 플레이 화면용: 글자 하나씩으로 나눈다. 언제 멈출지(stops)와 글자별 속도도 함께
-export interface Glyph { ch: string; style: CSSProperties; rate: number } // rate: 글자 속도 배율, 또는 fixed면 글자/초
+// shader: 이 글자에만 거는 등장 효과 ({shader=이름}글{/shader}. 가장 안쪽 것)
+export interface Glyph { ch: string; style: CSSProperties; rate: number; shader?: string } // rate: 글자 속도 배율, 또는 fixed면 글자/초
 export interface Stop { at: number; sec: number | null } // at번째 글자 앞에서 멈춤. sec가 null이면 클릭할 때까지
 export interface Tagged { glyphs: (Glyph & { fixed: boolean })[]; stops: Stop[]; noWait: boolean; fastTo: number }
 
 export function parseTagged(text: string, tagsOn: boolean, fontOf: (path: string) => string | undefined): Tagged {
   const out: Tagged = { glyphs: [], stops: [], noWait: false, fastTo: 0 };
-  const stack: { name: string; style: CSSProperties; rate?: number; fixed?: boolean }[] = [];
+  const stack: { name: string; style: CSSProperties; rate?: number; fixed?: boolean; shader?: string }[] = [];
   const add = (s: string) => {
     let rate = 1;
     let fixed = false;
+    let shader: string | undefined;
     const style: CSSProperties = {};
     for (const e of stack) {
       Object.assign(style, e.style);
       if (e.rate !== undefined) (rate = e.rate, (fixed = !!e.fixed));
+      if (e.shader) shader = e.shader;
     }
-    for (const ch of Array.from(s)) out.glyphs.push({ ch, style, rate, fixed });
+    for (const ch of Array.from(s)) out.glyphs.push({ ch, style, rate, fixed, shader });
   };
   if (!tagsOn) return add(text), out;
 
@@ -64,6 +67,7 @@ export function parseTagged(text: string, tagsOn: boolean, fontOf: (path: string
     else if (name === 'k') push({ letterSpacing: Number(val) || undefined });
     else if (name === 'rt') push({ fontSize: '0.5em', verticalAlign: 'super' }); // 루비는 위에 올리지 못하고 작은 글로만
     else if (name === 'rb') push({});
+    else if (name === 'shader') stack.push({ name, style: {}, shader: val.trim() });
     else if (name === 'size') {
       const m = /^([*+-]?)([\d.]+)$/.exec(val);
       const n = m ? Number(m[2]) : 0;

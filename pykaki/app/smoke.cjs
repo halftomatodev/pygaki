@@ -211,6 +211,22 @@ async function until(what, fn, ms = 10000) {
     await ta.evaluate((el) => el.setSelectionRange(2, 2));
     await bar.locator('button:text-is("가로 띄우기")').click();
     await taIs('띄우기 태그', '가나{space=30}다라');
+    // 고른 글에만 효과 (태그 상자 3단계): {shader=} 태그가 들어가고, 그 줄을 셰이더 오류 없이 그리는지
+    const glWarn = [];
+    const onWarn = (m) => m.text().includes('WebGL 효과를 못 그려서') && glWarn.push(m.text());
+    page.on('console', onWarn);
+    await ta.fill('가나다라');
+    await ta.evaluate((el) => el.setSelectionRange(0, 2));
+    const fxSel = bar.locator('select[title^="고른 글에만"]');
+    if (await fxSel.locator('option[value="echo"]').count()) fail('외곽선 겹을 쓰는 효과(echo)가 고른 글에만 효과 목록에 있음');
+    await fxSel.selectOption('shake');
+    await taIs('효과 태그', '{shader=shake}가나{/shader}다라');
+    await ta.fill('가{shader=shake}나{/shader}다{shader=wave}라마{/shader}');
+    await page.locator('.preview canvas.fx-canvas').first().waitFor({ state: 'attached', timeout: 10000 });
+    await wait(1200);
+    if (glWarn.length) fail('글의 일부에만 건 효과를 못 그림: ' + glWarn[0]);
+    if (!(await page.locator('.preview canvas.fx-canvas').count())) fail('글의 일부에만 건 효과의 미리보기가 사라짐');
+    page.off('console', onWarn);
     await ta.fill(before);
     console.log('태그 상자 더 보기: 됨');
   }

@@ -105,6 +105,21 @@ init -10 python in say_style:
     class LineInfo(store.python_object):
         pass
 
+    def _needs_textshader(who):
+        """지금 줄의 글에 {shader=} 태그가 있는데 등장 효과가 정해진 곳이 없는지."""
+        try:
+            if store.config.default_textshader:
+                return False
+            node = store.renpy.game.script.lookup(store.renpy.game.context().current)
+            what = getattr(node, "what", None)
+            if not isinstance(what, str) or "{shader=" not in what:
+                return False
+            if who is None:
+                who = store.narrator
+            return not getattr(who, "what_args", { }).get("textshader")
+        except Exception:
+            return False
+
     def say_arguments(who, *args, **kwargs):
         a = alias_map()
 
@@ -146,6 +161,11 @@ init -10 python in say_style:
         ts = kwargs.get("what_textshader")
         if isinstance(ts, str) and ts.split(":")[0] in TFX_OUTLINES and "what_outlines" not in kwargs:
             kwargs["what_outlines"] = list(TFX_OUTLINES[ts.split(":")[0]])
+
+        ## 글의 일부에만 효과({shader=이름}글{/shader})를 쓴 줄: 렌파이는 그 줄에 등장 효과가 하나도 없으면
+        ## 오류로 멈춥니다. 줄에도 캐릭터에도 효과가 없으면 한 글자씩 나오기(typewriter)를 넣어 줍니다.
+        if "what_textshader" not in kwargs and _needs_textshader(who):
+            kwargs["what_textshader"] = "typewriter"
 
         ## 글 상자: 대사 글의 background에 넣으면 text_box.rpy가 글 둘레에 그립니다.
         tb = box_from_args(box_args) if box_args else None

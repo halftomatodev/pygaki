@@ -77,6 +77,8 @@ export function pairTags(toks: Tok[]): { pairs: Pair[]; problems: TagProblem[] }
   return { pairs, problems };
 }
 
+// 글 안의 {shader=} 태그에 적힌 효과 값들 ("jitter", "slidein:u__dir=90|shake" ...)
+export const shaderTags = (text: string) => (text.includes('{shader') ? tokenize(text).filter((t) => t.k === 'open' && t.name === 'shader' && t.val.trim()).map((t) => t.val.trim()) : []);
 // 내보내기 검사용
 export const checkTags = (text: string) => pairTags(tokenize(text)).problems;
 // 렌파이 기본 루비 스타일(ruby_text)은 본문과 같은 크기, 같은 자리라서 그대로 두면 글에 겹쳐 보인다

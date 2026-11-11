@@ -59,6 +59,7 @@ label ward.n1:
 |---|---|---|
 | `size=30`, `font="…"`, `color="#…"`, `cps=30` | `size`, `font`, `color`, `cps` | 글자 모양과 속도 |
 | `effect="slidein"`, `effect="slidein|shake"` | `effect` | 등장 효과. 두 효과 겹치기는 `|` (pygaki 2.0, `FEATURE` 3) |
+| 글 안의 `{shader=shake}글{/shader}` | 대사 글 그대로 | 글의 일부에만 등장 효과(렌파이 텍스트 태그). 값은 `effect`와 같은 문법. 줄에 `effect`가 없으면 PyKaki가 `effect="typewriter"`를 붙여 내보내고(없으면 렌파이가 멈춤), 손으로 쓴 원고는 `say_style`이 같은 일을 함(`ui_kit` 4.4) |
 | `box="bubble"`, `box="pill"` | `box` | 글 상자: 말풍선, 둥근 테두리 (pygaki 플러그인 `ui_kit` 4.0 `text_box.rpy`, `FEATURE` 3) |
 | `tail="top"`, `tail=None` | `tail` (`bottom` `top` `left` `right` `none`) | 말풍선 꼬리. 비우면 상자 기본(말풍선은 아래, 둥근 테두리는 없음) |
 | `box_rotate=-4` | `box_rotate` | 상자와 글 기울기 (도) |

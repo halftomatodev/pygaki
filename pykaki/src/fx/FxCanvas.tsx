@@ -14,7 +14,7 @@ const STRIDE = ATTRS.reduce((n, [, k]) => n + k, 0);
 const FUTURE = 1e6; // 아직 언제 나올지 모르는 글자
 const LOD_BIAS = -0.6; // 렌파이 config.gl_lod_bias
 
-interface GlyphBox { i: number; ch: string; x: number; w: number; top: number; bottom: number; base: number; ascent: number; descent: number; font: string; color: string; alpha: number }
+interface GlyphBox { i: number; sh: string; ch: string; x: number; w: number; top: number; bottom: number; base: number; ascent: number; descent: number; font: string; color: string; alpha: number }
 interface Line { top: number; bottom: number; base: number; glyphs: GlyphBox[] }
 interface Layout { w: number; h: number; lines: Line[]; size: number }
 
@@ -27,7 +27,7 @@ const metrics = (font: string, ch: string) => {
 };
 
 // 화면의 글자 자리를 게임 픽셀로 잰다 (글 칸이 줄어 보여도 원래 크기로)
-function measure(box: HTMLElement): Layout | null {
+function measure(box: HTMLElement, groupOf: (i: number) => string): Layout | null {
   const W = box.offsetWidth;
   const H = box.offsetHeight;
   if (!W || !H) return null;
@@ -43,7 +43,7 @@ function measure(box: HTMLElement): Layout | null {
     const m = metrics(font, ch);
     const top = (r.top - br.top) / s;
     const g: GlyphBox = {
-      i: Number(el.dataset.i), ch, x: (r.left - br.left) / s, w: r.width / s, top, bottom: top + r.height / s, base: top + m.ascent,
+      i: Number(el.dataset.i), sh: groupOf(Number(el.dataset.i)), ch, x: (r.left - br.left) / s, w: r.width / s, top, bottom: top + r.height / s, base: top + m.ascent,
       ascent: m.ascent, descent: m.descent, font, color: cs.color, alpha: Number(cs.opacity) || 1,
     };
     size = Math.max(size, parseFloat(cs.fontSize) || 0);
@@ -94,8 +94,16 @@ function paint(layout: Layout, k: number, color: string | null, outline: number)
 export interface Timing { min: (i: number) => number; dur: (i: number) => number } // 초. 글자 번호는 parsed.glyphs 기준
 
 // 조각 만들기 (renpy/text/text.py create_mesh_displayable + gl2mesh2.pyx add_glyph). 단위는 그림 픽셀
+// 효과가 여럿이면({shader=} 태그) 렌파이처럼 효과마다 조각 묶음을 따로 만든다. 줄 양옆의 빈 곳은 첫 글자의 효과 묶음에만 넣는다
 function buildMesh(layout: Layout, k: number, t: Timing) {
-  const quads: number[][] = [];
+  const groups = new Map<string, number[][]>();
+  const firstKey = layout.lines[0]?.glyphs[0]?.sh ?? '';
+  let quads: number[][] = [];
+  const into = (key: string) => {
+    if (!groups.has(key)) groups.set(key, []);
+    quads = groups.get(key)!;
+  };
+  into(firstKey);
   const tw = Math.ceil(layout.w * k);
   const th = Math.ceil(layout.h * k);
   let index = 0; // 렌파이 글자 번호 (줄바꿈은 세지 않음)
@@ -115,8 +123,10 @@ function buildMesh(layout: Layout, k: number, t: Timing) {
     const first = l.glyphs[0];
     let right = first.x * k;
     // 줄 왼쪽의 빈 곳 (가짜 글자)
+    into(firstKey);
     if (right > 0) glyph(right / 2, base, lastIndex, 0, top, right, bottom, lastTime, lastTime, base - top, bottom - base, 1);
     for (const g of l.glyphs) {
+      into(g.sh);
       const left = right;
       right = Math.min(tw, Math.max(left, (g.x + g.w) * k));
       const min = t.min(g.i);
@@ -126,13 +136,16 @@ function buildMesh(layout: Layout, k: number, t: Timing) {
       lastIndex = index++;
     }
     // 줄 오른쪽의 빈 곳
+    into(firstKey);
     if (right < tw) glyph(right + (tw - right) / 2, base, lastIndex, right, top, tw, bottom, lastTime, lastTime, base - top, bottom - base, 1);
   }
-  const data = new Float32Array(quads.length * 4 * STRIDE);
-  quads.forEach((q, n) => data.set(q, n * 4 * STRIDE));
-  const idx = new Uint16Array(quads.length * 6);
-  for (let n = 0; n < quads.length; n++) idx.set([n * 4, n * 4 + 1, n * 4 + 2, n * 4, n * 4 + 2, n * 4 + 3], n * 6);
-  return { data, idx, count: quads.length * 6, tw, th };
+  return [...groups].map(([key, quads]) => {
+    const data = new Float32Array(quads.length * 4 * STRIDE);
+    quads.forEach((q, n) => data.set(q, n * 4 * STRIDE));
+    const idx = new Uint16Array(quads.length * 6);
+    for (let n = 0; n < quads.length; n++) idx.set([n * 4, n * 4 + 1, n * 4 + 2, n * 4, n * 4 + 2, n * 4 + 3], n * 6);
+    return { key, data, idx, count: quads.length * 6 };
+  });
 }
 
 interface Program { prog: WebGLProgram; attrs: [number, number, number][]; uniforms: { loc: WebGLUniformLocation; name: string; type: number }[] }
@@ -140,16 +153,12 @@ interface Program { prog: WebGLProgram; attrs: [number, number, number][]; unifo
 class Renderer {
   gl: WebGLRenderingContext;
   programs = new Map<string, Program>();
-  vbo: WebGLBuffer;
-  ibo: WebGLBuffer;
+  meshes: { key: string; vbo: WebGLBuffer; ibo: WebGLBuffer; count: number }[] = [];
   textures: WebGLTexture[] = [];
-  count = 0;
   constructor(public canvas: HTMLCanvasElement) {
     const gl = canvas.getContext('webgl', { premultipliedAlpha: true, alpha: true, antialias: false, preserveDrawingBuffer: false });
     if (!gl) throw new Error('WebGL을 쓸 수 없어요');
     this.gl = gl;
-    this.vbo = gl.createBuffer()!;
-    this.ibo = gl.createBuffer()!;
   }
 
   program(parts: string[]): Program {
@@ -202,27 +211,42 @@ class Renderer {
     });
   }
 
-  setMesh(data: Float32Array, idx: Uint16Array, count: number) {
+  // 효과 묶음마다 조각 버퍼 하나
+  setMeshes(list: { key: string; data: Float32Array; idx: Uint16Array; count: number }[]) {
     const gl = this.gl;
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
-    gl.bufferData(gl.ARRAY_BUFFER, data, gl.DYNAMIC_DRAW);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ibo);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idx, gl.DYNAMIC_DRAW);
-    this.count = count;
+    while (this.meshes.length > list.length) {
+      const m = this.meshes.pop()!;
+      gl.deleteBuffer(m.vbo);
+      gl.deleteBuffer(m.ibo);
+    }
+    list.forEach((src, n) => {
+      const m = (this.meshes[n] ??= { key: '', vbo: gl.createBuffer()!, ibo: gl.createBuffer()!, count: 0 });
+      gl.bindBuffer(gl.ARRAY_BUFFER, m.vbo);
+      gl.bufferData(gl.ARRAY_BUFFER, src.data, gl.DYNAMIC_DRAW);
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, m.ibo);
+      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, src.idx, gl.DYNAMIC_DRAW);
+      m.key = src.key;
+      m.count = src.count;
+    });
   }
 
-  // 겹마다 한 번씩 그린다. 외곽선 겹이 먼저(뒤), 글자가 마지막
-  draw(p: Program, layers: { tex: number; values: Map<string, UniformValue> }[]) {
+  clear() {
     const gl = this.gl;
     gl.viewport(0, 0, this.canvas.width, this.canvas.height);
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
-    if (!this.count) return;
+  }
+
+  // 묶음 하나를 겹마다 한 번씩 그린다
+  draw(p: Program, mesh: number, layers: { tex: number; values: Map<string, UniformValue> }[]) {
+    const gl = this.gl;
+    const m = this.meshes[mesh];
+    if (!m?.count) return;
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     gl.useProgram(p.prog);
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ibo);
+    gl.bindBuffer(gl.ARRAY_BUFFER, m.vbo);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, m.ibo);
     for (const [loc, size, off] of p.attrs) {
       gl.enableVertexAttribArray(loc);
       gl.vertexAttribPointer(loc, size, gl.FLOAT, false, STRIDE * 4, off * 4);
@@ -245,8 +269,9 @@ class Renderer {
         else if (u.type === gl.FLOAT_MAT4) gl.uniformMatrix4fv(u.loc, false, a);
         else if (u.type === gl.INT || u.type === gl.BOOL) gl.uniform1i(u.loc, a[0]);
       }
-      gl.drawElements(gl.TRIANGLES, this.count, gl.UNSIGNED_SHORT, 0);
+      gl.drawElements(gl.TRIANGLES, m.count, gl.UNSIGNED_SHORT, 0);
     }
+    for (const [loc] of p.attrs) gl.disableVertexAttribArray(loc); // 다음 묶음의 셰이더는 쓰는 값이 다를 수 있다
   }
 
   dispose() {
@@ -268,6 +293,7 @@ const now = () => (performance.now() - T0) / 1000;
 export interface FxCanvasProps {
   target: RefObject<HTMLElement | null>; // 글자(span.ch)가 깔린 칸. 캔버스는 이 칸의 형제로 같은 부모 안에 놓인다
   ts: TextShader;
+  tagTs?: Map<string, TextShader>; // 글의 일부에만 건 효과 ({shader=값} → 셰이더). 여기 없는 글자는 ts로 그린다
   parsed: Tagged;
   shown: number; // 지금까지 나온 글자 수 (useReveal)
   limit: number; // 멈춤 전까지 나올 수 있는 글자 수
@@ -277,7 +303,7 @@ export interface FxCanvasProps {
   onFail(e: unknown): void;
 }
 
-export function FxCanvas({ target, ts, parsed, shown, limit, holding, fast, cps, onFail }: FxCanvasProps) {
+export function FxCanvas({ target, ts, tagTs, parsed, shown, limit, holding, fast, cps, onFail }: FxCanvasProps) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const st = useRef({
     r: null as Renderer | null,
@@ -292,7 +318,7 @@ export function FxCanvas({ target, ts, parsed, shown, limit, holding, fast, cps,
     props: null as FxCanvasProps | null,
     timing: null as Timing | null,
   });
-  st.current.props = { target, ts, parsed, shown, limit, holding, fast, cps, onFail };
+  st.current.props = { target, ts, tagTs, parsed, shown, limit, holding, fast, cps, onFail };
 
   // 시간 기록: shown이 늘 때마다 그때를 적는다
   const s = st.current;
@@ -329,17 +355,19 @@ export function FxCanvas({ target, ts, parsed, shown, limit, holding, fast, cps,
     if (!s.r || !s.layout) return;
     try {
       const slowDur = p.cps > 0 ? 1 / p.cps : 0;
-      const maxTime = s.lastMin + s.lastDur + p.ts.extraSlowDuration * slowDur;
+      // 묶음마다 쓸 셰이더. 기다리는 시간은 가장 긴 것, 하나라도 계속 그리면 계속 그린다 (renpy/text/shader.py compute_times)
+      const groups = s.r.meshes.map((m, n) => ({ n, ts: p.tagTs?.get(m.key) ?? p.ts }));
+      const maxTime = s.lastMin + s.lastDur + Math.max(p.ts.extraSlowDuration, ...groups.map((g) => g.ts.extraSlowDuration)) * slowDur;
       const done = p.fast || (p.shown >= p.parsed.glyphs.length && !p.holding);
       const elapsed = p.holding || s.t0 < 0 ? 0 : now() - s.t0;
       const slow = p.fast ? maxTime : done ? Math.min(elapsed, maxTime) : elapsed;
-      const prog = s.r.program(['renpy.texture', ...p.ts.parts]);
       const { k, margin } = s;
       const cw = s.r.canvas.width;
       const ch = s.r.canvas.height;
       const outlines = p.ts.outlines;
       const maxDepth = outlines.length;
-      const layers = [...outlines.map((o, n) => ({ o, n })), { o: null, n: outlines.length }].map(({ o, n }) => {
+      const layerList = [...outlines.map((o, n) => ({ o, n })), { o: null, n: outlines.length }];
+      const layerOf = (ts: TextShader, { o, n }: (typeof layerList)[number]) => {
         const xo = (o?.[2] ?? 0) * k;
         const yo = (o?.[3] ?? 0) * k;
         // 그림 픽셀 → 캔버스 클립 좌표 (y는 아래로)
@@ -361,12 +389,15 @@ export function FxCanvas({ target, ts, parsed, shown, limit, holding, fast, cps,
           ['u_text_main', o ? 0 : 1],
           ['u_text_to_virtual', 1 / k],
           ['u_text_to_drawable', k],
-          ...p.ts.uniforms,
+          ...ts.uniforms,
         ]);
         return { tex: n, values };
-      });
-      s.r.draw(prog, layers);
-      if (p.ts.redraw || !done || slow < maxTime) s.raf = requestAnimationFrame(frame);
+      };
+      // 렌파이처럼 겹(외곽선이 뒤, 글자가 마지막)마다 묶음을 차례로 그린다
+      s.r.clear();
+      for (const layer of layerList)
+        for (const g of groups) s.r.draw(s.r.program(['renpy.texture', ...g.ts.parts]), g.n, [layerOf(g.ts, layer)]);
+      if (groups.some((g) => g.ts.redraw) || !done || slow < maxTime) s.raf = requestAnimationFrame(frame);
     } catch (e) {
       p.onFail(e);
     }
@@ -380,8 +411,7 @@ export function FxCanvas({ target, ts, parsed, shown, limit, holding, fast, cps,
     const s = st.current;
     const timing = s.timing;
     if (!s.r || !s.layout || !timing) return;
-    const m = buildMesh(s.layout, s.k, timing);
-    s.r.setMesh(m.data, m.idx, m.count);
+    s.r.setMeshes(buildMesh(s.layout, s.k, timing));
     const last = s.layout.lines.flatMap((l) => l.glyphs).pop();
     s.lastMin = last ? Math.min(timing.min(last.i), FUTURE) : 0;
     s.lastDur = last ? timing.dur(last.i) : 0;
@@ -397,7 +427,10 @@ export function FxCanvas({ target, ts, parsed, shown, limit, holding, fast, cps,
     if (!box || !c) return;
     try {
       s.r ??= new Renderer(c);
-      const layout = measure(box);
+      const layout = measure(box, (i) => {
+        const sh = p.parsed.glyphs[i]?.shader;
+        return sh && p.tagTs?.has(sh) ? sh : '';
+      });
       if (!layout) return;
       const scale = box.getBoundingClientRect().width / layout.w || 1;
       const k = Math.min(Math.max(scale * (window.devicePixelRatio || 1), 1), 4096 / (layout.w + 400));
@@ -419,7 +452,7 @@ export function FxCanvas({ target, ts, parsed, shown, limit, holding, fast, cps,
     }
   };
 
-  useLayoutEffect(relayout, [parsed, ts]);
+  useLayoutEffect(relayout, [parsed, ts, tagTs]);
   useLayoutEffect(remesh, [shown, limit, holding, fast, cps]);
 
   useEffect(() => {

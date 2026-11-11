@@ -2,8 +2,9 @@
 import type { BoxNode, LabelGroup, Line, Project, Settings } from './types';
 import { exitLinks, fallTarget } from './ops';
 import { IDENT, PLUGIN_NAMES, RESERVED } from './util';
-import { badImageName, renpyOnlyEffect, fxArgs, isStage, sayArgs, stageCode } from './stage';
-import { checkTags } from './tagEdit';
+import { badImageName, renpyOnlyEffect, fxArgs, isStage, sayArgs, stageCode, tagEffectNames, REMOVED_EFFECTS, RENPY_EFFECTS } from './stage';
+import { shaderEffect } from './fx/textShaders';
+import { checkTags, shaderTags } from './tagEdit';
 import { enterTrans, shaderCode, shaderOfBox, usesShaders } from './shader';
 
 export interface Warn { level: 'error' | 'warn'; msg: string; nodeId?: string }
@@ -154,6 +155,8 @@ export function generateRpy(p: Project): { code: string; warnings: Warn[] } {
         if (!S.escapePercent && loosePercent(t)) W.push({ level: 'error', msg: `${where}의 %에서 렌파이가 멈춰요. 설정에서 "% 를 글자 그대로"를 켜 주세요 (${b.title || b.id})`, nodeId: b.id });
         // 텍스트 태그 짝 (렌파이 check_text_tags와 같은 규칙)
         if (S.allowTextTags) for (const w of checkTags(t)) W.push({ level: w.level, msg: `${where}: ${w.msg} (${b.title || b.id})`, nodeId: b.id });
+        // 선택지 글에는 등장 효과가 없어서 {shader=}를 쓰면 렌파이가 멈춘다
+        if (S.allowTextTags && where !== '대사' && shaderTags(t).length) W.push({ level: 'error', msg: `${where}: {shader=}는 대사 글에만 쓸 수 있어요. 여기에 쓰면 렌파이가 멈춰요 (${b.title || b.id})`, nodeId: b.id });
       };
       const lineOut = (l: Line) => {
         if (S.renpyLink) body.push(`# @l:${l.id}`); // showpy가 줄을 찾는 표시
@@ -181,7 +184,14 @@ export function generateRpy(p: Project): { code: string; warnings: Warn[] } {
         // 짧은 이름과 화면 효과는 플러그인이 받는다. 플러그인이 없으면 오류가 나서 글자 모양만 렌파이 원래 이름으로 쓴다
         if (!S.renpyLink && l.say?.effect && !renpyOnlyEffect(l.say.effect)) W.push({ level: 'warn', msg: `이 등장 효과는 pygaki 플러그인이 있어야 해서 내보내지 않았어요 (${b.title || b.id})`, nodeId: b.id });
         if (!S.renpyLink && l.say?.box) W.push({ level: 'warn', msg: `글 상자는 pygaki 플러그인이 있어야 해서 내보내지 않았어요 (${b.title || b.id})`, nodeId: b.id });
-        const fa = S.renpyLink ? [...fxArgs(l.fx), ...sayArgs(l.say)] : sayArgs(l.say, true);
+        // 글의 일부에만 건 효과 {shader=이름}: 게임에 없는 이름이면 그 줄에서 멈춘다
+        const tagText = S.allowTextTags ? l.text : undefined;
+        for (const n of new Set(tagEffectNames(tagText))) {
+          const known = shaderEffect(n)?.kind === 'effect' || REMOVED_EFFECTS.includes(n);
+          if (!known) W.push({ level: 'warn', msg: `대사: {shader=${n}}는 PyKaki가 모르는 효과예요. 게임에 없는 이름이면 그 줄에서 렌파이가 멈춰요 (${b.title || b.id})`, nodeId: b.id });
+          else if (!S.renpyLink && !RENPY_EFFECTS.includes(n)) W.push({ level: 'warn', msg: `대사: {shader=${n}}는 pygaki 플러그인이 있어야 해요. 없는 게임에서는 그 줄에서 렌파이가 멈춰요 (${b.title || b.id})`, nodeId: b.id });
+        }
+        const fa = S.renpyLink ? [...fxArgs(l.fx), ...sayArgs(l.say, false, tagText)] : sayArgs(l.say, true, tagText);
         const tail = fa.length ? ` (${fa.join(', ')})` : '';
         if (l.type === 'narration') return body.push(q(l.text) + tail);
         const c = l.who ? charById.get(l.who) : undefined;
