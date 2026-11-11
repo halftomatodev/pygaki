@@ -197,6 +197,22 @@ PyKaki는 렌파이 연결(`renpyLink`)을 켜고 폴더를 연결했으면, 대
 
 새 표시: `@transition 이름 한글이름`, `@time 초`, `@fragment`(전환의 색 코드. `l__t`, `l__uv`, `l__size`, `l__old`, `l__new`를 씀), `@param u__이름 최소 최대 한글이름`(막대). 두 프로그램의 읽는 규칙(이름은 `[a-z][a-z0-9_]*`, 이미 있는 이름은 못 씀, 코드가 없으면 틀린 파일)은 같아야 합니다.
 
+### 8-2. 끈 효과 (`ui_kit/effects/effects_off.txt`, ui_kit 4.4)
+
+효과를 지우지 않고 고르는 목록에서만 감추는 파일입니다. 효과 폴더 안에 있고, 없으면 모두 켠 것입니다.
+
+```
+# 끈 효과. 한 줄에 이름 하나
+sweep
+bands
+```
+
+- 한 줄에 효과 이름 하나. `#`부터 줄 끝까지는 설명, 빈 줄은 건너뜀. UTF-8(맨 앞 BOM은 무시)
+- 글자 효과(`@effect`, 기본 효과와 렌파이 효과 `dissolve` 등 포함)와 그림 효과(`@transition`) 이름을 한 파일에 같이 적음. 모르는 이름은 그냥 둠(파일을 다시 넣으면 꺼진 채로 돌아옴)
+- **등록은 다 합니다.** 끈 효과도 셰이더는 그대로 있어서 이미 쓴 대사, 타이틀, `img_fx.use("이름")`은 그대로 돎. 고르는 목록에서만 빠지고, 지금 그 효과를 쓰는 곳에서는 이름이 그대로 보임
+- pygaki 플러그인: `say_style.TFX_OFF`(`text_effects.rpy`), 목록은 `say_style.tfx_listed`, `tmenu.effect_names`, `img_fx.listed`. 게임을 껐다 켜거나 Shift+R로 다시 읽음
+- PyKaki: 아직 읽지 않음(효과 탭 2단계에서 `scanFolder` 때 읽어 `EFFECTS`, `TRANSITIONS`에서 빼고, [효과] 화면에서 이 파일을 씀)
+
 대본에는 글자 효과가 이름 그대로(`say.effect`), 그림 전환이 `trans` 칸에 `img_fx.use("이름")`로 들어갑니다. pygaki 플러그인 연결이 꺼진 대본은 그림 전환을 `dissolve`로 내보냅니다. 적는 법 전체는 `showpy/game/ui_kit/effects/README.md`.
 
 렌파이에 들어 있는 효과(`dissolve` 등 7개)는 렌파이가 등록하므로 pygaki 플러그인 파일에 없고, PyKaki가 미리보기용으로 `src/fx/renpy_textshaders.glsl`에 같은 형식으로 옮겨 둡니다.

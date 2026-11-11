@@ -343,6 +343,11 @@ init -8 python in ui_editor:
                     return label
             return e or "없음"
 
+        def effect_choices(self):
+            """고르는 목록에 내놓을 등장 효과 [(이름, 표시)]. effects_off.txt에 적어 끈 효과는 빠지고,
+            지금 줄이 쓰는 효과는 꺼져 있어도 남습니다(4.4). 이름표는 EFFECTS 전체에서 찾습니다."""
+            return store.say_style.tfx_listed(self.EFFECTS, self.effect())
+
         ## ── 대사 창 위치 (화면 기준 숫자를 보여주기 위해) ──
 
         def window_origin(self):

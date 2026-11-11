@@ -181,6 +181,40 @@ init -10 python in say_style:
         base = main.rsplit("/", 2)[0] + "/effects/" if main.count("/") >= 2 else "effects/"
         return sorted(fn for fn in store.renpy.list_files() if fn.startswith(base) and fn.endswith(".glsl"))
 
+    ## ── 끈 효과 (ui_kit 4.4) ──
+    ## ui_kit/effects/effects_off.txt에 이름을 적은 효과는 "고르는 목록"에서만 빠집니다.
+    ## 셰이더는 그대로 등록하므로, 이미 그 효과를 쓴 대사와 원고는 전과 똑같이 돕니다.
+    ## 한 줄에 이름 하나, #으로 시작하는 줄은 설명, 파일이 없으면 다 켠 것입니다.
+    ## 글자 효과(기본 효과, 렌파이 효과 포함)와 그림 효과 이름을 같이 적습니다.
+    TFX_OFF_FILE = "effects_off.txt"
+    TFX_OFF = set()
+
+    def _tfx_read_off(main):
+        TFX_OFF.clear()
+        fn = (main.rsplit("/", 2)[0] + "/effects/" if main.count("/") >= 2 else "effects/") + TFX_OFF_FILE
+        if not store.renpy.loadable(fn):
+            return
+        try:
+            with store.renpy.open_file(fn, encoding="utf-8") as f:
+                text = f.read()
+        except Exception as ex:
+            TFX_ERRORS.append((fn, "읽지 못했습니다: " + str(ex)))
+            return
+        for row in text.replace("﻿", "").splitlines():
+            row = row.split("#", 1)[0].strip()
+            if row:
+                TFX_OFF.add(row)
+
+    def tfx_off(effect):
+        """끈 효과인지. "maskup", "maskup:u__duration=8" 모두 이름만 봅니다."""
+        if not effect or not isinstance(effect, str):
+            return False
+        return effect.split("|")[0].split(":")[0].strip() in TFX_OFF
+
+    def tfx_listed(pairs, keep=None):
+        """[(이름, 표시), ...]에서 끈 효과를 뺀 목록. keep(지금 쓰는 효과)은 꺼져 있어도 남깁니다."""
+        return [ (n, l) for n, l in pairs if n == keep or not tfx_off(n) ]
+
     def _tfx_name_ok(name):
         import re
         return re.match(r"^[a-z][a-z0-9_]*$", name) is not None
@@ -210,6 +244,7 @@ init -10 python in say_style:
                     (effects if e["kind"] == "effect" else TFX_TRANSITIONS).append(e)
             except Exception as ex:
                 TFX_ERRORS.append((fn, str(ex)))
+        _tfx_read_off(main)
         TFX_EFFECTS[:] = effects
         for e in effects:
             kw = dict(e["code"])

@@ -509,12 +509,16 @@ init -10 python in tmenu:
 
     ## ── 글자 효과 (3.19) ──
 
-    def effect_names():
-        """고를 수 있는 글자 효과 [(이름, 표시)]. 대사 등장 효과와 같은 목록."""
+    def effect_names(keep=None, all=False):
+        """고를 수 있는 글자 효과 [(이름, 표시)]. 대사 등장 효과와 같은 목록.
+        effects_off.txt에 적어 끈 효과는 빠집니다(4.4). keep(지금 쓰는 효과)은 꺼져 있어도 남기고, all=True면 다 돌려줍니다."""
         rv = [ (None, "없음"), ("dissolve", "서서히"), ("wave", "물결"), ("jitter", "떨림") ]
         ss = getattr(store, "say_style", None)
         for e in getattr(ss, "TFX_EFFECTS", [ ]):
             rv.append((e["name"], e["label"]))
+        listed = getattr(ss, "tfx_listed", None)
+        if listed is not None and not all:
+            rv = listed(rv, keep)
         return rv
 
     def with_effect(props, effect, cps=None):

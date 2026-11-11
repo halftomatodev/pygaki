@@ -24,7 +24,7 @@
 
 | 폴더 | 버전 | 하는 일 |
 |---|---|---|
-| `game/ui_kit` | 4.3 | 타이틀 메뉴(배경, 제목, 부제, 글자 효과), ESC 메뉴, 선택지, 커서, 클릭 대기 표시, 대사 소리, 대사 스타일, 글 상자(`text_box`), 그림과 영상 배치(`stage`), 확인 창 글과 버튼 글자(`ui_text`), GUI 편집기(개발 모드 Shift+M, 화면 이름 "GUI 편집기"), 원고 쓰기 도구(`script_edit`) |
+| `game/ui_kit` | 4.4 | 타이틀 메뉴(배경, 제목, 부제, 글자 효과), ESC 메뉴, 선택지, 커서, 클릭 대기 표시, 대사 소리, 대사 스타일, 글 상자(`text_box`), 그림과 영상 배치(`stage`), 확인 창 글과 버튼 글자(`ui_text`), GUI 편집기(개발 모드 Shift+M, 화면 이름 "GUI 편집기"), 원고 쓰기 도구(`script_edit`) |
 | `game/screen_fx` | 5.3 | 셰이더 두 자리(기본, 아스키, VHS, 단말기, 게임보이, 글리치, 지글거림, 망점, 홀로그램, 나이트비전, 포토 콜라주, 파편 흩날림 중 둘), 타이틀과 게임 내 메뉴 셰이더(따로 두 자리), TV 전환, 글자 빼기, 커서 자리, 타이틀 일렁임, 이미지 하나에 거는 효과, 셰이더 전환 틀 |
 | `game/hotkeys` | 1.0 | 단축키, 조작방법 화면 |
 | `game/splash` | 2.0 | 타이틀 전 로고, 경고, 조작 방법 페이지, 편집기 "스플래시" 탭(ui_kit이 있을 때, 화면에서 끌고 돌리고 글 고치기, 페이지 더하기) |
@@ -303,6 +303,7 @@ $ screen_fx.set_values("shards", count=80, colors=2, color="#d22", color2="#811"
 
 - 5단계 1차에서 만든 것 (2026-11-09): `slidein`, `shake`, `inkfill`, `glyphbox`. 겹치기 문법은 쉼표가 아니라 `|`(`effect="slidein|shake"`, 렌파이 `parse_textshader`). `glyphbox`는 줄 끝 빈 칸(가짜 글자 `a_text_pseudo_glyph`)은 빼고, 띄어쓰기에는 상자가 생김. `inkfill`의 외곽선 겹은 굵어진 글자에서 원래 모양을 빼서(8방향 erode, `u__line`) 테두리만 남김. 글자 자리는 `a_text_pos_rect`(x, y, 폭, 높이). 렌파이에 같은 이름 `flip` 효과가 있어서 뒤집기는 `flipin`으로.
 - 5단계 2차에서 만든 것 (2026-11-09): `stamp`, `punch`, `squash`, `extrude`, `flipin`, `led`, `split`(`flipin`, `led`, `split`은 ui_kit 4.2에서 뺌). 공용 조각 `ROTATE`가 `l__p`를 쓰므로 효과 안에서 같은 이름을 쓰지 않음.
+- ui_kit 4.4 (2026-11-11) **끈 효과**: `text_effects.rpy`의 `_tfx_read_off`가 `ui_kit/effects/effects_off.txt`(한 줄에 이름 하나, `#` 뒤는 설명, 없으면 다 켬)를 읽어 `say_style.TFX_OFF`에 둠. 등록(`register_textshader`, `ui_kit.imgfx.*`)은 그대로 다 하고 고르는 목록에서만 뺌: `say_style.tfx_off(이름)`, `say_style.tfx_listed(목록, keep)`, `tmenu.effect_names(keep, all)`(타이틀 글자 효과 버튼, 앱에 보내는 `state.title.effects`), `img_fx.listed(keep)`, 대사 탭 `effect_choices()`. 지금 쓰는 효과는 꺼져 있어도 목록에 남김. 형식은 LINK.md 8-2.
 - ui_kit 4.3 (2026-11-10) **효과 폴더**: `text_effects.rpy`의 `_tfx_register`가 기본 파일 다음에 `ui_kit/effects/*.glsl`을 파일 이름 순서로 읽음(기본 파일의 `@part`를 물려받음). 파일마다 따로 읽어서 틀리면 그 파일만 건너뛰고 `TFX_ERRORS`에 (파일, 이유). 이름은 `[a-z][a-z0-9_]*`, 이미 있는 이름은 못 씀. `@effect`는 `TFX_EFFECTS`에 더해져 편집기 목록에도 나오고, `@transition`은 `TFX_TRANSITIONS`에 모여 `image_effects.rpy`(`init -9 python in img_fx`)가 셰이더 `ui_kit.imgfx.<이름>`으로 등록함(`u__`, `l__` 이름은 `u_imgfx_<이름>_`로 바꿈, 앞 그림 `tex0`, 새 그림 `tex1`, 진행 `u_imgfx_t`, 크기 `u_imgfx_size`). `img_fx.use(이름, 시간, 값=…)`이 전환 객체를 돌려줌. 없는 이름은 개발 모드에서 오류, 배포판에서 `dissolve`. GLSL이 틀리면 처음 그릴 때 렌파이 오류 화면(등록할 때는 못 잡음).
 - ui_kit 4.2 (2026-11-10)에서 뺀 효과: `melt`, `mosh`, `flipin`, `led`, `split`(셰이더를 지움), 렌파이 기본 `typewriter`, `slowalpha`(목록에서만). 예전 원고의 지운 이름은 `text_effects.rpy`의 `REMOVED_EFFECTS`가 한 글자씩 나오기로 등록해서 오류가 나지 않음(예전 `u__` 값도 받기만 함).
 - 여러 효과 겹치기(`effect="slidein|shake"`)는 렌파이 글자 셰이더가 원래 됩니다. PyKaki 미리보기도 이미 겹친 효과를 그립니다.

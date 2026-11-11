@@ -92,6 +92,11 @@ init -9 python in img_fx:
 
     _register()
 
+    def listed(keep=None):
+        """고르는 목록에 내놓을 전환 [(이름, 한글 이름)]. ui_kit/effects/effects_off.txt에 적어 끈 것은 빠집니다(4.4).
+        끈 전환도 등록은 되어 있어서 원고의 img_fx.use("이름")은 그대로 돕니다. keep은 꺼져 있어도 남깁니다."""
+        return store.say_style.tfx_listed(ORDER, keep)
+
     class _Disp(_rtrans.Transition):
 
         def __init__(self, shader, time, uniforms, old_widget=None, new_widget=None, **properties):

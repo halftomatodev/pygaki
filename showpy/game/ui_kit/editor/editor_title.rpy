@@ -329,7 +329,7 @@ init -8 python in ui_editor:
 
         def effect_label(self):
             name = self.effect()
-            for n, l in self.tm().effect_names():
+            for n, l in self.tm().effect_names(all=True):
                 if n == name:
                     return l
             return str(name)
@@ -754,7 +754,7 @@ screen ui_editor_title_panel(tab):
         xmaximum 632
         text "글자 효과:" style "ui_editor_text" yalign 0.5
         $ _ef = tab.effect()
-        for _n, _nl in tmenu.effect_names():
+        for _n, _nl in tmenu.effect_names(keep=_ef):
             textbutton _nl style "ui_editor_button" text_size 13 action Function(tab.set_effect, _n) selected (_ef == _n)
 
     ## 배경 (3.19): 그림이나 webm 영상. 없으면 타이틀은 검은 화면, ESC 메뉴는 투명

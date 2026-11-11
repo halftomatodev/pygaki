@@ -263,7 +263,10 @@ init -8 python in ui_editor:
             )
         if has_labels:
             rv["background"] = _js(tm.screen_value("pause_background" if menu == "pause" else "background"))
-            rv["effects"] = [ [ _js(n), str(l) ] for n, l in tm.effect_names() ]
+            ## 끈 효과(effects_off.txt)는 빼고, 이미 어느 항목이 쓰는 효과는 남김 (4.4)
+            used = set(o["effect"] for o in out if o.get("effect"))
+            on = set(n for n, _l in tm.effect_names())
+            rv["effects"] = [ [ _js(n), str(l) ] for n, l in tm.effect_names(all=True) if n in on or n in used ]
         return rv
 
     def _custom_ui_state():
