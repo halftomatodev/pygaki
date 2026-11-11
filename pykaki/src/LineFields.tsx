@@ -223,7 +223,7 @@ export function SayFields({ l, set }: { l: Line; set: SetLine }) {
         {fxSlot(1)}
       </div>
       <div className="sf-row">
-        <select title="글 상자: 대사 글을 둘러싸는 상자 (showpy가 있어야 내보내요)" value={s.box ?? ''} onChange={(e) => putBox(e.target.value)}>
+        <select title="글 상자: 대사 글을 둘러싸는 상자 (pygaki 플러그인이 있어야 내보내요)" value={s.box ?? ''} onChange={(e) => putBox(e.target.value)}>
           {BOXES.map(([k, t]) => (
             <option key={k} value={k}>{t}</option>
           ))}

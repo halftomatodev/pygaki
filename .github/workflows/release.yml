@@ -60,7 +60,7 @@ jobs:
         shell: bash
         run: |
           B="out/pygaki-$TAG-renpy-$RENPY_VERSION"
-          cp -r "$B/showpy" lintproj && rm lintproj/project.json
+          cp -r "$B/pygaki/template" lintproj && rm lintproj/project.json
           "$B/lib/py3-windows-x86_64/python.exe" "$B/renpy.py" lintproj lint | tail -5
           "$B/lib/py3-windows-x86_64/python.exe" "$B/renpy.py" "$B/launcher" lint > /dev/null
           test -f "$B/launcher/game/pygaki_launcher.rpyc"
@@ -82,9 +82,9 @@ jobs:
           ## 어떤 것을 받나요?
 
           - **렌파이가 아직 없으면** → \`pygaki-$TAG-renpy-$RENPY_VERSION.zip\`
-            아무 폴더에 풀고 \`renpy.exe\`를 켜면 됩니다. 렌파이 $RENPY_VERSION + showpy + pygaki 앱이 다 들어 있습니다.
+            아무 폴더에 풀고 \`renpy.exe\`를 켜면 됩니다. 렌파이 $RENPY_VERSION + pygaki 플러그인 + pygaki 앱이 다 들어 있습니다.
           - **렌파이 SDK가 이미 있으면** → \`pygaki-$TAG-addon.zip\`
-            zip 안의 \`launcher\`, \`showpy\`, \`pygaki\` 세 폴더를 렌파이 SDK 폴더(\`renpy.exe\`가 있는 곳)에 끌어 넣고 런처를 껐다 켭니다. 렌파이의 원래 파일은 바뀌지 않습니다.
+            zip 안의 \`launcher\`, \`pygaki\` 두 폴더를 렌파이 SDK 폴더(\`renpy.exe\`가 있는 곳)에 끌어 넣고 런처를 껐다 켭니다. 렌파이의 원래 파일은 바뀌지 않습니다.
 
           런처 첫 화면 아래쪽에 **[pygaki로 편집]** 버튼이 생기고, 새 프로젝트 만들기에서 **기본 (Vanilla)** 과 **Pygaki** 를 고를 수 있습니다. 자세한 쓰는 법은 묶음 안의 \`pygaki/읽어주세요.txt\`.
 

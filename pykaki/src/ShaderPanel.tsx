@@ -55,7 +55,7 @@ export function ShaderPanel() {
   const name = box ? `상자 「${box.title || box.id}」` : `label ${group?.title ? `${group.title} (${group.name})` : group?.name}`;
   const nBoxes = project.nodes.filter((n) => n.group === so.id).length;
   const from = box ? project.nodes.filter((n) => exitLinks(n).some((l) => l.target === box.id)) : [];
-  const line = !linked ? '# showpy 연결이 꺼져 있어요' : !usesShaders(project) ? '# 셰이더를 정한 곳이 없어서 줄을 넣지 않아요' : box ? shaderCode(shaderOfBox(project, box), enterTrans(project, box, from)) : '';
+  const line = !linked ? '# pygaki 플러그인 연결이 꺼져 있어요' : !usesShaders(project) ? '# 셰이더를 정한 곳이 없어서 줄을 넣지 않아요' : box ? shaderCode(shaderOfBox(project, box), enterTrans(project, box, from)) : '';
 
   return (
     <div className="insp shader-panel">
@@ -106,7 +106,7 @@ export function ShaderPanel() {
           <pre className="rpy small">{line}</pre>
         </>
       )}
-      {!linked && <p className="tip warn-text">셰이더는 showpy 플러그인이 있어야 해요. 왼쪽 [설정]에서 "showpy 플러그인 연결"을 켜 주세요.</p>}
+      {!linked && <p className="tip warn-text">셰이더는 pygaki 플러그인이 있어야 해요. 왼쪽 [설정]에서 "pygaki 플러그인 연결"을 켜 주세요.</p>}
       <p className="tip">셰이더의 세부 값(막대)은 [GUI 편집] → 셰이더에서 게임 화면을 보면서 고쳐요. 여기서는 어느 상자에 걸지만 정해요.</p>
     </div>
   );

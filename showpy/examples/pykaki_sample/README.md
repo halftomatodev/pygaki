@@ -10,7 +10,7 @@
 
 ## PyKaki에서 열기
 
-[PyKaki](https://halftomatodev.github.io/pygaki/)에서 [열기]로 `pykaki/sample.flow.json`을 엽니다. 이 대본은 showpy 연결이 켜져 있습니다. [폴더 연결]로 위 프로젝트의 `game`을 고르면 됩니다.
+[PyKaki](https://halftomatodev.github.io/pygaki/)에서 [열기]로 `pykaki/sample.flow.json`을 엽니다. 이 대본은 pygaki 플러그인 연결이 켜져 있습니다. [폴더 연결]로 위 프로젝트의 `game`을 고르면 됩니다.
 
 | 상자 | 들어 있는 것 |
 |---|---|

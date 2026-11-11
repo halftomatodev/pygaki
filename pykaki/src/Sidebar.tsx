@@ -66,7 +66,7 @@ export function Sidebar() {
           </label>
           <label>
             <input type="checkbox" checked={!!project.settings.renpyLink} onChange={(e) => update((p) => void (p.settings.renpyLink = e.target.checked))} />
-            showpy 플러그인 연결
+            pygaki 플러그인 연결
           </label>
         </div>
       )}
@@ -116,7 +116,7 @@ function LinkPanel() {
           <button onClick={() => void desktop!.choose()}>다른 프로젝트</button>
         </div>
         <p className="tip">그림과 영상 {f.media.images.length}개, 소리 {f.media.audio.length}개를 찾았어요.</p>
-        {!f.hasShowpy && <p className="tip">이 프로젝트에는 showpy가 없어요. 위치와 화면 효과를 렌파이에서 고치려면 showpy로 만든 프로젝트를 쓰세요.</p>}
+        {!f.hasShowpy && <p className="tip">이 프로젝트에는 pygaki 플러그인이 없어요. 위치와 화면 효과를 렌파이에서 고치려면 런처 새 프로젝트 만들기의 "Pygaki"로 만든 프로젝트를 쓰세요.</p>}
         {f.startClash && hasStart && <p className="tip warn-text">{f.startClash}에도 label start가 있어요. 대본의 start label 이름을 바꾸거나 그 파일의 label start를 지워 주세요.</p>}
       </div>
     );
@@ -135,7 +135,7 @@ function LinkPanel() {
       {f.name && <p className="tip">그림과 영상 {f.media.images.length}개, 소리 {f.media.audio.length}개를 찾았어요.</p>}
       {f.name && !f.hasShowpy && f.media.images.length + f.media.audio.length + f.media.fonts.length > 0 && (
         <p className="tip">
-          showpy가 없어요. 위치와 화면 효과를 렌파이에서 고치려면 <a href="https://github.com/halftomatodev/pygaki/tree/main/showpy" target="_blank" rel="noreferrer">showpy</a> 폴더들을 game에 넣고 [폴더 바꾸기]로 다시 연결하세요.
+          pygaki 플러그인이 없어요. 위치와 화면 효과를 렌파이에서 고치려면 <a href="https://github.com/halftomatodev/pygaki/tree/main/showpy" target="_blank" rel="noreferrer">pygaki 플러그인</a> 폴더들을 game에 넣고 [폴더 바꾸기]로 다시 연결하세요.
         </p>
       )}
       {f.startClash && hasStart && <p className="tip warn-text">{f.startClash}에도 label start가 있어요. 대본의 start label 이름을 바꾸거나 그 파일의 label start를 지워 주세요.</p>}

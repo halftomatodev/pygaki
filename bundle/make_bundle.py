@@ -1,6 +1,6 @@
 """pygaki 배포 묶음 만들기 (윈도우).
 
-렌파이 SDK + showpy 템플릿 + 런처 버튼 + pygaki 데스크톱 앱을 폴더 하나(와 zip)로 묶는다.
+렌파이 SDK + pygaki 템플릿 + 런처 버튼 + pygaki 데스크톱 앱을 폴더 하나(와 zip)로 묶는다.
 렌파이를 새 버전으로 올릴 때도 새 SDK로 이 스크립트를 다시 돌리면 된다.
 
     python bundle/make_bundle.py
@@ -14,7 +14,8 @@
 묶음 안:
     renpy.exe, launcher/ ...          렌파이 SDK 그대로
     launcher/game/pygaki_launcher.rpy  런처 첫 화면의 [pygaki로 편집], 새 프로젝트 만들기의 기본(Vanilla)/Pygaki 고르기
-    showpy/                            새 프로젝트 템플릿 (런처처럼 만든 1280x720 한국어 기본 프로젝트 + showpy 플러그인, project.json "template")
+    pygaki/template/                   Pygaki 새 프로젝트에 얹을 플러그인을 담은 템플릿 (런처처럼 만든 1280x720 한국어 기본 프로젝트 + 플러그인.
+                                       새 프로젝트는 런처가 고른 해상도로 새로 만들고 여기서 플러그인만 가져감)
     pygaki/app/pygaki.exe              pygaki 데스크톱 앱 (GitHub Actions "pygaki 앱" 결과물을 풀어 둔 폴더)
     pygaki/읽어주세요.txt
 
@@ -32,14 +33,14 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 SHOWPY_GAME = os.path.join(ROOT, "showpy", "game")
 
-## 템플릿에 넣을 showpy 플러그인. 빼고 싶은 것은 여기서 지운다
+## 템플릿에 넣을 플러그인 (저장소 showpy/game 안의 폴더). 빼고 싶은 것은 여기서 지운다
 PLUGINS = ["ui_kit", "screen_fx", "hotkeys", "splash"]
 
 ## 템플릿 기본 프로젝트의 화면 크기와 언어 (런처로 새로 만들 때 고르는 것과 같음)
 SIZE = (1280, 720)
 LANGUAGE = "korean"
 
-## 템플릿에서만 바꾸는 설정 (파일, 원래 줄, 바꿀 줄). showpy 원본은 그대로 둔다
+## 템플릿에서만 바꾸는 설정 (파일, 원래 줄, 바꿀 줄). 저장소 원본은 그대로 둔다
 TEMPLATE_SETTINGS = [
     ## VHS 덮개는 처음에는 끔. 켜려면 새 프로젝트의 screen_fx/screen_fx_config.rpy에서 True로
     ("screen_fx/screen_fx_config.rpy", "define screen_fx.overlay = True",
@@ -90,12 +91,13 @@ def privacy_check(dirs):
 
 README = """pygaki ({version})
 
-렌파이 {renpy} + showpy {showpy} + pygaki 데스크톱 앱
+렌파이 {renpy} + pygaki 플러그인 {showpy} + pygaki 데스크톱 앱
 
 1. 이 폴더의 renpy.exe로 렌파이 런처를 켭니다.
    (런처가 영어면 preferences → Language → 한국어)
-2. 런처 왼쪽 아래의 [+ Create New Project](새 프로젝트 만들기)를 누르고 "Pygaki"를 골라 프로젝트를 만듭니다.
-   showpy가 처음부터 들어 있습니다. "기본 (Vanilla)"을 고르면 렌파이 원래 새 프로젝트가 만들어집니다(showpy 없음).
+2. 런처 왼쪽 아래의 [+ Create New Project](새 프로젝트 만들기)를 누르고 "Pygaki"를 고른 뒤
+   이름, 해상도, 색을 정해 프로젝트를 만듭니다. pygaki 편집 도구가 처음부터 들어 있는 한국어 프로젝트입니다.
+   "기본 (Vanilla)"을 고르면 렌파이 원래 새 프로젝트가 만들어집니다(pygaki 편집 도구 없음).
    VHS 덮개는 처음에는 꺼져 있습니다. 켜려면 game/screen_fx/screen_fx_config.rpy의
    define screen_fx.overlay = False 를 True로 바꿉니다.
 3. 왼쪽 목록에서 프로젝트를 고르고 [pygaki로 편집]을 누르면 pygaki 앱이 그 프로젝트로 열립니다.
@@ -103,7 +105,7 @@ README = """pygaki ({version})
    - 대본은 프로젝트 폴더 맨 위의 "프로젝트이름.flow.json"에 자동 저장됩니다.
    - Ctrl+E로 game/script_flow.rpy에 내보내면 렌파이가 바로 다시 불러옵니다.
 4. [Launch Project]로 게임을 켜면 앱의 [GUI 편집]이 게임에 붙습니다(초록 점).
-   앱 없이 게임 안에서 고치려면 Shift+M으로 showpy 편집기를 엽니다.
+   앱 없이 게임 안에서 고치려면 Shift+M으로 GUI 편집기를 엽니다.
    편집기에서 넣은 그림, 소리 줄은 대본에 바로 받아 적힙니다.
 
 앱만 따로 켜려면 pygaki\\app\\pygaki.exe (프로젝트 폴더를 고르는 창이 뜹니다).
@@ -111,7 +113,7 @@ README = """pygaki ({version})
 
 새 버전: https://github.com/halftomatodev/pygaki/releases
 
-라이선스: 렌파이는 MIT (renpy\\LICENSE.txt 등 SDK 안의 파일), showpy와 pygaki 앱은 MIT.
+라이선스: 렌파이는 MIT (renpy\\LICENSE.txt 등 SDK 안의 파일), pygaki 플러그인과 앱은 MIT.
 """
 
 ADDON_README = """pygaki 덧붙임 ({version}) 넣는 법
@@ -120,21 +122,22 @@ ADDON_README = """pygaki 덧붙임 ({version}) 넣는 법
 렌파이가 없으면 렌파이까지 들어 있는 pygaki-...-renpy-....zip을 받으세요.
 
 1. 렌파이 SDK 폴더(renpy.exe가 있는 폴더)를 엽니다.
-2. 이 zip 안의 launcher, showpy, pygaki 세 폴더를 그 폴더에 그대로 끌어 넣습니다.
+2. 이 zip 안의 launcher, pygaki 두 폴더를 그 폴더에 그대로 끌어 넣습니다.
    "같은 이름의 폴더가 있다"고 물으면 [바꾸기]나 [합치기]를 고릅니다.
    렌파이의 원래 파일은 바뀌지 않고 파일만 더해집니다:
-   launcher\\game\\pygaki_launcher.rpy, showpy\\, pygaki\\
+   launcher\\game\\pygaki_launcher.rpy, pygaki\\
 3. 런처가 켜져 있었으면 껐다 켭니다. 첫 화면 아래쪽에 [pygaki로 편집]이 생기고,
    [+ Create New Project](새 프로젝트 만들기)에서 "기본 (Vanilla)"과 "Pygaki"를 고를 수 있습니다.
 
 쓰는 법은 pygaki\\읽어주세요.txt를 보세요. 이 파일은 같이 넣어도 되고 지워도 됩니다.
 
-빼려면: launcher\\game\\pygaki_launcher.rpy(와 pygaki_launcher.rpyc), showpy, pygaki 폴더를 지웁니다.
-렌파이를 새 버전으로 올리면 새 SDK 폴더에 세 폴더를 다시 넣습니다.
+빼려면: launcher\\game\\pygaki_launcher.rpy(와 pygaki_launcher.rpyc), pygaki 폴더를 지웁니다.
+렌파이를 새 버전으로 올리면 새 SDK 폴더에 두 폴더를 다시 넣습니다.
+예전 판을 넣은 적이 있으면 SDK 폴더의 showpy 폴더는 이제 안 쓰니 지워도 됩니다.
 """
 
 ## 덧붙임에 들어가는 것 (SDK 폴더 기준). 나머지는 SDK 그대로
-ADDON_PARTS = [os.path.join("launcher", "game", "pygaki_launcher.rpy"), "showpy", "pygaki"]
+ADDON_PARTS = [os.path.join("launcher", "game", "pygaki_launcher.rpy"), "pygaki"]
 
 
 def version_of(path, pattern, default="?"):
@@ -241,13 +244,14 @@ def main():
     print("2/6 런처 버튼 넣기 ...")
     shutil.copy(os.path.join(HERE, "launcher", "pygaki_launcher.rpy"), os.path.join(out, "launcher", "game"))
 
-    print("3/6 showpy 템플릿 만들기 ...")
-    tdir = os.path.join(out, "showpy")
+    print("3/6 pygaki 템플릿 만들기 ...")
+    os.makedirs(os.path.join(out, "pygaki"), exist_ok=True)
+    tdir = os.path.join(out, "pygaki", "template")
     make_base_project(out, tdir)
     for name in PLUGINS:
         src = os.path.join(SHOWPY_GAME, name)
         if not os.path.isdir(src):
-            sys.exit("showpy 플러그인이 없어요: " + src)
+            sys.exit("플러그인이 없어요: " + src)
         shutil.copytree(src, os.path.join(tdir, "game", name), ignore=SKIP)
     ## 커서, 클릭 대기 표시(CTC) 샘플 그림 (custom_ui_config.rpy가 가리키는 game/gui/cursor, game/gui/ctc)
     samples = os.path.join(ROOT, "showpy", "samples", "gui")
@@ -288,7 +292,7 @@ def main():
         f.write(ADDON_README.format(version=prefix, renpy=renpy_ver).replace("\n", "\r\n"))
 
     print("정보 새는지 검사 ...")
-    privacy_check([ os.path.join(out, "showpy"), os.path.join(out, "pygaki"), os.path.join(out, "launcher", "game"), addon ])
+    privacy_check([ os.path.join(out, "pygaki"), os.path.join(out, "launcher", "game"), addon ])
 
     if a.zip:
         print("6/6 zip 만들기 ...")

@@ -1,10 +1,10 @@
-# showpy 커스텀 가이드 (5.0)
+# pygaki 플러그인 커스텀 가이드 (5.0)
 
 2026-11-09 · 버전 5.0 (5.0에서 바뀐 것: 새 화면 효과 일곱(글리치, 지글거림, 망점, 홀로그램, 나이트비전, 조각 어긋남, 파편 흩날림), 이미지 하나에 거는 효과, 글자 등장 효과 열하나, 글 상자(말풍선, 둥근 테두리), 스플래시를 화면에서 고치기, GUI 편집기 "UI 글" 탭. 4.22에서 바뀐 것: 셰이더가 바뀌는 줄과 줄마다 전환, 커서와 셰이더 '여기에서부터', 대사 탭 정리, 커서·CTC 그림 폴더. 4.21에서 바뀐 것: 셰이더 칸의 세부 속성을 1번, 2번 아래로, 줄을 누르면 게임도 그 줄로. 4.20에서 바뀐 것: 셰이더 두 자리와 '여기에서부터 적용', 타이틀/게임 내 메뉴 셰이더, 타이틀 배경과 제목, 부제, 글자 효과, 회전 손잡이)
 
 ## 이 문서 보는 법
 
-showpy 5.0을 받은 사람이 **어떤 파일의 어떤 값을 고치면 무엇이 바뀌는지** 찾아보는 문서입니다. 설정 이름의 전체 설명은 각 폴더의 `README.md`에 있고, 이 문서는 "하고 싶은 일"에서 출발합니다. 글을 PyKaki에서 쓰려면 "PyKaki와 함께 쓰기"부터 보세요.
+pygaki 플러그인 5.0을 받은 사람이 **어떤 파일의 어떤 값을 고치면 무엇이 바뀌는지** 찾아보는 문서입니다. 설정 이름의 전체 설명은 각 폴더의 `README.md`에 있고, 이 문서는 "하고 싶은 일"에서 출발합니다. 글을 PyKaki에서 쓰려면 "PyKaki와 함께 쓰기"부터 보세요.
 
 | 폴더 | 하는 일 | 고치는 파일 |
 | --- | --- | --- |
@@ -99,11 +99,11 @@ showpy 5.0을 받은 사람이 **어떤 파일의 어떤 값을 고치면 무엇
 
 ### 처음 한 번만 하는 준비
 
-1. 렌파이로 프로젝트를 만들고 showpy 폴더들을 `game`에 넣습니다.
+1. 렌파이로 프로젝트를 만들고 pygaki 플러그인 폴더들을 `game`에 넣습니다.
 2. 크롬이나 엣지로 PyKaki를 엽니다. (폴더 연결은 이 두 브라우저에서만 됩니다)
 3. 왼쪽 **[렌파이 프로젝트 연결]**을 누르고 프로젝트 폴더를 고른 뒤, 권한을 허용합니다.
 
-이것으로 끝입니다. PyKaki가 `game` 폴더를 찾고, showpy가 있으면 연결을 켜고, `game/script_flow.rpy`를 만듭니다. 렌파이에서 실행하면 PyKaki의 첫 상자부터 시작합니다.
+이것으로 끝입니다. PyKaki가 `game` 폴더를 찾고, pygaki 플러그인이 있으면 연결을 켜고, `game/script_flow.rpy`를 만듭니다. 렌파이에서 실행하면 PyKaki의 첫 상자부터 시작합니다.
 
 `script.rpy`는 그대로 둬도 됩니다. 내보낸 파일에 아래 줄이 들어 있어서 게임 시작이 첫 상자로 이어지고, `script.rpy`의 `label start:`는 실행되지 않습니다.
 
@@ -187,8 +187,8 @@ PyKaki의 **[버전 목록]**에서 되돌린 뒤 **Ctrl+E**를 누르면 렌파
 | `ValueError: unsupported format character` | 대사의 `%` 때문입니다. PyKaki 설정의 **% 를 글자 그대로**를 켭니다. 새 프로젝트는 켜져 있습니다 |
 | 렌파이에서 넣은 그림이 PyKaki에 안 나타남 | PyKaki에서 **[다시 읽기]**를 누르거나 Ctrl+E를 누르세요. 권한을 다시 묻는 경우가 있습니다 |
 | 렌파이에서 넣은 그림이 사라짐 | 폴더를 연결하지 않고 내보냈을 수 있습니다. `showpy_inbox.json`에 남아 있으니 폴더를 연결하고 Ctrl+E를 누르면 돌아옵니다 |
-| "이 줄의 표시가 없습니다" | PyKaki에서 showpy 연결을 켜고 다시 내보내세요 |
-| 캐릭터 id 오류 | `stage`, `ascii`, `t`, `n1` 등은 showpy가 쓰는 이름입니다. 다른 id로 바꾸세요 |
+| "이 줄의 표시가 없습니다" | PyKaki에서 pygaki 플러그인 연결을 켜고 다시 내보내세요 |
+| 캐릭터 id 오류 | `stage`, `ascii`, `t`, `n1` 등은 pygaki 플러그인이 쓰는 이름입니다. 다른 id로 바꾸세요 |
 
 ## 에셋 바꾸기
 
@@ -781,7 +781,7 @@ define n2 = Character(kind=t, what_xpos=400, what_ypos=210)   # 위치 프리셋
 | `width` | `what_xmaximum` | 한 줄 최대 너비 |
 | `align` | `what_text_align` | 줄 정렬 0.0 ~ 1.0 |
 | `speed` | `what_slow_cps_multiplier` | 나오는 속도 배율 (플레이어 텍스트 속도에 곱함. 0.5 = 절반) |
-| `effect` | `what_textshader` | 등장 효과: `"dissolve"` 서서히, `"typewriter"` 타자기, `"slowalpha"` 흐리게 대기, `"flip"` 뒤집히며, `"zoom"` 커지며, `"jitter"` 떨림, `"wave"` 물결. showpy 효과: `"scatter"` 흩어졌다 모이기, `"drop"` 떨어지기, `"spin"` 회전하며, `"shuffle"` 무작위 순서, `"flash"` 색 번쩍, `"slam"` 크게 찍히기, `"typecursor"` 커서 타자기, `"echo"` 색 잔상, `"glitch"` 글리치, `"glow"` 빛 번짐, `"blurin"` 흐렸다 또렷해지기, `"wipe"` 위에서 그려지기, `"blockglitch"` 블록 글리치, `"melt"` 녹아내림, `"mosh"` 데이터모싱 흉내, `"liquid"` 일렁임, `"vhs"` VHS 지직거림, `"rise"` 떠오르기, `"lean"` 기울며 들어오기, `"stretch"` 늘어나며 들어오기, `"slidein"` 미끄러져 멈춤, `"shake"` 살짝 흔들림, `"inkfill"` 외곽선 채우기, `"glyphbox"` 글자마다 상자, `"stamp"` 도장, `"punch"` 튀어나오는 줌, `"squash"` 찌그러졌다 튕김, `"extrude"` 입체 글자, `"flipin"` 뒤집으며 나오기, `"led"` LED 전광판, `"split"` 위아래 갈라짐. 두 효과 겹치기는 `effect="slidein|shake"` |
+| `effect` | `what_textshader` | 등장 효과: `"dissolve"` 서서히, `"typewriter"` 타자기, `"slowalpha"` 흐리게 대기, `"flip"` 뒤집히며, `"zoom"` 커지며, `"jitter"` 떨림, `"wave"` 물결. pygaki 플러그인 효과: `"scatter"` 흩어졌다 모이기, `"drop"` 떨어지기, `"spin"` 회전하며, `"shuffle"` 무작위 순서, `"flash"` 색 번쩍, `"slam"` 크게 찍히기, `"typecursor"` 커서 타자기, `"echo"` 색 잔상, `"glitch"` 글리치, `"glow"` 빛 번짐, `"blurin"` 흐렸다 또렷해지기, `"wipe"` 위에서 그려지기, `"blockglitch"` 블록 글리치, `"melt"` 녹아내림, `"mosh"` 데이터모싱 흉내, `"liquid"` 일렁임, `"vhs"` VHS 지직거림, `"rise"` 떠오르기, `"lean"` 기울며 들어오기, `"stretch"` 늘어나며 들어오기, `"slidein"` 미끄러져 멈춤, `"shake"` 살짝 흔들림, `"inkfill"` 외곽선 채우기, `"glyphbox"` 글자마다 상자, `"stamp"` 도장, `"punch"` 튀어나오는 줌, `"squash"` 찌그러졌다 튕김, `"extrude"` 입체 글자, `"flipin"` 뒤집으며 나오기, `"led"` LED 전광판, `"split"` 위아래 갈라짐. 두 효과 겹치기는 `effect="slidein|shake"` |
 | `name_x`, `name_y` | `namebox_xpos`, `namebox_ypos` | 이름 상자 위치 (대사 창 왼쪽 위 기준, 이름 배경째 움직임) |
 | `name_font`, `name_size`, `name_color` | `who_font`, `who_size`, `who_color` | 이름 글꼴, 크기, 색 |
 

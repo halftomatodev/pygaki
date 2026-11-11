@@ -1,4 +1,4 @@
-# showpy 명세서
+# pygaki 플러그인 명세서
 
 코드를 고치는 사람과 AI가 읽는 문서입니다. 사용법은 [CUSTOM_GUIDE.md](CUSTOM_GUIDE.md)에 있습니다.
 
@@ -12,7 +12,7 @@
 
 ## 1. 목적
 
-렌파이를 쓸 때 코드와 툴 사용법을 먼저 배워야 하는 부담을 낮춥니다. 글은 PyKaki에서 쓰고, 화면에 보이는 것은 게임을 실행한 채 showpy 편집기에서 마우스로 고칩니다.
+렌파이를 쓸 때 코드와 툴 사용법을 먼저 배워야 하는 부담을 낮춥니다. 글은 PyKaki에서 쓰고, 화면에 보이는 것은 게임을 실행한 채 GUI 편집기에서 마우스로 고칩니다.
 
 원칙:
 - 폴더를 `game/`에 넣는 것만으로 동작합니다. 렌파이 기본 파일(`screens.rpy` 등)은 고치지 않습니다.
@@ -66,7 +66,7 @@ PyKaki가 내보내는 문법이기도 합니다.
 | `size` `font` `color` `outline` `spacing` `bold` `italic` `kerning` `width` `align` | | 글자 모양 |
 | `speed` | 배율 | 나오는 속도. 플레이어 설정에 곱함 (설정이 "즉시"면 효과 없음) |
 | `cps` | 숫자 | 나오는 속도, 1초에 나오는 글자 수. 플레이어 설정과 상관없음 |
-| `effect` | `"dissolve"` `"flip"` `"zoom"` `"jitter"` `"wave"`, showpy가 등록한 `"scatter"` `"drop"` `"spin"` `"shuffle"` `"flash"` `"slam"` `"typecursor"` `"echo"` `"glitch"` `"glow"` `"blurin"` `"wipe"` `"blockglitch"` `"liquid"` `"vhs"` `"rise"` `"lean"` `"stretch"` `"slidein"` `"shake"` `"inkfill"` `"glyphbox"` `"stamp"` `"punch"` `"squash"` `"extrude"` (셰이더는 `ui_kit/engine/text_effects.glsl`, `text_effects.rpy`가 init에서 읽어 등록. PyKaki도 같은 파일의 사본으로 미리보기를 그림. `echo`는 `outlines`가 없으면 `say_style`이 파일의 `@outline` 겹을 넣음) | 등장 효과 |
+| `effect` | `"dissolve"` `"flip"` `"zoom"` `"jitter"` `"wave"`, pygaki 플러그인이 등록한 `"scatter"` `"drop"` `"spin"` `"shuffle"` `"flash"` `"slam"` `"typecursor"` `"echo"` `"glitch"` `"glow"` `"blurin"` `"wipe"` `"blockglitch"` `"liquid"` `"vhs"` `"rise"` `"lean"` `"stretch"` `"slidein"` `"shake"` `"inkfill"` `"glyphbox"` `"stamp"` `"punch"` `"squash"` `"extrude"` (셰이더는 `ui_kit/engine/text_effects.glsl`, `text_effects.rpy`가 init에서 읽어 등록. PyKaki도 같은 파일의 사본으로 미리보기를 그림. `echo`는 `outlines`가 없으면 `say_style`이 파일의 `@outline` 겹을 넣음) | 등장 효과 |
 | `name_x` `name_y` `name_font` `name_size` `name_color` | | 이름 |
 
 `screen_fx` 값은 다시 바꿀 때까지 유지되고 세이브에 저장됩니다. 플러그인을 빼면 이 괄호에서 오류가 납니다.
@@ -144,14 +144,14 @@ renpy.exe <프로젝트> lint
 | 무엇 | 지금 | 다음 |
 |---|---|---|
 | pygaki 묶음·앱 (Releases 태그) | v1.2 (2026-11-09) | **v1.3** (계획은 v2.0) |
-| showpy 묶음 | 4.23 | **5.0** |
+| pygaki 플러그인 묶음 | 4.23 | **5.0** |
 | `ui_kit` | 3.22 | **4.0** (글자 효과, 글 상자 꾸미기, 편집기 입력·회전 틀) |
 | `screen_fx` | 5.1 (새 효과 일곱 만듦, 트레이싱지는 뺌) | **5.1** |
 | `splash` | 2.0 (화면에서 고치기, 페이지 더하기, 만듦) | 2.0 |
 | `hotkeys` | 1.0 | 1.0 |
 
-- 2026-11-09 사용자와 정해서 이 장의 것을 다 모아 **v1.3**(showpy 5.0)으로 냄(이름만 v2.0 대신 v1.3).
-- 2026-11-09 사용자가 확인하려고 중간 판 **v1.2**(showpy 4.23)를 냄: 태그 상자, 웹에서 쓰고 앱에서 이어 쓰기, splash 2.0, screen_fx 5.0 바탕. 새 화면 효과·글자 효과는 v2.0에.
+- 2026-11-09 사용자와 정해서 이 장의 것을 다 모아 **v1.3**(pygaki 플러그인 5.0)으로 냄(이름만 v2.0 대신 v1.3).
+- 2026-11-09 사용자가 확인하려고 중간 판 **v1.2**(pygaki 플러그인 4.23)를 냄: 태그 상자, 웹에서 쓰고 앱에서 이어 쓰기, splash 2.0, screen_fx 5.0 바탕. 새 화면 효과·글자 효과는 v2.0에.
 - 한 번에 다 만들지 않고 8-7의 순서대로 나눠 커밋합니다. 단계마다 Lint, 시험 프로젝트 복사, `.rpyc` 지우기, PyKaki 빌드를 지킵니다.
 
 ### 8-2. 스플래시를 화면에서 고치기 (`splash` 2.0) — 만듦 (2026-11-09)

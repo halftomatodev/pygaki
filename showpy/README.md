@@ -1,4 +1,4 @@
-# showpy
+# pygaki 플러그인
 
 **렌파이(Ren'Py) 게임을 실행한 채, 코드 없이 마우스로 고치는 플러그인 묶음이에요.**
 
@@ -37,8 +37,8 @@ PyKaki에서 글을 쓴다 → Ctrl+E → 렌파이에서 바로 본다
 | [docs/CUSTOM_GUIDE.md](docs/CUSTOM_GUIDE.md) | **게임을 만드는 사람** | 어떤 값을 고치면 무엇이 바뀌는지, PyKaki 연결과 사용법 |
 | [docs/READ_ME_FIRST.md](docs/READ_ME_FIRST.md) | 게임을 만드는 사람 | 처음 넣을 때 알 것, 버전별 바뀐 점과 옮기는 법 |
 | `game/*/README.md` | 게임을 만드는 사람 | 폴더별 모든 값의 자세한 설명 |
-| [docs/SPEC.md](docs/SPEC.md) | 고치는 사람 | showpy 구조와 동작 |
-| [../docs/LINK.md](../docs/LINK.md) | 고치는 사람 | showpy와 PyKaki가 맞춰야 하는 형식 |
+| [docs/SPEC.md](docs/SPEC.md) | 고치는 사람 | pygaki 플러그인 구조와 동작 |
+| [../docs/LINK.md](../docs/LINK.md) | 고치는 사람 | pygaki 플러그인과 PyKaki가 맞춰야 하는 형식 |
 | [docs/DEV_RULES.md](docs/DEV_RULES.md) | 고치는 사람 | 작업 규칙, 버전 올리는 법 |
 | [PyKaki 명세](https://github.com/halftomatodev/pygaki/blob/main/pykaki/docs/SPEC.md), [PyKaki 가이드](https://github.com/halftomatodev/pygaki/blob/main/pykaki/docs/GUIDE.md) | | 같은 저장소의 pykaki 폴더에 있어요 |
 | [CHANGELOG.md](CHANGELOG.md) | 모두 | 버전 기록 |

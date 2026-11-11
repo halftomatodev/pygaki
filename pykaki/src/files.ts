@@ -365,7 +365,7 @@ export async function linkProject() {
     return;
   }
   await exportRpyFile(true);
-  s.say(f.hasShowpy ? '연결했어요. 렌파이에서 게임을 실행하면 돼요' : '연결했어요. showpy가 없어서 위치와 화면 효과는 렌파이에서 고칠 수 없어요');
+  s.say(f.hasShowpy ? '연결했어요. 렌파이에서 게임을 실행하면 돼요' : '연결했어요. pygaki 플러그인이 없어서 위치와 화면 효과는 렌파이에서 고칠 수 없어요');
 }
 
 export async function exportRpyFile(again = false) {
@@ -409,7 +409,7 @@ export async function exportRpyFile(again = false) {
       // 웹: 대본 파일도 같이 (앱에서 이어 쓰게)
       if (bound && !isDesktop && (await writeBound(serialize(s.project), true)) && useStore.getState().project === s.project)
         useStore.setState({ dirty: false, fileName: boundName });
-      s.say(`${RPY_FILE}로 내보냈어요. 게임이 켜져 있으면 저절로 다시 불러와요 (showpy 예전 판이면 게임에서 Shift+R)`);
+      s.say(`${RPY_FILE}로 내보냈어요. 게임이 켜져 있으면 저절로 다시 불러와요 (플러그인이 예전 판이면 게임에서 Shift+R)`);
     } else if (hasFS) {
       if (!rpyHandle || !again)
         rpyHandle = await w.showSaveFilePicker({

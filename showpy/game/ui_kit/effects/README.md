@@ -83,7 +83,7 @@ scene bg hall with img_fx.use("bands", 1.4, count=10, color="#c2185b")
 아래 글을 복사해서, 만들고 싶은 모양(글이나 참고 영상)과 같이 줍니다.
 
 ```text
-렌파이 게임의 showpy 효과 폴더(game/ui_kit/effects)에 넣을 효과 파일을 하나 만들어 줘.
+렌파이 게임의 pygaki 플러그인 효과 폴더(game/ui_kit/effects)에 넣을 효과 파일을 하나 만들어 줘.
 - 형식은 game/ui_kit/effects/README.md의 "적는 법"을 따르고, 같은 폴더의 샘플 파일을 본보기로 해.
 - 글자 효과는 @effect, 그림 효과는 @transition. 파일 하나에 효과 하나, 파일 이름은 효과 이름.glsl.
 - 고칠 만한 값은 @set과 @param으로 꺼내 줘 (최소, 최대, 한글 이름).

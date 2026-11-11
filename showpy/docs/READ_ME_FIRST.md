@@ -1,4 +1,4 @@
-# showpy (먼저 읽기)
+# pygaki 플러그인 (먼저 읽기)
 
 버전 4.22
 
@@ -26,7 +26,7 @@
 
 ### 이름이 pygaki로
 
-- 런처 버튼은 [pygaki로 편집]. 새 프로젝트는 런처의 [+ Create New Project]에서 "기본 (Vanilla)"과 "Pygaki" 가운데 고릅니다. 앱 위쪽은 [대본 편집]과 [GUI 편집]입니다.
+- 런처 버튼은 [pygaki로 편집]. 새 프로젝트는 런처의 [+ Create New Project]에서 "기본 (Vanilla)"과 "Pygaki" 가운데 고릅니다(둘 다 해상도와 색을 고름). 앱 위쪽은 [대본 편집]과 [GUI 편집]입니다.
 
 ### `screen_fx` 4.5, `ui_kit` 3.21: 셰이더는 두 자리를 같이, 줄마다 전환, 커서도 '여기에서부터'
 
@@ -567,4 +567,4 @@ e "흩어졌다가 모인다." (cps=30, effect="scatter")
 - 투명한 webm 영상은 렌파이의 side_mask 방식(왼쪽 절반 색, 오른쪽 절반 투명도)을 씁니다. 만드는 방법은 `ui_kit/README.md`에 있습니다.
 - VHS 셰이더 원본은 CC0입니다(크레딧은 선택). ASCII 셰이더는 MIT 라이선스 셰이더의 아이디어를, 레트로 터미널은 cool-retro-term(GPL)의 모습을, 게임보이는 Retro dither(CC0)의 디더링 무늬와 Gameboy Classic Shader(GPL)의 LCD 모습을 참고해 코드를 새로 썼습니다(크레딧은 `screen_fx/README.md` 15장).
 - `screen_fx/fonts/neodgm.ttf`(Neo둥근모)는 SIL OFL 1.1입니다. 게임에 넣어 배포·판매할 수 있고, 배포할 때 `neodgm_OFL.txt`를 같이 두세요.
-- showpy는 MIT 라이선스입니다. 글꼴처럼 라이선스가 다른 파일은 저장소의 `THIRD_PARTY.md`를 보세요.
+- pygaki 플러그인은 MIT 라이선스입니다. 글꼴처럼 라이선스가 다른 파일은 저장소의 `THIRD_PARTY.md`를 보세요.

@@ -1,4 +1,4 @@
-# showpy와 PyKaki 연결 약속
+# pygaki 플러그인과 PyKaki 연결 약속
 
 두 프로그램이 서로 맞춰야 하는 형식을 적은 문서입니다. 두 프로그램은 pygaki 저장소의 `showpy/`, `pykaki/` 폴더에 같이 들어 있고, 이 문서는 저장소 맨 위 `docs/`에 하나만 있습니다.
 
@@ -7,16 +7,16 @@
 | 다루는 것 | 어디서 | 어디에 저장 |
 |---|---|---|
 | 대사, 선택지, 흐름 | PyKaki | `.flow.json` |
-| 그림, webm 영상, 음악, 효과음 넣기 | 주로 showpy 편집기 (PyKaki에서도 칸으로 넣을 수 있음) | `.flow.json` (showpy에서 넣으면 PyKaki가 받아 적음) |
-| 그림 위치 | showpy 편집기만 | `game/ui_kit/stage_layout.rpy` |
+| 그림, webm 영상, 음악, 효과음 넣기 | 주로 GUI 편집기 (PyKaki에서도 칸으로 넣을 수 있음) | `.flow.json` (showpy에서 넣으면 PyKaki가 받아 적음) |
+| 그림 위치 | GUI 편집기만 | `game/ui_kit/stage_layout.rpy` |
 | 대사 글자 크기, 글꼴, 색, 속도, 등장 효과 | PyKaki | `.flow.json` |
-| 대사와 이름의 위치, 줄마다 바꾸는 화면 효과 | showpy 편집기 대사 탭 (PyKaki는 받아 적어 보여 줌) | `.flow.json` |
+| 대사와 이름의 위치, 줄마다 바꾸는 화면 효과 | GUI 편집기 대사 탭 (PyKaki는 받아 적어 보여 줌) | `.flow.json` |
 
 ```
 PyKaki (.flow.json이 원본)
    │  내보내기: game/script_flow.rpy에 씀
    ▼
-렌파이 + showpy 편집기
+렌파이 + GUI 편집기
    │  그림, 영상, 소리 줄을 넣으면 script_flow.rpy와 showpy_inbox.json에 같이 씀
    ▼
 PyKaki가 showpy_inbox.json을 받아 적음 → 대본에 보임 → 다음 내보내기에도 남음
@@ -47,32 +47,32 @@ label ward.n1:
 
 | 표시 | 뜻 | 누가 쓰는가 |
 |---|---|---|
-| `# PyKaki가 만든 파일이에요.` (파일 앞 5줄 안) | PyKaki 원고. 문구를 바꾸면 양쪽을 같이 고칩니다 | showpy `script_edit.is_pykaki` |
+| `# PyKaki가 만든 파일이에요.` (파일 앞 5줄 안) | PyKaki 원고. 문구를 바꾸면 양쪽을 같이 고칩니다 | pygaki 플러그인 `script_edit.is_pykaki` |
 | `# @node:ID 제목` | 상자의 시작 | 그 줄이 어느 상자인지 찾을 때 |
 | `label 그룹.ID:` | 모든 상자에 붙는 로컬 label | 실행 중 지금 상자를 알 때 (`config.label_callbacks`) |
 | `# @l:ID` | 바로 다음 줄이 그 id의 대본 줄 | 줄 넣기, 줄 바꾸기의 기준 |
 | `# @end:ID` | 여기부터 상자의 나가는 부분(선택지, jump, return) | 선택지 앞에 줄을 넣을 때 |
 
-대사 줄 괄호에는 PyKaki의 `say` 값(`SayStyle`)이 짧은 이름으로 붙습니다. showpy `say_style`이 받습니다.
+대사 줄 괄호에는 PyKaki의 `say` 값(`SayStyle`)이 짧은 이름으로 붙습니다. pygaki 플러그인 `say_style`이 받습니다.
 
 | 괄호 | PyKaki 값 | 뜻 |
 |---|---|---|
 | `size=30`, `font="…"`, `color="#…"`, `cps=30` | `size`, `font`, `color`, `cps` | 글자 모양과 속도 |
 | `effect="slidein"`, `effect="slidein|shake"` | `effect` | 등장 효과. 두 효과 겹치기는 `|` (pygaki 2.0, `FEATURE` 3) |
-| `box="bubble"`, `box="pill"` | `box` | 글 상자: 말풍선, 둥근 테두리 (showpy `ui_kit` 4.0 `text_box.rpy`, `FEATURE` 3) |
+| `box="bubble"`, `box="pill"` | `box` | 글 상자: 말풍선, 둥근 테두리 (pygaki 플러그인 `ui_kit` 4.0 `text_box.rpy`, `FEATURE` 3) |
 | `tail="top"`, `tail=None` | `tail` (`bottom` `top` `left` `right` `none`) | 말풍선 꼬리. 비우면 상자 기본(말풍선은 아래, 둥근 테두리는 없음) |
 | `box_rotate=-4` | `box_rotate` | 상자와 글 기울기 (도) |
-| `x=…`, `y=…`, `name_x=…`, `name_y=…` | 위치 | showpy가 정해서 PyKaki가 받아 적음 (3장) |
+| `x=…`, `y=…`, `name_x=…`, `name_y=…` | 위치 | pygaki 플러그인이 정해서 PyKaki가 받아 적음 (3장) |
 
-상자의 나머지 값(`bubble_color`, `pill_line` 등)은 showpy 원고나 `say_style.box_styles`에서만 고칩니다. 연결을 끈 파일에는 상자와 showpy 효과를 내보내지 않습니다(검사 탭에 경고).
+상자의 나머지 값(`bubble_color`, `pill_line` 등)은 pygaki 플러그인 원고나 `say_style.box_styles`에서만 고칩니다. 연결을 끈 파일에는 상자와 pygaki 플러그인 효과를 내보내지 않습니다(검사 탭에 경고).
 
-**상자와 label의 셰이더** (PyKaki `FEATURE` 5, `src/shader.ts`): 대본에서 상자나 label에 셰이더를 한 곳이라도 정하면, PyKaki는 **모든 상자의 첫 줄**(상자 label 바로 아래, 첫 `# @l:` 앞)에 표시 없이 `$ screen_fx.shaders("ascii", "vhs_crt", transition="fade")`를, 셰이더가 없는 상자에는 `$ screen_fx.clear()`를 적습니다. `call` 줄 바로 뒤에도 한 번 더 적습니다. showpy `screen_fx.use`가 같은 값이면 전환 없이 넘어가는 것에 기댑니다(이 동작을 바꾸면 PyKaki `exportRpy.ts`도 같이). 이 줄은 `# @l:` 표시가 없어서 받아 적기(3장)의 대상이 아니고, 내보낼 때마다 대본 값으로 다시 만들어집니다. 게임 안 편집기에서 이 줄을 고치거나 지워도 다음 내보내기 때 되돌아옵니다.
+**상자와 label의 셰이더** (PyKaki `FEATURE` 5, `src/shader.ts`): 대본에서 상자나 label에 셰이더를 한 곳이라도 정하면, PyKaki는 **모든 상자의 첫 줄**(상자 label 바로 아래, 첫 `# @l:` 앞)에 표시 없이 `$ screen_fx.shaders("ascii", "vhs_crt", transition="fade")`를, 셰이더가 없는 상자에는 `$ screen_fx.clear()`를 적습니다. `call` 줄 바로 뒤에도 한 번 더 적습니다. pygaki 플러그인 `screen_fx.use`가 같은 값이면 전환 없이 넘어가는 것에 기댑니다(이 동작을 바꾸면 PyKaki `exportRpy.ts`도 같이). 이 줄은 `# @l:` 표시가 없어서 받아 적기(3장)의 대상이 아니고, 내보낼 때마다 대본 값으로 다시 만들어집니다. 게임 안 편집기에서 이 줄을 고치거나 지워도 다음 내보내기 때 되돌아옵니다.
 
-`renpyLink`를 끈 파일에는 `# @l:`이 없습니다. showpy는 이런 원고에 그림 줄을 저장하지 않고, 연결을 켜고 다시 내보내라고 안내합니다.
+`renpyLink`를 끈 파일에는 `# @l:`이 없습니다. pygaki 플러그인은 이런 원고에 그림 줄을 저장하지 않고, 연결을 켜고 다시 내보내라고 안내합니다.
 
 ## 3. `game/showpy_inbox.json`
 
-showpy가 쓰고, PyKaki가 읽은 뒤 비웁니다. PyKaki가 읽은 기록만 지우므로 그사이 showpy가 더 적은 기록은 남습니다.
+pygaki 플러그인이 쓰고, PyKaki가 읽은 뒤 비웁니다. PyKaki가 읽은 기록만 지우므로 그사이 pygaki 플러그인이 더 적은 기록은 남습니다.
 
 ```json
 {
@@ -94,7 +94,7 @@ showpy가 쓰고, PyKaki가 읽은 뒤 비웁니다. PyKaki가 읽은 기록만 
 | 값 | 뜻 |
 |---|---|
 | `id` | `insert`면 새 줄의 id (`.rpy`의 `# @l:`과 같음). 이미 있는 id면 다시 넣지 않습니다 |
-| `op` | `insert` 줄 넣기, `replace` 줄 바꾸기, `remove` 줄 지우기(showpy 4.22), `say_pos` 대사 위치, `say_fx` 대사 화면 효과 |
+| `op` | `insert` 줄 넣기, `replace` 줄 바꾸기, `remove` 줄 지우기(pygaki 플러그인 4.22), `say_pos` 대사 위치, `say_fx` 대사 화면 효과 |
 | `code` | 렌파이 명령 한 줄 |
 | `box` | 줄이 들어갈 상자. 기준 줄이 사라졌을 때 그 상자의 끝에 넣습니다 |
 | `before` `after` `end` | `insert`의 자리. 줄 앞, 줄 뒤, 상자 끝 중 하나 |
@@ -104,7 +104,7 @@ showpy가 쓰고, PyKaki가 읽은 뒤 비웁니다. PyKaki가 읽은 기록만 
 
 `say_pos`, `say_fx`를 받으면 그 대사 줄의 괄호에 같은 값을 내보냅니다. 괄호 순서는 PyKaki 순서로 정리됩니다. 예전 PyKaki는 이 기록을 모른 채 지우므로 두 프로그램을 같이 올립니다.
 
-`code`는 `show` `scene` `hide` `play` `stop`으로 시작하는 줄과, 셰이더·커서 칸이 넣는 `$ screen_fx.`로 시작하는 줄(showpy 4.22: `shaders`, `set_cursor`. 고른 줄 바로 위의 같은 줄들은 `replace`/`remove`로 바꿈)만 들어옵니다. PyKaki(`src/inbox.ts`)는 칸으로 나타낼 수 있으면 칸이 있는 연출 줄로, 아니면 "직접 명령" 줄로 바꿉니다.
+`code`는 `show` `scene` `hide` `play` `stop`으로 시작하는 줄과, 셰이더·커서 칸이 넣는 `$ screen_fx.`로 시작하는 줄(pygaki 플러그인 4.22: `shaders`, `set_cursor`. 고른 줄 바로 위의 같은 줄들은 `replace`/`remove`로 바꿈)만 들어옵니다. PyKaki(`src/inbox.ts`)는 칸으로 나타낼 수 있으면 칸이 있는 연출 줄로, 아니면 "직접 명령" 줄로 바꿉니다.
 
 | `code` | PyKaki 줄 |
 |---|---|
@@ -118,7 +118,7 @@ showpy가 쓰고, PyKaki가 읽은 뒤 비웁니다. PyKaki가 읽은 기록만 
 
 ## 4. `ui_kit/stage_layout.rpy`
 
-showpy 편집기가 만듭니다. PyKaki는 쓰지 않고, 플레이 화면의 그림 자리를 잡을 때 읽기만 합니다.
+GUI 편집기가 만듭니다. PyKaki는 쓰지 않고, 플레이 화면의 그림 자리를 잡을 때 읽기만 합니다.
 
 ```renpy
 define stage.placed = {
@@ -155,7 +155,7 @@ PyKaki 플레이 화면은 연결한 game 폴더에서 아래 값을 글자로 �
 
 ## 7. `game/pykaki_preview.json` (렌파이 실시간 미리보기)
 
-PyKaki가 쓰고 showpy가 읽기만 합니다. PyKaki 글자 효과 칸의 [렌파이에서 보기]를 켜면, 줄이나 값을 바꿀 때마다 0.3초 뒤에 덮어씁니다. showpy는 개발 모드에서 0.25초마다 고친 시각을 보고, 바뀌면 화면 위 미리보기 창에서 그 줄을 다시 재생합니다(`ui_kit/editor/editor_preview.rpy`).
+PyKaki가 쓰고 pygaki 플러그인이 읽기만 합니다. PyKaki 글자 효과 칸의 [렌파이에서 보기]를 켜면, 줄이나 값을 바꿀 때마다 0.3초 뒤에 덮어씁니다. pygaki 플러그인은 개발 모드에서 0.25초마다 고친 시각을 보고, 바뀌면 화면 위 미리보기 창에서 그 줄을 다시 재생합니다(`ui_kit/editor/editor_preview.rpy`).
 
 ```json
 { "format": "pykaki-preview", "version": 1, "enabled": true, "line": "l5",
@@ -179,7 +179,7 @@ PyKaki는 렌파이 연결(`renpyLink`)을 켜고 폴더를 연결했으면, 대
 ```
 
 - `line`: 지금 쓰는 줄(`# @l:<줄 id>` 표시 다음의 첫 문장)의 원고 줄 번호. 쓰는 줄이 없으면 고른 상자의 첫 줄. 툴바 [게임 줄 따라가기]를 끄면(`localStorage["pykaki-follow-line"] = "off"`) `null`
-- showpy(개발 모드)는 0.25초마다 `script_flow.rpy`의 고친 시각과 크기를 보고, 같은 값을 두 번 보면 다시 불러옵니다(`renpy.reload_script`, Shift+R과 같음). 첫 줄에 "PyKaki가 만든 파일이에요"가 없으면 다시 불러오지 않습니다. GUI 편집기에 저장 안 한 값이 있으면 다시 불러오지 않고 알립니다
+- pygaki 플러그인(개발 모드)은 0.25초마다 `script_flow.rpy`의 고친 시각과 크기를 보고, 같은 값을 두 번 보면 다시 불러옵니다(`renpy.reload_script`, Shift+R과 같음). 첫 줄에 "PyKaki가 만든 파일이에요"가 없으면 다시 불러오지 않습니다. GUI 편집기에 저장 안 한 값이 있으면 다시 불러오지 않고 알립니다
 - 다시 불러오기 전에 `line`을 `renpy.session`에 두고, 다시 불러온 뒤 그 줄로 옮깁니다(앱 원고 칸의 줄 누르기와 같은 `goto_line`: 지나온 줄이면 되감기, 아니면 warp). 원고보다 5초 넘게 먼저 쓴 파일은 지난번 것이라 쓰지 않습니다
 - `line`이 `null`이면 게임은 있던 자리에 남습니다. 렌파이는 warp로 들어간 게임을 다시 불러오면 타이틀로 가 버리므로, 그때는 보던 줄의 `# @l:` 표시를 새 원고에서 찾아 그 줄로 되돌립니다(다시 불러온 뒤 10초 안에 타이틀에 닿으면)
 - 배포판에서 빠집니다
@@ -191,10 +191,10 @@ PyKaki는 렌파이 연결(`renpyLink`)을 켜고 폴더를 연결했으면, 대
 
 | 누가 | 어떻게 쓰나 |
 |---|---|
-| showpy `engine/text_effects.rpy` | init에서 읽어 효과마다 `renpy.register_textshader`로 등록. 편집기 대사 탭의 효과 버튼 이름도 여기서 |
+| pygaki 플러그인 `engine/text_effects.rpy` | init에서 읽어 효과마다 `renpy.register_textshader`로 등록. 편집기 대사 탭의 효과 버튼 이름도 여기서 |
 | PyKaki `src/fx/textShaders.ts`, `src/fx/FxCanvas.tsx` | 같은 코드를 렌파이가 셰이더 조각을 합치는 방식대로 합쳐 WebGL로 미리보기를 그림. 효과 목록, 한글 이름, 글자/초 기본값(`@cps`)도 여기서 |
 
-적는 법은 파일 맨 위에 있습니다. `@effect 이름 한글이름`, `@cps`, `@slow 식`, `@redraw`, `@outline`, `@set u__이름 값`, `@variables`, `@vertex_N`, `@fragment_N`, `@part`/`@use`, `RAND(n)`. 두 프로그램의 읽는 코드(showpy `tfx_parse`, PyKaki `parseShaders`)는 같은 규칙이라 표시를 새로 만들면 둘 다 고칩니다.
+적는 법은 파일 맨 위에 있습니다. `@effect 이름 한글이름`, `@cps`, `@slow 식`, `@redraw`, `@outline`, `@set u__이름 값`, `@variables`, `@vertex_N`, `@fragment_N`, `@part`/`@use`, `RAND(n)`. 두 프로그램의 읽는 코드(pygaki 플러그인 `tfx_parse`, PyKaki `parseShaders`)는 같은 규칙이라 표시를 새로 만들면 둘 다 고칩니다.
 
 ### 8-1. 효과 폴더 (`ui_kit/effects/*.glsl`, ui_kit 4.3)
 
@@ -202,21 +202,21 @@ PyKaki는 렌파이 연결(`renpyLink`)을 켜고 폴더를 연결했으면, 대
 
 | 누가 | 어떻게 읽나 |
 |---|---|
-| showpy `engine/text_effects.rpy` | 기본 파일 다음에 폴더의 `.glsl`을 이름 순서로. 틀린 파일은 건너뛰고 `say_style.TFX_ERRORS`에 이유 |
-| showpy `engine/image_effects.rpy` | 그 가운데 `@transition`을 장면 전환으로 등록. 원고에는 `with img_fx.use("이름"[, 초][, 값=…])` |
+| pygaki 플러그인 `engine/text_effects.rpy` | 기본 파일 다음에 폴더의 `.glsl`을 이름 순서로. 틀린 파일은 건너뛰고 `say_style.TFX_ERRORS`에 이유 |
+| pygaki 플러그인 `engine/image_effects.rpy` | 그 가운데 `@transition`을 장면 전환으로 등록. 원고에는 `with img_fx.use("이름"[, 초][, 값=…])` |
 | PyKaki `src/fx/textShaders.ts` | 저장소의 샘플은 빌드할 때 같이 가져옴(`import.meta.glob`). 연결한 게임 폴더의 파일은 폴더를 읽을 때 `setFolderEffects`로 더함(샘플과 같은 파일 이름은 건너뜀). 못 읽은 파일은 알림 |
 
 새 표시: `@transition 이름 한글이름`, `@time 초`, `@fragment`(전환의 색 코드. `l__t`, `l__uv`, `l__size`, `l__old`, `l__new`를 씀), `@param u__이름 최소 최대 한글이름`(막대). 두 프로그램의 읽는 규칙(이름은 `[a-z][a-z0-9_]*`, 이미 있는 이름은 못 씀, 코드가 없으면 틀린 파일)은 같아야 합니다.
 
-대본에는 글자 효과가 이름 그대로(`say.effect`), 그림 전환이 `trans` 칸에 `img_fx.use("이름")`로 들어갑니다. showpy 연결이 꺼진 대본은 그림 전환을 `dissolve`로 내보냅니다. 적는 법 전체는 `showpy/game/ui_kit/effects/README.md`.
+대본에는 글자 효과가 이름 그대로(`say.effect`), 그림 전환이 `trans` 칸에 `img_fx.use("이름")`로 들어갑니다. pygaki 플러그인 연결이 꺼진 대본은 그림 전환을 `dissolve`로 내보냅니다. 적는 법 전체는 `showpy/game/ui_kit/effects/README.md`.
 
-렌파이에 들어 있는 효과(`dissolve` 등 7개)는 렌파이가 등록하므로 showpy 파일에 없고, PyKaki가 미리보기용으로 `src/fx/renpy_textshaders.glsl`에 같은 형식으로 옮겨 둡니다.
+렌파이에 들어 있는 효과(`dissolve` 등 7개)는 렌파이가 등록하므로 pygaki 플러그인 파일에 없고, PyKaki가 미리보기용으로 `src/fx/renpy_textshaders.glsl`에 같은 형식으로 옮겨 둡니다.
 
-## 9. 실시간 연결 (`game/showpy_live.json`, showpy 4.15, 커서/대사 소리 4.16, 패널 통째로 4.17)
+## 9. 실시간 연결 (`game/showpy_live.json`, pygaki 플러그인 4.15, 커서/대사 소리 4.16, 패널 통째로 4.17)
 
-PyKaki 데스크톱 앱의 showpy 화면이 게임 안 편집기를 바깥에서 조종하는 연결입니다. 게임 창은 그대로 두고, 패널(숫자, 목록, 대본)만 앱에서 봅니다. 게임 화면에는 끌어서 옮기는 표시만 남습니다. 웹 버전 PyKaki에는 없습니다.
+PyKaki 데스크톱 앱의 [GUI 편집] 화면이 게임 안 편집기를 바깥에서 조종하는 연결입니다. 게임 창은 그대로 두고, 패널(숫자, 목록, 대본)만 앱에서 봅니다. 게임 화면에는 끌어서 옮기는 표시만 남습니다. 웹 버전 PyKaki에는 없습니다.
 
-**찾기**: 게임이 개발 모드(`config.developer`)로 켜지면 showpy `editor/editor_live.rpy`가 `127.0.0.1`의 빈 포트를 열고 이 파일을 씁니다. 게임을 끄면 지웁니다. 배포판에는 넣지 않습니다.
+**찾기**: 게임이 개발 모드(`config.developer`)로 켜지면 pygaki 플러그인 `editor/editor_live.rpy`가 `127.0.0.1`의 빈 포트를 열고 이 파일을 씁니다. 게임을 끄면 지웁니다. 배포판에는 넣지 않습니다.
 
 ```json
 { "version": 1, "port": 51234, "token": "9f2c...", "pid": 1234, "showpy": "3.14" }
@@ -314,12 +314,12 @@ PyKaki 데스크톱 앱의 showpy 화면이 게임 안 편집기를 바깥에서
 | `save` | | 편집기 Ctrl+S와 같음 (배치 파일과 원고 저장) |
 | `discard` | | 지금 탭의 저장 안 한 변경을 모두 버림 |
 
-저장은 지금처럼 게임이 합니다(`*_layout.rpy`, 원고). 앱은 값을 보내기만 하고 showpy 파일을 직접 쓰지 않습니다.
+저장은 지금처럼 게임이 합니다(`*_layout.rpy`, 원고). 앱은 값을 보내기만 하고 pygaki 플러그인 파일을 직접 쓰지 않습니다.
 
-## 10. 확인 상태 (showpy 4.13, 렌파이 8.5.3)
+## 10. 확인 상태 (pygaki 플러그인 4.13, 렌파이 8.5.3)
 
 **자동으로 실행해서 확인함:**
-- 실시간 미리보기: showpy는 미리보기 파일을 바꾸면 창이 새 줄로 바뀌고 `enabled: false`면 닫힘. PyKaki는 스위치를 켜고 고치고 끌 때 파일 내용이 맞음. **둘을 동시에 켜 놓고 확인하지는 않음**
+- 실시간 미리보기: pygaki 플러그인은 미리보기 파일을 바꾸면 창이 새 줄로 바뀌고 `enabled: false`면 닫힘. PyKaki는 스위치를 켜고 고치고 끌 때 파일 내용이 맞음. **둘을 동시에 켜 놓고 확인하지는 않음**
 - `cps`로 대사 속도가 바뀜 (`preferences.text_cps = 0`인 프로젝트에서. `speed`는 이 프로젝트에서 효과 없음)
 - 대사 탭 함수로 위치와 화면 효과 저장 → 받아 적기 → 다시 내보내기를 하면 값이 그대로 남음. PyKaki 원고에서 글자 크기 바꾸기는 막힘
 - `script.rpy`가 그대로 있거나, 지웠거나, 플러그인이 없어도 게임 시작이 첫 상자로 이어짐
@@ -333,7 +333,7 @@ PyKaki 데스크톱 앱의 showpy 화면이 게임 안 편집기를 바깥에서
 - PyKaki WebGL 미리보기: 효과 27개를 렌파이 견본 영상과 같은 조건(1280x720, 글자 40, 30글자/초, 같은 문장)으로 프레임마다 찍어 나란히 비교해 모양과 순서가 맞음. 여러 줄, 색과 굵기 태그, WebGL을 끈 브라우저(CSS로 돌아감)도 확인
 
 **아직 사람이 확인해야 함:**
-- 바뀐 showpy(4.13)를 렌파이에서 Lint하고 실행해 효과가 그대로 나오는지
+- 바뀐 pygaki 플러그인(4.13)을 렌파이에서 Lint하고 실행해 효과가 그대로 나오는지
 - 실제 폴더 선택창과 권한 창을 누르는 것
 - 소리가 실제로 나는지 (플레이 화면에서 재생이 시작되는 것까지는 확인함)
 - 크롬과 엣지에서 F8로 실제 전체화면이 되는 것

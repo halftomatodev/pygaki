@@ -78,7 +78,7 @@ export function generateRpy(p: Project): { code: string; warnings: Warn[] } {
   for (const c of p.characters) {
     if (!IDENT.test(c.id) || RESERVED.has(c.id)) W.push({ level: 'error', msg: `캐릭터 id "${c.id}"는 쓸 수 없어요` });
     if (cids.has(c.id)) W.push({ level: 'error', msg: `캐릭터 id "${c.id}"가 중복돼요` });
-    if (S.renpyLink && PLUGIN_NAMES.has(c.id)) W.push({ level: 'error', msg: `캐릭터 id "${c.id}"는 showpy가 쓰는 이름과 겹쳐요. 다른 이름으로 바꿔 주세요` });
+    if (S.renpyLink && PLUGIN_NAMES.has(c.id)) W.push({ level: 'error', msg: `캐릭터 id "${c.id}"는 pygaki 플러그인이 쓰는 이름과 겹쳐요. 다른 이름으로 바꿔 주세요` });
     cids.add(c.id);
   }
 
@@ -125,7 +125,7 @@ export function generateRpy(p: Project): { code: string; warnings: Warn[] } {
 
   // 상자·label 셰이더: 상자마다 첫 줄에 그 상자의 셰이더를 적는다 (shader.ts). showpy가 있어야 한다
   const shaders = usesShaders(p);
-  if (shaders && !S.renpyLink) W.push({ level: 'warn', msg: '상자와 label의 셰이더는 showpy 연결을 켜야 내보내요' });
+  if (shaders && !S.renpyLink) W.push({ level: 'warn', msg: '상자와 label의 셰이더는 pygaki 플러그인 연결을 켜야 내보내요' });
   const shaderLine = (b: BoxNode, enter: boolean) => {
     const from = enter ? (incoming.get(b.id) ?? []).map((x) => byId.get(x.from)).filter((x): x is BoxNode => !!x) : [];
     return shaderCode(shaderOfBox(p, b), enter ? enterTrans(p, b, from) : shaderOfBox(p, b)?.in);
@@ -166,12 +166,12 @@ export function generateRpy(p: Project): { code: string; warnings: Warn[] } {
           if (l.who && (l.kind ?? 'char') === 'char' && l.type !== 'scene' && !charById.has(l.who))
             W.push({ level: 'error', msg: `등록되지 않은 캐릭터 "${l.who}" (${b.title || b.id})`, nodeId: b.id });
           if (l.type === 'fx' && !S.renpyLink) {
-            W.push({ level: 'warn', msg: `화면 효과 줄은 showpy 연결을 켜야 내보내요 (${b.title || b.id})`, nodeId: b.id });
-            return body.push(`# showpy 연결 꺼짐: ${(code ?? '').split('\n')[0]}`);
+            W.push({ level: 'warn', msg: `화면 효과 줄은 pygaki 플러그인 연결을 켜야 내보내요 (${b.title || b.id})`, nodeId: b.id });
+            return body.push(`# pygaki 플러그인 연결 꺼짐: ${(code ?? '').split('\n')[0]}`);
           }
           // 효과 폴더의 그림 전환(img_fx.use)은 showpy가 등록한다. 연결이 꺼져 있으면 서서히 바뀌기로 내보낸다
           if (!S.renpyLink && code && l.trans?.startsWith('img_fx.')) {
-            W.push({ level: 'warn', msg: `이 그림 전환은 showpy가 있어야 해서 "서서히"로 내보냈어요 (${b.title || b.id})`, nodeId: b.id });
+            W.push({ level: 'warn', msg: `이 그림 전환은 pygaki 플러그인이 있어야 해서 "서서히"로 내보냈어요 (${b.title || b.id})`, nodeId: b.id });
             return body.push(code.replace(' with ' + l.trans, ' with dissolve'));
           }
           return body.push(...(code ?? `# TODO: ${problem}`).split('\n'));
@@ -179,8 +179,8 @@ export function generateRpy(p: Project): { code: string; warnings: Warn[] } {
         if (!l.text.trim()) W.push({ level: 'warn', msg: `빈 대사가 있어요 (${b.title || b.id})`, nodeId: b.id });
         pct(l.text, '대사');
         // 짧은 이름과 화면 효과는 플러그인이 받는다. 플러그인이 없으면 오류가 나서 글자 모양만 렌파이 원래 이름으로 쓴다
-        if (!S.renpyLink && l.say?.effect && !renpyOnlyEffect(l.say.effect)) W.push({ level: 'warn', msg: `이 등장 효과는 showpy가 있어야 해서 내보내지 않았어요 (${b.title || b.id})`, nodeId: b.id });
-        if (!S.renpyLink && l.say?.box) W.push({ level: 'warn', msg: `글 상자는 showpy가 있어야 해서 내보내지 않았어요 (${b.title || b.id})`, nodeId: b.id });
+        if (!S.renpyLink && l.say?.effect && !renpyOnlyEffect(l.say.effect)) W.push({ level: 'warn', msg: `이 등장 효과는 pygaki 플러그인이 있어야 해서 내보내지 않았어요 (${b.title || b.id})`, nodeId: b.id });
+        if (!S.renpyLink && l.say?.box) W.push({ level: 'warn', msg: `글 상자는 pygaki 플러그인이 있어야 해서 내보내지 않았어요 (${b.title || b.id})`, nodeId: b.id });
         const fa = S.renpyLink ? [...fxArgs(l.fx), ...sayArgs(l.say)] : sayArgs(l.say, true);
         const tail = fa.length ? ` (${fa.join(', ')})` : '';
         if (l.type === 'narration') return body.push(q(l.text) + tail);
