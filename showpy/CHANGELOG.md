@@ -9,6 +9,7 @@
 - **그림 등장 효과** (`engine/image_effects.rpy`): 효과 폴더에 `@transition`으로 적은 장면 전환을 `scene bg hall with img_fx.use("irisin")`처럼 씀. 시간과 값은 `img_fx.use("bands", 1.4, count=10, color="#c2185b")`.
 - 효과 파일의 새 표시 `@param u__이름 최소 최대 한글이름`(막대의 범위와 이름), `@transition`, `@time`, `@fragment`.
 - 샘플 여섯: 글자 `maskup` 아래에서 올라오기, `popin` 뿅 튀어나오기, `tracking` 자간이 좁아지며, `sweep` 빛 지나가기. 그림 `irisin` 원으로 열리기, `bands` 띠로 덮였다 열리기.
+- 없앰 (2026-11-11): **PyKaki 실시간 미리보기**. PyKaki 글자 효과 칸의 [렌파이에서 보기] 스위치와 게임 화면 위 "PyKaki 미리보기" 창(`ui_editor_pk_preview`, `ui_editor.preview_*`)을 뺌. 게임은 `pykaki_preview.json`을 읽지 않음(예전 프로젝트에 남은 파일은 배포판에서 계속 빠짐). 원고 다시 불러오기와 줄 따라가기는 그대로.
 
 pygaki 앱·PyKaki: 효과 폴더의 효과가 [대본 편집] 등장 효과 목록과 미리보기, 배경/보이기 줄의 "나타나는 방식"에 나옴(그림 전환은 플레이 화면에서 서서히 바뀌기로 보임). **원고 덮어쓰기 막기**: 창을 열고 처음 내보낼 때 `script_flow.rpy`에 지금 대본에 없는 상자가 절반 넘게 있으면(다른 대본으로 만든 원고) 자동 내보내기는 멈추고 알리고, Ctrl+E는 물어봄. 처음 덮어쓰기 전 원고는 `script_flow.rpy.bak`으로 남김. 전에는 상자가 적은 대본을 열어 둔 채 조금만 고쳐도 긴 원고가 통째로 덮어써졌음.
 

@@ -12,7 +12,6 @@ const w = window as any;
 export const hasDirPicker = typeof w.showDirectoryPicker === 'function' || isDesktop;
 export const INBOX_FILE = 'showpy_inbox.json';
 export const RPY_FILE = 'script_flow.rpy';
-export const PREVIEW_FILE = 'pykaki_preview.json'; // 렌파이 실시간 미리보기 (showpy ui_kit/editor/editor_preview.rpy가 읽음)
 export const GOTO_FILE = 'pykaki_goto.json'; // 자동 내보내기 뒤 게임이 옮겨 갈 줄 (showpy editor_preview.rpy가 읽음, LINK.md 7-1)
 
 export interface Media {
@@ -372,21 +371,6 @@ export async function pullInbox(ask = false) {
 // 고른 폴더가 렌파이 프로젝트인지. 새 프로젝트에는 늘 gui.rpy나 options.rpy가 있다
 export const looksLikeGame = async () => (await readText(dir, 'gui.rpy')) !== null || (await readText(dir, 'options.rpy')) !== null;
 export const readRpyFromFolder = () => readText(dir, RPY_FILE);
-
-// 렌파이 실시간 미리보기: 지금 줄을 적어 두면 개발 모드로 켠 게임이 화면 위에 다시 보여 준다
-// 'denied'면 폴더 권한이 없는 것 (ask는 클릭 안에서만 true. 브라우저가 권한 창을 클릭 때만 띄움)
-export type PreviewResult = 'ok' | 'denied' | 'error';
-export async function writePreview(data: object, ask = false): Promise<PreviewResult> {
-  if (!dir) return 'error';
-  try {
-    if (!(await allowed(ask))) return 'denied';
-    await writeText(dir, PREVIEW_FILE, JSON.stringify({ format: 'pykaki-preview', version: 1, ...data }));
-    return 'ok';
-  } catch (e) {
-    console.warn('미리보기 파일을 못 썼어요', e);
-    return 'error';
-  }
-}
 
 export async function writeRpyToFolder(code: string, goto?: { line: number | null }) {
   // 옮겨 갈 줄을 먼저 적는다. 게임은 원고가 바뀐 것을 보고 이 파일을 읽는다

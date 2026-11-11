@@ -17,6 +17,8 @@
 
 4.3에서 바뀐 점: **효과 폴더** `ui_kit/effects/`가 생겼습니다. 이 폴더에 `.glsl` 파일을 넣으면 그 안의 글자 등장 효과(`effect="maskup"`)와 그림 등장 효과(`scene bg hall with img_fx.use("irisin")`)가 생기고, 파일을 빼면 없어집니다. 샘플 여섯 개(`maskup`, `popin`, `tracking`, `sweep`, `irisin`, `bands`)가 들어 있습니다. 적는 법, 쓸 수 있는 값, 클로드에게 새 효과를 부탁할 때 줄 글은 [effects/README.md](effects/README.md)에 있습니다.
 
+4.3에서 없앤 것: **PyKaki 실시간 미리보기**(PyKaki의 [렌파이에서 보기] 스위치, 게임 화면 위의 "PyKaki 미리보기" 창). 글자 효과는 PyKaki의 미리보기로 보고, 게임에서는 PyKaki가 저절로 내보낸 원고의 그 줄로 가서 봅니다. 예전에 생긴 `game/pykaki_preview.json`은 지워도 됩니다(그대로 두어도 배포판에서 빠짐).
+
 4.2에서 바뀐 점: 개발 모드 게임이 켜진 채 PyKaki에서 Ctrl+E로 내보내면, 게임이 바뀐 원고(`script_flow.rpy`)를 보고 저절로 다시 불러옵니다(Shift+R과 같음). GUI 편집기에 저장 안 한 값이 있으면 다시 불러오지 않고 알립니다. PyKaki의 [게임 줄 따라가기]가 켜져 있으면 다시 불러온 뒤 PyKaki에서 쓰고 있는 줄로 옮겨 갑니다(`game/pykaki_goto.json`, 배포판에서 빠짐). PyKaki는 대본을 고치고 멈출 때 저절로 내보냅니다.
 
 4.2에서 뺀 등장 효과: 렌파이 기본 `typewriter`(타자기), `slowalpha`(흐리게 대기)는 효과 목록에서만 빠지고(렌파이에는 그대로 있음), pygaki 플러그인 효과 `melt`(녹아내림), `mosh`(데이터모싱), `flipin`(뒤집으며 나오기), `led`(LED 전광판), `split`(위아래 갈라짐)은 지웠습니다. 예전 원고에 남은 이 이름들은 오류 없이 한 글자씩 나오기로 돕니다(`text_effects.rpy`의 `REMOVED_EFFECTS`).
@@ -159,7 +161,7 @@
 
 ### 3.11에서 바뀐 점
 
-- **PyKaki 실시간 미리보기** (`editor/editor_preview.rpy`): PyKaki 글자 효과 칸에서 [렌파이에서 보기]를 켜면, 지금 쓰는 대사 줄이 `game/pykaki_preview.json`에 적힙니다. 개발 모드로 켜 둔 게임은 이 파일이 바뀔 때마다 화면 위에 미리보기 창을 띄워서 그 줄을 진짜 렌파이 효과로 다시 보여줍니다. R 다시 보기, Esc 닫기.
+- **PyKaki 실시간 미리보기** (`editor/editor_preview.rpy`): PyKaki 글자 효과 칸에서 [렌파이에서 보기]를 켜면, 지금 쓰는 대사 줄이 `game/pykaki_preview.json`에 적힙니다. 개발 모드로 켜 둔 게임은 이 파일이 바뀔 때마다 화면 위에 미리보기 창을 띄워서 그 줄을 진짜 렌파이 효과로 다시 보여줍니다. R 다시 보기, Esc 닫기. (4.3에서 없앴습니다.)
   - 글자 모양, 속도, 등장 효과만 보여줍니다. 대사창 자리와 화면 효과는 게임을 그 줄까지 진행해서 봅니다.
   - 게임을 켤 때 이미 있던 파일은 띄우지 않습니다. 미리보기 파일은 배포판에 들어가지 않습니다.
 - 옮기기: 폴더를 바꿔 넣고 `.rpyc`를 지우면 됩니다. PyKaki도 같이 새로 고침합니다.

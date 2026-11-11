@@ -189,7 +189,7 @@
   - 형식은 그대로다. 글 안의 태그일 뿐이라 `.flow.json`, LINK.md, `FEATURE`는 안 바뀐다.
 - **상자 보기 화면의 태그** (`TagView`): 고칠 때(textarea)와 자리가 같아야 해서 글자는 그대로 두고 태그 글자만 흐리게(`.tg`, 멈춤 태그는 `.tg-stop`), 안쪽 글에 굵게(폭이 안 변하는 그림자), 기울임, 밑줄, 취소선, 색만 입힌다. 크기는 바꾸지 않는다.
 - **렌파이 견본** (`EffectClip`): 효과를 고르면 미리보기 아래에 `public/effects/<효과>.webm`을 반복 재생한다. 렌파이에서 예시 대사를 재생하며 찍은 2.4초 영상이다. `tools/record_effect_clips.py`가 효과 목록을 `stage.ts`에서 읽어 렌파이 SDK와 ffmpeg로 만든다. 효과를 새로 넣으면 다시 돌린다.
-- **렌파이에서 보기** (폴더를 연결했을 때): 켜 두면 줄이나 값을 바꿀 때마다 0.3초 뒤 `game/pykaki_preview.json`을 쓴다(`writePreview`). 개발 모드로 켜 둔 게임이 화면 위에 그 줄을 진짜 효과로 다시 보여 준다. 형식은 [LINK.md](../../docs/LINK.md) 7장. 켰는지는 `localStorage["pykaki-live-preview"]`. 스위치를 켜고 끌 때는 클릭 안이라 폴더 권한을 물어보고, 그 뒤 자동으로 쓰다가 권한이 없으면(`'denied'`) 스위치 옆에 안내와 [권한 허용], 쓰기가 실패하면(`'error'`) [다시 쓰기]를 보여 준다.
+- **렌파이에서 보기**는 없앴다(2026-11-11). `game/pykaki_preview.json`을 쓰지 않고, 예전에 쓰던 `localStorage["pykaki-live-preview"]`도 읽지 않는다. 게임에서 보려면 자동 내보내기와 [게임 줄 따라가기]를 쓴다([LINK.md](../../docs/LINK.md) 7-1).
 - **글자/초 기본값** (`lineCps`, `DEFAULT_CPS` 30): 글자가 하나씩 나와야 보이는 효과(`wave`, `jitter`, `glow`, `liquid`, `vhs`를 뺀 모든 효과)에서 `cps`가 비면 30으로 재생하고 내보낸다. 효과가 없거나 `wave`, `jitter`이면 비운 채로 두고 게임 설정을 따른다.
 - **Ctrl+Enter**: 같은 화자로 새 줄을 만든다. `flushSync`로 즉시 그려서 바로 이어 쳐도 글자가 새 줄에 들어간다.
 - **빈 곳 더블클릭**: 새 상자를 만든다. label 프레임 안이면 그 label에 넣는다.

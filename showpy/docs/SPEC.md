@@ -38,13 +38,13 @@
 | 종류 | 내용 |
 |---|---|
 | 스크린 교체 | `choice`, `main_menu`, `navigation`, `game_menu`, `keyboard_help` |
-| 새 스크린 | `tmenu_pause`, `title_menu`, `cmenu_choice`, `splash_page`, `ui_editor_*` (`ui_editor_pk_watch`, `ui_editor_pk_preview`: PyKaki 실시간 미리보기) |
+| 새 스크린 | `tmenu_pause`, `title_menu`, `cmenu_choice`, `splash_page`, `ui_editor_*` (`ui_editor_pk_watch`: PyKaki 원고가 바뀌는지 지켜봄) |
 | 층 | `sfx_say`, `sfx_choice` (screens 아래), `ui_editor` (top_layers) |
 | config | `say_arguments_callback`(`screen_fx` → `say_style` 순서로 이어짐), `layer_transforms`, `say_layer`, `choice_layer`, `nvl_layer`, `nvl_choice_layer`, `context_clear_layers`, `mouse`, `mouse_displayable`, `always_shown_screens`, `top_layers`, `label_overrides["splashscreen"]`, `end_splash_transition`, `all_character_callbacks`, `start_callbacks`, `after_load_callbacks`, `after_default_callbacks`, `default_text_cps`, `keymap`, `underlay`, `language_callbacks`, `lint_hooks`, `show`, `hide`, `scene`, `with_callback`, `start_interact_callbacks`, `label_callbacks` |
 | 그 밖 | `_game_menu_screen`, `gui.main_menu_background` |
 | 세이브 값 | `screen_fx.current`, `cur_overlay`, `cur_target`, `cur_cursor`, `overrides`, `changes`, `stage.cur_box` |
 | persistent | `splash_seen`, `splash_hidden`, `screen_fx_off`, `vhs_crt_off`, `ascii_off`, `retro_term_off`, `gameboy_off`, `_ui_kit_text_cps` |
-| 프로젝트 폴더 | `ui_kit_backup/` (원고 백업), `game/showpy_inbox.json` (PyKaki 전달, 배포판 제외), `game/pykaki_preview.json` (PyKaki 실시간 미리보기, 배포판 제외) |
+| 프로젝트 폴더 | `ui_kit_backup/` (원고 백업), `game/showpy_inbox.json` (PyKaki 전달, 배포판 제외), `game/pykaki_goto.json` (PyKaki가 적는 옮겨 갈 줄, 배포판 제외), `game/pykaki_preview.json` (없앤 실시간 미리보기의 파일. 예전 프로젝트에 남아 있으면 배포판에서만 뺌) |
 
 ## 4. 스크립트 문법
 
