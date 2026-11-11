@@ -4,14 +4,15 @@ import { create } from 'zustand';
 import { kvGet, kvSet, snapAdd } from './persist';
 import { applyInbox, type InboxOp } from './inbox';
 import { useStore } from './store';
-import { gameDir, isDesktop, projectInfo } from './desktop';
-import { setFolderEffects } from './fx/textShaders';
-import { refreshEffects } from './stage';
+import { gameDir, isDesktop, projectDir, projectInfo } from './desktop';
+import { setFolderEffects, type EffectPack } from './fx/textShaders';
+import { parseEffectsOff, refreshEffects, setEffectsOff } from './stage';
 
 const w = window as any;
 export const hasDirPicker = typeof w.showDirectoryPicker === 'function' || isDesktop;
 export const INBOX_FILE = 'showpy_inbox.json';
 export const RPY_FILE = 'script_flow.rpy';
+export const EFFECTS_OFF_FILE = 'effects_off.txt'; // 끈 효과 목록 (ui_kit/effects 안, LINK.md 8-2)
 export const GOTO_FILE = 'pykaki_goto.json'; // 자동 내보내기 뒤 게임이 옮겨 갈 줄 (showpy editor_preview.rpy가 읽음, LINK.md 7-1)
 
 export interface Media {
@@ -55,6 +56,8 @@ interface F {
   hasShowpy: boolean; // game 폴더에 ui_kit이 있는지
   fxErrors: [string, string][]; // 효과 폴더(ui_kit/effects)에서 못 읽은 파일과 이유
   fxSeq: number; // 효과 목록이 바뀔 때마다 오른다 (목록을 쓰는 화면이 다시 그리게)
+  fxFiles: string[]; // 효과 폴더에 있는 효과 파일 이름
+  fxOff: string[]; // 끈 효과 이름 (effects_off.txt)
   set(v: Partial<F>): void;
 }
 
@@ -68,6 +71,8 @@ export const useGameFolder = create<F>((set) => ({
   hasShowpy: false,
   fxErrors: [],
   fxSeq: 0,
+  fxFiles: [],
+  fxOff: [],
   set: (v) => set(v),
 }));
 
@@ -243,17 +248,20 @@ export async function scanFolder() {
   const uiKit = await sub(dir, 'ui_kit');
   const hasShowpy = !!uiKit;
   // 효과 폴더: ui_kit/effects/*.glsl (showpy text_effects.rpy가 읽는 것과 같은 파일)
-  const packs: { name: string; text: string }[] = [];
+  // 플러그인이 있는 게임이면 그 폴더의 파일만 쓴다 (샘플도 게임에서 뺐으면 목록에서 빠짐). 없으면 앱에 든 샘플
+  const packs: EffectPack[] = [];
   const fxDir = uiKit ? await sub(uiKit, 'effects') : null;
   if (fxDir)
     for await (const [name, h] of fxDir.entries())
       if (h.kind === 'file' && /\.glsl$/i.test(name)) packs.push({ name, text: await (await h.getFile()).text() });
-  const fxErrors = setFolderEffects(packs);
+  const fxOff = parseEffectsOff((fxDir && (await readText(fxDir, EFFECTS_OFF_FILE))) || '');
+  const fxErrors = setFolderEffects(uiKit ? packs : null);
+  setEffectsOff(fxOff);
   refreshEffects();
   const g = useGameFolder.getState();
   if (fxErrors.length && JSON.stringify(fxErrors) !== JSON.stringify(g.fxErrors))
     useStore.getState().say('효과 폴더에서 못 읽은 파일: ' + fxErrors.map(([f, why]) => `${f} (${why})`).join(' / '));
-  g.set({ name: g.name ?? dir.name, media, look, startClash, hasShowpy, fxErrors, fxSeq: g.fxSeq + 1 });
+  g.set({ name: g.name ?? dir.name, media, look, startClash, hasShowpy, fxErrors, fxSeq: g.fxSeq + 1, fxFiles: packs.map((f) => f.name).sort(), fxOff });
   setTimeout(() => oldUrls.forEach((u) => URL.revokeObjectURL(u)), 5000);
 }
 
@@ -293,9 +301,10 @@ export async function disconnectFolder() {
   await kvSet('gameDir', null);
   await kvSet('projectDir', null);
   pictures = new Map();
-  setFolderEffects([]);
+  setFolderEffects(null);
+  setEffectsOff([]);
   refreshEffects();
-  useGameFolder.getState().set({ name: null, media: NO_MEDIA, look: DEFAULT_LOOK, startClash: null, hasShowpy: false, fxErrors: [], fxSeq: useGameFolder.getState().fxSeq + 1 });
+  useGameFolder.getState().set({ name: null, media: NO_MEDIA, look: DEFAULT_LOOK, startClash: null, hasShowpy: false, fxErrors: [], fxSeq: useGameFolder.getState().fxSeq + 1, fxFiles: [], fxOff: [] });
 }
 
 // 앱을 다시 열 때: 연결은 기억하지만, 권한은 사용자가 한 번 눌러야 다시 생긴다
@@ -382,3 +391,40 @@ export async function writeRpyToFolder(code: string, goto?: { line: number | nul
 export const backupRpy = (old: string) => writeText(dir, RPY_FILE + '.bak', old).catch((e) => console.warn('원고 백업 실패', e));
 
 export { allowed as folderAllowed };
+
+// ── 효과 폴더의 파일 다루기 (effectsLib.ts가 씀). 권한은 부르는 쪽이 먼저 얻는다 ──
+const BACKUP_DIR = 'ui_kit_backup'; // showpy script_edit.rpy가 원고 백업을 두는 곳과 같은 폴더
+const fxFolder = async (create: boolean) => {
+  const uiKit = dir && (await sub(dir, 'ui_kit'));
+  if (!uiKit) return null;
+  return create ? uiKit.getDirectoryHandle('effects', { create: true }) : sub(uiKit, 'effects');
+};
+export async function readFxFile(name: string): Promise<string | null> {
+  const d = await fxFolder(false);
+  return d ? readText(d, name) : null;
+}
+export async function writeFxFile(name: string, text: string) {
+  const d = await fxFolder(true);
+  if (!d) throw new Error('이 게임에 pygaki 플러그인(ui_kit)이 없어요');
+  await writeText(d, name, text);
+}
+// 효과 파일을 지운다. 지우기 전의 글은 프로젝트 폴더의 ui_kit_backup/effects/에 남긴다 (배포판에서 빠지는 폴더).
+// 웹에서 game 폴더를 바로 골랐으면 프로젝트 폴더에 못 써서 game/ui_kit_backup/effects/에 둔다. 돌려주는 값은 백업한 자리
+export async function removeFxFile(name: string): Promise<string> {
+  const d = await fxFolder(false);
+  const text = d ? await readText(d, name) : null;
+  if (text === null) throw new Error('효과 폴더에 그 파일이 없어요: ' + name);
+  const root = isDesktop ? projectDir() : proj;
+  const base = await (root ?? dir).getDirectoryHandle(BACKUP_DIR, { create: true });
+  const keep = await base.getDirectoryHandle('effects', { create: true });
+  let as = name;
+  if ((await readText(keep, name)) !== null) {
+    const t = new Date();
+    const two = (n: number) => String(n).padStart(2, '0');
+    const stamp = `${t.getFullYear()}${two(t.getMonth() + 1)}${two(t.getDate())}-${two(t.getHours())}${two(t.getMinutes())}${two(t.getSeconds())}`;
+    as = name.replace(/\.glsl$/i, '') + '.' + stamp + '.glsl';
+  }
+  await writeText(keep, as, text);
+  await d.removeEntry(name);
+  return (root ? '' : 'game/') + BACKUP_DIR + '/effects/' + as;
+}

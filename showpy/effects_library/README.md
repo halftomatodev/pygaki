@@ -1,0 +1,9 @@
+# 효과 모음
+
+pygaki와 같이 오는 효과 파일을 두는 곳입니다. 여기 있는 효과는 게임에 저절로 들어가지 않고,
+pygaki 앱의 [효과] 화면에서 [넣기]를 누르면 그 게임의 `game/ui_kit/effects/`로 복사됩니다.
+
+- 파일 하나에 효과 하나, 파일 이름은 `효과이름.glsl`
+- 형식은 `showpy/game/ui_kit/effects/README.md`의 "적는 법"과 같습니다 (글자 효과는 `@effect`, 그림 효과는 `@transition`)
+- 새 프로젝트마다 들어가는 샘플 여섯은 `showpy/game/ui_kit/effects/`에 그대로 둡니다. 그 샘플도 게임에서 빼면 앱의 모음 쪽에 보입니다
+- PyKaki는 빌드할 때 이 폴더의 `.glsl`을 그대로 가져갑니다 (사본 없음)

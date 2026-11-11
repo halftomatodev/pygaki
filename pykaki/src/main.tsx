@@ -9,6 +9,7 @@ import { createEmpty, createSample, normalizeProject } from './sample';
 import { desktop, flowFile, isDesktop, projectInfo } from './desktop';
 import { autoExport, checkExternal, restoreProjectFile, saveQuiet, setProjectFile, warnNewer } from './files';
 import { chooseFlow } from './flowPick';
+import './effectsLib'; // 효과 관리 함수 (window.pykakiEffects)
 
 // 데스크톱 앱: 프로젝트 폴더 맨 위의 .flow.json을 연다(여러 개면 고름). 없으면 프로젝트 이름으로 새 대본을 만들어 바로 저장한다
 async function bootDesktop() {

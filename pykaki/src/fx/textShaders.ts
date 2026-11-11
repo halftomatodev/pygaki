@@ -89,41 +89,47 @@ const BY_NAME = new Map([...RENPY_SHADERS, ...SHOWPY_SHADERS].map((e) => [e.name
 export const shaderEffect = (name: string) => BY_NAME.get(name);
 
 // ── 효과 폴더 (showpy ui_kit/effects/*.glsl, ui_kit 4.3) ──
-// showpy에 든 샘플은 빌드할 때 같이 가져오고, 연결한 게임 폴더의 파일은 폴더를 읽을 때 더한다.
+// 플러그인이 있는 게임 폴더를 연결했으면 그 폴더의 파일만 쓴다 (게임에서 도는 것과 같은 목록).
+// 연결하지 않았으면 showpy에 든 샘플(빌드할 때 같이 가져옴)을 쓴다.
 // 읽는 규칙은 showpy text_effects.rpy의 _tfx_register와 같다: 틀린 파일은 그 파일만 건너뛰고, 이미 있는 이름은 쓰지 않는다
 const NAME_OK = /^[a-z][a-z0-9_]*$/;
 function readPack(file: string, text: string, have: Set<string>): ShaderEffect[] {
   const more = parseShaders(text, true, { ...SHOWPY_PARTS });
   for (const e of more) {
-    if (!NAME_OK.test(e.name)) throw new Error('이름은 영어 소문자, 숫자, _만 써요: ' + e.name);
-    if (have.has(e.name)) throw new Error('이미 있는 이름이에요: ' + e.name);
+    if (!NAME_OK.test(e.name)) throw new Error('이름은 영어 소문자, 숫자, _만 써요: ' + (e.name || '(이름 없음)'));
+    if (have.has(e.name) || more.filter((x) => x.name === e.name).length > 1) throw new Error('이미 있는 이름이에요: ' + e.name);
     if (!e.code.length) throw new Error('셰이더 코드가 없어요: ' + e.name);
   }
   more.forEach((e) => (e.file = file));
   return more;
 }
 
-const samples = import.meta.glob('../../../showpy/game/ui_kit/effects/*.glsl', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
-for (const path of Object.keys(samples).sort()) {
-  const file = path.split('/').pop()!;
-  try {
-    for (const e of readPack(file, samples[path], new Set(BY_NAME.keys()))) {
-      BY_NAME.set(e.name, e);
-      (e.kind === 'effect' ? SHOWPY_SHADERS : IMAGE_FX).push(e);
-    }
-  } catch (e) {
-    console.warn('효과 파일을 못 읽었어요', file, e);
-  }
-}
-const BUILT_IN = new Set(BY_NAME.keys());
-const BUILT_IN_FILES = new Set([...BY_NAME.values()].map((e) => e.file).filter(Boolean));
+export interface EffectPack { name: string; text: string } // 효과 파일 하나: 파일 이름과 글
+const globPacks = (found: Record<string, string>): EffectPack[] =>
+  Object.keys(found).sort().map((path) => ({ name: path.split('/').pop()!, text: found[path] }));
+// 새 프로젝트마다 들어가는 샘플 (showpy/game/ui_kit/effects)
+export const SAMPLE_PACKS = globPacks(import.meta.glob('../../../showpy/game/ui_kit/effects/*.glsl', { query: '?raw', import: 'default', eager: true }) as Record<string, string>);
+// 효과 모음: pygaki와 같이 오지만 게임에 넣어야 쓸 수 있는 것 (showpy/effects_library)
+export const LIBRARY_PACKS = globPacks(import.meta.glob('../../../showpy/effects_library/*.glsl', { query: '?raw', import: 'default', eager: true }) as Record<string, string>);
 
-// 연결한 폴더의 효과 파일을 다시 읽는다. 돌려주는 값은 못 읽은 파일과 이유. 바뀐 것이 있으면 effectEpoch가 오른다 (미리보기 셰이더 다시 만들기)
+// 기본 효과와 렌파이 효과의 이름 (효과 폴더의 파일이 쓸 수 없는 이름)
+const BUILT_IN = new Set(BY_NAME.keys());
+
+// 효과 파일 검사: 지금 목록에 넣을 수 있는지. 같은 파일(바꿔 넣을 것)에 든 이름은 겹쳐도 된다. 틀리면 이유를 던진다
+export function checkPack(file: string, text: string): ShaderEffect[] {
+  const have = new Set([...BY_NAME.values()].filter((e) => e.file !== file).map((e) => e.name));
+  const found = readPack(file, text, have);
+  if (!found.length) throw new Error('효과가 없어요 (@effect나 @transition 줄이 있어야 해요)');
+  return found;
+}
+
+// 효과 폴더를 다시 읽는다. files가 null이면 연결한 폴더(플러그인)가 없는 것이라 샘플을 쓴다.
+// 돌려주는 값은 못 읽은 파일과 이유. 바뀐 것이 있으면 effectEpoch가 오른다 (미리보기 셰이더 다시 만들기)
 export let effectEpoch = 0;
-let folderSeen = '[]';
+let folderSeen = '';
 let folderErrors: [string, string][] = [];
-export function setFolderEffects(files: { name: string; text: string }[]): [string, string][] {
-  const sorted = [...files].sort((a, b) => (a.name < b.name ? -1 : 1));
+export function setFolderEffects(files: EffectPack[] | null): [string, string][] {
+  const sorted = [...(files ?? SAMPLE_PACKS)].sort((a, b) => (a.name < b.name ? -1 : 1));
   const seen = JSON.stringify(sorted);
   if (seen === folderSeen) return folderErrors;
   folderSeen = seen;
@@ -137,7 +143,6 @@ export function setFolderEffects(files: { name: string; text: string }[]): [stri
     for (let i = list.length - 1; i >= 0; i--) if (!BUILT_IN.has(list[i].name)) list.splice(i, 1);
   folderErrors = [];
   for (const f of sorted) {
-    if (BUILT_IN_FILES.has(f.name)) continue; // showpy에 든 샘플과 같은 파일
     try {
       for (const e of readPack(f.name, f.text, new Set(BY_NAME.keys()))) {
         BY_NAME.set(e.name, e);
@@ -223,6 +228,8 @@ PARTS.set('renpy.texture', makePart('renpy.texture', [
   ['fragment_200', '\n    gl_FragColor = texture2D(tex0, v_tex_coord.xy, u_lod_bias);\n'],
 ]));
 for (const e of BY_NAME.values()) if (e.kind === 'effect') PARTS.set('textshader.' + e.name, makePart('textshader.' + e.name, e.code));
+// 폴더를 연결하기 전에는 샘플을 쓴다
+for (const [file, why] of setFolderEffects(null)) console.warn('효과 파일을 못 읽었어요', file, why);
 
 // 셰이더 코드 만들기 (gl2shadercache.py의 source). WebGL1은 조각 셰이더에 정밀도가 있어야 한다
 function source(vars: Variable[], parts: [number, string, string][], fragment: boolean) {

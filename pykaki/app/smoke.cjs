@@ -90,6 +90,61 @@ async function until(what, fn, ms = 10000) {
   if (outside === 'written' || fs.existsSync(path.join(path.dirname(proj), 'pykaki-smoke-outside.txt'))) fail('프로젝트 밖에 쓸 수 있음');
   console.log('밖에 쓰기:', outside.slice(0, 40));
 
+  // 효과 관리 (효과 탭 2단계, src/effectsLib.ts): 모음에서 넣기 → 틀린 파일 막기 → 끄기/켜기 → 쓰인 줄 세기 → 바꾸고 빼기
+  const fx = (fn, ...args) => page.evaluate(([f, a]) => window.pykakiEffects[f](...a), [fn, args]);
+  const cardOf = async (name) => (await fx('catalog')).find((c) => c.name === name);
+  const fxDir = path.join(proj, 'game', 'ui_kit', 'effects');
+  let c = await cardOf('maskup');
+  if (!c || c.source !== 'library' || c.ready) fail('넣지 않은 샘플이 모음으로 안 보임: ' + JSON.stringify(c));
+  if ((await cardOf('dissolve'))?.source !== 'renpy' || (await cardOf('shake'))?.source !== 'base') fail('기본 효과의 자리가 다름');
+  let r = await fx('addFromLibrary', 'maskup.glsl');
+  if (!r.ok || !fs.existsSync(path.join(fxDir, 'maskup.glsl'))) fail('모음에서 넣지 못함: ' + JSON.stringify(r));
+  c = await cardOf('maskup');
+  if (c.source !== 'project' || !c.ready || !c.on) fail('넣은 효과가 프로젝트 효과로 안 보임: ' + JSON.stringify(c));
+  r = await fx('addFromLibrary', 'maskup.glsl');
+  if (r.ok || !r.exists) fail('같은 파일을 묻지 않고 다시 넣음');
+  for (const [file, text] of [['bad.glsl', '@effect Bad Name\n@fragment_300\n    gl_FragColor.a *= 1.0;\n'], ['dup.glsl', '@effect dissolve 겹침\n@fragment_300\n    gl_FragColor.a *= 1.0;\n'], ['empty.glsl', '// 아무것도 없음\n'], ['../up.glsl', '']]) {
+    r = await fx('addFile', file, text);
+    if (r.ok) fail('틀린 효과 파일을 넣음: ' + file);
+  }
+  if (fs.readdirSync(fxDir).join() !== 'maskup.glsl') fail('틀린 파일을 넣다가 효과 폴더가 바뀜: ' + fs.readdirSync(fxDir));
+  console.log('효과 넣기와 검사: 됨 (' + r.why.slice(0, 30) + ')');
+
+  const offFile = path.join(fxDir, 'effects_off.txt');
+  r = await fx('setOn', 'maskup', false);
+  if (!r.ok || !/^maskup$/m.test(fs.readFileSync(offFile, 'utf8')) || (await cardOf('maskup')).on) fail('효과를 끄지 못함');
+  fs.appendFileSync(offFile, 'someday  # 나중에 넣을 것\n');
+  r = await fx('setOn', 'maskup', true);
+  const offText = fs.readFileSync(offFile, 'utf8');
+  if (!r.ok || /^maskup$/m.test(offText) || !offText.includes('someday  # 나중에') || !(await cardOf('maskup')).on) fail('효과를 다시 켜지 못함: ' + offText);
+  console.log('효과 끄기/켜기: 됨');
+
+  // 대본에 그 효과를 쓴 줄을 넣고(밖에서 고친 것으로), 다른 효과로 바꾸고 뺀다
+  const nd = dialogs.length;
+  const used = JSON.parse(JSON.stringify(web));
+  used.nodes[0].lines.push({ id: 'fxsmoke1', type: 'narration', text: '효과 시험', say: { effect: 'maskup:u__duration=8|shake' } });
+  acceptNext = true;
+  fs.writeFileSync(flow, JSON.stringify(used, null, 2));
+  await until('효과를 쓴 대본을 다시 읽지 않음', () => dialogs.length > nd);
+  await page.waitForFunction(() => window.pykakiEffects.uses('effect', 'maskup').length === 1, null, { timeout: 10000 });
+  if ((await cardOf('maskup')).uses !== 1) fail('쓰인 줄 수가 다름');
+  r = await fx('remove', 'maskup.glsl', { maskup: 'dissolve' });
+  if (!r.ok || r.changed !== 1) fail('바꾸고 빼지 못함: ' + JSON.stringify(r));
+  if (fs.existsSync(path.join(fxDir, 'maskup.glsl'))) fail('뺀 효과 파일이 남아 있음');
+  if (!fs.existsSync(path.join(proj, r.backup))) fail('뺀 효과 파일의 백업이 없음: ' + r.backup);
+  if ((await cardOf('maskup')).source !== 'library') fail('뺀 효과가 모음으로 돌아가지 않음');
+  await until('대본에 예전 효과 이름이 남음', () => {
+    const t = fs.readFileSync(flow, 'utf8');
+    return t.includes('"dissolve|shake"') && !t.includes('maskup');
+  });
+  await until('내보낸 원고에 예전 효과 이름이 남음', () => {
+    const t = fs.readFileSync(rpy, 'utf8');
+    return t.includes('dissolve|shake') && !t.includes('maskup');
+  });
+  const kept = await page.evaluate(() => window.pygaki.remove('game/gui.rpy').then(() => 'removed', (e) => 'blocked: ' + e.message));
+  if (kept === 'removed' || !fs.existsSync(path.join(proj, 'game', 'gui.rpy'))) fail('효과 파일이 아닌 것을 지울 수 있음');
+  console.log('효과 바꾸고 빼기: 됨, 백업', r.backup);
+
   // showpy 실시간 연결 (docs/LINK.md 9장): 가짜 게임을 띄워 앱이 붙고, 상태를 보여주고, 명령을 보내는지
   const net = require('node:net');
   const got = [];

@@ -59,9 +59,20 @@ export function fxArgs(f?: LineFx): string[] {
 // - showpy가 등록하는 효과: showpy/game/ui_kit/engine/text_effects.glsl (빌드할 때 그대로 가져옴). showpy가 없는 게임에서는 내보내지 않는다
 // 효과 폴더(showpy ui_kit/effects)의 파일을 다시 읽으면 refreshEffects로 목록을 새로 채운다 (같은 배열을 고쳐 씀)
 export const EFFECTS: [string, string][] = [];
+// 끈 효과 (ui_kit/effects/effects_off.txt, LINK.md 8-2). 고르는 목록에서만 빠지고, 이미 쓴 줄에는 이름이 그대로 보인다
+const EFFECTS_OFF = new Set<string>();
+export const effectOff = (name: string) => EFFECTS_OFF.has(name);
+// effects_off.txt 읽기: 한 줄에 이름 하나, # 뒤는 설명 (showpy text_effects.rpy _tfx_read_off와 같은 규칙)
+export const parseEffectsOff = (text: string) =>
+  text.replace(/﻿/g, '').split(/\r?\n/).map((row) => row.split('#')[0].trim()).filter(Boolean);
+export function setEffectsOff(names: string[]) {
+  EFFECTS_OFF.clear();
+  names.forEach((n) => EFFECTS_OFF.add(n));
+}
 export function refreshEffects() {
-  EFFECTS.splice(0, EFFECTS.length, ['', '효과 없음'], ...[...RENPY_SHADERS, ...SHOWPY_SHADERS].map((e): [string, string] => [e.name, e.label || e.name]));
-  TRANSITIONS.splice(0, TRANSITIONS.length, ...BASE_TRANSITIONS, ...IMAGE_FX.map((e): [string, string] => [imageFxCode(e.name), e.label || e.name]));
+  const on = (e: { name: string }) => !EFFECTS_OFF.has(e.name);
+  EFFECTS.splice(0, EFFECTS.length, ['', '효과 없음'], ...[...RENPY_SHADERS, ...SHOWPY_SHADERS].filter(on).map((e): [string, string] => [e.name, e.label || e.name]));
+  TRANSITIONS.splice(0, TRANSITIONS.length, ...BASE_TRANSITIONS, ...IMAGE_FX.filter(on).map((e): [string, string] => [imageFxCode(e.name), e.label || e.name]));
 }
 refreshEffects();
 // 목록에서 뺀 효과 (ui_kit 4.2). 예전 대본에 남은 값은 그대로 두고 내보낸다

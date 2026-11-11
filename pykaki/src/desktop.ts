@@ -8,6 +8,7 @@ interface PygakiApi {
   stat(rel: string): Promise<{ dir: boolean; size: number; mtime: number } | null>;
   read(rel: string): Promise<Uint8Array | null>;
   write(rel: string, data: string | Uint8Array): Promise<boolean>;
+  remove(rel: string): Promise<boolean>; // 효과 파일(game/ui_kit/effects/*.glsl)만 지울 수 있다
   openFolder(rel: string): Promise<string>;
   choose(): Promise<boolean>;
   onChange(fn: (rel: string) => void): () => void;
@@ -58,11 +59,16 @@ export class AppDir {
       yield [e.name, e.dir ? new AppDir(e.name, r) : new AppFile(e.name, r)];
     }
   }
-  async getDirectoryHandle(name: string) {
+  // create: 폴더는 그 안에 파일을 쓸 때 앱이 만든다
+  async getDirectoryHandle(name: string, opt?: { create?: boolean }) {
     const r = join(this.rel, name);
     const st = await desktop!.stat(r);
-    if (!st?.dir) throw notFound(r);
+    if (st ? !st.dir : !opt?.create) throw notFound(r);
     return new AppDir(name, r);
+  }
+  async removeEntry(name: string) {
+    const r = join(this.rel, name);
+    if (!(await desktop!.remove(r))) throw notFound(r);
   }
   async getFileHandle(name: string, opt?: { create?: boolean }) {
     const r = join(this.rel, name);
@@ -86,4 +92,5 @@ export async function projectInfo() {
   return info;
 }
 export const gameDir = () => new AppDir('game', 'game');
+export const projectDir = () => new AppDir('', '');
 export const flowFile = (name: string) => new AppFile(name, name);

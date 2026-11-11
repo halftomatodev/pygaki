@@ -240,6 +240,21 @@ ipcMain.handle('pygaki:write', async (e, rel, data) => {
   return true;
 });
 
+// 지우기: 효과 폴더의 효과 파일(game/ui_kit/effects/*.glsl)만. 다른 파일은 앱이 지우지 않는다
+ipcMain.handle('pygaki:remove', (e, rel) => {
+  const project = projectOf(e);
+  const full = inside(project, rel);
+  const where = path.relative(project, full).split(path.sep).join('/');
+  if (!/^game\/ui_kit\/effects\/[^/]+\.glsl$/i.test(where)) throw new Error('효과 파일만 지울 수 있어요: ' + rel);
+  try {
+    fs.unlinkSync(full);
+    return true;
+  } catch (err) {
+    if (err.code === 'ENOENT') return false;
+    throw err;
+  }
+});
+
 ipcMain.handle('pygaki:liveSend', (e, msg) => {
   const l = windows.get(e.sender.id)?.live;
   if (!l || !l.ready) return false;

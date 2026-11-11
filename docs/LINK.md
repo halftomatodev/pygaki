@@ -193,7 +193,8 @@ PyKaki는 렌파이 연결(`renpyLink`)을 켜고 폴더를 연결했으면, 대
 |---|---|
 | pygaki 플러그인 `engine/text_effects.rpy` | 기본 파일 다음에 폴더의 `.glsl`을 이름 순서로. 틀린 파일은 건너뛰고 `say_style.TFX_ERRORS`에 이유 |
 | pygaki 플러그인 `engine/image_effects.rpy` | 그 가운데 `@transition`을 장면 전환으로 등록. 원고에는 `with img_fx.use("이름"[, 초][, 값=…])` |
-| PyKaki `src/fx/textShaders.ts` | 저장소의 샘플은 빌드할 때 같이 가져옴(`import.meta.glob`). 연결한 게임 폴더의 파일은 폴더를 읽을 때 `setFolderEffects`로 더함(샘플과 같은 파일 이름은 건너뜀). 못 읽은 파일은 알림 |
+| PyKaki `src/fx/textShaders.ts` | 플러그인(`ui_kit`)이 있는 게임 폴더를 연결했으면 그 폴더의 파일만 읽음(`scanFolder` → `setFolderEffects`. 게임에서 뺀 샘플은 앱 목록에서도 빠짐). 연결하지 않았으면 빌드할 때 가져온 저장소의 샘플(`import.meta.glob`)을 씀. 못 읽은 파일은 알림 |
+| PyKaki `src/effectsLib.ts` | 효과 파일을 넣고 뺌. 넣기 전에 위와 같은 규칙으로 검사해서 틀리면 쓰지 않음. 뺀 파일은 프로젝트 폴더의 `ui_kit_backup/effects/`에 남김(같은 이름이 있으면 `이름.날짜-시각.glsl`. 웹에서 game 폴더를 바로 골랐으면 `game/ui_kit_backup/effects/`) |
 
 새 표시: `@transition 이름 한글이름`, `@time 초`, `@fragment`(전환의 색 코드. `l__t`, `l__uv`, `l__size`, `l__old`, `l__new`를 씀), `@param u__이름 최소 최대 한글이름`(막대). 두 프로그램의 읽는 규칙(이름은 `[a-z][a-z0-9_]*`, 이미 있는 이름은 못 씀, 코드가 없으면 틀린 파일)은 같아야 합니다.
 
@@ -211,7 +212,11 @@ bands
 - 글자 효과(`@effect`, 기본 효과와 렌파이 효과 `dissolve` 등 포함)와 그림 효과(`@transition`) 이름을 한 파일에 같이 적음. 모르는 이름은 그냥 둠(파일을 다시 넣으면 꺼진 채로 돌아옴)
 - **등록은 다 합니다.** 끈 효과도 셰이더는 그대로 있어서 이미 쓴 대사, 타이틀, `img_fx.use("이름")`은 그대로 돎. 고르는 목록에서만 빠지고, 지금 그 효과를 쓰는 곳에서는 이름이 그대로 보임
 - pygaki 플러그인: `say_style.TFX_OFF`(`text_effects.rpy`), 목록은 `say_style.tfx_listed`, `tmenu.effect_names`, `img_fx.listed`. 게임을 껐다 켜거나 Shift+R로 다시 읽음
-- PyKaki: 아직 읽지 않음(효과 탭 2단계에서 `scanFolder` 때 읽어 `EFFECTS`, `TRANSITIONS`에서 빼고, [효과] 화면에서 이 파일을 씀)
+- PyKaki: `scanFolder` 때 읽어 `EFFECTS`, `TRANSITIONS`(고르는 목록)에서 뺌. 그 효과를 쓴 줄의 칸에는 이름이 그대로 보이고 내보내기도 그대로. 켜고 끌 때(`effectsLib.ts` `setEffectOn`) 이 파일을 고쳐 씀: 그 이름의 줄만 더하거나 빼고, 설명 줄과 다른 이름은 그대로 둠
+
+### 8-3. 효과 모음 (`showpy/effects_library/*.glsl`)
+
+pygaki와 같이 오지만 게임에 저절로 들어가지 않는 효과 파일입니다. 형식은 효과 폴더와 같고, PyKaki가 빌드할 때 그대로 가져갑니다(사본 없음). 앱에서 [넣기]를 하면 그 게임의 `game/ui_kit/effects/`로 복사됩니다. 새 프로젝트마다 들어가는 샘플(`showpy/game/ui_kit/effects/`)도 게임에서 빼면 모음으로 보입니다. pygaki 플러그인은 이 폴더를 읽지 않습니다.
 
 대본에는 글자 효과가 이름 그대로(`say.effect`), 그림 전환이 `trans` 칸에 `img_fx.use("이름")`로 들어갑니다. pygaki 플러그인 연결이 꺼진 대본은 그림 전환을 `dissolve`로 내보냅니다. 적는 법 전체는 `showpy/game/ui_kit/effects/README.md`.
 
