@@ -5,7 +5,7 @@ import { create } from 'zustand';
 import { useStore } from './store';
 import { useGameFolder } from './gameFolder';
 import { hit, keyOf } from './prefs';
-import { insertTag, removeTag, setTagValue, stepSize, tagsAt, toggleTag, type Edit } from './tagEdit';
+import { RUBY_NOTE, insertRuby, insertTag, removeTag, setTagValue, stepK, stepSize, tagsAt, toggleTag, type Edit } from './tagEdit';
 
 // 지금 태그를 넣을 글 칸(textarea id). 태그 상자 안으로 포커스가 옮겨 가도 그대로 둔다
 export const useTagTarget = create<{ id: string | null }>(() => ({ id: null }));
@@ -66,6 +66,15 @@ const saveRecent = (c: string) => {
 };
 const HEX = /^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
 const SIZE = /^[+\-*]?\d+(?:\.\d+)?$/;
+const KERN = /^-?\d+(?:\.\d+)?$/;
+const MORE_KEY = 'pykaki-tag-more';
+const readMore = () => {
+  try {
+    return localStorage.getItem(MORE_KEY) === '1';
+  } catch {
+    return false;
+  }
+};
 
 interface Swatch { c: string; title: string }
 
@@ -165,9 +174,14 @@ export function TagBar({ targetId, className = '' }: { targetId: string; classNa
   const tagsOn = useStore((s) => s.project.settings.allowTextTags);
   const update = useStore((s) => s.update);
   const [, redraw] = useReducer((x: number) => x + 1, 0);
-  const [palette, setPalette] = useState(false);
+  const [palette, setPalette] = useState<false | 'color' | 'outlinecolor'>(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [size, setSize] = useState<string | null>(null); // 크기 칸에 치는 중인 값
+  const [more, setMore] = useState(readMore);
+  const [kern, setKern] = useState<string | null>(null); // 자간 칸에 치는 중인 값
+  const [alpha, setAlpha] = useState<number | null>(null); // 투명도 막대를 끄는 중인 값
+  const media = useGameFolder((f) => f.media);
+  const linked = useGameFolder((f) => !!f.name);
   const el = () => document.getElementById(targetId) as HTMLTextAreaElement | null;
 
   // 커서가 움직이면 단추 켜짐을 다시 본다
@@ -209,7 +223,7 @@ export function TagBar({ targetId, className = '' }: { targetId: string; classNa
   // 단추를 눌러도 글 칸의 포커스와 고른 곳이 그대로 남게 (입력 칸만 빼고)
   const keep = (e: React.MouseEvent) => {
     const t = e.target as HTMLElement;
-    if (!t.closest('input, .tb-grid')) e.preventDefault();
+    if (!t.closest('input, select, .tb-grid')) e.preventDefault();
   };
 
   const cls = 'tagbar nodrag nowheel ' + className;
@@ -245,9 +259,37 @@ export function TagBar({ targetId, className = '' }: { targetId: string; classNa
     run((x, s, e) => setTagValue(x, s, e, 'size', v));
   };
   const pickColor = (c: string) => {
+    const name = palette || 'color';
     saveRecent(c);
     setPalette(false);
-    run((x, s, e) => setTagValue(x, s, e, 'color', c));
+    run((x, s, e) => setTagValue(x, s, e, name, c));
+  };
+  const outline = at.get('outlinecolor');
+  const curK = at.get('k');
+  const curFont = at.get('font');
+  const curAlpha = at.has('alpha') ? Number(at.get('alpha')) : NaN;
+  const alphaNow = alpha ?? (curAlpha >= 0 && curAlpha <= 1 ? curAlpha : 1);
+  const toggleMore = () => {
+    try {
+      localStorage.setItem(MORE_KEY, more ? '0' : '1');
+    } catch {
+      /* 이번 창에서만 */
+    }
+    setMore(!more);
+  };
+  const applyKern = () => {
+    const v = (kern ?? '').trim();
+    setKern(null);
+    if (!v) return el()?.focus();
+    if (!KERN.test(v)) return setMsg('자간은 2, -1, 0.5 같은 숫자로 적어요'), el()?.focus();
+    run((x, s, e) => (Number(v) === 0 ? (tagsAt(x, s, e).has('k') ? removeTag(x, s, e, 'k', '자간') : { text: x, s, e }) : setTagValue(x, s, e, 'k', v)));
+  };
+  // 투명도 막대는 끄는 동안 값만 보여 주고, 놓을 때 한 번만 글에 넣는다 (실행 취소가 한 번으로 묶이게)
+  const applyAlpha = () => {
+    if (alpha === null) return;
+    const v = String(alpha);
+    setAlpha(null);
+    run((x, s, e) => (alpha >= 1 ? (tagsAt(x, s, e).has('alpha') ? removeTag(x, s, e, 'alpha', '투명도') : { text: x, s, e }) : setTagValue(x, s, e, 'alpha', v)));
   };
 
   return (
@@ -273,7 +315,7 @@ export function TagBar({ targetId, className = '' }: { targetId: string; classNa
         />
         <button className="tb-btn" title="크게 (크기 +10)" onClick={() => run((x, s, e) => stepSize(x, s, e, 10))}>가+</button>
         <span className="tb-sep" />
-        <button className={'tb-btn tb-color' + (palette ? ' on' : '')} title="글자 색 {color=}" onClick={() => setPalette((v) => !v)}>
+        <button className={'tb-btn tb-color' + (palette === 'color' ? ' on' : '')} title="글자 색 {color=}" onClick={() => setPalette((v) => (v === 'color' ? false : 'color'))}>
           <span className="tb-dot" style={{ background: color ?? 'conic-gradient(#ef4444, #eab308, #22c55e, #0ea5e9, #8b5cf6, #ef4444)' }} />색
         </button>
       </div>
@@ -290,8 +332,111 @@ export function TagBar({ targetId, className = '' }: { targetId: string; classNa
         <button className={'tb-btn' + (at.get('cps') === '*0.5' ? ' on' : '')} title="고른 글만 느리게 {cps=*0.5}" onClick={() => run((x, s, e) => setTagValue(x, s, e, 'cps', '*0.5'))}>느리게</button>
         <button className={'tb-btn' + (at.get('cps') === '*2' ? ' on' : '')} title="고른 글만 빠르게 {cps=*2}" onClick={() => run((x, s, e) => setTagValue(x, s, e, 'cps', '*2'))}>빠르게</button>
         {at.has('cps') && <button className="tb-btn" title="속도 태그 빼기" onClick={() => run((x, s, e) => removeTag(x, s, e, 'cps', '속도'))}>보통</button>}
+        <span className="tb-fill" />
+        <button className={'tb-btn tb-more' + (more ? ' on' : '')} title="투명도, 자간, 글꼴, 외곽선 색, 띄우기, 루비, 글 속 그림" onClick={toggleMore}>{more ? '접기 ▴' : '더 보기 ▾'}</button>
       </div>
-      {palette && <Palette current={color} onPick={pickColor} onRemove={() => (setPalette(false), run((x, s, e) => removeTag(x, s, e, 'color', '색')))} onClose={() => (setPalette(false), el()?.focus())} />}
+      {more && (
+        <>
+          <div className="tb-row">
+            <span className="tb-label">투명도</span>
+            <input
+              className="tb-range"
+              type="range"
+              min={0}
+              max={1}
+              step={0.05}
+              value={alphaNow}
+              title="고른 글의 투명도 {alpha=}: 왼쪽으로 갈수록 흐려요. 맨 오른쪽(1)에 놓으면 태그를 빼요"
+              onChange={(e) => setAlpha(Number(e.target.value))}
+              onPointerUp={applyAlpha}
+              onKeyUp={applyAlpha}
+              onBlur={applyAlpha}
+            />
+            <span className={'tb-val' + (at.has('alpha') ? ' on' : '')}>{alphaNow.toFixed(2)}</span>
+            {at.has('alpha') && <button className="tb-btn" title="투명도 태그 빼기" onClick={() => run((x, s, e) => removeTag(x, s, e, 'alpha', '투명도'))}>빼기</button>}
+          </div>
+          <div className="tb-row">
+            <span className="tb-label">자간</span>
+            <button className="tb-btn" title="글자 사이를 좁게 (자간 -1)" onClick={() => run((x, s, e) => stepK(x, s, e, -1))}>좁게</button>
+            <input
+              className={'tb-size' + (curK !== undefined ? ' on' : '')}
+              value={kern ?? curK ?? ''}
+              placeholder="자간"
+              title="자간 {k=}: 글자 사이를 그만큼(픽셀) 넓혀요. 음수는 좁게. Enter로 적용, 0은 빼기"
+              onFocus={() => setKern(curK ?? '')}
+              onChange={(e) => setKern(e.target.value)}
+              onBlur={() => setKern(null)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') (e.preventDefault(), applyKern());
+              }}
+            />
+            <button className="tb-btn" title="글자 사이를 넓게 (자간 +1)" onClick={() => run((x, s, e) => stepK(x, s, e, 1))}>넓게</button>
+            <span className="tb-sep" />
+            <button
+              className={'tb-btn tb-color' + (palette === 'outlinecolor' ? ' on' : '')}
+              title="외곽선 색 {outlinecolor=}: 글자 스타일에 외곽선(outlines)이 있을 때만 게임에서 보여요"
+              onClick={() => setPalette((v) => (v === 'outlinecolor' ? false : 'outlinecolor'))}
+            >
+              <span className="tb-dot tb-ring" style={{ borderColor: outline ?? 'var(--muted)' }} />외곽선 색
+            </button>
+          </div>
+          <div className="tb-row">
+            <span className="tb-label">글꼴</span>
+            {linked && media.fonts.length ? (
+              <select
+                className={'tb-sel' + (curFont !== undefined ? ' on' : '')}
+                value={curFont ?? ''}
+                title="고른 글만 다른 글꼴로 {font=}"
+                onChange={(e) => {
+                  const v = e.target.value;
+                  run((x, s, en) => (v ? setTagValue(x, s, en, 'font', v) : removeTag(x, s, en, 'font', '글꼴')));
+                }}
+              >
+                <option value="">{curFont !== undefined ? '글꼴 태그 빼기' : '글꼴 고르기'}</option>
+                {curFont !== undefined && !media.fonts.includes(curFont) && <option value={curFont}>{curFont} (폴더에 없음)</option>}
+                {media.fonts.map((f) => <option key={f} value={f}>{f}</option>)}
+              </select>
+            ) : (
+              <span className="tb-hint">{linked ? 'game 폴더나 game/fonts에 글꼴 파일(.ttf, .otf)이 없어요' : '게임 폴더를 연결하면 그 안의 글꼴을 골라요'}</span>
+            )}
+          </div>
+          <div className="tb-row">
+            <span className="tb-label">넣기</span>
+            {ins('{space=30}', '가로 띄우기', '여기에 가로로 빈 자리를 넣어요 (숫자는 픽셀, 바꿀 수 있어요)', '30')}
+            {ins('{vspace=30}', '세로 띄우기', '여기서 줄을 바꾸고 세로로 빈 자리를 넣어요 (숫자는 픽셀)', '30')}
+            {ins('{{', '{ 글자', '중괄호를 글자 그대로 보여요')}
+            <button className="tb-btn tb-ins" title="루비: 고른 글 위에 작은 글(읽는 법)을 올려요 {rb}글{/rb}{rt}읽는 법{/rt}. 고른 글이 없으면 바로 앞 글자 위에 올려요. 게임에서 style ruby_text의 크기와 자리를 정해 줘야 글 위에 작게 올라가요" onClick={() => (run((x, s, e) => insertRuby(x, s, e, '읽는 법')), setMsg(RUBY_NOTE))}>루비</button>
+            {linked && media.images.length > 0 && (
+              <select
+                className="tb-sel tb-sel-s"
+                value=""
+                title="글 속 그림 {image=}: 커서 자리에 그림을 글자처럼 넣어요"
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v) run((x, s, en) => insertTag(x, s, en, `{image=${v}}`));
+                }}
+              >
+                <option value="">글 속 그림</option>
+                {media.images.map((f) => <option key={f} value={f}>{f}</option>)}
+              </select>
+            )}
+          </div>
+          {!linked && <div className="tb-hint">게임 폴더를 연결하면 글 속 그림 {'{image=}'}도 목록에서 골라 넣을 수 있어요</div>}
+        </>
+      )}
+      {palette && (
+        <Palette
+          key={palette}
+          current={palette === 'color' ? color : outline}
+          onPick={pickColor}
+          onRemove={() => {
+            const name = palette;
+            setPalette(false);
+            run((x, s, e) => removeTag(x, s, e, name, name === 'color' ? '색' : '외곽선 색'));
+          }}
+          onClose={() => (setPalette(false), el()?.focus())}
+        />
+      )}
       {msg && <div className="tb-msg">{msg}</div>}
     </div>
   );

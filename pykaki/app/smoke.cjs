@@ -182,6 +182,39 @@ async function until(what, fn, ms = 10000) {
   if (await page.locator('.fxv').count()) fail('쓰인 곳 [보기]를 눌러도 대본 화면으로 안 감');
   console.log('[효과] 화면: 됨');
 
+  // 태그 상자 [더 보기]: 자간, 루비, 띄우기를 눌러 글에 태그가 들어가는지 (끝나면 글을 되돌림)
+  {
+    const ta = page.locator('textarea[data-tags]').first();
+    await ta.waitFor({ timeout: 10000 });
+    const before = await ta.inputValue();
+    const taIs = async (what, want) => {
+      for (let i = 0; i < 50; i++) {
+        if ((await ta.inputValue()) === want) return;
+        await wait(200);
+      }
+      fail(what + ': ' + (await ta.inputValue()));
+    };
+    await ta.fill('가나다라');
+    await ta.focus();
+    await ta.evaluate((el) => el.setSelectionRange(0, 2));
+    const bar = page.locator('.tagbar');
+    await bar.waitFor({ timeout: 10000 });
+    if (!(await bar.locator('.tb-range').count())) await bar.locator('.tb-more').click();
+    await bar.locator('.tb-range').waitFor({ timeout: 10000 });
+    await bar.locator('button:text-is("넓게")').click();
+    await taIs('자간 태그', '{k=1}가나{/k}다라');
+    await bar.locator('button:text-is("좁게")').click();
+    await taIs('자간 태그 빼기', '가나다라');
+    await bar.locator('button:text-is("루비")').click();
+    await taIs('루비 태그', '{rb}가나{/rb}{rt}읽는 법{/rt}다라');
+    await ta.fill('가나다라');
+    await ta.evaluate((el) => el.setSelectionRange(2, 2));
+    await bar.locator('button:text-is("가로 띄우기")').click();
+    await taIs('띄우기 태그', '가나{space=30}다라');
+    await ta.fill(before);
+    console.log('태그 상자 더 보기: 됨');
+  }
+
   // showpy 실시간 연결 (docs/LINK.md 9장): 가짜 게임을 띄워 앱이 붙고, 상태를 보여주고, 명령을 보내는지
   const net = require('node:net');
   const got = [];

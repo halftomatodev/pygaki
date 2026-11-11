@@ -856,6 +856,16 @@ fieldset.plain:disabled { opacity: 0.4; }
 .tb-color { display: inline-flex; align-items: center; gap: 4px; }
 .tb-dot { width: 11px; height: 11px; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--text) 25%, transparent); }
 .tb-msg { color: var(--danger); font-size: 10.5px; }
+.tb-fill { flex: 1; }
+.tb-more { color: var(--muted); }
+.tagbar input.tb-range { width: 110px; flex: none; margin: 0 4px 0 0; }
+.tb-val { font-family: var(--mono); font-size: 10.5px; color: var(--muted); min-width: 28px; }
+.tb-val.on { color: var(--text); }
+.tb-ring { background: transparent; border-width: 3px; }
+.tb-sel { font-size: 11px; padding: 1px 4px; max-width: 220px; }
+.tb-sel.on { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent); }
+.tb-sel-s { max-width: 96px; }
+.tb-hint { color: var(--muted); font-size: 10.5px; }
 .tb-off { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; color: var(--muted); }
 .tb-palette { display: flex; flex-direction: column; gap: 4px; margin-top: 3px; padding-top: 5px; border-top: 1px solid var(--line); }
 .tb-grid { display: flex; flex-direction: column; gap: 4px; outline: none; border-radius: 6px; }

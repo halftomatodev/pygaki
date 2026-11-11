@@ -62,6 +62,8 @@ export function parseTagged(text: string, tagsOn: boolean, fontOf: (path: string
     else if (name === 'alpha') push({ opacity: Number(val.replace(/^[*+-]/, '')) || undefined });
     else if (name === 'font') push({ fontFamily: fontOf(val) });
     else if (name === 'k') push({ letterSpacing: Number(val) || undefined });
+    else if (name === 'rt') push({ fontSize: '0.5em', verticalAlign: 'super' }); // 루비는 위에 올리지 못하고 작은 글로만
+    else if (name === 'rb') push({});
     else if (name === 'size') {
       const m = /^([*+-]?)([\d.]+)$/.exec(val);
       const n = m ? Number(m[2]) : 0;
@@ -136,6 +138,7 @@ const VIEW_STYLE: Record<string, (v: string) => CSSProperties> = {
   a: () => ({ textDecoration: 'underline' }),
   s: () => ({ textDecoration: 'line-through' }),
   color: (v) => ({ color: v }),
+  alpha: (v) => (/^(?:0|1|0?\.\d+)$/.test(v) ? { opacity: Math.max(0.15, Number(v)) } : {}), // 다 안 보이면 고칠 수 없으니 조금은 남긴다
 };
 
 export function TagView({ text }: { text: string }) {
