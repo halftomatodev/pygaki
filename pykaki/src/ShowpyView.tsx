@@ -160,6 +160,11 @@ function Where({ st, sec }: { st: GameState; sec: string }) {
   );
 }
 
+// PyKaki 표시: 줄 전체(예전 형식)이거나 문장 끝에 붙는다 (docs/LINK.md 2장)
+const MARK_ROW = /^\s*#\s*@(l|node|end):/;
+const MARK_TAIL = /\s+#\s*@(l|node|end):\S+[^#]*$/;
+const MARK = /(?:^|\s)#\s*@(l|node|end):/;
+
 function Script({ file, line, peek }: { file: string | null; line: number; peek?: { line: number; n: number } | null }) {
   const [text, setText] = useState<{ file: string; lines: string[] | null } | null>(null);
   const [rev, setRev] = useState(0);
@@ -225,7 +230,7 @@ function Script({ file, line, peek }: { file: string | null; line: number; peek?
   // PyKaki가 내보낸 원고면 줄 위의 "# @node:id 이름" 표시로 상자를 찾는다 (docs/LINK.md 2장)
   let node: { id: string; name: string } | null = null;
   for (let i = Math.min(line, lines.length) - 1; i >= 0; i--) {
-    const m = /^\s*#\s*@node:(\S+)\s*(.*)$/.exec(lines[i]);
+    const m = /(?:^|\s)#\s*@node:(\S+)[ \t]*(.*)$/.exec(lines[i]);
     if (m) {
       node = { id: m[1], name: m[2] };
       break;
@@ -248,7 +253,7 @@ function Script({ file, line, peek }: { file: string | null; line: number; peek?
           </button>
         )}
         <span className="tip">줄을 누르면 게임도 그 줄로 가요</span>
-        {lines.some((l) => /^\s*#\s*@(l|node|end):/.test(l)) && (
+        {lines.some((l) => MARK.test(l)) && (
           <button
             className={hideMarks ? 'on' : ''}
             title="PyKaki가 줄을 찾으려고 넣은 표시 줄(# @l: 등)을 숨겨요. 파일은 그대로예요"
@@ -286,7 +291,7 @@ function Script({ file, line, peek }: { file: string | null; line: number; peek?
       >
         {lines.map((l, i) => {
           const n = i + 1;
-          if (hideMarks && n !== line && /^\s*#\s*@(l|node|end):/.test(l)) return null;
+          if (hideMarks && n !== line && MARK_ROW.test(l)) return null;
           return (
             <div
               key={n}
@@ -296,7 +301,7 @@ function Script({ file, line, peek }: { file: string | null; line: number; peek?
               title={n === line ? '게임의 지금 줄' : '게임을 이 줄로 옮겨요 (지나온 줄이면 되감기, 아니면 게임을 다시 시작해서 건너뜀)'}
             >
               <span className="ln">{n}</span>
-              {l || ' '}
+              {(hideMarks ? l.replace(MARK_TAIL, '') : l) || ' '}
             </div>
           );
         })}

@@ -4,12 +4,14 @@ import { Inspector } from './Inspector';
 import { Player } from './Player';
 import { generateRpy } from './exportRpy';
 import { exportRpyFile } from './files';
+import { useGameFolder } from './gameFolder';
 
 export function RightPanel() {
   const tab = useStore((s) => s.tab);
   const project = useStore((s) => s.project);
   const playing = useStore((s) => s.playing);
-  const { code, warnings } = useMemo(() => generateRpy(project), [project]);
+  const endMarks = useGameFolder((f) => f.endMarks); // 원고 탭도 내보낼 때와 같은 형식으로
+  const { code, warnings } = useMemo(() => generateRpy(project, { endMarks }), [project, endMarks]);
   const errors = warnings.filter((w) => w.level === 'error').length;
   const setTab = (t: Tab) => useStore.setState({ tab: t });
 

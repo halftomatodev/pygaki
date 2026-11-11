@@ -446,11 +446,14 @@ init -7 python in screen_fx:
         ## ── 구간 ──
 
         def _tree_can_insert(self, fn, line):
-            """그 줄 위에 셰이더 줄을 넣을 수 있는지. PyKaki 원고는 줄마다 '# @l:' 표시가 있는 줄만 (menu: 같은 줄은 안 됨)."""
+            """그 줄 위에 셰이더 줄을 넣을 수 있는지. PyKaki 원고는 줄마다 '# @l:' 표시가 있는 줄만 (menu: 같은 줄은 안 됨).
+            표시는 줄 끝이나 바로 윗줄에 있습니다. (ui_kit 4.5)"""
             se = self.se()
             if se is None or not hasattr(se, "is_pykaki") or not se.is_pykaki(fn):
                 return True
             src = self._file_lines(fn)
+            if hasattr(se, "_pk_mark"):
+                return se._pk_mark(src, line, "# @l:") is not None
             return 2 <= line <= len(src) + 1 and src[line - 2].strip().startswith("# @l:")
 
         def _tree_ins_from(self, rows, i):

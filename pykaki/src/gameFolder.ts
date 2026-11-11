@@ -55,6 +55,7 @@ interface F {
   startClash: string | null; // label start가 있는 다른 파일
   hasShowpy: boolean; // game 폴더에 ui_kit이 있는지
   fxErrors: [string, string][]; // 효과 폴더(ui_kit/effects)에서 못 읽은 파일과 이유
+  endMarks: boolean; // 이 게임의 플러그인이 줄 끝 표시를 읽는지 (ui_kit 4.5, script_edit.rpy의 PK_END_MARKS)
   fxSeq: number; // 효과 목록이 바뀔 때마다 오른다 (목록을 쓰는 화면이 다시 그리게)
   fxFiles: string[]; // 효과 폴더에 있는 효과 파일 이름
   fxOff: string[]; // 끈 효과 이름 (effects_off.txt)
@@ -70,6 +71,7 @@ export const useGameFolder = create<F>((set) => ({
   startClash: null,
   hasShowpy: false,
   fxErrors: [],
+  endMarks: false,
   fxSeq: 0,
   fxFiles: [],
   fxOff: [],
@@ -258,10 +260,12 @@ export async function scanFolder() {
   const fxErrors = setFolderEffects(uiKit ? packs : null);
   setEffectsOff(fxOff);
   refreshEffects();
+  const engine = uiKit ? await sub(uiKit, 'engine') : null;
+  const endMarks = /^\s*PK_END_MARKS\s*=\s*True/m.test((engine && (await readText(engine, 'script_edit.rpy'))) || '');
   const g = useGameFolder.getState();
   if (fxErrors.length && JSON.stringify(fxErrors) !== JSON.stringify(g.fxErrors))
     useStore.getState().say('효과 폴더에서 못 읽은 파일: ' + fxErrors.map(([f, why]) => `${f} (${why})`).join(' / '));
-  g.set({ name: g.name ?? dir.name, media, look, startClash, hasShowpy, fxErrors, fxSeq: g.fxSeq + 1, fxFiles: packs.map((f) => f.name).sort(), fxOff });
+  g.set({ name: g.name ?? dir.name, media, look, startClash, hasShowpy, endMarks, fxErrors, fxSeq: g.fxSeq + 1, fxFiles: packs.map((f) => f.name).sort(), fxOff });
   setTimeout(() => oldUrls.forEach((u) => URL.revokeObjectURL(u)), 5000);
 }
 
@@ -304,7 +308,7 @@ export async function disconnectFolder() {
   setFolderEffects(null);
   setEffectsOff([]);
   refreshEffects();
-  useGameFolder.getState().set({ name: null, media: NO_MEDIA, look: DEFAULT_LOOK, startClash: null, hasShowpy: false, fxErrors: [], fxSeq: useGameFolder.getState().fxSeq + 1, fxFiles: [], fxOff: [] });
+  useGameFolder.getState().set({ name: null, media: NO_MEDIA, look: DEFAULT_LOOK, startClash: null, hasShowpy: false, endMarks: false, fxErrors: [], fxSeq: useGameFolder.getState().fxSeq + 1, fxFiles: [], fxOff: [] });
 }
 
 // 앱을 다시 열 때: 연결은 기억하지만, 권한은 사용자가 한 번 눌러야 다시 생긴다

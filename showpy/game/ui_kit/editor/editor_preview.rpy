@@ -129,6 +129,21 @@ init -8 python in ui_editor:
         except Exception:
             return None
 
+    def _row_mark(row):
+        """그 줄의 PyKaki 표시 ("@l:id" 또는 "@node:id")와, 줄 끝에 붙은 것인지. 없으면 (None, False).
+        표시는 줄 전체이거나(예전 형식) 문장 끝에 붙습니다(ui_kit 4.5)."""
+        t = row.strip()
+        if t.startswith("# @l:") or t.startswith("# @node:"):
+            w = t.split()
+            return (w[1] if len(w) > 1 else None), False
+        for head in ("# @l:", "# @node:"):
+            i = t.rfind(head)
+            if i > 0 and t[i - 1] in (" ", chr(9)):
+                w = t[i + 2:].split()
+                ## 메모 줄(# …) 끝에 붙은 표시는 다음 문장을 가리킴
+                return (w[0] if w else None), not t.startswith("#")
+        return None, False
+
     def _keep_place(old, new):
         """지금 보던 줄이 PyKaki 원고면, 그 줄의 표시(# @l:)를 새 원고에서 찾아 (파일, 줄). 아니면 None."""
         if not old or not new:
@@ -142,20 +157,22 @@ init -8 python in ui_editor:
         rows = old.splitlines()
         mark = None
         for i in range(min(ln, len(rows)) - 1, -1, -1):
-            t = rows[i].strip()
-            if t.startswith("# @l:") or t.startswith("# @node:"):
-                mark = t.split()[1]
+            mark = _row_mark(rows[i])[0]
+            if mark is not None:
                 break
         if mark is None:
             return None
         rows = new.splitlines()
         for i, r in enumerate(rows):
-            t = r.strip()
-            if (t.startswith("# @l:") or t.startswith("# @node:")) and t.split()[1] == mark:
-                for j in range(i + 1, len(rows)):
-                    u = rows[j].strip()
-                    if u and not u.startswith("#"):
-                        return ("game/" + PK_SCRIPT, j + 1)
+            m, here = _row_mark(r)
+            if m != mark:
+                continue
+            if here:
+                return ("game/" + PK_SCRIPT, i + 1)
+            for j in range(i + 1, len(rows)):
+                u = rows[j].strip()
+                if u and not u.startswith("#"):
+                    return ("game/" + PK_SCRIPT, j + 1)
         return None
 
     def _goto_after_reload():

@@ -141,6 +141,7 @@
 11. **pygaki 플러그인 연결(`renpyLink`)을 켜면 달라지는 것**. 끄면 예전과 똑같이 내보낸다.
     - 모든 상자에 `label 그룹.상자id:`를 쓴다. 첫 상자는 `label 그룹:` 바로 아래에 이어 쓴다.
     - 줄마다 앞에 `# @l:줄id`, 나가는 부분 앞에 `# @end:상자id`를 쓴다.
+    - **줄 끝 표시** (`generateRpy(p, { endMarks })`, LINK.md 2장): 연결한 게임의 플러그인이 읽을 수 있으면(`gameFolder`의 `endMarks`, `ui_kit/engine/script_edit.rpy`에 `PK_END_MARKS = True`) 세 표시를 윗줄이 아니라 그 줄 끝에 붙인다(`mark()`). 끝에 붙일 수 없는 줄(`tailSafe`가 아니거나 쓴 줄이 없음)은 윗줄에 둔다. 폴더에 쓰는 길(`files.ts makeRpy`)과 원고 탭이 같은 값을 쓰고, 폴더 없이 받는 파일은 예전 형식이다. `codeLineOf`와 [GUI 편집] 원고 칸(`ShowpyView.tsx MARK_*`)은 두 형식을 모두 읽는다.
     - 대사 괄호(`fx=`, `size=` 등)와 `fx` 줄을 내보낸다. 끄면 `fx` 줄은 주석이 되고 경고가 뜬다. 괄호 순서는 화면 효과, 글자 모양, 위치다.
     - 형식은 [LINK.md](../../docs/LINK.md).
 

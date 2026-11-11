@@ -53,6 +53,24 @@ label ward.n1:
 | `# @l:ID` | 바로 다음 줄이 그 id의 대본 줄 | 줄 넣기, 줄 바꾸기의 기준 |
 | `# @end:ID` | 여기부터 상자의 나가는 부분(선택지, jump, return) | 선택지 앞에 줄을 넣을 때 |
 
+**줄 끝 표시** (pygaki 플러그인 `ui_kit` 4.5, PyKaki `generateRpy`의 `endMarks`): 연결한 게임의 `game/ui_kit/engine/script_edit.rpy`에 `PK_END_MARKS = True`가 있으면, PyKaki는 표시를 윗줄에 따로 두지 않고 그 줄 끝에 빈칸 두 개를 두고 붙입니다. 뜻은 위 표와 같습니다.
+
+```renpy
+label ward:
+label ward.n1:  # @node:n1 도입
+    scene bg hall with fade  # @l:l1
+    mina "여기 아무도 없는 거 맞지?" (fx_warp=3)  # @l:l5
+    menu:  # @end:n1
+        "문을 연다":
+            jump ward.n4
+```
+
+- `# @l:ID`는 그 대본 줄이 쓴 줄들 가운데 첫 문장 끝에(메모 줄처럼 문장이 없으면 첫 줄 끝에), `# @node:`는 상자의 마지막 label 줄 끝에, `# @end:`는 나가는 부분의 첫 줄 끝에 붙습니다.
+- 끝에 붙일 수 없으면 예전처럼 윗줄에 따로 씁니다: 내용이 없는 줄(빈 직접 명령), 다음 줄로 이어지는 줄(끝이 `\`이거나 따옴표가 안 닫힌 직접 명령), 나가는 줄이 없는 상자(다음 상자로 그냥 이어짐)의 `# @end:`.
+- 그래서 읽는 쪽은 **두 자리를 모두** 봅니다: 그 줄 끝의 표시, 없으면 바로 윗줄의 표시. 한 파일에 두 형식이 섞여 있어도 됩니다. 플러그인이 새 줄을 넣을 때는 그 원고에 줄 끝 `# @l:`이 하나라도 있으면 줄 끝에, 아니면 윗줄에 표시를 씁니다.
+- 플러그인이 4.5보다 예전이거나 폴더를 연결하지 않았으면(웹에서 파일로 받기 포함) PyKaki는 예전 형식으로 내보냅니다. 예전 플러그인은 줄 끝 표시를 못 읽기 때문입니다.
+- 받아 적기 기록(3장)의 `code`에는 표시를 붙이지 않습니다.
+
 대사 줄 괄호에는 PyKaki의 `say` 값(`SayStyle`)이 짧은 이름으로 붙습니다. pygaki 플러그인 `say_style`이 받습니다.
 
 | 괄호 | PyKaki 값 | 뜻 |
@@ -152,6 +170,7 @@ PyKaki 플레이 화면은 연결한 game 폴더에서 아래 값을 글자로 �
 | `options.rpy`, `ui_kit/custom_ui_config.rpy` | 기본 텍스트 속도 (`custom_ui.text_cps`가 먼저) |
 | `gui/textbox.png`, `gui/namebox.png` | 대사창과 이름 배경 |
 | `ui_kit/stage_layout.rpy` | 그림 위치 |
+| `ui_kit/engine/script_edit.rpy` | `PK_END_MARKS = True`가 있는지 (있으면 줄 끝 표시로 내보냄, 2장) |
 | `images/`, `movies/`, `audio/` | 그림, 영상, 소리 |
 
 ## 7. `game/pykaki_preview.json` (렌파이 실시간 미리보기, 없앰)

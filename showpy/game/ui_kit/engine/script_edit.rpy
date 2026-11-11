@@ -707,14 +707,49 @@ init -19 python in script_edit:
         except Exception:
             return False
 
-    def _pk_mark(lines, n, head):
-        """n번째 줄 바로 위 표시 주석의 값."""
+    ## 표시는 두 가지 자리에 올 수 있습니다. (ui_kit 4.5, LINK.md 2장)
+    ##   줄 끝:   e "대사"  # @l:l1        (PyKaki가 새 플러그인에 맞춰 내보낸 원고)
+    ##   윗줄:    # @l:l1  /  e "대사"     (예전 원고, 줄 끝에 붙일 수 없는 줄)
+    PK_END_MARKS = True     # PyKaki가 이 이름을 보고 줄 끝 표시로 내보냅니다
+
+    def _pk_end(text, head):
+        """그 줄 끝에 붙은 표시의 값. 줄 전체가 표시이거나 없으면 None."""
+        t = text.rstrip()
+        i = t.rfind(head)
+        if i <= 0 or t[i - 1] not in (" ", chr(9)) or not t[:i].strip():
+            return None
+        w = t[i + len(head):].split()
+        return w[0] if w else None
+
+    def _pk_above(lines, n, head):
+        """n번째 줄 바로 위가 표시 줄이면 그 값."""
         if n < 2 or n - 2 >= len(lines):
             return None
         t = lines[n - 2].strip()
         if t.startswith(head):
-            return t[len(head):].strip() or None
+            w = t[len(head):].split()
+            return w[0] if w else None
         return None
+
+    def _pk_mark(lines, n, head):
+        """n번째 줄의 표시 값 (줄 끝에 붙은 것, 없으면 바로 윗줄의 표시)."""
+        if 1 <= n <= len(lines):
+            v = _pk_end(lines[n - 1], head)
+            if v is not None:
+                return v
+        return _pk_above(lines, n, head)
+
+    def _pk_strip(text):
+        """줄 끝에 붙은 표시(# @l:, # @end:, # @node:)를 뗀 글자."""
+        t = text.rstrip()
+        for head in ("# @l:", "# @end:", "# @node:"):
+            if _pk_end(t, head) is not None:
+                t = t[:t.rfind(head)].rstrip()
+        return t
+
+    def _pk_tail_style(lines):
+        """이 원고가 표시를 줄 끝에 붙이는 형식인지."""
+        return any(_pk_end(l, "# @l:") is not None for l in lines)
 
     def box_of(filename, linenumber):
         """그 줄이 들어 있는 PyKaki 상자의 id."""
@@ -733,6 +768,9 @@ init -19 python in script_edit:
             if t.startswith("# @node:"):
                 w = t[8:].split()
                 return w[0] if w else None
+            v = _pk_end(t, "# @node:")
+            if v is not None:
+                return v
         return None
 
     def _pk_id():
@@ -775,14 +813,26 @@ init -19 python in script_edit:
                     continue
                 heads = tuple(e.args.get("replace", ( )))
                 ind = _indent(_split_eol(lines[n - 1])[0])
+                tail = _pk_tail_style(lines)
+                ## 고른 줄의 표시가 윗줄에 있으면 그 표시 위에, 줄 끝에 있으면 그 줄 위에 넣음
+                top = n - 1 if _pk_end(lines[n - 1], "# @l:") is None else n
                 existing = [ ]
-                k = n - 2       # 고른 줄의 표시(n-1) 바로 위 줄 (1부터 세는 번호)
-                while k >= 2:
+                pairs = False
+                k = top - 1     # 넣을 자리 바로 위 줄 (1부터 세는 번호)
+                while k >= 1:
                     t = _split_eol(lines[k - 1])[0]
-                    m = _split_eol(lines[k - 2])[0]
-                    if (_indent(t) == ind and t.strip().startswith(heads) and
-                            _indent(m) == ind and m.strip().startswith("# @l:")):
-                        existing.insert(0, m.strip()[len("# @l:"):].strip())
+                    if not (_indent(t) == ind and t.strip().startswith(heads)):
+                        break
+                    x = _pk_end(t, "# @l:")
+                    if x is not None:
+                        existing.insert(0, x)
+                        k -= 1
+                        continue
+                    m = _split_eol(lines[k - 2])[0] if k >= 2 else ""
+                    x = _pk_above(lines, k, "# @l:")
+                    if x is not None and _indent(m) == ind:
+                        existing.insert(0, x)
+                        pairs = True
                         k -= 2
                     else:
                         break
@@ -796,30 +846,35 @@ init -19 python in script_edit:
                     else:
                         x = _pk_id()
                         e.pk_ops.append(dict(id=x, op="insert", code=t, box=box, before=lid))
-                    new += [ "# @l:" + x, t ]
+                    new += [ t + "  # @l:" + x ] if tail else [ "# @l:" + x, t ]
                 for x in existing[len(codes):]:
                     e.pk_ops.append(dict(id=_pk_id(), op="remove", line=x))
-                e.linenumber = n - 1
-                e.expect = None
+                if top != n:
+                    e.linenumber = top
+                    e.expect = None
                 e.args["lines"] = new
-                e.args["replace"] = heads + ("# @l:",)
+                ## 윗줄 표시와 짝인 줄을 바꿀 때만 표시 줄도 같이 지움 (줄 끝 표시 원고에서 남의 표시 줄을 지우지 않게)
+                e.args["replace"] = heads + ("# @l:",) if (pairs or not tail) else heads
             elif e.kind in INSERT_KINDS and all(t.strip().split(None, 1)[0] in MEDIA_HEADS for t in e.args.get("lines", [ ]) if t.strip()):
                 lid = _pk_mark(lines, n, "# @l:")
+                tail = _pk_tail_style(lines)
                 if e.kind == INSERT:
                     end = _pk_mark(lines, n, "# @end:")
                     if lid is None and end is None:
                         e.reason = _PK_OLD
                         continue
                     anchor = { "before": lid } if lid else { "end": end }
-                    ## 줄 표시와 그 줄이 떨어지지 않게 표시 위에 넣습니다.
-                    e.linenumber = n - 1
-                    e.expect = None
+                    ## 줄 표시와 그 줄이 떨어지지 않게, 표시가 윗줄에 있으면 그 표시 위에 넣습니다.
+                    if _pk_end(lines[n - 1], "# @l:" if lid else "# @end:") is None:
+                        e.linenumber = n - 1
+                        e.expect = None
                 else:
                     if lid is None:
                         e.reason = _PK_OLD
                         continue
                     anchor = { "after": lid }
-                box = _pk_box(lines, n)
+                ## 상자 끝에 넣을 때는 그 끝 표시의 상자 (다음 상자의 label 줄에서 넣어도 앞 상자로)
+                box = anchor.get("end") or _pk_box(lines, n)
                 new = [ ]
                 for t in e.args.get("lines", [ ]):
                     if not t.strip():
@@ -828,7 +883,7 @@ init -19 python in script_edit:
                     op = dict(id=i, op="insert", code=t.strip(), box=box)
                     op.update(anchor)
                     e.pk_ops.append(op)
-                    new += [ "# @l:" + i, t ]
+                    new += [ t.strip() + "  # @l:" + i ] if tail else [ "# @l:" + i, t ]
                     anchor = { "after": i }
                 e.args["lines"] = new
                 e.args["replace"] = ( )
@@ -1000,7 +1055,7 @@ init -19 python in script_edit:
                     if e.kind in INSERT_KINDS:
                         ops += e.pk_ops
                     elif e.kind in IMAGE_KINDS:
-                        ops.append(dict(id=_pk_id(), op="replace", line=e.pk_line, code=e.after.strip()))
+                        ops.append(dict(id=_pk_id(), op="replace", line=e.pk_line, code=_pk_strip(e.after).strip()))
                     elif e.kind == SAY:
                         if e.pk_pos:
                             ops.append(dict(id=_pk_id(), op="say_pos", line=e.pk_line, pos=e.pk_pos))

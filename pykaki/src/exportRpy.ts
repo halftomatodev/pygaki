@@ -58,7 +58,25 @@ function orderGroup(p: Project, g: LabelGroup, byId: Map<string, BoxNode>): BoxN
 // 번역 문자열로 해석되어 멈추는 % (%% 는 괜찮다)
 const loosePercent = (t: string) => /%/.test(t.replace(/%%/g, ''));
 
-export function generateRpy(p: Project): { code: string; warnings: Warn[] } {
+// 줄 끝에 표시를 붙여도 되는 줄인지: 다음 줄로 이어지는 줄(끝의 \, 닫지 않은 따옴표)에는 붙이지 않는다
+function tailSafe(row: string) {
+  if (/\\\s*$/.test(row)) return false;
+  let q = '';
+  for (let i = 0; i < row.length; i++) {
+    const c = row[i];
+    if (q) {
+      if (c === '\\') i++;
+      else if (row.startsWith(q, i)) (i += q.length - 1), (q = '');
+    } else if (c === '#') return true;
+    else if (c === '"' || c === "'" || c === '`') q = row.startsWith(c.repeat(3), i) ? c.repeat(3) : c, (i += q.length - 1);
+  }
+  return !q;
+}
+
+// endMarks: 줄 표시(# @l:, # @node:, # @end:)를 윗줄이 아니라 줄 끝에 붙인다 (docs/LINK.md 2장).
+// 연결한 게임의 pygaki 플러그인이 ui_kit 4.5 이상일 때만 켠다 (그 전 판은 윗줄 표시만 읽는다)
+export function generateRpy(p: Project, opts: { endMarks?: boolean } = {}): { code: string; warnings: Warn[] } {
+  const endMarks = !!opts.endMarks && p.settings.renpyLink;
   const W: Warn[] = [];
   const out: string[] = [];
   const byId = new Map(p.nodes.map((n) => [n.id, n]));
@@ -149,10 +167,13 @@ export function generateRpy(p: Project): { code: string; warnings: Warn[] } {
       const nextId = o[i + 1]?.id ?? null;
       const inc = incoming.get(b.id) ?? [];
       const onlyFall = prev && inc.length === 1 && inc[0].from === prev.id && fallTarget(prev) === b.id;
-      out.push(`# @node:${b.id}${b.title ? ' ' + oneLine(b.title) : ''}`);
+      const nodeMark = `# @node:${b.id}${b.title ? ' ' + oneLine(b.title) : ''}`;
+      const nodeAt = out.length;
       if (i === 0) out.push(`label ${g.name}:`);
       // 연결을 켜면 showpy가 지금 상자를 알 수 있게 모든 상자에 label을 쓴다
       if (S.renpyLink || (i !== 0 && !onlyFall)) out.push(`label ${g.name}.${b.id}:`);
+      if (endMarks && out.length > nodeAt) out[out.length - 1] += '  ' + nodeMark;
+      else out.splice(nodeAt, 0, nodeMark);
 
       const body: string[] = [];
       if (shaders && S.renpyLink) body.push(shaderLine(b, true));
@@ -163,8 +184,23 @@ export function generateRpy(p: Project): { code: string; warnings: Warn[] } {
         // 선택지 글에는 등장 효과가 없어서 {shader=}를 쓰면 렌파이가 멈춘다
         if (S.allowTextTags && where !== '대사' && shaderTags(t).length) W.push({ level: 'error', msg: `${where}: {shader=}는 대사 글에만 쓸 수 있어요. 여기에 쓰면 렌파이가 멈춰요 (${b.title || b.id})`, nodeId: b.id });
       };
+      // 표시 붙이기: at부터 새로 쓴 줄 가운데 첫 문장(없으면 첫 줄) 끝에, 붙일 수 없으면 예전처럼 그 윗줄에
+      const mark = (at: number, m: string) => {
+        let k = -1;
+        if (endMarks) {
+          k = body.findIndex((x, j) => j >= at && !x.trimStart().startsWith('#'));
+          if (k < 0 && body.length > at) k = at;
+          if (k >= 0 && !tailSafe(body[k])) k = -1;
+        }
+        if (k >= 0) body[k] += '  ' + m;
+        else body.splice(at, 0, m);
+      };
       const lineOut = (l: Line) => {
-        if (S.renpyLink) body.push(`# @l:${l.id}`); // showpy가 줄을 찾는 표시
+        const at = body.length;
+        emit(l);
+        if (S.renpyLink) mark(at, `# @l:${l.id}`); // showpy가 줄을 찾는 표시
+      };
+      const emit = (l: Line) => {
         if (l.type === 'note') return l.text.split('\n').forEach((x) => body.push('# ' + x));
         if (l.type === 'command') return l.text.split('\n').forEach((x) => x.trim() && body.push(x.trimEnd()));
         if (isStage(l.type)) {
@@ -210,7 +246,7 @@ export function generateRpy(p: Project): { code: string; warnings: Warn[] } {
       const todo = 'return  # TODO: 연결 안 됨';
       const flow = (t: string | null) => (!t ? [todo] : t === nextId ? [] : [`jump ${ref(t)}`]);
       const e = b.exit;
-      if (S.renpyLink) body.push(`# @end:${b.id}`); // 상자 끝 (showpy가 선택지 앞에 줄을 넣을 때)
+      const endAt = body.length;
       if (e.type === 'next') {
         if (!e.target) W.push({ level: 'warn', msg: `다음 흐름이 연결되지 않았어요 (${b.title || b.id})`, nodeId: b.id });
         body.push(...flow(e.target));
@@ -239,6 +275,7 @@ export function generateRpy(p: Project): { code: string; warnings: Warn[] } {
           body.push(...(e.then ? flow(e.then) : ['return']));
         }
       } else body.push('return');
+      if (S.renpyLink) mark(endAt, `# @end:${b.id}`); // 상자 끝 (showpy가 선택지 앞에 줄을 넣을 때)
 
       if (!body.length) body.push('pass');
       for (const x of body) out.push(I + x);

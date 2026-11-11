@@ -793,7 +793,8 @@ init -6 python in screen_fx:
                         continue
                     if not t.strip().startswith(self.OUR_LINES):
                         break
-                    rv.insert(0, t.strip())
+                    ## 줄 끝에 붙은 PyKaki 표시(# @l:)는 떼고 봄 (ui_kit 4.5)
+                    rv.insert(0, getattr(se, "_pk_strip", lambda x: x)(t).strip())
                     n -= 1
                 return rv
 
@@ -914,6 +915,8 @@ init -6 python in screen_fx:
             def _say_kw(self, text):
                 """대사 줄 끝 괄호의 fx=, fx_overlay=, fx_transition= (없으면 None)."""
                 import ast, re
+                ## 줄 끝에 붙은 PyKaki 표시(# @l:)는 떼고 읽음 (ui_kit 4.5)
+                text = getattr(self.se(), "_pk_strip", lambda x: x)(text)
                 m = re.search(r"\(([^()]*)\)\s*$", text)
                 if not m or not re.search(r"\bfx(_overlay)?\s*=", m.group(1)):
                     return None

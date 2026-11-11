@@ -24,7 +24,7 @@
 
 | 폴더 | 버전 | 하는 일 |
 |---|---|---|
-| `game/ui_kit` | 4.4 | 타이틀 메뉴(배경, 제목, 부제, 글자 효과), ESC 메뉴, 선택지, 커서, 클릭 대기 표시, 대사 소리, 대사 스타일, 글 상자(`text_box`), 그림과 영상 배치(`stage`), 확인 창 글과 버튼 글자(`ui_text`), GUI 편집기(개발 모드 Shift+M, 화면 이름 "GUI 편집기"), 원고 쓰기 도구(`script_edit`) |
+| `game/ui_kit` | 4.5 | 타이틀 메뉴(배경, 제목, 부제, 글자 효과), ESC 메뉴, 선택지, 커서, 클릭 대기 표시, 대사 소리, 대사 스타일, 글 상자(`text_box`), 그림과 영상 배치(`stage`), 확인 창 글과 버튼 글자(`ui_text`), GUI 편집기(개발 모드 Shift+M, 화면 이름 "GUI 편집기"), 원고 쓰기 도구(`script_edit`) |
 | `game/screen_fx` | 5.3 | 셰이더 두 자리(기본, 아스키, VHS, 단말기, 게임보이, 글리치, 지글거림, 망점, 홀로그램, 나이트비전, 포토 콜라주, 파편 흩날림 중 둘), 타이틀과 게임 내 메뉴 셰이더(따로 두 자리), TV 전환, 글자 빼기, 커서 자리, 타이틀 일렁임, 이미지 하나에 거는 효과, 셰이더 전환 틀 |
 | `game/hotkeys` | 1.0 | 단축키, 조작방법 화면 |
 | `game/splash` | 2.0 | 타이틀 전 로고, 경고, 조작 방법 페이지, 편집기 "스플래시" 탭(ui_kit이 있을 때, 화면에서 끌고 돌리고 글 고치기, 페이지 더하기) |
@@ -112,7 +112,7 @@ hide ghost with stage.ease("outright", 1.2)
 - 알아보기: `script_edit.is_pykaki(filename)`. 파일 앞 5줄의 표시 문구.
 - 저장: `script_edit.apply`가 파일을 읽은 뒤 `_pk_prepare`로 거릅니다.
   - `show`, `hide`, `scene` 줄 고치기: 쓴 뒤 `replace` 기록을 남깁니다.
-  - 줄 넣기: 줄이 모두 `show`, `scene`, `hide`, `play`, `stop`이면 줄 앞에 `# @l:새id`를 함께 쓰고 `insert` 기록을 남깁니다. 앞에 넣을 때는 기준 줄의 표시 위에 넣어서 표시와 줄이 떨어지지 않게 합니다.
+  - 줄 넣기: 줄이 모두 `show`, `scene`, `hide`, `play`, `stop`이면 `# @l:새id`를 함께 쓰고(예전 형식은 윗줄에, 4.5의 줄 끝 형식은 그 줄 끝에) `insert` 기록을 남깁니다. 앞에 넣을 때는 기준 줄의 표시 위에 넣어서 표시와 줄이 떨어지지 않게 합니다.
   - 대사의 위치와 화면 효과: `SayTab.script_edits`가 `e.pk_pos`, `e.pk_fx`를 붙이면 괄호에 쓴 뒤 `say_pos`, `say_fx` 기록을 남깁니다.
   - 나머지: `e.reason`에 이유를 담아 실패로 돌려줍니다.
 - 위치: `StageTab`이 `pk_pos_edits`를 모아 `layout_file`로 `stage_layout.rpy`를 씁니다. 저장 범위는 `pos_scope` ("box" 이 상자에서만, "all" 어디서나).
@@ -303,6 +303,7 @@ $ screen_fx.set_values("shards", count=80, colors=2, color="#d22", color2="#811"
 
 - 5단계 1차에서 만든 것 (2026-11-09): `slidein`, `shake`, `inkfill`, `glyphbox`. 겹치기 문법은 쉼표가 아니라 `|`(`effect="slidein|shake"`, 렌파이 `parse_textshader`). `glyphbox`는 줄 끝 빈 칸(가짜 글자 `a_text_pseudo_glyph`)은 빼고, 띄어쓰기에는 상자가 생김. `inkfill`의 외곽선 겹은 굵어진 글자에서 원래 모양을 빼서(8방향 erode, `u__line`) 테두리만 남김. 글자 자리는 `a_text_pos_rect`(x, y, 폭, 높이). 렌파이에 같은 이름 `flip` 효과가 있어서 뒤집기는 `flipin`으로.
 - 5단계 2차에서 만든 것 (2026-11-09): `stamp`, `punch`, `squash`, `extrude`, `flipin`, `led`, `split`(`flipin`, `led`, `split`은 ui_kit 4.2에서 뺌). 공용 조각 `ROTATE`가 `l__p`를 쓰므로 효과 안에서 같은 이름을 쓰지 않음.
+- ui_kit 4.5 (2026-11-12) **PyKaki 원고의 줄 끝 표시**: 표시(`# @l:` `# @node:` `# @end:`)가 문장 끝에 붙은 원고도 읽음(LINK.md 2장). `script_edit`의 `_pk_end`(줄 끝 표시), `_pk_above`(윗줄 표시), `_pk_mark`(둘 중 있는 것), `_pk_strip`(표시를 뗀 글), `_pk_tail_style`(그 원고가 줄 끝 형식인지)을 쓰고, `_pk_prepare`는 고른 줄의 표시가 윗줄에 있을 때만 넣을 자리를 한 줄 올림. 새 줄은 원고의 형식대로 씀(줄 끝 형식이면 `줄  # @l:새id`). 받아 적기 기록의 `code`에는 표시를 떼고 적음. `PK_END_MARKS = True`는 PyKaki가 이 판인지 알아보는 이름이라 지우지 않음. `ui_editor._row_mark`(게임 줄 되돌리기), 화면 셰이더 칸의 `_tree_can_insert`, `existing_lines`, `_say_kw`도 두 형식을 읽음.
 - ui_kit 4.4 (2026-11-11) **끈 효과**: `text_effects.rpy`의 `_tfx_read_off`가 `ui_kit/effects/effects_off.txt`(한 줄에 이름 하나, `#` 뒤는 설명, 없으면 다 켬)를 읽어 `say_style.TFX_OFF`에 둠. 등록(`register_textshader`, `ui_kit.imgfx.*`)은 그대로 다 하고 고르는 목록에서만 뺌: `say_style.tfx_off(이름)`, `say_style.tfx_listed(목록, keep)`, `tmenu.effect_names(keep, all)`(타이틀 글자 효과 버튼, 앱에 보내는 `state.title.effects`), `img_fx.listed(keep)`, 대사 탭 `effect_choices()`. 지금 쓰는 효과는 꺼져 있어도 목록에 남김. 형식은 LINK.md 8-2.
 - ui_kit 4.3 (2026-11-10) **효과 폴더**: `text_effects.rpy`의 `_tfx_register`가 기본 파일 다음에 `ui_kit/effects/*.glsl`을 파일 이름 순서로 읽음(기본 파일의 `@part`를 물려받음). 파일마다 따로 읽어서 틀리면 그 파일만 건너뛰고 `TFX_ERRORS`에 (파일, 이유). 이름은 `[a-z][a-z0-9_]*`, 이미 있는 이름은 못 씀. `@effect`는 `TFX_EFFECTS`에 더해져 편집기 목록에도 나오고, `@transition`은 `TFX_TRANSITIONS`에 모여 `image_effects.rpy`(`init -9 python in img_fx`)가 셰이더 `ui_kit.imgfx.<이름>`으로 등록함(`u__`, `l__` 이름은 `u_imgfx_<이름>_`로 바꿈, 앞 그림 `tex0`, 새 그림 `tex1`, 진행 `u_imgfx_t`, 크기 `u_imgfx_size`). `img_fx.use(이름, 시간, 값=…)`이 전환 객체를 돌려줌. 없는 이름은 개발 모드에서 오류, 배포판에서 `dissolve`. GLSL이 틀리면 처음 그릴 때 렌파이 오류 화면(등록할 때는 못 잡음).
 - ui_kit 4.2 (2026-11-10)에서 뺀 효과: `melt`, `mosh`, `flipin`, `led`, `split`(셰이더를 지움), 렌파이 기본 `typewriter`, `slowalpha`(목록에서만). 예전 원고의 지운 이름은 `text_effects.rpy`의 `REMOVED_EFFECTS`가 한 글자씩 나오기로 등록해서 오류가 나지 않음(예전 `u__` 값도 받기만 함).
@@ -364,7 +365,7 @@ $ screen_fx.set_values("shards", count=80, colors=2, color="#d22", color2="#811"
 - **지우기** (`tree_delete`, Delete 키, `flow` `delete`): 구간이면 구간 행 안의 점 + 대상이 구간 안 문장인 점(바로 위 셰이더 줄) + 되돌리기 자리(`tree_range_plan`의 `restore`)의 점, 그리고 고른 전환 점. 원고에 있는 셰이더 줄은 `line_edits`의 `slots = None`(저장할 때 지움), 저장 전 적용은 그 편집을 버림, 대사 괄호는 대사 탭 `line_edits`에 `fx`, `fx_overlay`, `fx_transition` = `REMOVE`(덮인 셰이더 계산도 이것을 봄). 앞에서 이어진 값은 그대로(사용자와 정함, 기본 줄을 새로 넣지 않음).
 - 캐시 키: (파일, 렌파이가 읽은 줄 번호 목록, 원고 파일 수정 시간). script 객체 id는 다시 불러온 뒤 같은 값이 다시 쓰여서 못 씀.
 - 저장 뒤 `FxTab.after_script_save`는 `Edit.key`(처음 고른 줄)로 편집을 지움. PyKaki 원고는 `_pk_prepare`가 `linenumber`를 표시 줄로 옮기기 때문. 원고가 바뀐 파일의 남은 편집도 버림.
-- PyKaki 원고는 `# @l:` 표시가 바로 위에 있는 줄 앞에만 넣음(`_tree_can_insert`).
+- PyKaki 원고는 `# @l:` 표시가 바로 위나 줄 끝에 있는 줄 앞에만 넣음(`_tree_can_insert`).
 - 렌파이 8.5의 대사는 `TranslateSay` 노드. `call` 뒤 같은 줄의 `Pass`는 건너뜀.
 - 세션: `tree_open`만 기억(저장 → 다시 불러오기 뒤에도 펴진 채). 구간과 고른 전환 점은 저장하면 지움.
 - 한계: 다른 파일로 가는 `jump`/`call`은 따라가지 않음. `while` 안은 한 번 도는 것으로 봄.

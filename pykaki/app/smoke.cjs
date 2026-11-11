@@ -26,6 +26,9 @@ async function until(what, fn, ms = 10000) {
   fs.mkdirSync(path.join(proj, 'game', 'ui_kit'), { recursive: true });
   fs.writeFileSync(path.join(proj, 'game', 'gui.rpy'), 'init python:\n    gui.init(1280, 720)\n');
   fs.writeFileSync(path.join(proj, 'game', 'options.rpy'), '');
+  // 줄 끝 표시를 읽는 플러그인(ui_kit 4.5)인 것처럼: 이 이름이 있으면 표시를 줄 끝에 붙여 내보낸다 (LINK.md 2장)
+  fs.mkdirSync(path.join(proj, 'game', 'ui_kit', 'engine'), { recursive: true });
+  fs.writeFileSync(path.join(proj, 'game', 'ui_kit', 'engine', 'script_edit.rpy'), 'init -19 python in script_edit:\n    PK_END_MARKS = True\n');
 
   const app = await electron.launch({ args: ['--no-sandbox', __dirname, '--project', proj] });
   const page = await app.firstWindow();
@@ -57,6 +60,12 @@ async function until(what, fn, ms = 10000) {
   const rpy = path.join(proj, 'game', 'script_flow.rpy');
   await until('내보내기 파일이 없음', () => fs.existsSync(rpy));
   console.log('내보내기:', fs.readFileSync(rpy, 'utf8').split('\n')[0]);
+  {
+    const code = fs.readFileSync(rpy, 'utf8');
+    if (!/\S {2}# @l:\S+$/m.test(code) || !/^label \S+: {2}# @node:\S+/m.test(code)) fail('표시가 줄 끝에 안 붙음:\n' + code);
+    if (/^\s*# @(l|node):/m.test(code)) fail('줄 끝 표시 원고에 윗줄 표시가 남음:\n' + code);
+    console.log('줄 끝 표시: 됨');
+  }
 
   const box = p.nodes[0].id;
   fs.writeFileSync(path.join(proj, 'game', 'showpy_inbox.json'), JSON.stringify({ format: 'showpy-inbox', version: 1, ops: [{ id: 'spsmoke1', op: 'insert', code: 'show ghost', box, end: box }] }));

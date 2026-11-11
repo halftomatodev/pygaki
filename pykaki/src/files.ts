@@ -1,7 +1,7 @@
 // 파일 저장/열기/.rpy 내보내기. 크롬·엣지는 같은 파일에 덮어쓰기, 그 외 브라우저는 다운로드.
 import { useStore } from './store';
 import { createEmpty, normalizeProject } from './sample';
-import { generateRpy } from './exportRpy';
+import { generateRpy as generateRpyWith } from './exportRpy';
 import { kvGet, kvSet, snapAdd, snapAuto } from './persist';
 import { isDesktop } from './desktop';
 import { backupRpy, connectFolder, disconnectFolder, folderAllowed, folderReady, hasDirPicker, hasProjectFolder, looksLikeGame, projectFlowHandle, projectFlows, pullInbox, readRpyFromFolder, RPY_FILE, scanFolder, useGameFolder, writeRpyToFolder } from './gameFolder';
@@ -355,7 +355,7 @@ export async function linkProject() {
   if (!!useStore.getState().project.settings.renpyLink !== f.hasShowpy) s.update((p) => void (p.settings.renpyLink = f.hasShowpy));
   try {
     const old = await readRpyFromFolder();
-    const code = generateRpy(useStore.getState().project).code;
+    const code = makeRpy(useStore.getState().project).code;
     if (old && old !== code && !confirm(`이 폴더에 이미 ${RPY_FILE}가 있어요. 지금 대본으로 덮어쓸까요?\n다른 대본을 쓰던 폴더라면 [취소]를 누르고, 그 대본을 먼저 여세요.`)) {
       s.say('폴더만 연결했어요. 내보내려면 Ctrl+E를 누르세요');
       return;
@@ -387,7 +387,7 @@ export async function exportRpyFile(again = false) {
     }
     s = useStore.getState();
   }
-  const { code, warnings } = generateRpy(s.project);
+  const { code, warnings } = makeRpy(s.project);
   const errors = warnings.filter((x) => x.level === 'error').length;
   if (errors && !confirm(`오류 ${errors}개가 있어요. 이대로 내보내면 렌파이에서 실행이 안 될 수 있어요. 계속할까요?`)) {
     useStore.setState({ tab: 'warn' });
@@ -446,12 +446,18 @@ export function setFollowLine(on: boolean) {
   }
 }
 
+// 연결한 게임의 플러그인이 읽을 수 있을 때만 줄 끝 표시로 내보낸다 (LINK.md 2장)
+const makeRpy = (p: Parameters<typeof generateRpyWith>[0]) => generateRpyWith(p, { endMarks: useGameFolder.getState().endMarks });
+
 // 지금 쓰는 줄(없으면 고른 상자의 첫 줄)이 내보낸 원고의 몇째 줄인지 (1부터)
+// 표시는 그 줄 끝에 붙어 있거나(문장이면 그 줄, 메모면 다음 문장), 윗줄에 따로 있다
 export function codeLineOf(code: string, lineId: string | null): number | null {
   if (!lineId) return null;
   const rows = code.split(/\r?\n/);
-  const at = rows.findIndex((r) => r.trim() === `# @l:${lineId}`);
+  const mark = `# @l:${lineId}`;
+  const at = rows.findIndex((r) => r.trim() === mark || r.endsWith('  ' + mark));
   if (at < 0) return null;
+  if (rows[at].trim() !== mark && !rows[at].trim().startsWith('#')) return at + 1;
   for (let i = at + 1; i < rows.length; i++) {
     const t = rows[i].trim();
     if (t && !t.startsWith('#')) return i + 1;
@@ -487,7 +493,7 @@ export async function autoExport() {
   try {
     if (!(await folderAllowed(false))) return;
     await pullInbox(false).catch(() => 0);
-    const { code, warnings } = generateRpy(useStore.getState().project);
+    const { code, warnings } = makeRpy(useStore.getState().project);
     if (warnings.some((x) => x.level === 'error')) {
       if (!autoWarned) useStore.getState().say('오류가 있어서 렌파이로 자동 내보내기를 멈췄어요 (검사 탭). 고치면 다시 내보내요');
       autoWarned = true;
