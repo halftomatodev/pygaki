@@ -107,6 +107,21 @@ export function normalizeProject(raw: any): Project {
     n.exit ??= { type: 'return' };
     n.pos ??= { x: 0, y: 0 };
   }
+  // 없는 상자를 가리키는 흐름은 "연결 안 됨"으로 돌린다 (손으로 고친 파일, 상자가 잘린 파일에서 화면이 멈추지 않게)
+  const ids = new Set(p.nodes.map((n) => n.id));
+  const live = (t: unknown) => (typeof t === 'string' && ids.has(t) ? t : null);
+  for (const n of p.nodes) {
+    const e = n.exit as any;
+    if (e.type === 'next') e.target = live(e.target);
+    else if (e.type === 'menu') {
+      e.choices = Array.isArray(e.choices) ? e.choices : [];
+      for (const c of e.choices) c.target = live(c.target);
+    } else if (e.type === 'call') {
+      e.target = live(e.target);
+      e.then = live(e.then);
+    } else if (e.type !== 'return') n.exit = { type: 'return' };
+  }
+  p.project.startNode = live(p.project.startNode);
   fixEntries(p);
   return p;
 }

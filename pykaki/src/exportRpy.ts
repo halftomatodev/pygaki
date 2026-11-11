@@ -91,7 +91,12 @@ export function generateRpy(p: Project): { code: string; warnings: Warn[] } {
     if (o.length) entryOf.set(g.id, o[0].id);
   }
   const ref = (id: string) => {
-    const g = groupById.get(byId.get(id)!.group)!;
+    const g = groupById.get(byId.get(id)?.group ?? '');
+    if (!g) {
+      // 없는 상자를 가리킴 (파일을 열 때 normalizeProject가 정리하지만, 그 뒤에 생겨도 화면이 멈추지 않게)
+      W.push({ level: 'error', msg: `없는 상자 "${id}"로 가는 흐름이 있어요. 그 흐름을 다시 이어 주세요` });
+      return id;
+    }
     return entryOf.get(g.id) === id ? g.name : `${g.name}.${id}`;
   };
 
