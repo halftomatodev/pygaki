@@ -102,6 +102,7 @@ README = """pygaki ({version})
    define screen_fx.overlay = False 를 True로 바꿉니다.
 3. 왼쪽 목록에서 프로젝트를 고르고 [pygaki로 편집]을 누르면 pygaki 앱이 그 프로젝트로 열립니다.
    위쪽 [대본 편집]에서 대본을 쓰고, [GUI 편집]에서 실행 중인 게임의 화면을 고칩니다.
+   [효과]에서는 글자 효과와 그림 효과를 샘플로 돌려 보고, 켜고 끄고, 효과 파일을 넣고 뺍니다.
    - 대본은 프로젝트 폴더 맨 위의 "프로젝트이름.flow.json"에 자동 저장됩니다.
    - Ctrl+E로 game/script_flow.rpy에 내보내면 렌파이가 바로 다시 불러옵니다.
 4. [Launch Project]로 게임을 켜면 앱의 [GUI 편집]이 게임에 붙습니다(초록 점).
