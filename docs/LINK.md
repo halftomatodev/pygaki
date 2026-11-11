@@ -196,7 +196,7 @@ PyKaki는 렌파이 연결(`renpyLink`)을 켜고 폴더를 연결했으면, 대
 | PyKaki `src/fx/textShaders.ts` | 플러그인(`ui_kit`)이 있는 게임 폴더를 연결했으면 그 폴더의 파일만 읽음(`scanFolder` → `setFolderEffects`. 게임에서 뺀 샘플은 앱 목록에서도 빠짐). 연결하지 않았으면 빌드할 때 가져온 저장소의 샘플(`import.meta.glob`)을 씀. 못 읽은 파일은 알림 |
 | PyKaki `src/effectsLib.ts` | 효과 파일을 넣고 뺌. 넣기 전에 위와 같은 규칙으로 검사해서 틀리면 쓰지 않음. 뺀 파일은 프로젝트 폴더의 `ui_kit_backup/effects/`에 남김(같은 이름이 있으면 `이름.날짜-시각.glsl`. 웹에서 game 폴더를 바로 골랐으면 `game/ui_kit_backup/effects/`) |
 
-새 표시: `@transition 이름 한글이름`, `@time 초`, `@fragment`(전환의 색 코드. `l__t`, `l__uv`, `l__size`, `l__old`, `l__new`를 씀), `@param u__이름 최소 최대 한글이름`(막대). 두 프로그램의 읽는 규칙(이름은 `[a-z][a-z0-9_]*`, 이미 있는 이름은 못 씀, 코드가 없으면 틀린 파일)은 같아야 합니다.
+새 표시: `@transition 이름 한글이름`, `@time 초`, `@fragment`(전환의 색 코드. `l__t`, `l__uv`, `l__size`, `l__old`, `l__new`를 씀. 다른 자리의 색은 `texture2D(tex0, 자리)` 앞 그림, `texture2D(tex1, 자리)` 새 그림), `@param u__이름 최소 최대 한글이름`(막대). 두 프로그램의 읽는 규칙(이름은 `[a-z][a-z0-9_]*`, 이미 있는 이름은 못 씀, 코드가 없으면 틀린 파일)은 같아야 합니다.
 
 ### 8-2. 끈 효과 (`ui_kit/effects/effects_off.txt`, ui_kit 4.4)
 
@@ -216,7 +216,7 @@ bands
 
 ### 8-3. 효과 모음 (`showpy/effects_library/*.glsl`)
 
-pygaki와 같이 오지만 게임에 저절로 들어가지 않는 효과 파일입니다. 형식은 효과 폴더와 같고, PyKaki가 빌드할 때 그대로 가져갑니다(사본 없음). 앱에서 [넣기]를 하면 그 게임의 `game/ui_kit/effects/`로 복사됩니다. 새 프로젝트마다 들어가는 샘플(`showpy/game/ui_kit/effects/`)도 게임에서 빼면 모음으로 보입니다. pygaki 플러그인은 이 폴더를 읽지 않습니다.
+pygaki와 같이 오지만 게임에 저절로 들어가지 않는 효과 파일입니다. 형식은 효과 폴더와 같고, PyKaki가 빌드할 때 그대로 가져갑니다(사본 없음). 앱에서 [넣기]를 하면 그 게임의 `game/ui_kit/effects/`로 복사됩니다. 새 프로젝트마다 들어가는 샘플(`showpy/game/ui_kit/effects/`)도 게임에서 빼면 모음으로 보입니다. pygaki 플러그인은 이 폴더를 읽지 않습니다. 지금 들어 있는 것: 그림 효과 `slide`, `mosaic`, `blinds`.
 
 대본에는 글자 효과가 이름 그대로(`say.effect`), 그림 전환이 `trans` 칸에 `img_fx.use("이름")`로 들어갑니다. pygaki 플러그인 연결이 꺼진 대본은 그림 전환을 `dissolve`로 내보냅니다. 적는 법 전체는 `showpy/game/ui_kit/effects/README.md`.
 

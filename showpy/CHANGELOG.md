@@ -9,6 +9,8 @@
 
 pygaki 앱·PyKaki (2026-11-11): 위쪽에 **[효과]** 화면. 글자 효과와 그림 효과를 한곳에서 샘플로 돌려 보고(세부 값 막대, 그림 효과는 앞 그림 → 새 그림), 켜고 끄고(`effects_off.txt`), 효과 파일을 넣고(형식 검사) 뺌(프로젝트 폴더 `ui_kit_backup/effects/`에 백업, 쓰던 줄은 다른 효과로 바꿈). 게임에서 뺀 샘플은 "효과 모음"에 남아 다시 넣을 수 있음. 플레이 화면도 그림 전환을 게임과 같은 셰이더로 그림(전에는 서서히 바뀌기). 플러그인이 있는 게임을 연결하면 그 게임의 효과 폴더에 있는 파일만 목록에 나옴.
 
+효과 모음 (2026-11-11): 그림 효과 셋을 넣음. `slide` 옆으로 밀기(`dir` 방향), `mosaic` 모자이크로 바뀌기(`size` 칸 크기), `blinds` 가로 블라인드(`count` 줄 수, `vertical`, `soft`). 앱 [효과] 화면의 "효과 모음"에서 [넣기]를 눌러야 그 게임에 생김. 효과 코드에서 `texture2D(tex0, 자리)`, `texture2D(tex1, 자리)`로 다른 자리의 색을 읽는 법을 효과 폴더 README에 적음(엔진은 그대로).
+
 `ui_kit` 4.3 (2026-11-10):
 - **효과 폴더** `ui_kit/effects/`: `.glsl` 파일을 넣으면 그 안의 효과가 게임과 pygaki 앱에 생기고, 빼면 없어짐(효과 하나에 파일 하나). 글자 등장 효과(`@effect`)는 기본 효과와 같은 형식이고 기본 파일의 공용 조각(`@use T`, `@use ROTATE`)을 씀. 틀린 파일은 그 파일만 건너뛰고 개발 모드에서 알림(`say_style.TFX_ERRORS`). 적는 법과 클로드에게 줄 요청문은 `ui_kit/effects/README.md`.
 - **그림 등장 효과** (`engine/image_effects.rpy`): 효과 폴더에 `@transition`으로 적은 장면 전환을 `scene bg hall with img_fx.use("irisin")`처럼 씀. 시간과 값은 `img_fx.use("bands", 1.4, count=10, color="#c2185b")`.

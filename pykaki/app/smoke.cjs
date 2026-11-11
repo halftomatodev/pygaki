@@ -166,7 +166,7 @@ async function until(what, fn, ms = 10000) {
   await fxCard('maskup').locator('button:has-text("넣기")').waitFor({ timeout: 10000 });
   // 그림 효과 샘플 (효과 탭 4단계, src/fx/TransitionCanvas.tsx): 두 샘플이 셰이더 오류 없이 한 번 도는지
   await page.click('.fxv-kind button:has-text("그림 효과")');
-  for (const name of ['irisin', 'bands']) {
+  for (const name of ['irisin', 'bands', 'slide', 'mosaic', 'blinds']) { // 뒤의 셋은 효과 모음(showpy/effects_library)
     await fxCard(name).click();
     await page.waitForSelector(`.fxv-side h3:has-text("${name}")`, { timeout: 10000 });
     await page.waitForSelector('.fxv-pic canvas', { timeout: 10000 });
