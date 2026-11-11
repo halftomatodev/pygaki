@@ -682,7 +682,10 @@ fieldset.plain:disabled { opacity: 0.4; }
 .fxv-row { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
 .fxv-row > b { font-size: 12px; color: var(--muted); font-weight: 600; white-space: nowrap; }
 .fxv-row input { border-color: var(--line); min-width: 0; }
-.fxv-todo { padding: 22px 14px; border: 1px dashed var(--line); border-radius: 8px; }
+.fxv-pic { position: relative; background: #15171f; border-radius: 6px; overflow: hidden; cursor: pointer; }
+.fxv-pic canvas { display: block; width: 100%; height: 100%; }
+.fxv-code { font-family: var(--mono); font-size: 11.5px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; user-select: text; }
+.fx-canvas-scene { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
 .fxv-use { display: flex; align-items: center; gap: 8px; padding: 2px 0; font-size: 12.5px; }
 .fxv-use-box { font-weight: 600; white-space: nowrap; max-width: 130px; overflow: hidden; text-overflow: ellipsis; }
 .fxv-use-text { flex: 1; min-width: 0; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

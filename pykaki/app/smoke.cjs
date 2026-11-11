@@ -164,6 +164,18 @@ async function until(what, fn, ms = 10000) {
   await page.click('.modal button.danger:has-text("빼기")');
   await until('[빼기]를 눌러도 효과 파일이 남음', () => !fs.existsSync(path.join(fxDir, 'maskup.glsl')));
   await fxCard('maskup').locator('button:has-text("넣기")').waitFor({ timeout: 10000 });
+  // 그림 효과 샘플 (효과 탭 4단계, src/fx/TransitionCanvas.tsx): 두 샘플이 셰이더 오류 없이 한 번 도는지
+  await page.click('.fxv-kind button:has-text("그림 효과")');
+  for (const name of ['irisin', 'bands']) {
+    await fxCard(name).click();
+    await page.waitForSelector(`.fxv-side h3:has-text("${name}")`, { timeout: 10000 });
+    await page.waitForSelector('.fxv-pic canvas', { timeout: 10000 });
+    await wait(1300);
+    if (await page.locator('.fxv-bad').count()) fail('그림 효과 샘플을 못 그림: ' + name + ' ' + (await page.locator('.fxv-bad').innerText()));
+    if (!(await page.locator('.fxv-code').innerText()).includes(`img_fx.use("${name}")`)) fail('그림 효과의 적는 법이 다름: ' + name);
+  }
+  console.log('그림 효과 샘플: 됨');
+  await page.click('.fxv-kind button:has-text("글자 효과")');
   await fxCard('dissolve').click();
   await page.click('.fxv-use button:has-text("보기")');
   await page.waitForSelector('.view-switch button.on:has-text("대본 편집")', { timeout: 10000 });

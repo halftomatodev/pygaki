@@ -8,7 +8,8 @@ import type { SayStyle } from './types';
 import { parseTagged, type Tagged } from './textTags';
 import { gameFont, pictureOf, useGameFolder, type GameLook } from './gameFolder';
 import { FxCanvas, webglOk } from './fx/FxCanvas';
-import { parseTextShader } from './fx/textShaders';
+import { IMAGE_FX, parseTextShader, type ShaderEffect } from './fx/textShaders';
+import { TransitionCanvas, type Picture } from './fx/TransitionCanvas';
 
 // 줄마다 고른 글꼴. 못 읽으면 게임 기본 글꼴로 보인다
 const fontStack = (path?: string) => {
@@ -73,13 +74,157 @@ function placeOf(s: Sprite, look: GameLook): React.CSSProperties {
   return { left: look.width / 2, bottom: 0, translate: '-50% 0' };
 }
 
+// ── 그림 효과 (효과 폴더의 @transition, img_fx.use) ──
+// 게임처럼 화면 전체를 앞 장면에서 새 장면으로 바꾼다: 두 장면을 그림 한 장씩으로 만들어 같은 셰이더 코드로 그린다 (fx/TransitionCanvas).
+// 그리는 동안 밑의 그림 겹은 이미 새 장면이고, 캔버스가 그 위를 덮는다. WebGL이 안 되거나 효과를 못 그리면 서서히 바뀌기로 보인다
+const BROKEN_FX = new WeakSet<ShaderEffect>();
+
+// "img_fx.use("bands", 1.2, count=10, color="#c2185b")" → 효과, 걸리는 초, 고친 값. 그릴 수 없으면 null
+function imageFx(trans?: string) {
+  if (!trans || !webglOk) return null;
+  const m = /^img_fx\.use\(\s*"(\w+)"\s*(.*)\)\s*$/.exec(trans);
+  const effect = m && IMAGE_FX.find((e) => e.name === m[1]);
+  if (!m || !effect || BROKEN_FX.has(effect)) return null;
+  const args: Record<string, string> = {};
+  let time = effect.time;
+  for (const part of m[2].split(',').map((p) => p.trim()).filter(Boolean)) {
+    const i = part.indexOf('=');
+    const [k, v] = i < 0 ? ['time', part] : [part.slice(0, i).trim(), part.slice(i + 1).trim()];
+    if (k !== 'time') args[k] = v;
+    else if (!isNaN(Number(v))) time = Number(v);
+  }
+  return { effect, time, args };
+}
+
+// 장면을 그릴 그림. 폴더를 다시 읽으면 버린다
+let picsFor: unknown = null;
+const PICS = new Map<string, Picture | null>();
+const PENDING = new Map<string, Promise<Picture | null>>();
+function loadPicture(name: string): Promise<Picture | null> {
+  const media = useGameFolder.getState().media;
+  if (media !== picsFor) (picsFor = media), PICS.clear(), PENDING.clear();
+  if (PICS.has(name)) return Promise.resolve(PICS.get(name)!);
+  let p = PENDING.get(name);
+  if (!p) {
+    p = pictureOf(name)
+      .then((pic) =>
+        !pic
+          ? null
+          : new Promise<Picture | null>((done) => {
+              const el = pic.video ? Object.assign(document.createElement('video'), { muted: true, preload: 'auto' }) : new Image();
+              el.addEventListener(pic.video ? 'loadeddata' : 'load', () => done(el));
+              el.addEventListener('error', () => done(null));
+              el.src = pic.url;
+            }),
+      )
+      .catch(() => null)
+      .then((r) => {
+        if (picsFor === media) PICS.set(name, r);
+        return r;
+      });
+    PENDING.set(name, p);
+  }
+  return p;
+}
+const sceneSprites = (st: PStage | null) => (st ? [st.bg, ...st.sprites].filter((s): s is Sprite => !!s) : []);
+const picturesReady = (st: PStage | null) => picsFor === useGameFolder.getState().media && sceneSprites(st).every((s) => PICS.has(s.name));
+
+// 장면을 그림 한 장으로 (다 읽은 그림만 그린다). 자리는 placeOf와 같다
+function paintScene(st: PStage | null, look: GameLook) {
+  const c = document.createElement('canvas');
+  c.width = look.width;
+  c.height = look.height;
+  const g = c.getContext('2d')!;
+  const back = g.createLinearGradient(0, 0, 0, look.height); // .game의 바탕
+  back.addColorStop(0, '#2b3047');
+  back.addColorStop(1, '#1a1d2b');
+  g.fillStyle = back;
+  g.fillRect(0, 0, look.width, look.height);
+  for (const s of sceneSprites(st)) {
+    const pic = PICS.get(s.name);
+    if (!pic) continue;
+    const [w, h] = pic instanceof HTMLVideoElement ? [pic.videoWidth, pic.videoHeight] : pic instanceof HTMLImageElement ? [pic.naturalWidth, pic.naturalHeight] : [pic.width, pic.height];
+    const pos = s.pos ?? look.placed[s.box + '|' + s.tag] ?? look.placed[s.tag];
+    let xy = [look.width / 2 - w / 2, look.height - h];
+    if (s === st!.bg) xy = [0, 0];
+    else if (s.at === 'left') xy = [0, look.height - h];
+    else if (s.at === 'right') xy = [look.width - w, look.height - h];
+    else if (pos) xy = [pos[0] - w / 2, pos[1] - h];
+    try {
+      g.drawImage(pic, xy[0], xy[1]);
+    } catch {
+      // 못 그리는 그림은 건너뛴다
+    }
+  }
+  return c;
+}
+
+// 이번 걸음에 새로 걸린 그림 효과 (여러 개면 마지막 것 하나로 앞 장면 → 새 장면)
+function freshImageFx(before: PStage | null, stage: PStage) {
+  const had = new Set(sceneSprites(before).map((s) => s.key));
+  const fresh = [...stage.leaving, ...sceneSprites(stage).filter((s) => !had.has(s.key))];
+  for (let i = fresh.length - 1; i >= 0; i--) {
+    const fx = imageFx(fresh[i].trans);
+    if (fx) return fx;
+  }
+  return null;
+}
+
+let fxRunSeq = 0;
+function SceneFx({ stage, look }: { stage: PStage; look: GameLook }) {
+  const media = useGameFolder((s) => s.media);
+  const seen = useRef<{ stage: PStage; before: PStage | null } | null>(null);
+  if (seen.current?.stage !== stage) seen.current = { stage, before: seen.current?.stage ?? null };
+  const before = seen.current.before;
+  const [run, setRun] = useState<{ id: number; stage: PStage; fx: NonNullable<ReturnType<typeof imageFx>>; old: Picture; next: Picture | null } | null>(null);
+
+  // 지금 장면의 그림을 미리 읽어 둔다 (다음 전환의 앞 장면을 기다리지 않고 그리게)
+  useEffect(() => {
+    for (const s of sceneSprites(stage)) void loadPicture(s.name);
+  }, [stage, media]);
+
+  useLayoutEffect(() => {
+    const fx = freshImageFx(before, stage);
+    if (!fx) return setRun(null);
+    let alive = true;
+    const id = ++fxRunSeq;
+    const old = picturesReady(before) ? paintScene(before, look) : null;
+    setRun(old && { id, stage, fx, old, next: null });
+    Promise.all([...sceneSprites(before), ...sceneSprites(stage)].map((s) => loadPicture(s.name))).then(
+      () => alive && setRun({ id, stage, fx, old: old ?? paintScene(before, look), next: paintScene(stage, look) }),
+    );
+    return () => void (alive = false);
+  }, [stage]);
+
+  if (!run || run.stage !== stage) return null;
+  return (
+    <TransitionCanvas
+      key={run.id}
+      className="fx-canvas-scene"
+      effect={run.fx.effect}
+      args={run.fx.args}
+      time={run.fx.time}
+      old={run.old}
+      next={run.next}
+      size={[look.width, look.height]}
+      onDone={() => setRun(null)}
+      onFail={(e) => {
+        console.warn('그림 효과를 못 그려서 서서히 바뀌기로 보여요', e);
+        BROKEN_FX.add(run.fx.effect);
+        setRun(null);
+      }}
+    />
+  );
+}
+
 function Layer({ s, look, bg, leaving }: { s: Sprite; look: GameLook; bg?: boolean; leaving?: boolean }) {
   const pic = usePicture(s.name);
-  const info = transInfo(s.trans);
+  const gl = !!imageFx(s.trans); // 그림 효과는 SceneFx가 화면 전체로 그린다
+  const info = gl ? null : transInfo(s.trans);
   const style: React.CSSProperties = bg ? { left: 0, top: 0 } : placeOf(s, look);
   const anim = info ? ` ${leaving ? 'tout' : 'tin'}-${info.kind}` : '';
   const vars = info ? ({ '--dur': info.dur + 's' } as React.CSSProperties) : undefined;
-  if (pic === undefined) return null;
+  if (pic === undefined || (gl && leaving)) return null;
   return (
     <div className={'layer' + anim} style={{ ...style, ...vars }}>
       {!pic ? (
@@ -103,6 +248,7 @@ export function Scene({ stage, look }: { stage: PStage; look: GameLook }) {
       {leavingOther.map((s) => <Layer key={s.key} s={s} look={look} leaving />)}
       {stage.sprites.map((s) => <Layer key={s.key} s={s} look={look} />)}
       {stage.fade && <div key={stage.fade} className="fade-black" />}
+      <SceneFx stage={stage} look={look} />
     </>
   );
 }

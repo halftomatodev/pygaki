@@ -6,15 +6,17 @@ import { useStore } from './store';
 import { useLive } from './showpyLive';
 import { folderReady, gameFont, useGameFolder } from './gameFolder';
 import { addEffectFile, addFromLibrary, allPacks, effectCatalog, effectUses, removeEffectFile, setEffectOn, type EffectCard, type EffectUse, type FxKind } from './effectsLib';
-import { EFFECTS, TRANSITIONS, effectKnobs, formatEffect, imageFxCode } from './stage';
-import { parseTextShader, previewPack } from './fx/textShaders';
+import { EFFECTS, TRANSITIONS, effectKnobs, formatEffect, imageFxCode, type EffectKnob } from './stage';
+import { parseTextShader, previewPack, shaderEffect, type ShaderEffect } from './fx/textShaders';
 import { FxCanvas, webglOk } from './fx/FxCanvas';
+import { TransitionCanvas } from './fx/TransitionCanvas';
 import { Glyphs, useReveal } from './PlayStage';
 import { parseTagged } from './textTags';
 
 const SOURCE_LABEL: Record<EffectCard['source'], string> = { renpy: '렌파이', base: '기본', project: '프로젝트', library: '모음' };
 const SAMPLE_CPS = 30;
 const SAMPLE_TEXT = '안녕, 반가워!';
+const TIME_KEY = '@time'; // 그림 효과 샘플의 걸리는 시간 막대 (효과 값 이름과 겹치지 않게)
 // 효과 폴더 README의 "클로드에게 새 효과를 부탁할 때" 글 (사본을 두지 않고 그 파일에서 꺼낸다)
 const REQUEST_TEXT = /## 클로드에게[\s\S]*?```text\r?\n([\s\S]*?)```/.exec(readme)?.[1].trim() ?? '';
 
@@ -62,6 +64,58 @@ function TextSample({ spec, name, text, onReplay }: { spec: string; name: string
       )}
       {bad && <div className="fxv-bad">이 효과의 셰이더 코드를 그리지 못했어요. 게임에서도 오류가 날 수 있어요.<br />{bad}</div>}
       {!webglOk && <div className="fxv-bad">이 브라우저는 WebGL이 안 돼서 비슷한 모양으로 보여요.</div>}
+    </div>
+  );
+}
+
+// 샘플 그림: 앞 그림과 새 그림. 사용자가 그림을 고르면 새 그림 자리에 꽉 차게 넣는다
+function samplePicture(w: number, h: number, fresh: boolean, picture: HTMLImageElement | null) {
+  const c = document.createElement('canvas');
+  c.width = w;
+  c.height = h;
+  const g = c.getContext('2d')!;
+  if (fresh && picture) {
+    const k = Math.max(w / picture.naturalWidth, h / picture.naturalHeight);
+    g.fillRect(0, 0, w, h);
+    g.drawImage(picture, (w - picture.naturalWidth * k) / 2, (h - picture.naturalHeight * k) / 2, picture.naturalWidth * k, picture.naturalHeight * k);
+    return c;
+  }
+  const bg = g.createLinearGradient(0, 0, w, h);
+  const [a, b, ink] = fresh ? ['#f6c56b', '#e2607a', '#3a1420'] : ['#27304f', '#151a2b', '#aab4d8'];
+  bg.addColorStop(0, a);
+  bg.addColorStop(1, b);
+  g.fillStyle = bg;
+  g.fillRect(0, 0, w, h);
+  g.globalAlpha = 0.18;
+  g.fillStyle = ink;
+  // 바둑판 무늬: 그림이 어느 쪽으로 밀리고 잘리는지 보이게
+  const cell = w / 12;
+  for (let y = 0; y * cell < h; y++) for (let x = y % 2; x < 12; x += 2) g.fillRect(x * cell, y * cell, cell, cell);
+  g.globalAlpha = 1;
+  g.font = `700 ${Math.round(h / 5)}px sans-serif`;
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  g.fillText(fresh ? '새 그림' : '앞 그림', w / 2, h / 2);
+  return c;
+}
+
+const SAMPLE_WIDTH = 960;
+
+// 그림 효과 샘플: 게임과 같은 셰이더 코드로 앞 그림에서 새 그림으로 바뀌는 모습을 그린다
+function PictureSample({ effect, args, time, picture, onReplay }: { effect: ShaderEffect; args: Record<string, string>; time: number; picture: HTMLImageElement | null; onReplay(): void }) {
+  const look = useGameFolder((s) => s.look);
+  const [bad, setBad] = useState<string | null>(null);
+  const [old, next] = useMemo(() => {
+    const h = Math.round((SAMPLE_WIDTH * look.height) / look.width);
+    return [samplePicture(SAMPLE_WIDTH, h, false, null), samplePicture(SAMPLE_WIDTH, h, true, picture)];
+  }, [look.width, look.height, picture]);
+  return (
+    <div className="fxv-pic" title="클릭: 다시 보기" style={{ aspectRatio: `${look.width} / ${look.height}` }} onClick={onReplay}>
+      {webglOk && !bad && (
+        <TransitionCanvas effect={effect} args={args} time={time} old={old} next={next} size={[look.width, look.height]} onFail={(e) => setBad(String((e as any)?.message ?? e).split('\n')[0])} />
+      )}
+      {bad && <div className="fxv-bad">이 효과의 셰이더 코드를 그리지 못했어요. 게임에서도 오류가 날 수 있어요.<br />{bad}</div>}
+      {!webglOk && <div className="fxv-bad">이 브라우저는 WebGL이 안 돼서 그림 효과 샘플을 볼 수 없어요.</div>}
     </div>
   );
 }
@@ -140,6 +194,16 @@ export function EffectsView() {
   const [removing, setRemoving] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const filePick = useRef<HTMLInputElement>(null);
+  const picPick = useRef<HTMLInputElement>(null);
+  const [picture, setPicture] = useState<HTMLImageElement | null>(null); // 그림 효과 샘플의 새 그림 (저장하지 않음)
+  const pickPicture = (f: File | undefined) => {
+    if (picPick.current) picPick.current.value = '';
+    if (!f) return;
+    const img = new Image();
+    img.onload = () => (setPicture(img), setReplay((v) => v + 1));
+    img.onerror = () => say('그림을 읽지 못했어요: ' + f.name);
+    img.src = URL.createObjectURL(f);
+  };
 
   const cards = useMemo(() => effectCatalog(project), [project, fxSeq]);
   // 프로젝트를 연결하지 않았으면 구경만 한다
@@ -247,9 +311,16 @@ export function EffectsView() {
     </div>
   );
 
-  const knobs = sel?.kind === 'effect' ? effectKnobs(sel.name, true) : [];
+  const fx = sel ? shaderEffect(sel.name, true) : undefined;
+  const picFx = sel?.kind === 'transition' && fx?.kind === 'transition' ? fx : null;
+  // 그림 효과는 걸리는 시간도 막대로 (img_fx.use의 둘째 값)
+  const knobs: EffectKnob[] = !sel ? [] : [...(picFx ? [{ key: TIME_KEY, label: '걸리는 시간(초)', kind: 'num' as const, min: 0.1, max: 3, step: 0.1, def: String(picFx.time) }] : []), ...effectKnobs(sel.name, true)];
   const mine = (sel && args[sel.name]) || {};
-  const spec = sel ? formatEffect([{ name: sel.name, args: Object.entries(mine) }]) ?? sel.name : '';
+  // 원고에 적는 법: 샘플에서 맞춘 값 그대로
+  const picCode = picFx
+    ? `with img_fx.use(${[`"${picFx.name}"`, ...(mine[TIME_KEY] ? [mine[TIME_KEY]] : []), ...Object.entries(mine).filter(([k]) => k !== TIME_KEY).map(([k, v]) => `${k.replace(/^u__/, '')}=${v.startsWith('#') ? `"${v}"` : v}`)].join(', ')})`
+    : '';
+  const spec = sel?.kind === 'effect' ? formatEffect([{ name: sel.name, args: Object.entries(mine) }]) ?? sel.name : '';
   const putArg = (key: string, v: string | undefined) =>
     sel &&
     setArgs((all) => {
@@ -305,20 +376,47 @@ export function EffectsView() {
               {SOURCE_LABEL[sel.source]} 효과{sel.file ? ` · ${sel.file}` : ''}
               {!sel.ready ? ' · 아직 이 게임에 넣지 않았어요' : !sel.on ? ' · 꺼 둠 (고르는 목록에 안 나와요)' : ''}
             </p>
-            {sel.kind === 'effect' ? (
-              sampleError ? (
-                <p className="tip warn-text">이 파일은 샘플을 돌릴 수 없어요: {sampleError}</p>
+            {sampleError || (sel.kind === 'transition' && !picFx) ? (
+                <p className="tip warn-text">이 파일은 샘플을 돌릴 수 없어요: {sampleError ?? '효과를 읽지 못했어요'}</p>
               ) : (
                 <>
-                  <TextSample key={[spec, text, replay, fxSeq].join('|')} spec={spec} name={sel.name} text={text} onReplay={() => setReplay((v) => v + 1)} />
-                  <div className="fxv-row">
-                    <b>샘플 글</b>
-                    <input className="grow" value={text} placeholder={SAMPLE_TEXT} onChange={(e) => setText(e.target.value)} />
-                    <button onClick={() => setReplay((v) => v + 1)}>다시 보기</button>
-                  </div>
+                  {picFx ? (
+                    <>
+                      <PictureSample
+                        key={[picFx.name, JSON.stringify(mine), replay, fxSeq].join('|')}
+                        effect={picFx}
+                        args={mine}
+                        time={Number(mine[TIME_KEY] ?? picFx.time)}
+                        picture={picture}
+                        onReplay={() => setReplay((v) => v + 1)}
+                      />
+                      <div className="fxv-row">
+                        <b>샘플 그림</b>
+                        <button title="새 그림 자리에 넣을 그림 파일을 골라요 (저장하지 않아요)" onClick={() => picPick.current?.click()}>고르기</button>
+                        {picture && <button onClick={() => setPicture(null)}>기본 그림</button>}
+                        <span className="grow" />
+                        <button onClick={() => setReplay((v) => v + 1)}>다시 보기</button>
+                        <input ref={picPick} type="file" accept="image/*" hidden onChange={(e) => pickPicture(e.target.files?.[0])} />
+                      </div>
+                      <div className="fxv-row">
+                        <b>원고에 적는 법</b>
+                        <code className="fxv-code grow" title="배경·보이기 줄의 '나타나는 방식'에서 고르면 값 없이 들어가요. 값을 바꾸려면 직접 명령 줄에 이렇게 적어요">{picCode}</code>
+                        <button onClick={() => navigator.clipboard.writeText(picCode).then(() => say('복사했어요: ' + picCode), () => alert(picCode))}>복사</button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <TextSample key={[spec, text, replay, fxSeq].join('|')} spec={spec} name={sel.name} text={text} onReplay={() => setReplay((v) => v + 1)} />
+                      <div className="fxv-row">
+                        <b>샘플 글</b>
+                        <input className="grow" value={text} placeholder={SAMPLE_TEXT} onChange={(e) => setText(e.target.value)} />
+                        <button onClick={() => setReplay((v) => v + 1)}>다시 보기</button>
+                      </div>
+                    </>
+                  )}
                   {knobs.length > 0 && (
                     <>
-                      <h4>세부 값 <span className="tip">여기서 맞춘 값은 저장하지 않아요. 값은 [대본 편집]의 대사 줄마다 정해요</span></h4>
+                      <h4>세부 값 <span className="tip">{picFx ? '여기서 맞춘 값은 저장하지 않아요. 원고에는 위의 글처럼 적어요' : '여기서 맞춘 값은 저장하지 않아요. 값은 [대본 편집]의 대사 줄마다 정해요'}</span></h4>
                       <div className="fx-knobs">
                         {knobs.map((k) => {
                           const set = mine[k.key];
@@ -342,10 +440,7 @@ export function EffectsView() {
                     </>
                   )}
                 </>
-              )
-            ) : (
-              <p className="tip fxv-todo">그림 효과는 아직 여기서 돌려 볼 수 없어요. 배경·보이기 줄의 "나타나는 방식"에서 고르고 게임에서 확인해요.</p>
-            )}
+              )}
             <h4>쓰인 곳 <span className="tip">{uses.length ? `대본 ${uses.length}줄` : '대본에서 안 써요'}</span></h4>
             {uses.slice(0, 30).map((u) => {
               const { box, text } = lineOf(u);

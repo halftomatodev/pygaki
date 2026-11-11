@@ -42,7 +42,8 @@
 - **[효과] 화면** (`EffectsView.tsx`, 웹과 앱 모두): 왼쪽은 효과 카드 목록([글자 효과 | 그림 효과], 찾기, [파일 넣기], [새 효과 요청문 복사]), 오른쪽은 고른 효과의 샘플과 쓰인 곳. 목록과 파일 다루기는 `effectsLib.ts`의 함수만 부른다(7장).
   - 카드: 체크(켬/끔 = `setEffectOn`), 한글 이름, 영어 이름, 쓰인 줄 수, 어디 것(렌파이 / 기본 / 프로젝트 / 모음), 프로젝트 효과는 [빼기], 아직 넣지 않은 모음은 [넣기]. 플러그인이 있는 게임 폴더를 연결하지 않았으면 구경만 하고 버튼은 막는다.
   - [빼기]는 창을 띄워 그 파일에 든 효과가 쓰인 줄 수를 보여 주고, 쓰였으면 [다른 효과로 바꾸고 빼기](효과마다 바꿀 것을 고름) / [그냥 빼기] / [취소].
-  - 샘플(글자 효과): 대사 미리보기와 같은 `FxCanvas`로 샘플 글을 돌린다. 세부 값 막대(`effectKnobs`)를 움직이면 다시 돌고, 그 값은 저장하지 않는다. 아직 넣지 않은 모음의 효과는 `textShaders.ts`의 `previewPack`으로 샘플용으로만 올려서(`shaderEffect(name, true)`) 돌린다(고르는 목록과 플레이에는 안 나옴). 셰이더 코드가 틀리면 샘플 칸에 이유가 나온다. 그림 효과 샘플은 아직 없다(안내 글만).
+  - 샘플(글자 효과): 대사 미리보기와 같은 `FxCanvas`로 샘플 글을 돌린다. 세부 값 막대(`effectKnobs`)를 움직이면 다시 돌고, 그 값은 저장하지 않는다. 아직 넣지 않은 모음의 효과는 `textShaders.ts`의 `previewPack`으로 샘플용으로만 올려서(`shaderEffect(name, true)`) 돌린다(고르는 목록과 플레이에는 안 나옴). 셰이더 코드가 틀리면 샘플 칸에 이유가 나온다.
+  - 샘플(그림 효과): `fx/TransitionCanvas.tsx`가 효과 파일의 `@fragment`를 게임(`image_effects.rpy`)과 같은 틀(`tex0` 앞 그림, `tex1` 새 그림, `l__uv` `l__old` `l__new` `l__t` `l__size`, 이름은 `u_imgfx_<효과>_값`)로 묶어 WebGL로 그린다. 샘플 그림 둘은 캔버스로 만들고, [고르기]로 고른 그림 파일은 새 그림 자리에 꽉 차게 넣는다(저장 안 함). 막대는 `@time`(걸리는 시간)과 `effectKnobs`, "원고에 적는 법" 줄에 맞춘 값 그대로의 `with img_fx.use(...)`가 나온다.
   - 쓰인 곳의 [보기]는 [대본 편집]으로 돌아가 그 상자를 고르고 그 줄에 초점을 둔다.
   - [새 효과 요청문 복사]는 `showpy/game/ui_kit/effects/README.md`의 요청문을 빌드할 때 가져와 클립보드에 넣는다(사본 없음, 밖으로 통신 없음).
   - 이 화면에서는 단축키가 저장, 실행 취소, 다시 실행만 듣는다.
@@ -161,7 +162,7 @@
 - 텍스트 태그를 흉내 낸다: `{b} {i} {u} {s} {color=} {size=} {font=} {alpha=} {k=} {cps=} {p} {w} {nw} {fast} {a=}`, `{{`. 글자를 하나씩 내보내고(`parseTagged`, `SayBox`), 클릭하면 다음 멈춤까지 다 보여 준 뒤에 넘어간다.
 - **게임 화면**: 게임 해상도로 그린 뒤 틀에 맞춰 줄인다(`GameFrame`). 크기와 대사창 값은 연결한 폴더에서 읽고(`readLook`, [LINK.md](../../docs/LINK.md) 6장), 없으면 1280x720 기본값이다. 파일이 없는 그림은 이름 표시로 대신한다. 폴더가 없어도 플레이된다.
 - **전환**: `dissolve`, `fade`, `stage.move/ease/zoom`을 CSS로 흉내 내고, 전환 시간만큼 다음 글자를 기다린다.
-- **등장 효과**: 렌파이 텍스트 셰이더 7개와 pygaki 플러그인이 등록한 20개를 **WebGL로, pygaki 플러그인과 같은 셰이더 코드로** 그린다(`src/fx/`). 효과 폴더(pygaki 플러그인 `ui_kit/effects/*.glsl`, LINK.md 8-1)의 효과도 같다: 플러그인이 있는 폴더를 연결했으면 그 폴더의 파일만 `scanFolder`가 읽고(연결하지 않았으면 빌드할 때 가져온 저장소의 샘플) `setFolderEffects` → `refreshEffects`(`EFFECTS`, `TRANSITIONS` 배열을 그 자리에서 다시 채움, `useGameFolder.fxSeq`로 다시 그림). 바뀌면 `effectEpoch`가 올라 미리보기 셰이더를 다시 만든다. 그림 전환(`img_fx.use`)은 플레이 화면에서 같은 시간의 서서히 바뀌기로 보인다.
+- **등장 효과**: 렌파이 텍스트 셰이더 7개와 pygaki 플러그인이 등록한 20개를 **WebGL로, pygaki 플러그인과 같은 셰이더 코드로** 그린다(`src/fx/`). 효과 폴더(pygaki 플러그인 `ui_kit/effects/*.glsl`, LINK.md 8-1)의 효과도 같다: 플러그인이 있는 폴더를 연결했으면 그 폴더의 파일만 `scanFolder`가 읽고(연결하지 않았으면 빌드할 때 가져온 저장소의 샘플) `setFolderEffects` → `refreshEffects`(`EFFECTS`, `TRANSITIONS` 배열을 그 자리에서 다시 채움, `useGameFolder.fxSeq`로 다시 그림). 바뀌면 `effectEpoch`가 올라 미리보기 셰이더를 다시 만든다. 그림 전환(`img_fx.use`)도 플레이 화면에서 같은 셰이더 코드로 그린다(`PlayStage.tsx`의 `SceneFx` → `fx/TransitionCanvas.tsx`): 게임처럼 화면 전체를 앞 장면에서 새 장면으로 바꾸려고, 앞 걸음의 장면과 지금 장면을 게임 해상도의 그림 한 장씩으로 만들어(`paintScene`, 자리는 `placeOf`와 같음) 그림 겹 위에 캔버스로 덮고, 끝나면 걷는다. 밑의 그림 겹은 그동안 이미 새 장면이다. `img_fx.use("이름", 초, 값=...)`의 초와 값도 읽는다. 한 걸음에 그림 전환이 여럿이면 마지막 것 하나로 그린다. WebGL이 안 되거나 그 효과를 못 그리면 예전처럼 같은 시간의 서서히 바뀌기(`transInfo`). 영상 그림은 첫 장면으로 그린다.
   - **효과 관리** (`src/effectsLib.ts`, 화면은 3장의 [효과] 화면. `window.pykakiEffects`로도 부를 수 있음): `effectCatalog`가 렌파이 / 기본 / 프로젝트 / 모음(샘플과 `showpy/effects_library`, 아직 넣지 않은 것)을 한 목록으로 만든다(켬·끔, 쓰인 줄 수). `setEffectOn`은 `effects_off.txt`(LINK.md 8-2)를 고치고, 끈 효과는 `stage.ts`의 `refreshEffects`가 고르는 목록에서 뺀다. `addEffectFile`·`addFromLibrary`는 `checkPack`으로 검사한 뒤에만 효과 폴더에 쓰고, `removeEffectFile`은 백업(`ui_kit_backup/effects/`)을 남기고 지우며 `replace`를 주면 대본의 그 효과를 다른 값으로 바꾼다(`replaceInProject`: 칸으로 고른 값, 명령 줄의 `effect="…"`·`img_fx.use(…)`, 대사 글의 `{shader=…}`). 쓰인 곳은 `effectUses`.
   - 셰이더는 `showpy/game/ui_kit/engine/text_effects.glsl` 하나이고, 빌드할 때 `?raw`로 그대로 가져온다. 렌파이 내장 7개는 `src/fx/renpy_textshaders.glsl`(렌파이 8.5.3 `00textshader_ren.py`를 옮김, MIT). 형식은 [LINK.md](../../docs/LINK.md) 8장. 효과 목록 `EFFECTS`, `RENPY_EFFECTS`, 글자/초 기본값을 쓰는 효과(`@cps`)도 이 파일에서 온다.
   - `textShaders.ts`: 파일 읽기(`parseShaders`, pygaki 플러그인 `tfx_parse`와 같은 규칙), 효과 문자열(`"scatter:u__distance=200"`, `"a|b"`) 읽기(`parseTextShader`, 렌파이 `parse_textshader`), 렌파이처럼 셰이더 조각 합치기(`shaderSource`: `renpy.geometry` `renpy.texture` `textshader.이름`을 이름순으로, 쓰는 변수만 이름순으로, `vertex_N`/`fragment_N`은 우선순위순, `u__` `l__` `v__` `a__`는 `u_textshader_이름_…`으로 바꿈). 색 값은 투명도를 곱한 vec4.
@@ -304,6 +305,7 @@
 | `src/store.ts` | zustand 상태, 실행 취소, 선택, 플레이 상태, 상자 안 편집 상태 |
 | `src/showpyLive.ts`, `src/ShowpyView.tsx` | 데스크톱 앱의 [GUI 편집] 화면 (게임과 실시간 연결) |
 | `src/effectsLib.ts`, `src/EffectsView.tsx` | 효과 관리: 목록·켜고 끄기·넣기·빼기(7장), [효과] 화면(3장) |
+| `src/fx/TransitionCanvas.tsx` | 그림 효과(`@transition`)를 WebGL로 그리기: [효과] 화면의 샘플과 플레이 화면이 함께 씀 |
 | `src/sample.ts` | 예제/빈 프로젝트, 불러오기 정규화 |
 | `src/persist.ts` | IndexedDB |
 | `src/files.ts` | 파일 열기/저장/`.rpy` 내보내기, 프로젝트 대본 파일과 밖에서 바뀜(9-3) |
