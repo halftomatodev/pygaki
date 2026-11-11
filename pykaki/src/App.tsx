@@ -14,6 +14,7 @@ import { isTyping } from './util';
 import { isDesktop } from './desktop';
 import { liveSend, startLive, toggleGamePanel, useLive } from './showpyLive';
 import { ShowpyView } from './ShowpyView';
+import { EffectsView } from './EffectsView';
 
 // 단축키는 환경 설정에서 바꿀 수 있다 (prefs.ts)
 function Keys() {
@@ -27,6 +28,13 @@ function Keys() {
       // showpy 화면에서는 저장 키가 게임 안 편집기의 저장(Ctrl+S)
       if (useLive.getState().view === 'showpy') {
         if (hit(e, 'save')) run(() => liveSend({ cmd: 'save' }));
+        return;
+      }
+      // 효과 화면에서는 저장과 되돌리기만 (효과를 바꾸고 빼면 대본이 바뀜)
+      if (useLive.getState().view === 'effects') {
+        if (hit(e, 'save')) run(() => saveProject());
+        else if (!isTyping(e.target) && hit(e, 'undo')) run(s.undo);
+        else if (!isTyping(e.target) && hit(e, 'redo')) run(s.redo);
         return;
       }
       if (hit(e, 'fullPlay')) run(() => void (s.fullPlay ? leaveFullPlay() : enterFullPlay()));
@@ -79,12 +87,13 @@ export function App() {
       <div className={'app' + (focus ? ' focus' : '')}>
         <Toolbar />
         {/* 대본 화면은 showpy 화면을 보는 동안에도 그대로 둔다 (캔버스 상태 유지) */}
-        <div className={'main' + (hideLeft ? ' no-left' : '') + (hideRight ? ' no-right' : '')} hidden={view === 'showpy'}>
+        <div className={'main' + (hideLeft ? ' no-left' : '') + (hideRight ? ' no-right' : '')} hidden={view !== 'script'}>
           <Sidebar />
           <Canvas />
           <RightPanel />
         </div>
         {view === 'showpy' && <ShowpyView />}
+        {view === 'effects' && <EffectsView />}
       </div>
       {flash && <div className="toast">{flash}</div>}
       {/* 일렁임(liquid) 효과가 쓰는 물결 필터 */}

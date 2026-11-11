@@ -86,7 +86,9 @@ export const RENPY_SHADERS = parseShaders(renpySource, false);
 // 그림 전환 (효과 폴더의 @transition). showpy img_fx.use("이름")
 export const IMAGE_FX: ShaderEffect[] = [];
 const BY_NAME = new Map([...RENPY_SHADERS, ...SHOWPY_SHADERS].map((e) => [e.name, e]));
-export const shaderEffect = (name: string) => BY_NAME.get(name);
+// 샘플로만 돌려 보는 효과: 효과 모음에 있지만 아직 게임에 넣지 않은 것 ([효과] 화면). 고르는 목록과 플레이에는 안 나온다
+const PREVIEW = new Map<string, ShaderEffect>();
+export const shaderEffect = (name: string, preview = false) => BY_NAME.get(name) ?? (preview ? PREVIEW.get(name) : undefined);
 
 // ── 효과 폴더 (showpy ui_kit/effects/*.glsl, ui_kit 4.3) ──
 // 플러그인이 있는 게임 폴더를 연결했으면 그 폴더의 파일만 쓴다 (게임에서 도는 것과 같은 목록).
@@ -120,6 +122,18 @@ export function checkPack(file: string, text: string): ShaderEffect[] {
   const have = new Set([...BY_NAME.values()].filter((e) => e.file !== file).map((e) => e.name));
   const found = readPack(file, text, have);
   if (!found.length) throw new Error('효과가 없어요 (@effect나 @transition 줄이 있어야 해요)');
+  return found;
+}
+
+// 아직 넣지 않은 효과 파일을 샘플로 돌릴 수 있게 올려 둔다. 이미 쓸 수 있는 이름은 그대로 둔다. 틀린 파일이면 이유를 던진다
+export function previewPack(file: string, text: string): ShaderEffect[] {
+  const found = checkPack(file, text);
+  for (const e of found) {
+    if (BY_NAME.has(e.name)) continue;
+    if (JSON.stringify(PREVIEW.get(e.name)?.code) !== JSON.stringify(e.code)) effectEpoch++; // 만들어 둔 셰이더를 버린다
+    PREVIEW.set(e.name, e);
+    if (e.kind === 'effect') PARTS.set('textshader.' + e.name, makePart('textshader.' + e.name, e.code));
+  }
   return found;
 }
 
@@ -305,12 +319,13 @@ function evalSlow(expr: string, kw: Record<string, UniformValue>) {
 }
 
 // "scatter", "scatter:u__distance=200", "scatter:200", "slidein|shake" → 텍스트 셰이더. 모르는 효과면 null
-export function parseTextShader(effect: string): TextShader | null {
+// preview: 샘플로 올려 둔 효과(previewPack)도 찾는다
+export function parseTextShader(effect: string, preview = false): TextShader | null {
   let rv: TextShader | null = null;
   for (const one of effect.split('|')) {
     const [name0, ...args] = one.split(':');
     const name = name0.trim();
-    const e = shaderEffect(name);
+    const e = shaderEffect(name, preview);
     if (!e || e.kind !== 'effect') return null;
     const part = PARTS.get('textshader.' + name)!;
     const prefix = 'u_textshader_' + name.replace(/\./g, '_');

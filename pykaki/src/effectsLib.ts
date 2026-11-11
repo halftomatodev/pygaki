@@ -69,7 +69,7 @@ const card = (e: ShaderEffect, source: FxSource, ready: boolean, p: Project): Ef
   params: e.uniforms.length,
 });
 
-const allPacks = (): EffectPack[] => [...SAMPLE_PACKS, ...LIBRARY_PACKS.filter((l) => !SAMPLE_PACKS.some((s) => s.name === l.name))];
+export const allPacks = (): EffectPack[] => [...SAMPLE_PACKS, ...LIBRARY_PACKS.filter((l) => !SAMPLE_PACKS.some((s) => s.name === l.name))];
 
 // 기본 → 프로젝트 → 모음(아직 넣지 않은 것) 순서. 폴더를 연결하지 않았으면 샘플은 쓸 수 있는 모음으로 나온다
 export function effectCatalog(p: Project = useStore.getState().project): EffectCard[] {

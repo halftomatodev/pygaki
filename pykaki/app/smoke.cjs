@@ -145,6 +145,31 @@ async function until(what, fn, ms = 10000) {
   if (kept === 'removed' || !fs.existsSync(path.join(proj, 'game', 'gui.rpy'))) fail('효과 파일이 아닌 것을 지울 수 있음');
   console.log('효과 바꾸고 빼기: 됨, 백업', r.backup);
 
+  // [효과] 화면 (효과 탭 3단계, src/EffectsView.tsx): 눌러서 넣기 → 샘플 → 끄기/켜기 → 빼기 → 쓰인 곳 [보기]
+  const fxCard = (n) => page.locator(`.fxv-card:has(.fxv-name:text-is("${n}"))`);
+  await page.click('.view-switch button:has-text("효과")');
+  await fxCard('maskup').locator('button:has-text("넣기")').click();
+  await until('[넣기]를 눌러도 효과 파일이 안 생김', () => fs.existsSync(path.join(fxDir, 'maskup.glsl')));
+  await fxCard('maskup').locator('button:has-text("빼기")').waitFor({ timeout: 10000 });
+  await page.waitForSelector('.fxv-side h3:has-text("maskup")', { timeout: 10000 }); // 넣은 효과를 고른 채로
+  await page.waitForSelector('.fxv-stage canvas', { timeout: 10000 });
+  await wait(800); // 샘플이 한 번 도는 동안 셰이더 오류가 없는지
+  if (await page.locator('.fxv-bad').count()) fail('효과 샘플을 못 그림: ' + (await page.locator('.fxv-bad').innerText()));
+  await fxCard('maskup').locator('input[type=checkbox]').click();
+  await until('체크를 꺼도 끈 효과 목록에 안 적힘', () => /^maskup$/m.test(fs.readFileSync(offFile, 'utf8')));
+  await page.waitForSelector('.fxv-card.off:has(.fxv-name:text-is("maskup"))', { timeout: 10000 });
+  await fxCard('maskup').locator('input[type=checkbox]').click();
+  await until('체크를 켜도 끈 효과 목록에 남음', () => !/^maskup$/m.test(fs.readFileSync(offFile, 'utf8')));
+  await fxCard('maskup').locator('button:has-text("빼기")').click();
+  await page.click('.modal button.danger:has-text("빼기")');
+  await until('[빼기]를 눌러도 효과 파일이 남음', () => !fs.existsSync(path.join(fxDir, 'maskup.glsl')));
+  await fxCard('maskup').locator('button:has-text("넣기")').waitFor({ timeout: 10000 });
+  await fxCard('dissolve').click();
+  await page.click('.fxv-use button:has-text("보기")');
+  await page.waitForSelector('.view-switch button.on:has-text("대본 편집")', { timeout: 10000 });
+  if (await page.locator('.fxv').count()) fail('쓰인 곳 [보기]를 눌러도 대본 화면으로 안 감');
+  console.log('[효과] 화면: 됨');
+
   // showpy 실시간 연결 (docs/LINK.md 9장): 가짜 게임을 띄워 앱이 붙고, 상태를 보여주고, 명령을 보내는지
   const net = require('node:net');
   const got = [];

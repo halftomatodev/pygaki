@@ -11,17 +11,21 @@ import { installApp, useCanInstall } from './pwa';
 import { isDesktop } from './desktop';
 import { useLive } from './showpyLive';
 
-// 데스크톱 앱에서만: 대본 화면 / showpy 화면 바꾸기. 점은 게임과 붙어 있는지
+// 화면 바꾸기: 대본 편집 / GUI 편집(데스크톱 앱에서만. 점은 게임과 붙어 있는지) / 효과
 function ViewSwitch() {
   const { view, on } = useLive();
-  if (!isDesktop) return null;
   return (
     <span className="view-switch">
       <button className={view === 'script' ? 'on' : ''} onClick={() => useLive.setState({ view: 'script' })} title="상자와 선으로 대본을 써요">
         대본 편집
       </button>
-      <button className={view === 'showpy' ? 'on' : ''} onClick={() => useLive.setState({ view: 'showpy' })} title={on ? 'GUI 편집: 게임과 연결됨' : 'GUI 편집: 게임 연결 안 됨 (런처에서 프로젝트를 실행하면 붙어요)'}>
-        GUI 편집 <b className={'live-dot' + (on ? ' on' : '')}>●</b>
+      {isDesktop && (
+        <button className={view === 'showpy' ? 'on' : ''} onClick={() => useLive.setState({ view: 'showpy' })} title={on ? 'GUI 편집: 게임과 연결됨' : 'GUI 편집: 게임 연결 안 됨 (런처에서 프로젝트를 실행하면 붙어요)'}>
+          GUI 편집 <b className={'live-dot' + (on ? ' on' : '')}>●</b>
+        </button>
+      )}
+      <button className={view === 'effects' ? 'on' : ''} onClick={() => useLive.setState({ view: 'effects' })} title="글자 효과와 그림 효과를 보고, 켜고 끄고, 넣고 빼요">
+        효과
       </button>
     </span>
   );

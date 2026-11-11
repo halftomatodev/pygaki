@@ -110,7 +110,7 @@ export function Scene({ stage, look }: { stage: PStage; look: GameLook }) {
 export interface SayBoxHandle { click(): boolean } // 아직 다 안 나왔으면 다 보여 주고 true
 
 // 글자를 속도(글자/초)와 멈춤 태그에 맞춰 하나씩 내보낸다. 대사창과 미리보기가 함께 쓴다
-function useReveal(parsed: Tagged, cps: number, wait = 0) {
+export function useReveal(parsed: Tagged, cps: number, wait = 0) {
   const total = parsed.glyphs.length;
   const anyRate = cps > 0 || parsed.glyphs.some((g) => g.fixed && g.rate > 0);
   const [passed, setPassed] = useState(0); // 지나온 멈춤 수
@@ -159,7 +159,7 @@ const rand = (i: number, seed: number) => {
   return v - Math.floor(v);
 };
 
-function Glyphs({ parsed, shown }: { parsed: Tagged; shown: number }) {
+export function Glyphs({ parsed, shown }: { parsed: Tagged; shown: number }) {
   return (
     <>
       {parsed.glyphs.map((g, i) =>

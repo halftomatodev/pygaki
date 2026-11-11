@@ -120,8 +120,8 @@ const KNOB_LABEL: Record<string, string> = {
   shade: '그늘', rise: '오름', pop: '튀어나옴', slide: '미끄러짐', span: '범위', mode: '방식', dim: '어둡기', width: '폭', from: '처음 크기',
 };
 const niceStep = (span: number) => (span >= 50 ? 1 : span >= 5 ? 0.1 : 0.01);
-export function effectKnobs(name: string): EffectKnob[] {
-  const e = shaderEffect(name);
+export function effectKnobs(name: string, preview = false): EffectKnob[] {
+  const e = shaderEffect(name, preview);
   if (!e) return [];
   const ranges = new Map(e.params.map(([k, lo, hi, label]) => [k, { lo, hi, label }]));
   return e.uniforms.map(([key, def]): EffectKnob => {
