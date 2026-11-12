@@ -346,6 +346,38 @@ PyKaki 데스크톱 앱의 [GUI 편집] 화면이 게임 안 편집기를 바깥
 
 저장은 지금처럼 게임이 합니다(`*_layout.rpy`, 원고). 앱은 값을 보내기만 하고 pygaki 플러그인 파일을 직접 쓰지 않습니다.
 
+## 11. 화면 셰이더 목록 (`screen_fx/shader_list.json`, `shaders_off.txt`, screen_fx 5.4)
+
+상자와 label에 거는 셰이더(2장)의 이름을 PyKaki가 게임 폴더에서 읽습니다. 번호는 10장 뒤지만 쓰이는 차례 때문에 여기에 둡니다.
+
+**`game/screen_fx/shader_list.json`** — 플러그인이 씁니다(`screen_fx.rpy` `_write_shader_list`, 개발 모드에서 게임을 켤 때, 내용이 달라졌을 때만). 저장소에도 기본 셰이더의 목록이 들어 있어서 게임을 한 번도 켜지 않은 새 프로젝트에도 있습니다. PyKaki는 읽기만 합니다.
+
+```json
+{ "version": 2, "screen_fx": "5.4",
+  "shaders": [
+    { "id": "boil", "label": "지글거림", "name": "지글거림", "order": 52, "overlay_only": false,
+      "params": { "strength": ["float", 1.0], "amount": ["float", 1.5] },
+      "groups": [ ["떨림", [ ["strength", "전체 세기", 0.0, 1.0, 0.01, 2] ]] ],
+      "prefix": "u_boil_", "extra": false,
+      "glsl": [ { "name": "boil.effect", "variables": "uniform sampler2D tex0; …",
+                  "vertex_functions": "", "fragment_functions": "float bo_hash(vec2 p) { … }",
+                  "vertex": [[200, "v_tex_coord = a_tex_coord;"]], "fragment": [[300, "…"]] } ] } ] }
+```
+
+- `shaders`의 차례는 편집기 버튼 차례. 끈 셰이더도 들어 있습니다(끈 것은 아래 파일로 가름).
+- `id`는 `$ screen_fx.shaders("id", …)`에 적는 이름, `label`은 고르는 칸에 보이는 이름(`slot_label`), `name`은 효과의 이름.
+- `params`는 값 이름 → `[종류, 기본값]`(`"choice"`면 세 번째에 고를 수 있는 값). 종류는 `float` `bool` `color` `vec2` `resolution` `choice` `str`.
+- `groups`는 편집기 막대 묶음 `[묶음 이름, [줄…]]`. 줄은 `[값 이름, 보일 글, 최소, 최대, 한 칸, 소수 자리]` 또는 `[값 이름, 보일 글, "bool" | "color" | "options", …]`. 플러그인의 `GROUPS`를 그대로 적은 것입니다.
+- 2판(`"version": 2`)부터 샘플용으로 `prefix`(값 이름 앞에 붙는 유니폼 머리. 값 `amount`는 `u_boil_amount`), `extra`(효과가 `extra()`로 값이나 그림을 더 넣는지. `true`면 PyKaki는 샘플을 그리지 않음), `glsl`(렌파이에 등록한 셰이더 조각: `renpy.gl2.gl2shadercache.shader_part`의 `raw_variables`, `vertex_functions`, `fragment_functions`, `vertex_parts`, `fragment_parts`. 못 꺼내면 `null`)이 더해집니다. 1판 파일도 그대로 읽고, 샘플만 "코드가 없어요"로 알립니다.
+- PyKaki 샘플(`fx/ScreenFxCanvas.tsx`): `glsl`의 변수(uniform, varying)와 함수, `fragment`를 차례대로 합쳐 WebGL로 그립니다. 값은 `ShaderEffect._apply_values`와 같은 규칙(`choice`는 순서 번호, `bool`은 0/1, `color`는 0~1 세 값, `resolution`이 비면 화면의 절반, `str`은 안 보냄)이고, 렌파이가 넣는 `u_time` `u_model_size` `u_drawable_size` `u_lod_bias`와 플러그인의 `u_sfx_base`(1) `u_sfx_text`(0)도 넣습니다.
+- 파일이 없거나 읽을 수 없으면 PyKaki는 빌드할 때 가져온 저장소의 목록(`showpy/game/screen_fx/shader_list.json`)을 씁니다. 폴더를 연결하지 않았을 때도 같습니다.
+
+**`game/screen_fx/shaders_off.txt`** — 끈 셰이더. 한 줄에 `id` 하나, `#` 뒤는 설명, 파일이 없으면 다 켠 것(8-2장 `effects_off.txt`와 같은 규칙).
+
+- 플러그인: `screen_fx.slot_choices()`가 끈 것을 뺍니다. 지금 고른 것은 남깁니다(`keep`). 효과 등록과 `screen_fx.shaders()`는 그대로라 이미 쓴 원고는 돕니다.
+- PyKaki(`shader.ts` `shaderNames`): 고르는 목록에서 뺍니다. 이미 정해 둔 상자·label에는 "(끔)"으로 남고, 목록에 없는 이름은 "(이 게임에 없음)"으로 남습니다. 내보내는 줄은 대본 값 그대로입니다.
+- PyKaki [효과] 화면의 [셰이더] 칸에서 켜고 끄면 PyKaki가 이 파일을 씁니다(`shaderLib.ts` `setShaderOn`). 적혀 있던 설명 줄과 다른 이름은 그대로 둡니다. 게임은 껐다 켜야(또는 다시 불러와야) 읽습니다.
+
 ## 10. 확인 상태 (pygaki 플러그인 4.13, 렌파이 8.5.3)
 
 **자동으로 실행해서 확인함:**

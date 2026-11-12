@@ -3,15 +3,16 @@
 // 카드 셋: 셰이더(1번, 2번) / 전환(시작할 때, 끝날 때) / 원고 파일에 들어가는 줄
 import { useStore } from './store';
 import type { BoxShader } from './types';
-import { SHADER_NAMES, SHADER_TRANS, enterTrans, newShader, oldTransLabel, shaderCode, shaderLabel, shaderOfBox, usesShaders } from './shader';
+import { SHADER_TRANS, shaderNames, enterTrans, newShader, oldTransLabel, shaderCode, shaderLabel, shaderOfBox, usesShaders } from './shader';
 import { exitLinks } from './ops';
-import { RPY_FILE } from './gameFolder';
+import { RPY_FILE, useGameFolder } from './gameFolder';
 
 export function ShaderPanel() {
   const so = useStore((s) => s.shaderOf)!;
   const project = useStore((s) => s.project);
   const update = useStore((s) => s.update);
   const linked = !!project.settings.renpyLink;
+  useGameFolder((g) => g.fxSeq); // 게임 폴더의 셰이더 목록이 바뀌면 다시 그린다
   const box = so.kind === 'box' ? project.nodes.find((n) => n.id === so.id) : undefined;
   const group = project.labels.find((g) => g.id === (box ? box.group : so.id));
   const owner = so.kind === 'box' ? box : group;
@@ -38,7 +39,7 @@ export function ShaderPanel() {
     <div className="row">
       <label>{label}</label>
       <select value={sh?.[key] ?? 'none'} onChange={(e) => set((s) => void (s[key] = e.target.value))}>
-        {SHADER_NAMES.map(([k, t]) => (
+        {shaderNames([sh?.a, sh?.b]).map(([k, t]) => (
           <option key={k} value={k}>{t}</option>
         ))}
       </select>

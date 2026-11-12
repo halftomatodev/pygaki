@@ -1951,7 +1951,7 @@ screen ui_editor_fx_slot_row(label, slot, cur, pick, clear=None, owner=None):
         box_wrap_spacing 4
         xmaximum 632
         use ui_editor_fx_name(label)
-        for _n, _nl in screen_fx.slot_choices():
+        for _n, _nl in screen_fx.slot_choices(keep=(cur,)):
             textbutton _nl style "ui_editor_fx_button" action Function(pick, slot, _n) selected (cur == _n)
         if clear is not None:
             textbutton "전부 셰이더 적용 취소" style "ui_editor_fx_button" action Function(clear)

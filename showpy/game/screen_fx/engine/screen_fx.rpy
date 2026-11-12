@@ -42,7 +42,7 @@ init -110 python in screen_fx:
 
     import store
 
-    VERSION = "5.3"
+    VERSION = "5.4"
 
     ## ── 플러그인 폴더 위치 ──
     ## 이 파일은 <플러그인 폴더>/engine/screen_fx.rpy 에 있습니다.
@@ -936,10 +936,47 @@ init -110 python in screen_fx:
         fx = EFFECTS.get(name)
         return fx.label if fx is not None else str(name)
 
-    def slot_choices():
-        """셰이더 자리에서 고를 수 있는 (이름, 표시) 목록. 맨 앞은 "기본"(아무것도 안 함)."""
+    def slot_choices(keep=()):
+        """셰이더 자리에서 고를 수 있는 (이름, 표시) 목록. 맨 앞은 "기본"(아무것도 안 함).
+        shaders_off.txt에 적어 끈 셰이더는 빠집니다(5.4). keep(지금 고른 것)은 꺼져 있어도 남깁니다."""
         names = [ i for i in SLOT_ORDER if i in EFFECTS ] + [ i for i in ORDER if i not in SLOT_ORDER ]
-        return [ (NONE, slot_label(NONE)) ] + [ (i, slot_label(i)) for i in names ]
+        return [ (NONE, slot_label(NONE)) ] + [ (i, slot_label(i)) for i in names if i in keep or i not in SHADERS_OFF ]
+
+    ## ── 끈 셰이더 (5.4) ──
+    ## <플러그인 폴더>/shaders_off.txt에 이름을 적은 셰이더는 "고르는 목록"에서만 빠집니다.
+    ## 효과는 그대로 등록하므로, 이미 그 셰이더를 쓴 원고($ screen_fx.shaders("ascii"))는 전과 똑같이 돕니다.
+    ## 한 줄에 이름 하나, #으로 시작하는 줄은 설명, 파일이 없으면 다 켠 것입니다.
+    ##     # 끈 셰이더. 한 줄에 이름 하나
+    ##     gameboy
+    ##     shards
+    SHADERS_OFF_FILE = "shaders_off.txt"
+    SHADERS_OFF = set()
+
+    def _game_rel(filename):
+        """플러그인 폴더 안 파일의 이름 (renpy.loadable에 넣는 game 폴더 기준)."""
+        rel = ROOT[5:] if ROOT.startswith("game/") else ("" if ROOT == "game" else ROOT)
+        return (rel + "/" if rel else "") + filename
+
+    def _read_shaders_off():
+        SHADERS_OFF.clear()
+        fn = _game_rel(SHADERS_OFF_FILE)
+        if not renpy.loadable(fn):
+            return
+        try:
+            with renpy.open_file(fn, encoding="utf-8") as f:
+                text = f.read()
+        except Exception:
+            return
+        for row in text.replace(u"\ufeff", "").splitlines():
+            row = row.split("#", 1)[0].strip()
+            if row:
+                SHADERS_OFF.add(alias(row))
+
+    _read_shaders_off()
+
+    def shader_off(name):
+        """끈 셰이더인지."""
+        return alias(name) in SHADERS_OFF
 
     def norm_slots(v):
         """(1번, 2번) → 효과 이름 두 개. 없는 이름은 "none"."""
@@ -2084,6 +2121,84 @@ init 998 python in screen_fx:
     ## 커서 자리 (4.2): 기본 효과 전 / 덮개 전 / 따로 씌울 때
     _lt[None] = list(_lt.get(None, [ ])) + [ cursor_effect_wrap, fx_layer, cursor_overlay_wrap, ovl_layer, cursor_split_wrap, tv_wrap ]
     store.config.layer_transforms = _lt
+
+
+init 800 python in screen_fx:
+
+    ## ── 셰이더 목록 파일 (5.4, docs/LINK.md 11장) ──
+    ## pygaki 앱(PyKaki)이 게임을 켜지 않고도 이 프로젝트에 어떤 셰이더가 있는지, 값과 막대가 무엇인지 알 수 있게
+    ## <플러그인 폴더>/shader_list.json에 적어 둡니다. 개발 모드에서 게임을 켤 때, 내용이 달라졌을 때만 다시 씁니다.
+    ## (새 효과를 engine/에 넣고 게임을 한 번 켜면 앱의 목록에도 나옵니다.)
+    SHADER_LIST_FILE = "shader_list.json"
+
+    def _plain(v):
+        """JSON으로 적을 수 있는 모양으로 (튜플은 목록으로)."""
+        if isinstance(v, dict):
+            return { str(k) : _plain(x) for k, x in v.items() }
+        if isinstance(v, (tuple, list, set, frozenset)):
+            return [ _plain(x) for x in v ]
+        if v is None or isinstance(v, (bool, int, float, str)):
+            return v
+        return str(v)
+
+    def _shader_code(fx):
+        """등록한 셰이더의 코드 (앱이 샘플을 그릴 때 씀). 못 꺼내면 None."""
+        try:
+            import renpy.gl2.gl2shadercache as cache
+            names = fx.shader if isinstance(fx.shader, (tuple, list)) else (fx.shader, )
+            rv = [ ]
+            for name in names:
+                part = cache.shader_part[name]
+                rv.append({
+                    "name": name,
+                    "variables": part.raw_variables,
+                    "vertex_functions": part.vertex_functions,
+                    "fragment_functions": part.fragment_functions,
+                    "vertex": [ [ pr, text ] for pr, _n, text in sorted(part.vertex_parts) ],
+                    "fragment": [ [ pr, text ] for pr, _n, text in sorted(part.fragment_parts) ],
+                    })
+            return rv
+        except Exception:
+            return None
+
+    def shader_list():
+        """셰이더 자리에서 고를 수 있는 효과 모두(끈 것도). 순서는 편집기 버튼 순서."""
+        rv = [ ]
+        for n, lab in slot_choices(keep=ORDER)[1:]:
+            fx = EFFECTS[n]
+            rv.append({
+                "prefix": fx.prefix,                    # 값 이름 앞에 붙는 유니폼 머리 (u_boil_)
+                "extra": type(fx).extra is not ShaderEffect.extra,  # True면 파이썬이 값·그림을 더 넣는 효과 (ASCII의 글자 그림)
+                "glsl": _shader_code(fx),               # 셰이더 코드 조각들
+                "id": n,
+                "label": lab,                           # 셰이더 자리 버튼에 보이는 이름
+                "name": fx.label,                       # 효과의 이름
+                "order": fx.order,
+                "overlay_only": bool(fx.overlay_only),
+                "params": _plain(fx.PARAMS),            # 값 이름: [종류, 기본값(, 고를 수 있는 값)]
+                "groups": _plain(fx.GROUPS),            # 편집기 막대 묶음
+                })
+        return { "version": 2, "screen_fx": VERSION, "shaders": rv }
+
+    def _write_shader_list():
+        if not store.config.developer or renpy.android or renpy.ios or renpy.emscripten:
+            return
+        try:
+            import json
+            text = json.dumps(shader_list(), ensure_ascii=False, indent=1, sort_keys=True) + "\n"
+            path = root_path(SHADER_LIST_FILE)
+            old = None
+            if os.path.exists(path):
+                with open(path, "rb") as f:
+                    old = f.read().decode("utf-8", "replace").replace("\r\n", "\n")
+            if old == text:
+                return
+            with open(path, "wb") as f:
+                f.write(text.encode("utf-8"))
+        except Exception:
+            pass    # 못 써도 게임은 그대로 돕니다 (읽기 전용 폴더 등)
+
+    _write_shader_list()
 
 
 init 990 python in screen_fx:

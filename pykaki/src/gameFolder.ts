@@ -7,11 +7,14 @@ import { useStore } from './store';
 import { gameDir, isDesktop, projectDir, projectInfo } from './desktop';
 import { setFolderEffects, type EffectPack } from './fx/textShaders';
 import { parseEffectsOff, refreshEffects, setEffectsOff } from './stage';
+import { setShaderList, setShadersOff } from './shader';
 
 const w = window as any;
 export const hasDirPicker = typeof w.showDirectoryPicker === 'function' || isDesktop;
 export const INBOX_FILE = 'showpy_inbox.json';
 export const RPY_FILE = 'script_flow.rpy';
+export const SHADER_LIST_FILE = 'shader_list.json'; // 셰이더 목록 (screen_fx 안, 플러그인이 씀. LINK.md 11장)
+export const SHADERS_OFF_FILE = 'shaders_off.txt'; // 끈 셰이더 목록 (screen_fx 안)
 export const EFFECTS_OFF_FILE = 'effects_off.txt'; // 끈 효과 목록 (ui_kit/effects 안, LINK.md 8-2)
 export const GOTO_FILE = 'pykaki_goto.json'; // 자동 내보내기 뒤 게임이 옮겨 갈 줄 (showpy editor_preview.rpy가 읽음, LINK.md 7-1)
 
@@ -59,6 +62,7 @@ interface F {
   fxSeq: number; // 효과 목록이 바뀔 때마다 오른다 (목록을 쓰는 화면이 다시 그리게)
   fxFiles: string[]; // 효과 폴더에 있는 효과 파일 이름
   fxOff: string[]; // 끈 효과 이름 (effects_off.txt)
+  shOff: string[]; // 끈 셰이더 이름 (screen_fx/shaders_off.txt)
   set(v: Partial<F>): void;
 }
 
@@ -75,6 +79,7 @@ export const useGameFolder = create<F>((set) => ({
   fxSeq: 0,
   fxFiles: [],
   fxOff: [],
+  shOff: [],
   set: (v) => set(v),
 }));
 
@@ -260,12 +265,17 @@ export async function scanFolder() {
   const fxErrors = setFolderEffects(uiKit ? packs : null);
   setEffectsOff(fxOff);
   refreshEffects();
+  // 화면 셰이더: 플러그인이 내놓은 목록과 끈 목록 (shader.ts)
+  const sfx = await sub(dir, 'screen_fx');
+  setShaderList(sfx ? await readText(sfx, SHADER_LIST_FILE) : null);
+  const shOff = parseEffectsOff((sfx && (await readText(sfx, SHADERS_OFF_FILE))) || '');
+  setShadersOff(shOff);
   const engine = uiKit ? await sub(uiKit, 'engine') : null;
   const endMarks = /^\s*PK_END_MARKS\s*=\s*True/m.test((engine && (await readText(engine, 'script_edit.rpy'))) || '');
   const g = useGameFolder.getState();
   if (fxErrors.length && JSON.stringify(fxErrors) !== JSON.stringify(g.fxErrors))
     useStore.getState().say('효과 폴더에서 못 읽은 파일: ' + fxErrors.map(([f, why]) => `${f} (${why})`).join(' / '));
-  g.set({ name: g.name ?? dir.name, media, look, startClash, hasShowpy, endMarks, fxErrors, fxSeq: g.fxSeq + 1, fxFiles: packs.map((f) => f.name).sort(), fxOff });
+  g.set({ name: g.name ?? dir.name, media, look, startClash, hasShowpy, endMarks, fxErrors, fxSeq: g.fxSeq + 1, fxFiles: packs.map((f) => f.name).sort(), fxOff, shOff });
   setTimeout(() => oldUrls.forEach((u) => URL.revokeObjectURL(u)), 5000);
 }
 
@@ -307,6 +317,8 @@ export async function disconnectFolder() {
   pictures = new Map();
   setFolderEffects(null);
   setEffectsOff([]);
+  setShaderList(null);
+  setShadersOff([]);
   refreshEffects();
   useGameFolder.getState().set({ name: null, media: NO_MEDIA, look: DEFAULT_LOOK, startClash: null, hasShowpy: false, endMarks: false, fxErrors: [], fxSeq: useGameFolder.getState().fxSeq + 1, fxFiles: [], fxOff: [] });
 }
@@ -406,6 +418,16 @@ const fxFolder = async (create: boolean) => {
 export async function readFxFile(name: string): Promise<string | null> {
   const d = await fxFolder(false);
   return d ? readText(d, name) : null;
+}
+// 화면 효과 플러그인 폴더(game/screen_fx)의 글 파일. 폴더가 없으면 읽기는 null, 쓰기는 오류
+export async function readSfxFile(name: string): Promise<string | null> {
+  const d = dir ? await sub(dir, 'screen_fx') : null;
+  return d ? readText(d, name) : null;
+}
+export async function writeSfxFile(name: string, text: string) {
+  const d = dir ? await sub(dir, 'screen_fx') : null;
+  if (!d) throw new Error('이 게임에 화면 효과 플러그인(screen_fx 폴더)이 없어요');
+  await writeText(d, name, text);
 }
 export async function writeFxFile(name: string, text: string) {
   const d = await fxFolder(true);

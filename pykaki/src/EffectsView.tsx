@@ -12,6 +12,7 @@ import { FxCanvas, webglOk } from './fx/FxCanvas';
 import { TransitionCanvas } from './fx/TransitionCanvas';
 import { Glyphs, useReveal } from './PlayStage';
 import { parseTagged } from './textTags';
+import { ShadersView } from './ShadersView';
 
 const SOURCE_LABEL: Record<EffectCard['source'], string> = { renpy: '렌파이', base: '기본', project: '프로젝트', library: '모음' };
 const SAMPLE_CPS = 30;
@@ -69,7 +70,7 @@ function TextSample({ spec, name, text, onReplay }: { spec: string; name: string
 }
 
 // 샘플 그림: 앞 그림과 새 그림. 사용자가 그림을 고르면 새 그림 자리에 꽉 차게 넣는다
-function samplePicture(w: number, h: number, fresh: boolean, picture: HTMLImageElement | null) {
+export function samplePicture(w: number, h: number, fresh: boolean, picture: HTMLImageElement | null, caption?: string) {
   const c = document.createElement('canvas');
   c.width = w;
   c.height = h;
@@ -95,11 +96,11 @@ function samplePicture(w: number, h: number, fresh: boolean, picture: HTMLImageE
   g.font = `700 ${Math.round(h / 5)}px sans-serif`;
   g.textAlign = 'center';
   g.textBaseline = 'middle';
-  g.fillText(fresh ? '새 그림' : '앞 그림', w / 2, h / 2);
+  g.fillText(caption ?? (fresh ? '새 그림' : '앞 그림'), w / 2, h / 2);
   return c;
 }
 
-const SAMPLE_WIDTH = 960;
+export const SAMPLE_WIDTH = 960;
 
 // 그림 효과 샘플: 게임과 같은 셰이더 코드로 앞 그림에서 새 그림으로 바뀌는 모습을 그린다
 function PictureSample({ effect, args, time, picture, onReplay }: { effect: ShaderEffect; args: Record<string, string>; time: number; picture: HTMLImageElement | null; onReplay(): void }) {
@@ -186,6 +187,7 @@ export function EffectsView() {
   const hasShowpy = useGameFolder((s) => s.hasShowpy);
   const fxErrors = useGameFolder((s) => s.fxErrors);
   const [kind, setKind] = useState<FxKind>('effect');
+  const [shaders, setShaders] = useState(false); // [셰이더] 칸을 보는 중 (ShadersView.tsx)
   const [query, setQuery] = useState('');
   const [picked, setPicked] = useState<Record<FxKind, string>>({ effect: '', transition: '' });
   const [args, setArgs] = useState<Record<string, Record<string, string>>>({}); // 샘플에서만 쓰는 값: 효과 이름 → { u__값: 값 }
@@ -336,14 +338,20 @@ export function EffectsView() {
     return { box: n?.title || '(이름 없는 상자)', text: (l?.text || l?.image || l?.type || '').slice(0, 40) };
   };
 
+  const kindBar = (
+    <span className="view-switch fxv-kind">
+      <button className={!shaders && kind === 'effect' ? 'on' : ''} onClick={() => (setShaders(false), setKind('effect'))} title="대사 글자가 나오는 모양">글자 효과</button>
+      <button className={!shaders && kind === 'transition' ? 'on' : ''} onClick={() => (setShaders(false), setKind('transition'))} title="배경, 캐릭터가 나타나는 모양">그림 효과</button>
+      <button className={shaders ? 'on' : ''} onClick={() => setShaders(true)} title="화면 전체에 씌우는 셰이더 (상자와 label에 거는 것)">셰이더</button>
+    </span>
+  );
+  if (shaders) return <ShadersView bar={kindBar} />;
+
   return (
     <div className="sp-view fxv">
       <div className="fxv-list">
         <div className="fxv-bar">
-          <span className="view-switch fxv-kind">
-            <button className={kind === 'effect' ? 'on' : ''} onClick={() => setKind('effect')} title="대사 글자가 나오는 모양">글자 효과</button>
-            <button className={kind === 'transition' ? 'on' : ''} onClick={() => setKind('transition')} title="배경, 캐릭터가 나타나는 모양">그림 효과</button>
-          </span>
+          {kindBar}
           <input className="fxv-find" placeholder="찾기 (이름)" value={query} onChange={(e) => setQuery(e.target.value)} />
           <span className="grow" />
           <button disabled={!!blocked || busy} title={blocked || '가진 .glsl 효과 파일을 검사해서 이 게임의 효과 폴더에 넣어요'} onClick={() => filePick.current?.click()}>파일 넣기</button>

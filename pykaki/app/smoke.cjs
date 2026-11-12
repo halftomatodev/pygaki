@@ -254,6 +254,61 @@ async function until(what, fn, ms = 10000) {
     console.log('태그 상자 더 보기: 됨');
   }
 
+  // 화면 셰이더 목록 (screen_fx 5.4, LINK.md 11장): 게임 폴더에 목록 파일이 없으면 앱에 든 목록,
+  // 있으면 그 파일의 것. 끈 셰이더(shaders_off.txt)는 고르는 목록에서 빠지고, 지금 고른 것이면 남는지
+  {
+    const names = (keep) => page.evaluate((k) => window.pykakiShaders.names(k).map((x) => x[0]), keep ?? []);
+    const first = await names();
+    if (first[0] !== 'none' || !first.includes('ascii') || !first.includes('vhs_crt')) fail('앱에 든 셰이더 목록이 다름: ' + first);
+    const sfx = path.join(proj, 'game', 'screen_fx');
+    fs.mkdirSync(sfx, { recursive: true });
+    const one = (id, label) => ({ id, label, name: label, order: 1, overlay_only: false, params: { strength: ['float', 1.0] }, groups: [] });
+    fs.writeFileSync(path.join(sfx, 'shader_list.json'), JSON.stringify({ version: 1, screen_fx: '5.4', shaders: [one('mono', '흑백'), one('sepia', '세피아')] }));
+    fs.writeFileSync(path.join(sfx, 'shaders_off.txt'), '# 끈 셰이더\nsepia  # 설명\n');
+    await page.locator('.tb-right button', { hasText: '다시 읽기' }).click();
+    await page.waitForFunction(() => window.pykakiShaders.names().map((x) => x[0]).join() === 'none,mono', null, { timeout: 10000 });
+    if ((await names(['sepia', 'gone'])).join() !== 'none,mono,sepia,gone') fail('끈 셰이더와 없는 셰이더를 지금 고른 것으로 남기지 않음: ' + (await names(['sepia', 'gone'])));
+    // 켜기/끄기 (shaderLib.ts): shaders_off.txt에 적고, 적혀 있던 다른 줄은 그대로 두는지
+    const off = await page.evaluate(() => window.pykakiShaders.setOn('mono', false));
+    if (!off.ok) fail('셰이더를 끄지 못함: ' + off.why);
+    const offText = fs.readFileSync(path.join(sfx, 'shaders_off.txt'), 'utf8');
+    if (!/^mono$/m.test(offText) || !/^sepia  # 설명$/m.test(offText) || !/^# 끈 셰이더$/m.test(offText)) fail('끈 셰이더 파일이 다름: ' + offText);
+    if ((await names()).join() !== 'none') fail('끈 셰이더가 고르는 목록에 남음: ' + (await names()));
+    const on = await page.evaluate(() => window.pykakiShaders.setOn('mono', true));
+    if (!on.ok || /^mono$/m.test(fs.readFileSync(path.join(sfx, 'shaders_off.txt'), 'utf8'))) fail('셰이더를 다시 켜지 못함');
+    // [효과] 화면의 [셰이더] 칸: 카드 둘, 끈 것은 끔 표시
+    await page.locator('.toolbar .view-switch button', { hasText: '효과' }).click();
+    await page.locator('.fxv-kind button', { hasText: '셰이더' }).click();
+    await page.waitForSelector('.fxv-card:has-text("흑백")', { timeout: 10000 });
+    if ((await page.locator('.fxv-card').count()) !== 2) fail('셰이더 카드 수가 다름');
+    if (!(await page.locator('.fxv-card.off:has-text("세피아")').count())) fail('끈 셰이더 카드에 끔 표시가 없음');
+    await page.locator('.fxv-card:has-text("세피아") input').click();
+    await page.waitForFunction(() => window.pykakiShaders.names().map((x) => x[0]).join() === 'none,mono,sepia', null, { timeout: 10000 });
+    await page.locator('.fxv-kind button', { hasText: '글자 효과' }).click();
+    await page.locator('.toolbar .view-switch button', { hasText: '대본 편집' }).click();
+    console.log('셰이더 켜기/끄기와 [셰이더] 칸: 됨');
+    fs.rmSync(sfx, { recursive: true, force: true });
+    await page.locator('.tb-right button', { hasText: '다시 읽기' }).click();
+    await page.waitForFunction(() => window.pykakiShaders.names().includes !== undefined && window.pykakiShaders.names().some((x) => x[0] === 'ascii'), null, { timeout: 10000 });
+    console.log('셰이더 목록 읽기: 됨');
+    // 셰이더 샘플 (fx/ScreenFxCanvas.tsx): 앱에 든 목록의 코드로 오류 없이 그리고, 파이썬이 그림을 넣는 ASCII는 안내만
+    await page.locator('.toolbar .view-switch button', { hasText: '효과' }).click();
+    await page.locator('.fxv-kind button', { hasText: '셰이더' }).click();
+    for (const id of ['boil', 'vhs_crt', 'gameboy', 'retro_term']) {
+      await page.locator('.fxv-card', { has: page.locator('.fxv-name', { hasText: new RegExp('^' + id + '$') }) }).click();
+      await page.waitForSelector('.fxv-pic canvas', { timeout: 10000 });
+      await wait(600); // 몇 장 그리는 동안 셰이더 오류가 없는지
+      const bad = await page.locator('.fxv-pic .fxv-bad').count();
+      if (bad) fail(`셰이더 샘플을 못 그림 (${id}): ` + (await page.locator('.fxv-pic .fxv-bad').innerText()));
+      if (!(await page.locator('.sfx-group input').count())) fail('셰이더 세부 값 막대가 없음: ' + id);
+    }
+    await page.locator('.fxv-card', { has: page.locator('.fxv-name', { hasText: /^ascii$/ }) }).click();
+    await page.waitForSelector('.fxv-pic .fxv-bad:has-text("글자 그림")', { timeout: 10000 });
+    await page.locator('.fxv-kind button', { hasText: '글자 효과' }).click();
+    await page.locator('.toolbar .view-switch button', { hasText: '대본 편집' }).click();
+    console.log('셰이더 샘플: 됨');
+  }
+
   // 위쪽 줄: 제목 칸과 [렌파이에서 실행] 단추가 있고, 상자·정렬 단추는 왼쪽 칸에 있는지
   if (!(await page.locator('.toolbar .ptitle').count())) fail('위쪽 줄에 프로젝트 제목 칸이 없음');
   if (!(await page.locator('.toolbar .run').count())) fail('위쪽 줄에 [렌파이에서 실행] 단추가 없음');

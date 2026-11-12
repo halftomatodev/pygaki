@@ -101,6 +101,8 @@
 - 불러올 때 `normalizeProject()`가 빠진 값을 채우고, 그룹이 없는 상자를 첫 그룹에 넣는다.
 - **셰이더** (`BoxNode.shader`, `LabelGroup.shader`, `src/shader.ts`, `FEATURE` 5): `{ a, b, in?, out? }`. `a` `b`는 pygaki 플러그인 `screen_fx.shaders`의 1번, 2번 이름(`none`, `ascii`, `vhs_crt` …), `in` `out`은 전환. 고를 수 있는 것은 `tv`와 `none`(없음, `transition=None`) 둘이고(`SHADER_TRANS`), 새로 정하면 둘 다 `tv`로 시작한다(`newShader`). 예전 판의 `fade`와 빈 값(게임 설정대로)은 대본에 그대로 두고 그대로 내보내며, 칸에 "예전 값"으로 알린다(`oldTransLabel`). 상자에 없으면 label 것, label에도 없으면 없음(`shaderOfBox`). 값이 없는 것이 기본이라 예전 파일은 그대로 열린다.
   - 내보내기: 셰이더를 한 곳이라도 정했고 `renpyLink`가 켜져 있으면 **모든 상자의 첫 줄**(상자 label 바로 아래, 첫 `# @l:` 앞)에 `$ screen_fx.shaders("a", "b"[, transition=…])`를, 셰이더가 없는 상자에는 `$ screen_fx.clear([transition=…])`를 적는다. pygaki 플러그인은 같은 값이면 전환 없이 넘어가므로(`screen_fx.use`의 `old == new`) 어느 길로 들어와도 맞다. `call` 줄 바로 뒤에도 한 번 더 적는다(불러온 장면이 바꿨을 때).
+  - 고르는 목록(`shaderNames`): 게임 폴더의 `screen_fx/shader_list.json`(없으면 빌드할 때 가져온 저장소의 목록)에서 `screen_fx/shaders_off.txt`에 적힌 것을 뺀 것. `gameFolder.ts` `scanFolder`가 읽어 `setShaderList` `setShadersOff`로 넘긴다. 형식은 LINK.md 11장. 지금 고른 것은 꺼져 있거나 목록에 없어도 남긴다.
+  - [효과] 화면의 [셰이더] 칸(`ShadersView.tsx`, `shaderLib.ts`): 카드 목록(이름, 쓰인 곳 수, 끔·덮개 표시), 켜기/끄기(`setShaderOn`이 `screen_fx/shaders_off.txt`를 씀), 샘플(`fx/ScreenFxCanvas.tsx` `ScreenFxCanvas`: 목록 파일의 `glsl`을 합쳐 WebGL로 계속 그림, `extra`인 효과와 코드가 없는 1판 목록은 안내만)과 세부 값 막대(`ScreenFxKnobs`, 플러그인 `GROUPS` 그대로. 값은 저장하지 않음), 쓰인 곳 [보기](`openShader`). `EffectsView.tsx`의 `shaders` 상태로 바꿔 그린다.
   - 화면(`ShaderPanel.tsx`): 카드 셋. 셰이더(1번, 2번) / 전환(시작할 때, 끝날 때) / `script_flow.rpy`에 들어가는 줄.
   - 전환(`enterTrans`): 그 상자의 `in` → 셰이더가 다른 앞 상자의 `out` → 없음(게임 설정). 상자 끝에는 줄을 넣지 않는다(선택지 화면이 바뀌지 않게).
   - 하나도 안 정한 대본에는 이 줄이 전혀 안 들어간다. `renpyLink`가 꺼져 있으면 검사 탭에 경고 한 줄.
