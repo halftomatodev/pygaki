@@ -17,7 +17,6 @@ import { TagView } from './textTags';
 // 줄 종류·순서·삭제 단추는 상자 왼쪽 바깥에, 연출 입력칸은 오른쪽 바깥에 붙는다
 export const BoxView = memo(function BoxView({ id, selected }: NodeProps) {
   const project = useStore((s) => s.project);
-  const play = useStore((s) => s.play);
   const editing = useStore((s) => s.inlineEdit === id);
   const update = useStore((s) => s.update);
   const tagTarget = useTagTarget((s) => s.id);
@@ -29,7 +28,7 @@ export const BoxView = memo(function BoxView({ id, selected }: NodeProps) {
   const isEntry = g?.entry === b.id;
   const isStart = project.project.startNode === b.id;
   const tb = project.layout.direction === 'TB';
-  const cls = ['box', selected && 'sel', editing && 'editing', play?.current === id && 'playing', play?.visitedNodes.includes(id) && 'visited'].filter(Boolean).join(' ');
+  const cls = ['box', selected && 'sel', editing && 'editing'].filter(Boolean).join(' ');
   const onEsc = (e: React.KeyboardEvent) => e.key === 'Escape' && useStore.setState({ inlineEdit: null });
 
   return (

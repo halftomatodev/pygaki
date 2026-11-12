@@ -3,7 +3,7 @@ import { useStore } from './store';
 import { disconnectProject, exportRpyFile, followLine, hasRpyTarget, linkProject, newProject, openProject, runInRenpy, saveProject, setFollowLine } from './files';
 import { hasDirPicker, pullInbox, scanFolder, useGameFolder } from './gameFolder';
 import { snapAdd, snapDelete, snapList, type Snapshot } from './persist';
-import { enterFullPlay, toggleFocus } from './actions';
+import { toggleFocus } from './actions';
 import { keyOf } from './prefs';
 import { installApp, useCanInstall } from './pwa';
 import { desktop, isDesktop } from './desktop';
@@ -80,15 +80,10 @@ export function Toolbar() {
       </div>
       {/* 게임 돌려보기: 첫 줄 오른쪽 끝에 초록 톤으로 */}
       <div className="tb-run">
-      {isDesktop ? (
+      {isDesktop && (
         <button className="run" onClick={() => void runInRenpy()} title="지금 대본을 내보내고 렌파이로 게임을 켜요. 이미 켜져 있을 때 어떻게 할지는 [설정]에서 골라요">
           ▶ 렌파이에서 실행
         </button>
-      ) : (
-        <>
-          <button className="primary" onClick={() => s.startPlay(null)} title={keyOf('play')}>▶ 플레이</button>
-          <button onClick={() => void enterFullPlay()} title={`고른 상자부터 전체화면으로 플레이 (${keyOf('fullPlay')})`}>⛶ 전체화면</button>
-        </>
       )}
       <FollowLine />
       </div>

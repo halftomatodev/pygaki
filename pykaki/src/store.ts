@@ -1,8 +1,7 @@
 import { create } from 'zustand';
 import type { Project } from './types';
 
-export type Tab = 'edit' | 'play' | 'warn' | 'rpy';
-export interface PlayView { current: string | null; line: string | null; visitedNodes: string[]; visitedEdges: string[] }
+export type Tab = 'edit' | 'warn' | 'rpy';
 
 interface S {
   project: Project;
@@ -19,13 +18,6 @@ interface S {
   activeLine: string | null; // 지금 쓰고 있는 줄. 오른쪽 글자 효과 칸이 따라간다
   inlineEdit: string | null; // 상자 안에서 바로 편집 중인 상자 id
   tab: Tab;
-  playing: boolean;
-  playStart: string | null;
-  playLine: string | null; // 상자 가운데서 시작할 때 그 줄
-  playSession: number;
-  play: PlayView | null;
-  fullPlay: boolean; // 전체화면 플레이 중
-  playResume: { box: string; line: string | null } | null; // 전체화면에서 돌아올 때 보던 줄. 다시 들어가면 여기부터
   focusReq: { ids: string[]; t: number } | null;
   animating: boolean;
   focusMode: boolean; // 집중 모드: 캔버스만 남기고 나머지 화면을 숨긴다
@@ -42,8 +34,6 @@ interface S {
   redo(): void;
   select(ids: string[]): void;
   focusNodes(ids: string[]): void;
-  startPlay(from?: string | null, line?: string | null): void;
-  stopPlay(): void;
   say(msg: string): void;
 }
 
@@ -72,13 +62,6 @@ export const useStore = create<S>((set, get) => ({
   activeLine: null,
   inlineEdit: null,
   tab: 'edit',
-  playing: false,
-  playStart: null,
-  playLine: null,
-  playSession: 0,
-  play: null,
-  fullPlay: false,
-  playResume: null,
   focusReq: null,
   animating: false,
   focusMode: false,
@@ -135,10 +118,6 @@ export const useStore = create<S>((set, get) => ({
       selectedIds: [],
       inlineEdit: null,
       shaderOf: null,
-      playing: false,
-      play: null,
-      fullPlay: false,
-      playResume: null,
       focusReq: { ids: p.nodes.map((n) => n.id), t: Date.now() },
     }),
 
@@ -165,10 +144,6 @@ export const useStore = create<S>((set, get) => ({
   },
 
   focusNodes: (ids) => set({ focusReq: { ids, t: Date.now() } }),
-
-  startPlay: (from = null, line = null) => set((s) => ({ tab: 'play', playing: true, playStart: from, playLine: line, playSession: s.playSession + 1 })),
-
-  stopPlay: () => set({ playing: false, play: null, fullPlay: false }),
 
   say: (msg) => {
     clearTimeout(flashTimer);

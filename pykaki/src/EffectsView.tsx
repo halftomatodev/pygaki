@@ -10,7 +10,7 @@ import { EFFECTS, TRANSITIONS, effectKnobs, formatEffect, imageFxCode, type Effe
 import { parseTextShader, previewPack, shaderEffect, type ShaderEffect } from './fx/textShaders';
 import { FxCanvas, webglOk } from './fx/FxCanvas';
 import { TransitionCanvas } from './fx/TransitionCanvas';
-import { Glyphs, useReveal } from './PlayStage';
+import { Glyphs, useReveal } from './SayPreview';
 import { parseTagged } from './textTags';
 
 const SOURCE_LABEL: Record<EffectCard['source'], string> = { renpy: '렌파이', base: '기본', project: '프로젝트', library: '모음' };

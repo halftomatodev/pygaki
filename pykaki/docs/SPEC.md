@@ -34,21 +34,22 @@
 │ label+정렬    │ label 묶음 배경(프레임)           │ 상자 / 글자 효과 /      │
 │ 캐릭터        │ 상자(노드), 선(엣지)              │ 대사 / 다음 흐름        │
 │ 검사          │ 미니맵, 확대/축소                │ 또는 셰이더 / 전환 / 줄 │
-│ 프로젝트 정보 │                                  │ 또는 플레이 카드        │
+│ 프로젝트 정보 │                                  │                        │
 │ 스크립트, 설정, 사용법 │                          │                        │
 └──────────────┴──────────────────────────────────┴───────────────────────┘
 ```
 
-- 양쪽 칸의 묶음은 모두 같은 카드(`.sec`)다. 오른쪽 칸(`Panels.tsx` `RightPanel`)은 탭이 없다(2026-11-12). 상자를 고르면 상자 / 글자 효과(`.look-panel`, 위에 붙음, 제목 `h3.look-h`) / 대사 / 다음 흐름 카드(`.right-scroll`), ◐ 셰이더면 `ShaderPanel`, 플레이 중이고 `store.tab === 'play'`이면 플레이 카드(`.play-card`, 지우지 않고 숨김). 검사와 스크립트는 왼쪽 칸 카드(`Sidebar.tsx` `WarnCard` `ScriptCard`, 원고는 `generateRpy`를 `useMemo`로). 왼쪽 순서: label(+ 상자와 정렬) / 캐릭터 / 검사 / 렌파이 프로젝트 정보 / 스크립트 / 설정 / 사용법. 사용법은 왼쪽 칸 맨 아래 카드(`Sidebar.tsx` `Usage`).
-- **카드 접기** (`Card.tsx`, 2026-11-12 세션 32): 양쪽 칸과 GUI 편집 칸의 카드는 모두 `Card`. 제목 오른쪽 회색 [접기]/[펼치기](`.fold-btn`), 제목 더블클릭도 같음. 접으면 이름만 한 줄, 하늘색 톤(`.sec.folded`). 접은 것은 카드 id로 `localStorage['pygaki-folded']`에 기억(예전 `pygaki-script-open`, `pygaki-usage-closed`도 처음 한 번 읽음). 스크립트 카드는 처음에 접혀 있다. 왼쪽 칸 스크롤바는 왼쪽(`.sidebar { direction: rtl }`, 안쪽은 `ltr`).
-- **상자 카드 더** (세션 32): 대사 카드 아래 배경(그림, 영상) / 그림, 영상 / 효과음, 음악 카드(`StageCards.tsx`). 이 상자의 그 종류 줄 목록(누르면 그 줄로), 게임 폴더 파일을 눌러서 넣기(`scene`, `show`, `sound`/`music` 줄), 이름을 쳐서 넣기. 지금 쓰는 줄(`activeLine`) 바로 앞에, 없으면 상자 끝에 넣는다. 글자 효과 카드와 다음 흐름(선택지) 카드에는 앱에서 게임과 연결됐을 때 [🎯 게임에서 대사(선택지) 위치 고르기](`PickPos.tsx`): 원고를 내보내고(`files.ts` `exportedLineOf`) 게임을 그 줄로(`goto`), 게임 안 편집기의 대사(선택지) 탭을 연다. 게임 창에서 끌고 저장하면 받아 적기(LINK.md 3장).
+- 양쪽 칸의 묶음은 모두 같은 카드(`.sec`)다. 오른쪽 칸(`Panels.tsx` `RightPanel`)은 탭이 없다(2026-11-12). 상자를 고르면 상자 / 글자 효과(`.look-panel`, 같이 스크롤됨. 세션 34에 sticky를 풀었다) / 대사 / 다음 흐름 카드(`.right-scroll`), ◐ 셰이더면 `ShaderPanel`. 칸 맨 위 오른쪽에 [모두 접기]↔[모두 펼치기](`Card.tsx` `FoldAll`, 그 칸 `FoldScope` 안에 지금 보이는 카드를 모두). 검사와 스크립트는 왼쪽 칸 카드(`Sidebar.tsx` `WarnCard` `ScriptCard`, 원고는 `generateRpy`를 `useMemo`로). 왼쪽 순서: label(+ 상자와 정렬) / 캐릭터 / 검사 / 렌파이 프로젝트 정보 / 스크립트 / 설정 / 사용법. 사용법은 왼쪽 칸 맨 아래 카드(`Sidebar.tsx` `Usage`).
+- **카드 접기** (`Card.tsx`, 2026-11-12 세션 32): 양쪽 칸과 GUI 편집 칸의 카드는 모두 `Card`. 제목 오른쪽 회색 [접기]/[펼치기](`.fold-btn`), 제목 더블클릭도 같음. 접으면 이름만 한 줄, 하늘색 톤(`.sec.folded`). 접은 것은 카드 id로 `localStorage['pygaki-folded']`에 기억. 왼쪽 칸 카드(`FRESH`)는 기억을 읽지 않고 켤 때마다 모두 접혀서 시작한다(세션 34). 내보내기가 오류로 멈추면 검사 카드를 편다. 왼쪽 칸 스크롤바는 왼쪽(`.sidebar { direction: rtl }`, 안쪽은 `ltr`).
+- **상자 카드 더** (세션 32): 대사 카드 아래 배경(그림, 영상) / 그림, 영상 / 효과음, 음악 카드(`StageCards.tsx`). 이 상자의 그 종류 줄 목록(누르면 그 줄로), 게임 폴더 파일을 눌러서 넣기(`scene`, `show`, `sound`/`music` 줄), 이름을 쳐서 넣기. 지금 쓰는 줄(`activeLine`) 바로 앞에, 없으면 상자 끝에 넣는다(안내 글은 세션 34에 뺌).
+- **게임으로 가는 단추** (`PickPos.tsx`, 세션 34. 앱 + 게임 연결일 때만, `useGameReady`): 상자 카드 [렌파이에서 여기로 이동](연결 안 되면 회색)은 원고를 내보내고(`files.ts` `exportedBoxLineOf` → `codeBoxLineOf`: `# @node:` 다음 첫 실행 줄, label 줄은 건너뜀, 줄이 없으면 label 줄) `goto`. 대사 카드 줄마다(`line-top`, 마우스를 올리면 보임) [여기로 이동](`exportedLineOf`)과, 대사·내레이션 줄에는 [위치 옮기기](`goto` → `panel` → 0.7초 뒤 `editor open tab:'say'`, 연결 설정 `renpyLink`도 켜져 있어야 함). 다음 흐름(선택지) 카드의 [위치 옮기기]는 상자 마지막 줄로 가서 `choice` 탭. 누른 줄 아래에 "끌어 옮기고 저장" 띠(`PickBand`). 게임 창에서 끌고 저장하면 받아 적기(LINK.md 3장). 연결 안 됐으면 대사 카드 아래에 안내 한 줄(`GameOffTip`).
 - 칸 너비: 칸과 캔버스 사이의 `.resizer`(`App.tsx` `Resizer`)를 끌면 `prefs.leftW` `rightW`가 바뀌고 `--left-w` `--right-w`로 적용된다. 범위와 처음 값은 `prefs.ts` `SIZES`(왼쪽 190~520, 처음 244 / 오른쪽 300~760, 처음 400). 더블클릭은 그 칸만 처음 값, 왼쪽 "설정"의 [처음 크기]는 양쪽, [잠금](`prefs.sizeLock`)이면 손잡이가 움직이지 않는다. 접은 칸은 손잡이도 없다.
-- 왼쪽 칸과 오른쪽 칸은 캔버스 위쪽 양 끝의 작은 버튼(`.side-toggle`, `Canvas.tsx`)으로 따로 접고 편다(`store.hideLeft` `hideRight`, `localStorage['pygaki-hide-left']` `['pygaki-hide-right']`). 접어도 지우지 않고 CSS로만 숨긴다(플레이 상태 유지).
+- 왼쪽 칸과 오른쪽 칸은 캔버스 위쪽 양 끝의 작은 버튼(`.side-toggle`, `Canvas.tsx`)으로 따로 접고 편다(`store.hideLeft` `hideRight`, `localStorage['pygaki-hide-left']` `['pygaki-hide-right']`). 접어도 지우지 않고 CSS로만 숨긴다.
 - 툴바 왼쪽의 화면 바꾸기(`Toolbar.tsx` `ViewSwitch`, `showpyLive.ts`의 `view`): [대본 편집] / [GUI 편집](데스크톱 앱에서만) / [효과]. 대본 화면은 다른 화면을 보는 동안에도 지우지 않고 숨긴다.
 - **[효과] 화면** (`EffectsView.tsx`, 웹과 앱 모두): 왼쪽은 효과 카드 목록([글자 효과 | 그림 효과], 찾기, [파일 넣기], [새 효과 요청문 복사]), 오른쪽은 고른 효과의 샘플과 쓰인 곳. 목록과 파일 다루기는 `effectsLib.ts`의 함수만 부른다(7장).
   - 카드: 체크(켬/끔 = `setEffectOn`), 한글 이름, 영어 이름, 쓰인 줄 수, 어디 것(렌파이 / 기본 / 프로젝트 / 모음), 프로젝트 효과는 [빼기], 아직 넣지 않은 모음은 [넣기]. 플러그인이 있는 게임 폴더를 연결하지 않았으면 구경만 하고 버튼은 막는다.
   - [빼기]는 창을 띄워 그 파일에 든 효과가 쓰인 줄 수를 보여 주고, 쓰였으면 [다른 효과로 바꾸고 빼기](효과마다 바꿀 것을 고름) / [그냥 빼기] / [취소].
-  - 샘플(글자 효과): 대사 미리보기와 같은 `FxCanvas`로 샘플 글을 돌린다. 세부 값 막대(`effectKnobs`)를 움직이면 다시 돌고, 그 값은 저장하지 않는다. 아직 넣지 않은 모음의 효과는 `textShaders.ts`의 `previewPack`으로 샘플용으로만 올려서(`shaderEffect(name, true)`) 돌린다(고르는 목록과 플레이에는 안 나옴). 셰이더 코드가 틀리면 샘플 칸에 이유가 나온다.
+  - 샘플(글자 효과): 대사 미리보기와 같은 `FxCanvas`로 샘플 글을 돌린다. 세부 값 막대(`effectKnobs`)를 움직이면 다시 돌고, 그 값은 저장하지 않는다. 아직 넣지 않은 모음의 효과는 `textShaders.ts`의 `previewPack`으로 샘플용으로만 올려서(`shaderEffect(name, true)`) 돌린다(고르는 목록에는 안 나옴). 셰이더 코드가 틀리면 샘플 칸에 이유가 나온다.
   - 샘플(그림 효과): `fx/TransitionCanvas.tsx`가 효과 파일의 `@fragment`를 게임(`image_effects.rpy`)과 같은 틀(`tex0` 앞 그림, `tex1` 새 그림, `l__uv` `l__old` `l__new` `l__t` `l__size`, 이름은 `u_imgfx_<효과>_값`)로 묶어 WebGL로 그린다. 샘플 그림 둘은 캔버스로 만들고, [고르기]로 고른 그림 파일은 새 그림 자리에 꽉 차게 넣는다(저장 안 함). 막대는 `@time`(걸리는 시간)과 `effectKnobs`, "원고에 적는 법" 줄에 맞춘 값 그대로의 `with img_fx.use(...)`가 나온다.
   - 쓰인 곳의 [보기]는 [대본 편집]으로 돌아가 그 상자를 고르고 그 줄에 초점을 둔다.
   - [새 효과 요청문 복사]는 `showpy/game/ui_kit/effects/README.md`의 요청문을 빌드할 때 가져와 클립보드에 넣는다(사본 없음, 밖으로 통신 없음).
@@ -93,7 +94,7 @@
   - `fx` `{ fx: { fx, transition, overlay, warp, cursor } }`: pygaki 플러그인 화면 효과 명령. 값은 `src/stage.ts`의 `FX_*`. 화면 효과는 렌파이 편집기에서 고치므로 줄 종류 목록에서 뺐고, 예전 파일의 이 줄만 그대로 보여 주고 내보낸다.
   - `trans`는 `dissolve` | `fade` | 비움, 또는 showpy에서 받아 적은 식(`stage.move("inleft", 0.8)` 등). 모두 선택 칸이라 예전 파일은 그대로 열린다.
 - **대사 줄의 `fx`**: `say`, `narration` 줄도 같은 `fx` 값(`exclude` 포함)을 가질 수 있다. pygaki 플러그인 대사 탭에서 받아 적고, PyKaki에서는 고치지 않는다. 연결을 켜면 대사 괄호로 내보낸다.
-- **대사 줄의 `say`** (`SayStyle`): `size` `font` `color` `cps` `effect` `box` `tail` `box_rotate` `name_size` `name_font` `name_color`는 PyKaki에서 고친다. `effect`는 두 효과를 `|`로 겹칠 수 있다(`slidein|shake`). `box`는 글 상자(`bubble` 말풍선, `pill` 둥근 테두리, pygaki 플러그인 `ui_kit` 4.0)이고 연결을 켰을 때만 내보낸다. 미리보기와 플레이 화면은 CSS로 비슷하게 그린다(`.sbox`, 셰이더 효과일 때는 기울기를 안 보여 줌). `x` `y` `name_x` `name_y`는 showpy에서 받아 적은 값을 보여 주고 지우기만 한다. 연결을 켜면 짧은 이름으로(`sayArgs`), 끄면 플러그인 없이 동작하는 렌파이 원래 이름(`what_size`, `what_slow_cps`, `what_textshader` 등)으로 내보낸다. 모두 선택 칸이라 예전 파일은 그대로 열린다.
+- **대사 줄의 `say`** (`SayStyle`): `size` `font` `color` `cps` `effect` `box` `tail` `box_rotate` `name_size` `name_font` `name_color`는 PyKaki에서 고친다. `effect`는 두 효과를 `|`로 겹칠 수 있다(`slidein|shake`). `box`는 글 상자(`bubble` 말풍선, `pill` 둥근 테두리, pygaki 플러그인 `ui_kit` 4.0)이고 연결을 켰을 때만 내보낸다. 미리보기는 CSS로 비슷하게 그린다(`.sbox`, 셰이더 효과일 때는 기울기를 안 보여 줌). `x` `y` `name_x` `name_y`는 showpy에서 받아 적은 값을 보여 주고 지우기만 한다. 연결을 켜면 짧은 이름으로(`sayArgs`), 끄면 플러그인 없이 동작하는 렌파이 원래 이름(`what_size`, `what_slow_cps`, `what_textshader` 등)으로 내보낸다. 모두 선택 칸이라 예전 파일은 그대로 열린다.
 - **나가는 방식(exit)**:
   - `next` `{ target }`: 다음 상자로
   - `menu` `{ choices: [{ id, text, target, mode:"jump", condition:null, actions:[] }] }`: 선택지
@@ -109,7 +110,7 @@
   - 화면(`ShaderPanel.tsx`): 카드 셋. 셰이더(1번, 2번) / 전환(시작할 때, 끝날 때) / `script_flow.rpy`에 들어가는 줄.
   - 전환(`enterTrans`): 그 상자의 `in` → 셰이더가 다른 앞 상자의 `out` → 없음(게임 설정). 상자 끝에는 줄을 넣지 않는다(선택지 화면이 바뀌지 않게).
   - 하나도 안 정한 대본에는 이 줄이 전혀 안 들어간다. `renpyLink`가 꺼져 있으면 왼쪽 검사 카드에 경고 한 줄.
-  - 화면: 상자 머리와 label 틀 오른쪽 위의 `ShaderButton`(`BoxView.tsx`) → `store.openShader` → 오른쪽 칸이 `ShaderPanel.tsx`. 그 상자만 골라져 있는 동안(label은 아무 상자도 안 고른 동안)만 열려 있다. 플레이는 상자에 들어갈 때 `stage.fx`에 이름만.
+  - 화면: 상자 머리와 label 틀 오른쪽 위의 `ShaderButton`(`BoxView.tsx`) → `store.openShader` → 오른쪽 칸이 `ShaderPanel.tsx`. 그 상자만 골라져 있는 동안(label은 아무 상자도 안 고른 동안)만 열려 있다.
   - **세부 값** (`FEATURE` 6, screen_fx 5.5): `BoxShader.va`(1번) `vb`(2번)는 `{값 이름: 값}`, `tv`는 TV 전환 값. 셰이더 칸에서 고른 셰이더 아래 [세부 값]을 펼치면 `ScreenFxKnobs`(값 이름과 범위는 `shader_list.json`의 `params` `groups`), 전환이 TV면 `TvKnobs`(`shader.ts` `TV_KNOBS`). 셰이더를 바꾸면 그 자리 값은 지운다. 내보낼 때(`shaderCode`) 대본 어디에든 셰이더 값이 있으면(`usesShaderValues`) 모든 셰이더 줄에 `values={이름: {…}}`(두 자리를 이름별로 합침, `slotValues`), 전환이 `"tv"`이고 그 전환의 주인에게 `tv`가 있으면 `tv={…}`. 들어올 때 전환과 TV 값은 `enterTransTv`. 게임 목록의 `screen_fx`가 5.5보다 낮으면(`valuesSupported`) 값을 빼고 검사 경고. 형식은 LINK.md 2장.
   - 위쪽 [셰이더] 화면(`ShadersView.tsx`): [셰이더](목록, 켜기/끄기, 샘플, 구경용 막대) / [전환](TV 꺼짐·켜짐, 없음. TV는 CSS로 비슷하게 그리는 샘플 `TvSample`과 구경용 막대, 쓰인 곳).
   - 예전 `fx` 줄(`screen_fx.use`)은 그대로 읽고 내보낸다(새 줄 목록에는 없음).
@@ -150,7 +151,7 @@
     - `escapePercent`가 꺼졌는데 대사나 선택지에 `%`가 있음 (오류. 렌파이가 실행 중 멈춘다)
     - 텍스트 태그를 켰을 때 대사나 선택지의 태그 짝 (`checkTags`, 렌파이 `check_text_tags`와 같은 규칙): 여는 태그 없는 닫는 태그는 오류(렌파이가 실행 중 멈춘다), 엇갈려 닫힘(글 하나에 첫 번째만 알림)·닫지 않음·모르는 태그는 경고
     - 없는 상자를 가리키는 흐름은 파일을 열 때 `normalizeProject`가 "연결 안 됨"으로 돌리고, 그 뒤에 생기면 내보내기가 멈추지 않고 오류로 알린다
-    - 태그 효과와 그림 효과의 세부 값: 태그 상자 [세부 값]은 `tagEdit.retag`로 `{shader=이름:u__값=3}`의 값만 고치고, 배경·보이기·숨기기 줄의 [세부 값]은 `stage.parseImageFx`/`formatImageFx`로 `trans`의 `img_fx.use("이름", 초, 값=…)`를 고친다(저장 형식은 그대로). 플레이 선택지 글은 `renderTagged`가 `parseTagged`로 읽어 대사와 같은 모양으로 그린다
+    - 태그 효과와 그림 효과의 세부 값: 태그 상자 [세부 값]은 `tagEdit.retag`로 `{shader=이름:u__값=3}`의 값만 고치고, 배경·보이기·숨기기 줄의 [세부 값]은 `stage.parseImageFx`/`formatImageFx`로 `trans`의 `img_fx.use("이름", 초, 값=…)`를 고친다(저장 형식은 그대로).
     - 연결을 켰는데 캐릭터 id가 pygaki 플러그인 이름과 겹침 (오류, `PLUGIN_NAMES`)
 11. **pygaki 플러그인 연결(`renpyLink`)을 켜면 달라지는 것**. 끄면 예전과 똑같이 내보낸다.
     - 모든 상자에 `label 그룹.상자id:`를 쓴다. 첫 상자는 `label 그룹:` 바로 아래에 이어 쓴다.
@@ -167,19 +168,11 @@
 - **되돌아가는 선(루프)**: 깊이 우선으로 찾은 back edge는 정렬 계산에서 뺀다. ELK의 cycleBreaking 옵션은 계층 그래프에서 기대대로 동작하지 않았다.
 - 정렬 결과는 `update()`로 반영되므로 실행 취소가 되고, 0.4초 이동 애니메이션이 붙는다.
 
-## 7. 테스트 플레이 (`src/playEngine.ts`, `src/Player.tsx`, `src/PlayStage.tsx`)
+## 7. 대사 미리보기와 등장 효과 (`src/SayPreview.tsx`, `src/fx/`)
 
-- 상태: 현재 상자, 줄 위치, call 스택(`{from, to}`), 선택지, 표시 중인 줄, 명령 뱃지, 종료 사유, 방문한 상자와 선, 화면(`stage`: 배경, 그림, 사라지는 그림, 음악, 효과음, 화면 효과 이름). 화면도 상태 안에 있어서 뒤로 가기와 건너뛰기가 그대로 맞는다.
-- `advance()`는 다음 표시할 줄까지 진행한다.
-  - 메모는 건너뛴다.
-  - 연출 줄은 화면 상태에 넣는다. 직접 명령도 `show`/`scene`/`hide`/`play`/`stop`, `stage.pos`, `screen_fx.use`/`clear`는 읽고, 나머지는 뱃지로만 쌓는다.
-  - 나가는 방식은 jump, menu, call, return 규칙대로 따라간다.
-  - 무한 반복은 5000단계에서 멈춘다.
-- 종료 사유: `end`(return), `broken`(연결 없음), `missing`(없는 상자), `loop`.
-- 텍스트 태그를 흉내 낸다: `{b} {i} {u} {s} {color=} {size=} {font=} {alpha=} {k=} {cps=} {p} {w} {nw} {fast} {a=}`, `{{`. 글자를 하나씩 내보내고(`parseTagged`, `SayBox`), 클릭하면 다음 멈춤까지 다 보여 준 뒤에 넘어간다.
-- **게임 화면**: 게임 해상도로 그린 뒤 틀에 맞춰 줄인다(`GameFrame`). 크기와 대사창 값은 연결한 폴더에서 읽고(`readLook`, [LINK.md](../../docs/LINK.md) 6장), 없으면 1280x720 기본값이다. 파일이 없는 그림은 이름 표시로 대신한다. 폴더가 없어도 플레이된다.
-- **전환**: `dissolve`, `fade`, `stage.move/ease/zoom`을 CSS로 흉내 내고, 전환 시간만큼 다음 글자를 기다린다.
-- **등장 효과**: 렌파이 텍스트 셰이더 7개와 pygaki 플러그인이 등록한 20개를 **WebGL로, pygaki 플러그인과 같은 셰이더 코드로** 그린다(`src/fx/`). 효과 폴더(pygaki 플러그인 `ui_kit/effects/*.glsl`, LINK.md 8-1)의 효과도 같다: 플러그인이 있는 폴더를 연결했으면 그 폴더의 파일만 `scanFolder`가 읽고(연결하지 않았으면 빌드할 때 가져온 저장소의 샘플) `setFolderEffects` → `refreshEffects`(`EFFECTS`, `TRANSITIONS` 배열을 그 자리에서 다시 채움, `useGameFolder.fxSeq`로 다시 그림). 바뀌면 `effectEpoch`가 올라 미리보기 셰이더를 다시 만든다. 그림 전환(`img_fx.use`)도 플레이 화면에서 같은 셰이더 코드로 그린다(`PlayStage.tsx`의 `SceneFx` → `fx/TransitionCanvas.tsx`): 게임처럼 화면 전체를 앞 장면에서 새 장면으로 바꾸려고, 앞 걸음의 장면과 지금 장면을 게임 해상도의 그림 한 장씩으로 만들어(`paintScene`, 자리는 `placeOf`와 같음) 그림 겹 위에 캔버스로 덮고, 끝나면 걷는다. 밑의 그림 겹은 그동안 이미 새 장면이다. `img_fx.use("이름", 초, 값=...)`의 초와 값도 읽는다. 한 걸음에 그림 전환이 여럿이면 마지막 것 하나로 그린다. WebGL이 안 되거나 그 효과를 못 그리면 예전처럼 같은 시간의 서서히 바뀌기(`transInfo`). 영상 그림은 첫 장면으로 그린다.
+- **PyKaki 안 플레이는 없앴다** (세션 34, 사용자 말): 위쪽 [▶ 플레이] [⛶ 전체화면], 오른쪽 플레이 카드, 단축키 Alt+P·F8, `playEngine.ts` `Player.tsx`, store의 `playing` `play` `fullPlay` 등. 대본은 [▶ 렌파이에서 실행]과 [렌파이에서 여기로 이동](6장)으로 게임에서 본다. 남긴 것은 `SayPreview.tsx`(예전 `PlayStage.tsx`의 `useReveal` `Glyphs` `LinePreview`): 글자 효과 카드 미리보기와 [효과] 화면 샘플이 쓴다.
+- 텍스트 태그를 흉내 낸다: `{b} {i} {u} {s} {color=} {size=} {font=} {alpha=} {k=} {cps=} {p} {w} {nw} {fast} {a=}`, `{{`. 글자를 하나씩 내보내고(`parseTagged`, `useReveal`), 클릭하면 다음 멈춤까지 다 보여 준다.
+- **등장 효과**: 렌파이 텍스트 셰이더 7개와 pygaki 플러그인이 등록한 20개를 **WebGL로, pygaki 플러그인과 같은 셰이더 코드로** 그린다(`src/fx/`). 효과 폴더(pygaki 플러그인 `ui_kit/effects/*.glsl`, LINK.md 8-1)의 효과도 같다: 플러그인이 있는 폴더를 연결했으면 그 폴더의 파일만 `scanFolder`가 읽고(연결하지 않았으면 빌드할 때 가져온 저장소의 샘플) `setFolderEffects` → `refreshEffects`(`EFFECTS`, `TRANSITIONS` 배열을 그 자리에서 다시 채움, `useGameFolder.fxSeq`로 다시 그림). 바뀌면 `effectEpoch`가 올라 미리보기 셰이더를 다시 만든다. 그림 전환(`img_fx.use`)은 [효과] 화면 샘플에서 같은 셰이더 코드로 그린다(`fx/TransitionCanvas.tsx`).
   - **효과 관리** (`src/effectsLib.ts`, 화면은 3장의 [효과] 화면. `window.pykakiEffects`로도 부를 수 있음): `effectCatalog`가 렌파이 / 기본 / 프로젝트 / 모음(샘플과 `showpy/effects_library`, 아직 넣지 않은 것)을 한 목록으로 만든다(켬·끔, 쓰인 줄 수). `setEffectOn`은 `effects_off.txt`(LINK.md 8-2)를 고치고, 끈 효과는 `stage.ts`의 `refreshEffects`가 고르는 목록에서 뺀다. `addEffectFile`·`addFromLibrary`는 `checkPack`으로 검사한 뒤에만 효과 폴더에 쓰고, `removeEffectFile`은 백업(`ui_kit_backup/effects/`)을 남기고 지우며 `replace`를 주면 대본의 그 효과를 다른 값으로 바꾼다(`replaceInProject`: 칸으로 고른 값, 명령 줄의 `effect="…"`·`img_fx.use(…)`, 대사 글의 `{shader=…}`). 쓰인 곳은 `effectUses`.
   - 셰이더는 `showpy/game/ui_kit/engine/text_effects.glsl` 하나이고, 빌드할 때 `?raw`로 그대로 가져온다. 렌파이 내장 7개는 `src/fx/renpy_textshaders.glsl`(렌파이 8.5.3 `00textshader_ren.py`를 옮김, MIT). 형식은 [LINK.md](../../docs/LINK.md) 8장. 효과 목록 `EFFECTS`, `RENPY_EFFECTS`, 글자/초 기본값을 쓰는 효과(`@cps`)도 이 파일에서 온다.
   - `textShaders.ts`: 파일 읽기(`parseShaders`, pygaki 플러그인 `tfx_parse`와 같은 규칙), 효과 문자열(`"scatter:u__distance=200"`, `"a|b"`) 읽기(`parseTextShader`, 렌파이 `parse_textshader`), 렌파이처럼 셰이더 조각 합치기(`shaderSource`: `renpy.geometry` `renpy.texture` `textshader.이름`을 이름순으로, 쓰는 변수만 이름순으로, `vertex_N`/`fragment_N`은 우선순위순, `u__` `l__` `v__` `a__`는 `u_textshader_이름_…`으로 바꿈). 색 값은 투명도를 곱한 vec4.
@@ -187,10 +180,7 @@
   - `echo`처럼 `@outline`이 있는 효과는 외곽선 겹(`u_text_main` 0)을 글자 뒤에 먼저 그린다.
   - WebGL이 없거나 셰이더가 실패하면 예전처럼 CSS로 흉내 낸다(`.fx-*`, `--cd`, `--r1`~`--r4`, `liquid`는 App.tsx의 SVG 필터).
   - pygaki 플러그인 효과는 연결을 끄면 내보내지 않고 경고한다(`RENPY_EFFECTS`). 렌파이처럼 글자가 하나씩 나올 때만 보이고, 물결과 떨림은 늘 보인다. 목록에서 뺀 효과는 `stage.ts`의 `REMOVED_EFFECTS`: 예전 대본 값은 그대로 두고 내보낸다(`typewriter`, `slowalpha`는 렌파이에 있어서 `RENPY_EFFECTS`에 넣음, 나머지는 pygaki 플러그인이 한 글자씩 나오기로 받음).
-- **안 되는 것**: 화면 효과(ASCII 등)는 웹 글자에 셰이더를 입힐 수 없어서 이름만 보여 준다. `$` 명령은 실행하지 않는다. `screens.rpy`를 고친 내용은 반영되지 않는다.
-- **전체화면** (`enterFullPlay`, `leaveFullPlay`, 기본 F8): 플레이 화면을 `document.body`로 옮겨 창을 덮고 브라우저 전체화면을 요청한다. 거절되어도 창을 덮은 채 플레이된다. 플레이 중이면 이어서, 아니면 고른 상자부터 시작한다. 시작 상자까지 가장 짧은 길을 따라가며 배경과 그림을 미리 채운다(`seedStage`). 돌아오면(F8, Esc) 플레이를 끝내고 보던 상자와 줄을 고른 채 편집 화면을 보여 주고, 다시 들어가면 그 줄부터 시작한다(`playResume`).
-- 플레이 중인 상자는 캔버스에 강조되고 화면이 따라간다. 지나온 선은 주황색이다.
-- 탭을 바꿔도 플레이 상태를 유지한다(컴포넌트를 숨길 뿐 지우지 않음). 플레이 중 대본을 고치면 다음 줄부터 반영된다.
+- 화면 효과(ASCII 등)는 웹 글자에 셰이더를 입힐 수 없어서 미리보기에 안 나온다.
 
 ## 8. 편집 동작
 
@@ -206,12 +196,12 @@
 - **상자 한 번 클릭**: 오른쪽 칸에서 label, 다음 흐름, 시작 상자 등을 설정한다.
 - **줄 순서**: ⠿ 손잡이를 끌어 다른 줄의 위/아래 절반에 놓는다(HTML 드래그 앤 드롭, `useLineDrag`). 상자 안 편집과 오른쪽 칸 모두.
 - **오른쪽 칸 줄 모양**: 줄마다 2칸 격자. 왼쪽 칸(136px)에 손잡이·줄 종류·✕와 대사 속성, 오른쪽 칸에 글(또는 연출 입력칸)을 두고 사이에 세로 선을 긋는다.
-- **글자 효과 칸** (`LineLook`, 연결과 상관없이): 글 칸에는 글만 둔다. 오른쪽 칸 위쪽에 붙어 있고(`.look-panel`, sticky), 지금 쓰는 줄(`store.activeLine`, 상자 안 편집과 오른쪽 칸이 같이 씀)을 따라간다. 그 줄이 대사가 아니면 상자의 첫 대사 줄을 보여 준다. 집중 모드에서는 패널과 함께 숨는다. 글자 모양, 속도, 등장 효과가 들어 있고, 받아 적은 좌표와 화면 효과는 보여 주기만 한다. 맨 위 미리보기(`LinePreview`)는 플레이 화면과 같은 코드(`useReveal`, `Glyphs`, `FxCanvas`)로 글자만 그린다. 글자는 칸에 들어가는 가장 큰 크기(11~60px)로 맞추고, 효과나 글자/초를 바꾸면 다시 재생한다.
+- **글자 효과 칸** (`LineLook`, 연결과 상관없이): 글 칸에는 글만 둔다. 오른쪽 칸 상자 카드 아래에 있고(`.look-panel`), 지금 쓰는 줄(`store.activeLine`, 상자 안 편집과 오른쪽 칸이 같이 씀)을 따라간다. 그 줄이 대사가 아니면 상자의 첫 대사 줄을 보여 준다. 집중 모드에서는 패널과 함께 숨는다. 글자 모양, 속도, 등장 효과가 들어 있고, 받아 적은 좌표와 화면 효과는 보여 주기만 한다. 맨 위 미리보기(`LinePreview`)는 `SayPreview.tsx`의 `useReveal`, `Glyphs`, `FxCanvas`로 글자만 그린다. 글자는 칸에 들어가는 가장 큰 크기(11~60px)로 맞추고, 효과나 글자/초를 바꾸면 다시 재생한다.
 - **태그 상자** (`src/TagBar.tsx`, `src/tagEdit.ts`): 대사·내레이션 글 칸(`textarea[data-tags]`)에 포커스가 있으면 뜬다. 지금 칸은 `useTagTarget`(document `focusin`으로 따라가고, 태그 상자 안으로 포커스가 가도 그대로, 빈 곳으로 포커스가 사라지면 닫음). 상자 안 편집(`in-줄id`)이면 `BoxView`가 상자 오른쪽 위 바깥(`.tagbar-box`)에, 오른쪽 칸(`ed-줄id`)이면 `LineLook`이 글자 효과 칸 제목 아래(`.tagbar-look`)에 그린다.
   - 단추를 눌러도 글 칸의 포커스와 고른 곳이 남게 `mousedown`을 막는다(입력 칸, 팔레트 칸 빼고). 고친 글은 `HTMLTextAreaElement` value setter + `input` 이벤트로 넣어서 React `onChange`를 그대로 탄다(실행 취소 묶음도 타이핑과 같음).
   - `tagEdit.ts`: `tokenize`(렌파이처럼 `{{`, `{#…}`, 짝 태그와 혼자 쓰는 태그는 렌파이 8.5.3 `text_tags` 목록), `pairTags`(닫는 태그는 가장 안쪽을 닫음). 고치기: `toggleTag`(b i u s: 같은 태그 안이면 빼기, 고른 곳이 안쪽 일부면 그 부분만 끊어서 밖으로, 아니면 감싸기), `setTagValue`(color size cps: 안이면 값만 바꾸기), `stepSize`(+10/-10, `+n`은 더하고 0이 되면 빼기, 숫자는 더하기, `*x`는 1.25배/0.8배), `removeTag`, `insertTag`(커서 자리, `{nw}`는 글 끝, `{w=0.5}`는 숫자를 골라 둠), `tagsAt`(단추 켜짐). 커서가 태그 글자 한가운데면 태그 밖으로 옮기고, 고른 곳 안의 태그 짝이 안 맞으면 넣지 않고 알린다.
   - [더 보기] (2단계, 펼침은 `localStorage["pykaki-tag-more"]`): 투명도 `{alpha}`(막대는 끄는 동안 값만 보이고 놓을 때 한 번 넣음, 1이면 빼기), 자간 `{k}`(`stepK` ±1, 0이 되면 빼기), 외곽선 색 `{outlinecolor}`(같은 팔레트, 외곽선이 있는지는 읽지 않고 안내만), 글꼴 `{font}`(연결한 폴더 `media.fonts`), `{space=30}` `{vspace=30}` `{{`, 루비 `insertRuby`(`{rb}고른 글{/rb}{rt}읽는 법{/rt}`, 읽는 법을 골라 둠), 글 속 그림 `{image=}`(`media.images`). 렌파이 기본 `ruby_text` 스타일은 본문과 같은 크기·자리라 겹쳐 보여서, 루비를 넣을 때 게임 쪽 스타일을 정하라고 알린다(`RUBY_NOTE`, 멈추지는 않음). `select`도 포커스를 받게 `mousedown` 막기에서 뺀다.
-  - 고른 글에만 효과 (3단계): [더 보기]의 효과 목록이 `{shader=이름}`으로 감싼다(`setTagValue`, 빼기는 `removeTag`). 목록은 `stage.ts` `EFFECTS`(켜 둔 글자 효과)에서 `@outline`이 있는 효과를 뺀 것(외곽선 겹은 줄 전체의 값이라 일부에만 못 넣음). 렌파이는 줄에 텍스트 셰이더가 없으면 `{shader}`에서 예외를 내므로, `sayArgs(s, native, text)`가 줄에 효과가 없을 때 `effect="typewriter"`(플러그인이 없으면 `what_textshader=`)를 붙인다. `lineCps(s, text)`는 태그의 효과가 `@cps`여도 기본 글자/초를 쓴다. 내보내기 검사: 모르는 효과 이름, 플러그인이 없는데 플러그인 효과, 선택지 글의 `{shader=}`(오류). 그리기: `parseTagged`가 글자마다 `shader`(가장 안쪽 태그 값)를 적고, `PlayStage.tsx` `useShader`가 줄의 효과(없으면 숨은 `typewriter`, `textShaders.ts` `HIDDEN_SHADERS`)와 태그 값마다의 셰이더(`tagTs`)를 만든다. `FxCanvas.tsx`는 렌파이 `create_mesh_displayable`처럼 효과마다 조각 묶음을 따로 만들고(글자 번호와 시간은 줄 전체 기준, 줄 양옆 빈 조각은 첫 글자의 묶음에만), 겹마다 묶음을 차례로 그린다. 기다리는 시간은 가장 긴 효과, 하나라도 계속 그리는 효과면 계속 그린다(`compute_times`). 값이 틀린 태그의 글자는 줄의 효과로 그린다.
+  - 고른 글에만 효과 (3단계): [더 보기]의 효과 목록이 `{shader=이름}`으로 감싼다(`setTagValue`, 빼기는 `removeTag`). 목록은 `stage.ts` `EFFECTS`(켜 둔 글자 효과)에서 `@outline`이 있는 효과를 뺀 것(외곽선 겹은 줄 전체의 값이라 일부에만 못 넣음). 렌파이는 줄에 텍스트 셰이더가 없으면 `{shader}`에서 예외를 내므로, `sayArgs(s, native, text)`가 줄에 효과가 없을 때 `effect="typewriter"`(플러그인이 없으면 `what_textshader=`)를 붙인다. `lineCps(s, text)`는 태그의 효과가 `@cps`여도 기본 글자/초를 쓴다. 내보내기 검사: 모르는 효과 이름, 플러그인이 없는데 플러그인 효과, 선택지 글의 `{shader=}`(오류). 그리기: `parseTagged`가 글자마다 `shader`(가장 안쪽 태그 값)를 적고, `SayPreview.tsx` `useShader`가 줄의 효과(없으면 숨은 `typewriter`, `textShaders.ts` `HIDDEN_SHADERS`)와 태그 값마다의 셰이더(`tagTs`)를 만든다. `FxCanvas.tsx`는 렌파이 `create_mesh_displayable`처럼 효과마다 조각 묶음을 따로 만들고(글자 번호와 시간은 줄 전체 기준, 줄 양옆 빈 조각은 첫 글자의 묶음에만), 겹마다 묶음을 차례로 그린다. 기다리는 시간은 가장 긴 효과, 하나라도 계속 그리는 효과면 계속 그린다(`compute_times`). 값이 틀린 태그의 글자는 줄의 효과로 그린다.
   - 팔레트: 8색 × 밝게/보통/어둡게 + 회색 8칸, 이 프로젝트 색(`gui.rpy` `text_color`, 캐릭터 색), 최근 8칸(`localStorage["pykaki-recent-colors"]`), `#rrggbb` 칸, 브라우저 색 고르기. 화살표 8칸씩, Enter, Esc.
   - 단축키 `tagBold` `tagItalic` `tagUnderline`(기본 Ctrl+B/I/U, 글 칸에 포커스가 있을 때만 잡음).
   - 텍스트 태그가 꺼져 있으면(`allowTextTags`) [켜기]만 보인다.
@@ -226,7 +216,7 @@
 - **선 더블클릭**: next ↔ call을 전환한다.
 - **Delete**: 상자나 선을 삭제한다.
 - **Shift+드래그**: 여러 상자를 선택한다.
-- **단축키(기본값)**: Ctrl+\\ 집중 모드, Ctrl+Enter 새 줄, Ctrl+Shift+Enter 다음 상자로 이어 쓰기, Alt+Enter 다음 흐름 창, Ctrl+S 저장, Ctrl+Shift+S 다른 이름으로 저장, Ctrl+E 같은 곳에 다시 내보내기, Ctrl+Z/Y 실행 취소/다시 실행(입력칸 밖에서), Ctrl+B/I/U 대사 글 칸에서 굵게/기울임/밑줄 태그, Alt+N 새 상자, Alt+P 플레이, F8 편집 화면과 전체화면 플레이 바꾸기(F5는 새로고침과 겹쳐서 쓰지 않음). 8-1 참고.
+- **단축키(기본값)**: Ctrl+\\ 집중 모드, Ctrl+Enter 새 줄, Ctrl+Shift+Enter 다음 상자로 이어 쓰기, Alt+Enter 다음 흐름 창, Ctrl+S 저장, Ctrl+Shift+S 다른 이름으로 저장, Ctrl+E 같은 곳에 다시 내보내기, Ctrl+Z/Y 실행 취소/다시 실행(입력칸 밖에서), Ctrl+B/I/U 대사 글 칸에서 굵게/기울임/밑줄 태그, Alt+N 새 상자(F5는 새로고침과 겹쳐서 쓰지 않음. 플레이 단축키 Alt+P, F8은 세션 34에 뺌). 8-1 참고.
 - 실행 취소: 같은 key로 1.2초 안에 이어지는 변경(타이핑)은 한 번으로 묶는다. 최대 100단계.
 
 ## 8-1. 화면, 집중 모드, 환경 설정
@@ -271,7 +261,7 @@
 - 연결 버튼 `linkProject` (왼쪽 패널): 폴더 고르기, 렌파이 프로젝트인지 확인(`gui.rpy`/`options.rpy`), `ui_kit`이 있으면 `renpyLink` 켜고 없으면 끄기, 이미 다른 `script_flow.rpy`가 있으면 묻기, 첫 내보내기까지 한 번에 한다.
 - 폴더: `showDirectoryPicker`로 `game` 폴더 핸들을 받아 IndexedDB `kv.gameDir`에 둔다. 프로젝트 폴더를 고르면 안의 `game`을 쓴다. 권한은 사용자 동작이 있을 때 다시 얻는다.
 - 목록: `images`, `movies`, `audio`를 읽어 연출 줄 칸의 `datalist`로 보여 준다. 대본에 이름이 `start`인 label이 있고 위쪽 폴더의 다른 `.rpy`에도 `label start`가 있으면 사이드바에 알린다.
-- 목록과 함께 플레이 화면 값(`look`)과 글꼴 목록도 읽는다. 전체화면에 들어갈 때 다시 읽는다.
+- 목록과 함께 미리보기 값(`look`: 글꼴, 글자 색, 글자/초)과 글꼴 목록도 읽는다.
 - 받아 적기 `pullInbox`: 창이 다시 focus될 때, 앱을 켤 때, [다시 읽기], 내보내기 직전. 받을 것이 있으면 저장본을 먼저 남기고 `applyInbox`로 넣은 뒤, 읽은 기록만 파일에서 지운다.
 - 내보내기: 폴더를 연결했거나 연결을 켜면 먼저 받아 적고 `script_flow.rpy`에 쓴다. 받아 적기가 실패하면 쓰지 않는다. 폴더 권한을 못 쓰는 브라우저에서는 예전처럼 내려받기.
 - 연결을 켜면 show 줄의 위치 칸을 숨긴다(값이 이미 있을 때만 보임). 위치는 pygaki 플러그인이 저장한다.
@@ -287,7 +277,7 @@
 - [열기]는 두 대본의 요약을 보여 주고 확인을 받은 뒤 고른 파일의 내용을 이 프로젝트 대본으로 가져오고, [새로]는 이 프로젝트 대본을 비운다. 저장 파일은 바뀌지 않는다.
 - 메인 프로세스는 프로젝트 폴더 맨 위도 지켜보고 `*.flow.json`이 바뀌면 `pygaki:changed`로 이름을 알린다. 연 대본 파일이면 0.3초 뒤 `checkExternal`(9-3).
 - 위쪽 줄 오른쪽(`Toolbar.tsx` `FolderButtons`): [다시 읽기] [폴더 열기] [다른 프로젝트]. 연결과 끊기는 없다. 왼쪽 "렌파이 프로젝트 정보" 칸에는 정보만 둔다.
-- [▶ 렌파이에서 실행] (`files.ts` `runInRenpy`, `main.cjs` `pygaki:runGame`): 대본을 내보낸 뒤 렌파이로 이 프로젝트를 켠다. 렌파이는 앱 실행 파일의 두 칸 위 폴더(묶음의 `<렌파이 SDK>/pygaki/app`)에서, 없으면 환경 변수 `RENPY_SDK`에서 찾는다. 답은 `started` / `running` / `no-sdk` / `failed`. 설정 `prefs.runSkip`(처음 값 켬)이 켜져 있으면, 게임과 붙어 있거나(실시간 연결) 이 창이 켠 게임이 살아 있을 때 켜지 않고 `running`만 돌려준다. 켠 게임은 앱을 꺼도 그대로 둔다. 앱에서는 위쪽 줄의 [▶ 플레이] [⛶ 전체화면]을 빼고(단축키와 상자 카드의 [▶ 여기서 플레이], 오른쪽 플레이 카드는 그대로), 웹은 그대로 둔다.
+- [▶ 렌파이에서 실행] (`files.ts` `runInRenpy`, `main.cjs` `pygaki:runGame`): 대본을 내보낸 뒤 렌파이로 이 프로젝트를 켠다. 렌파이는 앱 실행 파일의 두 칸 위 폴더(묶음의 `<렌파이 SDK>/pygaki/app`)에서, 없으면 환경 변수 `RENPY_SDK`에서 찾는다. 답은 `started` / `running` / `no-sdk` / `failed`. 설정 `prefs.runSkip`(처음 값 켬)이 켜져 있으면, 게임과 붙어 있거나(실시간 연결) 이 창이 켠 게임이 살아 있을 때 켜지 않고 `running`만 돌려준다. 켠 게임은 앱을 꺼도 그대로 둔다. PyKaki 안 플레이는 세션 34에 없앴다(7장).
 - `showpy_inbox.json`이 바뀌면 0.3초 뒤 받아 적는다(창으로 돌아올 때도).
 - [GUI 편집] 화면 (`src/ShowpyView.tsx`, `src/showpyLive.ts`): 툴바 [대본 편집 | GUI 편집]로 바꾼다(앱에서만). 대본 화면은 숨기기만 해서 캔버스 상태가 남는다. 메인 프로세스가 `game/showpy_live.json`을 보고 그 포트로 붙어(지켜보기 + 3초마다 다시 시도) 한 줄 JSON을 `pygaki:live`로 넘기고, 화면은 `liveSend`로 명령을 보낸다(`pygaki:liveSend`). 형식은 저장소 맨 위 docs/LINK.md 9장.
   - 줄기표 (`src/ShowpyFlow.tsx`, pygaki 플러그인 screen_fx 5.2): (앱에서는 꺼 둠, `ShowpyView.tsx` `FLOW_IN_APP = false`. 셰이더를 거는 자리를 상자·label로 옮겨서) "셰이더" 칸에서 `state.flow`가 있으면 가운데 위 [줄기표 펴기/접기](`flow` `toggle`). 펴지면 가운데가 원고 | 줄기표. 행을 끌면 `flow` `range`, 누르면 `flow` `pick`과 원고 칸 스크롤(`peek`), 네모 점은 `flow` `point`, 줄기표에서 Delete나 [셰이더 지우기]는 `flow` `delete`(Delete는 상자 캔버스로 안 가게 막음). 게임 서랍과 같은 어두운 바탕.
@@ -322,10 +312,10 @@
 |---|---|
 | `src/types.ts` | 데이터 구조 |
 | `src/ops.ts` | 편집 함수 (연결, 상자/그룹 추가, 삭제, 나가는 방식 변경, 화자 변경) |
-| `src/store.ts` | zustand 상태, 실행 취소, 선택, 플레이 상태, 상자 안 편집 상태 |
+| `src/store.ts` | zustand 상태, 실행 취소, 선택, 상자 안 편집 상태 |
 | `src/showpyLive.ts`, `src/ShowpyView.tsx` | 데스크톱 앱의 [GUI 편집] 화면 (게임과 실시간 연결) |
 | `src/effectsLib.ts`, `src/EffectsView.tsx` | 효과 관리: 목록·켜고 끄기·넣기·빼기(7장), [효과] 화면(3장) |
-| `src/fx/TransitionCanvas.tsx` | 그림 효과(`@transition`)를 WebGL로 그리기: [효과] 화면의 샘플과 플레이 화면이 함께 씀 |
+| `src/fx/TransitionCanvas.tsx` | 그림 효과(`@transition`)를 WebGL로 그리기: [효과] 화면의 샘플 |
 | `src/sample.ts` | 예제/빈 프로젝트, 불러오기 정규화 |
 | `src/persist.ts` | IndexedDB |
 | `src/files.ts` | 파일 열기/저장/`.rpy` 내보내기, 프로젝트 대본 파일과 밖에서 바뀜(9-3) |
@@ -337,14 +327,14 @@
 | `src/stage.ts` | 연출 줄 → 렌파이 명령 |
 | `src/LineFields.tsx` | 줄 종류 선택, 연출 줄 입력칸, 줄 끌어 옮기기 |
 | `src/layout.ts` | 자동 정렬 |
-| `src/playEngine.ts` | 플레이 엔진 (Windows는 대소문자를 구분하지 않아서 `Player.tsx`와 이름을 다르게 함) |
 | `src/actions.ts` | 정렬 실행, 상자 추가, 상자 더블클릭 편집, 포커스 |
 | `src/Canvas.tsx` | React Flow 캔버스, label 프레임, 선 |
 | `src/BoxView.tsx` | 상자 표시와 상자 안 편집 |
 | `src/Inspector.tsx` | 오른쪽 칸 |
-| `src/Player.tsx` | 플레이 카드(오른쪽 칸), 조작, 소리 |
-| `src/PlayStage.tsx` | 게임 화면: 틀, 그림, 대사창과 글자 내보내기 |
-| `src/Panels.tsx` | 오른쪽 탭, 검사, 스크립트 미리보기 |
+| `src/SayPreview.tsx` | 대사 미리보기: 글자 내보내기(`useReveal`, `Glyphs`), 글자 효과 카드의 `LinePreview` |
+| `src/PickPos.tsx` | 앱: [렌파이에서 여기로 이동], [위치 옮기기] |
+| `src/Card.tsx` | 카드 접기, [모두 접기] |
+| `src/Panels.tsx` | 오른쪽 칸 |
 | `src/Toolbar.tsx`, `src/Sidebar.tsx` | 툴바, 버전 목록, 왼쪽 패널 |
 | `src/textTags.tsx` | 텍스트 태그 표시 |
 | `src/prefs.ts` | 환경 설정(화면 색, 단축키) |
@@ -361,5 +351,4 @@
   - 선택지/상자 동작 → `$ 이름 = 값`
   - 선택지 조건 → `"텍스트" if 조건:`
   - 조건 분기 상자 → `if/elif/else` + `jump`
-  - 플레이에서 변수 보기와 바꾸기
 - **확인됨**: 내보낸 `.rpy`가 렌파이 8.5.3에서 실행된다(로컬 label 포함). 연결 쪽 확인 상태는 [LINK.md](../../docs/LINK.md) 9장.

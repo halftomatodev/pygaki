@@ -17,7 +17,6 @@ const FRAME_HEAD = 24;
 export function Canvas() {
   const project = useStore((s) => s.project);
   const selectedIds = useStore((s) => s.selectedIds);
-  const play = useStore((s) => s.play);
   const focusReq = useStore((s) => s.focusReq);
   const animating = useStore((s) => s.animating);
   const inlineEdit = useStore((s) => s.inlineEdit);
@@ -78,13 +77,12 @@ export function Canvas() {
 
   const edges = useMemo<Edge[]>(() => {
     const groupOf = new Map(project.nodes.map((b) => [b.id, b.group]));
-    const visited = new Set(play?.visitedEdges ?? []);
     const res: Edge[] = [];
     for (const b of project.nodes)
       for (const l of ops.exitLinks(b)) {
         if (!l.target || !groupOf.has(l.target)) continue;
         const id = `${b.id}|${l.handle}`;
-        const cls = ['k-' + l.kind, groupOf.get(l.target) !== b.group ? 'cross' : '', visited.has(b.id + '>' + l.target) ? 'visited' : ''];
+        const cls = ['k-' + l.kind, groupOf.get(l.target) !== b.group ? 'cross' : ''];
         res.push({
           id, source: b.id, sourceHandle: l.handle, target: l.target, targetHandle: 'in',
           className: cls.join(' '), selected: id === selEdge,
@@ -93,15 +91,7 @@ export function Canvas() {
         });
       }
     return res;
-  }, [project, play, selEdge]);
-
-  // 플레이 중인 상자로 화면 이동
-  useEffect(() => {
-    if (!play?.current) return;
-    const n = rf.getNode(play.current);
-    if (!n) return;
-    rf.setCenter(n.position.x + (n.measured?.width ?? 250) / 2, n.position.y + (n.measured?.height ?? 120) / 2, { zoom: rf.getZoom(), duration: 300 });
-  }, [play?.current, rf]);
+  }, [project, selEdge]);
 
   // 글을 고치기 시작하면 그 상자로 부드럽게 다가가고, 끝내면 원래 보던 곳으로 돌아간다
   const before = useRef<Viewport | null>(null);

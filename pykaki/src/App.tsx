@@ -8,7 +8,7 @@ import { SettingsModal } from './SettingsModal';
 import { EditCaret } from './Caret';
 import { useStore } from './store';
 import { exportRpyFile, saveProject } from './files';
-import { addBoxCenter, enterFullPlay, goNextBox, leaveFullPlay, toggleFocus } from './actions';
+import { addBoxCenter, goNextBox, toggleFocus } from './actions';
 import { SIZES, clampSize, hit, usePrefs } from './prefs';
 import { isTyping } from './util';
 import { isDesktop } from './desktop';
@@ -38,35 +38,19 @@ function Keys() {
         else if (!isTyping(e.target) && hit(e, 'redo')) run(s.redo);
         return;
       }
-      if (hit(e, 'fullPlay')) run(() => void (s.fullPlay ? leaveFullPlay() : enterFullPlay()));
-      else if (s.fullPlay) return; // 전체화면에서는 플레이 키만 쓴다
-      else if (hit(e, 'focus')) run(toggleFocus);
+      if (hit(e, 'focus')) run(toggleFocus);
       else if (s.inlineEdit && hit(e, 'nextBox')) run(() => goNextBox(s.inlineEdit!));
       else if (s.inlineEdit && hit(e, 'flowMenu')) run(() => useStore.setState({ flowMenu: !s.flowMenu }));
       else if (hit(e, 'save')) run(() => saveProject());
       else if (hit(e, 'saveAs')) run(() => saveProject(true));
       else if (hit(e, 'export')) run(() => exportRpyFile(true));
       else if (hit(e, 'newBox')) run(() => addBoxCenter(rf));
-      else if (hit(e, 'play')) run(() => s.startPlay(null));
       // 입력칸 안에서는 브라우저의 글자 되돌리기를 쓴다
       else if (!isTyping(e.target) && hit(e, 'undo')) run(s.undo);
       else if (!isTyping(e.target) && hit(e, 'redo')) run(s.redo);
     };
     window.addEventListener('keydown', onKey);
-    // 브라우저가 Esc로 전체화면을 끄면 편집 화면으로 돌아간다
-    let wasFull = false;
-    const onFull = () => {
-      if (document.fullscreenElement) wasFull = true;
-      else if (wasFull) {
-        wasFull = false;
-        leaveFullPlay();
-      }
-    };
-    document.addEventListener('fullscreenchange', onFull);
-    return () => {
-      window.removeEventListener('keydown', onKey);
-      document.removeEventListener('fullscreenchange', onFull);
-    };
+    return () => window.removeEventListener('keydown', onKey);
   }, [rf]);
   return null;
 }

@@ -45,6 +45,10 @@ async function until(what, fn, ms = 10000) {
       void d.accept();
     } else void d.dismiss();
   });
+  // 왼쪽 칸 카드는 켤 때마다 접혀서 시작한다 → [모두 펼치기]
+  await page.waitForSelector('.sidebar .fold-all button', { timeout: 20000 });
+  if ((await page.locator('.sidebar .sec.folded').count()) !== (await page.locator('.sidebar .sec.card').count())) fail('왼쪽 칸 카드가 접혀서 시작하지 않음');
+  await page.locator('.sidebar .fold-all button', { hasText: '모두 펼치기' }).click();
   await page.waitForSelector('.link-panel', { timeout: 20000 });
   const panel = await page.locator('.link-panel').innerText();
   if (!panel.includes(name)) fail('왼쪽 칸에 프로젝트 이름이 없음: ' + panel);
@@ -405,6 +409,16 @@ async function until(what, fn, ms = 10000) {
   await page.locator('.sp-picker .sp-pick-grid button').nth(1).click();
   await until('그림 칸 값을 보내지 않음', () => got.some((m) => m.cmd === 'custom_ui.set' && m.key === 'ctc_frames' && m.value?.[0] === 'gui/ctc/ctc2.png'));
   console.log('커서/대사 소리 칸: 됨');
+  // 상자 카드 [렌파이에서 여기로 이동]: 원고의 그 상자 첫 줄로 goto (PyKaki 안 플레이는 없앰)
+  await page.click('.view-switch button:nth-child(1)');
+  await page.locator('.react-flow__node-box').first().click();
+  const goBtn = page.locator('.insp button.go-here', { hasText: '렌파이에서 여기로 이동' });
+  await goBtn.waitFor({ timeout: 10000 });
+  if (await goBtn.isDisabled()) fail('게임과 이어졌는데 [렌파이에서 여기로 이동]을 못 누름');
+  await goBtn.click();
+  await until('[렌파이에서 여기로 이동]이 goto를 보내지 않음', () => got.some((m) => m.cmd === 'goto' && m.where === 'line' && m.file === 'game/script_flow.rpy' && m.line > 0));
+  if (await page.locator('.tb-run button', { hasText: /^▶ 플레이/ }).count()) fail('PyKaki 안 [▶ 플레이]가 남아 있음');
+  console.log('렌파이에서 여기로 이동: 됨');
   console.log('showpy 연결: 됨, 받은 명령', got.length);
   srv.close();
 
@@ -423,6 +437,7 @@ async function until(what, fn, ms = 10000) {
   if ((await page2.locator('.flow-pick button').count()) !== 2) fail('대본 고르기 칸 수가 다름');
   await page2.locator('.flow-pick button', { hasText: 'b.flow.json' }).click();
   await page2.waitForFunction(() => document.querySelector('.ptitle')?.value === '대본 나', null, { timeout: 20000 });
+  await page2.locator('.sidebar .fold-all button', { hasText: '모두 펼치기' }).click();
   if (!(await page2.locator('.link-panel').innerText()).includes('b.flow.json')) fail('왼쪽 칸에 고른 대본 파일 이름이 없음');
   await app2.close();
   console.log('대본 파일 고르기: 됨');

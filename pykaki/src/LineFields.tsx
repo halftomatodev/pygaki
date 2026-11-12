@@ -6,7 +6,7 @@ import type { ImageKind, Line, LineFx, SayStyle } from './types';
 import { shaderEffect } from './fx/textShaders';
 import { BOXES, EFFECTS, effectKnobs, formatEffect, formatImageFx, imageFxCode, parseEffect, parseImageFx, type EffectKnob, type EffectPart, FX_BASE, TAILS, FX_CURSOR, FX_OVERLAY, FX_TRANS, FX_WARP, POSITIONS, STAGE_LABEL, STAGE_TYPES, TRANSITIONS, fxArgs, lineCps, stageCode } from './stage';
 import { useGameFolder } from './gameFolder';
-import { LinePreview } from './PlayStage';
+import { LinePreview } from './SayPreview';
 import { TagBar, useTagTarget } from './TagBar';
 
 type SetLine = (fn: (x: Line) => void, key?: string) => void;

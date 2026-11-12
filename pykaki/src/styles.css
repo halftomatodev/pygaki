@@ -211,8 +211,6 @@ input[type='color']::-webkit-color-swatch { border: none; border-radius: 50%; }
 }
 .box.sel { outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent); }
 .box.editing { cursor: default; }
-.box.visited { border-color: var(--play); }
-.box.playing { outline: 2.5px solid var(--play); box-shadow: 0 0 0 6px color-mix(in srgb, var(--play) 22%, transparent); }
 .box-head { display: flex; gap: 4px; align-items: center; padding: 6px 8px 4px; }
 .badge { font-size: 10px; color: var(--muted); background: var(--hover); border-radius: 4px; padding: 1px 5px; font-family: var(--mono); white-space: nowrap; }
 .badge small { opacity: 0.6; }
@@ -297,7 +295,6 @@ input.box-title.ed { flex: 1; min-width: 0; }
 .react-flow__edge.cross .react-flow__edge-path { stroke-width: 2.2; stroke: color-mix(in srgb, var(--text) 55%, var(--bg)); }
 .react-flow__edge.k-call .react-flow__edge-path { stroke-dasharray: 6 4; stroke: #7c5cd6; }
 .react-flow__edge.k-then .react-flow__edge-path { stroke-dasharray: 2 4; }
-.react-flow__edge.visited .react-flow__edge-path { stroke: var(--play); stroke-width: 3; }
 .react-flow__edge.selected .react-flow__edge-path { stroke: var(--accent); }
 .react-flow__edge-textbg { fill: var(--bg); }
 .react-flow__edge-text { font-size: 10px; fill: #7c5cd6; }
@@ -364,51 +361,6 @@ pre.rpy { background: #17191f; color: #d4d6dd; padding: 12px; border-radius: 8px
 .drop-before { box-shadow: 0 -2px 0 var(--accent); }
 .drop-after { box-shadow: 0 2px 0 var(--accent); }
 
-/* 플레이 (게임 화면이라 테마와 상관없이 어둡게) */
-.pframe { position: relative; width: 100%; background: #000; color: #fff; overflow: hidden; border-radius: 10px; cursor: pointer; user-select: none; }
-.pframe.full { position: fixed; inset: 0; z-index: 200; width: auto; border-radius: 0; }
-.game { position: absolute; left: 0; top: 0; transform-origin: 0 0; overflow: hidden; background: linear-gradient(#2b3047, #1a1d2b); font-family: var(--game-font); }
-.layer { position: absolute; }
-.layer img, .layer video { display: block; }
-.noimg { display: inline-block; padding: 8px 16px; font-size: 22px; border: 2px dashed rgba(255, 255, 255, .45); border-radius: 8px; color: rgba(255, 255, 255, .7); }
-.noimg.bg { margin: 16px; }
-.fade-black { position: absolute; inset: 0; background: #000; opacity: 0; animation: fade-black 1s linear; pointer-events: none; }
-@keyframes fade-black { 50% { opacity: 1; } }
-.tin-dissolve { animation: t-opacity var(--dur) linear backwards; }
-.tout-dissolve { animation: t-opacity var(--dur) linear reverse forwards; }
-@keyframes t-opacity { from { opacity: 0; } to { opacity: 1; } }
-.tin-fade { animation: t-after-half var(--dur) steps(1) backwards; }
-.tout-fade { animation: t-until-half var(--dur) steps(1) forwards; }
-@keyframes t-after-half { from { opacity: 0; } 50%, to { opacity: 1; } }
-@keyframes t-until-half { from { opacity: 1; } 50%, to { opacity: 0; } }
-.tin-inleft { animation: t-left var(--dur) ease-out backwards; }
-.tin-inright { animation: t-right var(--dur) ease-out backwards; }
-.tin-intop { animation: t-top var(--dur) ease-out backwards; }
-.tin-inbottom { animation: t-bottom var(--dur) ease-out backwards; }
-.tout-outleft { animation: t-left var(--dur) ease-in reverse forwards; }
-.tout-outright { animation: t-right var(--dur) ease-in reverse forwards; }
-.tout-outtop { animation: t-top var(--dur) ease-in reverse forwards; }
-.tout-outbottom { animation: t-bottom var(--dur) ease-in reverse forwards; }
-@keyframes t-left { from { transform: translateX(-2000px); } }
-@keyframes t-right { from { transform: translateX(2000px); } }
-@keyframes t-top { from { transform: translateY(-2000px); } }
-@keyframes t-bottom { from { transform: translateY(2000px); } }
-.tin-zoomin { animation: t-zoom var(--dur) ease-out backwards; }
-.tout-zoomout { animation: t-zoom var(--dur) ease-in reverse forwards; }
-@keyframes t-zoom { from { transform: scale(0); opacity: 0; } }
-.ptop { position: absolute; top: 6px; left: 6px; right: 6px; display: flex; flex-wrap: wrap; gap: 4px; pointer-events: none; }
-.ptop span { background: rgba(0, 0, 0, .55); font-family: var(--mono); font-size: 11px; padding: 1px 6px; border-radius: 4px; color: #c7d2fe; }
-.pmenu { position: absolute; inset: 0 0 160px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px; }
-.pmenu button { width: 62%; background: rgba(0, 0, 0, .72); color: #fff; padding: 12px; border: none; border-radius: 4px; white-space: normal; font: inherit; }
-.pmenu button:hover { background: rgba(255, 255, 255, .92) !important; color: #111 !important; }
-.pmenu button.broken { opacity: 0.6; }
-.ended { position: absolute; top: 40%; left: 0; right: 0; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; color: #e5e7eb; text-shadow: 0 1px 4px #000; }
-.ended.broken, .ended.missing, .ended.loop { color: #fca5a5; }
-.ended button { background: rgba(255, 255, 255, 0.9); color: #111; font: inherit; }
-.ended small { font-size: .7em; opacity: .75; }
-.textbox { position: absolute; left: 0; right: 0; background-size: 100% 100%; }
-.textbox .name { position: absolute; padding: 5px 10px; background-size: 100% 100%; white-space: nowrap; }
-.textbox .say { position: absolute; line-height: 1.3; white-space: pre-wrap; word-break: keep-all; overflow-wrap: anywhere; }
 /* 글자 하나씩: 나온 글자(.on)만 보인다. 등장 효과는 렌파이 텍스트 셰이더를 비슷하게 흉내 낸다 */
 .ch { visibility: hidden; }
 .ch.on { visibility: visible; }
@@ -510,9 +462,6 @@ pre.rpy { background: #17191f; color: #d4d6dd; padding: 12px; border-radius: 8px
 @keyframes fx-wipe { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
 /* 클릭으로 한 번에 보이면 렌파이처럼 효과 없이 */
 .fast .ch.on { animation: none !important; transition: none !important; }
-.ctrl { display: flex; gap: 2px; margin-top: 8px; flex-wrap: wrap; }
-.plog { margin-top: 8px; max-height: 200px; overflow: auto; border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; line-height: 1.6; }
-.plog .c { color: var(--accent); }
 .dbg { margin-top: 10px; font-size: 12px; background: var(--faint); border-radius: 6px; padding: 8px; line-height: 1.7; color: var(--muted); }
 
 /* 창 (버전 목록, 환경 설정) */
@@ -549,7 +498,6 @@ pre.rpy { background: #17191f; color: #d4d6dd; padding: 12px; border-radius: 8px
 [data-mono='1'] .pl.pl-stage code { background: transparent; padding: 0; }
 [data-mono='1'] .todo { text-decoration: underline dotted; }
 [data-mono='1'] .box.sel { outline: 2px solid var(--text); outline-offset: 2px; }
-[data-mono='1'] .box.playing { outline: 2px dashed var(--text); outline-offset: 3px; box-shadow: none; }
 [data-mono='1'] .box.editing .pl.active { background: transparent; box-shadow: none; text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--text) 40%, transparent); }
 [data-mono='1'] button:hover:not(:disabled), [data-mono='1'] .tabs button.on { text-decoration: underline; }
 [data-mono='1'] button.on, [data-mono='1'] .swatch.on { outline: 1px solid var(--text); }
@@ -1017,9 +965,6 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 /* 오른쪽 칸: 탭 없이 카드만 (왼쪽 칸과 같은 모양) */
 .right-panel { padding: 4px 10px 16px 4px; }
 .right-scroll { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 10px; }
-.right-scroll[hidden], .play-card[hidden] { display: none; }
-.play-back { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; }
-.play-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
 .look > h3.look-h { font-size: 13.5px; font-weight: 700; color: var(--text); margin: 0 0 6px; }
 
 /* 왼쪽 칸 */
