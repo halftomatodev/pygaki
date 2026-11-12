@@ -1,4 +1,5 @@
 // 파일 저장/열기/.rpy 내보내기. 크롬·엣지는 같은 파일에 덮어쓰기, 그 외 브라우저는 다운로드.
+import { useFolded } from './Card';
 import { useStore } from './store';
 import { createEmpty, normalizeProject } from './sample';
 import { generateRpy as generateRpyWith } from './exportRpy';
@@ -392,6 +393,7 @@ export async function exportRpyFile(again = false) {
   const errors = warnings.filter((x) => x.level === 'error').length;
   if (errors && !confirm(`오류 ${errors}개가 있어요. 이대로 내보내면 렌파이에서 실행이 안 될 수 있어요. 계속할까요?`)) {
     useStore.setState({ hideLeft: false });
+    useFolded.setState({ warn: false }); // 왼쪽 카드는 접혀서 시작하니 검사 카드를 펼친다
     document.getElementById('warn-card')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     return;
   }

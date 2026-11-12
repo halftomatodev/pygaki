@@ -7,7 +7,7 @@ import { addBoxCenter, runLayout } from './actions';
 import { keyOf, SIZES, usePrefs } from './prefs';
 import { forgetFlow } from './flowPick';
 import { useStore } from './store';
-import { Card } from './Card';
+import { Card, FoldAll, FoldScope } from './Card';
 import * as ops from './ops';
 import type { Character, LabelGroup } from './types';
 import { IDENT, RESERVED, timeStr } from './util';
@@ -31,7 +31,9 @@ export function Sidebar() {
 
   return (
     <aside className="sidebar">
-      <Card id="labels" title="label (장면)" extra={<button onClick={() => update((p) => void ops.addGroup(p))}>+ 추가</button>}>
+      <FoldScope name="left">
+      <FoldAll />
+      <Card id="labels" defFolded title="label (장면)" extra={<button onClick={() => update((p) => void ops.addGroup(p))}>+ 추가</button>}>
         {project.labels.map((g) => (
           <GroupRow key={g.id} g={g} />
         ))}
@@ -51,7 +53,7 @@ export function Sidebar() {
         </label>
       </Card>
 
-      <Card id="chars" title="캐릭터" extra={<button onClick={addChar}>+ 추가</button>}>
+      <Card id="chars" defFolded title="캐릭터" extra={<button onClick={addChar}>+ 추가</button>}>
         {project.characters.length === 0 && <p className="tip">대사를 말할 캐릭터를 추가하세요. 내레이션은 따로 등록하지 않아도 돼요.</p>}
         {project.characters.map((c, i) => (
           <CharRow key={i} c={c} i={i} />
@@ -60,13 +62,13 @@ export function Sidebar() {
 
       <WarnCard />
 
-      <Card id="project" title="렌파이 프로젝트 정보">
+      <Card id="project" defFolded title="렌파이 프로젝트 정보">
         <LinkPanel />
       </Card>
 
       <ScriptCard />
 
-      <Card id="settings" title="설정">
+      <Card id="settings" defFolded title="설정">
         <div className="info-row">
           <span>양쪽 칸 크기</span>
           <span className="mini-btns">
@@ -100,6 +102,7 @@ export function Sidebar() {
       </Card>
 
       <Usage />
+      </FoldScope>
     </aside>
   );
 }
@@ -121,7 +124,7 @@ function WarnCard() {
     useStore.getState().focusNodes([w.nodeId]);
   };
   return (
-    <Card id="warn" className="warn-card" domId="warn-card" title={<>검사 {warnings.length > 0 && <span className={'count' + (errors ? ' err' : '')}>{warnings.length}</span>}</>}>
+    <Card id="warn" defFolded className="warn-card" domId="warn-card" title={<>검사 {warnings.length > 0 && <span className={'count' + (errors ? ' err' : '')}>{warnings.length}</span>}</>}>
       {!warnings.length && <p className="tip">문제가 없어요.</p>}
       {warnings.map((w, i) => (
         <div key={i} className={'warn-item ' + w.level + (w.nodeId ? ' go' : '')} onClick={() => go(w)}>
@@ -151,7 +154,7 @@ function ScriptCard() {
 function Usage() {
   usePrefs((p) => p.keys); // 단축키를 바꾸면 안내도 다시 그린다
   return (
-    <Card id="usage" title="사용법" className="usage">
+    <Card id="usage" defFolded title="사용법" className="usage">
       <ul>
           <li>상자를 <b>더블클릭</b>하면 상자 안에서 바로 글을 써요. 대사 줄·제목·선택지를 더블클릭하면 그 칸으로 가요. Esc나 빈 곳 클릭으로 끝내요.</li>
           <li>상자를 한 번 클릭하면 오른쪽에서 label, 다음 흐름 같은 나머지 설정을 바꿔요.</li>

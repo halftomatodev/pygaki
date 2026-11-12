@@ -135,7 +135,9 @@ code { font-family: var(--mono); }
 .sec.folded { --sky: color-mix(in srgb, #38bdf8 15%, var(--panel)); background: var(--sky); padding: 6px 10px; }
 .sec.folded > h3 { margin: 0; font-weight: 600; color: color-mix(in srgb, #0284c7 60%, var(--text)); }
 .sec.folded > h3 .fold-btn { background: color-mix(in srgb, var(--text) 7%, var(--sky)); }
-.look-panel.folded { position: static; box-shadow: none; }
+.fold-all { display: flex; justify-content: flex-end; margin: 0 2px -6px; flex-shrink: 0; }
+.fold-all .fold-btn { color: var(--muted); background: var(--faint); font-weight: 500; font-size: 11.5px; padding: 2px 8px; }
+.fold-all .fold-btn:hover:not(:disabled) { background: var(--line); color: var(--text); text-decoration: none; }
 [data-mono='1'] .sec.folded { background: var(--bg); outline: 1px dashed var(--text); }
 [data-mono='1'] .sec.folded > h3 { color: var(--text); }
 .sec > .tip, .sec .link-panel > .tip { margin: 6px 0 2px; }
@@ -163,7 +165,6 @@ body.resizing .react-flow { pointer-events: none; }
 .info-btn { display: block; width: 100%; margin: 4px 0; background: var(--faint); padding: 5px 6px; }
 .info-btn.primary { background: var(--accent-soft); font-weight: 600; }
 [data-mono='1'] :is(.sec, .tabs, .tab-body:not(.cards)) { background: transparent; border: 1px solid var(--text); border-radius: 0; }
-[data-mono='1'] .look-panel { background: var(--bg); box-shadow: none; }
 [data-mono='1'] :is(.sec-btns button, .info-btn) { background: transparent; outline: 1px solid var(--text); border-radius: 0; }
 [data-mono='1'] .toolbar .run { background: var(--text); color: var(--bg); border-radius: 0; }
 [data-mono='1'] .toolbar .follow, [data-mono='1'] .toolbar .follow.on { background: transparent; color: var(--text); outline: 1px solid var(--text); border-radius: 0; }
@@ -669,8 +670,6 @@ fieldset.plain:disabled { opacity: 0.4; }
 /* showpy 연결 */
 .link-panel { margin: 0; }
 .warn-text { color: #b45309; }
-/* 글자 효과 칸: 오른쪽 편집 탭 위쪽에 붙어 있어서 줄이 많아 스크롤해도 보인다 */
-.look-panel { position: sticky; top: 0; z-index: 3; box-shadow: 0 6px 14px -8px rgba(0, 0, 0, 0.25); }
 .look { width: 100%; display: flex; flex-direction: column; gap: 3px; }
 .preview { position: relative; display: flex; align-items: center; height: 84px; padding: 0; background: #15171f; border-radius: 6px; overflow: hidden; cursor: pointer; user-select: none; }
 .preview-text { width: 100%; padding: 0; line-height: 1.25; white-space: pre-wrap; word-break: keep-all; overflow-wrap: anywhere; font-family: var(--game-font); }

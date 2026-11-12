@@ -1,6 +1,7 @@
 import { useStore } from './store';
 import { Inspector } from './Inspector';
 import { Player } from './Player';
+import { FoldAll, FoldScope } from './Card';
 
 // 오른쪽 칸: 왼쪽 칸과 같은 카드 모양. 탭 없이 고른 것을 보여 준다
 // (상자를 누르면 상자 카드들, ◐ 셰이더를 누르면 셰이더 카드들, 플레이 중이면 플레이 카드)
@@ -11,6 +12,8 @@ export function RightPanel() {
   return (
     <div className="right-panel">
       <div className="right-scroll" hidden={showPlay}>
+        <FoldScope name="right">
+        <FoldAll />
         {playing && (
           <section className="sec play-back">
             <span>플레이 중이에요</span>
@@ -18,6 +21,7 @@ export function RightPanel() {
           </section>
         )}
         <Inspector />
+        </FoldScope>
       </div>
       {/* 플레이 상태를 유지하려고 닫아도 지우지 않는다 */}
       <div className="tab-body play-card" hidden={!showPlay}>

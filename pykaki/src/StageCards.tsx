@@ -13,8 +13,6 @@ const TYPES: Record<Kind, LineType[]> = { bg: ['scene'], pic: ['show', 'hide'], 
 
 export function StageCards({ b, upd }: { b: BoxNode; upd: Upd }) {
   const activeLine = useStore((s) => s.activeLine);
-  const at = b.lines.findIndex((l) => l.id === activeLine);
-  const where = at >= 0 ? `${at + 1}번째 줄 앞에 넣어요` : '상자 끝에 넣어요';
   const add = (l: Omit<Line, 'id' | 'text'>) => {
     const nl: Line = { id: uid('l'), text: '', ...l };
     upd((x) => {
@@ -28,17 +26,14 @@ export function StageCards({ b, upd }: { b: BoxNode; upd: Upd }) {
       <Card id="i-bg" title="배경 (그림, 영상)">
         <Used b={b} kind="bg" />
         <BgPicker add={add} />
-        <p className="tip">{where} · 고른 대사 줄을 바꾸면 넣는 자리도 바뀌어요.</p>
       </Card>
       <Card id="i-pic" title="그림, 영상">
         <Used b={b} kind="pic" />
         <PicPicker add={add} />
-        <p className="tip">{where}</p>
       </Card>
       <Card id="i-sound" title="효과음, 음악">
         <Used b={b} kind="sound" />
         <SoundPicker add={add} />
-        <p className="tip">{where}</p>
       </Card>
     </>
   );
