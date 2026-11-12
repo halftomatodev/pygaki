@@ -823,11 +823,20 @@ init -8 python in ui_editor:
         tm = getattr(store, "tmenu", None)
 
         if cmd == "editor":
+            ## line: 이미지/영상 탭에서 고를 원고 줄 (PyKaki [위치 옮기기], ui_kit 4.8, LINK.md 9장)
+            st_tab = get_tab("stage") if (c.get("tab") == "stage" and c.get("line")) else None
+            if st_tab is not None:
+                try:
+                    st_tab.want = (str(c.get("file") or "script_flow.rpy"), int(c["line"]))
+                except Exception:
+                    st_tab.want = None
             if c.get("open"):
                 if not state.open:
                     open_editor(c.get("tab"))
                 elif c.get("tab"):
                     switch_tab(c["tab"])
+                if st_tab is not None and state.open and state.tab == "stage" and tab_available(st_tab)[0]:
+                    st_tab.pick_default()
             elif state.open:
                 close_editor()
             return True

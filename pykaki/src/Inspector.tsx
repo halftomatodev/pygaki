@@ -155,6 +155,7 @@ function LineRow({ l, i, upd, drag }: { l: Line; i: number; upd: Upd; drag: Retu
 
   const set = (fn: (x: Line) => void, key?: string) => upd((x) => fn(x.lines[i]), key);
   const isSay = l.type === 'say' || l.type === 'narration';
+  const movable = l.type === 'show' || l.type === 'scene'; // 숨기기 줄은 자리가 없어서 뺌
 
   const onKey = (e: React.KeyboardEvent) => {
     if (!hit(e, 'newLine')) return;
@@ -172,6 +173,7 @@ function LineRow({ l, i, upd, drag }: { l: Line; i: number; upd: Upd; drag: Retu
         <span className="grip" {...drag.grip(i)}>⠿</span>
         <SpeakerSelect l={l} set={set} />
         {isSay && <MoveBtn where={{ line: l.id }} tab="say" what="대사" />}
+        {movable && <MoveBtn where={{ line: l.id }} tab="stage" what="이미지/영상" />}
         <GoHere where={{ line: l.id }} short />
         <button title="줄 삭제" onClick={() => upd((x) => void x.lines.splice(i, 1))}>✕</button>
         {l.type === 'say' && <input className="attr" placeholder="속성(표정)" value={l.attr ?? ''} onChange={(e) => upd((x) => void (x.lines[i].attr = e.target.value), 'attr' + l.id)} />}
@@ -184,6 +186,7 @@ function LineRow({ l, i, upd, drag }: { l: Line; i: number; upd: Upd; drag: Retu
         )}
       </div>
       {isSay && <PickBand where={{ line: l.id }} tab="say" what="대사" />}
+      {movable && <PickBand where={{ line: l.id }} tab="stage" what="그림" />}
     </div>
   );
 }

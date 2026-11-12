@@ -4,6 +4,8 @@
 
 ## 5.1 (만드는 중)
 
+`ui_kit` 4.8 (2026-11-12): 실시간 연결의 `editor` 명령에 `line`(원고 줄 번호)과 `file`을 주면 이미지/영상 탭이 그 show/scene 줄을 고름(`docs/LINK.md` 9장). pygaki 앱·PyKaki: 대사 카드 줄마다와 그림 카드에 **[위치 옮기기] [여기로 이동]**, 상자 카드 **[렌파이에서 여기로 이동]**(예전 [🎯 게임에서 위치 고르기]와 [▶ 여기서 플레이]를 바꿈). PyKaki 안 플레이 화면과 웹 버전은 없앰.
+
 `splash` 2.2, `ui_kit` 4.7 (2026-11-12): 앱과 붙어 있을 때 스플래시 페이지 목록을 앱에 보내고, 앱에서 페이지를 고름(`docs/LINK.md` 9장 `splash`, `splash.page`). pygaki 앱의 GUI 편집 왼쪽 "스플래시" 카드가 로고·경고·조작 방법(과 직접 만든 페이지)으로 나뉨.
 
 `ui_kit` 4.7 (2026-11-12): **`custom_ui.scene(typing_sound=, ctc=, cursor=)`** 장면(상자)마다 대사 소리, 클릭 대기 표시 그림, 커서 그림을 바꿈. `ctc`, `cursor`는 그림이 든 폴더(이름 차례로 돌림), `typing_sound=None`이면 끔, `scene()`이면 게임 처음 값으로. 세이브·되감기에 남음(`custom_ui_scene`). 형식은 `docs/LINK.md` 2장.

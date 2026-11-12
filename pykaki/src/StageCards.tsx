@@ -7,6 +7,7 @@ import { useStore } from './store';
 import type { BoxNode, Line, LineType } from './types';
 import { uid } from './util';
 import type { Upd } from './Inspector';
+import { GoHere, MoveBtn, PickBand } from './PickPos';
 
 type Kind = 'bg' | 'pic' | 'sound';
 const TYPES: Record<Kind, LineType[]> = { bg: ['scene'], pic: ['show', 'hide'], sound: ['sound', 'music'] };
@@ -46,10 +47,17 @@ function Used({ b, kind }: { b: BoxNode; kind: Kind }) {
   return (
     <div className="sc-used">
       {rows.map(([l, i]) => (
-        <button key={l.id} onClick={() => useStore.setState({ focusLineId: l.id, activeLine: l.id })} title="그 줄로 가요">
-          <span className="sc-n">{i + 1}</span>
-          {lineText(l)}
-        </button>
+        <div key={l.id} className="sc-row">
+          <div className="sc-row-top">
+            <button className="sc-go" onClick={() => useStore.setState({ focusLineId: l.id, activeLine: l.id })} title="그 줄로 가요">
+              <span className="sc-n">{i + 1}</span>
+              {lineText(l)}
+            </button>
+            {(l.type === 'show' || l.type === 'scene') && <MoveBtn where={{ line: l.id }} tab="stage" what="이미지/영상" />}
+            <GoHere where={{ line: l.id }} short />
+          </div>
+          {(l.type === 'show' || l.type === 'scene') && <PickBand where={{ line: l.id }} tab="stage" what="그림" />}
+        </div>
       ))}
     </div>
   );

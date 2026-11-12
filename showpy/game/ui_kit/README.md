@@ -38,6 +38,10 @@ bands
 
 4.1에서 바뀐 점: pygaki 앱과의 실시간 연결에 줄기표(`state.flow`, `flow` 명령)를 더함. Screen FX 5.2의 줄기표를 앱에서 펴고 끌 수 있습니다.
 
+### 4.8에서 바뀐 점 (이미지/영상 탭에서 줄 고르기)
+
+- pygaki 앱의 [위치 옮기기]가 게임을 그 줄로 옮기고 GUI 편집기 이미지/영상 탭을 열면서 원고 줄 번호를 보냅니다(`editor` 명령의 `line`, `file`). 탭은 그 show/scene 줄을 고릅니다. 위치와 전환을 끌어서 고치고 저장하면 지금처럼 PyKaki가 받아 적습니다.
+
 ### 4.7에서 바뀐 점 (장면마다 대사 소리, 커서, 클릭 대기)
 
 - **`$ custom_ui.scene(typing_sound="audio/soft.ogg", ctc="gui/ctc/heart", cursor="gui/cursor/hand")`**: 그 줄부터 대사 소리, 클릭 대기 표시 그림, 커서 그림을 바꿉니다. `ctc`, `cursor`는 그림이 든 폴더이고 그 안의 그림을 이름 차례(1, 2, 10)로 돌립니다. `typing_sound=None`이면 끔, 안 적은 값과 `$ custom_ui.scene()`은 게임 처음 값(`custom_ui_layout.rpy`). 값은 세이브·되감기에 남습니다. 클릭 대기 표시와 커서는 처음 값에서 켜 둔 것만 바뀌고, 커서는 소프트웨어 커서일 때만 바뀝니다. PyKaki가 상자마다 이 줄을 적습니다(`docs/LINK.md` 2장).

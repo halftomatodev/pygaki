@@ -20,26 +20,29 @@ const keyOf = (w: Where) => ('line' in w ? 'l:' + w.line : 'b:' + w.box);
 export const useGameReady = () => useLive((s) => isDesktop && s.on);
 export const GAME_OFF_TIP = '앱에서 [▶ 렌파이에서 실행]으로 게임을 켜고 연결하면 눌러요';
 
-async function goto(w: Where): Promise<boolean> {
+async function goto(w: Where): Promise<number | null> {
   const line = 'line' in w ? await exportedLineOf(w.line) : await exportedBoxLineOf(w.box);
   if (line == null) {
     useStore.getState().say(`원고(${RPY_FILE})를 이 대본으로 내보내지 못해서 게임을 옮기지 않았어요. 검사 카드나 Ctrl+E를 확인해 주세요`);
-    return false;
+    return null;
   }
   liveSend({ cmd: 'goto', where: 'line', file: 'game/' + RPY_FILE, line });
-  return true;
+  return line;
 }
 
 export async function gotoInGame(w: Where) {
-  if (await goto(w)) useStore.getState().say('게임을 이 자리로 옮겼어요');
+  if ((await goto(w)) != null) useStore.getState().say('게임을 이 자리로 옮겼어요');
 }
 
 export async function pickInGame(w: Where, tab: PickTab) {
-  if (!(await goto(w))) return;
+  const line = await goto(w);
+  if (line == null) return;
   usePicked.setState({ key: keyOf(w) });
   liveSend({ cmd: 'panel', hide: !useLive.getState().gamePanel });
-  // 게임이 그 줄로 간 뒤에 탭을 연다 (그 화면에서만 쓸 수 있는 탭이라)
-  setTimeout(() => liveSend({ cmd: 'editor', open: true, tab }), 700);
+  // 게임이 그 줄로 간 뒤에 탭을 연다 (그 화면에서만 쓸 수 있는 탭이라).
+  // 이미지/영상 탭은 그 줄을 골라 달라고 줄 번호도 보낸다 (ui_kit 4.8. 예전 판은 line을 모르고 그냥 연다)
+  const extra = tab === 'stage' ? { file: RPY_FILE, line } : {};
+  setTimeout(() => liveSend({ cmd: 'editor', open: true, tab, ...extra }), 700);
 }
 
 // [렌파이에서 여기로 이동]. short면 줄마다 붙는 짧은 이름

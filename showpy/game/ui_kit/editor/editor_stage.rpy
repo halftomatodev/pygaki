@@ -46,6 +46,7 @@ init -8 python in ui_editor:
             self.pos_scope = "box"      # PyKaki 원고의 위치 저장 범위: "box" 이 상자에서만 / "all" 어디서나
             self.media_sel = None       # 그림/영상 고르기 창에서 고른 것 (이름)
             self.media_filter = "all"   # "all" / "image" / "movie"
+            self.want = None            # PyKaki [위치 옮기기]가 고르라고 한 (원고 파일 이름, 줄) (4.8)
 
         def st(self):
             return getattr(store, "stage", None)
@@ -251,7 +252,26 @@ init -8 python in ui_editor:
                 return None
             return n
 
+        def pick_want(self):
+            """PyKaki가 고르라고 한 줄이 있고 게임이 그 원고에 있으면 그 줄을 고릅니다. 골랐으면 True. (4.8)"""
+            want = getattr(self, "want", None)
+            node = self.game_node()
+            if not want or node is None:
+                return False
+            fn = node.filename.replace("\\", "/")
+            if fn.split("/")[-1] != want[0].replace("\\", "/").split("/")[-1]:
+                return False
+            self.want = None
+            stmts = self.statements(node.filename)
+            if not stmts:
+                return False
+            after = [ s for s in stmts if s[0] >= want[1] ]
+            self.sel = (node.filename, (after[0] if after else stmts[-1])[0])
+            return True
+
         def pick_default(self):
+            if self.pick_want():
+                return
             rt = self.st().rt
             node = self.game_node()
             if self._valid(self.sel) and node is not None and self.sel[0] == node.filename:

@@ -1008,6 +1008,9 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 /* 상자 편집의 배경 / 그림·영상 / 소리 카드 (StageCards.tsx) */
 .sc-used { display: flex; flex-direction: column; gap: 1px; margin-bottom: 6px; }
 .sc-used button { text-align: left; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+.sc-row-top { display: flex; align-items: center; gap: 2px; }
+.sc-row-top .sc-go { flex: 1; min-width: 0; }
+.sc-used .move-pos, .sc-used .go-here { flex-shrink: 0; font-size: 11px; color: var(--accent); }
 .sc-n { display: inline-block; min-width: 18px; color: var(--muted); font-size: 11px; }
 .sc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 4px; max-height: 220px; overflow: auto; margin-bottom: 6px; }
 .sc-grid button { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 3px; background: var(--faint); border-radius: 8px; min-width: 0; }
