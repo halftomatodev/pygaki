@@ -307,6 +307,46 @@ ipcMain.handle('pygaki:runGame', (e, always) => {
   }
 });
 
+// ── 파일 고르기 (그림·영상·소리 카드의 [📂 파일 고르기]) ──
+// 탐색기 창으로 파일 하나를 고른다. game 폴더 안이면 game 기준 경로를, 밖이면 복사할 때 쓸 표(token)를 돌려준다.
+// 화면은 고른 파일의 경로를 모르고, 복사는 이 창에서 고른 파일만 한다
+const PICK_KINDS = {
+  image: { dir: 'images', name: '그림, 영상', ext: ['png', 'jpg', 'jpeg', 'webp', 'avif', 'webm'] },
+  sound: { dir: 'audio', name: '소리', ext: ['ogg', 'opus', 'mp3', 'wav', 'flac'] },
+};
+const picked = new Map(); // token → 고른 파일의 전체 경로
+ipcMain.handle('pygaki:pickFile', async (e, kind) => {
+  const k = PICK_KINDS[kind];
+  if (!k) throw new Error('모르는 종류예요: ' + kind);
+  const project = projectOf(e);
+  const game = path.join(project, 'game');
+  const start = fs.existsSync(path.join(game, k.dir)) ? path.join(game, k.dir) : game;
+  const w = windows.get(e.sender.id);
+  const r = await dialog.showOpenDialog(w?.win, { title: k.name + ' 파일 고르기', defaultPath: start, properties: ['openFile'], filters: [{ name: k.name, extensions: k.ext }] });
+  if (r.canceled || !r.filePaths[0]) return null;
+  const full = path.resolve(r.filePaths[0]);
+  const name = path.basename(full);
+  if (full.startsWith(game + path.sep)) return { name, rel: path.relative(game, full).split(path.sep).join('/') };
+  const token = Math.random().toString(36).slice(2) + Date.now().toString(36);
+  picked.set(token, full);
+  return { name, token };
+});
+// 밖에서 고른 파일을 game/<dir>/ 로 복사한다 (dir은 images, movies, audio만). 같은 이름이 있으면 _2, _3 …을 붙인다
+ipcMain.handle('pygaki:importFile', (e, token, dir) => {
+  const full = picked.get(token);
+  if (!full) throw new Error('고른 파일을 찾지 못했어요');
+  if (!['images', 'movies', 'audio'].includes(dir)) throw new Error('복사할 수 없는 자리예요: ' + dir);
+  picked.delete(token);
+  const dest = inside(projectOf(e), path.join('game', dir));
+  fs.mkdirSync(dest, { recursive: true });
+  const ext = path.extname(full);
+  const base = path.basename(full, ext);
+  let name = base + ext;
+  for (let i = 2; fs.existsSync(path.join(dest, name)); i++) name = `${base}_${i}${ext}`;
+  fs.copyFileSync(full, path.join(dest, name));
+  return dir + '/' + name;
+});
+
 // 다른 프로젝트 열기: 새 창으로
 ipcMain.handle('pygaki:choose', async (e) => {
   const w = windows.get(e.sender.id);

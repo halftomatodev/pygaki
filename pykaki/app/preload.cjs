@@ -11,6 +11,8 @@ contextBridge.exposeInMainWorld('pygaki', {
   openFolder: (rel) => ipcRenderer.invoke('pygaki:openFolder', rel),
   choose: () => ipcRenderer.invoke('pygaki:choose'),
   runGame: (always) => ipcRenderer.invoke('pygaki:runGame', !!always), // 렌파이에서 실행
+  pickFile: (kind) => ipcRenderer.invoke('pygaki:pickFile', kind), // 탐색기로 그림·영상('image') 또는 소리('sound') 고르기
+  importFile: (token, dir) => ipcRenderer.invoke('pygaki:importFile', token, dir), // 밖에서 고른 파일을 game/<dir>로 복사
 
   // showpy 실시간 연결 (docs/LINK.md 9장)
   liveSend: (msg) => ipcRenderer.invoke('pygaki:liveSend', msg),

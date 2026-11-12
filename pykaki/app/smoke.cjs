@@ -419,6 +419,12 @@ async function until(what, fn, ms = 10000) {
   await until('[렌파이에서 여기로 이동]이 goto를 보내지 않음', () => got.some((m) => m.cmd === 'goto' && m.where === 'line' && m.file === 'game/script_flow.rpy' && m.line > 0));
   if (await page.locator('.tb-run button', { hasText: /^▶ 플레이/ }).count()) fail('PyKaki 안 [▶ 플레이]가 남아 있음');
   console.log('렌파이에서 여기로 이동: 됨');
+  // [📂 파일 고르기]: 창은 시험에서 못 띄우니 함수와 단추가 있는지, 고르지 않은 파일은 복사하지 못하는지만
+  if ((await page.evaluate(() => typeof window.pygaki.pickFile)) !== 'function') fail('pickFile이 없음');
+  const imp = await page.evaluate(() => window.pygaki.importFile('nope', 'images').then(() => 'copied', (e) => 'blocked: ' + e.message));
+  if (imp === 'copied') fail('고르지 않은 파일을 복사함');
+  if ((await page.locator('.insp .sc-pickfile').count()) < 3) fail('그림·소리 카드에 [📂 파일 고르기]가 없음');
+  console.log('파일 고르기 단추: 됨,', imp.slice(0, 30));
   console.log('showpy 연결: 됨, 받은 명령', got.length);
   srv.close();
 

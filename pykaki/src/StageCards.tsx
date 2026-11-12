@@ -2,7 +2,8 @@
 // 줄은 대사 사이 차례가 중요해서 대사 카드에 그대로 있고, 여기서는 "지금 쓰는 줄 바로 앞"(없으면 상자 끝)에 넣기만 한다.
 import { useEffect, useState } from 'react';
 import { Card } from './Card';
-import { pictureOf, soundUrl, useGameFolder } from './gameFolder';
+import { imageNameOf, movieNameOf, pictureOf, scanFolder, soundUrl, useGameFolder } from './gameFolder';
+import { desktop } from './desktop';
 import { useStore } from './store';
 import type { BoxNode, Line, LineType } from './types';
 import { uid } from './util';
@@ -73,11 +74,53 @@ function lineText(l: Line) {
 
 const words = (n: string) => n.split(' ');
 
+// [📂 파일 고르기] (앱): 탐색기로 고른 파일의 game 기준 경로. game 밖이면 묻고 images·movies·audio로 복사한다
+async function pickGameFile(kind: 'image' | 'sound'): Promise<string | null> {
+  const r = await desktop?.pickFile?.(kind).catch((e) => (alert('파일을 고르지 못했어요: ' + e.message), null));
+  if (!r) return null;
+  const dir = kind === 'sound' ? 'audio' : /\.webm$/i.test(r.name) ? 'movies' : 'images';
+  if (r.rel) {
+    if (kind === 'sound' || /^(images|movies)\//.test(r.rel)) return r.rel;
+    alert(`${r.rel}은(는) images, movies 폴더 밖이라 렌파이가 그림 이름으로 못 찾아요. game/${dir} 폴더 안의 파일을 골라 주세요.`);
+    return null;
+  }
+  if (!r.token || !confirm(`${r.name}은(는) 이 게임 폴더 밖에 있어요. game/${dir} 폴더로 복사해서 쓸까요?`)) return null;
+  try {
+    const rel = await desktop!.importFile!(r.token, dir);
+    await scanFolder().catch(() => {});
+    useStore.getState().say(`${rel}(으)로 복사했어요`);
+    return rel;
+  } catch (e: any) {
+    alert('파일을 복사하지 못했어요: ' + e.message);
+    return null;
+  }
+}
+// game 기준 경로 → 렌파이 그림 이름 ("images/bg room.png" → "bg room")
+const imageOfPath = (rel: string) => {
+  const file = rel.split('/').pop()!;
+  return rel.startsWith('movies/') ? movieNameOf(file) : imageNameOf(file);
+};
+
+function PickFile({ kind, onPick }: { kind: 'image' | 'sound'; onPick: (rel: string) => void }) {
+  if (!desktop?.pickFile) return null;
+  return (
+    <button className="sc-pickfile" onClick={() => void pickGameFile(kind).then((rel) => rel && onPick(rel))} title={kind === 'sound' ? '탐색기 창에서 소리 파일을 골라요' : '탐색기 창에서 그림·영상 파일을 골라요'}>
+      📂 파일 고르기
+    </button>
+  );
+}
+
 function BgPicker({ add }: { add: (l: Omit<Line, 'id' | 'text'>) => void }) {
   const images = useGameFolder((s) => s.media.images);
   const names = images.filter((n) => words(n)[0] === 'bg' && words(n).length > 1).map((n) => words(n).slice(1).join(' '));
+  const fromFile = (rel: string) => {
+    const n = imageOfPath(rel);
+    if (words(n)[0] === 'bg' && words(n).length > 1) add({ type: 'scene', image: words(n).slice(1).join(' ') });
+    else alert(`배경 그림은 파일 이름이 bg로 시작해야 해요 (예: "bg room.png"). 이 파일의 렌파이 이름은 "${n}"이라 배경으로 쓸 수 없어요. [그림, 영상] 카드에서 넣거나 파일 이름을 바꿔 주세요.`);
+  };
   return (
     <>
+      <PickFile kind="image" onPick={fromFile} />
       <Grid names={names} pic={(n) => 'bg ' + n} onPick={(n) => add({ type: 'scene', image: n })} empty="images 폴더에 bg로 시작하는 그림·영상이 없어요." />
       <TextAdd placeholder="배경 이름 (예: room)" onAdd={(n) => add({ type: 'scene', image: n })} extra={<button onClick={() => add({ type: 'scene', image: '' })}>검은 화면</button>} />
     </>
@@ -95,6 +138,7 @@ function PicPicker({ add }: { add: (l: Omit<Line, 'id' | 'text'>) => void }) {
   };
   return (
     <>
+      <PickFile kind="image" onPick={(rel) => show(imageOfPath(rel))} />
       <Grid names={names} pic={(n) => n} onPick={show} empty="images, movies 폴더에 배경 말고 다른 그림·영상이 없어요." />
       <TextAdd placeholder="이미지 이름 (예: mina smile)" onAdd={show} />
     </>
@@ -111,6 +155,7 @@ function SoundPicker({ add }: { add: (l: Omit<Line, 'id' | 'text'>) => void }) {
         <button className={music ? '' : 'on'} onClick={() => setMusic(false)}>효과음 (한 번)</button>
         <button className={music ? 'on' : ''} onClick={() => setMusic(true)}>음악 (계속)</button>
       </div>
+      <PickFile kind="sound" onPick={(rel) => put(rel.startsWith('audio/') ? rel.slice(6) : rel)} />
       {audio.length ? (
         <div className="sc-sounds">
           {audio.map((f) => (

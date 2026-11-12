@@ -89,7 +89,6 @@ export const useGameFolder = create<F>((set) => ({
 
 let dir: any = null;
 // 웹: 프로젝트 폴더(game 폴더 위)를 골랐을 때 그 손잡이. 대본 파일(.flow.json)을 여기에 둔다. game 폴더를 바로 골랐으면 null
-let proj: any = null;
 let pictures = new Map<string, { path: string; video: boolean }>(); // 렌파이 그림 이름 → game 폴더 기준 경로
 const urls = new Map<string, string>(); // 경로 → 읽어 둔 주소
 
@@ -304,7 +303,7 @@ export async function scanFolder() {
 
 // 권한은 프로젝트 폴더에 받으면 안의 game 폴더까지 같이 된다
 const allowed = async (ask: boolean) => {
-  const root = proj ?? dir;
+  const root = dir;
   if (!root) return false;
   const o = { mode: 'readwrite' };
   if ((await root.queryPermission(o)) === 'granted') return true;
@@ -405,7 +404,7 @@ export async function removeFxFile(name: string): Promise<string> {
   const d = await fxFolder(false);
   const text = d ? await readText(d, name) : null;
   if (text === null) throw new Error('효과 폴더에 그 파일이 없어요: ' + name);
-  const root = isDesktop ? projectDir() : proj;
+  const root = isDesktop ? projectDir() : null;
   const base = await (root ?? dir).getDirectoryHandle(BACKUP_DIR, { create: true });
   const keep = await base.getDirectoryHandle('effects', { create: true });
   let as = name;

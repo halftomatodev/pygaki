@@ -13,6 +13,9 @@ interface PygakiApi {
   choose(): Promise<boolean>;
   // 렌파이에서 실행. always가 아니면 게임이 이미 켜져 있을 때 'running'만 돌려주고 켜지 않는다
   runGame?(always: boolean): Promise<'started' | 'running' | 'no-sdk' | 'failed'>;
+  // 탐색기로 파일 하나 고르기. game 안이면 rel(game 기준), 밖이면 token(importFile로 복사할 때 씀). 취소면 null
+  pickFile?(kind: 'image' | 'sound'): Promise<{ name: string; rel?: string; token?: string } | null>;
+  importFile?(token: string, dir: 'images' | 'movies' | 'audio'): Promise<string>; // 복사한 자리 (game 기준)
   onChange(fn: (rel: string) => void): () => void;
   // showpy 실시간 연결 (docs/LINK.md 9장)
   liveSend(msg: object): Promise<boolean>;

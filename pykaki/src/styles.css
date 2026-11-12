@@ -1065,3 +1065,4 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .tp-item:hover:not(:disabled) { background: var(--faint); }
 .tp-item.on { background: var(--accent-soft); font-weight: 600; }
 .tp-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sc-pickfile { display: block; width: 100%; margin: 2px 0 6px; background: var(--faint); font-weight: 600; }
