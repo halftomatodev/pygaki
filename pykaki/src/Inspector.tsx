@@ -9,7 +9,7 @@ import { isStage } from './stage';
 import { hit } from './prefs';
 import { ShaderPanel } from './ShaderPanel';
 import { StageCards } from './StageCards';
-import { PickPos } from './PickPos';
+import { GameOffTip, GoHere, MoveBtn, PickBand } from './PickPos';
 
 export type Upd = (fn: (b: BoxNode, p: Project) => void, key?: string) => void;
 
@@ -111,7 +111,7 @@ function BoxInspector({ b }: { b: BoxNode }) {
       <div className="row">
         {g?.entry !== b.id && <button onClick={() => update((p) => void (p.labels.find((l) => l.id === b.group)!.entry = b.id))}>label의 첫 상자로</button>}
         {project.project.startNode !== b.id && <button onClick={() => update((p) => void (p.project.startNode = b.id))}>시작 상자로</button>}
-        <button onClick={() => useStore.getState().startPlay(b.id)}>▶ 여기서 플레이</button>
+        <GoHere where={{ box: b.id }} />
         <button className="danger" onClick={() => (update((p) => ops.deleteBoxes(p, [b.id])), useStore.getState().select([]))}>삭제</button>
       </div>
       </Card>
@@ -130,6 +130,7 @@ function BoxInspector({ b }: { b: BoxNode }) {
         <button onClick={addLine}>+ 줄 추가</button>
         <span className="tip">Ctrl+Enter: 같은 화자로 아래에 새 줄</span>
       </div>
+      <GameOffTip what="대사" />
       </Card>
 
       <StageCards b={b} upd={upd} />
@@ -153,6 +154,7 @@ function LineRow({ l, i, upd, drag }: { l: Line; i: number; upd: Upd; drag: Retu
   }, [focusLineId, l.id]);
 
   const set = (fn: (x: Line) => void, key?: string) => upd((x) => fn(x.lines[i]), key);
+  const isSay = l.type === 'say' || l.type === 'narration';
 
   const onKey = (e: React.KeyboardEvent) => {
     if (!hit(e, 'newLine')) return;
@@ -169,6 +171,8 @@ function LineRow({ l, i, upd, drag }: { l: Line; i: number; upd: Upd; drag: Retu
       <div className="line-top">
         <span className="grip" {...drag.grip(i)}>⠿</span>
         <SpeakerSelect l={l} set={set} />
+        {isSay && <MoveBtn where={{ line: l.id }} tab="say" what="대사" />}
+        <GoHere where={{ line: l.id }} short />
         <button title="줄 삭제" onClick={() => upd((x) => void x.lines.splice(i, 1))}>✕</button>
         {l.type === 'say' && <input className="attr" placeholder="속성(표정)" value={l.attr ?? ''} onChange={(e) => upd((x) => void (x.lines[i].attr = e.target.value), 'attr' + l.id)} />}
       </div>
@@ -176,9 +180,10 @@ function LineRow({ l, i, upd, drag }: { l: Line; i: number; upd: Upd; drag: Retu
         {isStage(l.type) ? (
           <StageFields l={l} set={set} />
         ) : (
-          <textarea id={'ed-' + l.id} ref={ref} rows={1} value={l.text} placeholder={placeholder} data-tags={l.type === 'say' || l.type === 'narration' ? '1' : undefined} onFocus={() => useStore.setState({ activeLine: l.id })} onKeyDown={onKey} onChange={(e) => upd((x) => void (x.lines[i].text = e.target.value), 'text' + l.id)} />
+          <textarea id={'ed-' + l.id} ref={ref} rows={1} value={l.text} placeholder={placeholder} data-tags={isSay ? '1' : undefined} onFocus={() => useStore.setState({ activeLine: l.id })} onKeyDown={onKey} onChange={(e) => upd((x) => void (x.lines[i].text = e.target.value), 'text' + l.id)} />
         )}
       </div>
+      {isSay && <PickBand where={{ line: l.id }} tab="say" what="대사" />}
     </div>
   );
 }
@@ -208,6 +213,7 @@ function TargetSelect({ value, onChange, self }: { value: string | null; onChang
 export function ExitEditor({ b, upd }: { b: BoxNode; upd: Upd }) {
   const e = b.exit;
   const linkedOn = useStore((s) => !!s.project.settings.renpyLink);
+  const last = b.lines[b.lines.length - 1]?.id;
   return (
     <div className="exit-ed">
       <div className="row">
@@ -249,7 +255,14 @@ export function ExitEditor({ b, upd }: { b: BoxNode; upd: Upd }) {
           ))}
           <button onClick={() => upd((x) => void (x.exit as any).choices.push(ops.newChoice()))}>+ 선택지 추가</button>
           {/* 게임은 이 상자의 마지막 줄로 가요. 한 번 넘기면 선택지가 나와요 */}
-          {linkedOn && <PickPos lineId={b.lines[b.lines.length - 1]?.id} tab="choice" what="선택지" />}
+          {linkedOn && last && (
+            <>
+              <div className="row">
+                <MoveBtn where={{ line: last }} tab="choice" what="선택지" />
+              </div>
+              <PickBand where={{ line: last }} tab="choice" what="선택지" />
+            </>
+          )}
         </>
       )}
       {e.type === 'return' && <p className="tip">이 상자에서 흐름이 끝나요. call로 불린 장면이면 부른 곳으로 돌아가요.</p>}

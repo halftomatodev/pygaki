@@ -544,7 +544,7 @@ export async function autoExport() {
   }
 }
 
-// [게임에서 위치 고르기] (앱 + 게임 연결): 원고를 지금 대본으로 내보낸 뒤 그 줄의 원고 줄 번호를 돌려준다.
+// [위치 옮기기], [렌파이에서 여기로 이동] (앱 + 게임 연결): 원고를 지금 대본으로 내보낸 뒤 그 줄의 원고 줄 번호를 돌려준다.
 // 원고가 다르거나 오류가 있으면 null (게임을 옮기지 않는다)
 export async function exportedLineOf(lineId: string): Promise<number | null> {
   await autoExport();
@@ -552,4 +552,38 @@ export async function exportedLineOf(lineId: string): Promise<number | null> {
   const { code } = makeRpy(useStore.getState().project);
   if (old !== code) return null;
   return codeLineOf(code, lineId);
+}
+
+// 상자의 시작 자리: # @node:id 다음의 첫 실행 줄(label 줄은 건너뜀). 줄이 없는 상자면 label 줄
+export function codeBoxLineOf(code: string, boxId: string): number | null {
+  const rows = code.split(/\r?\n/);
+  const mark = `# @node:${boxId}`;
+  const isMark = (r: string) => {
+    const k = r.indexOf(mark);
+    if (k < 0) return false;
+    const after = r[k + mark.length];
+    return (after === undefined || after === ' ') && (r.slice(0, k).trim() === '' || r.slice(k - 2, k) === '  ');
+  };
+  const at = rows.findIndex(isMark);
+  if (at < 0) return null;
+  let labelRow: number | null = null;
+  for (let i = at; i < rows.length; i++) {
+    const t = rows[i].trim();
+    if (i > at && t.includes('# @node:')) break;
+    if (!t || t.startsWith('#')) continue;
+    if (/^label\s/.test(t)) {
+      labelRow = i + 1;
+      continue;
+    }
+    return i + 1;
+  }
+  return labelRow;
+}
+
+export async function exportedBoxLineOf(boxId: string): Promise<number | null> {
+  await autoExport();
+  const old = await readRpyFromFolder();
+  const { code } = makeRpy(useStore.getState().project);
+  if (old !== code) return null;
+  return codeBoxLineOf(code, boxId);
 }

@@ -28,8 +28,8 @@ const SECTIONS: Section[] = [
   { id: 'pause_fx', label: '게임 내 메뉴 셰이더', tab: 'pause_fx', app: false, mirror: true, note: 'ESC 메뉴와 거기서 연 화면에만 걸리는 셰이더 두 자리예요. 메뉴가 열려 있는 동안 뒤 게임 화면도 이 셰이더로 보여요.' },
   { id: 'screen_fx', label: '셰이더 기본 값', tab: 'screen_fx', app: false, mirror: true, note: '셰이더마다 처음 값(세부 값)을 게임 화면을 보면서 고쳐요. 타이틀, 게임 내 메뉴 셰이더와, 상자에서 값을 따로 정하지 않은 곳이 이 값을 써요. 상자마다 다른 값은 [대본 편집]에서 상자나 label의 ◐ 셰이더로 정해요.' },
   { id: 'custom_ui', label: '커서, 클릭 대기, 대사 소리', tab: 'custom_ui', app: true, note: '' },
-  { id: 'say', label: '대사 상자', tab: 'say', app: false, mirror: true, note: '대사 상자의 처음 위치와 모양이에요. 줄마다 다른 위치는 [대본 편집] 글자 효과 카드의 [게임에서 대사 위치 고르기]로 정해요.' },
-  { id: 'choice', label: '선택지', tab: 'choice', app: false, mirror: true, note: '선택지의 처음 위치와 모양이에요. 상자마다 다른 위치는 [대본 편집] 다음 흐름 카드의 [게임에서 선택지 위치 고르기]로 정해요.' },
+  { id: 'say', label: '대사 상자', tab: 'say', app: false, mirror: true, note: '대사 상자의 처음 위치와 모양이에요. 줄마다 다른 위치는 [대본 편집] 대사 카드의 줄마다 있는 [위치 옮기기]로 정해요.' },
+  { id: 'choice', label: '선택지', tab: 'choice', app: false, mirror: true, note: '선택지의 처음 위치와 모양이에요. 상자마다 다른 위치는 [대본 편집] 다음 흐름 카드의 [위치 옮기기]로 정해요.' },
   { id: 'stage', label: '그림, 영상 배치', tab: 'stage', app: false, mirror: true, note: '그림을 넣는 것은 [대본 편집] 상자의 배경, 그림·영상 카드에서 해요. 여기서는 게임 화면에서 자리를 끌어 정해요.' },
   { id: 'ui_text', label: '종료 메시지, 버튼 글', tab: 'ui_text', app: false, mirror: true, note: '종료 확인 창, 퀵메뉴 버튼 같은 글을 바꿔요. showpy ui_kit 3.23부터 있어요.' },
 ];

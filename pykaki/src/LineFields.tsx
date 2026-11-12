@@ -1,6 +1,5 @@
 // 상자 안 편집과 오른쪽 편집 탭이 함께 쓰는 줄 입력 부품
 import { useEffect, useState } from 'react';
-import { PickPos } from './PickPos';
 import { useStore } from './store';
 import * as ops from './ops';
 import type { ImageKind, Line, LineFx, SayStyle } from './types';
@@ -79,7 +78,6 @@ export function SayFields({ l, set }: { l: Line; set: SetLine }) {
   const s = l.say ?? {};
   const fonts = useGameFolder((f) => f.media.fonts);
   useGameFolder((f) => f.fxSeq); // 효과 폴더를 다시 읽으면 효과 목록도 다시 그린다
-  const linked = useStore((v) => !!v.project.settings.renpyLink);
   const put = (key: keyof SayStyle, v: string | number | undefined, mergeKey?: string) =>
     set((x) => {
       const say: SayStyle = { ...(x.say ?? {}) };
@@ -268,7 +266,6 @@ export function SayFields({ l, set }: { l: Line; set: SetLine }) {
         </datalist>
       )}
       {(posWhat || posName) && <div className="sf-row">{posWhat}{posName}</div>}
-      {linked && <PickPos lineId={l.id} tab="say" what="대사" />}
     </>
   );
 }
