@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useReactFlow } from '@xyflow/react';
 import { useStore } from './store';
-import { exportRpyFile, followLine, hasRpyTarget, newProject, openProject, saveProject, setFollowLine } from './files';
-import { useGameFolder } from './gameFolder';
+import { disconnectProject, exportRpyFile, followLine, hasRpyTarget, linkProject, newProject, openProject, runInRenpy, saveProject, setFollowLine } from './files';
+import { hasDirPicker, pullInbox, scanFolder, useGameFolder } from './gameFolder';
 import { snapAdd, snapDelete, snapList, type Snapshot } from './persist';
-import { addBoxCenter, enterFullPlay, runLayout, toggleFocus } from './actions';
-import { timeStr } from './util';
+import { enterFullPlay, toggleFocus } from './actions';
 import { keyOf } from './prefs';
 import { installApp, useCanInstall } from './pwa';
-import { isDesktop } from './desktop';
+import { desktop, isDesktop } from './desktop';
 import { useLive } from './showpyLive';
 
 // 화면 바꾸기: 대본 편집 / GUI 편집(데스크톱 앱에서만. 점은 게임과 붙어 있는지) / 효과
@@ -32,10 +30,8 @@ function ViewSwitch() {
 }
 
 export function Toolbar() {
-  const rf = useReactFlow();
   const s = useStore();
   const [showVersions, setShowVersions] = useState(false);
-  const sel = s.selectedIds.length;
   const canInstall = useCanInstall();
 
   const saveVersion = async () => {
@@ -51,48 +47,76 @@ export function Toolbar() {
 
   return (
     <div className="toolbar">
-      <span className="brand">pygaki</span>
+      {/* 왼쪽: 프로젝트 제목, 큰 탭 셋, 게임 돌려보기 */}
+      <div className="tb-left">
+      <input
+        className="ptitle"
+        value={s.project.project.title}
+        onChange={(e) => s.update((p) => void (p.project.title = e.target.value), 'ptitle')}
+        placeholder="프로젝트 제목"
+        title="프로젝트 제목 (눌러서 고쳐요)"
+      />
       <ViewSwitch />
+      {isDesktop ? (
+        <button className="run" onClick={() => void runInRenpy()} title="지금 대본을 내보내고 렌파이로 게임을 켜요. 이미 켜져 있을 때 어떻게 할지는 [설정]에서 골라요">
+          ▶ 렌파이에서 실행
+        </button>
+      ) : (
+        <>
+          <button className="primary" onClick={() => s.startPlay(null)} title={keyOf('play')}>▶ 플레이</button>
+          <button onClick={() => void enterFullPlay()} title={`고른 상자부터 전체화면으로 플레이 (${keyOf('fullPlay')})`}>⛶ 전체화면</button>
+        </>
+      )}
+      <FollowLine />
+      </div>
+      {/* 오른쪽: 파일, 프로젝트 폴더, 버전, 되돌리기, 내보내기, 화면. 자리가 모자라면 이 묶음이 아랫줄로 내려가도 오른쪽에 붙는다 */}
+      <div className="tb-right">
       <button onClick={newProject}>새로</button>
       <button onClick={openProject}>열기</button>
       <button onClick={() => saveProject()} title={keyOf('save')}>저장</button>
       <button onClick={() => saveProject(true)} title={keyOf('saveAs')}>다른 이름</button>
+      <FolderButtons />
       <span className="sep" />
       <button onClick={saveVersion}>버전 저장</button>
       <button onClick={() => setShowVersions(true)}>버전 목록</button>
       <span className="sep" />
-      <button onClick={() => addBoxCenter(rf)} title="캔버스 빈 곳 더블클릭으로도 만들 수 있어요">+ 상자</button>
-      <button onClick={() => runLayout(rf, 'all')}>전체 정렬</button>
-      <button disabled={!sel} onClick={() => runLayout(rf, 'label')} title="선택한 상자의 label 안에서만 정렬">label 정렬</button>
-      <button disabled={sel < 2} onClick={() => runLayout(rf, 'selection')} title="Shift+드래그로 여러 상자 선택">선택 정렬</button>
-      <select
-        value={s.project.layout.direction}
-        onChange={(e) => s.update((p) => void (p.layout.direction = e.target.value as 'TB' | 'LR'))}
-        title="정렬 방향"
-      >
-        <option value="TB">↓ 위→아래</option>
-        <option value="LR">→ 왼→오른</option>
-      </select>
-      <span className="sep" />
       <button disabled={!s.past.length} onClick={s.undo} title={'실행 취소 ' + keyOf('undo')}>↶</button>
       <button disabled={!s.future.length} onClick={s.redo} title={'다시 실행 ' + keyOf('redo')}>↷</button>
       <span className="sep" />
-      <button className="primary" onClick={() => s.startPlay(null)} title={keyOf('play')}>▶ 플레이</button>
-      <button onClick={() => void enterFullPlay()} title={`고른 상자부터 전체화면으로 플레이 (${keyOf('fullPlay')})`}>⛶ 전체화면</button>
       <button onClick={() => exportRpyFile(false)}>.rpy 내보내기</button>
       {hasRpyTarget() && <button onClick={() => exportRpyFile(true)} title={keyOf('export')}>같은 곳에 다시</button>}
-      <FollowLine />
-      <span className="grow" />
-      <span className="status">
-        {s.fileName ?? '파일로 저장 안 됨'}
-        {s.dirty && <b className="dirty" title="파일로 저장하지 않은 변경이 있어요"> ●</b>}
-        {s.localSavedAt && <> · 자동 저장 {timeStr(s.localSavedAt)}</>}
-      </span>
+      <span className="sep" />
       {canInstall && <button className="primary" onClick={installApp} title="바탕화면과 작업 표시줄에서 바로 여는 앱으로 설치해요">앱 설치</button>}
       <button onClick={toggleFocus} title={'집중 모드: 캔버스만 남기기 ' + keyOf('focus')}>집중</button>
       <button onClick={() => useStore.setState({ showPrefs: true })} title="화면 색, 단축키">설정</button>
+      </div>
       {showVersions && <Versions onClose={() => setShowVersions(false)} />}
     </div>
+  );
+}
+
+// 렌파이 프로젝트 폴더를 열고 읽는 단추. 앱은 프로젝트 하나를 연 채라 다시 읽기·폴더 열기·다른 프로젝트,
+// 웹은 폴더를 연결했을 때만 폴더 바꾸기·다시 읽기·끊기 (처음 연결은 왼쪽 [렌파이 프로젝트 정보]에서)
+function FolderButtons() {
+  const name = useGameFolder((g) => g.name);
+  const reread = () => void pullInbox(true).then(() => scanFolder());
+  if (isDesktop)
+    return (
+      <>
+        <span className="sep" />
+        <button onClick={reread} title="프로젝트 폴더의 그림·소리와 GUI 편집기가 넣은 줄을 다시 읽어요">다시 읽기</button>
+        <button onClick={() => void desktop!.openFolder('')} title="프로젝트 폴더를 탐색기로 열어요">폴더 열기</button>
+        <button onClick={() => void desktop!.choose()} title="다른 렌파이 프로젝트를 새 창으로 열어요">다른 프로젝트</button>
+      </>
+    );
+  if (!hasDirPicker || !name) return null;
+  return (
+    <>
+      <span className="sep" />
+      <button onClick={() => void linkProject()}>폴더 바꾸기</button>
+      <button onClick={reread}>다시 읽기</button>
+      <button onClick={() => void disconnectProject()}>끊기</button>
+    </>
   );
 }
 

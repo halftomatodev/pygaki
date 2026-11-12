@@ -10,6 +10,8 @@ contextBridge.exposeInMainWorld('pygaki', {
   remove: (rel) => ipcRenderer.invoke('pygaki:remove', rel), // 효과 파일(game/ui_kit/effects/*.glsl)만
   openFolder: (rel) => ipcRenderer.invoke('pygaki:openFolder', rel),
   choose: () => ipcRenderer.invoke('pygaki:choose'),
+  runGame: (always) => ipcRenderer.invoke('pygaki:runGame', !!always), // 렌파이에서 실행
+
   // showpy 실시간 연결 (docs/LINK.md 9장)
   liveSend: (msg) => ipcRenderer.invoke('pygaki:liveSend', msg),
   liveStatus: () => ipcRenderer.invoke('pygaki:liveStatus'),

@@ -7,6 +7,7 @@ const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const fs = require('node:fs');
 const path = require('node:path');
 const net = require('node:net');
+const { spawn } = require('node:child_process');
 
 // 이름을 pygaki로 바꿔도(2026-11, 예전 PyKaki) 설정, 최근 파일, 자동 저장(IndexedDB renpy-flow-editor)이
 // 든 폴더는 예전 자리(%APPDATA%\PyKaki)를 그대로 쓴다. 단일 실행 잠금보다 먼저 정해야 함
@@ -121,7 +122,7 @@ function open(project) {
     webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, sandbox: true },
   });
   const id = win.webContents.id;
-  const entry = { win, project, watcher: null, rootWatcher: null, live: null, liveTimer: null };
+  const entry = { win, project, watcher: null, rootWatcher: null, live: null, liveTimer: null, game: null };
   windows.set(id, entry);
   // showpy가 남기는 받아 적기 파일과 미리보기 파일을 지켜본다
   try {
@@ -269,6 +270,42 @@ ipcMain.handle('pygaki:liveStatus', (e) => {
 });
 
 ipcMain.handle('pygaki:openFolder', (e, rel) => shell.openPath(inside(projectOf(e), rel)));
+
+// ── 렌파이에서 실행 ──
+// 묶음에서는 앱이 <렌파이 SDK>/pygaki/app 안에 있어서 두 칸 위에서 렌파이를 찾는다.
+// 묶음 밖에서 켰으면(개발 중) 환경 변수 RENPY_SDK가 가리키는 폴더에서 찾는다.
+function findRenpy() {
+  const name = process.platform === 'win32' ? 'renpy.exe' : 'renpy.sh';
+  for (const dir of [process.env.RENPY_SDK, path.resolve(path.dirname(process.execPath), '..', '..')]) {
+    if (!dir) continue;
+    const exe = path.join(dir, name);
+    if (fs.existsSync(exe)) return exe;
+  }
+  return null;
+}
+
+// 돌려주는 값: 'started' 켰음, 'running' 이미 켜져 있어서 안 켬, 'no-sdk' 렌파이를 못 찾음, 'failed' 켜지 못함
+// 켜져 있는지는 게임과의 실시간 연결(플러그인이 있는 게임)과 이 창이 켠 프로세스로 안다. always면 켜져 있어도 하나 더 켠다
+ipcMain.handle('pygaki:runGame', (e, always) => {
+  const entry = windows.get(e.sender.id);
+  if (!entry) throw new Error('창을 찾지 못했어요');
+  if (!always && ((entry.live && entry.live.ready) || entry.game)) return 'running';
+  const exe = findRenpy();
+  if (!exe) return 'no-sdk';
+  try {
+    const child = spawn(exe, [entry.project], { cwd: path.dirname(exe), detached: true, stdio: 'ignore' });
+    const gone = () => {
+      if (entry.game === child) entry.game = null;
+    };
+    child.on('error', gone);
+    child.on('exit', gone);
+    child.unref(); // 앱을 꺼도 게임은 그대로 둔다
+    entry.game = child;
+    return 'started';
+  } catch {
+    return 'failed';
+  }
+});
 
 // 다른 프로젝트 열기: 새 창으로
 ipcMain.handle('pygaki:choose', async (e) => {

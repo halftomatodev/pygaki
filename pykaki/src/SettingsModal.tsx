@@ -1,6 +1,7 @@
 // 환경 설정 창: 화면 색, 단축키 바꾸기
 import { useEffect, useState } from 'react';
 import { useStore } from './store';
+import { isDesktop } from './desktop';
 import { ACTIONS, DIMS, FONTS, GRAD_DEFAULTS, THEMES, colorsOf, gradColors, gradOf, ensureNeodgm, ensurePretendard, comboLabel, comboOf, resetKeys, resetPrefs, usePrefs, type ActionId, type Colors } from './prefs';
 
 const close = () => useStore.setState({ showPrefs: false });
@@ -15,6 +16,7 @@ export function SettingsModal() {
         <ColorPrefs />
         <LookPrefs />
         <BoxColors />
+        {isDesktop && <RunPrefs />}
         <KeyPrefs />
         <div className="row end">
           <button
@@ -205,6 +207,24 @@ function LookPrefs() {
         ))}
       </div>
       <p className="tip">집중 모드에서 상자 안에 글을 쓰는 동안, 커서가 있는 줄 말고는 흐려지고 다른 상자는 더 흐려져요. 흐린 상자에 마우스를 올리면 잠깐 또렷해져요.</p>
+    </>
+  );
+}
+
+// [렌파이에서 실행] 단추 (앱)
+function RunPrefs() {
+  const skip = usePrefs((p) => p.runSkip);
+  return (
+    <>
+      <h4>렌파이에서 실행</h4>
+      <label className="row">
+        <input type="checkbox" checked={skip} onChange={(e) => usePrefs.setState({ runSkip: e.target.checked })} />
+        게임이 이미 켜져 있으면 무시 (다시 켜지 않음)
+      </label>
+      <p className="tip">
+        켜 두면 게임이 켜져 있을 때 [▶ 렌파이에서 실행]을 눌러도 대본만 내보내고 게임은 그대로 둬요. 끄면 누를 때마다 게임을 하나 더 켜요.
+        켜져 있는지는 pygaki 플러그인이 든 게임과의 연결, 그리고 이 창에서 켠 게임으로 알아요.
+      </p>
     </>
   );
 }

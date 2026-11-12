@@ -3,7 +3,8 @@ import { useStore } from './store';
 import { createEmpty, normalizeProject } from './sample';
 import { generateRpy as generateRpyWith } from './exportRpy';
 import { kvGet, kvSet, snapAdd, snapAuto } from './persist';
-import { isDesktop } from './desktop';
+import { desktop, isDesktop } from './desktop';
+import { usePrefs } from './prefs';
 import { backupRpy, connectFolder, disconnectFolder, folderAllowed, folderReady, hasDirPicker, hasProjectFolder, looksLikeGame, projectFlowHandle, projectFlows, pullInbox, readRpyFromFolder, RPY_FILE, scanFolder, useGameFolder, writeRpyToFolder } from './gameFolder';
 import { BUILD, FEATURE } from './version';
 import type { Project } from './types';
@@ -425,6 +426,21 @@ export async function exportRpyFile(again = false) {
   } catch (e: any) {
     if (!aborted(e)) alert('내보내기 실패: ' + e.message);
   }
+}
+
+// ── 렌파이에서 실행 (앱) ──
+// 지금 대본을 내보낸 뒤 이 프로젝트를 렌파이로 켠다. 게임이 이미 켜져 있으면 설정에 따라 그냥 둔다(내보낸 대본은 게임이 다시 불러옴)
+export async function runInRenpy() {
+  const s = useStore.getState();
+  if (!desktop?.runGame) return s.say('이 판의 앱에서는 게임을 켤 수 없어요. 렌파이 런처에서 실행해 주세요');
+  await exportRpyFile(true);
+  const r = await desktop.runGame(!usePrefs.getState().runSkip).catch(() => 'failed' as const);
+  s.say(
+    r === 'started' ? '렌파이에서 게임을 켜는 중이에요'
+    : r === 'running' ? '게임이 이미 켜져 있어서 다시 켜지 않았어요. 고친 대본은 게임이 저절로 다시 불러와요'
+    : r === 'no-sdk' ? '렌파이를 찾지 못했어요. 렌파이 런처에서 [프로젝트 실행]으로 켜 주세요'
+    : '게임을 켜지 못했어요. 렌파이 런처에서 실행해 주세요',
+  );
 }
 
 // ── 자동 내보내기 (앱에서 대본을 고치고 멈추면) ──

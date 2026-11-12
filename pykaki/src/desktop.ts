@@ -11,6 +11,8 @@ interface PygakiApi {
   remove(rel: string): Promise<boolean>; // 효과 파일(game/ui_kit/effects/*.glsl)만 지울 수 있다
   openFolder(rel: string): Promise<string>;
   choose(): Promise<boolean>;
+  // 렌파이에서 실행. always가 아니면 게임이 이미 켜져 있을 때 'running'만 돌려주고 켜지 않는다
+  runGame?(always: boolean): Promise<'started' | 'running' | 'no-sdk' | 'failed'>;
   onChange(fn: (rel: string) => void): () => void;
   // showpy 실시간 연결 (docs/LINK.md 9장)
   liveSend(msg: object): Promise<boolean>;

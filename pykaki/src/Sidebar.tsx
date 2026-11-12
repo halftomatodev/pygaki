@@ -1,16 +1,21 @@
-import { useEffect, useState } from 'react';
-import { hasDirPicker, hasProjectFolder, pullInbox, scanFolder, useGameFolder } from './gameFolder';
-import { desktop, isDesktop, projectInfo } from './desktop';
-import { disconnectProject, linkProject, newerThanMe, projectFileName } from './files';
+import { useEffect, useState, type ReactNode } from 'react';
+import { useReactFlow } from '@xyflow/react';
+import { hasDirPicker, hasProjectFolder, useGameFolder } from './gameFolder';
+import { isDesktop, projectInfo } from './desktop';
+import { linkProject, newerThanMe, projectFileName } from './files';
+import { addBoxCenter, runLayout } from './actions';
+import { keyOf } from './prefs';
 import { forgetFlow } from './flowPick';
 import { useStore } from './store';
 import * as ops from './ops';
 import type { Character, LabelGroup } from './types';
-import { IDENT, RESERVED } from './util';
+import { IDENT, RESERVED, timeStr } from './util';
 
 export function Sidebar() {
   const project = useStore((s) => s.project);
   const update = useStore((s) => s.update);
+  const sel = useStore((s) => s.selectedIds.length);
+  const rf = useReactFlow();
   const [showSettings, setShowSettings] = useState(false);
 
   const addChar = () =>
@@ -22,59 +27,104 @@ export function Sidebar() {
 
   return (
     <aside className="sidebar">
-      <input
-        className="ptitle"
-        value={project.project.title}
-        onChange={(e) => update((p) => void (p.project.title = e.target.value), 'ptitle')}
-        placeholder="프로젝트 제목"
-      />
+      <section className="sec tint">
+        <h3>
+          캐릭터 <button onClick={addChar}>+ 추가</button>
+        </h3>
+        {project.characters.length === 0 && <p className="tip">대사를 말할 캐릭터를 추가하세요. 내레이션은 따로 등록하지 않아도 돼요.</p>}
+        {project.characters.map((c, i) => (
+          <CharRow key={i} c={c} i={i} />
+        ))}
+      </section>
 
-      <h3>
-        캐릭터 <button onClick={addChar}>+ 추가</button>
-      </h3>
-      {project.characters.length === 0 && <p className="tip">대사를 말할 캐릭터를 추가하세요. 내레이션은 따로 등록하지 않아도 돼요.</p>}
-      {project.characters.map((c, i) => (
-        <CharRow key={i} c={c} i={i} />
-      ))}
+      <section className="sec tint">
+        <h3>
+          label (장면) <button onClick={() => update((p) => void ops.addGroup(p))}>+ 추가</button>
+        </h3>
+        {project.labels.map((g) => (
+          <GroupRow key={g.id} g={g} />
+        ))}
+      </section>
 
-      <h3>
-        label (장면) <button onClick={() => update((p) => void ops.addGroup(p))}>+ 추가</button>
-      </h3>
-      {project.labels.map((g) => (
-        <GroupRow key={g.id} g={g} />
-      ))}
-
-      <h3>렌파이 프로젝트</h3>
-      <LinkPanel />
-
-      <h3>
-        설정 <button onClick={() => setShowSettings((v) => !v)}>{showSettings ? '접기' : '펼치기'}</button>
-      </h3>
-      {showSettings && (
-        <div className="settings">
-          <label>
-            <input type="checkbox" checked={project.settings.escapeBrackets} onChange={(e) => update((p) => void (p.settings.escapeBrackets = e.target.checked))} />
-            [ 를 글자 그대로 ([[ 로 변환)
-          </label>
-          <label>
-            <input type="checkbox" checked={project.settings.allowTextTags} onChange={(e) => update((p) => void (p.settings.allowTextTags = e.target.checked))} />
-            텍스트 태그 사용 ({'{b}'} 등)
-          </label>
-          <label>
-            <input type="checkbox" checked={project.settings.escapePercent} onChange={(e) => update((p) => void (p.settings.escapePercent = e.target.checked))} />
-            % 를 글자 그대로 (%% 로 변환)
-          </label>
-          <label>
-            <input type="checkbox" checked={!!project.settings.renpyLink} onChange={(e) => update((p) => void (p.settings.renpyLink = e.target.checked))} />
-            pygaki 플러그인 연결
-          </label>
+      <section className="sec">
+        <h3>상자와 정렬</h3>
+        <div className="sec-btns">
+          <button className="primary" onClick={() => addBoxCenter(rf)} title={`캔버스 빈 곳 더블클릭으로도 만들 수 있어요 (${keyOf('newBox')})`}>+ 상자</button>
+          <button onClick={() => runLayout(rf, 'all')}>전체 정렬</button>
+          <button disabled={!sel} onClick={() => runLayout(rf, 'label')} title="선택한 상자의 label 안에서만 정렬">label 정렬</button>
+          <button disabled={sel < 2} onClick={() => runLayout(rf, 'selection')} title="Shift+드래그로 여러 상자 선택">선택 정렬</button>
         </div>
-      )}
+        <label className="info-row">
+          <span>정렬 방향</span>
+          <select value={project.layout.direction} onChange={(e) => update((p) => void (p.layout.direction = e.target.value as 'TB' | 'LR'))}>
+            <option value="TB">↓ 위→아래</option>
+            <option value="LR">→ 왼→오른</option>
+          </select>
+        </label>
+      </section>
+
+      <section className="sec">
+        <h3>렌파이 프로젝트 정보</h3>
+        <LinkPanel />
+      </section>
+
+      <section className="sec">
+        <h3>
+          설정 <button onClick={() => setShowSettings((v) => !v)}>{showSettings ? '접기' : '펼치기'}</button>
+        </h3>
+        {showSettings && (
+          <div className="settings">
+            <label>
+              <input type="checkbox" checked={project.settings.escapeBrackets} onChange={(e) => update((p) => void (p.settings.escapeBrackets = e.target.checked))} />
+              [ 를 글자 그대로 ([[ 로 변환)
+            </label>
+            <label>
+              <input type="checkbox" checked={project.settings.allowTextTags} onChange={(e) => update((p) => void (p.settings.allowTextTags = e.target.checked))} />
+              텍스트 태그 사용 ({'{b}'} 등)
+            </label>
+            <label>
+              <input type="checkbox" checked={project.settings.escapePercent} onChange={(e) => update((p) => void (p.settings.escapePercent = e.target.checked))} />
+              % 를 글자 그대로 (%% 로 변환)
+            </label>
+            <label>
+              <input type="checkbox" checked={!!project.settings.renpyLink} onChange={(e) => update((p) => void (p.settings.renpyLink = e.target.checked))} />
+              pygaki 플러그인 연결
+            </label>
+          </div>
+        )}
+      </section>
     </aside>
   );
 }
 
-// 렌파이 프로젝트를 잇는 칸. 버튼 하나로 연결과 첫 내보내기까지 한다
+// 정보 한 줄: 왼쪽에 이름, 오른쪽에 값
+function Info({ k, children }: { k: string; children: ReactNode }) {
+  return (
+    <div className="info-row">
+      <span>{k}</span>
+      <b>{children}</b>
+    </div>
+  );
+}
+
+// 저장 상태 (예전에는 위쪽 줄 오른쪽에 있었다)
+function SaveInfo() {
+  const fileName = useStore((v) => v.fileName);
+  const dirty = useStore((v) => v.dirty);
+  const savedAt = useStore((v) => v.localSavedAt);
+  return (
+    <>
+      <Info k="파일 저장">
+        {!fileName ? '파일로 저장 안 됨' : dirty ? '저장 안 한 변경 있음' : '저장됨'}
+        {dirty && <i className="dirty" title="파일로 저장하지 않은 변경이 있어요"> ●</i>}
+      </Info>
+      {savedAt && <Info k="자동 저장">{timeStr(savedAt)}</Info>}
+    </>
+  );
+}
+
+// 렌파이 프로젝트 정보: 프로젝트, 대본 파일, 저장 상태, 찾은 그림·소리, 경고를 한곳에.
+// 폴더를 열고 읽는 단추는 위쪽 줄에 있다 (웹에서 처음 연결하는 단추만 여기)
 function LinkPanel() {
   const f = useGameFolder();
   const hasStart = useStore((v) => v.project.labels.some((l) => l.name === 'start'));
@@ -86,59 +136,70 @@ function LinkPanel() {
       이 대본은 더 새 판({app.by} {app.build})에서 저장했어요. {isDesktop ? '앱을 새 판으로 바꾸세요.' : '페이지를 새로 고쳐 새 판으로 여세요.'} 이 판으로 내보내면 일부 줄이 빠질 수 있어요.
     </p>
   );
+  const clash = f.startClash && hasStart && <p className="tip warn-text">{f.startClash}에도 label start가 있어요. 대본의 start label 이름을 바꾸거나 그 파일의 label start를 지워 주세요.</p>;
+  const media = (
+    <>
+      <Info k="그림과 영상">{f.media.images.length}개</Info>
+      <Info k="소리">{f.media.audio.length}개</Info>
+    </>
+  );
   const [info, setInfo] = useState<{ project: string; flows: string[] } | null>(null);
   useEffect(() => void (isDesktop && projectInfo().then(setInfo)), []);
   if (isDesktop)
     return (
       <div className="link-panel">
-        <p className="tip">렌파이 프로젝트: {f.name}</p>
-        <p className="tip">
-          대본 파일: {flowFile}
-          {info && info.flows.length > 1 && (
-            <>
-              {' '}
-              <button
-                onClick={() => {
-                  if (useStore.getState().dirty && !confirm('아직 파일에 저장하지 않은 변경이 있어요. 그래도 다른 대본 파일을 고를까요?')) return;
-                  forgetFlow(info.project);
-                  location.reload();
-                }}
-              >
-                다른 대본 파일
-              </button>
-            </>
-          )}
-        </p>
+        <Info k="프로젝트">{f.name}</Info>
+        <Info k="대본 파일">{flowFile}</Info>
+        {info && info.flows.length > 1 && (
+          <button
+            className="info-btn"
+            onClick={() => {
+              if (useStore.getState().dirty && !confirm('아직 파일에 저장하지 않은 변경이 있어요. 그래도 다른 대본 파일을 고를까요?')) return;
+              forgetFlow(info.project);
+              location.reload();
+            }}
+          >
+            다른 대본 파일 고르기
+          </button>
+        )}
+        <SaveInfo />
+        {media}
         {newer}
-        <div className="row">
-          <button onClick={() => void pullInbox(true).then(() => scanFolder())}>다시 읽기</button>
-          <button onClick={() => void desktop!.openFolder('')}>폴더 열기</button>
-          <button onClick={() => void desktop!.choose()}>다른 프로젝트</button>
-        </div>
-        <p className="tip">그림과 영상 {f.media.images.length}개, 소리 {f.media.audio.length}개를 찾았어요.</p>
         {!f.hasShowpy && <p className="tip">이 프로젝트에는 pygaki 플러그인이 없어요. 위치와 화면 효과를 렌파이에서 고치려면 런처 새 프로젝트 만들기의 "Pygaki"로 만든 프로젝트를 쓰세요.</p>}
-        {f.startClash && hasStart && <p className="tip warn-text">{f.startClash}에도 label start가 있어요. 대본의 start label 이름을 바꾸거나 그 파일의 label start를 지워 주세요.</p>}
+        {clash}
       </div>
     );
-  if (!hasDirPicker) return <p className="tip">폴더 연결은 크롬과 엣지에서 돼요. 이 브라우저에서는 내려받은 script_flow.rpy를 game 폴더에 넣어 주세요. showpy에서 넣은 줄은 받아 적지 못해요.</p>;
+  if (!hasDirPicker)
+    return (
+      <div className="link-panel">
+        <SaveInfo />
+        <p className="tip">폴더 연결은 크롬과 엣지에서 돼요. 이 브라우저에서는 내려받은 script_flow.rpy를 game 폴더에 넣어 주세요. GUI 편집기에서 넣은 줄은 받아 적지 못해요.</p>
+      </div>
+    );
+  if (!f.name)
+    return (
+      <div className="link-panel">
+        <SaveInfo />
+        <p className="tip">프로젝트 폴더를 고르면 연결하고 바로 내보내요.</p>
+        <button className="info-btn primary" onClick={() => void linkProject()}>렌파이 프로젝트 연결</button>
+        {newer}
+      </div>
+    );
   return (
     <div className="link-panel">
-      <p className="tip">{f.name ? `연결한 폴더: ${f.name}` : '프로젝트 폴더를 고르면 연결하고 바로 내보내요.'}</p>
-      <div className="row">
-        <button className={f.name ? '' : 'primary'} onClick={() => void linkProject()}>{f.name ? '폴더 바꾸기' : '렌파이 프로젝트 연결'}</button>
-        {f.name && <button onClick={() => void pullInbox(true).then(() => scanFolder())}>다시 읽기</button>}
-        {f.name && <button onClick={() => void disconnectProject()}>끊기</button>}
-      </div>
-      {f.name && flowFile && <p className="tip">대본 파일: {flowFile} (프로젝트 폴더). Ctrl+S, Ctrl+E 때 저장돼요. 런처의 [pygaki로 편집]으로 앱에서 이 대본을 이어 쓸 수 있어요.</p>}
-      {f.name && !hasProjectFolder() && <p className="tip">game 폴더를 바로 골라서 대본 파일은 프로젝트 폴더에 저장하지 않아요. 앱에서 이어 쓰려면 [폴더 바꾸기]로 game 위의 프로젝트 폴더를 고르세요.</p>}
+      <Info k="연결한 폴더">{f.name}</Info>
+      {flowFile && <Info k="대본 파일">{flowFile}</Info>}
+      <SaveInfo />
+      {media}
+      {flowFile && <p className="tip">대본 파일은 프로젝트 폴더에 있고 Ctrl+S, Ctrl+E 때 저장돼요. 런처의 [pygaki로 편집]으로 앱에서 이 대본을 이어 쓸 수 있어요.</p>}
+      {!hasProjectFolder() && <p className="tip">game 폴더를 바로 골라서 대본 파일은 프로젝트 폴더에 저장하지 않아요. 앱에서 이어 쓰려면 위쪽 [폴더 바꾸기]로 game 위의 프로젝트 폴더를 고르세요.</p>}
       {newer}
-      {f.name && <p className="tip">그림과 영상 {f.media.images.length}개, 소리 {f.media.audio.length}개를 찾았어요.</p>}
-      {f.name && !f.hasShowpy && f.media.images.length + f.media.audio.length + f.media.fonts.length > 0 && (
+      {!f.hasShowpy && f.media.images.length + f.media.audio.length + f.media.fonts.length > 0 && (
         <p className="tip">
-          pygaki 플러그인이 없어요. 위치와 화면 효과를 렌파이에서 고치려면 <a href="https://github.com/halftomatodev/pygaki/tree/main/showpy" target="_blank" rel="noreferrer">pygaki 플러그인</a> 폴더들을 game에 넣고 [폴더 바꾸기]로 다시 연결하세요.
+          pygaki 플러그인이 없어요. 위치와 화면 효과를 렌파이에서 고치려면 <a href="https://github.com/halftomatodev/pygaki/tree/main/showpy" target="_blank" rel="noreferrer">pygaki 플러그인</a> 폴더들을 game에 넣고 위쪽 [폴더 바꾸기]로 다시 연결하세요.
         </p>
       )}
-      {f.startClash && hasStart && <p className="tip warn-text">{f.startClash}에도 label start가 있어요. 대본의 start label 이름을 바꾸거나 그 파일의 label start를 지워 주세요.</p>}
+      {clash}
     </div>
   );
 }

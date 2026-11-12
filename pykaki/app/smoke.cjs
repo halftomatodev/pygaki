@@ -30,6 +30,7 @@ async function until(what, fn, ms = 10000) {
   fs.mkdirSync(path.join(proj, 'game', 'ui_kit', 'engine'), { recursive: true });
   fs.writeFileSync(path.join(proj, 'game', 'ui_kit', 'engine', 'script_edit.rpy'), 'init -19 python in script_edit:\n    PK_END_MARKS = True\n');
 
+  process.env.RENPY_SDK = ''; // 시험하다가 이 컴퓨터의 렌파이로 진짜 게임을 켜지 않게
   const app = await electron.launch({ args: ['--no-sandbox', __dirname, '--project', proj] });
   const page = await app.firstWindow();
   const errors = [];
@@ -253,6 +254,15 @@ async function until(what, fn, ms = 10000) {
     console.log('태그 상자 더 보기: 됨');
   }
 
+  // 위쪽 줄: 제목 칸과 [렌파이에서 실행] 단추가 있고, 상자·정렬 단추는 왼쪽 칸에 있는지
+  if (!(await page.locator('.toolbar .ptitle').count())) fail('위쪽 줄에 프로젝트 제목 칸이 없음');
+  if (!(await page.locator('.toolbar .run').count())) fail('위쪽 줄에 [렌파이에서 실행] 단추가 없음');
+  if (!(await page.locator('.sidebar .sec-btns button', { hasText: '+ 상자' }).count())) fail('왼쪽 칸에 [+ 상자] 단추가 없음');
+  // 렌파이를 못 찾는 자리(시험)에서는 켜지 않고 그렇다고 알림
+  const run1 = await page.evaluate(() => window.pygaki.runGame(false));
+  if (run1 !== 'no-sdk') fail('렌파이가 없는데 [렌파이에서 실행]의 답이 다름: ' + run1);
+  console.log('렌파이에서 실행 (렌파이 없음):', run1);
+
   // showpy 실시간 연결 (docs/LINK.md 9장): 가짜 게임을 띄워 앱이 붙고, 상태를 보여주고, 명령을 보내는지
   const net = require('node:net');
   const got = [];
@@ -290,6 +300,10 @@ async function until(what, fn, ms = 10000) {
   await new Promise((r) => srv.listen(0, '127.0.0.1', r));
   fs.writeFileSync(path.join(proj, 'game', 'showpy_live.json'), JSON.stringify({ version: 1, port: srv.address().port, token: 'smoketoken', showpy: '3.14' }));
   await until('게임에 붙지 않음 (hello 없음)', () => got.some((m) => m.hello === 'smoketoken'));
+  // 게임이 켜져 있으면(붙어 있으면) [렌파이에서 실행]은 다시 켜지 않음
+  const run2 = await page.evaluate(() => window.pygaki.runGame(false));
+  if (run2 !== 'running') fail('게임이 켜져 있는데 [렌파이에서 실행]의 답이 다름: ' + run2);
+  console.log('렌파이에서 실행 (이미 켜짐):', run2);
   await page.click('.view-switch button:nth-child(2)');
   await page.waitForSelector('.sp-conn.on', { timeout: 10000 });
   await page.waitForSelector('.sp-script .cur', { timeout: 10000 });

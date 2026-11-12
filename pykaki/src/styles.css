@@ -67,15 +67,20 @@ code { font-family: var(--mono); }
 .main { flex: 1; display: flex; min-height: 0; }
 .toolbar {
   display: flex; flex-wrap: wrap; gap: 2px; align-items: center;
-  padding: 5px 10px; background: var(--bg); opacity: 0.6; transition: opacity 0.2s;
+  padding: 6px 10px; background: var(--bg);
 }
-.toolbar:hover, .toolbar:focus-within { opacity: 1; }
-.toolbar .brand { font-weight: 700; margin-right: 8px; color: var(--muted); letter-spacing: 0.02em; }
+/* 왼쪽(제목, 큰 탭, 게임 돌려보기)은 늘 또렷하게, 오른쪽에 모은 메뉴는 마우스를 올리기 전까지 흐리게 */
+.tb-left, .tb-right { display: flex; align-items: center; gap: 2px; }
+.tb-right { flex-wrap: wrap; justify-content: flex-end; margin-left: auto; opacity: 0.6; transition: opacity 0.2s; }
+.toolbar:hover .tb-right, .toolbar:focus-within .tb-right { opacity: 1; }
 .toolbar .sep { width: 1px; height: 14px; background: var(--line); margin: 0 4px; }
-.toolbar .grow { flex: 1; }
-.toolbar select { background: transparent; color: var(--muted); }
-.status { color: var(--muted); font-size: 11.5px; margin-right: 6px; }
-.status .dirty { color: var(--play); }
+.toolbar .ptitle {
+  field-sizing: content; min-width: 72px; max-width: 280px; margin-right: 8px; padding: 4px 8px;
+  font-size: 16px; font-weight: 800; letter-spacing: -0.01em; background: transparent; text-overflow: ellipsis;
+}
+.toolbar .run, .toolbar .run:hover:not(:disabled) { background: var(--accent); color: #fff; font-weight: 700; padding: 6px 14px; margin-right: 2px; }
+.toolbar .run:hover:not(:disabled) { filter: brightness(1.08); }
+.dirty { color: var(--play); font-style: normal; }
 .toast {
   position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 200;
   background: color-mix(in srgb, var(--text) 82%, var(--bg)); color: var(--bg);
@@ -108,10 +113,27 @@ code { font-family: var(--mono); }
 .app.focus .box.editing { box-shadow: none; border-color: transparent; }
 
 /* 왼쪽 */
-.sidebar { width: 230px; overflow: auto; background: var(--bg); padding: 8px 10px; flex-shrink: 0; }
-.sidebar h3 { font-size: 11.5px; font-weight: 600; color: var(--muted); margin: 18px 0 6px; display: flex; justify-content: space-between; align-items: center; }
-.sidebar h3 button { font-size: 11px; padding: 1px 6px; }
-.ptitle { width: 100%; font-weight: 700; font-size: 14px; background: transparent; }
+.sidebar { width: 244px; overflow: auto; background: var(--bg); padding: 4px 10px 16px; flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; }
+/* 묶음마다 둥근 카드. 캐릭터와 label은 강조색(사과 스타일의 파랑)을 옅게 깔아 말풍선과 같은 톤으로 */
+.sec { background: var(--panel); border-radius: 14px; padding: 10px 10px 8px; flex-shrink: 0; }
+.sec.tint { background: color-mix(in srgb, var(--accent) 9%, var(--panel)); }
+.sec > h3 { font-size: 13.5px; font-weight: 700; color: var(--text); margin: 0 0 8px; display: flex; justify-content: space-between; align-items: center; }
+.sec.tint > h3 { color: color-mix(in srgb, var(--accent) 85%, var(--text)); }
+.sec > h3 button { font-size: 11.5px; font-weight: 600; padding: 2px 8px; color: var(--accent); }
+.sec.tint :is(input:not([type='color']), select) { background: color-mix(in srgb, var(--panel) 75%, transparent); }
+.sec > .tip, .sec .link-panel > .tip { margin: 6px 0 2px; }
+.sec-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 6px; }
+.sec-btns button { background: var(--faint); padding: 5px 6px; }
+.sec-btns button.primary { background: var(--accent-soft); font-weight: 600; }
+/* 정보 한 줄: 왼쪽 이름, 오른쪽 값 */
+.info-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 3px 0; font-size: 12px; }
+.info-row > span { color: var(--muted); flex-shrink: 0; }
+.info-row > b { font-weight: 600; text-align: right; min-width: 0; overflow-wrap: anywhere; }
+.info-btn { display: block; width: 100%; margin: 4px 0; background: var(--faint); padding: 5px 6px; }
+.info-btn.primary { background: var(--accent-soft); font-weight: 600; }
+[data-mono='1'] .sec { background: transparent; border: 1px solid var(--text); border-radius: 0; }
+[data-mono='1'] :is(.sec-btns button, .info-btn) { background: transparent; outline: 1px solid var(--text); border-radius: 0; }
+[data-mono='1'] .toolbar .run { background: var(--text); color: var(--bg); border-radius: 0; }
 .item { display: flex; gap: 4px; align-items: center; margin-bottom: 4px; }
 .item input:not([type='color']) { flex: 1; }
 .item .cid, .item .gname { font-family: var(--mono); }
@@ -609,8 +631,7 @@ fieldset.plain { border: none; margin: 0; padding: 0; min-width: 0; }
 fieldset.plain:disabled { opacity: 0.4; }
 
 /* showpy 연결 */
-.link-panel { margin: 4px 0 2px; }
-.link-panel .row { display: flex; gap: 4px; flex-wrap: wrap; }
+.link-panel { margin: 0; }
 .warn-text { color: #b45309; }
 /* 글자 효과 칸: 오른쪽 편집 탭 위쪽에 붙어 있어서 줄이 많아 스크롤해도 보인다 */
 .look-panel { position: sticky; top: -12px; z-index: 3; margin: 12px -12px 0; padding: 8px 12px; background: var(--panel); border-bottom: 1px solid var(--line); }
