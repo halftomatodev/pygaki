@@ -72,7 +72,7 @@ export type ExitType = Exit['type'];
 export interface BoxShader {
   a: string; // 1번: none | ascii | vhs_crt | retro_term | gameboy | ...
   b: string; // 2번
-  in?: string; // 이 셰이더가 시작할 때 전환: tv | fade | none (비우면 게임 설정대로)
+  in?: string; // 이 셰이더가 시작할 때 전환: tv | none. 예전 대본에는 fade나 빈 값(게임 설정대로)도 있다
   out?: string; // 이 셰이더가 끝날 때 전환
 }
 

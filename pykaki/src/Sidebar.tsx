@@ -29,7 +29,7 @@ export function Sidebar() {
 
   return (
     <aside className="sidebar">
-      <section className="sec tint">
+      <section className="sec">
         <h3>
           캐릭터 <button onClick={addChar}>+ 추가</button>
         </h3>
@@ -39,7 +39,7 @@ export function Sidebar() {
         ))}
       </section>
 
-      <section className="sec tint">
+      <section className="sec">
         <h3>
           label (장면) <button onClick={() => update((p) => void ops.addGroup(p))}>+ 추가</button>
         </h3>

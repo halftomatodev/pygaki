@@ -14,14 +14,7 @@ export function Inspector() {
   const ids = useStore((s) => s.selectedIds);
   const project = useStore((s) => s.project);
   const shaderOf = useStore((s) => s.shaderOf);
-  if (shaderOf)
-    return (
-      <div className="insp">
-        <section className="sec">
-          <ShaderPanel />
-        </section>
-      </div>
-    );
+  if (shaderOf) return <ShaderPanel />;
   if (!ids.length)
     return (
       <div className="insp">

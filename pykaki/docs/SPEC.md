@@ -28,7 +28,7 @@
 ## 3. 화면 구성
 
 ```
-┌ 위쪽 줄: [제목] [대본 편집|GUI 편집|효과] [▶렌파이에서 실행]   ⇢ 오른쪽: 새로 열기 저장 다른이름 │ 폴더 │ 버전 │ ↶↷ │ .rpy 내보내기 │ 집중 설정 ┐
+┌ 위쪽 줄: [제목] [대본 편집|GUI 편집|효과]   ⇢ 오른쪽 끝: [▶렌파이에서 실행] [게임 줄 따라가기] (초록, `.tb-run`)  ⇢ 메뉴: 새로 열기 저장 다른이름 │ 폴더 │ 버전 │ ↶↷ │ .rpy 내보내기 │ 집중 설정 ┐
 ├ 왼쪽 ───────┬ 캔버스 ─────────────────────────┬ 오른쪽 탭 ────────────┤
 │ 캐릭터 목록   │ label 묶음 배경(프레임)           │ 편집: 선택한 상자 설정 │
 │ label 목록    │ 상자(노드), 선(엣지)              │ 플레이: 테스트 플레이  │
@@ -99,8 +99,9 @@
 - `condition`, `actions`, `variables`는 2단계(플래그)를 위해 비워 둔 자리다. 지금은 쓰지 않는다.
 - id는 툴이 만든다. 상자는 `n01`, `n02` … 만든 순서 번호(`ops.nextBoxId`: 지금 있는 가장 큰 번호 다음, 지운 번호는 다시 안 씀, 99를 넘으면 `n100`. 한번 붙으면 안 바뀜. 예전 상자의 `n` + 영숫자 6자는 그대로 둠), 줄·선택지·label은 `l`/`c`/`g` + 영숫자 6자. 로컬 label 이름으로도 쓰이므로 영문 식별자 규칙을 지킨다.
 - 불러올 때 `normalizeProject()`가 빠진 값을 채우고, 그룹이 없는 상자를 첫 그룹에 넣는다.
-- **셰이더** (`BoxNode.shader`, `LabelGroup.shader`, `src/shader.ts`, `FEATURE` 5): `{ a, b, in?, out? }`. `a` `b`는 pygaki 플러그인 `screen_fx.shaders`의 1번, 2번 이름(`none`, `ascii`, `vhs_crt` …), `in` `out`은 전환(`tv` `fade` `none`, 비우면 게임 설정대로). 상자에 없으면 label 것, label에도 없으면 없음(`shaderOfBox`). 값이 없는 것이 기본이라 예전 파일은 그대로 열린다.
+- **셰이더** (`BoxNode.shader`, `LabelGroup.shader`, `src/shader.ts`, `FEATURE` 5): `{ a, b, in?, out? }`. `a` `b`는 pygaki 플러그인 `screen_fx.shaders`의 1번, 2번 이름(`none`, `ascii`, `vhs_crt` …), `in` `out`은 전환. 고를 수 있는 것은 `tv`와 `none`(없음, `transition=None`) 둘이고(`SHADER_TRANS`), 새로 정하면 둘 다 `tv`로 시작한다(`newShader`). 예전 판의 `fade`와 빈 값(게임 설정대로)은 대본에 그대로 두고 그대로 내보내며, 칸에 "예전 값"으로 알린다(`oldTransLabel`). 상자에 없으면 label 것, label에도 없으면 없음(`shaderOfBox`). 값이 없는 것이 기본이라 예전 파일은 그대로 열린다.
   - 내보내기: 셰이더를 한 곳이라도 정했고 `renpyLink`가 켜져 있으면 **모든 상자의 첫 줄**(상자 label 바로 아래, 첫 `# @l:` 앞)에 `$ screen_fx.shaders("a", "b"[, transition=…])`를, 셰이더가 없는 상자에는 `$ screen_fx.clear([transition=…])`를 적는다. pygaki 플러그인은 같은 값이면 전환 없이 넘어가므로(`screen_fx.use`의 `old == new`) 어느 길로 들어와도 맞다. `call` 줄 바로 뒤에도 한 번 더 적는다(불러온 장면이 바꿨을 때).
+  - 화면(`ShaderPanel.tsx`): 카드 셋. 셰이더(1번, 2번) / 전환(시작할 때, 끝날 때) / `script_flow.rpy`에 들어가는 줄.
   - 전환(`enterTrans`): 그 상자의 `in` → 셰이더가 다른 앞 상자의 `out` → 없음(게임 설정). 상자 끝에는 줄을 넣지 않는다(선택지 화면이 바뀌지 않게).
   - 하나도 안 정한 대본에는 이 줄이 전혀 안 들어간다. `renpyLink`가 꺼져 있으면 검사 탭에 경고 한 줄.
   - 화면: 상자 머리와 label 틀 오른쪽 위의 `ShaderButton`(`BoxView.tsx`) → `store.openShader` → 오른쪽 편집 탭이 `ShaderPanel.tsx`. 그 상자만 골라져 있는 동안(label은 아무 상자도 안 고른 동안)만 열려 있다. 플레이는 상자에 들어갈 때 `stage.fx`에 이름만.

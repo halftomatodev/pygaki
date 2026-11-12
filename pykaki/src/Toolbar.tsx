@@ -47,7 +47,7 @@ export function Toolbar() {
 
   return (
     <div className="toolbar">
-      {/* 왼쪽: 프로젝트 제목, 큰 탭 셋, 게임 돌려보기 */}
+      {/* 왼쪽: 프로젝트 제목, 큰 탭 셋 */}
       <div className="tb-left">
       <input
         className="ptitle"
@@ -57,6 +57,9 @@ export function Toolbar() {
         title="프로젝트 제목 (눌러서 고쳐요)"
       />
       <ViewSwitch />
+      </div>
+      {/* 게임 돌려보기: 첫 줄 오른쪽 끝에 초록 톤으로 */}
+      <div className="tb-run">
       {isDesktop ? (
         <button className="run" onClick={() => void runInRenpy()} title="지금 대본을 내보내고 렌파이로 게임을 켜요. 이미 켜져 있을 때 어떻게 할지는 [설정]에서 골라요">
           ▶ 렌파이에서 실행
@@ -128,7 +131,7 @@ function FollowLine() {
   if (!link || !name) return null;
   return (
     <button
-      className={on ? 'on' : ''}
+      className={'follow' + (on ? ' on' : '')}
       onClick={() => {
         setFollowLine(!on);
         setOn(!on);

@@ -85,7 +85,7 @@ label ward.n1:  # @node:n1 도입
 
 상자의 나머지 값(`bubble_color`, `pill_line` 등)은 pygaki 플러그인 원고나 `say_style.box_styles`에서만 고칩니다. 연결을 끈 파일에는 상자와 pygaki 플러그인 효과를 내보내지 않습니다(검사 탭에 경고).
 
-**상자와 label의 셰이더** (PyKaki `FEATURE` 5, `src/shader.ts`): 대본에서 상자나 label에 셰이더를 한 곳이라도 정하면, PyKaki는 **모든 상자의 첫 줄**(상자 label 바로 아래, 첫 `# @l:` 앞)에 표시 없이 `$ screen_fx.shaders("ascii", "vhs_crt", transition="fade")`를, 셰이더가 없는 상자에는 `$ screen_fx.clear()`를 적습니다. `call` 줄 바로 뒤에도 한 번 더 적습니다. pygaki 플러그인 `screen_fx.use`가 같은 값이면 전환 없이 넘어가는 것에 기댑니다(이 동작을 바꾸면 PyKaki `exportRpy.ts`도 같이). 이 줄은 `# @l:` 표시가 없어서 받아 적기(3장)의 대상이 아니고, 내보낼 때마다 대본 값으로 다시 만들어집니다. 게임 안 편집기에서 이 줄을 고치거나 지워도 다음 내보내기 때 되돌아옵니다.
+**상자와 label의 셰이더** (PyKaki `FEATURE` 5, `src/shader.ts`): 대본에서 상자나 label에 셰이더를 한 곳이라도 정하면, PyKaki는 **모든 상자의 첫 줄**(상자 label 바로 아래, 첫 `# @l:` 앞)에 표시 없이 `$ screen_fx.shaders("ascii", "vhs_crt", transition="fade")`를, 셰이더가 없는 상자에는 `$ screen_fx.clear()`를 적습니다. `call` 줄 바로 뒤에도 한 번 더 적습니다. PyKaki가 고르게 하는 전환은 `transition="tv"`와 `transition=None` 둘입니다(예전 판으로 쓴 대본에는 `transition="fade"`나 전환을 적지 않은 줄이 남아 있을 수 있고, 그대로 내보냅니다. 플러그인은 셋 다 그대로 받습니다). pygaki 플러그인 `screen_fx.use`가 같은 값이면 전환 없이 넘어가는 것에 기댑니다(이 동작을 바꾸면 PyKaki `exportRpy.ts`도 같이). 이 줄은 `# @l:` 표시가 없어서 받아 적기(3장)의 대상이 아니고, 내보낼 때마다 대본 값으로 다시 만들어집니다. 게임 안 편집기에서 이 줄을 고치거나 지워도 다음 내보내기 때 되돌아옵니다.
 
 `renpyLink`를 끈 파일에는 `# @l:`이 없습니다. pygaki 플러그인은 이런 원고에 그림 줄을 저장하지 않고, 연결을 켜고 다시 내보내라고 안내합니다.
 

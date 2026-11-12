@@ -8,10 +8,13 @@ export const SHADER_NAMES: [string, string][] = [
   ['glitch', '글리치'], ['boil', '지글거림'], ['halftone', '망점'], ['hologram', '홀로그램'], ['nightvision', '나이트비전'],
   ['collage', '포토 콜라주'], ['shards', '파편 흩날림'],
 ];
-export const SHADER_TRANS: [string, string][] = [['', '게임 설정대로'], ['tv', 'TV 꺼짐·켜짐'], ['fade', '서서히'], ['none', '바로']];
+// 전환은 둘만 고른다: TV 꺼짐·켜짐, 없음(바로 바뀜, transition=None)
+export const SHADER_TRANS: [string, string][] = [['tv', 'TV 꺼짐·켜짐'], ['none', '없음']];
+// 예전 판에서 고를 수 있던 값. 대본에 남아 있으면 그대로 내보내고(게임 설정대로는 전환을 적지 않음, 서서히는 "fade"), 칸에 예전 값이라고 알린다
+export const oldTransLabel = (t?: string) => (SHADER_TRANS.some(([k]) => k === t) ? null : t === 'fade' ? '서서히' : !t ? '게임 설정대로' : t);
 
 const nameOf = (n: string) => SHADER_NAMES.find(([k]) => k === n)?.[1] ?? n;
-export const newShader = (): BoxShader => ({ a: 'none', b: 'none' });
+export const newShader = (): BoxShader => ({ a: 'none', b: 'none', in: 'tv', out: 'tv' });
 
 // 이 상자에 걸리는 셰이더: 상자 것 → label 것 → 없음(게임 설정대로)
 export function shaderOfBox(p: Project, b: BoxNode): BoxShader | null {
