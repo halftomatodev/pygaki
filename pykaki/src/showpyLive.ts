@@ -131,7 +131,11 @@ export interface GameState {
   custom_ui?: CustomUIState | null; // ui_kit 3.15부터
   panel?: PanelState | null; // ui_kit 3.16부터. 편집기가 열려 있고 게임 안 패널이 숨어 있을 때만
   flow?: FlowState | null; // screen_fx 5.2부터 (줄기표). 없으면 예전 판
+  splash?: SplashPages | null; // splash 2.2부터 (페이지 목록). 없으면 예전 판
 }
+
+// 스플래시 페이지 (LINK.md 9장). new는 splash_config.rpy에 없고 편집기에서 만든 페이지
+export interface SplashPages { pages: { id: string; title: string; new: boolean }[]; cur: string | null }
 
 interface S {
   view: 'script' | 'showpy' | 'effects' | 'shaders'; // 대본 편집 / GUI 편집 / 효과 / 셰이더

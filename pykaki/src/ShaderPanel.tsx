@@ -1,6 +1,7 @@
 // 오른쪽 칸의 셰이더 고르기. 상자나 label의 [◐ 셰이더] 버튼으로 연다.
 // 상자에 정하면 그 상자에서만, label에 정하면 그 label의 상자 모두에 걸린다 (상자에 따로 정한 것이 먼저).
 // 카드 셋: 셰이더(1번, 2번, 고른 것 아래에 세부 값) / 전환(시작할 때, 끝날 때, TV 세부 값) / 원고 파일에 들어가는 줄
+import { Card } from './Card';
 import { useState } from 'react';
 import { useStore } from './store';
 import type { BoxShader } from './types';
@@ -9,6 +10,8 @@ import { exitLinks } from './ops';
 import { RPY_FILE, useGameFolder } from './gameFolder';
 import { ScreenFxKnobs } from './fx/ScreenFxCanvas';
 import { TvKnobs } from './ShadersView';
+import { AllRow, UiCards } from './UiPanel';
+import { sceneCode, sceneSupported, uiOfBox, usesSceneUi } from './boxUi';
 
 type Vals = Record<string, unknown>;
 function put<T>(o: Record<string, T> | undefined, k: string, v: T | undefined) {
@@ -131,10 +134,7 @@ export function ShaderPanel() {
 
   return (
     <div className="insp shader-panel">
-      <section className="sec">
-        <h3>
-          셰이더 <button onClick={close}>{box ? '← 상자 편집으로' : '닫기'}</button>
-        </h3>
+      <Card id="s-shader" title="셰이더" extra={<button onClick={close}>{box ? '← 상자 편집으로' : '닫기'}</button>}>
         <p className="tip">{name}{!box && ` · 상자 ${nBoxes}개`}</p>
 
         <div className="seg">
@@ -165,11 +165,27 @@ export function ShaderPanel() {
         )}
         {sh && !canValues && <p className="tip warn-text">이 게임의 pygaki 플러그인은 예전 판이라 세부 값을 받지 못해요. 화면 효과(screen_fx) 5.5부터 돼요.</p>}
         {!linked && <p className="tip warn-text">셰이더는 pygaki 플러그인이 있어야 해요. 왼쪽 [설정]에서 "pygaki 플러그인 연결"을 켜 주세요.</p>}
-      </section>
+        <AllRow
+          what="셰이더"
+          so={so}
+          has={!!(box ? shaderOfBox(project, box) : sh)}
+          count={(p) => [...p.nodes, ...p.labels].filter((x) => x.shader).length}
+          apply={(p) => {
+            const b = so.kind === 'box' ? p.nodes.find((n) => n.id === so.id) : null;
+            const src = b ? shaderOfBox(p, b) : p.labels.find((g) => g.id === so.id)?.shader;
+            if (!src) return;
+            const copy = structuredClone(src);
+            for (const n of p.nodes) delete n.shader;
+            for (const g of p.labels) g.shader = structuredClone(copy);
+          }}
+          clear={(p) => {
+            for (const x of [...p.nodes, ...p.labels]) delete x.shader;
+          }}
+        />
+      </Card>
 
       {sh && (
-        <section className="sec">
-          <h3>전환</h3>
+        <Card id="s-trans" title="전환">
           {trans('in', '시작할 때')}
           {trans('out', '끝날 때')}
           {usesTv && (
@@ -191,15 +207,16 @@ export function ShaderPanel() {
             "시작할 때"는 앞 상자와 셰이더가 달라지는 상자에서 이 셰이더로 바뀌는 모양이에요. 같은 셰이더가 이어지는 상자 사이에서는 전환이 없어요.
             "끝날 때"는 이 셰이더가 끝나고 셰이더가 없는 상자로 넘어갈 때 써요. "없음"이면 바로 바뀌어요. 모양은 위쪽 [셰이더] → 전환에서 미리 봐요.
           </p>
-        </section>
+        </Card>
       )}
 
+      <UiCards so={so} />
+
       {box && (
-        <section className="sec">
-          <h3>{RPY_FILE}에 들어가는 줄</h3>
-          <pre className="rpy small">{line}</pre>
+        <Card id="s-line" title={`${RPY_FILE}에 들어가는 줄`}>
+          <pre className="rpy small">{[line, linked && usesSceneUi(project) && sceneSupported() ? sceneCode(uiOfBox(project, box)) : null].filter(Boolean).join(String.fromCharCode(10))}</pre>
           <p className="tip">내보낼 때 이 상자의 첫 줄에 적혀요.</p>
-        </section>
+        </Card>
       )}
     </div>
   );

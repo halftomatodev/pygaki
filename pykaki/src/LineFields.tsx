@@ -1,5 +1,6 @@
 // 상자 안 편집과 오른쪽 편집 탭이 함께 쓰는 줄 입력 부품
 import { useEffect, useState } from 'react';
+import { PickPos } from './PickPos';
 import { useStore } from './store';
 import * as ops from './ops';
 import type { ImageKind, Line, LineFx, SayStyle } from './types';
@@ -266,7 +267,8 @@ export function SayFields({ l, set }: { l: Line; set: SetLine }) {
           ))}
         </datalist>
       )}
-      {posWhat || posName ? <div className="sf-row">{posWhat}{posName}</div> : linked && <p className="tip">위치와 화면 효과는 렌파이 편집기의 대사 탭에서 정해요.</p>}
+      {(posWhat || posName) && <div className="sf-row">{posWhat}{posName}</div>}
+      {linked && <PickPos lineId={l.id} tab="say" what="대사" />}
     </>
   );
 }
@@ -280,7 +282,6 @@ export function LineLook({ l, set }: { l: Line; set: SetLine }) {
 
   return (
     <div className="look">
-      <h3 className="look-h" title="글자 모양, 속도, 등장 효과">글자 효과</h3>
       {tagHere && <TagBar targetId={'ed-' + l.id} className="tagbar-look" />}
       <LinePreview line={l} tagsOn={tagsOn} />
       {l.say?.effect && <EffectClip effect={l.say.effect} />}

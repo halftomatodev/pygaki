@@ -22,7 +22,10 @@ export interface Media {
   images: string[]; // "bg hall", "mina scared", "ghost", 영상도 같은 이름 규칙
   audio: string[]; // audio 폴더 기준 경로
   fonts: string[]; // game 폴더 기준 경로
+  // 커서와 클릭 대기 표시의 그림 묶음: 그림이 든 폴더 하나가 한 묶음 (gui/ctc, gui/ctc/heart …). first는 첫 그림 (작은 그림용)
+  frames?: { ctc: FrameSet[]; cursor: FrameSet[] };
 }
+export interface FrameSet { dir: string; first: string; n: number }
 
 // 플레이 화면을 게임처럼 그리는 데 쓰는 값. gui.rpy 등에서 읽고, 없으면 렌파이 기본값 (1280x720)
 export interface GameLook {
@@ -59,6 +62,7 @@ interface F {
   hasShowpy: boolean; // game 폴더에 ui_kit이 있는지
   fxErrors: [string, string][]; // 효과 폴더(ui_kit/effects)에서 못 읽은 파일과 이유
   endMarks: boolean; // 이 게임의 플러그인이 줄 끝 표시를 읽는지 (ui_kit 4.5, script_edit.rpy의 PK_END_MARKS)
+  sceneUi: boolean | null; // custom_ui.scene이 있는지 (ui_kit 4.7). 플러그인이 없거나 폴더를 안 열었으면 null
   fxSeq: number; // 효과 목록이 바뀔 때마다 오른다 (목록을 쓰는 화면이 다시 그리게)
   fxFiles: string[]; // 효과 폴더에 있는 효과 파일 이름
   fxOff: string[]; // 끈 효과 이름 (effects_off.txt)
@@ -66,7 +70,7 @@ interface F {
   set(v: Partial<F>): void;
 }
 
-const NO_MEDIA: Media = { images: [], audio: [], fonts: [] };
+const NO_MEDIA: Media = { images: [], audio: [], fonts: [], frames: { ctc: [], cursor: [] } };
 
 export const useGameFolder = create<F>((set) => ({
   name: null,
@@ -76,6 +80,7 @@ export const useGameFolder = create<F>((set) => ({
   hasShowpy: false,
   fxErrors: [],
   endMarks: false,
+  sceneUi: null,
   fxSeq: 0,
   fxFiles: [],
   fxOff: [],
@@ -241,6 +246,23 @@ export async function scanFolder() {
   const fonts = await sub(dir, 'fonts');
   if (fonts) for (const f of await walk(fonts)) if (FONT.test(f)) media.fonts.push('fonts/' + f);
   media.fonts.sort();
+  // 커서·클릭 대기 그림 묶음 (custom_ui.scene의 ctc=, cursor=에 적는 폴더)
+  const gui = await sub(dir, 'gui');
+  const sets = async (name: 'ctc' | 'cursor') => {
+    const d = gui ? await sub(gui, name) : null;
+    if (!d) return [];
+    const by = new Map<string, string[]>();
+    for (const f of await walk(d)) {
+      if (!/\.(png|webp|jpe?g)$/i.test(f)) continue;
+      const at = f.lastIndexOf('/');
+      const k = at < 0 ? '' : f.slice(0, at);
+      by.set(k, [...(by.get(k) ?? []), f]);
+    }
+    return [...by.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([k, fs]) => ({ dir: `gui/${name}` + (k ? '/' + k : ''), first: `gui/${name}/` + fs.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))[0], n: fs.length }));
+  };
+  media.frames = { ctc: await sets('ctc'), cursor: await sets('cursor') };
   const look = await readLook();
 
   // 대본에 이름이 start인 label을 만들면 script.rpy의 label start와 겹친다
@@ -272,10 +294,12 @@ export async function scanFolder() {
   setShadersOff(shOff);
   const engine = uiKit ? await sub(uiKit, 'engine') : null;
   const endMarks = /^\s*PK_END_MARKS\s*=\s*True/m.test((engine && (await readText(engine, 'script_edit.rpy'))) || '');
+  const cuText = engine ? await readText(engine, 'custom_ui.rpy') : null;
+  const sceneUi = cuText === null ? null : /^\s*def scene\(/m.test(cuText);
   const g = useGameFolder.getState();
   if (fxErrors.length && JSON.stringify(fxErrors) !== JSON.stringify(g.fxErrors))
     useStore.getState().say('효과 폴더에서 못 읽은 파일: ' + fxErrors.map(([f, why]) => `${f} (${why})`).join(' / '));
-  g.set({ name: g.name ?? dir.name, media, look, startClash, hasShowpy, endMarks, fxErrors, fxSeq: g.fxSeq + 1, fxFiles: packs.map((f) => f.name).sort(), fxOff, shOff });
+  g.set({ name: g.name ?? dir.name, media, look, startClash, hasShowpy, endMarks, sceneUi, fxErrors, fxSeq: g.fxSeq + 1, fxFiles: packs.map((f) => f.name).sort(), fxOff, shOff });
   setTimeout(() => oldUrls.forEach((u) => URL.revokeObjectURL(u)), 5000);
 }
 
@@ -320,7 +344,7 @@ export async function disconnectFolder() {
   setShaderList(null);
   setShadersOff([]);
   refreshEffects();
-  useGameFolder.getState().set({ name: null, media: NO_MEDIA, look: DEFAULT_LOOK, startClash: null, hasShowpy: false, endMarks: false, fxErrors: [], fxSeq: useGameFolder.getState().fxSeq + 1, fxFiles: [], fxOff: [] });
+  useGameFolder.getState().set({ name: null, media: NO_MEDIA, look: DEFAULT_LOOK, startClash: null, hasShowpy: false, endMarks: false, sceneUi: null, fxErrors: [], fxSeq: useGameFolder.getState().fxSeq + 1, fxFiles: [], fxOff: [] });
 }
 
 // 앱을 다시 열 때: 연결은 기억하지만, 권한은 사용자가 한 번 눌러야 다시 생긴다

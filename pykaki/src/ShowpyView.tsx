@@ -9,6 +9,7 @@ import { useStore } from './store';
 import { CustomUIPanel } from './ShowpyCustomUI';
 import { MirrorPanel } from './ShowpyMirror';
 import { FlowTree } from './ShowpyFlow';
+import { Card } from './Card';
 
 interface Section {
   id: string;
@@ -20,16 +21,16 @@ interface Section {
 }
 
 const SECTIONS: Section[] = [
-  { id: 'splash', label: '로고, 경고, 조작 방법', tab: 'splash', app: false, mirror: true, note: '게임을 켰을 때 타이틀 전에 나오는 페이지예요. showpy 4.18(splash 1.2)부터 여기서 고쳐요. 예전 판이면 splash/splash_config.rpy에서 고쳐요.' },
+  { id: 'splash', label: '스플래시 페이지', tab: 'splash', app: false, mirror: true, note: '게임을 켰을 때 타이틀 전에 나오는 페이지예요. showpy 4.18(splash 1.2)부터 여기서 고쳐요. 예전 판이면 splash/splash_config.rpy에서 고쳐요.' },
   { id: 'title', label: '타이틀 메뉴', tab: 'title', app: true, note: '' },
   { id: 'title_fx', label: '타이틀 셰이더', tab: 'title_fx', app: false, mirror: true, note: '타이틀에만 걸리는 셰이더 두 자리예요. 1번과 2번에 고른 것이 겹쳐요. 일렁임(예전 "타이틀 일렁임")도 여기서 골라요.' },
   { id: 'pause', label: 'ESC 메뉴', tab: 'title', app: true, note: '' },
   { id: 'pause_fx', label: '게임 내 메뉴 셰이더', tab: 'pause_fx', app: false, mirror: true, note: 'ESC 메뉴와 거기서 연 화면에만 걸리는 셰이더 두 자리예요. 메뉴가 열려 있는 동안 뒤 게임 화면도 이 셰이더로 보여요.' },
   { id: 'screen_fx', label: '셰이더 기본 값', tab: 'screen_fx', app: false, mirror: true, note: '셰이더마다 처음 값(세부 값)을 게임 화면을 보면서 고쳐요. 타이틀, 게임 내 메뉴 셰이더와, 상자에서 값을 따로 정하지 않은 곳이 이 값을 써요. 상자마다 다른 값은 [대본 편집]에서 상자나 label의 ◐ 셰이더로 정해요.' },
-  { id: 'custom_ui', label: '커서, 클릭 대기(CTC), 대사 소리', tab: 'custom_ui', app: true, note: '' },
-  { id: 'say', label: '대사', tab: 'say', app: false, mirror: true, note: '' },
-  { id: 'choice', label: '선택지', tab: 'choice', app: false, mirror: true, note: '' },
-  { id: 'stage', label: '그림, 영상 배치', tab: 'stage', app: false, mirror: true, note: '' },
+  { id: 'custom_ui', label: '커서, 클릭 대기, 대사 소리', tab: 'custom_ui', app: true, note: '' },
+  { id: 'say', label: '대사 상자', tab: 'say', app: false, mirror: true, note: '대사 상자의 처음 위치와 모양이에요. 줄마다 다른 위치는 [대본 편집] 글자 효과 카드의 [게임에서 대사 위치 고르기]로 정해요.' },
+  { id: 'choice', label: '선택지', tab: 'choice', app: false, mirror: true, note: '선택지의 처음 위치와 모양이에요. 상자마다 다른 위치는 [대본 편집] 다음 흐름 카드의 [게임에서 선택지 위치 고르기]로 정해요.' },
+  { id: 'stage', label: '그림, 영상 배치', tab: 'stage', app: false, mirror: true, note: '그림을 넣는 것은 [대본 편집] 상자의 배경, 그림·영상 카드에서 해요. 여기서는 게임 화면에서 자리를 끌어 정해요.' },
   { id: 'ui_text', label: '종료 메시지, 버튼 글', tab: 'ui_text', app: false, mirror: true, note: '종료 확인 창, 퀵메뉴 버튼 같은 글을 바꿔요. showpy ui_kit 3.23부터 있어요.' },
 ];
 
@@ -38,13 +39,16 @@ const GROUPS: { title: string; ids: string[] }[] = [
   { title: '스플래시', ids: ['splash'] },
   { title: '타이틀 메뉴', ids: ['title', 'title_fx', 'screen_fx'] },
   { title: '게임 내 메뉴', ids: ['pause', 'pause_fx'] },
-  { title: '커서, 클릭 대기', ids: ['custom_ui'] },
-  { title: '대사, 선택지 (위치, 스타일)', ids: ['say', 'choice'] },
-  { title: '그림, 영상 (위치, 스타일)', ids: ['stage'] },
   { title: '확인 창, UI 글', ids: ['ui_text'] },
+  // 상자마다 바꾸는 것은 [대본 편집]으로 옮겼다(세션 32). 여기는 상자에서 정하지 않았을 때 쓰는 게임 처음 값만
+  { title: '게임 처음 값', ids: ['say', 'choice', 'stage', 'custom_ui'] },
 ];
 
 const FLOW_IN_APP = false;
+
+// 스플래시 기본 페이지는 우리말 이름, 사용자가 만든 페이지는 제목(없으면 id)
+const PAGE_NAMES: Record<string, string> = { logo: '로고', warning: '경고', controls: '조작 방법' };
+const pageLabel = (p: { id: string; title: string }) => PAGE_NAMES[p.id] ?? (p.title.replace(/\{[^}]*\}/g, '').trim() || p.id);
 
 export function ShowpyView() {
   const { on, st, section, err } = useLive();
@@ -72,10 +76,22 @@ export function ShowpyView() {
       </div>
       <nav className="sp-nav">
         {GROUPS.map((g) => (
-          <section key={g.title} className="sec sp-group">
-            <h3>{g.title}</h3>
+          <Card key={g.title} id={'gn-' + g.title} title={g.title} className="sp-group">
             {g.ids.map((id) => {
               const s = SECTIONS.find((x) => x.id === id)!;
+              // 스플래시는 페이지마다 항목 (splash 2.2. 예전 판이면 항목 하나)
+              if (s.id === 'splash' && st?.splash?.pages.length)
+                return st.splash.pages.map((p) => (
+                  <button
+                    key={'splash-' + p.id}
+                    className={'sp-nav-item' + (sec.id === 'splash' && st.splash?.cur === p.id ? ' on' : '')}
+                    onClick={() => (choose(s), liveSend({ cmd: 'splash.page', id: p.id }))}
+                    title={p.id}
+                  >
+                    {pageLabel(p)}
+                    {!inApp(s) && <span className="sp-badge">게임 안</span>}
+                  </button>
+                ));
               const t = s.tab ? st?.editor.tabs.find((x) => x.id === s.tab) : null;
               return (
                 <button key={s.id} className={'sp-nav-item' + (s.id === sec.id ? ' on' : '')} onClick={() => choose(s)} title={t && !t.ok ? t.why : ''}>
@@ -84,27 +100,32 @@ export function ShowpyView() {
                 </button>
               );
             })}
-          </section>
+          </Card>
         ))}
       </nav>
       <div className="sp-main">
         {!on ? <NotConnected /> : st ? <Where st={st} sec={sec.id} /> : <p className="tip">게임 상태를 기다리는 중...</p>}
       </div>
+      {/* 오른쪽 칸도 대본 편집처럼 카드: 저장·편집기 카드 + 고치는 칸 카드 (커서·대사 소리는 칸마다 카드) */}
       <div className="sp-panel">
-        <h3>{sec.label}</h3>
-        {on && st && <EditorBar st={st} />}
-        {err && <p className="sp-err">{err}</p>}
-        {!on ? (
-          <p className="tip">게임과 연결되면 여기서 고쳐요.</p>
-        ) : !st ? null : sec.id === 'custom_ui' && st.custom_ui !== undefined ? (
+        <Card id="g-bar" title="저장과 GUI 편집기">
+          {on && st && <EditorBar st={st} />}
+          {err && <p className="sp-err">{err}</p>}
+          {!on && <p className="tip">게임과 연결되면 여기서 고쳐요.</p>}
+        </Card>
+        {on && st && (sec.id === 'custom_ui' && st.custom_ui !== undefined ? (
           <CustomUIPanel cu={st.custom_ui} />
-        ) : sec.id === 'title' || sec.id === 'pause' ? (
-          <TitlePanel st={st} want={sec.id} />
-        ) : sec.mirror && mirrorOk ? (
-          <MirrorSection st={st} sec={sec} />
         ) : (
-          <InGamePanel st={st} sec={sec} />
-        )}
+          <Card id={'g-' + sec.id} title={sec.id === 'splash' && st.splash?.cur ? '스플래시: ' + pageLabel(st.splash.pages.find((p) => p.id === st.splash!.cur) ?? { id: st.splash.cur, title: '' }) : sec.label}>
+            {sec.id === 'title' || sec.id === 'pause' ? (
+              <TitlePanel st={st} want={sec.id} />
+            ) : sec.mirror && mirrorOk ? (
+              <MirrorSection st={st} sec={sec} />
+            ) : (
+              <InGamePanel st={st} sec={sec} />
+            )}
+          </Card>
+        ))}
       </div>
     </div>
   );

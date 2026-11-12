@@ -5,6 +5,7 @@ import { IDENT, PLUGIN_NAMES, RESERVED } from './util';
 import { badImageName, renpyOnlyEffect, fxArgs, isStage, sayArgs, stageCode, tagEffectNames, REMOVED_EFFECTS, RENPY_EFFECTS } from './stage';
 import { shaderEffect } from './fx/textShaders';
 import { checkTags, shaderTags } from './tagEdit';
+import { sceneCode, sceneSupported, uiOfBox, usesSceneUi } from './boxUi';
 import { enterTransTv, shaderCode, shaderOfBox, usesShaderValues, usesShaders, usesTvValues, valuesSupported } from './shader';
 
 export interface Warn { level: 'error' | 'warn'; msg: string; nodeId?: string }
@@ -162,6 +163,13 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean } = {}): { co
     return shaderCode(mine, tr.t, { tv: canValues ? tr.tv : undefined, values });
   };
 
+  // 상자·label의 대사 소리, 커서, 클릭 대기: 상자마다 첫 줄에 $ custom_ui.scene(...) (boxUi.ts, ui_kit 4.7)
+  const sceneWanted = usesSceneUi(p);
+  if (sceneWanted && !S.renpyLink) W.push({ level: 'warn', msg: '상자와 label의 대사 소리, 커서, 클릭 대기는 pygaki 플러그인 연결을 켜야 내보내요' });
+  if (sceneWanted && S.renpyLink && !sceneSupported())
+    W.push({ level: 'warn', msg: '상자와 label의 대사 소리, 커서, 클릭 대기는 pygaki 플러그인 ui_kit 4.7부터 돼요. 이 게임은 예전 판이라 내보내지 않아요' });
+  const sceneUi = sceneWanted && S.renpyLink && sceneSupported();
+
   const I = '    ';
   const q =(t: string) => '"' + escapeText(t, S) + '"';
 
@@ -184,6 +192,9 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean } = {}): { co
 
       const body: string[] = [];
       if (shaders && S.renpyLink) body.push(shaderLine(b, true));
+      const bui = uiOfBox(p, b);
+      const boxCps = bui.cps;
+      if (sceneUi) body.push(sceneCode(bui));
       const pct =(t: string, where: string) => {
         if (!S.escapePercent && loosePercent(t)) W.push({ level: 'error', msg: `${where}의 %에서 렌파이가 멈춰요. 설정에서 "% 를 글자 그대로"를 켜 주세요 (${b.title || b.id})`, nodeId: b.id });
         // 텍스트 태그 짝 (렌파이 check_text_tags와 같은 규칙)
@@ -239,7 +250,9 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean } = {}): { co
           if (!known) W.push({ level: 'warn', msg: `대사: {shader=${n}}는 PyKaki가 모르는 효과예요. 게임에 없는 이름이면 그 줄에서 렌파이가 멈춰요 (${b.title || b.id})`, nodeId: b.id });
           else if (!S.renpyLink && !RENPY_EFFECTS.includes(n)) W.push({ level: 'warn', msg: `대사: {shader=${n}}는 pygaki 플러그인이 있어야 해요. 없는 게임에서는 그 줄에서 렌파이가 멈춰요 (${b.title || b.id})`, nodeId: b.id });
         }
-        const fa = S.renpyLink ? [...fxArgs(l.fx), ...sayArgs(l.say, false, tagText)] : sayArgs(l.say, true, tagText);
+        // 상자·label의 텍스트 속도는 그 줄에 따로 정하지 않았을 때 대사 줄에 적는다 (boxUi.ts)
+        const ls = boxCps !== undefined && l.say?.cps === undefined ? { ...(l.say ?? {}), cps: boxCps } : l.say;
+        const fa = S.renpyLink ? [...fxArgs(l.fx), ...sayArgs(ls, false, tagText)] : sayArgs(ls, true, tagText);
         const tail = fa.length ? ` (${fa.join(', ')})` : '';
         if (l.type === 'narration') return body.push(q(l.text) + tail);
         const c = l.who ? charById.get(l.who) : undefined;
@@ -279,6 +292,7 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean } = {}): { co
           body.push(`call ${ref(e.target)}`);
           // 불러온 장면이 셰이더를 바꿨으면 돌아와서 이 상자 것으로 되돌린다
           if (shaders && S.renpyLink) body.push(shaderLine(b, false));
+          if (sceneUi) body.push(sceneCode(bui));
           body.push(...(e.then ? flow(e.then) : ['return']));
         }
       } else body.push('return');

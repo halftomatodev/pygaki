@@ -38,6 +38,11 @@ bands
 
 4.1에서 바뀐 점: pygaki 앱과의 실시간 연결에 줄기표(`state.flow`, `flow` 명령)를 더함. Screen FX 5.2의 줄기표를 앱에서 펴고 끌 수 있습니다.
 
+### 4.7에서 바뀐 점 (장면마다 대사 소리, 커서, 클릭 대기)
+
+- **`$ custom_ui.scene(typing_sound="audio/soft.ogg", ctc="gui/ctc/heart", cursor="gui/cursor/hand")`**: 그 줄부터 대사 소리, 클릭 대기 표시 그림, 커서 그림을 바꿉니다. `ctc`, `cursor`는 그림이 든 폴더이고 그 안의 그림을 이름 차례(1, 2, 10)로 돌립니다. `typing_sound=None`이면 끔, 안 적은 값과 `$ custom_ui.scene()`은 게임 처음 값(`custom_ui_layout.rpy`). 값은 세이브·되감기에 남습니다. 클릭 대기 표시와 커서는 처음 값에서 켜 둔 것만 바뀌고, 커서는 소프트웨어 커서일 때만 바뀝니다. PyKaki가 상자마다 이 줄을 적습니다(`docs/LINK.md` 2장).
+- 실시간 연결에 스플래시 페이지 목록(`splash`)과 명령 `splash.page`(splash 2.2와 같이).
+
 ### 4.0에서 바뀐 점 (글자 효과, 글 상자)
 
 - **이미지/영상 탭 [효과] 칸**: 고른 그림에 화면 효과 하나를 겁니다(`screen_fx.image_fx`). 자세히는 4-6.

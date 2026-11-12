@@ -39,7 +39,9 @@
 └──────────────┴──────────────────────────────────┴───────────────────────┘
 ```
 
-- 양쪽 칸의 묶음은 모두 같은 카드(`.sec`)다. 오른쪽 칸(`Panels.tsx` `RightPanel`)은 탭이 없다(2026-11-12). 상자를 고르면 상자 / 글자 효과(`.look-panel`, 위에 붙음, 제목 `h3.look-h`) / 대사 / 다음 흐름 카드(`.right-scroll`), ◐ 셰이더면 `ShaderPanel`, 플레이 중이고 `store.tab === 'play'`이면 플레이 카드(`.play-card`, 지우지 않고 숨김). 검사와 스크립트는 왼쪽 칸 카드(`Sidebar.tsx` `WarnCard` `ScriptCard`, 원고는 `generateRpy`를 `useMemo`로). 왼쪽 순서: label(+ 상자와 정렬) / 캐릭터 / 검사 / 렌파이 프로젝트 정보 / 스크립트 / 설정 / 사용법. 사용법은 왼쪽 칸 맨 아래 카드(`Sidebar.tsx` `Usage`, 접은 것은 `localStorage['pygaki-usage-closed']`).
+- 양쪽 칸의 묶음은 모두 같은 카드(`.sec`)다. 오른쪽 칸(`Panels.tsx` `RightPanel`)은 탭이 없다(2026-11-12). 상자를 고르면 상자 / 글자 효과(`.look-panel`, 위에 붙음, 제목 `h3.look-h`) / 대사 / 다음 흐름 카드(`.right-scroll`), ◐ 셰이더면 `ShaderPanel`, 플레이 중이고 `store.tab === 'play'`이면 플레이 카드(`.play-card`, 지우지 않고 숨김). 검사와 스크립트는 왼쪽 칸 카드(`Sidebar.tsx` `WarnCard` `ScriptCard`, 원고는 `generateRpy`를 `useMemo`로). 왼쪽 순서: label(+ 상자와 정렬) / 캐릭터 / 검사 / 렌파이 프로젝트 정보 / 스크립트 / 설정 / 사용법. 사용법은 왼쪽 칸 맨 아래 카드(`Sidebar.tsx` `Usage`).
+- **카드 접기** (`Card.tsx`, 2026-11-12 세션 32): 양쪽 칸과 GUI 편집 칸의 카드는 모두 `Card`. 제목 오른쪽 회색 [접기]/[펼치기](`.fold-btn`), 제목 더블클릭도 같음. 접으면 이름만 한 줄, 하늘색 톤(`.sec.folded`). 접은 것은 카드 id로 `localStorage['pygaki-folded']`에 기억(예전 `pygaki-script-open`, `pygaki-usage-closed`도 처음 한 번 읽음). 스크립트 카드는 처음에 접혀 있다. 왼쪽 칸 스크롤바는 왼쪽(`.sidebar { direction: rtl }`, 안쪽은 `ltr`).
+- **상자 카드 더** (세션 32): 대사 카드 아래 배경(그림, 영상) / 그림, 영상 / 효과음, 음악 카드(`StageCards.tsx`). 이 상자의 그 종류 줄 목록(누르면 그 줄로), 게임 폴더 파일을 눌러서 넣기(`scene`, `show`, `sound`/`music` 줄), 이름을 쳐서 넣기. 지금 쓰는 줄(`activeLine`) 바로 앞에, 없으면 상자 끝에 넣는다. 글자 효과 카드와 다음 흐름(선택지) 카드에는 앱에서 게임과 연결됐을 때 [🎯 게임에서 대사(선택지) 위치 고르기](`PickPos.tsx`): 원고를 내보내고(`files.ts` `exportedLineOf`) 게임을 그 줄로(`goto`), 게임 안 편집기의 대사(선택지) 탭을 연다. 게임 창에서 끌고 저장하면 받아 적기(LINK.md 3장).
 - 칸 너비: 칸과 캔버스 사이의 `.resizer`(`App.tsx` `Resizer`)를 끌면 `prefs.leftW` `rightW`가 바뀌고 `--left-w` `--right-w`로 적용된다. 범위와 처음 값은 `prefs.ts` `SIZES`(왼쪽 190~520, 처음 244 / 오른쪽 300~760, 처음 400). 더블클릭은 그 칸만 처음 값, 왼쪽 "설정"의 [처음 크기]는 양쪽, [잠금](`prefs.sizeLock`)이면 손잡이가 움직이지 않는다. 접은 칸은 손잡이도 없다.
 - 왼쪽 칸과 오른쪽 칸은 캔버스 위쪽 양 끝의 작은 버튼(`.side-toggle`, `Canvas.tsx`)으로 따로 접고 편다(`store.hideLeft` `hideRight`, `localStorage['pygaki-hide-left']` `['pygaki-hide-right']`). 접어도 지우지 않고 CSS로만 숨긴다(플레이 상태 유지).
 - 툴바 왼쪽의 화면 바꾸기(`Toolbar.tsx` `ViewSwitch`, `showpyLive.ts`의 `view`): [대본 편집] / [GUI 편집](데스크톱 앱에서만) / [효과]. 대본 화면은 다른 화면을 보는 동안에도 지우지 않고 숨긴다.
@@ -111,6 +113,9 @@
   - **세부 값** (`FEATURE` 6, screen_fx 5.5): `BoxShader.va`(1번) `vb`(2번)는 `{값 이름: 값}`, `tv`는 TV 전환 값. 셰이더 칸에서 고른 셰이더 아래 [세부 값]을 펼치면 `ScreenFxKnobs`(값 이름과 범위는 `shader_list.json`의 `params` `groups`), 전환이 TV면 `TvKnobs`(`shader.ts` `TV_KNOBS`). 셰이더를 바꾸면 그 자리 값은 지운다. 내보낼 때(`shaderCode`) 대본 어디에든 셰이더 값이 있으면(`usesShaderValues`) 모든 셰이더 줄에 `values={이름: {…}}`(두 자리를 이름별로 합침, `slotValues`), 전환이 `"tv"`이고 그 전환의 주인에게 `tv`가 있으면 `tv={…}`. 들어올 때 전환과 TV 값은 `enterTransTv`. 게임 목록의 `screen_fx`가 5.5보다 낮으면(`valuesSupported`) 값을 빼고 검사 경고. 형식은 LINK.md 2장.
   - 위쪽 [셰이더] 화면(`ShadersView.tsx`): [셰이더](목록, 켜기/끄기, 샘플, 구경용 막대) / [전환](TV 꺼짐·켜짐, 없음. TV는 CSS로 비슷하게 그리는 샘플 `TvSample`과 구경용 막대, 쓰인 곳).
   - 예전 `fx` 줄(`screen_fx.use`)은 그대로 읽고 내보낸다(새 줄 목록에는 없음).
+  - 셰이더 카드 맨 아래 [⚠ 모든 상자에 적용](이 상자·label에 걸린 셰이더를 모든 label에 걸고 상자마다 따로 정한 것은 지움) / [⚠ 전부 삭제](대본 전체에서 지움). 확인 창을 띄우고, ↶로 되돌린다(`UiPanel.tsx` `AllRow`).
+- **대사 소리·속도, 커서, 클릭 대기** (`BoxNode.ui`, `LabelGroup.ui`, `src/boxUi.ts`, `FEATURE` 7): `{ cps?, sound?, ctc?, cursor? }`. 값마다 상자 → label → 게임 처음 값(`uiOfBox`). `sound`는 game 기준 경로이고 `''`이면 끔, `ctc` `cursor`는 그림 폴더(`gui/ctc/heart`). 셰이더 칸 아래 카드 둘(`UiPanel.tsx` `UiCards`): 대사 소리와 속도 / 커서와 클릭 대기. 값마다 [따름]/[이 상자에], 카드 맨 아래 [⚠ 모든 상자에 적용] [⚠ 전부 삭제](`applyAll` `clearAll`). 그림 묶음은 `scanFolder`가 `gui/ctc`, `gui/cursor` 안의 폴더를 읽은 것(`Media.frames`).
+  - 내보내기: `cps`는 그 상자의 대사·내레이션 줄 가운데 속도를 정하지 않은 줄에 `cps=`로. 나머지는 하나라도 쓰면(`usesSceneUi`) 모든 상자의 첫 줄(셰이더 줄 다음)과 `call` 뒤에 `$ custom_ui.scene(...)`(`sceneCode`). 게임의 `custom_ui.rpy`에 `def scene(`가 없으면(`sceneSupported`, `useGameFolder.sceneUi`) 빼고 검사 경고. 형식은 LINK.md 2장.
 
 ## 5. `.rpy` 내보내기 규칙 (`src/exportRpy.ts`)
 

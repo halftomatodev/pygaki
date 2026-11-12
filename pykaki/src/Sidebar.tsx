@@ -7,6 +7,7 @@ import { addBoxCenter, runLayout } from './actions';
 import { keyOf, SIZES, usePrefs } from './prefs';
 import { forgetFlow } from './flowPick';
 import { useStore } from './store';
+import { Card } from './Card';
 import * as ops from './ops';
 import type { Character, LabelGroup } from './types';
 import { IDENT, RESERVED, timeStr } from './util';
@@ -18,7 +19,6 @@ export function Sidebar() {
   const update = useStore((s) => s.update);
   const sel = useStore((s) => s.selectedIds.length);
   const rf = useReactFlow();
-  const [showSettings, setShowSettings] = useState(false);
   const sizeLock = usePrefs((p) => p.sizeLock);
   const resized = usePrefs((p) => p.leftW !== SIZES.left.def || p.rightW !== SIZES.right.def);
 
@@ -31,10 +31,7 @@ export function Sidebar() {
 
   return (
     <aside className="sidebar">
-      <section className="sec">
-        <h3>
-          label (장면) <button onClick={() => update((p) => void ops.addGroup(p))}>+ 추가</button>
-        </h3>
+      <Card id="labels" title="label (장면)" extra={<button onClick={() => update((p) => void ops.addGroup(p))}>+ 추가</button>}>
         {project.labels.map((g) => (
           <GroupRow key={g.id} g={g} />
         ))}
@@ -52,32 +49,24 @@ export function Sidebar() {
             <option value="LR">→ 왼→오른</option>
           </select>
         </label>
+      </Card>
 
-      </section>
-
-      <section className="sec">
-        <h3>
-          캐릭터 <button onClick={addChar}>+ 추가</button>
-        </h3>
+      <Card id="chars" title="캐릭터" extra={<button onClick={addChar}>+ 추가</button>}>
         {project.characters.length === 0 && <p className="tip">대사를 말할 캐릭터를 추가하세요. 내레이션은 따로 등록하지 않아도 돼요.</p>}
         {project.characters.map((c, i) => (
           <CharRow key={i} c={c} i={i} />
         ))}
-      </section>
+      </Card>
 
       <WarnCard />
 
-      <section className="sec">
-        <h3>렌파이 프로젝트 정보</h3>
+      <Card id="project" title="렌파이 프로젝트 정보">
         <LinkPanel />
-      </section>
+      </Card>
 
       <ScriptCard />
 
-      <section className="sec">
-        <h3>
-          설정 <button onClick={() => setShowSettings((v) => !v)}>{showSettings ? '접기' : '펼치기'}</button>
-        </h3>
+      <Card id="settings" title="설정">
         <div className="info-row">
           <span>양쪽 칸 크기</span>
           <span className="mini-btns">
@@ -90,8 +79,7 @@ export function Sidebar() {
           </span>
         </div>
         <p className="tip">{sizeLock ? '칸 크기를 잠갔어요.' : '칸과 캔버스 사이 경계를 끌면 너비가 바뀌어요. 경계를 더블클릭하면 그 칸만 처음 크기로.'}</p>
-        {showSettings && (
-          <div className="settings">
+        <div className="settings">
             <label>
               <input type="checkbox" checked={project.settings.escapeBrackets} onChange={(e) => update((p) => void (p.settings.escapeBrackets = e.target.checked))} />
               [ 를 글자 그대로 ([[ 로 변환)
@@ -108,9 +96,8 @@ export function Sidebar() {
               <input type="checkbox" checked={!!project.settings.renpyLink} onChange={(e) => update((p) => void (p.settings.renpyLink = e.target.checked))} />
               pygaki 플러그인 연결
             </label>
-          </div>
-        )}
-      </section>
+        </div>
+      </Card>
 
       <Usage />
     </aside>
@@ -134,12 +121,7 @@ function WarnCard() {
     useStore.getState().focusNodes([w.nodeId]);
   };
   return (
-    <section className="sec warn-card" id="warn-card">
-      <h3>
-        <span>
-          검사 {warnings.length > 0 && <span className={'count' + (errors ? ' err' : '')}>{warnings.length}</span>}
-        </span>
-      </h3>
+    <Card id="warn" className="warn-card" domId="warn-card" title={<>검사 {warnings.length > 0 && <span className={'count' + (errors ? ' err' : '')}>{warnings.length}</span>}</>}>
       {!warnings.length && <p className="tip">문제가 없어요.</p>}
       {warnings.map((w, i) => (
         <div key={i} className={'warn-item ' + w.level + (w.nodeId ? ' go' : '')} onClick={() => go(w)}>
@@ -147,70 +129,30 @@ function WarnCard() {
           {w.msg}
         </div>
       ))}
-    </section>
+    </Card>
   );
 }
 
-// 스크립트: 내보낼 원고. 길어서 접어 두고 펼치면 보인다 (예전에는 오른쪽 [스크립트] 탭)
-const SCRIPT_KEY = 'pygaki-script-open';
-const NL = String.fromCharCode(10);
+// 스크립트: 내보낼 원고. 길어서 처음에는 접어 둔다 (예전에는 오른쪽 [스크립트] 탭)
 function ScriptCard() {
   const { code } = useRpy();
-  const [open, setOpen] = useState(() => {
-    try {
-      return localStorage.getItem(SCRIPT_KEY) === '1';
-    } catch {
-      return false;
-    }
-  });
-  const toggle = () => {
-    setOpen(!open);
-    try {
-      localStorage.setItem(SCRIPT_KEY, open ? '' : '1');
-    } catch {
-      // 기억 못 해도 이번 창에서는 된다
-    }
-  };
   return (
-    <section className="sec">
-      <h3>
-        스크립트 <button onClick={toggle}>{open ? '접기' : '펼치기'}</button>
-      </h3>
+    <Card id="script" title="스크립트" defFolded>
       <div className="sec-btns">
         <button onClick={() => navigator.clipboard.writeText(code).then(() => useStore.getState().say('복사했어요'))}>복사</button>
         <button className="primary" onClick={() => exportRpyFile(false)}>.rpy 내보내기</button>
       </div>
-      {open ? <pre className="rpy side-rpy">{code}</pre> : <p className="tip">내보낼 원고 {code.split(NL).length}줄. 펼치면 보여요.</p>}
-    </section>
+      <pre className="rpy side-rpy">{code}</pre>
+    </Card>
   );
 }
 
 // 사용법 (예전에는 오른쪽 편집 탭에 상자를 고르지 않았을 때 나왔다). 접은 것은 기억한다
-const USAGE_KEY = 'pygaki-usage-closed';
 function Usage() {
   usePrefs((p) => p.keys); // 단축키를 바꾸면 안내도 다시 그린다
-  const [open, setOpen] = useState(() => {
-    try {
-      return localStorage.getItem(USAGE_KEY) !== '1';
-    } catch {
-      return true;
-    }
-  });
-  const toggle = () => {
-    setOpen(!open);
-    try {
-      localStorage.setItem(USAGE_KEY, open ? '1' : '');
-    } catch {
-      // 기억 못 해도 이번 창에서는 접힌다
-    }
-  };
   return (
-    <section className="sec usage">
-      <h3>
-        사용법 <button onClick={toggle}>{open ? '접기' : '펼치기'}</button>
-      </h3>
-      {open && (
-        <ul>
+    <Card id="usage" title="사용법" className="usage">
+      <ul>
           <li>상자를 <b>더블클릭</b>하면 상자 안에서 바로 글을 써요. 대사 줄·제목·선택지를 더블클릭하면 그 칸으로 가요. Esc나 빈 곳 클릭으로 끝내요.</li>
           <li>상자를 한 번 클릭하면 오른쪽에서 label, 다음 흐름 같은 나머지 설정을 바꿔요.</li>
           <li>캔버스 빈 곳을 <b>더블클릭</b>하면 새 상자가 생겨요.</li>
@@ -222,9 +164,9 @@ function Usage() {
           <li><b>{keyOf('focus')}</b>: 집중 모드. 캔버스만 남기고 나머지를 숨겨요. 한 번 더 누르면 돌아와요.</li>
           <li>{keyOf('save')} 파일 저장 · {keyOf('undo')} 실행 취소 · {keyOf('export')} .rpy 다시 내보내기</li>
           <li>단축키와 화면 색은 위쪽 둘째 줄 [설정]에서 바꿔요.</li>
-        </ul>
-      )}
-    </section>
+          <li>카드 제목 오른쪽 [접기]를 누르면 이름만 남기고 접혀요.</li>
+      </ul>
+    </Card>
   );
 }
 

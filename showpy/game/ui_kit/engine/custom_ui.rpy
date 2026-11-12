@@ -98,8 +98,57 @@ init -10 python in custom_ui:
         n = int(st / delay) % len(frames)
         return store.renpy.displayable(frames[n]), delay
 
+    ## ── 상자·장면마다 바꾸는 값 (ui_kit 4.7, PyKaki가 상자 첫 줄에 적음. docs/LINK.md 2장) ──
+    ##   $ custom_ui.scene(typing_sound="audio/soft.ogg", ctc="gui/ctc/heart", cursor="gui/cursor/hand")
+    ##   $ custom_ui.scene()     # 모두 게임 처음 값으로
+    ## typing_sound=None이면 그 장면에서 대사 소리를 끔. ctc, cursor는 그림이 든 폴더(game 기준)이고
+    ## 그 안의 그림을 이름 차례(1, 2, 10)로 돌림. 값은 세이브와 되감기에 남음(store.custom_ui_scene).
+    ## 클릭 대기 표시와 커서는 게임 처음 값에서 켜 둔 것만 바뀜. 커서는 소프트웨어 커서일 때만.
+
+    _SCENE_KEEP = object()
+    _frames_cache = { }
+
+    def scene(typing_sound=_SCENE_KEEP, ctc=None, cursor=None):
+        d = { }
+        if typing_sound is not _SCENE_KEEP:
+            d["typing_sound"] = str(typing_sound) if typing_sound else None
+        if ctc:
+            d["ctc"] = str(ctc)
+        if cursor:
+            d["cursor"] = str(cursor)
+        if d != dict(getattr(store, "custom_ui_scene", None) or { }):
+            store.custom_ui_scene = d
+
+    def _scene():
+        return getattr(store, "custom_ui_scene", None) or { }
+
+    def folder_frames(folder):
+        """그 폴더(바로 아래)의 그림을 이름 차례대로. 없으면 빈 목록."""
+        folder = (folder or "").strip("/")
+        if folder in _frames_cache:
+            return _frames_cache[folder]
+        import re
+        def natural(n):
+            return [ int(t) if t.isdigit() else t.lower() for t in re.split(r"(\d+)", n) ]
+        out = [ ]
+        for f in store.renpy.list_files():
+            if f.startswith(folder + "/") and "/" not in f[len(folder) + 1:] and re.search(r"\.(png|webp|jpe?g)$", f, re.I):
+                out.append(f)
+        out.sort(key=natural)
+        _frames_cache[folder] = out
+        return out
+
+    def _frames(kind):
+        """지금 쓸 그림: 장면 값(폴더)에 그림이 있으면 그것, 아니면 게임 처음 값."""
+        folder = _scene().get(kind)
+        if folder:
+            fr = folder_frames(folder)
+            if fr:
+                return fr
+        return cfg(kind + "_frames")
+
     def _ctc_frame(st, at):
-        return frame_at(cfg("ctc_frames"), hold_delay(cfg("ctc_hold")), st)
+        return frame_at(_frames("ctc"), hold_delay(cfg("ctc_hold")), st)
 
     def _setup_ctc():
         if not on() or not cfg("ctc") or not cfg("ctc_frames"):
@@ -124,7 +173,7 @@ init -10 python in custom_ui:
     ## ── 마우스 커서 ──
 
     def _cursor_frame(st, at):
-        return frame_at(cfg("cursor_frames"), hold_delay(cfg("cursor_hold")), st)
+        return frame_at(_frames("cursor"), hold_delay(cfg("cursor_hold")), st)
 
     def _setup_cursor():
         if not on() or not cfg("cursor") or not cfg("cursor_frames"):
@@ -180,7 +229,13 @@ init -10 python in custom_ui:
         if not interact or not on():
             return
 
-        sound = cfg("typing_sound") if typing_sound is _NOT_SET else typing_sound
+        ## 캐릭터에 정한 소리(cb_typing_sound) → 장면 값(custom_ui.scene) → 게임 처음 값
+        if typing_sound is not _NOT_SET:
+            sound = typing_sound
+        elif "typing_sound" in _scene():
+            sound = _scene()["typing_sound"]
+        else:
+            sound = cfg("typing_sound")
         channel = cfg("typing_channel")
 
         if event == "show_done":
@@ -255,3 +310,6 @@ init 990 python in custom_ui:
     ## 설정 값을 바꾼 뒤 처음 실행할 때 적용 (default 문이 실행된 직후마다 확인)
     if apply_text_cps not in store.config.after_default_callbacks:
         store.config.after_default_callbacks.append(apply_text_cps)
+
+## 상자·장면마다 바꾼 값 (custom_ui.scene, ui_kit 4.7). 세이브와 되감기에 남음
+default custom_ui_scene = { }

@@ -79,11 +79,21 @@ export interface BoxShader {
   tv?: Record<string, number>; // TV 전환의 세부 값 (시작할 때와 끝날 때 같이 씀)
 }
 
+// 상자나 label에 거는 대사 소리·속도와 커서·클릭 대기 그림 (pygaki 플러그인 ui_kit 4.7 custom_ui.scene, LINK.md 2장).
+// 값마다 따로: 상자에 없으면 label 것, label에도 없으면 게임 처음 값(GUI 편집 → 게임 처음 값)
+export interface BoxUi {
+  cps?: number; // 텍스트 속도 (1초에 나오는 글자 수, 0이면 한 번에). 이 상자의 대사 줄에 cps=로 적는다
+  sound?: string; // 대사 소리 (audio 폴더 기준 경로). ''이면 끔
+  ctc?: string; // 클릭 대기 표시 그림 폴더 (game 기준, 예: gui/ctc/heart)
+  cursor?: string; // 커서 그림 폴더 (game 기준, 예: gui/cursor/hand)
+}
+
 export interface BoxNode {
   id: string;
   group: string; // LabelGroup.id
   color?: string; // 상자 색. 없으면 label 색을 따른다
   shader?: BoxShader; // 이 상자의 셰이더. 없으면 label 것을 따른다
+  ui?: BoxUi; // 이 상자의 대사 소리·속도, 커서, 클릭 대기. 값마다 없으면 label 것을 따른다
   title: string;
   pos: { x: number; y: number };
   lines: Line[];
@@ -103,6 +113,7 @@ export interface LabelGroup {
   color: string;
   entry: string | null;
   shader?: BoxShader; // 이 label의 상자 모두에 거는 셰이더
+  ui?: BoxUi; // 이 label의 상자 모두에 거는 대사 소리·속도, 커서, 클릭 대기
 }
 
 export interface Settings {

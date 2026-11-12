@@ -398,6 +398,20 @@ init -6 python in splash:
                 self.sel = None
                 store.renpy.restart_interaction()
 
+            def live_pages(self):
+                """PyKaki 앱의 GUI 편집 왼쪽 목록에 보일 페이지 (splash 2.2, LINK.md 9장)."""
+                rv = [ ]
+                for r in self.raws():
+                    pid = r.get("id")
+                    try:
+                        title = merged(r).get("title") or ""
+                    except Exception:
+                        title = ""
+                    if not isinstance(title, str):
+                        title = ""
+                    rv.append(dict(id=str(pid), title=title, new=bool(self.is_new_page(pid))))
+                return dict(pages=rv, cur=self.cur())
+
             def available(self):
                 if not self.ids() and not config_ids():
                     return (False, "splash.pages에 페이지가 없습니다. (splash_config.rpy)")

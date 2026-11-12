@@ -541,3 +541,13 @@ export async function autoExport() {
     autoBusy = false;
   }
 }
+
+// [게임에서 위치 고르기] (앱 + 게임 연결): 원고를 지금 대본으로 내보낸 뒤 그 줄의 원고 줄 번호를 돌려준다.
+// 원고가 다르거나 오류가 있으면 null (게임을 옮기지 않는다)
+export async function exportedLineOf(lineId: string): Promise<number | null> {
+  await autoExport();
+  const old = await readRpyFromFolder();
+  const { code } = makeRpy(useStore.getState().project);
+  if (old !== code) return null;
+  return codeLineOf(code, lineId);
+}

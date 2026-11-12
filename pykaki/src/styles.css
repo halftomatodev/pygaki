@@ -119,11 +119,25 @@ code { font-family: var(--mono); }
 .app.focus .box.editing { box-shadow: none; border-color: transparent; }
 
 /* 왼쪽 */
-.sidebar { width: var(--left-w, 244px); overflow: auto; background: var(--bg); padding: 4px 4px 16px 10px; flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; }
+/* 스크롤바는 왼쪽에 (rtl로 옮기고 안쪽은 ltr로 되돌림) */
+.sidebar { direction: rtl; width: var(--left-w, 244px); overflow: auto; background: var(--bg); padding: 4px 4px 16px 6px; flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; }
 /* 묶음마다 둥근 카드. 모든 카드가 같은 바탕색(면 색) */
 .sec { background: var(--panel); border-radius: 14px; padding: 10px 10px 8px; flex-shrink: 0; }
 .sec > h3 { font-size: 13.5px; font-weight: 700; color: var(--text); margin: 0 0 8px; display: flex; justify-content: space-between; align-items: center; }
 .sec > h3 button { font-size: 11.5px; font-weight: 600; padding: 2px 8px; color: var(--accent); }
+.sidebar > * { direction: ltr; }
+/* 카드 접기 (Card.tsx): 접으면 이름만 한 줄, 하늘색 톤. 접기·펼치기 단추는 회색 */
+.card > h3 { gap: 6px; }
+.card-title { min-width: 0; display: flex; align-items: center; gap: 6px; user-select: none; }
+.card-acts { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+.sec > h3 .fold-btn, .sec > h3 .fold-btn:hover:not(:disabled) { color: var(--muted); background: var(--faint); font-weight: 500; }
+.sec > h3 .fold-btn:hover:not(:disabled) { background: var(--line); color: var(--text); }
+.sec.folded { --sky: color-mix(in srgb, #38bdf8 15%, var(--panel)); background: var(--sky); padding: 6px 10px; }
+.sec.folded > h3 { margin: 0; font-weight: 600; color: color-mix(in srgb, #0284c7 60%, var(--text)); }
+.sec.folded > h3 .fold-btn { background: color-mix(in srgb, var(--text) 7%, var(--sky)); }
+.look-panel.folded { position: static; box-shadow: none; }
+[data-mono='1'] .sec.folded { background: var(--bg); outline: 1px dashed var(--text); }
+[data-mono='1'] .sec.folded > h3 { color: var(--text); }
 .sec > .tip, .sec .link-panel > .tip { margin: 6px 0 2px; }
 .mini-btns { display: flex; gap: 4px; }
 .mini-btns button { background: var(--faint); padding: 2px 8px; font-size: 11.5px; }
@@ -749,7 +763,7 @@ fieldset.plain:disabled { opacity: 0.4; }
 .sp-badge { font-size: 10px; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; flex-shrink: 0; }
 .sp-main { flex: 1; min-width: 0; overflow: auto; padding: 14px 18px; display: flex; flex-direction: column; gap: 12px; }
 .sp-panel { width: 380px; flex-shrink: 0; overflow: auto; padding: 12px 16px; background: var(--panel); border-left: 1px solid var(--line); }
-.sp-panel h3 { margin: 2px 0 10px; font-size: 15px; }
+.sp-panel > h3 { margin: 2px 0 10px; font-size: 15px; }
 .sp-card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
 .sp-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
 .sp-row > b { width: 64px; flex-shrink: 0; font-size: 12px; color: var(--muted); font-weight: 600; }
@@ -802,21 +816,21 @@ fieldset.plain:disabled { opacity: 0.4; }
 .sp-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; margin-bottom: 10px; }
 .sp-field { display: flex; flex-direction: column; gap: 2px; font-size: 11.5px; color: var(--muted); }
 .sp-field.wide { grid-column: 1 / -1; }
-.sp-field input { padding: 4px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); min-width: 0; }
+.sp-field input { padding: 4px 6px; border-radius: 8px; color: var(--text); min-width: 0; }
 .sp-color { flex-direction: row; align-items: flex-end; flex-wrap: wrap; }
 .sp-color > span { width: 100%; }
 .sp-color input[type='color'] { width: 36px; height: 28px; padding: 1px; }
 .sp-color .sp-field { flex: 1; }
 /* showpy 화면: 커서, 클릭 대기, 대사 소리 칸 (ui_kit 3.15) */
-.sp-cu section { border-bottom: 1px solid var(--line); padding: 8px 0 10px; }
-.sp-cu section:last-of-type { border-bottom: 0; }
+.sp-cu { display: flex; flex-direction: column; gap: 10px; }
+.sp-cu > section { background: var(--panel); border-radius: 14px; padding: 10px 10px 8px; }
 .sp-cu-head { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; font-size: 13px; }
 .sp-cu-lab { font-size: 12px; color: var(--muted); }
 .sp-cu-val { font-size: 12px; min-width: 64px; }
-.sp-cu select { min-width: 0; padding: 4px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); }
+.sp-cu select { min-width: 0; padding: 4px 6px; border-radius: 8px; color: var(--text); }
 .sp-check.strong { color: var(--text); font-size: 13px; font-weight: 600; }
 .sp-undo { font-size: 11px; padding: 0 6px; color: var(--play); }
-.sp-small-num { width: 56px; padding: 3px 5px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); }
+.sp-small-num { width: 56px; padding: 3px 5px; border-radius: 8px; color: var(--text); }
 .sp-slots { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin-top: 6px; }
 /* 그림 칸은 회색 바둑판 (흰 그림, 검은 그림 다 보이게) */
 .sp-slot, .sp-pick-grid button img, .sp-anim { background-color: #9a9a9a; background-image: linear-gradient(45deg, #7c7c7c 25%, transparent 25%, transparent 75%, #7c7c7c 75%), linear-gradient(45deg, #7c7c7c 25%, transparent 25%, transparent 75%, #7c7c7c 75%); background-size: 12px 12px; background-position: 0 0, 6px 6px; }
@@ -850,12 +864,12 @@ fieldset.plain:disabled { opacity: 0.4; }
 .sp-m-v { display: flex; flex-direction: column; gap: 4px; }
 .sp-m-h { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
 .sp-m-t { white-space: pre-wrap; line-height: 1.45; }
-.sp-m-b { padding: 2px 8px; font-size: 12px; display: inline-flex; gap: 4px; align-items: center; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); }
-.sp-m-b.on { background: var(--accent-soft); border-color: var(--accent); color: var(--text); }
+.sp-m-b { padding: 3px 9px; font-size: 12px; display: inline-flex; gap: 4px; align-items: center; border-radius: 8px; background: var(--faint); color: var(--text); }
+.sp-m-b.on { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
 .sp-m-b:disabled { opacity: 0.45; }
 .sp-m-b.media { padding: 2px; }
 .sp-m-bar { flex: 1; min-width: 120px; }
-.sp-m-in { width: 90px; padding: 2px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); }
+.sp-m-in { width: 90px; padding: 3px 6px; border-radius: 8px; color: var(--text); }
 .sp-m-inwrap { display: inline-flex; gap: 4px; align-items: center; }
 .sp-m-inwrap.wide { display: flex; width: 100%; align-items: flex-start; }
 .sp-m-inwrap.wide .sp-m-in { flex: 1; }
@@ -1040,3 +1054,51 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .sp-group { display: flex; flex-direction: column; gap: 2px; }
 .sp-group > h3 { margin-bottom: 4px; }
 .sp-group .sp-nav-item { font-size: 12.5px; padding: 6px 8px; }
+
+/* GUI 편집 오른쪽 칸: 왼쪽 칸처럼 바탕 위에 카드 (세션 32) */
+.sp-cards > .sp-panel { background: var(--bg); border-left: 0; padding: 6px 10px 16px 4px; display: flex; flex-direction: column; gap: 10px; }
+.sp-panel .card .sp-bar { border-bottom: 0; padding-bottom: 0; margin-bottom: 0; }
+.sp-panel .card p:first-child { margin-top: 0; }
+[data-mono='1'] .sp-cu > section { background: var(--bg); outline: 1px solid var(--text); }
+
+/* 상자 편집의 배경 / 그림·영상 / 소리 카드 (StageCards.tsx) */
+.sc-used { display: flex; flex-direction: column; gap: 1px; margin-bottom: 6px; }
+.sc-used button { text-align: left; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+.sc-n { display: inline-block; min-width: 18px; color: var(--muted); font-size: 11px; }
+.sc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 4px; max-height: 220px; overflow: auto; margin-bottom: 6px; }
+.sc-grid button { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 3px; background: var(--faint); border-radius: 8px; min-width: 0; }
+.sc-grid button > span { font-size: 10.5px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
+.sc-pic { display: block; width: 100%; height: 44px; object-fit: cover; border-radius: 5px; background: var(--line); }
+.sc-sounds { display: flex; flex-direction: column; gap: 1px; max-height: 200px; overflow: auto; margin-bottom: 6px; }
+.sc-sound { display: flex; align-items: center; gap: 2px; }
+.sc-play { padding: 2px 6px; font-size: 10px; }
+.sc-sname { flex: 1; min-width: 0; text-align: left; font-size: 12px; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+.sc-seg { margin-bottom: 6px; }
+.sc-add { display: flex; gap: 4px; align-items: center; }
+.sc-add input { flex: 1; min-width: 0; }
+
+/* [게임에서 위치 고르기] (PickPos.tsx) */
+.pick-pos { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-top: 6px; }
+.pick-pos > button.primary { background: var(--accent-soft); font-weight: 600; }
+.pick-pos > span { flex: 1 1 100%; font-size: 12px; padding: 5px 8px; border-radius: 8px; background: color-mix(in srgb, var(--play) 14%, var(--panel)); }
+
+/* 셰이더 칸 아래 대사 소리·속도, 커서·클릭 대기 카드 (UiPanel.tsx) */
+.ui-row { padding: 4px 0 6px; border-bottom: 1px solid var(--faint); }
+.ui-row:last-of-type { border-bottom: 0; }
+.ui-row > .row { justify-content: space-between; }
+.ui-seg { margin: 0; }
+.ui-seg button { padding: 2px 8px; font-size: 11.5px; }
+.ui-now { margin: 2px 0 0; }
+.ui-cps input[type='range'] { flex: 1; }
+.ui-val { font-size: 12px; min-width: 76px; text-align: right; }
+.ui-frames { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 4px; margin: 4px 0; }
+.ui-frames button { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 3px; background: var(--faint); border-radius: 8px; }
+.ui-frames button.on { box-shadow: 0 0 0 2px var(--accent); }
+.ui-frames img, .ui-frames i { width: 32px; height: 32px; object-fit: contain; display: block; }
+.ui-frames span { font-size: 10.5px; color: var(--text); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* 카드 맨 아래 [⚠ 모든 상자에 적용] [⚠ 전부 삭제] */
+.all-row { display: flex; gap: 4px; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); }
+.all-row button { flex: 1; display: inline-flex; gap: 5px; align-items: center; justify-content: center; background: color-mix(in srgb, #eab308 12%, var(--panel)); color: color-mix(in srgb, #a16207 70%, var(--text)); font-size: 12px; }
+.all-row button.danger { background: color-mix(in srgb, var(--danger) 10%, var(--panel)); color: color-mix(in srgb, var(--danger) 80%, var(--text)); }
+.warn-ico { flex-shrink: 0; }
+[data-mono='1'] .all-row button { background: transparent; outline: 1px solid var(--text); color: var(--text); }

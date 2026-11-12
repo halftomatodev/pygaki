@@ -3,10 +3,13 @@ import { useStore } from './store';
 import * as ops from './ops';
 import type { BoxNode, ExitType, Line, Project } from './types';
 import { uid } from './util';
+import { Card } from './Card';
 import { LineLook, SpeakerSelect, StageFields, useLineDrag } from './LineFields';
 import { isStage } from './stage';
 import { hit } from './prefs';
 import { ShaderPanel } from './ShaderPanel';
+import { StageCards } from './StageCards';
+import { PickPos } from './PickPos';
 
 export type Upd = (fn: (b: BoxNode, p: Project) => void, key?: string) => void;
 
@@ -85,8 +88,7 @@ function BoxInspector({ b }: { b: BoxNode }) {
 
   return (
     <div className="insp">
-      <section className="sec">
-      <h3>상자</h3>
+      <Card id="i-box" title="상자">
       <input id="ed-title" className="title" value={b.title} placeholder="상자 제목 (예: 우산을 빌려준다)" onChange={(e) => upd((x) => void (x.title = e.target.value), 'title' + b.id)} />
       <div className="row">
         <label>label</label>
@@ -112,16 +114,15 @@ function BoxInspector({ b }: { b: BoxNode }) {
         <button onClick={() => useStore.getState().startPlay(b.id)}>▶ 여기서 플레이</button>
         <button className="danger" onClick={() => (update((p) => ops.deleteBoxes(p, [b.id])), useStore.getState().select([]))}>삭제</button>
       </div>
-      </section>
+      </Card>
 
       {lookLine && (
-        <section className="sec look-panel">
+        <Card id="i-look" title="글자 효과" className="look-panel">
           <LineLook l={lookLine} set={(fn, key) => upd((x) => fn(x.lines.find((l) => l.id === lookLine.id)!), key)} />
-        </section>
+        </Card>
       )}
 
-      <section className="sec">
-      <h3>대사</h3>
+      <Card id="i-lines" title="대사">
       {b.lines.map((l, i) => (
         <LineRow key={l.id} l={l} i={i} upd={upd} drag={drag} />
       ))}
@@ -129,12 +130,13 @@ function BoxInspector({ b }: { b: BoxNode }) {
         <button onClick={addLine}>+ 줄 추가</button>
         <span className="tip">Ctrl+Enter: 같은 화자로 아래에 새 줄</span>
       </div>
-      </section>
+      </Card>
 
-      <section className="sec">
-      <h3>다음 흐름</h3>
+      <StageCards b={b} upd={upd} />
+
+      <Card id="i-exit" title="다음 흐름">
       <ExitEditor b={b} upd={upd} />
-      </section>
+      </Card>
     </div>
   );
 }
@@ -205,6 +207,7 @@ function TargetSelect({ value, onChange, self }: { value: string | null; onChang
 
 export function ExitEditor({ b, upd }: { b: BoxNode; upd: Upd }) {
   const e = b.exit;
+  const linkedOn = useStore((s) => !!s.project.settings.renpyLink);
   return (
     <div className="exit-ed">
       <div className="row">
@@ -245,6 +248,8 @@ export function ExitEditor({ b, upd }: { b: BoxNode; upd: Upd }) {
             </div>
           ))}
           <button onClick={() => upd((x) => void (x.exit as any).choices.push(ops.newChoice()))}>+ 선택지 추가</button>
+          {/* 게임은 이 상자의 마지막 줄로 가요. 한 번 넘기면 선택지가 나와요 */}
+          {linkedOn && <PickPos lineId={b.lines[b.lines.length - 1]?.id} tab="choice" what="선택지" />}
         </>
       )}
       {e.type === 'return' && <p className="tip">이 상자에서 흐름이 끝나요. call로 불린 장면이면 부른 곳으로 돌아가요.</p>}

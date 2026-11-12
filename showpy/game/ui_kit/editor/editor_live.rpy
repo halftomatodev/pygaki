@@ -289,6 +289,17 @@ init -8 python in ui_editor:
             cursor_lines=_cursor_lines(),
             )
 
+    def _splash_state():
+        """스플래시 페이지 목록 (splash 2.2). 없거나 예전 판이면 None."""
+        t = get_tab("splash")
+        f = getattr(t, "live_pages", None)
+        if f is None:
+            return None
+        try:
+            return _js(f())
+        except Exception:
+            return None
+
     def _flow_state():
         """화면 효과 탭의 줄기표 (Screen FX 5.2가 있을 때). 없으면 None."""
         fx = get_tab("screen_fx")
@@ -589,6 +600,7 @@ init -8 python in ui_editor:
             custom_ui=_custom_ui_state(),
             panel=_panel_state(),
             flow=_flow_state(),
+            splash=_splash_state(),
             )
 
     ## ── 앱이 보낸 명령 ──
@@ -876,6 +888,17 @@ init -8 python in ui_editor:
 
         if cmd == "panel.do":
             return _panel_do(c)
+
+        if cmd == "splash.page":
+            ## 스플래시 페이지 고르기 (splash 2.2): {"cmd": "splash.page", "id": "warning"}. 편집기도 스플래시 탭으로
+            t = get_tab("splash")
+            if t is None or not hasattr(t, "set_page"):
+                return False
+            pid = str(c.get("id") or "")
+            if pid not in t.ids():
+                return False
+            t.set_page(pid)
+            return True
 
         if cmd == "flow":
             ## 줄기표 (Screen FX 5.2): do = open / close / toggle / range(a, b) / pick(row) / point(target)

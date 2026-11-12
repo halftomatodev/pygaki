@@ -99,6 +99,20 @@ $ screen_fx.clear(transition="tv", tv={"noise": 0.2})
 - 값 이름과 막대 범위는 11장 `shader_list.json`의 `params`, `groups`에서 옵니다. 목록 값(`choice`)이 여러 칸이면 튜플로 적습니다.
 - PyKaki는 게임의 `shader_list.json`의 `screen_fx`가 5.5 이상일 때만 `values`와 `tv`를 적습니다. 예전 판이면 값 없이 내보내고 검사 칸에 알립니다.
 
+**상자와 label의 대사 소리, 커서, 클릭 대기** (PyKaki `FEATURE` 7, `src/boxUi.ts`, pygaki 플러그인 ui_kit 4.7 `custom_ui.scene`): 대본 어딘가에 대사 소리, 커서, 클릭 대기를 한 곳이라도 정하면 PyKaki는 **모든 상자의 첫 줄**(셰이더 줄 바로 다음)과 `call` 줄 바로 뒤에 표시 없이 이 줄을 적습니다. 값은 상자 → label → 게임 처음 값 순서로 값마다 따로 찾습니다.
+
+```renpy
+$ custom_ui.scene(typing_sound="audio/soft.ogg", ctc="gui/ctc/heart", cursor="gui/cursor/hand")
+$ custom_ui.scene(typing_sound=None)   # 이 장면은 대사 소리 끔
+$ custom_ui.scene()                    # 모두 게임 처음 값으로
+```
+
+- `typing_sound`: game 기준 소리 파일, `None`이면 끔, 안 적으면 게임 처음 값. 캐릭터에 정한 `cb_typing_sound`가 먼저입니다.
+- `ctc`, `cursor`: 그림이 든 폴더(game 기준). 플러그인은 그 폴더 바로 아래의 그림(`png` `webp` `jpg`)을 이름 차례(1, 2, 10)로 돌립니다. 그림이 없으면 게임 처음 값. 클릭 대기 표시와 커서는 게임 처음 값(`custom_ui_layout.rpy`)에서 켜 둔 것만 바뀌고, 커서는 소프트웨어 커서일 때만 바뀝니다.
+- 값은 `store.custom_ui_scene`에 두어 세이브와 되감기에 남습니다. 같은 값이면 아무것도 하지 않습니다.
+- **텍스트 속도**는 이 줄에 적지 않고, 그 상자의 대사·내레이션 줄 가운데 속도를 따로 정하지 않은 줄의 괄호에 `cps=`로 적습니다(플러그인 연결을 끄면 `what_slow_cps=`).
+- PyKaki는 연결한 게임의 `ui_kit/engine/custom_ui.rpy`에 `def scene(`가 있을 때만 이 줄을 적고, 없으면 검사 칸에 알립니다(폴더를 연결하지 않았으면 적음). 이 줄도 받아 적기(3장) 대상이 아니고 내보낼 때마다 다시 만들어집니다.
+
 `renpyLink`를 끈 파일에는 `# @l:`이 없습니다. pygaki 플러그인은 이런 원고에 그림 줄을 저장하지 않고, 연결을 켜고 다시 내보내라고 안내합니다.
 
 ## 3. `game/showpy_inbox.json`
@@ -329,6 +343,7 @@ PyKaki 데스크톱 앱의 [GUI 편집] 화면이 게임 안 편집기를 바깥
                         "a": "#4fc3f7", "b": null, "s": "1번 아스키 + 2번 기본", "p": ["game/script.rpy", 13], "i": false } ] }
   ```
   행(`rows`)은 원고 줄 순서이고 가지(선택지, `if`)는 그 블록이 이어서 나옵니다. `l` 원고 줄, `k` 종류(`label`, `branch` 선택지/조건 머리, `say`, `stmt`, `fx` 셰이더 줄, `jump`(return 포함), `call`, `show`(scene/show/hide/with), `menu`(menu/if/while)), `d` 깊이, `g` 이 행을 지나는 세로선 깊이, `t` 보일 글, `c` 글자색(어두운 바탕용), `a`/`b` 그 줄에 덮인 1번/2번 셰이더 색(없으면 `null`), `s` 두 자리 이름, `p` 전환 점이면 그 대상 [파일, 줄](전환을 바꾸면 이 줄 위의 셰이더 줄이 바뀜), `i` 고를 수 있는 줄. `range`는 고른 구간(행 번호), `sel` 고른 줄, `here` 게임의 지금 줄, `points` 고른 전환 점. [이 구간에 적용], 되돌리는 곳, 전환 고르기는 `panel`의 버튼입니다.
+- `splash`(splash 2.2 + ui_kit 4.7)는 스플래시 페이지 목록입니다. `{"pages": [{"id": "logo", "title": "…", "new": false}], "cur": "logo"}`. 차례는 편집기의 페이지 차례, `new`는 `splash_config.rpy`에 없고 편집기에서 만든 페이지, `cur`는 편집기에서 고른 페이지. 스플래시가 없거나 예전 판이면 `null`(또는 없음). 앱은 GUI 편집 왼쪽 "스플래시" 카드에 페이지마다 항목을 보여 줍니다(`logo` 로고, `warning` 경고, `controls` 조작 방법, 나머지는 제목).
 - `editor.pending`은 저장할 것의 수입니다. 3.19부터 원고에 넣을 줄(화면 효과 "여기에서부터 적용" 등)도 셉니다.
 
 앱 → 게임 (`cmd`):
@@ -352,6 +367,7 @@ PyKaki 데스크톱 앱의 [GUI 편집] 화면이 게임 안 편집기를 바깥
 | `custom_ui.stop` | | 들려주던 소리 멈춤 |
 | `custom_ui.cursor` | `do`: `mode`(+ `mode`) / `pick`(+ `file`, `line`, 게임도 그 줄로) / `step`(+ `n`) / `here` / `apply` / `remove` / `leave` | 커서와 셰이더 '여기에서부터' (3.21). `mode`는 미리 보기도 함, `apply`는 고른 줄 위에 `$ screen_fx.set_cursor("…")`(저장하면 원고에), `leave`는 미리 보기 끝 |
 | `flow` | `do`: `open` / `close` / `toggle` / `range`(+ `a`, `b` 행 번호, `a`가 `null`이면 구간 풀기) / `pick`(+ `row`, 그 행부터 처음 고를 수 있는 줄을 고르고 게임도 그 줄로) / `point`(+ `target` [파일, 줄], 전환 점 고르기/풀기) / `delete`(고른 구간 안과 끝 다음 '원래대로' 줄, 고른 전환 점의 셰이더 줄을 지우기로 함. 대사 괄호면 `fx=`를 뺌. 저장하면 원고에서 빠짐) | 줄기표 (ui_kit 4.1 + screen_fx 5.2). 앱이 패널을 가져가 있으면 게임 창의 줄기표 서랍은 숨음 |
+| `splash.page` | `id` | 스플래시 편집 탭에서 그 페이지를 고름 (splash 2.2). 목록에 없는 `id`는 무시 |
 | `files` | | 파일 목록(`files`)을 다시 보내 달라고 함 |
 | `save` | | 편집기 Ctrl+S와 같음 (배치 파일과 원고 저장) |
 | `discard` | | 지금 탭의 저장 안 한 변경을 모두 버림 |
