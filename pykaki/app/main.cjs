@@ -133,7 +133,7 @@ function open(project) {
   } catch {
     /* 지켜보기를 못 해도 창으로 돌아올 때 읽는다 */
   }
-  // 대본 파일(프로젝트 폴더 맨 위의 *.flow.json)을 웹 PyKaki 등 밖에서 고치면 알린다
+  // 대본 파일(프로젝트 폴더 맨 위의 *.flow.json)을 다른 창이나 다른 프로그램이 고치면 알린다
   try {
     entry.rootWatcher = fs.watch(project, (_ev, name) => {
       if (name && /\.flow\.json$/i.test(String(name)) && !win.isDestroyed()) win.webContents.send('pygaki:changed', String(name));

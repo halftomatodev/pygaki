@@ -4,10 +4,10 @@ import './styles.css';
 import { App } from './App';
 import { useStore } from './store';
 import { AUTO_MEMO, kvGet, kvSet, snapAuto } from './persist';
-import { folderReady, INBOX_FILE, pullInbox, restoreFolder, useGameFolder } from './gameFolder';
+import { INBOX_FILE, pullInbox, restoreFolder, useGameFolder } from './gameFolder';
 import { createEmpty, createSample, normalizeProject } from './sample';
 import { desktop, flowFile, isDesktop, projectInfo } from './desktop';
-import { autoExport, checkExternal, restoreProjectFile, saveQuiet, setProjectFile, warnNewer } from './files';
+import { autoExport, checkExternal, saveQuiet, setProjectFile, warnNewer } from './files';
 import { chooseFlow } from './flowPick';
 import './effectsLib'; // 효과 관리 함수 (window.pykakiEffects)
 
@@ -75,7 +75,7 @@ async function bootDesktop() {
   window.addEventListener('focus', pull);
   pull();
 
-  // 대본 파일이 밖(웹 PyKaki, 다른 창)에서 바뀌면 다시 읽을지 묻는다
+  // 대본 파일이 밖(다른 창, 다른 프로그램)에서 바뀌면 다시 읽을지 묻는다
   let extTimer: ReturnType<typeof setTimeout> | undefined;
   const ext = () => {
     clearTimeout(extTimer);
@@ -87,6 +87,7 @@ async function bootDesktop() {
   createRoot(document.getElementById('root')!).render(<App />);
 }
 
+// 개발 서버(npm run dev)를 브라우저로 열 때: 앱이 아니라 렌파이 프로젝트를 못 연다. 예제 대본을 브라우저 자동 저장(IndexedDB)으로만 쓴다
 async function boot() {
   if (isDesktop) return bootDesktop();
   let saved: any = null;
@@ -120,7 +121,6 @@ async function boot() {
       } catch (e) {
         console.warn('자동 저장 실패', e);
       }
-      void autoExport();
     }, 700);
   });
 
@@ -132,18 +132,6 @@ async function boot() {
     lastSnap = cur;
     snapAuto(AUTO_MEMO, cur).catch((e) => console.warn('자동 저장본 실패', e));
   }, 5 * 60 * 1000);
-
-  // 렌파이에서 돌아오면 showpy가 넣은 줄을 바로 대본에 보여 준다
-  await restoreFolder();
-  // 연결한 프로젝트 폴더의 대본 파일: 앱에서 고쳤으면 다시 읽을지 묻는다 (폴더 권한이 남아 있을 때)
-  await restoreProjectFile().catch((e) => console.warn('대본 파일 확인 실패', e));
-  const pull = () => void (folderReady() && pullInbox().catch((e) => console.warn('받아 적기 실패', e)));
-  const ext = () => void checkExternal().catch((e) => console.warn('대본 파일 확인 실패', e));
-  window.addEventListener('focus', () => {
-    ext();
-    pull();
-  });
-  pull();
 
   window.addEventListener('beforeunload', (e) => {
     if (useStore.getState().dirty) {

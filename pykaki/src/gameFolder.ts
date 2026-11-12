@@ -1,7 +1,7 @@
 // 렌파이 game 폴더 연결: 그림/소리 목록, script_flow.rpy 쓰기, showpy_inbox.json 받아 적기.
 // 크롬·엣지의 폴더 권한을 쓴다. 다른 브라우저에서는 연결 없이 지금처럼 글자로 적는다.
 import { create } from 'zustand';
-import { kvGet, kvSet, snapAdd } from './persist';
+import { snapAdd } from './persist';
 import { applyInbox, type InboxOp } from './inbox';
 import { useStore } from './store';
 import { gameDir, isDesktop, projectDir, projectInfo } from './desktop';
@@ -9,8 +9,7 @@ import { setFolderEffects, type EffectPack } from './fx/textShaders';
 import { parseEffectsOff, refreshEffects, setEffectsOff } from './stage';
 import { setShaderList, setShadersOff } from './shader';
 
-const w = window as any;
-export const hasDirPicker = typeof w.showDirectoryPicker === 'function' || isDesktop;
+export const hasDirPicker = isDesktop; // 폴더는 앱에서만 연다 (웹 버전은 2026-11-12에 없앰)
 export const INBOX_FILE = 'showpy_inbox.json';
 export const RPY_FILE = 'script_flow.rpy';
 export const SHADER_LIST_FILE = 'shader_list.json'; // 셰이더 목록 (screen_fx 안, 플러그인이 씀. LINK.md 11장)
@@ -312,42 +311,7 @@ const allowed = async (ask: boolean) => {
   return ask ? (await root.requestPermission(o)) === 'granted' : false;
 };
 
-// 고른 폴더가 프로젝트 폴더면 그 안의 game을 쓴다
-export async function connectFolder(pull = true) {
-  try {
-    const picked = await w.showDirectoryPicker({ id: 'pykaki-game', mode: 'readwrite' });
-    const inner = await sub(picked, 'game');
-    dir = inner ?? picked;
-    proj = inner ? picked : null;
-    await kvSet('gameDir', dir);
-    await kvSet('projectDir', proj);
-    await scanFolder();
-    await kvSet('gameName', inner ? picked.name : dir.name);
-    useGameFolder.getState().set({ name: inner ? picked.name : dir.name });
-    if (pull) await pullInbox();
-    useStore.getState().say(`렌파이 폴더 "${useGameFolder.getState().name}"를 연결했어요`);
-    return true;
-  } catch (e: any) {
-    if (e?.name !== 'AbortError') alert('폴더를 연결하지 못했어요: ' + e.message);
-    return false;
-  }
-}
-
-export async function disconnectFolder() {
-  dir = null;
-  proj = null;
-  await kvSet('gameDir', null);
-  await kvSet('projectDir', null);
-  pictures = new Map();
-  setFolderEffects(null);
-  setEffectsOff([]);
-  setShaderList(null);
-  setShadersOff([]);
-  refreshEffects();
-  useGameFolder.getState().set({ name: null, media: NO_MEDIA, look: DEFAULT_LOOK, startClash: null, hasShowpy: false, endMarks: false, sceneUi: null, fxErrors: [], fxSeq: useGameFolder.getState().fxSeq + 1, fxFiles: [], fxOff: [] });
-}
-
-// 앱을 다시 열 때: 연결은 기억하지만, 권한은 사용자가 한 번 눌러야 다시 생긴다
+// 앱을 켤 때: 연 렌파이 프로젝트의 game 폴더를 읽는다
 export async function restoreFolder() {
   // 데스크톱 앱: 연 렌파이 프로젝트의 game 폴더가 곧 연결한 폴더
   if (isDesktop) {
@@ -356,34 +320,11 @@ export async function restoreFolder() {
     useGameFolder.getState().set({ name });
     await scanFolder();
     useGameFolder.getState().set({ name });
-    return;
-  }
-  if (!hasDirPicker) return;
-  try {
-    dir = (await kvGet('gameDir')) ?? null;
-    proj = (await kvGet('projectDir')) ?? null;
-    if (!dir) return;
-    const name = (await kvGet('gameName')) ?? dir.name;
-    useGameFolder.getState().set({ name });
-    if (await allowed(false)) await scanFolder();
-    useGameFolder.getState().set({ name });
-  } catch {
-    dir = null;
-    proj = null;
   }
 }
 
 export const folderReady = () => !!dir;
 
-// 웹: 연결한 프로젝트 폴더의 대본 파일 (SPEC 9-3). 권한은 부르는 쪽이 먼저 얻는다
-export const hasProjectFolder = () => !isDesktop && !!proj;
-export async function projectFlows(): Promise<string[]> {
-  if (!proj) return [];
-  const out: string[] = [];
-  for await (const [name, h] of proj.entries()) if (h.kind === 'file' && /\.flow\.json$/i.test(name)) out.push(name);
-  return out.sort();
-}
-export const projectFlowHandle = (name: string) => proj.getFileHandle(name, { create: true });
 
 // 받아 적기. 받은 것이 있으면 저장본을 먼저 남기고, 다 적은 기록은 파일에서 지운다
 export async function pullInbox(ask = false) {

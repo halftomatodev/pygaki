@@ -1,15 +1,15 @@
 # PyKaki
 
-렌파이 대본을 상자와 선으로 쓰고 `.rpy`로 내보내는 웹 에디터. 사용자는 한국어로 대화한다.
+렌파이 대본을 상자와 선으로 쓰고 `.rpy`로 내보내는 에디터. 데스크톱 앱(`app/`, Electron)으로만 낸다. 화면은 웹 빌드(`dist/index.html`)를 앱이 그대로 쓴다. 사용자는 한국어로 대화한다.
 
 - 구현 명세: [docs/SPEC.md](docs/SPEC.md) — 작업 전에 먼저 읽기
 - 사용자 가이드: [docs/GUIDE.md](docs/GUIDE.md) — 기능을 바꾸면 같이 고치기
-- 배포: `main`에 push하면 GitHub Actions가 GitHub Pages에 배포 (https://halftomatodev.github.io/pygaki/)
+- 웹 버전(GitHub Pages 배포, 웹앱 설치)은 2026-11-12에 없앴다. `npm run dev`는 개발용으로만 쓴다(렌파이 프로젝트는 못 열고 예제 대본을 브라우저 자동 저장으로).
 
 ## 명령
 
 ```bash
-npm run dev        # 개발 서버 http://localhost:5173
+npm run dev        # 개발 서버 http://localhost:5173 (개발용)
 npx tsc --noEmit   # 타입 검사
 npm run build      # dist/index.html 한 파일로 빌드
 ```
@@ -17,7 +17,7 @@ npm run build      # dist/index.html 한 파일로 빌드
 ## 꼭 지킬 것
 
 - 저장소 맨 위 [../CLAUDE.md](../CLAUDE.md)도 같이 따른다.
-- 기능을 고친 뒤에는 **`npm run build`로 로컬 `dist/index.html`도 다시 만든다.** 사용자가 그 파일을 직접 열어 쓴다.
+- 기능을 고친 뒤에는 **`npm run build`로 로컬 `dist/index.html`도 다시 만든다.** 데스크톱 앱이 그 파일을 복사해 쓴다(`app`에서 `npm run web`).
 - 작업 폴더는 Dropbox 밖의 `<저장소>\pykaki`다(pygaki 저장소 안). 저장소를 Dropbox 안에 두지 않는다. Vite 캐시는 `vite.config.ts`의 `cacheDir`로 임시 폴더에 둔다(Dropbox 안에서 돌릴 때도 EBUSY로 개발 서버가 멈추지 않게).
 - Windows는 파일 이름 대소문자를 구분하지 않는다. 새 파일 이름이 있는 파일과 대소문자만 다르지 않게 한다.
 - PyKaki 안 플레이 화면은 없앴다(2026-11-12). 대본은 앱의 [▶ 렌파이에서 실행]과 [렌파이에서 여기로 이동]으로 게임에서 본다. 대사 미리보기는 `src/SayPreview.tsx`.

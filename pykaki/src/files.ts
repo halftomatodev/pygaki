@@ -3,10 +3,10 @@ import { useFolded } from './Card';
 import { useStore } from './store';
 import { createEmpty, normalizeProject } from './sample';
 import { generateRpy as generateRpyWith } from './exportRpy';
-import { kvGet, kvSet, snapAdd, snapAuto } from './persist';
+import { snapAdd, snapAuto } from './persist';
 import { desktop, isDesktop } from './desktop';
 import { usePrefs } from './prefs';
-import { backupRpy, connectFolder, disconnectFolder, folderAllowed, folderReady, hasDirPicker, hasProjectFolder, looksLikeGame, projectFlowHandle, projectFlows, pullInbox, readRpyFromFolder, RPY_FILE, scanFolder, useGameFolder, writeRpyToFolder } from './gameFolder';
+import { backupRpy, folderAllowed, folderReady, hasDirPicker, pullInbox, readRpyFromFolder, RPY_FILE, scanFolder, useGameFolder, writeRpyToFolder } from './gameFolder';
 import { BUILD, FEATURE } from './version';
 import type { Project } from './types';
 
@@ -57,10 +57,9 @@ const hash = (t: string) => {
   return t.length + ':' + (h >>> 0).toString(36);
 };
 
+// 앱은 켤 때마다 파일을 읽으니 지문을 남기지 않는다(앱 창들이 저장소를 같이 씀)
 async function setSeen(text: string | null) {
   seen = text === null ? null : hash(text);
-  // 웹은 다시 켜도 알 수 있게 남긴다. 앱은 켤 때마다 파일을 읽으니 남기지 않는다(앱 창들이 저장소를 같이 씀)
-  if (!isDesktop) await kvSet('flowSeen', seen).catch(() => {});
 }
 
 // 데스크톱 앱: 대본은 프로젝트 폴더의 .flow.json 하나에 저장한다 (main.tsx가 열 때 정함). text는 연 파일의 글(새 파일이면 null)
@@ -73,7 +72,6 @@ export function setProjectFile(handle: any, text: string | null) {
 export const projectFileName = () => (bound ? boundName : null);
 
 async function handleOf() {
-  if (!jsonHandle && boundName && hasProjectFolder()) jsonHandle = await projectFlowHandle(boundName);
   return jsonHandle;
 }
 
@@ -100,7 +98,7 @@ async function resolveExternal(cur: string): Promise<'took' | 'kept' | 'wait'> {
   try {
     const s = useStore.getState();
     const yes = confirm(
-      `대본 파일 ${boundName}이 다른 곳(${isDesktop ? '웹 PyKaki나 다른 창' : 'pygaki 앱이나 다른 창'})에서 바뀌었어요.\n\n` +
+      `대본 파일 ${boundName}이 다른 곳(다른 창이나 다른 프로그램)에서 바뀌었어요.\n\n` +
         `파일: ${summary(p)}\n지금 화면: ${summary(s.project)}\n\n` +
         `[확인] 파일을 다시 읽어요${s.dirty ? ' (여기서 고친 것은 버전 목록에 백업돼요)' : ''}\n[취소] 지금 화면의 대본을 쓰고, 다음 저장 때 파일을 덮어써요`,
     );
@@ -122,17 +120,12 @@ async function resolveExternal(cur: string): Promise<'took' | 'kept' | 'wait'> {
 // 창으로 돌아올 때, 앱이 파일 바뀜을 알릴 때
 export async function checkExternal() {
   if (!bound || asking || writing) return;
-  if (!isDesktop && !(await folderAllowed(false))) return;
   const cur = await readCurrent();
   if (cur !== null && !writing && outside(cur)) await resolveExternal(cur);
 }
 
 // 프로젝트 대본 파일에 쓰기. 밖에서 바뀌었으면 먼저 묻는다. 썼으면 true
 async function writeBound(text: string, ask: boolean) {
-  if (!isDesktop && !(await folderAllowed(ask))) {
-    if (ask) alert('렌파이 프로젝트 폴더에 쓸 권한이 없어요. 권한을 허용해 주세요.');
-    return false;
-  }
   const cur = await readCurrent();
   if (cur !== null && cur !== text && outside(cur) && (await resolveExternal(cur)) !== 'kept') return false;
   await setSeen(text);
@@ -154,73 +147,6 @@ export async function saveQuiet() {
   if (!(await writeBound(serialize(project), false))) return false;
   if (useStore.getState().project === project) useStore.setState({ dirty: false, fileName: boundName });
   return true;
-}
-
-// 웹: 렌파이 프로젝트 폴더를 연결하면 대본도 그 폴더에. 앱이 같은 파일을 연다
-async function bindProjectFolder(folderName: string) {
-  if (!hasProjectFolder()) return unbind();
-  const flows = await projectFlows();
-  const own = `${folderName}.flow.json`;
-  const name = flows.includes(own) ? own : flows.length === 1 ? flows[0] : own;
-  jsonHandle = null;
-  bound = true;
-  boundName = name;
-  await kvSet('flowName', name).catch(() => {});
-  const s = useStore.getState();
-  const cur = flows.includes(name) ? await readCurrent() : null;
-  if (cur === null) {
-    await setSeen(null);
-    useStore.setState({ dirty: true });
-  } else {
-    let p: Project | null = null;
-    try {
-      p = normalizeProject(JSON.parse(cur));
-    } catch {
-      /* 읽을 수 없는 파일이면 덮어쓰기를 묻는다 */
-    }
-    const same = p && JSON.stringify({ ...p, app: undefined }) === JSON.stringify({ ...s.project, app: undefined });
-    if (!same) {
-      const file = await (await handleOf()).getFile();
-      const open =
-        p &&
-        confirm(
-          `이 프로젝트 폴더에 대본 파일 ${name}이 있어요.\n\n파일: ${summary(p, file.lastModified)}\n지금 화면: ${summary(s.project)}\n\n` +
-            `[확인] 그 대본을 열어요 (지금 대본은 버전 목록에 백업돼요)\n[취소] 지금 대본을 써요. 저장하면 그 파일을 덮어써요`,
-        );
-      if (open && p) {
-        await snapAdd('열기 전 자동 백업', s.project).catch(() => {});
-        s.load(p, { fileName: name, dirty: false });
-        warnNewer(p);
-      } else useStore.setState({ dirty: true });
-    }
-    await setSeen(cur);
-  }
-  useStore.setState({ fileName: name });
-  if (flows.length > 1) s.say(`대본 파일이 ${flows.length}개 있어서 ${name}을 써요`);
-}
-
-function unbind() {
-  if (!bound || isDesktop) return;
-  bound = false;
-  boundName = null;
-  jsonHandle = null;
-  void kvSet('flowName', null).catch(() => {});
-}
-
-// 웹을 다시 켤 때: 연결한 프로젝트 폴더의 대본 파일을 다시 잇는다. 권한이 있으면 밖에서 바뀌었는지도 본다
-export async function restoreProjectFile() {
-  if (isDesktop || !hasProjectFolder()) return;
-  const name = await kvGet('flowName').catch(() => null);
-  if (!name || useStore.getState().fileName !== name) return;
-  bound = true;
-  boundName = name;
-  seen = (await kvGet('flowSeen').catch(() => null)) ?? null;
-  await checkExternal();
-}
-
-export async function disconnectProject() {
-  unbind();
-  await disconnectFolder();
 }
 
 function download(name: string, text: string) {
@@ -336,46 +262,12 @@ export async function newProject() {
   s.load(createEmpty(), { fileName: null, dirty: false });
 }
 
-// 렌파이 프로젝트 연결: 폴더를 고르면 연결, showpy 확인, 첫 내보내기까지 한 번에 한다
-export async function linkProject() {
-  // 받아 적기는 대본 파일을 정한 뒤에 (폴더의 대본을 열면 그 대본에 받아 적어야 함)
-  if (!(await connectFolder(false))) return;
-  const s = useStore.getState();
-  if (!(await looksLikeGame())) {
-    await disconnectProject();
-    alert('렌파이 프로젝트 폴더가 아닌 것 같아요. gui.rpy가 들어 있는 game 폴더나 그 위 프로젝트 폴더를 골라 주세요.');
-    return;
-  }
-  try {
-    await bindProjectFolder(useGameFolder.getState().name ?? '');
-  } catch (e: any) {
-    unbind();
-    alert('프로젝트 폴더의 대본 파일을 읽지 못했어요: ' + e.message);
-  }
-  await pullInbox().catch((e) => console.warn('받아 적기 실패', e));
-  const f = useGameFolder.getState();
-  if (!!useStore.getState().project.settings.renpyLink !== f.hasShowpy) s.update((p) => void (p.settings.renpyLink = f.hasShowpy));
-  try {
-    const old = await readRpyFromFolder();
-    const code = makeRpy(useStore.getState().project).code;
-    if (old && old !== code && !confirm(`이 폴더에 이미 ${RPY_FILE}가 있어요. 지금 대본으로 덮어쓸까요?\n다른 대본을 쓰던 폴더라면 [취소]를 누르고, 그 대본을 먼저 여세요.`)) {
-      s.say('폴더만 연결했어요. 내보내려면 Ctrl+E를 누르세요');
-      return;
-    }
-  } catch (e: any) {
-    alert('폴더를 정리하지 못했어요: ' + e.message);
-    return;
-  }
-  await exportRpyFile(true);
-  s.say(f.hasShowpy ? '연결했어요. 렌파이에서 게임을 실행하면 돼요' : '연결했어요. pygaki 플러그인이 없어서 위치와 화면 효과는 렌파이에서 고칠 수 없어요');
-}
-
 export async function exportRpyFile(again = false) {
   let s = useStore.getState();
   // showpy 연결: 연결한 폴더의 script_flow.rpy에 바로 쓴다. 쓰기 전에 showpy가 넣은 줄부터 받아 적어야 안 사라진다
   const toFolder = hasDirPicker && (s.project.settings.renpyLink || folderReady());
   if (toFolder) {
-    if (!folderReady() && !(await connectFolder())) return;
+    if (!folderReady()) return;
     if (!(await folderAllowed(true))) {
       alert('렌파이 폴더에 쓸 권한이 없어요. 권한을 허용해 주세요.');
       return;

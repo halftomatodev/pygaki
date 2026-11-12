@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useReactFlow } from '@xyflow/react';
-import { hasDirPicker, hasProjectFolder, useGameFolder } from './gameFolder';
+import { useGameFolder } from './gameFolder';
 import { isDesktop, projectInfo } from './desktop';
-import { linkProject, newerThanMe, projectFileName } from './files';
+import { newerThanMe, projectFileName } from './files';
 import { addBoxCenter, runLayout } from './actions';
 import { keyOf, SIZES, usePrefs } from './prefs';
 import { forgetFlow } from './flowPick';
@@ -209,7 +209,7 @@ function LinkPanel() {
   const flowFile = fileName && projectFileName();
   const newer = app && newerThanMe(useStore.getState().project) && (
     <p className="tip warn-text">
-      이 대본은 더 새 판({app.by} {app.build})에서 저장했어요. {isDesktop ? '앱을 새 판으로 바꾸세요.' : '페이지를 새로 고쳐 새 판으로 여세요.'} 이 판으로 내보내면 일부 줄이 빠질 수 있어요.
+      이 대본은 더 새 판({app.by} {app.build})에서 저장했어요. 앱을 새 판으로 바꾸세요. 이 판으로 내보내면 일부 줄이 빠질 수 있어요.
     </p>
   );
   const clash = f.startClash && hasStart && <p className="tip warn-text">{f.startClash}에도 label start가 있어요. 대본의 start label 이름을 바꾸거나 그 파일의 label start를 지워 주세요.</p>;
@@ -245,37 +245,12 @@ function LinkPanel() {
         {clash}
       </div>
     );
-  if (!hasDirPicker)
-    return (
-      <div className="link-panel">
-        <SaveInfo />
-        <p className="tip">폴더 연결은 크롬과 엣지에서 돼요. 이 브라우저에서는 내려받은 script_flow.rpy를 game 폴더에 넣어 주세요. GUI 편집기에서 넣은 줄은 받아 적지 못해요.</p>
-      </div>
-    );
-  if (!f.name)
-    return (
-      <div className="link-panel">
-        <SaveInfo />
-        <p className="tip">프로젝트 폴더를 고르면 연결하고 바로 내보내요.</p>
-        <button className="info-btn primary" onClick={() => void linkProject()}>렌파이 프로젝트 연결</button>
-        {newer}
-      </div>
-    );
+  // 개발 서버를 브라우저로 열었을 때 (웹 버전은 없앰)
   return (
     <div className="link-panel">
-      <Info k="연결한 폴더">{f.name}</Info>
-      {flowFile && <Info k="대본 파일">{flowFile}</Info>}
       <SaveInfo />
-      {media}
-      {flowFile && <p className="tip">대본 파일은 프로젝트 폴더에 있고 Ctrl+S, Ctrl+E 때 저장돼요. 런처의 [pygaki로 편집]으로 앱에서 이 대본을 이어 쓸 수 있어요.</p>}
-      {!hasProjectFolder() && <p className="tip">game 폴더를 바로 골라서 대본 파일은 프로젝트 폴더에 저장하지 않아요. 앱에서 이어 쓰려면 위쪽 [폴더 바꾸기]로 game 위의 프로젝트 폴더를 고르세요.</p>}
+      <p className="tip">개발용 화면이에요. 렌파이 프로젝트는 pygaki 앱에서 열어요(런처의 [pygaki로 편집]).</p>
       {newer}
-      {!f.hasShowpy && f.media.images.length + f.media.audio.length + f.media.fonts.length > 0 && (
-        <p className="tip">
-          pygaki 플러그인이 없어요. 위치와 화면 효과를 렌파이에서 고치려면 <a href="https://github.com/halftomatodev/pygaki/tree/main/showpy" target="_blank" rel="noreferrer">pygaki 플러그인</a> 폴더들을 game에 넣고 위쪽 [폴더 바꾸기]로 다시 연결하세요.
-        </p>
-      )}
-      {clash}
     </div>
   );
 }

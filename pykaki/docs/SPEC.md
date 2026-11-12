@@ -2,7 +2,7 @@
 
 지금 구현된 상태를 기준으로 정리한 명세예요. 처음 설계 문서(`../RENPY_FLOW_EDITOR_SPEC.md`)와 다른 곳은 이 문서가 맞아요.
 
-- 사이트: https://halftomatodev.github.io/pygaki/
+- 웹 버전(사이트, 웹앱 설치)은 2026-11-12에 없앴다. 데스크톱 앱(9-2)만 낸다. 화면 코드는 웹 빌드 그대로이고, `npm run dev`는 개발용(렌파이 프로젝트 없이 예제 대본, 브라우저 자동 저장)
 - 저장소: https://github.com/halftomatodev/pygaki (`pykaki/` 폴더)
 - 사용자 가이드: [GUIDE.md](GUIDE.md)
 
@@ -10,7 +10,7 @@
 
 - Twine처럼 **상자와 선**으로 렌파이 대본의 흐름을 보며 쓰고, `.rpy`로 내보낸다.
 - **원본은 툴의 JSON 파일**(`*.flow.json`)이다. `.rpy`는 결과물이다. 내보내기는 단방향이다.
-- 서버가 없다. 모든 동작은 브라우저 안에서 일어나고, 대본은 사용자 PC에만 있다.
+- 서버가 없다. 대본은 사용자 PC에만 있다.
 
 ## 2. 기술 구성
 
@@ -21,9 +21,9 @@
 | 상태 관리 | `zustand` (실행 취소/다시 실행 포함) |
 | 자동 정렬 | `elkjs` (layered 알고리즘) |
 | 빌드 | Vite 5 + `vite-plugin-singlefile` → `dist/index.html` 한 파일 |
-| 배포 | GitHub Actions → GitHub Pages (`main`에 push하면 자동) |
-| 브라우저 저장 | IndexedDB (자동 저장, 버전 스냅샷) |
-| 파일 저장 | File System Access API (크롬/엣지), 그 외 브라우저는 다운로드 |
+| 배포 | 데스크톱 앱(Electron, GitHub Actions "pygaki 앱"), 묶음(`bundle/`) |
+| 앱 안 저장 | IndexedDB (버전 스냅샷, 자동 저장본. 개발 서버는 자동 저장도) |
+| 파일 저장 | 프로젝트 대본 파일은 앱 IPC(9-2), [다른 이름]·[열기]는 File System Access API |
 
 ## 3. 화면 구성
 
@@ -46,7 +46,7 @@
 - 칸 너비: 칸과 캔버스 사이의 `.resizer`(`App.tsx` `Resizer`)를 끌면 `prefs.leftW` `rightW`가 바뀌고 `--left-w` `--right-w`로 적용된다. 범위와 처음 값은 `prefs.ts` `SIZES`(왼쪽 190~520, 처음 244 / 오른쪽 300~760, 처음 400). 더블클릭은 그 칸만 처음 값, 왼쪽 "설정"의 [처음 크기]는 양쪽, [잠금](`prefs.sizeLock`)이면 손잡이가 움직이지 않는다. 접은 칸은 손잡이도 없다.
 - 왼쪽 칸과 오른쪽 칸은 캔버스 위쪽 양 끝의 작은 버튼(`.side-toggle`, `Canvas.tsx`)으로 따로 접고 편다(`store.hideLeft` `hideRight`, `localStorage['pygaki-hide-left']` `['pygaki-hide-right']`). 접어도 지우지 않고 CSS로만 숨긴다.
 - 툴바 왼쪽의 화면 바꾸기(`Toolbar.tsx` `ViewSwitch`, `showpyLive.ts`의 `view`): [대본 편집] / [GUI 편집](데스크톱 앱에서만) / [효과]. 대본 화면은 다른 화면을 보는 동안에도 지우지 않고 숨긴다.
-- **[효과] 화면** (`EffectsView.tsx`, 웹과 앱 모두): 왼쪽은 효과 카드 목록([글자 효과 | 그림 효과], 찾기, [파일 넣기], [새 효과 요청문 복사]), 오른쪽은 고른 효과의 샘플과 쓰인 곳. 목록과 파일 다루기는 `effectsLib.ts`의 함수만 부른다(7장).
+- **[효과] 화면** (`EffectsView.tsx`): 왼쪽은 효과 카드 목록([글자 효과 | 그림 효과], 찾기, [파일 넣기], [새 효과 요청문 복사]), 오른쪽은 고른 효과의 샘플과 쓰인 곳. 목록과 파일 다루기는 `effectsLib.ts`의 함수만 부른다(7장).
   - 카드: 체크(켬/끔 = `setEffectOn`), 한글 이름, 영어 이름, 쓰인 줄 수, 어디 것(렌파이 / 기본 / 프로젝트 / 모음), 프로젝트 효과는 [빼기], 아직 넣지 않은 모음은 [넣기]. 플러그인이 있는 게임 폴더를 연결하지 않았으면 구경만 하고 버튼은 막는다.
   - [빼기]는 창을 띄워 그 파일에 든 효과가 쓰인 줄 수를 보여 주고, 쓰였으면 [다른 효과로 바꾸고 빼기](효과마다 바꿀 것을 고름) / [그냥 빼기] / [취소].
   - 샘플(글자 효과): 대사 미리보기와 같은 `FxCanvas`로 샘플 글을 돌린다. 세부 값 막대(`effectKnobs`)를 움직이면 다시 돌고, 그 값은 저장하지 않는다. 아직 넣지 않은 모음의 효과는 `textShaders.ts`의 `previewPack`으로 샘플용으로만 올려서(`shaderEffect(name, true)`) 돌린다(고르는 목록에는 안 나옴). 셰이더 코드가 틀리면 샘플 칸에 이유가 나온다.
@@ -244,7 +244,7 @@
 
 | 층 | 방식 | 위치 |
 |---|---|---|
-| 자동 저장 | 변경 0.7초 뒤 | IndexedDB `renpy-flow-editor` / `kv.current` |
+| 자동 저장 | 변경 0.7초 뒤 | 앱: 프로젝트 대본 파일(9-2). 개발 서버: IndexedDB `renpy-flow-editor` / `kv.current` |
 | 버전 스냅샷 | [버전 저장], 열기/새로/복원 직전 자동 | IndexedDB `snapshots` |
 | 파일 | Ctrl+S, `.flow.json` | 사용자 폴더 (진짜 백업) |
 | 자동 저장본 | 바뀐 것이 있으면 5분마다, 연결 내보내기 때. 최근 30개만 둠 | IndexedDB `snapshots` |
@@ -252,20 +252,17 @@
 
 - 파일로 저장하지 않은 변경이 있으면 탭을 닫을 때 경고한다.
 - 파일에 쓸 때 `app: { by, build, needs }`를 붙인다(9-3).
-- 사이트와 로컬 `dist/index.html`은 출처(origin)가 달라서 자동 저장 공간이 따로다.
 
 ## 9-0. pygaki 플러그인 연결 (`src/gameFolder.ts`, `src/inbox.ts`)
 
 전체 형식은 [LINK.md](../../docs/LINK.md). `.rpy`를 되읽는 역가져오기는 없다.
 
-- 연결 버튼 `linkProject` (왼쪽 패널): 폴더 고르기, 렌파이 프로젝트인지 확인(`gui.rpy`/`options.rpy`), `ui_kit`이 있으면 `renpyLink` 켜고 없으면 끄기, 이미 다른 `script_flow.rpy`가 있으면 묻기, 첫 내보내기까지 한 번에 한다.
-- 폴더: `showDirectoryPicker`로 `game` 폴더 핸들을 받아 IndexedDB `kv.gameDir`에 둔다. 프로젝트 폴더를 고르면 안의 `game`을 쓴다. 권한은 사용자 동작이 있을 때 다시 얻는다.
+- 폴더: 앱이 연 렌파이 프로젝트의 `game` 폴더(`restoreFolder`, 9-2). 웹의 폴더 고르기(`showDirectoryPicker`, `linkProject`, `kv.gameDir`)는 웹 버전과 같이 없앴다.
 - 목록: `images`, `movies`, `audio`를 읽어 연출 줄 칸의 `datalist`로 보여 준다. 대본에 이름이 `start`인 label이 있고 위쪽 폴더의 다른 `.rpy`에도 `label start`가 있으면 사이드바에 알린다.
 - 목록과 함께 미리보기 값(`look`: 글꼴, 글자 색, 글자/초)과 글꼴 목록도 읽는다.
 - 받아 적기 `pullInbox`: 창이 다시 focus될 때, 앱을 켤 때, [다시 읽기], 내보내기 직전. 받을 것이 있으면 저장본을 먼저 남기고 `applyInbox`로 넣은 뒤, 읽은 기록만 파일에서 지운다.
-- 내보내기: 폴더를 연결했거나 연결을 켜면 먼저 받아 적고 `script_flow.rpy`에 쓴다. 받아 적기가 실패하면 쓰지 않는다. 폴더 권한을 못 쓰는 브라우저에서는 예전처럼 내려받기.
+- 내보내기: 폴더를 연결했거나 연결을 켜면 먼저 받아 적고 `script_flow.rpy`에 쓴다. 받아 적기가 실패하면 쓰지 않는다.
 - 연결을 켜면 show 줄의 위치 칸을 숨긴다(값이 이미 있을 때만 보임). 위치는 pygaki 플러그인이 저장한다.
-- 프로젝트 폴더(game 위)를 고르면 그 손잡이도 IndexedDB `kv.projectDir`에 두고, 대본을 그 폴더의 `.flow.json`에 둔다(9-3). 권한은 프로젝트 폴더에 받는다(안의 game까지 같이 됨). game 폴더를 바로 골랐으면 `projectDir`은 null이고 예전처럼 대본 파일은 따로.
 
 ## 9-2. 데스크톱 앱 (`app/`, `src/desktop.ts`)
 
@@ -273,7 +270,7 @@
 - 렌파이 프로젝트 폴더 하나를 연다. `pygaki.exe --project "폴더"`(렌파이 런처 버튼), 없으면 폴더 고르는 창. 같은 프로젝트를 다시 열면 있던 창을 앞으로, 다른 프로젝트는 새 창.
 - 파일은 메인 프로세스(`app/main.cjs`)가 다룬다: `info` `list` `stat` `read` `write`(임시 파일에 쓰고 바꿔 끼움) `remove`(효과 파일 `game/ui_kit/effects/*.glsl`만 지움) `openFolder` `choose`. 경로는 프로젝트 폴더 기준이고 밖은 막는다. `game/` 폴더를 `fs.watch`로 지켜보고 바뀐 파일 이름을 `pygaki:changed`로 알린다.
 - `src/desktop.ts`의 `AppDir`, `AppFile`이 이 기능을 브라우저 폴더 손잡이(`FileSystemDirectoryHandle`)와 같은 모양으로 감싼다. 그래서 `gameFolder.ts`, `files.ts`는 웹과 같은 코드로 돈다. 권한은 늘 `granted`.
-- 대본: 프로젝트 폴더 맨 위의 `*.flow.json`을 연다. 여러 개면 처음 열 때 고르게 하고(`src/flowPick.ts`, 상자 수·줄 수·고친 때, 가장 최근 것을 강조), 고른 이름을 `localStorage['pygaki-flow:<프로젝트 경로>']`에 둔다. 왼쪽 칸 [다른 대본 파일]은 이 기억을 지우고 창을 다시 연다. 없으면 `프로젝트이름.flow.json`으로 빈 대본을 만들고, pygaki 플러그인(`game/ui_kit`)이 있으면 `renpyLink`를 켠다. 바뀌면 0.7초 뒤 그 파일에 자동 저장(`saveQuiet`)하고 이어서 자동 내보내기(`autoExport`, 웹 자동 저장도 같음): `renpyLink`이고 폴더가 연결돼 있으면 받아 적기 → `generateRpy` → 오류가 없고 지난번과 다르면 `pykaki_goto.json`(지금 쓰는 줄 `activeLine`, 없으면 고른 상자의 첫 줄, [게임 줄 따라가기]를 끄면 `null`) → `script_flow.rpy`. 형식은 LINK.md 7-1. 창을 열고 처음 쓸 때(`lastAuto === null`)는 `foreignBoxes`로 원고의 `# @node:` 표시를 보고, 절반 넘게 지금 대본에 없으면 자동은 멈추고(`autoHeld`) Ctrl+E는 물어본다. 처음 덮어쓰기 전 원고는 `script_flow.rpy.bak`(`backupRpy`). 끄기 버튼 상태는 `localStorage['pykaki-follow-line']`. 브라우저 저장소의 `current`는 읽지 않는다. 버전 목록(IndexedDB)은 앱 전체가 같이 쓴다.
+- 대본: 프로젝트 폴더 맨 위의 `*.flow.json`을 연다. 여러 개면 처음 열 때 고르게 하고(`src/flowPick.ts`, 상자 수·줄 수·고친 때, 가장 최근 것을 강조), 고른 이름을 `localStorage['pygaki-flow:<프로젝트 경로>']`에 둔다. 왼쪽 칸 [다른 대본 파일]은 이 기억을 지우고 창을 다시 연다. 없으면 `프로젝트이름.flow.json`으로 빈 대본을 만들고, pygaki 플러그인(`game/ui_kit`)이 있으면 `renpyLink`를 켠다. 바뀌면 0.7초 뒤 그 파일에 자동 저장(`saveQuiet`)하고 이어서 자동 내보내기(`autoExport`): `renpyLink`이고 폴더가 연결돼 있으면 받아 적기 → `generateRpy` → 오류가 없고 지난번과 다르면 `pykaki_goto.json`(지금 쓰는 줄 `activeLine`, 없으면 고른 상자의 첫 줄, [게임 줄 따라가기]를 끄면 `null`) → `script_flow.rpy`. 형식은 LINK.md 7-1. 창을 열고 처음 쓸 때(`lastAuto === null`)는 `foreignBoxes`로 원고의 `# @node:` 표시를 보고, 절반 넘게 지금 대본에 없으면 자동은 멈추고(`autoHeld`) Ctrl+E는 물어본다. 처음 덮어쓰기 전 원고는 `script_flow.rpy.bak`(`backupRpy`). 끄기 버튼 상태는 `localStorage['pykaki-follow-line']`. 브라우저 저장소의 `current`는 읽지 않는다. 버전 목록(IndexedDB)은 앱 전체가 같이 쓴다.
 - [열기]는 두 대본의 요약을 보여 주고 확인을 받은 뒤 고른 파일의 내용을 이 프로젝트 대본으로 가져오고, [새로]는 이 프로젝트 대본을 비운다. 저장 파일은 바뀌지 않는다.
 - 메인 프로세스는 프로젝트 폴더 맨 위도 지켜보고 `*.flow.json`이 바뀌면 `pygaki:changed`로 이름을 알린다. 연 대본 파일이면 0.3초 뒤 `checkExternal`(9-3).
 - 위쪽 줄 오른쪽(`Toolbar.tsx` `FolderButtons`): [다시 읽기] [폴더 열기] [다른 프로젝트]. 연결과 끊기는 없다. 왼쪽 "렌파이 프로젝트 정보" 칸에는 정보만 둔다.
@@ -289,22 +286,18 @@
 
 ## 9-3. 프로젝트 대본 파일과 쓴 판 (`src/files.ts`, `src/version.ts`)
 
-웹에서 쓰고 앱에서 이어 쓰기 위한 약속. 앱은 늘, 웹은 프로젝트 폴더를 연결했을 때 "프로젝트 대본 파일"(`bound`)을 쓴다.
+앱은 늘 "프로젝트 대본 파일"(`bound`)을 쓴다. (예전 웹 버전의 폴더 연결과 `kv.flowName` `kv.flowSeen`은 없앴다)
 
-- **파일 이름**: 앱은 위(9-2)대로. 웹은 연결할 때 `폴더이름.flow.json`이 있으면 그것, `.flow.json`이 하나뿐이면 그것, 아니면 `폴더이름.flow.json`. 이름은 `kv.flowName`.
-- **연결할 때 (웹)**: 폴더에 그 파일이 있고 지금 대본과 다르면(쓴 판 표시는 빼고 비교) 요약을 보여 주고 묻는다. [확인] 그 파일을 열기(지금 대본은 버전 목록에 백업), [취소] 지금 대본을 쓰고 다음 저장 때 덮어쓰기. 받아 적기(`showpy_inbox.json`)는 대본을 정한 뒤에 한다.
-- **저장**: 앱은 바뀌고 0.7초 뒤 자동으로, 웹은 Ctrl+S와 Ctrl+E 때(자동 저장은 지금처럼 IndexedDB). [다른 이름]은 프로젝트 대본 파일을 바꾸지 않고 사본만 쓴다. 웹은 다시 켜면 `kv.flowName`이 지금 `fileName`과 같을 때 다시 잇는다.
-- **밖에서 바뀜**: 이 창이 마지막으로 읽거나 쓴 글의 지문(`seen`, 웹은 `kv.flowSeen`)과 파일이 다르면 다른 곳이 고친 것. 이 창이 최근에 쓴 지문 20개와 쓰는 중에 읽은 것은 빼고 본다. 쓰기 전과, 창으로 돌아올 때, 앱은 파일 바뀜 알림 때 본다. 묻기: [확인] 파일을 다시 읽기(지금 대본은 백업), [취소] 지금 대본을 쓰고 덮어쓰기. 빈 파일, 읽을 수 없는 글(쓰는 중)은 다음에 다시 본다.
-- **쓴 판** (`app`): 파일에 쓸 때 `{ by: "PyKaki 웹" | "pygaki 앱", build: "2026-11-05 dc3ac85", needs }`를 붙인다. `build`는 `vite.config.ts`가 빌드 날짜와 커밋으로 넣는다. `needs`는 `max(파일의 needs, FEATURE)`라서 내려가지 않는다. `FEATURE`(지금 5: 2 글자 효과 11개, 3 글 상자·효과 겹치기·새 화면 효과 이름, 4 효과 폴더, 5 상자와 label의 셰이더)는 예전 판이 모르는 줄 종류나 값을 대본에 더할 때만 올린다. 예전 파일은 `app`이 없다(needs 0).
+- **파일 이름**: 9-2대로.
+- **저장**: 바뀌고 0.7초 뒤 자동으로. [다른 이름]은 프로젝트 대본 파일을 바꾸지 않고 사본만 쓴다.
+- **밖에서 바뀜**: 이 창이 마지막으로 읽거나 쓴 글의 지문(`seen`)과 파일이 다르면 다른 곳이 고친 것. 이 창이 최근에 쓴 지문 20개와 쓰는 중에 읽은 것은 빼고 본다. 쓰기 전과, 창으로 돌아올 때, 앱은 파일 바뀜 알림 때 본다. 묻기: [확인] 파일을 다시 읽기(지금 대본은 백업), [취소] 지금 대본을 쓰고 덮어쓰기. 빈 파일, 읽을 수 없는 글(쓰는 중)은 다음에 다시 본다.
+- **쓴 판** (`app`): 파일에 쓸 때 `{ by: "pygaki 앱"(개발 서버는 "PyKaki 웹"), build: "2026-11-05 dc3ac85", needs }`를 붙인다. `build`는 `vite.config.ts`가 빌드 날짜와 커밋으로 넣는다. `needs`는 `max(파일의 needs, FEATURE)`라서 내려가지 않는다. `FEATURE`(지금 5: 2 글자 효과 11개, 3 글 상자·효과 겹치기·새 화면 효과 이름, 4 효과 폴더, 5 상자와 label의 셰이더)는 예전 판이 모르는 줄 종류나 값을 대본에 더할 때만 올린다. 예전 파일은 `app`이 없다(needs 0).
 - `needs`가 이 판의 `FEATURE`보다 크면 열 때 알리고, 왼쪽 "렌파이 프로젝트 정보" 칸에 경고를 둔다. 모르는 값은 지우지 않고 그대로 저장한다.
 - `format`, `version`, `.flow.json`, IndexedDB 이름은 바꾸지 않는다.
 
 ## 9-1. 웹앱 설치 (PWA)
 
-- `public/`의 `manifest.webmanifest`, `sw.js`, 아이콘(Ren'Py 런처 아이콘을 보라색 모노톤으로 바꾼 PNG 32/192/512/마스크용 512, `licenses/RENPY-ICON.txt`)이 빌드 때 `dist/`로 그대로 복사된다. 경로는 모두 상대 경로라 GitHub Pages의 `/pykaki/` 아래에서 동작한다.
-- 서비스 워커는 **네트워크 먼저**: 인터넷이 되면 늘 새로 받아 캐시에 넣고, 안 되면 캐시로 연다. 그래서 `main`에 올린 업데이트가 설치한 앱에도 바로 반영된다.
-- 등록은 `src/pwa.ts`에서 http/https일 때만 한다(파일로 연 `dist/index.html`에서는 하지 않음). `beforeinstallprompt`를 잡아 두었다가 툴바 [앱 설치]로 띄운다.
-- `theme-color`는 화면 색 설정의 바탕색을 따른다.
+- 웹 버전과 같이 없앴다(2026-11-12): `pwa.ts`, `public/manifest.webmanifest`, `sw.js`, 아이콘, `.github/workflows/deploy.yml`. 이미 설치한 사람의 앱은 마지막으로 배포된 페이지가 남아 있는 동안 그대로 열린다.
 
 ## 10. 소스 구조
 
@@ -341,7 +334,6 @@
 | `src/SettingsModal.tsx` | 환경 설정 창 |
 | `src/Caret.tsx` | 상자 안 편집의 밑줄 커서 |
 | `src/FlowMenu.tsx` | 편집 중 오른쪽에 붙는 다음 흐름 창 |
-| `src/pwa.ts`, `public/` | 웹앱 설치 |
 | `licenses/` | 함께 배포하는 글꼴의 라이선스 |
 
 ## 11. 남은 단계

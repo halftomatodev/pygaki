@@ -175,7 +175,6 @@ function apply(p: Prefs) {
   };
   fill('box', isMono(p) ? undefined : c.box);
   fill('label', isMono(p) ? undefined : c.label);
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', c.bg);
   const f = FONTS.find((x) => x.id === p.font) ?? FONTS[0];
   r.style.setProperty('--font', f.family);
   r.style.setProperty('--font-weight', String(f.weight));

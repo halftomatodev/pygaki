@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useStore } from './store';
-import { disconnectProject, exportRpyFile, followLine, hasRpyTarget, linkProject, newProject, openProject, runInRenpy, saveProject, setFollowLine } from './files';
-import { hasDirPicker, pullInbox, scanFolder, useGameFolder } from './gameFolder';
+import { exportRpyFile, followLine, hasRpyTarget, newProject, openProject, runInRenpy, saveProject, setFollowLine } from './files';
+import { pullInbox, scanFolder, useGameFolder } from './gameFolder';
 import { snapAdd, snapDelete, snapList, type Snapshot } from './persist';
 import { toggleFocus } from './actions';
 import { keyOf } from './prefs';
-import { installApp, useCanInstall } from './pwa';
 import { desktop, isDesktop } from './desktop';
 import { useLive } from './showpyLive';
 
@@ -51,7 +50,6 @@ function LiveBadge() {
 export function Toolbar() {
   const s = useStore();
   const [showVersions, setShowVersions] = useState(false);
-  const canInstall = useCanInstall();
 
   const saveVersion = async () => {
     const memo = prompt('버전 메모 (예: 1장 완성, 엔딩 분기 추가 전)');
@@ -105,17 +103,14 @@ export function Toolbar() {
       <span className="sep" />
       <button onClick={() => exportRpyFile(false)}>.rpy 내보내기</button>
       {hasRpyTarget() && <button onClick={() => exportRpyFile(true)} title={keyOf('export')}>같은 곳에 다시</button>}
-      {canInstall && <button className="primary" onClick={installApp} title="바탕화면과 작업 표시줄에서 바로 여는 앱으로 설치해요">앱 설치</button>}
       </div>
       {showVersions && <Versions onClose={() => setShowVersions(false)} />}
     </div>
   );
 }
 
-// 렌파이 프로젝트 폴더를 열고 읽는 단추. 앱은 프로젝트 하나를 연 채라 다시 읽기·폴더 열기·다른 프로젝트,
-// 웹은 폴더를 연결했을 때만 폴더 바꾸기·다시 읽기·끊기 (처음 연결은 왼쪽 [렌파이 프로젝트 정보]에서)
+// 렌파이 프로젝트 폴더를 열고 읽는 단추. 앱은 프로젝트 하나를 연 채라 다시 읽기·폴더 열기·다른 프로젝트
 function FolderButtons() {
-  const name = useGameFolder((g) => g.name);
   const reread = () => void pullInbox(true).then(() => scanFolder());
   if (isDesktop)
     return (
@@ -126,15 +121,7 @@ function FolderButtons() {
         <button onClick={() => void desktop!.choose()} title="다른 렌파이 프로젝트를 새 창으로 열어요">다른 프로젝트</button>
       </>
     );
-  if (!hasDirPicker || !name) return null;
-  return (
-    <>
-      <span className="sep" />
-      <button onClick={() => void linkProject()}>폴더 바꾸기</button>
-      <button onClick={reread}>다시 읽기</button>
-      <button onClick={() => void disconnectProject()}>끊기</button>
-    </>
-  );
+  return null;
 }
 
 // 렌파이 폴더를 연결했을 때: 고치면 저절로 내보내고, 게임을 지금 쓰는 줄로 옮길지

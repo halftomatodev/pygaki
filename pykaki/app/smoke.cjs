@@ -83,7 +83,7 @@ async function until(what, fn, ms = 10000) {
   console.log('쓴 판:', JSON.stringify(stamped.app));
   if (dialogs.some((m) => m.includes('다른 곳'))) fail('앱이 쓴 파일을 밖에서 바뀐 것으로 봄');
 
-  // 밖(웹 PyKaki)에서 대본 파일을 고치면 다시 읽을지 묻고, [확인]이면 다시 읽음
+  // 밖(예전 웹 판, 다른 프로그램)에서 대본 파일을 고치면 다시 읽을지 묻고, [확인]이면 다시 읽음
   await wait(1500);
   const web = { ...stamped, project: { ...stamped.project, title: '웹에서 고친 제목' }, app: { by: 'PyKaki 웹', build: 'smoke', needs: 1 } };
   acceptNext = true;
