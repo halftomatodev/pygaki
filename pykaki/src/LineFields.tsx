@@ -4,9 +4,10 @@ import { useStore } from './store';
 import * as ops from './ops';
 import type { ImageKind, Line, LineFx, SayStyle } from './types';
 import { shaderEffect } from './fx/textShaders';
-import { BOXES, EFFECTS, effectKnobs, formatEffect, formatImageFx, imageFxCode, parseEffect, parseImageFx, type EffectKnob, type EffectPart, FX_BASE, TAILS, FX_CURSOR, FX_OVERLAY, FX_TRANS, FX_WARP, POSITIONS, STAGE_LABEL, STAGE_TYPES, TRANSITIONS, fxArgs, lineCps, stageCode } from './stage';
+import { BOXES, EFFECTS, effectKnobs, formatEffect, formatImageFx, parseEffect, parseImageFx, type EffectKnob, type EffectPart, FX_BASE, TAILS, FX_CURSOR, FX_OVERLAY, FX_TRANS, FX_WARP, POSITIONS, STAGE_LABEL, STAGE_TYPES, fxArgs, lineCps, stageCode } from './stage';
 import { useGameFolder } from './gameFolder';
 import { LinePreview } from './SayPreview';
+import { TransPicker } from './TransPicker';
 import { TagBar, useTagTarget } from './TagBar';
 
 type SetLine = (fn: (x: Line) => void, key?: string) => void;
@@ -373,7 +374,7 @@ export function StageFields({ l, set, firstId, nd = '' }: { l: Line; set: SetLin
     }, `pic${key}${l.id}`);
   const trans = (
     <>
-      {pick(TRANSITIONS, picUse ? imageFxCode(picUse.name) : l.trans, (x, v) => void (x.trans = v || undefined), '나타나는 방식')}
+      <TransPicker className={nd} value={l.trans} onPick={(v) => set((x) => void (x.trans = v || undefined))} />
       {picKnobs.length > 0 && (
         <button className={nd + ' fx-more' + (picOpen ? ' on' : '')} title="이 그림 효과의 걸리는 시간과 세부 값을 막대로 고쳐요" onClick={() => setPicOpen(!picOpen)}>
           세부 값{picChanged ? ` (${picChanged})` : ''}

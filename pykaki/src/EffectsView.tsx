@@ -13,7 +13,7 @@ import { TransitionCanvas } from './fx/TransitionCanvas';
 import { Glyphs, useReveal } from './SayPreview';
 import { parseTagged } from './textTags';
 
-const SOURCE_LABEL: Record<EffectCard['source'], string> = { renpy: '렌파이', base: '기본', project: '프로젝트', library: '모음' };
+export const SOURCE_LABEL: Record<EffectCard['source'], string> = { renpy: '렌파이', base: '기본', project: '프로젝트', library: '모음' };
 const SAMPLE_CPS = 30;
 const SAMPLE_TEXT = '안녕, 반가워!';
 const TIME_KEY = '@time'; // 그림 효과 샘플의 걸리는 시간 막대 (효과 값 이름과 겹치지 않게)
@@ -102,7 +102,7 @@ export function samplePicture(w: number, h: number, fresh: boolean, picture: HTM
 export const SAMPLE_WIDTH = 960;
 
 // 그림 효과 샘플: 게임과 같은 셰이더 코드로 앞 그림에서 새 그림으로 바뀌는 모습을 그린다
-function PictureSample({ effect, args, time, picture, onReplay }: { effect: ShaderEffect; args: Record<string, string>; time: number; picture: HTMLImageElement | null; onReplay(): void }) {
+export function PictureSample({ effect, args, time, picture, onReplay }: { effect: ShaderEffect; args: Record<string, string>; time: number; picture: HTMLImageElement | null; onReplay(): void }) {
   const look = useGameFolder((s) => s.look);
   const [bad, setBad] = useState<string | null>(null);
   const [old, next] = useMemo(() => {

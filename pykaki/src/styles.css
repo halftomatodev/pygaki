@@ -1051,3 +1051,17 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .all-row button.danger { background: color-mix(in srgb, var(--danger) 10%, var(--panel)); color: color-mix(in srgb, var(--danger) 80%, var(--text)); }
 .warn-ico { flex-shrink: 0; }
 [data-mono='1'] .all-row button { background: transparent; outline: 1px solid var(--text); color: var(--text); }
+
+/* 나타나는 방식 고르기 창 (TransPicker.tsx) */
+.tp { position: relative; display: inline-flex; min-width: 0; }
+.tp-btn { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; }
+.tp-pop { position: fixed; z-index: 150; width: 280px; display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 10px 28px rgba(0, 0, 0, .22); overflow: hidden; }
+.tp-sample { flex-shrink: 0; padding: 6px; border-bottom: 1px solid var(--line); }
+.tp-sample .fxv-pic { width: 100%; }
+.tp-nosample { display: flex; align-items: center; justify-content: center; aspect-ratio: 16 / 9; background: #15171f; color: rgba(255, 255, 255, .6); border-radius: 6px; font-size: 12px; text-align: center; padding: 8px; }
+.tp-list { overflow: auto; padding: 4px 6px 6px; }
+.tp-sub { font-size: 11px; font-weight: 700; color: var(--muted); margin: 6px 2px 2px; }
+.tp-item { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 6px; text-align: left; padding: 4px 6px; font-size: 12px; background: none; }
+.tp-item:hover:not(:disabled) { background: var(--faint); }
+.tp-item.on { background: var(--accent-soft); font-weight: 600; }
+.tp-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

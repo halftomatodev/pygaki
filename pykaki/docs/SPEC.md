@@ -151,7 +151,7 @@
     - `escapePercent`가 꺼졌는데 대사나 선택지에 `%`가 있음 (오류. 렌파이가 실행 중 멈춘다)
     - 텍스트 태그를 켰을 때 대사나 선택지의 태그 짝 (`checkTags`, 렌파이 `check_text_tags`와 같은 규칙): 여는 태그 없는 닫는 태그는 오류(렌파이가 실행 중 멈춘다), 엇갈려 닫힘(글 하나에 첫 번째만 알림)·닫지 않음·모르는 태그는 경고
     - 없는 상자를 가리키는 흐름은 파일을 열 때 `normalizeProject`가 "연결 안 됨"으로 돌리고, 그 뒤에 생기면 내보내기가 멈추지 않고 오류로 알린다
-    - 태그 효과와 그림 효과의 세부 값: 태그 상자 [세부 값]은 `tagEdit.retag`로 `{shader=이름:u__값=3}`의 값만 고치고, 배경·보이기·숨기기 줄의 [세부 값]은 `stage.parseImageFx`/`formatImageFx`로 `trans`의 `img_fx.use("이름", 초, 값=…)`를 고친다(저장 형식은 그대로).
+    - 태그 효과와 그림 효과의 세부 값: 태그 상자 [세부 값]은 `tagEdit.retag`로 `{shader=이름:u__값=3}`의 값만 고치고, 배경·보이기·숨기기 줄의 "나타나는 방식"은 고르기 창(`TransPicker.tsx`, 세션 34): `effectCatalog`의 그림 효과(켠 것)와 연결했으면 모음(아직 안 넣은 것, 고르면 묻고 `addFromLibrary` 뒤 고름), 위에 마우스를 올린 효과의 샘플(`EffectsView.tsx` `PictureSample`, WebGL 하나만). 창은 `document.body`에 `position: fixed`로 띄워 칸에 안 잘린다. 그 줄의 [세부 값]은 `stage.parseImageFx`/`formatImageFx`로 `trans`의 `img_fx.use("이름", 초, 값=…)`를 고친다(저장 형식은 그대로).
     - 연결을 켰는데 캐릭터 id가 pygaki 플러그인 이름과 겹침 (오류, `PLUGIN_NAMES`)
 11. **pygaki 플러그인 연결(`renpyLink`)을 켜면 달라지는 것**. 끄면 예전과 똑같이 내보낸다.
     - 모든 상자에 `label 그룹.상자id:`를 쓴다. 첫 상자는 `label 그룹:` 바로 아래에 이어 쓴다.
