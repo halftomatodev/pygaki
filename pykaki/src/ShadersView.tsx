@@ -1,5 +1,5 @@
-// [효과] 화면의 [셰이더] 칸: 화면 전체에 씌우는 셰이더를 보고, 켜고 끈다 (docs/LINK.md 11장).
-// 목록은 게임 폴더의 screen_fx/shader_list.json에서 온다. 어느 상자에 걸지는 [대본 편집]의 ◐ 셰이더에서 정한다
+// 위쪽 [셰이더] 화면: 화면 전체에 씌우는 셰이더와, 셰이더가 바뀔 때의 전환을 보고 켜고 끈다 (docs/LINK.md 11장).
+// 셰이더 목록은 게임 폴더의 screen_fx/shader_list.json에서 온다. 어느 상자에 걸지와 세부 값은 [대본 편집]의 ◐ 셰이더에서 정한다
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useStore } from './store';
 import { useLive } from './showpyLive';
@@ -7,7 +7,8 @@ import { useGameFolder } from './gameFolder';
 import { SAMPLE_WIDTH, samplePicture } from './EffectsView';
 import { webglOk } from './fx/FxCanvas';
 import { ScreenFxCanvas, ScreenFxKnobs, screenFxBlocked } from './fx/ScreenFxCanvas';
-import type { ShaderInfo } from './shader';
+import { SHADER_TRANS, TV_KNOBS, type ShaderInfo } from './shader';
+import type { Project } from './types';
 import { setShaderOn, shaderBlocked, shaderCatalog, shaderUses, type ShaderCard, type ShaderUse } from './shaderLib';
 
 // 막대 묶음에서 사람이 읽을 이름만 꺼낸다: [묶음 이름, [[값 이름, 보일 글, …], …]]
@@ -36,7 +37,153 @@ function ShaderSample({ info, args, picture }: { info: ShaderInfo; args: Record<
   );
 }
 
-export function ShadersView({ bar }: { bar: ReactNode }) {
+// 전환을 쓴 상자와 label: "시작할 때"나 "끝날 때"에 고른 곳
+function transUses(p: Project, k: string) {
+  const rv: { kind: 'box' | 'label'; id: string; title: string; slot: string }[] = [];
+  const at = (o: { shader?: { in?: string; out?: string } }) => [o.shader?.in === k && '시작할 때', o.shader?.out === k && '끝날 때'].filter(Boolean).join(', ');
+  for (const g of p.labels) if (at(g)) rv.push({ kind: 'label', id: g.id, title: g.title || g.name, slot: at(g) });
+  for (const n of p.nodes) if (at(n)) rv.push({ kind: 'box', id: n.id, title: n.title || n.id, slot: at(n) });
+  return rv;
+}
+
+// TV 꺼짐·켜짐 샘플: 게임과 같은 순서로 (꺼짐 → 검은 화면 → 켜짐). 값을 바꾸면 다시
+function TvSample({ values }: { values: Record<string, number> }) {
+  const look = useGameFolder((s) => s.look);
+  const v = (k: string) => values[k] ?? TV_KNOBS.find((x) => x[0] === k)![6];
+  const [off, black, on] = [v('off_time'), v('black_time'), v('on_time')];
+  const total = Math.max(0.05, off + black + on) + 1.2; // 끝나고 잠깐 쉼
+  const pct = (t: number) => `${((t / total) * 100).toFixed(2)}%`;
+  const line = Math.max(1, v('line'));
+  const ly = (line / look.height).toFixed(4);
+  const name = ['tv', off, black, on, line, v('flash')].map((x) => String(x).replace('.', '_')).join('_');
+  const pic = useMemo(() => samplePicture(SAMPLE_WIDTH, Math.round((SAMPLE_WIDTH * look.height) / look.width), true, null, '샘플 화면').toDataURL(), [look.width, look.height]);
+  const flash = 1 + v('flash') * 3;
+  const css = `@keyframes ${name} {
+    0% { transform: scale(1, 1); filter: brightness(1); }
+    ${pct(off * 0.6)} { transform: scale(1, ${ly}); filter: brightness(${flash}); }
+    ${pct(off)} { transform: scale(0.004, ${ly}); filter: brightness(${flash}); }
+    ${pct(off + black)} { transform: scale(0, ${ly}); filter: brightness(1); }
+    ${pct(off + black + on * 0.4)} { transform: scale(1, ${ly}); filter: brightness(2); }
+    ${pct(off + black + on)}, 100% { transform: scale(1, 1); filter: brightness(1); }
+  }`;
+  return (
+    <div className="fxv-pic tv-sample" style={{ aspectRatio: `${look.width} / ${look.height}` }}>
+      <style>{css}</style>
+      <img src={pic} alt="" style={{ animation: `${name} ${total}s linear infinite` }} />
+      {v('noise') > 0 && <div className="tv-noise" style={{ opacity: v('noise') * 0.35 }} />}
+      <span className="tv-note">비슷한 모양 (게임은 렌파이에서)</span>
+    </div>
+  );
+}
+
+// TV 전환 막대 (셰이더의 ScreenFxKnobs와 같은 모양)
+export function TvKnobs({ values, onChange }: { values: Record<string, number>; onChange(key: string, v: number | undefined): void }) {
+  return (
+    <div className="fx-knobs">
+      {TV_KNOBS.map(([key, label, min, max, step, dp, def]) => {
+        const set = values[key] !== undefined;
+        const v = values[key] ?? def;
+        return (
+          <label key={key} className={set ? 'set' : ''}>
+            <span className="fx-kn" title={key}>{label}</span>
+            <input type="range" min={min} max={max} step={step} value={v} onChange={(e) => onChange(key, Number(e.target.value))} />
+            <span className="fx-kv">{v.toFixed(dp)}</span>
+            <button className="fx-x" style={{ visibility: set ? 'visible' : 'hidden' }} title="기본값으로" onClick={(e) => (e.preventDefault(), onChange(key, undefined))}>↺</button>
+          </label>
+        );
+      })}
+    </div>
+  );
+}
+
+const TRANS_DESC: Record<string, string> = {
+  tv: '화면이 위아래로 눌려 가로선이 되고 점으로 꺼졌다가, 검은 화면 뒤에 다시 켜져요. 검은 화면일 때 셰이더가 바뀌어요.',
+  none: '전환 없이 바로 바뀌어요.',
+};
+
+// 전환 칸: TV 꺼짐·켜짐, 없음. 세부 값은 상자마다 [대본 편집]에서
+function TransList({ bar }: { bar: ReactNode }) {
+  const project = useStore((s) => s.project);
+  const [picked, setPicked] = useState('tv');
+  const [vals, setVals] = useState<Record<string, number>>({});
+  const uses = transUses(project, picked);
+  const goTo = (u: { kind: 'box' | 'label'; id: string }) => {
+    useLive.setState({ view: 'script' });
+    const s = useStore.getState();
+    if (u.kind === 'box') s.focusNodes([u.id]);
+    else s.focusNodes(project.nodes.filter((n) => n.group === u.id).map((n) => n.id));
+    if (s.shaderOf?.kind !== u.kind || s.shaderOf.id !== u.id) s.openShader(u.kind, u.id);
+  };
+  const put = (k: string, v: number | undefined) =>
+    setVals((o) => {
+      const n = { ...o };
+      if (v === undefined) delete n[k];
+      else n[k] = v;
+      return n;
+    });
+  return (
+    <div className="sp-view fxv">
+      <div className="fxv-list">
+        <div className="fxv-bar">{bar}</div>
+        <div className="fxv-cards">
+          <h4>셰이더가 바뀔 때 <span className="tip">{SHADER_TRANS.length}</span></h4>
+          {SHADER_TRANS.map(([k, t]) => {
+            const n = transUses(project, k).length;
+            return (
+              <div key={k} className={'fxv-card' + (picked === k ? ' on' : '')} onClick={() => setPicked(k)}>
+                <span className="fxv-label">{t}</span>
+                <span className="fxv-name">{k}</span>
+                <span className="grow" />
+                {n > 0 && <span className="fxv-uses" title="이 전환을 고른 상자와 label">{n}곳</span>}
+              </div>
+            );
+          })}
+          <p className="tip">전환은 상자나 label의 ◐ 셰이더에서 셰이더 바로 아래 "시작할 때", "끝날 때"로 골라요.</p>
+        </div>
+      </div>
+      <div className="fxv-side">
+        <h3>
+          {SHADER_TRANS.find(([k]) => k === picked)?.[1]} <span className="fxv-name">{picked}</span>
+        </h3>
+        <p className="tip">{TRANS_DESC[picked]}</p>
+        {picked === 'tv' && (
+          <>
+            <TvSample values={vals} />
+            <div className="fxv-row">
+              <span className="grow" />
+              {Object.keys(vals).length > 0 && <button onClick={() => setVals({})}>값 모두 기본으로</button>}
+            </div>
+            <h4>세부 값 <span className="tip">여기서 맞춘 값은 저장하지 않아요 (구경용). 상자마다 [대본 편집]의 ◐ 셰이더에서 정해요</span></h4>
+            <TvKnobs values={vals} onChange={put} />
+          </>
+        )}
+        <h4>쓰인 곳 <span className="tip">{uses.length ? `${uses.length}곳` : '대본에서 안 써요'}</span></h4>
+        {uses.slice(0, 30).map((u) => (
+          <div className="fxv-use" key={u.kind + u.id}>
+            <span className="fxv-use-box">{u.kind === 'box' ? '상자' : 'label'} · {u.slot}</span>
+            <span className="fxv-use-text">{u.title}</span>
+            <button onClick={() => goTo(u)} title="[대본 편집]에서 그 상자(label)의 셰이더 칸을 열어요">보기</button>
+          </div>
+        ))}
+        {uses.length > 30 && <p className="tip">… 외 {uses.length - 30}곳</p>}
+      </div>
+    </div>
+  );
+}
+
+// 위쪽 [셰이더] 화면: [셰이더] / [전환]
+export function ShadersView() {
+  const [part, setPart] = useState<'shader' | 'trans'>('shader');
+  const bar = (
+    <span className="view-switch fxv-kind">
+      <button className={part === 'shader' ? 'on' : ''} onClick={() => setPart('shader')} title="화면 전체에 씌우는 셰이더">셰이더</button>
+      <button className={part === 'trans' ? 'on' : ''} onClick={() => setPart('trans')} title="셰이더가 바뀔 때의 모양">전환</button>
+    </span>
+  );
+  return part === 'shader' ? <ShaderList bar={bar} /> : <TransList bar={bar} />;
+}
+
+function ShaderList({ bar }: { bar: ReactNode }) {
   const project = useStore((s) => s.project);
   const say = useStore((s) => s.say);
   const fxSeq = useGameFolder((s) => s.fxSeq);
@@ -144,7 +291,7 @@ export function ShadersView({ bar }: { bar: ReactNode }) {
               {Object.keys(mine).length > 0 && <button onClick={() => setArgs((all) => ({ ...all, [sel.id]: {} }))}>값 모두 기본으로</button>}
               <input ref={picPick} type="file" accept="image/*" hidden onChange={(e) => pickPicture(e.target.files?.[0])} />
             </div>
-            <p className="tip">어느 상자에 걸지는 [대본 편집]에서 상자나 label의 ◐ 셰이더로 정해요.</p>
+            <p className="tip">어느 상자에 걸지와 그 상자의 세부 값은 [대본 편집]에서 상자나 label의 ◐ 셰이더로 정해요.</p>
             <h4>세부 값 <span className="tip">여기서 맞춘 값은 저장하지 않아요 (구경용)</span></h4>
             {screenFxBlocked(sel) ? (
               groupNames(sel.groups).map(([title, names]) => (

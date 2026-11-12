@@ -134,7 +134,7 @@ export interface GameState {
 }
 
 interface S {
-  view: 'script' | 'showpy' | 'effects'; // 대본 편집 / GUI 편집 / 효과
+  view: 'script' | 'showpy' | 'effects' | 'shaders'; // 대본 편집 / GUI 편집 / 효과 / 셰이더
   gamePanel: boolean; // 게임 창에도 GUI 편집기 패널을 보일지 (앱이 기억함, F9)
   on: boolean; // 게임과 붙어 있음
   showpy: string | null; // 게임의 ui_kit 버전

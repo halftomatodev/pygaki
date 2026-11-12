@@ -391,7 +391,8 @@ export async function exportRpyFile(again = false) {
   const { code, warnings } = makeRpy(s.project);
   const errors = warnings.filter((x) => x.level === 'error').length;
   if (errors && !confirm(`오류 ${errors}개가 있어요. 이대로 내보내면 렌파이에서 실행이 안 될 수 있어요. 계속할까요?`)) {
-    useStore.setState({ tab: 'warn' });
+    useStore.setState({ hideLeft: false });
+    document.getElementById('warn-card')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     return;
   }
   try {

@@ -42,7 +42,7 @@ init -110 python in screen_fx:
 
     import store
 
-    VERSION = "5.4"
+    VERSION = "5.5"
 
     ## ── 플러그인 폴더 위치 ──
     ## 이 파일은 <플러그인 폴더>/engine/screen_fx.rpy 에 있습니다.
@@ -753,6 +753,14 @@ init -110 python in screen_fx:
 
     TRANSITIONS = ("tv", "fade", None)
 
+    def _check_tv(tv):
+        """tv={...}에 모르는 이름이 있으면 알립니다. (5.5)"""
+        if not isinstance(tv, dict):
+            raise Exception("screen_fx: tv에는 {\"off_time\": 0.5} 같은 사전을 적습니다. 받은 값: {!r}".format(tv))
+        for k in tv:
+            if k not in TV_DEFAULTS:
+                raise Exception("screen_fx: tv에 모르는 이름 {!r}가 있습니다. 쓸 수 있는 이름: {}".format(k, ", ".join(sorted(TV_DEFAULTS))))
+
     class _ConfEdit(store.python_object):
         """편집기에서 고치고 아직 저장 안 한 전환 설정. (저장되지 않음)"""
         def __init__(self):
@@ -993,20 +1001,46 @@ init -110 python in screen_fx:
         """게임의 지금 셰이더 두 자리 (1번, 2번)."""
         return (current_effect(), current_overlay() or NONE)
 
-    def shaders(first=NONE, second=NONE, transition=DEFAULT, duration=None, wait=None):
+    def shaders(first=NONE, second=NONE, transition=DEFAULT, duration=None, wait=None, tv=None, values=None):
         """
         인게임 셰이더 두 자리를 한 번에 정합니다. 다음에 바꿀 때까지 유지되고, 세이브·되감기에 저장됩니다. (4.3)
             $ screen_fx.shaders("ascii", "vhs_crt")     # 1번 아스키 + 2번 VHS
             $ screen_fx.shaders("gameboy")              # 1번 게임보이, 2번 없음
             $ screen_fx.shaders("none", "none")         # 전부 셰이더 적용 취소 (아무것도 안 함)
         이름: "none"(기본) "ascii"(아스키) "vhs_crt"(VHS) "retro_term"(단말기) "gameboy"(게임보이)
+
+        세부 값과 TV 전환 값을 이 자리에서만 (5.5. PyKaki가 상자마다 적음):
+            $ screen_fx.shaders("vhs_crt", "none", values={"vhs_crt": {"warp_amount": 2.0}})
+            $ screen_fx.shaders("glitch", "none", transition="tv", tv={"off_time": 0.6})
+        values: {셰이더 이름: {값 이름: 값}}. 고른 셰이더의 값을 이 값으로 바꿉니다(적지 않은 값은 설정대로).
+                {}를 주면 설정대로 돌아갑니다. values를 아예 적지 않으면 바꾼 값을 그대로 둡니다.
+        tv: 이번 TV 전환에만 쓰는 값 (screen_fx.tv와 같은 이름)
         """
         first = alias(first or NONE)
         second = alias(second or NONE)
         _check_name(first)
         _check_overlay(second, "shaders()의 2번")
+        if values is not None:
+            _put_values(values, (first, second))
         use(first, transition=transition, duration=duration, wait=wait,
-            overlay=(False if second in (NONE, None, False) else second))
+            overlay=(False if second in (NONE, None, False) else second), tv=tv)
+
+    def _put_values(values, slots):
+        """shaders(values=)의 값을 고른 셰이더에 씁니다. 지금 값과 같으면 그대로 둡니다. (5.5)"""
+        if not isinstance(values, dict):
+            raise Exception("screen_fx.shaders: values에는 {\"vhs_crt\": {\"warp_amount\": 2.0}} 같은 사전을 적습니다.")
+        for name, vals in values.items():
+            fx = EFFECTS.get(alias(name))
+            if fx is None:
+                raise Exception("screen_fx.shaders: values에 {!r}라는 효과가 없습니다. 쓸 수 있는 이름: {}".format(name, ", ".join(names())))
+        for name in slots:
+            fx = EFFECTS.get(name)
+            if fx is None:
+                continue
+            vals = dict(values.get(name, None) or { })
+            fx.check(vals, "screen_fx.shaders(values=)")
+            if fx.overrides() != vals:
+                fx._write(vals, 0.0)
 
     ## ── 타이틀, 게임 내 메뉴 셰이더 (4.3) ──
     ## 타이틀(과 타이틀에서 연 화면), 게임 중 ESC 메뉴(와 거기서 연 화면)는 인게임 셰이더 대신
@@ -1066,13 +1100,17 @@ init -110 python in screen_fx:
 
     class _Anim(store.python_object):
 
-        def __init__(self, kind, old, new, duration=None, preview=False):
+        def __init__(self, kind, old, new, duration=None, preview=False, tv=None):
             self.kind = kind
             self.old = _as_state(old)
             self.new = _as_state(new)
             self.preview = preview
             self.t0 = time.time()
             self.c = tv_conf()
+            if tv:
+                ## 이번 전환에만 쓰는 TV 값 (shaders(..., tv={...}), 5.5)
+                _check_tv(tv)
+                self.c.update(tv)
 
             if kind == "tv":
                 parts = [ max(0.0, float(self.c[k])) for k in ("off_time", "black_time", "on_time") ]
@@ -1208,7 +1246,7 @@ init -110 python in screen_fx:
             return True
         return False
 
-    def use(effect, transition=DEFAULT, duration=None, wait=None, overlay=DEFAULT, target=DEFAULT, exclude=DEFAULT, cursor=_KEEP):
+    def use(effect, transition=DEFAULT, duration=None, wait=None, overlay=DEFAULT, target=DEFAULT, exclude=DEFAULT, cursor=_KEEP, tv=None):
         """
         화면 효과를 바꿉니다. 다음에 다시 바꿀 때까지 유지되고, 세이브·되감기에 저장됩니다.
 
@@ -1231,6 +1269,7 @@ init -110 python in screen_fx:
         exclude를 적지 않으면 그 효과의 설정(<이름>.exclude)을 따릅니다. (target은 예전 이름)
         wait: True면 전환이 끝날 때까지 기다렸다가 다음 줄로 (기본은 screen_fx.wait)
         cursor: 커서를 그릴 자리 (set_cursor와 같음). 안 적으면 그대로 둠 (4.2)
+        tv: 이번 TV 전환에만 쓰는 값. 예: tv={"off_time": 0.6, "noise": 0.2} (5.5)
         """
 
         effect = alias(effect)
@@ -1263,7 +1302,7 @@ init -110 python in screen_fx:
             renpy.restart_interaction()
             return
 
-        a = _Anim(kind, old, new, duration)
+        a = _Anim(kind, old, new, duration, tv=tv)
         rt.anim = a
         _play_sounds(a)
 
@@ -1279,15 +1318,16 @@ init -110 python in screen_fx:
         else:
             renpy.restart_interaction()
 
-    def clear(transition=DEFAULT, duration=None, wait=None, overlay=DEFAULT, target=DEFAULT, exclude=DEFAULT, cursor=_KEEP):
+    def clear(transition=DEFAULT, duration=None, wait=None, overlay=DEFAULT, target=DEFAULT, exclude=DEFAULT, cursor=_KEEP, tv=None):
         """
         use()로 바꾼 효과를 끝내고 기본 효과로 돌아갑니다. (선택취소)
             $ screen_fx.clear()
             $ screen_fx.clear(transition="fade")
         덮개(overlay)와 글자 빼기(exclude)도 설정대로 돌아갑니다.
         커서 자리는 그대로입니다. 같이 돌리려면 clear(cursor="default")
+        tv: 이번 TV 전환에만 쓰는 값 (5.5)
         """
-        use(DEFAULT, transition=transition, duration=duration, wait=wait, overlay=overlay, target=target, exclude=exclude, cursor=cursor)
+        use(DEFAULT, transition=transition, duration=duration, wait=wait, overlay=overlay, target=target, exclude=exclude, cursor=cursor, tv=tv)
 
     def set_overlay(overlay, transition=DEFAULT, duration=None, wait=None):
         """

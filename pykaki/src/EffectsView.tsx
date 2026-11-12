@@ -12,7 +12,6 @@ import { FxCanvas, webglOk } from './fx/FxCanvas';
 import { TransitionCanvas } from './fx/TransitionCanvas';
 import { Glyphs, useReveal } from './PlayStage';
 import { parseTagged } from './textTags';
-import { ShadersView } from './ShadersView';
 
 const SOURCE_LABEL: Record<EffectCard['source'], string> = { renpy: '렌파이', base: '기본', project: '프로젝트', library: '모음' };
 const SAMPLE_CPS = 30;
@@ -187,7 +186,6 @@ export function EffectsView() {
   const hasShowpy = useGameFolder((s) => s.hasShowpy);
   const fxErrors = useGameFolder((s) => s.fxErrors);
   const [kind, setKind] = useState<FxKind>('effect');
-  const [shaders, setShaders] = useState(false); // [셰이더] 칸을 보는 중 (ShadersView.tsx)
   const [query, setQuery] = useState('');
   const [picked, setPicked] = useState<Record<FxKind, string>>({ effect: '', transition: '' });
   const [args, setArgs] = useState<Record<string, Record<string, string>>>({}); // 샘플에서만 쓰는 값: 효과 이름 → { u__값: 값 }
@@ -340,12 +338,10 @@ export function EffectsView() {
 
   const kindBar = (
     <span className="view-switch fxv-kind">
-      <button className={!shaders && kind === 'effect' ? 'on' : ''} onClick={() => (setShaders(false), setKind('effect'))} title="대사 글자가 나오는 모양">글자 효과</button>
-      <button className={!shaders && kind === 'transition' ? 'on' : ''} onClick={() => (setShaders(false), setKind('transition'))} title="배경, 캐릭터가 나타나는 모양">그림 효과</button>
-      <button className={shaders ? 'on' : ''} onClick={() => setShaders(true)} title="화면 전체에 씌우는 셰이더 (상자와 label에 거는 것)">셰이더</button>
+      <button className={kind === 'effect' ? 'on' : ''} onClick={() => setKind('effect')} title="대사 글자가 나오는 모양">글자 효과</button>
+      <button className={kind === 'transition' ? 'on' : ''} onClick={() => setKind('transition')} title="배경, 캐릭터가 나타나는 모양">그림 효과</button>
     </span>
   );
-  if (shaders) return <ShadersView bar={kindBar} />;
 
   return (
     <div className="sp-view fxv">

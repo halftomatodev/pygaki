@@ -20,24 +20,34 @@ interface Section {
 }
 
 const SECTIONS: Section[] = [
-  { id: 'splash', label: '스플래시 (로고, 경고, 조작 방법)', tab: 'splash', app: false, mirror: true, note: '게임을 켰을 때 타이틀 전에 나오는 페이지예요. showpy 4.18(splash 1.2)부터 여기서 고쳐요. 예전 판이면 splash/splash_config.rpy에서 고쳐요.' },
+  { id: 'splash', label: '로고, 경고, 조작 방법', tab: 'splash', app: false, mirror: true, note: '게임을 켰을 때 타이틀 전에 나오는 페이지예요. showpy 4.18(splash 1.2)부터 여기서 고쳐요. 예전 판이면 splash/splash_config.rpy에서 고쳐요.' },
   { id: 'title', label: '타이틀 메뉴', tab: 'title', app: true, note: '' },
-  { id: 'title_fx', label: '└ 타이틀 셰이더', tab: 'title_fx', app: false, mirror: true, note: '타이틀에만 걸리는 셰이더 두 자리예요. 1번과 2번에 고른 것이 겹쳐요. showpy 4.20(screen_fx 4.3)부터 있어요.' },
-  { id: 'pause', label: '게임 내 메뉴 (ESC)', tab: 'title', app: true, note: '' },
-  { id: 'pause_fx', label: '└ 게임 내 메뉴 셰이더', tab: 'pause_fx', app: false, mirror: true, note: 'ESC 메뉴와 거기서 연 화면에만 걸리는 셰이더 두 자리예요. 메뉴가 열려 있는 동안 뒤 게임 화면도 이 셰이더로 보여요.' },
-  { id: 'watermorph', label: '타이틀 일렁임', tab: 'watermorph', app: false, mirror: true, note: '타이틀 배경에만 걸리는 일렁임 효과예요.' },
-  { id: 'screen_fx', label: '셰이더', tab: 'screen_fx', app: false, mirror: true, note: '게임 화면에 씌우는 셰이더 두 자리예요. 여기서는 고른 셰이더의 모양(세부 값)을 게임 화면을 보면서 고쳐요. 어느 장면에 걸지는 [대본 편집]에서 상자나 label 오른쪽 위의 ◐ 셰이더로 정해요.' },
+  { id: 'title_fx', label: '타이틀 셰이더', tab: 'title_fx', app: false, mirror: true, note: '타이틀에만 걸리는 셰이더 두 자리예요. 1번과 2번에 고른 것이 겹쳐요. 일렁임(예전 "타이틀 일렁임")도 여기서 골라요.' },
+  { id: 'pause', label: 'ESC 메뉴', tab: 'title', app: true, note: '' },
+  { id: 'pause_fx', label: '게임 내 메뉴 셰이더', tab: 'pause_fx', app: false, mirror: true, note: 'ESC 메뉴와 거기서 연 화면에만 걸리는 셰이더 두 자리예요. 메뉴가 열려 있는 동안 뒤 게임 화면도 이 셰이더로 보여요.' },
+  { id: 'screen_fx', label: '셰이더 기본 값', tab: 'screen_fx', app: false, mirror: true, note: '셰이더마다 처음 값(세부 값)을 게임 화면을 보면서 고쳐요. 타이틀, 게임 내 메뉴 셰이더와, 상자에서 값을 따로 정하지 않은 곳이 이 값을 써요. 상자마다 다른 값은 [대본 편집]에서 상자나 label의 ◐ 셰이더로 정해요.' },
   { id: 'custom_ui', label: '커서, 클릭 대기(CTC), 대사 소리', tab: 'custom_ui', app: true, note: '' },
-  { id: 'say', label: '대사 (위치, 스타일)', tab: 'say', app: false, mirror: true, note: '' },
+  { id: 'say', label: '대사', tab: 'say', app: false, mirror: true, note: '' },
   { id: 'choice', label: '선택지', tab: 'choice', app: false, mirror: true, note: '' },
   { id: 'stage', label: '그림, 영상 배치', tab: 'stage', app: false, mirror: true, note: '' },
-  { id: 'ui_text', label: '확인 창, UI 글 (종료 메시지, 버튼)', tab: 'ui_text', app: false, mirror: true, note: '종료 확인 창, 퀵메뉴 버튼 같은 글을 바꿔요. showpy ui_kit 3.23부터 있어요.' },
+  { id: 'ui_text', label: '종료 메시지, 버튼 글', tab: 'ui_text', app: false, mirror: true, note: '종료 확인 창, 퀵메뉴 버튼 같은 글을 바꿔요. showpy ui_kit 3.23부터 있어요.' },
+];
+
+// 왼쪽 목록의 카드 묶음
+const GROUPS: { title: string; ids: string[] }[] = [
+  { title: '스플래시', ids: ['splash'] },
+  { title: '타이틀 메뉴', ids: ['title', 'title_fx', 'screen_fx'] },
+  { title: '게임 내 메뉴', ids: ['pause', 'pause_fx'] },
+  { title: '커서, 클릭 대기', ids: ['custom_ui'] },
+  { title: '대사, 선택지 (위치, 스타일)', ids: ['say', 'choice'] },
+  { title: '그림, 영상 (위치, 스타일)', ids: ['stage'] },
+  { title: '확인 창, UI 글', ids: ['ui_text'] },
 ];
 
 const FLOW_IN_APP = false;
 
 export function ShowpyView() {
-  const { on, st, section, err, showpy } = useLive();
+  const { on, st, section, err } = useLive();
   const sec = SECTIONS.find((s) => s.id === section) ?? SECTIONS[1];
   const mirrorOk = !!st && st.panel !== undefined; // 게임의 showpy가 패널을 통째로 보낼 수 있음
   const inApp = (s: Section) => s.app || (!!s.mirror && mirrorOk);
@@ -56,18 +66,26 @@ export function ShowpyView() {
   };
 
   return (
-    <div className="sp-view">
+    <div className="sp-view sp-cards">
+      <div className="sp-hint">
+        게임 창 옆에 두고 써요 · 왼쪽에서 고칠 곳을 고르면 게임도 그 화면으로 · 게임 화면에서 끌어서 옮기고 숫자는 오른쪽에서 · {keyOf('save')} 저장 · 게임 창에서 Esc: 편집 닫고 게임 진행
+      </div>
       <nav className="sp-nav">
-        <div className={'sp-conn' + (on ? ' on' : '')}>{on ? `게임과 연결됨 (ui_kit ${showpy ?? '?'})` : '게임 연결 안 됨'}</div>
-        {SECTIONS.map((s) => {
-          const t = s.tab ? st?.editor.tabs.find((x) => x.id === s.tab) : null;
-          return (
-            <button key={s.id} className={'sp-nav-item' + (s.id === sec.id ? ' on' : '')} onClick={() => choose(s)} title={t && !t.ok ? t.why : ''}>
-              {s.label}
-              {!inApp(s) && <span className="sp-badge">게임 안</span>}
-            </button>
-          );
-        })}
+        {GROUPS.map((g) => (
+          <section key={g.title} className="sec sp-group">
+            <h3>{g.title}</h3>
+            {g.ids.map((id) => {
+              const s = SECTIONS.find((x) => x.id === id)!;
+              const t = s.tab ? st?.editor.tabs.find((x) => x.id === s.tab) : null;
+              return (
+                <button key={s.id} className={'sp-nav-item' + (s.id === sec.id ? ' on' : '')} onClick={() => choose(s)} title={t && !t.ok ? t.why : ''}>
+                  {s.label}
+                  {!inApp(s) && <span className="sp-badge">게임 안</span>}
+                </button>
+              );
+            })}
+          </section>
+        ))}
       </nav>
       <div className="sp-main">
         {!on ? <NotConnected /> : st ? <Where st={st} sec={sec.id} /> : <p className="tip">게임 상태를 기다리는 중...</p>}
@@ -339,11 +357,8 @@ function EditorBar({ st }: { st: GameState }) {
         </button>
       </div>
       {e.open && e.hide_panel && (
-        <div className="sp-editing">
-          <span>
-            편집 중이라 게임 화면의 클릭과 키는 편집기로 가요(끌어서 옮기기용). 게임을 진행하려면 편집기를 닫아요. (게임 창에서 Esc)
-          </span>
-          <button onClick={() => liveSend({ cmd: 'editor', open: false })}>편집기 닫기</button>
+        <div className="sp-editing" title="편집 중에는 게임 화면의 클릭과 키가 편집기로 가요(끌어서 옮기기용). 게임을 진행하려면 편집기를 닫아요 (게임 창에서 Esc)">
+          <span>편집 중: 게임 클릭은 편집기로 가요</span>
         </div>
       )}
       {e.message && <p className="sp-msg">{e.message}</p>}

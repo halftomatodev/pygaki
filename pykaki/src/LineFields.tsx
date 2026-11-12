@@ -280,7 +280,7 @@ export function LineLook({ l, set }: { l: Line; set: SetLine }) {
 
   return (
     <div className="look">
-      <div className="look-title">글자 모양, 속도, 등장 효과</div>
+      <h3 className="look-h" title="글자 모양, 속도, 등장 효과">글자 효과</h3>
       {tagHere && <TagBar targetId={'ed-' + l.id} className="tagbar-look" />}
       <LinePreview line={l} tagsOn={tagsOn} />
       {l.say?.effect && <EffectClip effect={l.say.effect} />}

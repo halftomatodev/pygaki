@@ -87,6 +87,18 @@ label ward.n1:  # @node:n1 도입
 
 **상자와 label의 셰이더** (PyKaki `FEATURE` 5, `src/shader.ts`): 대본에서 상자나 label에 셰이더를 한 곳이라도 정하면, PyKaki는 **모든 상자의 첫 줄**(상자 label 바로 아래, 첫 `# @l:` 앞)에 표시 없이 `$ screen_fx.shaders("ascii", "vhs_crt", transition="fade")`를, 셰이더가 없는 상자에는 `$ screen_fx.clear()`를 적습니다. `call` 줄 바로 뒤에도 한 번 더 적습니다. PyKaki가 고르게 하는 전환은 `transition="tv"`와 `transition=None` 둘입니다(예전 판으로 쓴 대본에는 `transition="fade"`나 전환을 적지 않은 줄이 남아 있을 수 있고, 그대로 내보냅니다. 플러그인은 셋 다 그대로 받습니다). pygaki 플러그인 `screen_fx.use`가 같은 값이면 전환 없이 넘어가는 것에 기댑니다(이 동작을 바꾸면 PyKaki `exportRpy.ts`도 같이). 이 줄은 `# @l:` 표시가 없어서 받아 적기(3장)의 대상이 아니고, 내보낼 때마다 대본 값으로 다시 만들어집니다. 게임 안 편집기에서 이 줄을 고치거나 지워도 다음 내보내기 때 되돌아옵니다.
 
+**셰이더와 TV 전환의 세부 값** (PyKaki `FEATURE` 6, screen_fx 5.5): 상자·label의 셰이더 칸에서 고른 셰이더 아래 막대로 값을 바꾸면 대본에 `shader.va`(1번), `shader.vb`(2번), `shader.tv`(TV 전환)로 저장되고, 원고 줄에 이렇게 붙습니다.
+
+```renpy
+$ screen_fx.shaders("vhs_crt", "none", transition="tv", tv={"off_time": 0.6}, values={"vhs_crt": {"warp_amount": 2.0}})
+$ screen_fx.clear(transition="tv", tv={"noise": 0.2})
+```
+
+- `values`: `{셰이더 이름: {값 이름: 값}}`. 플러그인은 고른 두 자리 셰이더의 바꾼 값(`<이름>.set()`과 같은 곳, 세이브·되감기에 저장)을 **이 값으로 바꿉니다**. `{}`이면 설정대로. 대본 어딘가에 값을 하나라도 정했으면 PyKaki는 **모든 셰이더 줄에** `values`를 적어서 앞 상자의 값이 다음 상자에 남지 않게 합니다. 아무 데도 안 정했으면 `values`를 적지 않습니다(전과 같은 줄).
+- `tv`: 이번 TV 전환에만 쓰는 값(`screen_fx.tv`와 같은 이름: `off_time` `black_time` `on_time` `line` `flash` `noise` `volume`). 전환이 `"tv"`일 때만 적습니다. 전환의 값은 그 전환을 고른 상자·label의 것(시작할 때는 들어오는 상자, 끝날 때는 나가는 상자)을 씁니다.
+- 값 이름과 막대 범위는 11장 `shader_list.json`의 `params`, `groups`에서 옵니다. 목록 값(`choice`)이 여러 칸이면 튜플로 적습니다.
+- PyKaki는 게임의 `shader_list.json`의 `screen_fx`가 5.5 이상일 때만 `values`와 `tv`를 적습니다. 예전 판이면 값 없이 내보내고 검사 칸에 알립니다.
+
 `renpyLink`를 끈 파일에는 `# @l:`이 없습니다. pygaki 플러그인은 이런 원고에 그림 줄을 저장하지 않고, 연결을 켜고 다시 내보내라고 안내합니다.
 
 ## 3. `game/showpy_inbox.json`
@@ -346,7 +358,7 @@ PyKaki 데스크톱 앱의 [GUI 편집] 화면이 게임 안 편집기를 바깥
 
 저장은 지금처럼 게임이 합니다(`*_layout.rpy`, 원고). 앱은 값을 보내기만 하고 pygaki 플러그인 파일을 직접 쓰지 않습니다.
 
-## 11. 화면 셰이더 목록 (`screen_fx/shader_list.json`, `shaders_off.txt`, screen_fx 5.4)
+## 11. 화면 셰이더 목록 (`screen_fx/shader_list.json`, `shaders_off.txt`, screen_fx 5.4. 세부 값 5.5)
 
 상자와 label에 거는 셰이더(2장)의 이름을 PyKaki가 게임 폴더에서 읽습니다. 번호는 10장 뒤지만 쓰이는 차례 때문에 여기에 둡니다.
 

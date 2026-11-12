@@ -9,23 +9,42 @@ import { installApp, useCanInstall } from './pwa';
 import { desktop, isDesktop } from './desktop';
 import { useLive } from './showpyLive';
 
-// 화면 바꾸기: 대본 편집 / GUI 편집(데스크톱 앱에서만. 점은 게임과 붙어 있는지) / 효과
+// 화면 바꾸기: 대본 편집 / GUI 편집(데스크톱 앱에서만) / 효과 / 셰이더
 function ViewSwitch() {
-  const { view, on } = useLive();
+  const view = useLive((l) => l.view);
+  const go = (v: typeof view) => useLive.setState({ view: v });
   return (
     <span className="view-switch">
-      <button className={view === 'script' ? 'on' : ''} onClick={() => useLive.setState({ view: 'script' })} title="상자와 선으로 대본을 써요">
+      <button className={view === 'script' ? 'on' : ''} onClick={() => go('script')} title="상자와 선으로 대본을 써요">
         대본 편집
       </button>
       {isDesktop && (
-        <button className={view === 'showpy' ? 'on' : ''} onClick={() => useLive.setState({ view: 'showpy' })} title={on ? 'GUI 편집: 게임과 연결됨' : 'GUI 편집: 게임 연결 안 됨 (런처에서 프로젝트를 실행하면 붙어요)'}>
-          GUI 편집 <b className={'live-dot' + (on ? ' on' : '')}>●</b>
+        <button className={view === 'showpy' ? 'on' : ''} onClick={() => go('showpy')} title="게임 화면을 보면서 타이틀, 대사 창, 선택지 같은 GUI를 고쳐요">
+          GUI 편집
         </button>
       )}
-      <button className={view === 'effects' ? 'on' : ''} onClick={() => useLive.setState({ view: 'effects' })} title="글자 효과와 그림 효과를 보고, 켜고 끄고, 넣고 빼요">
+      <button className={view === 'effects' ? 'on' : ''} onClick={() => go('effects')} title="글자 효과와 그림 효과를 보고, 켜고 끄고, 넣고 빼요">
         효과
       </button>
+      <button className={view === 'shaders' ? 'on' : ''} onClick={() => go('shaders')} title="화면 전체에 씌우는 셰이더와 셰이더가 바뀔 때의 전환을 봐요">
+        셰이더
+      </button>
     </span>
+  );
+}
+
+// 게임과 붙어 있는지 (데스크톱 앱). 붙어 있으면 옅은 파란색, 아니면 회색. 누르면 GUI 편집으로
+function LiveBadge() {
+  const on = useLive((l) => l.on);
+  if (!isDesktop) return null;
+  return (
+    <button
+      className={'live-badge' + (on ? ' on' : '')}
+      onClick={() => useLive.setState({ view: 'showpy' })}
+      title={on ? '게임과 연결됐어요. 누르면 GUI 편집으로 가요' : '게임과 연결 안 됨. [▶ 렌파이에서 실행]이나 런처에서 프로젝트를 실행하면 저절로 붙어요'}
+    >
+      {on ? '● 게임과 연결됨' : '○ 게임 연결 안 됨'}
+    </button>
   );
 }
 
@@ -57,6 +76,7 @@ export function Toolbar() {
         title="프로젝트 제목 (눌러서 고쳐요)"
       />
       <ViewSwitch />
+      <LiveBadge />
       </div>
       {/* 게임 돌려보기: 첫 줄 오른쪽 끝에 초록 톤으로 */}
       <div className="tb-run">
@@ -72,8 +92,13 @@ export function Toolbar() {
       )}
       <FollowLine />
       </div>
-      {/* 오른쪽: 파일, 프로젝트 폴더, 버전, 되돌리기, 내보내기, 화면. 자리가 모자라면 이 묶음이 아랫줄로 내려가도 오른쪽에 붙는다 */}
+      {/* 메뉴: 둘째 줄 왼쪽부터. 자주 쓰는 되돌리기, 집중, 설정이 맨 앞 */}
       <div className="tb-right">
+      <button disabled={!s.past.length} onClick={s.undo} title={'실행 취소 ' + keyOf('undo')}>↶</button>
+      <button disabled={!s.future.length} onClick={s.redo} title={'다시 실행 ' + keyOf('redo')}>↷</button>
+      <button className="focus-btn" onClick={toggleFocus} title={'집중 모드: 캔버스만 남기기 ' + keyOf('focus')}>집중</button>
+      <button onClick={() => useStore.setState({ showPrefs: true })} title="화면 색, 단축키">설정</button>
+      <span className="sep" />
       <button onClick={newProject}>새로</button>
       <button onClick={openProject}>열기</button>
       <button onClick={() => saveProject()} title={keyOf('save')}>저장</button>
@@ -83,15 +108,9 @@ export function Toolbar() {
       <button onClick={saveVersion}>버전 저장</button>
       <button onClick={() => setShowVersions(true)}>버전 목록</button>
       <span className="sep" />
-      <button disabled={!s.past.length} onClick={s.undo} title={'실행 취소 ' + keyOf('undo')}>↶</button>
-      <button disabled={!s.future.length} onClick={s.redo} title={'다시 실행 ' + keyOf('redo')}>↷</button>
-      <span className="sep" />
       <button onClick={() => exportRpyFile(false)}>.rpy 내보내기</button>
       {hasRpyTarget() && <button onClick={() => exportRpyFile(true)} title={keyOf('export')}>같은 곳에 다시</button>}
-      <span className="sep" />
       {canInstall && <button className="primary" onClick={installApp} title="바탕화면과 작업 표시줄에서 바로 여는 앱으로 설치해요">앱 설치</button>}
-      <button onClick={toggleFocus} title={'집중 모드: 캔버스만 남기기 ' + keyOf('focus')}>집중</button>
-      <button onClick={() => useStore.setState({ showPrefs: true })} title="화면 색, 단축키">설정</button>
       </div>
       {showVersions && <Versions onClose={() => setShowVersions(false)} />}
     </div>

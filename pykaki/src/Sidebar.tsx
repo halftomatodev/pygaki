@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import { hasDirPicker, hasProjectFolder, useGameFolder } from './gameFolder';
 import { isDesktop, projectInfo } from './desktop';
@@ -10,6 +10,8 @@ import { useStore } from './store';
 import * as ops from './ops';
 import type { Character, LabelGroup } from './types';
 import { IDENT, RESERVED, timeStr } from './util';
+import { generateRpy, type Warn as Warning } from './exportRpy';
+import { exportRpyFile } from './files';
 
 export function Sidebar() {
   const project = useStore((s) => s.project);
@@ -31,25 +33,12 @@ export function Sidebar() {
     <aside className="sidebar">
       <section className="sec">
         <h3>
-          캐릭터 <button onClick={addChar}>+ 추가</button>
-        </h3>
-        {project.characters.length === 0 && <p className="tip">대사를 말할 캐릭터를 추가하세요. 내레이션은 따로 등록하지 않아도 돼요.</p>}
-        {project.characters.map((c, i) => (
-          <CharRow key={i} c={c} i={i} />
-        ))}
-      </section>
-
-      <section className="sec">
-        <h3>
           label (장면) <button onClick={() => update((p) => void ops.addGroup(p))}>+ 추가</button>
         </h3>
         {project.labels.map((g) => (
           <GroupRow key={g.id} g={g} />
         ))}
-      </section>
-
-      <section className="sec">
-        <h3>상자와 정렬</h3>
+        <div className="sec-sub">상자와 정렬</div>
         <div className="sec-btns">
           <button className="primary" onClick={() => addBoxCenter(rf)} title={`캔버스 빈 곳 더블클릭으로도 만들 수 있어요 (${keyOf('newBox')})`}>+ 상자</button>
           <button onClick={() => runLayout(rf, 'all')}>전체 정렬</button>
@@ -63,12 +52,27 @@ export function Sidebar() {
             <option value="LR">→ 왼→오른</option>
           </select>
         </label>
+
       </section>
+
+      <section className="sec">
+        <h3>
+          캐릭터 <button onClick={addChar}>+ 추가</button>
+        </h3>
+        {project.characters.length === 0 && <p className="tip">대사를 말할 캐릭터를 추가하세요. 내레이션은 따로 등록하지 않아도 돼요.</p>}
+        {project.characters.map((c, i) => (
+          <CharRow key={i} c={c} i={i} />
+        ))}
+      </section>
+
+      <WarnCard />
 
       <section className="sec">
         <h3>렌파이 프로젝트 정보</h3>
         <LinkPanel />
       </section>
+
+      <ScriptCard />
 
       <section className="sec">
         <h3>
@@ -113,6 +117,74 @@ export function Sidebar() {
   );
 }
 
+// 지금 대본으로 만든 원고와 경고 (검사, 스크립트 카드가 같이 쓴다)
+function useRpy() {
+  const project = useStore((s) => s.project);
+  const endMarks = useGameFolder((f) => f.endMarks); // 내보낼 때와 같은 형식으로
+  return useMemo(() => generateRpy(project, { endMarks }), [project, endMarks]);
+}
+
+// 검사: 내보낼 때 걸리는 것. 누르면 그 상자로 간다 (예전에는 오른쪽 [검사] 탭)
+function WarnCard() {
+  const { warnings } = useRpy();
+  const errors = warnings.filter((w) => w.level === 'error').length;
+  const go = (w: Warning) => {
+    if (!w.nodeId) return;
+    useStore.getState().select([w.nodeId]);
+    useStore.getState().focusNodes([w.nodeId]);
+  };
+  return (
+    <section className="sec warn-card" id="warn-card">
+      <h3>
+        <span>
+          검사 {warnings.length > 0 && <span className={'count' + (errors ? ' err' : '')}>{warnings.length}</span>}
+        </span>
+      </h3>
+      {!warnings.length && <p className="tip">문제가 없어요.</p>}
+      {warnings.map((w, i) => (
+        <div key={i} className={'warn-item ' + w.level + (w.nodeId ? ' go' : '')} onClick={() => go(w)}>
+          {w.level === 'error' ? '⛔ ' : '⚠ '}
+          {w.msg}
+        </div>
+      ))}
+    </section>
+  );
+}
+
+// 스크립트: 내보낼 원고. 길어서 접어 두고 펼치면 보인다 (예전에는 오른쪽 [스크립트] 탭)
+const SCRIPT_KEY = 'pygaki-script-open';
+const NL = String.fromCharCode(10);
+function ScriptCard() {
+  const { code } = useRpy();
+  const [open, setOpen] = useState(() => {
+    try {
+      return localStorage.getItem(SCRIPT_KEY) === '1';
+    } catch {
+      return false;
+    }
+  });
+  const toggle = () => {
+    setOpen(!open);
+    try {
+      localStorage.setItem(SCRIPT_KEY, open ? '' : '1');
+    } catch {
+      // 기억 못 해도 이번 창에서는 된다
+    }
+  };
+  return (
+    <section className="sec">
+      <h3>
+        스크립트 <button onClick={toggle}>{open ? '접기' : '펼치기'}</button>
+      </h3>
+      <div className="sec-btns">
+        <button onClick={() => navigator.clipboard.writeText(code).then(() => useStore.getState().say('복사했어요'))}>복사</button>
+        <button className="primary" onClick={() => exportRpyFile(false)}>.rpy 내보내기</button>
+      </div>
+      {open ? <pre className="rpy side-rpy">{code}</pre> : <p className="tip">내보낼 원고 {code.split(NL).length}줄. 펼치면 보여요.</p>}
+    </section>
+  );
+}
+
 // 사용법 (예전에는 오른쪽 편집 탭에 상자를 고르지 않았을 때 나왔다). 접은 것은 기억한다
 const USAGE_KEY = 'pygaki-usage-closed';
 function Usage() {
@@ -149,7 +221,7 @@ function Usage() {
           <li>대사 칸에서 <b>{keyOf('newLine')}</b>: 같은 화자로 다음 줄 추가.</li>
           <li><b>{keyOf('focus')}</b>: 집중 모드. 캔버스만 남기고 나머지를 숨겨요. 한 번 더 누르면 돌아와요.</li>
           <li>{keyOf('save')} 파일 저장 · {keyOf('undo')} 실행 취소 · {keyOf('export')} .rpy 다시 내보내기</li>
-          <li>단축키와 화면 색은 위쪽 줄 오른쪽 [설정]에서 바꿔요.</li>
+          <li>단축키와 화면 색은 위쪽 둘째 줄 [설정]에서 바꿔요.</li>
         </ul>
       )}
     </section>

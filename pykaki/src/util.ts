@@ -14,7 +14,7 @@ export const RESERVED = new Set([
 // showpy 연결을 켜면 캐릭터 id로 못 쓰는 이름 (플러그인이 쓰는 변수와 겹침)
 export const PLUGIN_NAMES = new Set([
   'ui_kit', 'tmenu', 'cmenu', 'custom_ui', 'say_style', 'stage', 'script_edit', 'ui_editor',
-  'screen_fx', 'vhs_crt', 'ascii', 'retro_term', 'gameboy', 'watermorph', 'hotkeys', 'splash',
+  'screen_fx', 'vhs_crt', 'ascii', 'retro_term', 'gameboy', 'watermorph', 'ripple', 'hotkeys', 'splash',
   't', 'n1', 'n2', 'n3',
 ]);
 

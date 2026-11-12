@@ -5,7 +5,7 @@ import { IDENT, PLUGIN_NAMES, RESERVED } from './util';
 import { badImageName, renpyOnlyEffect, fxArgs, isStage, sayArgs, stageCode, tagEffectNames, REMOVED_EFFECTS, RENPY_EFFECTS } from './stage';
 import { shaderEffect } from './fx/textShaders';
 import { checkTags, shaderTags } from './tagEdit';
-import { enterTrans, shaderCode, shaderOfBox, usesShaders } from './shader';
+import { enterTransTv, shaderCode, shaderOfBox, usesShaderValues, usesShaders, usesTvValues, valuesSupported } from './shader';
 
 export interface Warn { level: 'error' | 'warn'; msg: string; nodeId?: string }
 
@@ -150,9 +150,16 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean } = {}): { co
   // 상자·label 셰이더: 상자마다 첫 줄에 그 상자의 셰이더를 적는다 (shader.ts). showpy가 있어야 한다
   const shaders = usesShaders(p);
   if (shaders && !S.renpyLink) W.push({ level: 'warn', msg: '상자와 label의 셰이더는 pygaki 플러그인 연결을 켜야 내보내요' });
+  // 세부 값(셰이더 values=, TV tv=)은 게임의 screen_fx 5.5부터. 예전 판이면 값 없이 내보내고 알린다
+  const canValues = valuesSupported();
+  const values = shaders && canValues && usesShaderValues(p);
+  if (shaders && S.renpyLink && !canValues && (usesShaderValues(p) || usesTvValues(p)))
+    W.push({ level: 'warn', msg: '셰이더와 TV 전환의 세부 값은 pygaki 플러그인의 화면 효과(screen_fx) 5.5부터 돼요. 이 게임은 예전 판이라 값 없이 내보내요' });
   const shaderLine = (b: BoxNode, enter: boolean) => {
     const from = enter ? (incoming.get(b.id) ?? []).map((x) => byId.get(x.from)).filter((x): x is BoxNode => !!x) : [];
-    return shaderCode(shaderOfBox(p, b), enter ? enterTrans(p, b, from) : shaderOfBox(p, b)?.in);
+    const mine = shaderOfBox(p, b);
+    const tr = enter ? enterTransTv(p, b, from) : { t: mine?.in ?? '', tv: mine?.tv };
+    return shaderCode(mine, tr.t, { tv: canValues ? tr.tv : undefined, values });
   };
 
   const I = '    ';

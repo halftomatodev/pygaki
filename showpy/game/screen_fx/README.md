@@ -30,12 +30,28 @@
 
 `ui_kit` 플러그인이 같이 있으면 그 편집기(개발 모드에서 Shift+M)에 **"화면 효과", "타이틀 일렁임" 탭**이 생기고, **대사 탭에서 "이 대사부터 이 효과", 덮개 켬/끔, 덮개 휘어짐을 골라 원고에 바로 저장**할 수 있습니다. 대사가 아닌 줄(show, scene, with, $ 줄 등)에서 바꾸고 싶으면 **"화면 효과" 탭의 "줄에 넣기"** 로 그 줄 바로 위에 `$ screen_fx.use(…)` 줄을 넣습니다(4.1). `ui_kit`이 없어도 효과는 설정 파일과 스크립트로 그대로 동작합니다.
 
-버전 5.4 · 렌파이 8.5.3에서 만들고 테스트했습니다.
+버전 5.5 · 렌파이 8.5.3에서 만들고 테스트했습니다.
 
 VHS 셰이더 원본: [VHS and CRT monitor effect](https://godotshaders.com/shader/vhs-and-crt-monitor-effect/) (Godot Shaders, CC0). 렌파이용으로 옮기면서 채도·대비·전체 세기를 바꿀 수 있게 추가했습니다.
 레트로 터미널은 [cool-retro-term](https://github.com/Swordfish90/cool-retro-term)의 모습과 설정 목록을 참고해 새로 썼습니다(코드는 가져오지 않음).
 게임보이는 [Retro dither](https://godotshaders.com/shader/retro-dither/) (tcmug, CC0)의 4×4 디더링 무늬와 [Gameboy Classic Shader](https://github.com/HarlequinVG/shaders/tree/master/gameboy_shader) (Harlequin, GPL v3)의 LCD 모습(점 격자·점 그림자)을 참고해 새로 썼습니다(코드는 가져오지 않음).
 ASCII 효과는 [ASCII shader](https://godotshaders.com/shader/ascii-shader/) (Daniel Bologna, Acerola의 아이디어, MIT)를 참고해 렌파이용으로 새로 썼습니다. 글꼴은 [Neo둥근모](https://neodgm.dalgona.dev/) (SIL OFL 1.1)입니다.
+
+### 5.5에서 바뀐 점
+
+- **일렁임 셰이더 (`ripple`)**: 예전 "타이틀 일렁임"(watermorph)을 셰이더 하나로 옮겼습니다. 타이틀 셰이더, 게임 내 메뉴 셰이더, 게임 중 셰이더 어디에나 고를 수 있습니다. 설정은 `ripple_config.rpy`.
+  ```renpy
+  define screen_fx.title_shaders = ("ripple", "none")   # 타이틀에 일렁임 (새 프로젝트의 처음 값)
+  $ screen_fx.shaders("ripple", "vhs_crt")              # 게임 중에 일렁임 + VHS
+  ```
+  예전 방식(`watermorph_config.rpy`)도 그대로 돕니다. 새 프로젝트에서는 `watermorph.enabled = False`가 처음 값입니다. 둘을 같이 켜면 두 번 일렁이니 하나만 켜세요.
+- **이 자리에서만 쓰는 세부 값**: `screen_fx.shaders()`에 `values=`와 `tv=`를 적을 수 있습니다. pygaki 앱이 상자마다 정한 값을 이렇게 적습니다.
+  ```renpy
+  $ screen_fx.shaders("vhs_crt", "none", values={"vhs_crt": {"warp_amount": 2.0}})   # 이 장면만 더 휘게
+  $ screen_fx.shaders("glitch", "none", transition="tv", tv={"off_time": 0.6})       # 이번 TV 전환만 천천히 꺼짐
+  $ screen_fx.shaders("vhs_crt", "none", values={})                                    # 바꾼 값을 설정대로
+  ```
+  `values`를 적으면 고른 셰이더의 바꾼 값을 그 값으로 바꿉니다(적지 않은 값은 설정대로). 아예 안 적으면 전처럼 그대로 둡니다. `tv`는 `screen_fx.tv`와 같은 이름을 씁니다. `screen_fx.use()`, `screen_fx.clear()`에도 `tv=`를 적을 수 있습니다.
 
 ### 5.4에서 바뀐 점
 

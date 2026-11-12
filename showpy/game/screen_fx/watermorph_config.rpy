@@ -11,7 +11,10 @@ init offset = 1
 
 
 ## 켜기 / 끄기
-define watermorph.enabled = True
+## screen_fx 5.5부터 타이틀 일렁임은 셰이더 "일렁임"(ripple)으로 옮겼습니다. 그래서 처음 값은 꺼짐이고,
+## 타이틀에는 screen_fx_config.rpy의 screen_fx.title_shaders = ("ripple", "none")로 걸립니다.
+## 예전 방식을 그대로 쓰려면 True로 바꾸고 title_shaders에서 "ripple"을 빼세요 (둘을 같이 켜면 두 번 일렁임).
+define watermorph.enabled = False
 
 ## 적용 대상
 ##   "screen"     타이틀 화면 전체 (배경 + 메뉴 글자)

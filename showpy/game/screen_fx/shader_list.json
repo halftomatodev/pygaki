@@ -1,5 +1,5 @@
 {
- "screen_fx": "5.4",
+ "screen_fx": "5.5",
  "shaders": [
   {
    "extra": true,
@@ -2559,6 +2559,116 @@
     ]
    },
    "prefix": "u_shards_"
+  },
+  {
+   "extra": false,
+   "glsl": [
+    {
+     "fragment": [
+      [
+       300,
+       "\n        vec2 rp_size = max(u_model_size, vec2(1.0));\n        vec4 rp_orig = texture2D(tex0, v_tex_coord, u_lod_bias);\n        vec2 rp_p = v_tex_coord * rp_size / max(u_ripple_scale, 1.0);\n        float rp_t = u_time * u_ripple_speed;\n\n        float rp_e = 0.08;\n        float rp_h = rp_height(rp_p, rp_t, u_ripple_flow);\n        vec2 rp_grad = vec2(rp_height(rp_p + vec2(rp_e, 0.0), rp_t, u_ripple_flow) - rp_h,\n                            rp_height(rp_p + vec2(0.0, rp_e), rp_t, u_ripple_flow) - rp_h) / rp_e;\n\n        // 가장자리가 늘어나 보이지 않도록 살짝 확대한 뒤 굴절\n        vec2 rp_margin = vec2(u_ripple_amount * 1.5) / rp_size;\n        vec2 rp_uv = 0.5 + (v_tex_coord - 0.5) * (1.0 - 2.0 * rp_margin);\n        rp_uv += rp_grad * u_ripple_amount / rp_size;\n        rp_uv = clamp(rp_uv, vec2(0.0), vec2(1.0));\n\n        vec4 rp_c = texture2D(tex0, rp_uv, u_lod_bias);\n\n        // 액체 표면에 비친 빛 (투명도를 곱한 색이라 a를 곱해서 더함)\n        vec3 rp_n = normalize(vec3(-rp_grad, 1.0));\n        float rp_spec = pow(max(0.0, dot(rp_n, normalize(vec3(-0.4, -0.6, 0.7)))), 24.0);\n        rp_c.rgb = min(rp_c.rgb + rp_c.a * u_ripple_shine * rp_spec, vec3(rp_c.a));\n\n        gl_FragColor = mix(rp_orig, rp_c, clamp(u_ripple_strength, 0.0, 1.0));\n    "
+      ]
+     ],
+     "fragment_functions": "\n        float rp_hash(vec2 p) {\n            p = fract(p * vec2(123.34, 456.21));\n            p += dot(p, p + 45.32);\n            return fract(p.x * p.y);\n        }\n\n        float rp_noise(vec2 p) {\n            vec2 i = floor(p);\n            vec2 f = fract(p);\n            vec2 u = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);\n            return mix(mix(rp_hash(i), rp_hash(i + vec2(1.0, 0.0)), u.x),\n                       mix(rp_hash(i + vec2(0.0, 1.0)), rp_hash(i + vec2(1.0, 1.0)), u.x), u.y);\n        }\n\n        float rp_fbm(vec2 p) {\n            float v = 0.0;\n            float a = 0.5;\n            for (int k = 0; k < 2; k++) {\n                v += a * rp_noise(p);\n                p = p * 2.03 + vec2(1.7, 9.2);\n                a *= 0.5;\n            }\n            return v;\n        }\n\n        float rp_height(vec2 p, float t, float flow) {\n            vec2 q = vec2(rp_fbm(p + vec2(0.0, t * 0.30)),\n                          rp_fbm(p + vec2(5.2, 1.3) - vec2(t * 0.25, 0.0)));\n            return rp_fbm(p + flow * q + vec2(t * 0.10, -t * 0.07));\n        }\n    ",
+     "name": "ripple.effect",
+     "variables": "\n        uniform sampler2D tex0;\n        uniform float u_lod_bias;\n        uniform float u_time;\n        uniform vec2 u_model_size;\n        attribute vec2 a_tex_coord;\n        varying vec2 v_tex_coord;\n\n        uniform float u_ripple_strength;\n        uniform float u_ripple_amount;\n        uniform float u_ripple_scale;\n        uniform float u_ripple_speed;\n        uniform float u_ripple_flow;\n        uniform float u_ripple_shine;\n    ",
+     "vertex": [
+      [
+       200,
+       "\n            v_tex_coord = a_tex_coord;\n        "
+      ]
+     ],
+     "vertex_functions": ""
+    }
+   ],
+   "groups": [
+    [
+     "일렁임",
+     [
+      [
+       "strength",
+       "전체 세기",
+       0.0,
+       1.0,
+       0.01,
+       2
+      ],
+      [
+       "amount",
+       "일렁임 (픽셀)",
+       0.0,
+       30.0,
+       0.5,
+       1
+      ],
+      [
+       "scale",
+       "물결 크기 (픽셀)",
+       20.0,
+       600.0,
+       5.0,
+       0
+      ],
+      [
+       "speed",
+       "흐르는 속도",
+       0.0,
+       3.0,
+       0.05,
+       2
+      ],
+      [
+       "flow",
+       "소용돌이",
+       0.0,
+       4.0,
+       0.05,
+       2
+      ],
+      [
+       "shine",
+       "비친 빛",
+       0.0,
+       1.0,
+       0.01,
+       2
+      ]
+     ]
+    ]
+   ],
+   "id": "ripple",
+   "label": "일렁임",
+   "name": "일렁임",
+   "order": 60,
+   "overlay_only": false,
+   "params": {
+    "amount": [
+     "float",
+     6.0
+    ],
+    "flow": [
+     "float",
+     1.2
+    ],
+    "scale": [
+     "float",
+     180.0
+    ],
+    "shine": [
+     "float",
+     0.15
+    ],
+    "speed": [
+     "float",
+     0.6
+    ],
+    "strength": [
+     "float",
+     1.0
+    ]
+   },
+   "prefix": "u_ripple_"
   },
   {
    "extra": false,

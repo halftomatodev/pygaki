@@ -144,11 +144,12 @@ define screen_fx.cursor = "effect"
 ##   "vhs_crt"     VHS
 ##   "retro_term"  단말기 (레트로 터미널)
 ##   "gameboy"     게임보이
+##   "ripple"      일렁임 (5.5)
 ## 예: define screen_fx.title_shaders = ("vhs_crt", "none")      # 타이틀에 VHS
 ##     define screen_fx.menu_shaders = ("gameboy", "vhs_crt")    # ESC 메뉴에 게임보이 + VHS
 ## 편집기(Shift+M) "타이틀 셰이더", "게임 내 메뉴 셰이더" 탭에서 고르고 저장하면 screen_fx_layout.rpy에 들어갑니다.
 ## 효과마다 세부 값(휘어짐, 글자 크기 …)은 인게임과 같이 씁니다 (<이름>_config.rpy).
-define screen_fx.title_shaders = ("none", "none")
+define screen_fx.title_shaders = ("ripple", "none")   # 타이틀에 일렁임 (5.5. 예전 "타이틀 일렁임")
 define screen_fx.menu_shaders = ("none", "none")
 
 ## UI Kit 편집기(Shift+M)를 연 동안에도 화면 효과를 보여줄지 (3.4)

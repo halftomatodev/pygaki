@@ -277,14 +277,12 @@ async function until(what, fn, ms = 10000) {
     const on = await page.evaluate(() => window.pykakiShaders.setOn('mono', true));
     if (!on.ok || /^mono$/m.test(fs.readFileSync(path.join(sfx, 'shaders_off.txt'), 'utf8'))) fail('셰이더를 다시 켜지 못함');
     // [효과] 화면의 [셰이더] 칸: 카드 둘, 끈 것은 끔 표시
-    await page.locator('.toolbar .view-switch button', { hasText: '효과' }).click();
-    await page.locator('.fxv-kind button', { hasText: '셰이더' }).click();
+    await page.locator('.toolbar .view-switch button', { hasText: '셰이더' }).click();
     await page.waitForSelector('.fxv-card:has-text("흑백")', { timeout: 10000 });
     if ((await page.locator('.fxv-card').count()) !== 2) fail('셰이더 카드 수가 다름');
     if (!(await page.locator('.fxv-card.off:has-text("세피아")').count())) fail('끈 셰이더 카드에 끔 표시가 없음');
     await page.locator('.fxv-card:has-text("세피아") input').click();
     await page.waitForFunction(() => window.pykakiShaders.names().map((x) => x[0]).join() === 'none,mono,sepia', null, { timeout: 10000 });
-    await page.locator('.fxv-kind button', { hasText: '글자 효과' }).click();
     await page.locator('.toolbar .view-switch button', { hasText: '대본 편집' }).click();
     console.log('셰이더 켜기/끄기와 [셰이더] 칸: 됨');
     fs.rmSync(sfx, { recursive: true, force: true });
@@ -292,9 +290,8 @@ async function until(what, fn, ms = 10000) {
     await page.waitForFunction(() => window.pykakiShaders.names().includes !== undefined && window.pykakiShaders.names().some((x) => x[0] === 'ascii'), null, { timeout: 10000 });
     console.log('셰이더 목록 읽기: 됨');
     // 셰이더 샘플 (fx/ScreenFxCanvas.tsx): 앱에 든 목록의 코드로 오류 없이 그리고, 파이썬이 그림을 넣는 ASCII는 안내만
-    await page.locator('.toolbar .view-switch button', { hasText: '효과' }).click();
-    await page.locator('.fxv-kind button', { hasText: '셰이더' }).click();
-    for (const id of ['boil', 'vhs_crt', 'gameboy', 'retro_term']) {
+    await page.locator('.toolbar .view-switch button', { hasText: '셰이더' }).click();
+    for (const id of ['boil', 'vhs_crt', 'gameboy', 'retro_term', 'ripple']) {
       await page.locator('.fxv-card', { has: page.locator('.fxv-name', { hasText: new RegExp('^' + id + '$') }) }).click();
       await page.waitForSelector('.fxv-pic canvas', { timeout: 10000 });
       await wait(600); // 몇 장 그리는 동안 셰이더 오류가 없는지
@@ -304,7 +301,10 @@ async function until(what, fn, ms = 10000) {
     }
     await page.locator('.fxv-card', { has: page.locator('.fxv-name', { hasText: /^ascii$/ }) }).click();
     await page.waitForSelector('.fxv-pic .fxv-bad:has-text("글자 그림")', { timeout: 10000 });
-    await page.locator('.fxv-kind button', { hasText: '글자 효과' }).click();
+    // 전환 칸: TV 샘플과 막대
+    await page.locator('.fxv-kind button', { hasText: '전환' }).click();
+    await page.waitForSelector('.tv-sample img', { timeout: 10000 });
+    if ((await page.locator('.fxv-side .fx-knobs input[type=range]').count()) !== 7) fail('TV 전환 막대 수가 다름');
     await page.locator('.toolbar .view-switch button', { hasText: '대본 편집' }).click();
     console.log('셰이더 샘플: 됨');
   }
@@ -360,7 +360,7 @@ async function until(what, fn, ms = 10000) {
   if (run2 !== 'running') fail('게임이 켜져 있는데 [렌파이에서 실행]의 답이 다름: ' + run2);
   console.log('렌파이에서 실행 (이미 켜짐):', run2);
   await page.click('.view-switch button:nth-child(2)');
-  await page.waitForSelector('.sp-conn.on', { timeout: 10000 });
+  await page.waitForSelector('.live-badge.on', { timeout: 10000 });
   await page.waitForSelector('.sp-script .cur', { timeout: 10000 });
   await page.click('.sp-nav-item >> text=/^셰이더/');
   await until('편집기 명령을 보내지 않음', () => got.some((m) => m.cmd === 'editor' && m.tab === 'screen_fx'));
