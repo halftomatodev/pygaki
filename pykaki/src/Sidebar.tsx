@@ -4,7 +4,7 @@ import { hasDirPicker, hasProjectFolder, useGameFolder } from './gameFolder';
 import { isDesktop, projectInfo } from './desktop';
 import { linkProject, newerThanMe, projectFileName } from './files';
 import { addBoxCenter, runLayout } from './actions';
-import { keyOf } from './prefs';
+import { keyOf, SIZES, usePrefs } from './prefs';
 import { forgetFlow } from './flowPick';
 import { useStore } from './store';
 import * as ops from './ops';
@@ -17,6 +17,8 @@ export function Sidebar() {
   const sel = useStore((s) => s.selectedIds.length);
   const rf = useReactFlow();
   const [showSettings, setShowSettings] = useState(false);
+  const sizeLock = usePrefs((p) => p.sizeLock);
+  const resized = usePrefs((p) => p.leftW !== SIZES.left.def || p.rightW !== SIZES.right.def);
 
   const addChar = () =>
     update((p) => {
@@ -72,6 +74,18 @@ export function Sidebar() {
         <h3>
           설정 <button onClick={() => setShowSettings((v) => !v)}>{showSettings ? '접기' : '펼치기'}</button>
         </h3>
+        <div className="info-row">
+          <span>양쪽 칸 크기</span>
+          <span className="mini-btns">
+            <button disabled={!resized} onClick={() => usePrefs.setState({ leftW: SIZES.left.def, rightW: SIZES.right.def })} title="왼쪽 칸과 오른쪽 칸의 너비를 처음 크기로 되돌려요">
+              처음 크기
+            </button>
+            <button className={sizeLock ? 'on' : ''} onClick={() => usePrefs.setState({ sizeLock: !sizeLock })} title={sizeLock ? '잠겨 있어요. 누르면 칸 경계를 끌어서 크기를 바꿀 수 있어요' : '누르면 칸 경계를 끌어도 크기가 바뀌지 않아요'}>
+              {sizeLock ? '잠김' : '잠금'}
+            </button>
+          </span>
+        </div>
+        <p className="tip">{sizeLock ? '칸 크기를 잠갔어요.' : '칸과 캔버스 사이 경계를 끌면 너비가 바뀌어요. 경계를 더블클릭하면 그 칸만 처음 크기로.'}</p>
         {showSettings && (
           <div className="settings">
             <label>
@@ -93,7 +107,52 @@ export function Sidebar() {
           </div>
         )}
       </section>
+
+      <Usage />
     </aside>
+  );
+}
+
+// 사용법 (예전에는 오른쪽 편집 탭에 상자를 고르지 않았을 때 나왔다). 접은 것은 기억한다
+const USAGE_KEY = 'pygaki-usage-closed';
+function Usage() {
+  usePrefs((p) => p.keys); // 단축키를 바꾸면 안내도 다시 그린다
+  const [open, setOpen] = useState(() => {
+    try {
+      return localStorage.getItem(USAGE_KEY) !== '1';
+    } catch {
+      return true;
+    }
+  });
+  const toggle = () => {
+    setOpen(!open);
+    try {
+      localStorage.setItem(USAGE_KEY, open ? '1' : '');
+    } catch {
+      // 기억 못 해도 이번 창에서는 접힌다
+    }
+  };
+  return (
+    <section className="sec usage">
+      <h3>
+        사용법 <button onClick={toggle}>{open ? '접기' : '펼치기'}</button>
+      </h3>
+      {open && (
+        <ul>
+          <li>상자를 <b>더블클릭</b>하면 상자 안에서 바로 글을 써요. 대사 줄·제목·선택지를 더블클릭하면 그 칸으로 가요. Esc나 빈 곳 클릭으로 끝내요.</li>
+          <li>상자를 한 번 클릭하면 오른쪽에서 label, 다음 흐름 같은 나머지 설정을 바꿔요.</li>
+          <li>캔버스 빈 곳을 <b>더블클릭</b>하면 새 상자가 생겨요.</li>
+          <li>상자 아래 점(●)을 끌어 다른 상자에 놓으면 연결돼요. 빈 곳에 놓으면 새 상자가 생기며 연결돼요.</li>
+          <li>선을 <b>더블클릭</b>하면 jump ↔ call이 바뀌어요.</li>
+          <li>같은 label(장면)의 상자는 같은 색이에요. label은 위쪽 목록에서 관리해요.</li>
+          <li>상자나 label 오른쪽 위의 <b>◐ 셰이더</b>를 누르면 오른쪽에서 화면 셰이더를 골라요. 상자에 정하면 그 상자에서만, label에 정하면 그 label 전체에 걸려요.</li>
+          <li>대사 칸에서 <b>{keyOf('newLine')}</b>: 같은 화자로 다음 줄 추가.</li>
+          <li><b>{keyOf('focus')}</b>: 집중 모드. 캔버스만 남기고 나머지를 숨겨요. 한 번 더 누르면 돌아와요.</li>
+          <li>{keyOf('save')} 파일 저장 · {keyOf('undo')} 실행 취소 · {keyOf('export')} .rpy 다시 내보내기</li>
+          <li>단축키와 화면 색은 위쪽 줄 오른쪽 [설정]에서 바꿔요.</li>
+        </ul>
+      )}
+    </section>
   );
 }
 

@@ -104,7 +104,14 @@ interface Prefs {
   grads: Record<GradId, Grad>; // 밝게/어둡게 테마의 두 색
   textColor: string | null; // 텍스트 색. null이면 테마가 정한 색
   runSkip: boolean; // [렌파이에서 실행]: 게임이 이미 켜져 있으면 무시 (앱)
+  leftW: number; // 왼쪽 칸 너비 (px)
+  rightW: number; // 오른쪽 칸 너비 (px)
+  sizeLock: boolean; // 칸 경계를 끌어도 크기가 바뀌지 않게
 }
+
+// 양쪽 칸 너비의 처음 값과 범위
+export const SIZES = { left: { def: 244, min: 190, max: 520 }, right: { def: 400, min: 300, max: 760 } } as const;
+export const clampSize = (side: 'left' | 'right', w: number) => Math.round(Math.min(SIZES[side].max, Math.max(SIZES[side].min, w)));
 
 const KEY = 'pykaki-prefs';
 const defKeys = () => Object.fromEntries(ACTIONS.map((a) => [a.id, a.def])) as Record<ActionId, string>;
@@ -113,6 +120,7 @@ const defKeys = () => Object.fromEntries(ACTIONS.map((a) => [a.id, a.def])) as R
 const defaults = (): Prefs => ({
   theme: 'apple', custom: { ...THEMES.find((t) => t.id === 'apple')!.colors, box: '#ffffff' }, keys: defKeys(),
   font: 'default', dim: 'mid', frameWidth: 3, grads: structuredClone(GRAD_DEFAULTS), textColor: null, runSkip: true,
+  leftW: SIZES.left.def, rightW: SIZES.right.def, sizeLock: false,
 });
 
 function loadPrefs(): Prefs {
@@ -160,6 +168,8 @@ function apply(p: Prefs) {
   r.dataset.mono = isMono(p) ? '1' : '';
   r.style.setProperty('--frame-w', Math.min(6, Math.max(0, p.frameWidth)) + 'px');
   r.dataset.look = lookOf(p) ?? '';
+  r.style.setProperty('--left-w', clampSize('left', p.leftW) + 'px');
+  r.style.setProperty('--right-w', clampSize('right', p.rightW) + 'px');
   // 그라데이션·직접 고르기 테마: 상자와 label 배경을 테마 색으로 칠한다
   const fill = (name: string, v?: string) => {
     r.dataset[name + 'fill'] = v ? '1' : '';

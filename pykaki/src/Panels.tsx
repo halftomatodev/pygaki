@@ -25,7 +25,7 @@ export function RightPanel() {
         </button>
         <button className={tab === 'rpy' ? 'on' : ''} onClick={() => setTab('rpy')}>스크립트</button>
       </div>
-      <div className="tab-body" hidden={tab !== 'edit'}>
+      <div className="tab-body cards" hidden={tab !== 'edit'}>
         <Inspector />
       </div>
       {/* 플레이 상태를 유지하려고 탭을 바꿔도 지우지 않는다 */}

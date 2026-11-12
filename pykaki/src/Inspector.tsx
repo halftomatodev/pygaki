@@ -5,7 +5,7 @@ import type { BoxNode, ExitType, Line, Project } from './types';
 import { uid } from './util';
 import { LineLook, SpeakerSelect, StageFields, useLineDrag } from './LineFields';
 import { isStage } from './stage';
-import { hit, keyOf, usePrefs } from './prefs';
+import { hit } from './prefs';
 import { ShaderPanel } from './ShaderPanel';
 
 export type Upd = (fn: (b: BoxNode, p: Project) => void, key?: string) => void;
@@ -13,26 +13,22 @@ export type Upd = (fn: (b: BoxNode, p: Project) => void, key?: string) => void;
 export function Inspector() {
   const ids = useStore((s) => s.selectedIds);
   const project = useStore((s) => s.project);
-  usePrefs((p) => p.keys); // 단축키를 바꾸면 안내도 다시 그린다
   const shaderOf = useStore((s) => s.shaderOf);
-  if (shaderOf) return <ShaderPanel />;
+  if (shaderOf)
+    return (
+      <div className="insp">
+        <section className="sec">
+          <ShaderPanel />
+        </section>
+      </div>
+    );
   if (!ids.length)
     return (
-      <div className="hint">
-        <h4>사용법</h4>
-        <ul>
-          <li>상자를 <b>더블클릭</b>하면 상자 안에서 바로 글을 써요. 대사 줄·제목·선택지를 더블클릭하면 그 칸으로 가요. Esc나 빈 곳 클릭으로 끝내요.</li>
-          <li>상자를 한 번 클릭하면 여기서 label, 다음 흐름 같은 나머지 설정을 바꿔요.</li>
-          <li>캔버스 빈 곳을 <b>더블클릭</b>하면 새 상자가 생겨요.</li>
-          <li>상자 아래 점(●)을 끌어 다른 상자에 놓으면 연결돼요. 빈 곳에 놓으면 새 상자가 생기며 연결돼요.</li>
-          <li>선을 <b>더블클릭</b>하면 jump ↔ call이 바뀌어요.</li>
-          <li>같은 label(장면)의 상자는 같은 색이에요. label은 왼쪽 목록에서 관리해요.</li>
-          <li>상자나 label 오른쪽 위의 <b>◐ 셰이더</b>를 누르면 여기서 화면 셰이더를 골라요. 상자에 정하면 그 상자에서만, label에 정하면 그 label 전체에 걸려요.</li>
-          <li>대사 칸에서 <b>{keyOf('newLine')}</b>: 같은 화자로 다음 줄 추가.</li>
-          <li><b>{keyOf('focus')}</b>: 집중 모드. 캔버스만 남기고 나머지를 숨겨요. 한 번 더 누르면 돌아와요.</li>
-          <li>{keyOf('save')} 파일 저장 · {keyOf('undo')} 실행 취소 · {keyOf('export')} .rpy 다시 내보내기</li>
-          <li>단축키와 화면 색은 툴바 오른쪽 [설정]에서 바꿔요.</li>
-        </ul>
+      <div className="insp">
+        <section className="sec">
+          <h3>상자 편집</h3>
+          <p className="tip">상자를 한 번 클릭하면 여기서 label, 대사, 다음 흐름을 고쳐요. 쓰는 법은 왼쪽 칸 아래의 [사용법]에 있어요.</p>
+        </section>
       </div>
     );
   if (ids.length > 1) return <MultiInspector ids={ids} />;
@@ -45,7 +41,8 @@ function MultiInspector({ ids }: { ids: string[] }) {
   const update = useStore((s) => s.update);
   return (
     <div className="insp">
-      <h4>상자 {ids.length}개 선택</h4>
+      <section className="sec">
+      <h3>상자 {ids.length}개 선택</h3>
       <div className="row">
         <label>label</label>
         <select
@@ -69,7 +66,8 @@ function MultiInspector({ ids }: { ids: string[] }) {
           선택한 상자 삭제
         </button>
       </div>
-      <p className="tip">툴바의 [선택 정렬]로 이 상자들만 흐름 순서로 정렬할 수 있어요.</p>
+      <p className="tip">왼쪽 "상자와 정렬"의 [선택 정렬]로 이 상자들만 흐름 순서로 정렬할 수 있어요.</p>
+      </section>
     </div>
   );
 }
@@ -94,6 +92,8 @@ function BoxInspector({ b }: { b: BoxNode }) {
 
   return (
     <div className="insp">
+      <section className="sec">
+      <h3>상자</h3>
       <input id="ed-title" className="title" value={b.title} placeholder="상자 제목 (예: 우산을 빌려준다)" onChange={(e) => upd((x) => void (x.title = e.target.value), 'title' + b.id)} />
       <div className="row">
         <label>label</label>
@@ -119,14 +119,16 @@ function BoxInspector({ b }: { b: BoxNode }) {
         <button onClick={() => useStore.getState().startPlay(b.id)}>▶ 여기서 플레이</button>
         <button className="danger" onClick={() => (update((p) => ops.deleteBoxes(p, [b.id])), useStore.getState().select([]))}>삭제</button>
       </div>
+      </section>
 
       {lookLine && (
-        <div className="look-panel">
+        <section className="sec look-panel">
           <LineLook l={lookLine} set={(fn, key) => upd((x) => fn(x.lines.find((l) => l.id === lookLine.id)!), key)} />
-        </div>
+        </section>
       )}
 
-      <h4>대사</h4>
+      <section className="sec">
+      <h3>대사</h3>
       {b.lines.map((l, i) => (
         <LineRow key={l.id} l={l} i={i} upd={upd} drag={drag} />
       ))}
@@ -134,9 +136,12 @@ function BoxInspector({ b }: { b: BoxNode }) {
         <button onClick={addLine}>+ 줄 추가</button>
         <span className="tip">Ctrl+Enter: 같은 화자로 아래에 새 줄</span>
       </div>
+      </section>
 
-      <h4>다음 흐름</h4>
+      <section className="sec">
+      <h3>다음 흐름</h3>
       <ExitEditor b={b} upd={upd} />
+      </section>
     </div>
   );
 }

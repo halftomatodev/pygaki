@@ -113,7 +113,7 @@ code { font-family: var(--mono); }
 .app.focus .box.editing { box-shadow: none; border-color: transparent; }
 
 /* 왼쪽 */
-.sidebar { width: 244px; overflow: auto; background: var(--bg); padding: 4px 10px 16px; flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; }
+.sidebar { width: var(--left-w, 244px); overflow: auto; background: var(--bg); padding: 4px 4px 16px 10px; flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; }
 /* 묶음마다 둥근 카드. 캐릭터와 label은 강조색(사과 스타일의 파랑)을 옅게 깔아 말풍선과 같은 톤으로 */
 .sec { background: var(--panel); border-radius: 14px; padding: 10px 10px 8px; flex-shrink: 0; }
 .sec.tint { background: color-mix(in srgb, var(--accent) 9%, var(--panel)); }
@@ -122,6 +122,20 @@ code { font-family: var(--mono); }
 .sec > h3 button { font-size: 11.5px; font-weight: 600; padding: 2px 8px; color: var(--accent); }
 .sec.tint :is(input:not([type='color']), select) { background: color-mix(in srgb, var(--panel) 75%, transparent); }
 .sec > .tip, .sec .link-panel > .tip { margin: 6px 0 2px; }
+.mini-btns { display: flex; gap: 4px; }
+.mini-btns button { background: var(--faint); padding: 2px 8px; font-size: 11.5px; }
+.mini-btns button.on { background: var(--accent-soft); }
+.usage ul { margin: 0; padding-left: 16px; line-height: 1.65; font-size: 12px; color: var(--muted); }
+.usage li { margin-bottom: 3px; }
+/* 칸과 캔버스 사이 경계: 끌어서 너비를 바꾼다 (App.tsx Resizer) */
+.resizer { flex: 0 0 6px; cursor: col-resize; position: relative; z-index: 4; touch-action: none; }
+.resizer::after { content: ''; position: absolute; top: 8px; bottom: 8px; left: 2px; width: 2px; border-radius: 1px; background: var(--accent); opacity: 0; transition: opacity 0.15s; }
+.resizer:hover::after, body.resizing .resizer::after { opacity: 0.55; }
+.resizer.locked { cursor: default; }
+.resizer.locked::after { display: none; }
+body.resizing { cursor: col-resize; user-select: none; }
+body.resizing .react-flow { pointer-events: none; }
+.app.focus .resizer { display: none; }
 .sec-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 6px; }
 .sec-btns button { background: var(--faint); padding: 5px 6px; }
 .sec-btns button.primary { background: var(--accent-soft); font-weight: 600; }
@@ -131,7 +145,8 @@ code { font-family: var(--mono); }
 .info-row > b { font-weight: 600; text-align: right; min-width: 0; overflow-wrap: anywhere; }
 .info-btn { display: block; width: 100%; margin: 4px 0; background: var(--faint); padding: 5px 6px; }
 .info-btn.primary { background: var(--accent-soft); font-weight: 600; }
-[data-mono='1'] .sec { background: transparent; border: 1px solid var(--text); border-radius: 0; }
+[data-mono='1'] :is(.sec, .tabs, .tab-body:not(.cards)) { background: transparent; border: 1px solid var(--text); border-radius: 0; }
+[data-mono='1'] .look-panel { background: var(--bg); box-shadow: none; }
 [data-mono='1'] :is(.sec-btns button, .info-btn) { background: transparent; outline: 1px solid var(--text); border-radius: 0; }
 [data-mono='1'] .toolbar .run { background: var(--text); color: var(--bg); border-radius: 0; }
 .item { display: flex; gap: 4px; align-items: center; margin-bottom: 4px; }
@@ -270,14 +285,18 @@ input.box-title.ed { flex: 1; min-width: 0; }
 .react-flow__arrowhead polyline { stroke: color-mix(in srgb, var(--text) 30%, var(--bg)); fill: color-mix(in srgb, var(--text) 30%, var(--bg)); }
 
 /* 오른쪽 */
-.right-panel { width: 400px; display: flex; flex-direction: column; background: var(--panel); border-left: 1px solid var(--line); min-height: 0; flex-shrink: 0; }
-.tabs { display: flex; padding: 0 6px; }
+.right-panel { width: var(--right-w, 400px); display: flex; flex-direction: column; gap: 10px; background: var(--bg); padding: 4px 10px 10px 4px; min-height: 0; flex-shrink: 0; }
+.tabs { display: flex; padding: 0 6px; background: var(--panel); border-radius: 14px; flex-shrink: 0; }
 .tabs button { border-radius: 0; padding: 9px 12px; background: none; border-bottom: 2px solid transparent; }
 .tabs button:hover:not(:disabled) { background: none; }
 .tabs button.on { border-bottom-color: var(--accent); color: var(--text); background: none; }
 .count { background: color-mix(in srgb, #eab308 25%, var(--panel)); border-radius: 8px; padding: 0 6px; font-size: 11px; }
 .count.err { background: color-mix(in srgb, var(--danger) 25%, var(--panel)); }
-.tab-body { flex: 1; overflow: auto; padding: 12px; min-height: 0; }
+.tab-body { flex: 1; overflow: auto; padding: 12px; min-height: 0; background: var(--panel); border-radius: 14px; }
+/* 편집 탭은 묶음마다 카드로 나눈다 (왼쪽 칸과 같은 모양) */
+.tab-body.cards { background: transparent; padding: 0; border-radius: 0; }
+.insp { display: flex; flex-direction: column; gap: 10px; padding-bottom: 6px; }
+.insp .sec { padding: 12px 12px 8px; }
 .hint { color: var(--muted); }
 .hint ul { padding-left: 18px; line-height: 1.7; }
 .insp h4, .modal h4 { margin: 18px 0 6px; font-size: 11.5px; font-weight: 600; color: var(--muted); }
@@ -566,7 +585,6 @@ input[type='range'] { flex: 1; padding: 0; background: transparent; border: none
 [data-look^='apple'] :is(select, input, textarea):focus { border-color: transparent; box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent); background: var(--panel); }
 [data-look^='apple'] button { border-radius: 8px; }
 [data-look^='apple'] button.primary { color: var(--accent); font-weight: 600; }
-[data-look^='apple'] .right-panel { border-left: none; box-shadow: -1px 0 0 var(--line); }
 [data-look^='apple'] .tabs button.on { border-bottom-color: transparent; color: var(--text); background: var(--fill); border-radius: 8px; }
 [data-look^='apple'] .tabs { padding: 6px; gap: 2px; }
 [data-look^='apple'] .tabs button { padding: 5px 12px; border-radius: 8px; }
@@ -634,7 +652,7 @@ fieldset.plain:disabled { opacity: 0.4; }
 .link-panel { margin: 0; }
 .warn-text { color: #b45309; }
 /* 글자 효과 칸: 오른쪽 편집 탭 위쪽에 붙어 있어서 줄이 많아 스크롤해도 보인다 */
-.look-panel { position: sticky; top: -12px; z-index: 3; margin: 12px -12px 0; padding: 8px 12px; background: var(--panel); border-bottom: 1px solid var(--line); }
+.look-panel { position: sticky; top: 0; z-index: 3; box-shadow: 0 6px 14px -8px rgba(0, 0, 0, 0.25); }
 .look { width: 100%; display: flex; flex-direction: column; gap: 3px; }
 .preview { position: relative; display: flex; align-items: center; height: 84px; padding: 0; background: #15171f; border-radius: 6px; overflow: hidden; cursor: pointer; user-select: none; }
 .preview-text { width: 100%; padding: 0; line-height: 1.25; white-space: pre-wrap; word-break: keep-all; overflow-wrap: anywhere; font-family: var(--game-font); }

@@ -38,6 +38,8 @@
 └──────────────┴──────────────────────────────────┴───────────────────────┘
 ```
 
+- 양쪽 칸의 묶음은 모두 같은 카드(`.sec`)다. 오른쪽 편집 탭은 상자 / 글자 모양(`.look-panel`, 위에 붙음) / 대사 / 다음 흐름 카드로 나뉘고(`.tab-body.cards`), 다른 탭은 탭 내용 전체가 카드 하나다. 사용법은 왼쪽 칸 맨 아래 카드(`Sidebar.tsx` `Usage`, 접은 것은 `localStorage['pygaki-usage-closed']`).
+- 칸 너비: 칸과 캔버스 사이의 `.resizer`(`App.tsx` `Resizer`)를 끌면 `prefs.leftW` `rightW`가 바뀌고 `--left-w` `--right-w`로 적용된다. 범위와 처음 값은 `prefs.ts` `SIZES`(왼쪽 190~520, 처음 244 / 오른쪽 300~760, 처음 400). 더블클릭은 그 칸만 처음 값, 왼쪽 "설정"의 [처음 크기]는 양쪽, [잠금](`prefs.sizeLock`)이면 손잡이가 움직이지 않는다. 접은 칸은 손잡이도 없다.
 - 왼쪽 칸과 오른쪽 칸은 캔버스 위쪽 양 끝의 작은 버튼(`.side-toggle`, `Canvas.tsx`)으로 따로 접고 편다(`store.hideLeft` `hideRight`, `localStorage['pygaki-hide-left']` `['pygaki-hide-right']`). 접어도 지우지 않고 CSS로만 숨긴다(플레이 상태 유지).
 - 툴바 왼쪽의 화면 바꾸기(`Toolbar.tsx` `ViewSwitch`, `showpyLive.ts`의 `view`): [대본 편집] / [GUI 편집](데스크톱 앱에서만) / [효과]. 대본 화면은 다른 화면을 보는 동안에도 지우지 않고 숨긴다.
 - **[효과] 화면** (`EffectsView.tsx`, 웹과 앱 모두): 왼쪽은 효과 카드 목록([글자 효과 | 그림 효과], 찾기, [파일 넣기], [새 효과 요청문 복사]), 오른쪽은 고른 효과의 샘플과 쓰인 곳. 목록과 파일 다루기는 `effectsLib.ts`의 함수만 부른다(7장).

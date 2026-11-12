@@ -9,7 +9,7 @@ import { EditCaret } from './Caret';
 import { useStore } from './store';
 import { exportRpyFile, saveProject } from './files';
 import { addBoxCenter, enterFullPlay, goNextBox, leaveFullPlay, toggleFocus } from './actions';
-import { hit } from './prefs';
+import { SIZES, clampSize, hit, usePrefs } from './prefs';
 import { isTyping } from './util';
 import { isDesktop } from './desktop';
 import { liveSend, startLive, toggleGamePanel, useLive } from './showpyLive';
@@ -70,6 +70,37 @@ function Keys() {
   return null;
 }
 
+// 칸과 캔버스 사이 경계: 끌면 그 칸의 너비가 바뀐다. 더블클릭하면 처음 크기로. 잠그면 안 움직인다
+function Resizer({ side }: { side: 'left' | 'right' }) {
+  const lock = usePrefs((p) => p.sizeLock);
+  const hidden = useStore((s) => (side === 'left' ? s.hideLeft : s.hideRight));
+  if (hidden) return null;
+  const key = side === 'left' ? 'leftW' : 'rightW';
+  const onDown = (e: React.PointerEvent) => {
+    if (lock || e.button !== 0) return;
+    e.preventDefault();
+    const x0 = e.clientX;
+    const w0 = usePrefs.getState()[key];
+    const move = (ev: PointerEvent) => usePrefs.setState({ [key]: clampSize(side, w0 + (ev.clientX - x0) * (side === 'left' ? 1 : -1)) });
+    const up = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      document.body.classList.remove('resizing');
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+    document.body.classList.add('resizing');
+  };
+  return (
+    <div
+      className={'resizer ' + side + (lock ? ' locked' : '')}
+      onPointerDown={onDown}
+      onDoubleClick={() => !lock && usePrefs.setState({ [key]: SIZES[side].def })}
+      title={lock ? '칸 크기를 잠갔어요 (왼쪽 칸 [설정]에서 풀어요)' : '끌어서 칸 너비 바꾸기 · 더블클릭: 처음 크기로'}
+    />
+  );
+}
+
 export function App() {
   const focus = useStore((s) => s.focusMode);
   const showPrefs = useStore((s) => s.showPrefs);
@@ -89,7 +120,9 @@ export function App() {
         {/* 대본 화면은 showpy 화면을 보는 동안에도 그대로 둔다 (캔버스 상태 유지) */}
         <div className={'main' + (hideLeft ? ' no-left' : '') + (hideRight ? ' no-right' : '')} hidden={view !== 'script'}>
           <Sidebar />
+          <Resizer side="left" />
           <Canvas />
+          <Resizer side="right" />
           <RightPanel />
         </div>
         {view === 'showpy' && <ShowpyView />}
