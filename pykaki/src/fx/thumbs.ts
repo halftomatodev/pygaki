@@ -1,6 +1,6 @@
 // 갤러리 카드의 멈춘 미리보기 그림. 카드마다 WebGL을 켜면 브라우저가 몇 개(16쯤)만 허락해서,
 // 그리는 판 하나(종류마다 하나)로 차례대로 한 장씩 그리고 그림(data URL)으로 바꿔 둔다. 움직이는 샘플은 마우스를 올린 카드 하나만.
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import type { ShaderInfo } from '../shader';
 import type { ShaderEffect } from './textShaders';
 import { ScreenFxRenderer, screenFxValues } from './ScreenFxCanvas';
@@ -83,6 +83,25 @@ export function transitionThumb(effect: ShaderEffect, args: Record<string, strin
   return grab(c);
 }
 
+// 만들 그림 수와 다 만든 수 (갤러리 위 진행 막대). 다 끝나면 0으로 돌아간다. 글자 효과 사진(FxGallery.tsx)도 같이 센다
+let workDoneN = 0;
+let workTotal = 0;
+let workSnap = { done: 0, total: 0 };
+const workSubs = new Set<() => void>();
+const emit = () => {
+  if (workDoneN >= workTotal) workDoneN = workTotal = 0;
+  workSnap = { done: workDoneN, total: workTotal };
+  workSubs.forEach((f) => f());
+};
+export const workAdd = () => (workTotal++, emit());
+export const workDone = () => (workDoneN++, emit());
+export const workDrop = () => (workTotal--, emit()); // 만들기 전에 카드가 사라짐
+export const useWork = () =>
+  useSyncExternalStore(
+    (f) => (workSubs.add(f), () => void workSubs.delete(f)),
+    () => workSnap,
+  );
+
 // 한 박자에 한 장씩 (셰이더를 처음 맞추는 데 시간이 걸려서 한꺼번에 하면 화면이 멈춤)
 type Job = { key: string; make: () => string; done: (v: string | Error) => void };
 const queue: Job[] = [];
@@ -106,6 +125,7 @@ function pump() {
       cache.set(job.key, v);
     }
     job.done(v);
+    workDone();
     setTimeout(step, 30); // requestAnimationFrame은 창이 안 보일 때 멈춰서 쓰지 않음
   };
   step();
@@ -122,11 +142,12 @@ export function useThumb(key: string, make: (() => string) | null): string | Err
     let live = true;
     const job: Job = { key, make, done: (x) => live && setV(x) };
     queue.push(job);
+    workAdd();
     pump();
     return () => {
       live = false;
       const i = queue.indexOf(job);
-      if (i >= 0) queue.splice(i, 1);
+      if (i >= 0) queue.splice(i, 1), workDrop();
     };
     // make는 key가 바뀔 때만 다시 씀
     // eslint-disable-next-line react-hooks/exhaustive-deps

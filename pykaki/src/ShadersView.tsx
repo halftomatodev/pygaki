@@ -1,6 +1,7 @@
 // 위쪽 [셰이더] 화면: 화면 전체에 씌우는 셰이더와, 셰이더가 바뀔 때의 전환을 보고 켜고 끈다 (docs/LINK.md 11장).
 // 셰이더 목록은 게임 폴더의 screen_fx/shader_list.json에서 온다. 어느 상자에 걸지와 세부 값은 [대본 편집]의 ◐ 셰이더에서 정한다
 import { Hint } from './Help';
+import { Card } from './Card';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useStore } from './store';
 import { useLive } from './showpyLive';
@@ -177,10 +178,9 @@ function TransList({ bar }: { bar: ReactNode }) {
         </div>
       </div>
       <Resizer size="fxSideW" grow={-1} className="right" />
+      {/* 오른쪽 칸도 대본 편집처럼 카드: 샘플 / 세부 값 / 쓰인 곳 */}
       <div className="fxv-side">
-        <h3>
-          {SHADER_TRANS.find(([k]) => k === picked)?.[1]} <span className="fxv-name">{picked}</span>
-        </h3>
+        <Card id="tr-sample" title={<>{SHADER_TRANS.find(([k]) => k === picked)?.[1]} <span className="fxv-name">{picked}</span></>}>
         <p className="tip">{TRANS_DESC[picked]}</p>
         {picked === 'tv' && (
           <>
@@ -189,8 +189,6 @@ function TransList({ bar }: { bar: ReactNode }) {
               <span className="grow" />
               {Object.keys(vals).length > 0 && <button onClick={() => setVals({})}>값 모두 기본으로</button>}
             </div>
-            <h4>세부 값<Hint text="여기 값은 구경용이라 저장하지 않아요. 상자마다 ◐ 셰이더에서 정해요" topic="셰이더 (상자" /></h4>
-            <TvKnobs values={vals} onChange={put} />
           </>
         )}
         {picked !== 'tv' && picked !== 'none' && (imgFx?.kind === 'transition' ? (
@@ -198,7 +196,13 @@ function TransList({ bar }: { bar: ReactNode }) {
         ) : (
           <p className="tip warn-text">효과 폴더에 {picked}이 없어요 ([효과]에서 넣기). 없으면 TV 꺼짐·켜짐으로 내보내요.</p>
         ))}
-        <h4>쓰인 곳 <span className="tip">{uses.length ? `${uses.length}곳` : '대본에서 안 써요'}</span></h4>
+        </Card>
+        {picked === 'tv' && (
+          <Card id="tr-knobs" title="세부 값" hint="여기 값은 구경용이라 저장하지 않아요. 상자마다 ◐ 셰이더에서 정해요" topic="셰이더 (상자">
+            <TvKnobs values={vals} onChange={put} />
+          </Card>
+        )}
+        <Card id="tr-uses" title={<>쓰인 곳 <span className="tip">{uses.length ? `${uses.length}곳` : '대본에서 안 써요'}</span></>}>
         {uses.slice(0, 30).map((u) => (
           <div className="fxv-use" key={u.kind + u.id}>
             <span className="fxv-use-box">{u.kind === 'box' ? '상자' : 'label'} · {u.slot}</span>
@@ -207,6 +211,7 @@ function TransList({ bar }: { bar: ReactNode }) {
           </div>
         ))}
         {uses.length > 30 && <p className="tip">… 외 {uses.length - 30}곳</p>}
+        </Card>
       </div>
     </div>
   );
@@ -344,12 +349,12 @@ function ShaderList({ bar }: { bar: ReactNode }) {
       <Resizer size="fxSideW" grow={-1} className="right" />
       <div className="fxv-side">
         {!sel ? (
-          <p className="tip">왼쪽에서 셰이더를 골라 주세요.</p>
+          <Card id="sh-none" title="샘플">
+            <p className="tip">왼쪽에서 셰이더를 골라 주세요.</p>
+          </Card>
         ) : (
           <>
-            <h3>
-              {sel.label} <span className="fxv-name">{sel.id}</span>
-            </h3>
+            <Card id="sh-sample" title={<>{sel.label} <span className="fxv-name">{sel.id}</span></>}>
             <p className="tip">
               화면 전체에 씌우는 셰이더{sel.name !== sel.label ? ` · ${sel.name}` : ''}
               {!sel.on ? ' · 꺼 둠 (고르는 목록에 안 나와요)' : ''}
@@ -363,7 +368,8 @@ function ShaderList({ bar }: { bar: ReactNode }) {
               {Object.keys(mine).length > 0 && <button onClick={() => setArgs((all) => ({ ...all, [sel.id]: {} }))}>값 모두 기본으로</button>}
               <input ref={picPick} type="file" accept="image/*" hidden onChange={(e) => pickPicture(e.target.files?.[0])} />
             </div>
-            <h4>세부 값<Hint text="여기 값은 구경용이라 저장하지 않아요. 상자마다 ◐ 셰이더에서 정해요" topic="셰이더 (상자" /></h4>
+            </Card>
+            <Card id="sh-knobs" title="세부 값" hint="여기 값은 구경용이라 저장하지 않아요. 상자마다 ◐ 셰이더에서 정해요" topic="셰이더 (상자">
             {screenFxBlocked(sel) ? (
               groupNames(sel.groups).map(([title, names]) => (
                 <div className="fxv-use" key={title}>
@@ -374,7 +380,8 @@ function ShaderList({ bar }: { bar: ReactNode }) {
             ) : (
               <ScreenFxKnobs info={sel} values={mine} onChange={putArg} />
             )}
-            <h4>쓰인 곳 <span className="tip">{uses.length ? `${uses.length}곳` : '대본에서 안 써요'}</span></h4>
+            </Card>
+            <Card id="sh-uses" title={<>쓰인 곳 <span className="tip">{uses.length ? `${uses.length}곳` : '대본에서 안 써요'}</span></>}>
             {uses.slice(0, 30).map((u) => (
               <div className="fxv-use" key={u.kind + u.id}>
                 <span className="fxv-use-box">{u.kind === 'box' ? '상자' : 'label'} · {u.slot}번</span>
@@ -383,6 +390,7 @@ function ShaderList({ bar }: { bar: ReactNode }) {
               </div>
             ))}
             {uses.length > 30 && <p className="tip">… 외 {uses.length - 30}곳</p>}
+            </Card>
           </>
         )}
       </div>

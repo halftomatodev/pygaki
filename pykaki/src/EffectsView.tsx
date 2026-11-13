@@ -1,6 +1,7 @@
 // [효과] 화면: 글자 효과와 그림 효과를 한곳에서 보고, 켜고 끄고, 넣고 뺀다 (docs/EFFECTS_TAB_SPEC.md 3장).
 // 목록과 파일 다루기는 effectsLib.ts가 하고, 여기는 화면만 그린다. 샘플에서 맞춘 값은 저장하지 않는다 (값은 대사 줄마다 정함)
 import { Hint } from './Help';
+import { Card } from './Card';
 import { useMemo, useRef, useState } from 'react';
 import readme from '../../showpy/game/ui_kit/effects/README.md?raw';
 import { useStore } from './store';
@@ -442,22 +443,23 @@ export function EffectsView() {
         </div>
       </div>
       <Resizer size="fxSideW" grow={-1} className="right" />
+      {/* 오른쪽 칸도 대본 편집처럼 카드: 샘플 / 세부 값 / 쓰인 곳 */}
       <div className="fxv-side">
         {!sel ? (
-          <p className="tip">왼쪽에서 효과를 골라 주세요.</p>
+          <Card id="fx-none" title="샘플">
+            <p className="tip">왼쪽에서 효과를 골라 주세요.</p>
+          </Card>
         ) : (
           <>
-            <h3>
-              {sel.label} <span className="fxv-name">{sel.name}</span>
-            </h3>
+            <Card id="fx-sample" title={<>{sel.label} <span className="fxv-name">{sel.name}</span></>}>
             <p className="tip">
               {SOURCE_LABEL[sel.source]} 효과{sel.file ? ` · ${sel.file}` : ''}
               {!sel.ready ? ' · 아직 이 게임에 넣지 않았어요' : !sel.on ? ' · 꺼 둠 (고르는 목록에 안 나와요)' : ''}
             </p>
             {sampleError || (sel.kind === 'transition' && !picFx) ? (
-                <p className="tip warn-text">이 파일은 샘플을 돌릴 수 없어요: {sampleError ?? '효과를 읽지 못했어요'}</p>
-              ) : (
-                <>
+              <p className="tip warn-text">이 파일은 샘플을 돌릴 수 없어요: {sampleError ?? '효과를 읽지 못했어요'}</p>
+            ) : (
+              <>
                   {picFx ? (
                     <>
                       <PictureSample
@@ -492,9 +494,11 @@ export function EffectsView() {
                       </div>
                     </>
                   )}
-                  {knobs.length > 0 && (
-                    <>
-                      <h4>세부 값<Hint text={picFx ? '구경용이라 저장하지 않아요. 원고에는 위의 글처럼 적어요' : '구경용이라 저장하지 않아요. 값은 대사 줄마다 정해요'} topic="효과 관리" /></h4>
+              </>
+            )}
+            </Card>
+            {knobs.length > 0 && !sampleError && !(sel.kind === 'transition' && !picFx) && (
+              <Card id="fx-knobs" title="세부 값" hint={picFx ? '구경용이라 저장하지 않아요. 원고에는 위의 글처럼 적어요' : '구경용이라 저장하지 않아요. 값은 대사 줄마다 정해요'} topic="효과 관리">
                       <div className="fx-knobs">
                         {knobs.map((k) => {
                           const set = mine[k.key];
@@ -515,11 +519,9 @@ export function EffectsView() {
                           );
                         })}
                       </div>
-                    </>
-                  )}
-                </>
-              )}
-            <h4>쓰인 곳 <span className="tip">{selUses.length ? `대본 ${selUses.length}줄` : '대본에서 안 써요'}</span></h4>
+              </Card>
+            )}
+            <Card id="fx-uses" title={<>쓰인 곳 <span className="tip">{selUses.length ? `대본 ${selUses.length}줄` : '대본에서 안 써요'}</span></>}>
             {selUses.slice(0, 30).map((u) => {
               const { box, text } = lineOf(u);
               return (
@@ -531,6 +533,7 @@ export function EffectsView() {
               );
             })}
             {selUses.length > 30 && <p className="tip">… 외 {selUses.length - 30}줄</p>}
+            </Card>
           </>
         )}
       </div>

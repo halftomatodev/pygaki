@@ -4,7 +4,7 @@ import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'rea
 import { useGameFolder, gameFont } from './gameFolder';
 import { usePrefs } from './prefs';
 import { samplePicture, TextSample } from './EffectsView';
-import { shaderThumb, transitionThumb, useThumb, THUMB_WIDTH } from './fx/thumbs';
+import { shaderThumb, transitionThumb, useThumb, useWork, workAdd, workDone, workDrop, THUMB_WIDTH } from './fx/thumbs';
 import { ScreenFxCanvas, screenFxBlocked } from './fx/ScreenFxCanvas';
 import { TransitionCanvas } from './fx/TransitionCanvas';
 import { webglOk } from './fx/FxCanvas';
@@ -15,8 +15,18 @@ import type { ShaderInfo } from './shader';
 export function GallerySwitch() {
   const gallery = usePrefs((p) => p.gallery);
   const move = usePrefs((p) => p.galleryMove);
+  const work = useWork();
   return (
     <>
+      {gallery && work.total > 0 && (
+        <span className="gal-prog" title="카드 미리보기 그림을 하나씩 만드는 중이에요. 다 될 때까지 글이나 빈 카드로 보여요">
+          <span className="gal-spin" />
+          그림 만드는 중 {work.done}/{work.total}
+          <span className="gal-bar">
+            <i style={{ width: `${(work.done / work.total) * 100}%` }} />
+          </span>
+        </span>
+      )}
       {gallery && (
         <button
           className={'gal-move' + (move ? ' on' : '')}
@@ -196,11 +206,12 @@ export function TextStill({ spec, name, text }: { spec: string; name: string; te
     let live = true;
     const job: TextJob = { key, spec, name, text, done: (v) => live && v && setShot(v) };
     textQueue.push(job);
+    workAdd();
     wakePhotographer?.();
     return () => {
       live = false;
       const i = textQueue.indexOf(job);
-      if (i >= 0) textQueue.splice(i, 1);
+      if (i >= 0) textQueue.splice(i, 1), workDrop();
     };
   }, [key]);
   if (shot) return <img src={shot} alt="" draggable={false} />;
@@ -236,6 +247,7 @@ export function TextPhotographer() {
     taken.current = true;
     if (v) textShots.set(job.key, v);
     job.done(v);
+    workDone();
     setTimeout(() => setJob(textQueue.shift() ?? null), 30);
   };
   const onFrame = (c: HTMLCanvasElement, slow: number, maxTime: number) => {
