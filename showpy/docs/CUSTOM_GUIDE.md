@@ -1,15 +1,15 @@
-# pygaki 플러그인 커스텀 가이드 (5.0)
+# pygaki 플러그인 커스텀 가이드 (5.1)
 
-2026-11-09 · 버전 5.0 (5.0에서 바뀐 것: 새 화면 효과 일곱(글리치, 지글거림, 망점, 홀로그램, 나이트비전, 조각 어긋남, 파편 흩날림), 이미지 하나에 거는 효과, 글자 등장 효과 열하나, 글 상자(말풍선, 둥근 테두리), 스플래시를 화면에서 고치기, GUI 편집기 "UI 글" 탭. 4.22에서 바뀐 것: 셰이더가 바뀌는 줄과 줄마다 전환, 커서와 셰이더 '여기에서부터', 대사 탭 정리, 커서·CTC 그림 폴더. 4.21에서 바뀐 것: 셰이더 칸의 세부 속성을 1번, 2번 아래로, 줄을 누르면 게임도 그 줄로. 4.20에서 바뀐 것: 셰이더 두 자리와 '여기에서부터 적용', 타이틀/게임 내 메뉴 셰이더, 타이틀 배경과 제목, 부제, 글자 효과, 회전 손잡이)
+2026-11-13 · 버전 5.1 (5.1에서 바뀐 것: 효과 폴더와 그림 전환, 효과·셰이더 끄기 파일, 포토 콜라주(조각 어긋남 대신), 일렁임 셰이더 `ripple`, 셰이더 줄의 세부 값과 장면마다 대사 소리·커서, 셰이더 전환에 픽셀소트·데이터모싱, 줄기표, PyKaki는 데스크톱 앱만. 5.0에서 바뀐 것: 새 화면 효과 일곱(글리치, 지글거림, 망점, 홀로그램, 나이트비전, 조각 어긋남, 파편 흩날림), 이미지 하나에 거는 효과, 글자 등장 효과 열하나, 글 상자(말풍선, 둥근 테두리), 스플래시를 화면에서 고치기, GUI 편집기 "UI 글" 탭. 4.22에서 바뀐 것: 셰이더가 바뀌는 줄과 줄마다 전환, 커서와 셰이더 '여기에서부터', 대사 탭 정리, 커서·CTC 그림 폴더. 4.21에서 바뀐 것: 셰이더 칸의 세부 속성을 1번, 2번 아래로, 줄을 누르면 게임도 그 줄로. 4.20에서 바뀐 것: 셰이더 두 자리와 '여기에서부터 적용', 타이틀/게임 내 메뉴 셰이더, 타이틀 배경과 제목, 부제, 글자 효과, 회전 손잡이)
 
 ## 이 문서 보는 법
 
-pygaki 플러그인 5.0을 받은 사람이 **어떤 파일의 어떤 값을 고치면 무엇이 바뀌는지** 찾아보는 문서입니다. 설정 이름의 전체 설명은 각 폴더의 `README.md`에 있고, 이 문서는 "하고 싶은 일"에서 출발합니다. 글을 PyKaki에서 쓰려면 "PyKaki와 함께 쓰기"부터 보세요.
+pygaki 플러그인 5.1을 받은 사람이 **어떤 파일의 어떤 값을 고치면 무엇이 바뀌는지** 찾아보는 문서입니다. 설정 이름의 전체 설명은 각 폴더의 `README.md`에 있고, 이 문서는 "하고 싶은 일"에서 출발합니다. 글을 PyKaki에서 쓰려면 "PyKaki와 함께 쓰기"부터 보세요.
 
 | 폴더 | 하는 일 | 고치는 파일 |
 | --- | --- | --- |
 | `ui_kit` | 타이틀 메뉴, 선택지, 커서·클릭 대기 표시·대사 소리·텍스트 속도·퀵메뉴, 대사 한 줄 스타일·이름 위치·속도·등장 효과, 이미지·영상 배치(movies/ 영상 자동 등록, bg 맨 뒤, show·hide 줄의 위치와 전환. 2.8에서 추가) + 편집기 | `title_menu_config.rpy`, `choice_menu_config.rpy`, `custom_ui_config.rpy`, `say_style_config.rpy`, `stage_config.rpy` |
-| `screen_fx` | 화면 전체 효과. **기본 효과**(없음, ASCII, 레트로 터미널, 게임보이) 위에 **VHS 덮개**(켬/끔, 왜곡 정도)를 겹침 (4.0), 장면마다 효과 바꾸기와 TV 꺼짐·켜짐 전환, 글자 빼기(대사·선택지·메뉴를 골라서 효과에서 빼기), 타이틀 화면 일렁임 | `screen_fx_config.rpy`, `vhs_crt_config.rpy`, `ascii_config.rpy`, `retro_term_config.rpy`, `gameboy_config.rpy`, `watermorph_config.rpy` |
+| `screen_fx` | 화면 전체 효과. **기본 효과**(없음, ASCII, 레트로 터미널, 게임보이, 5.0부터 글리치 등 일곱, 5.5부터 일렁임) 위에 **VHS 덮개**(켬/끔, 왜곡 정도)를 겹침 (4.0), 장면마다 효과 바꾸기와 TV 꺼짐·켜짐 전환, 글자 빼기(대사·선택지·메뉴를 골라서 효과에서 빼기), 타이틀 화면 일렁임 | `screen_fx_config.rpy`, `vhs_crt_config.rpy`, `ascii_config.rpy`, `retro_term_config.rpy`, `gameboy_config.rpy`, `ripple_config.rpy`, `collage_config.rpy` 등 효과마다 하나 |
 | `hotkeys` | 단축키 추가·해제, 조작방법 화면 설명 | `hotkeys_config.rpy` |
 | `splash` | 타이틀 전에 나오는 로고·경고·조작 방법 페이지 (2.3에서 추가) | `splash_config.rpy` |
 
@@ -76,7 +76,9 @@ pygaki 플러그인 5.0을 받은 사람이 **어떤 파일의 어떤 값을 고
 | 레트로 터미널 색(형광체·바탕), 곡면 CRT, 자체 VHS | `screen_fx/retro_term_config.rpy` | `retro_term.settings`의 `"phosphor"`, `"background"`, `"crt"`, `"vhs"`, `retro_term.presets` | 화면 효과 탭 → 레트로 터미널 |
 | 게임보이 디더링/픽셀화, 점 크기, 4가지 색, LCD 느낌 | `screen_fx/gameboy_config.rpy` | `gameboy.settings`의 `"mode"`, `"pixel_size"`, `"color1"`~`"color4"`, `"grid"`, `"shadow"`, `gameboy.presets` | 화면 효과 탭 → 게임보이 |
 | 스크린에 넣은 그림에도 장면 효과 | 그 스크린 | `add "map.png" at screen_fx.scene` |  |
-| 타이틀 일렁임 세기·대상 | `screen_fx/watermorph_config.rpy` | `watermorph.amount`, `target`, `shine` | 타이틀 일렁임 탭 |
+| 타이틀 일렁임 세기 (5.5부터 셰이더) | `screen_fx/ripple_config.rpy` | `ripple.settings`의 `"amount"`, `"scale"`, `"speed"`, `"shine"`, `ripple.presets`. 타이틀에 걸지는 `screen_fx_config.rpy`의 `screen_fx.title_shaders` | GUI 편집 → 타이틀 셰이더, 셰이더 기본 값 |
+| 고르는 목록에서 효과·셰이더 감추기 (5.1) | `ui_kit/effects/effects_off.txt`, `screen_fx/shaders_off.txt` | 한 줄에 이름 하나 (`#` 뒤는 설명). 이미 쓴 원고는 그대로 돎 | 앱 [효과], [셰이더]의 체크 |
+| 글자 등장 효과, 그림 전환 더하기·빼기 (5.1) | `ui_kit/effects/` 폴더 | `.glsl` 파일 하나가 효과 하나. 아래 "효과 폴더" | 앱 [효과] |
 | VHS 덮개 세기·범위 | `screen_fx/vhs_crt_config.rpy` | `vhs_crt.settings`, `vhs_crt.scope` | 화면 효과 탭 → VHS 덮개 |
 | VHS 프리셋 (게임 중 바꿀 묶음) | `screen_fx/vhs_crt_config.rpy` | `vhs_crt.presets` | 화면 효과 탭 → VHS 덮개, "고칠 대상"에서 프리셋 고르기 |
 | 단축키 추가·해제 | `hotkeys/hotkeys_config.rpy` | `hotkeys.bindings`, `hotkeys.unbind` |  |
@@ -85,25 +87,24 @@ pygaki 플러그인 5.0을 받은 사람이 **어떤 파일의 어떤 값을 고
 
 ## PyKaki와 함께 쓰기
 
-PyKaki는 상자와 선으로 대본을 쓰는 에디터입니다(pygaki 묶음의 데스크톱 앱, 런처의 [pygaki로 편집]). 두 프로그램을 함께 쓰면 **글은 PyKaki에서, 화면은 렌파이에서** 맞춥니다. 렌파이 코드를 몰라도 됩니다.
+PyKaki는 상자와 선으로 대본을 쓰는 에디터입니다. pygaki 묶음의 데스크톱 앱으로 나오고, 렌파이 런처에서 프로젝트를 고르고 **[pygaki로 편집]**을 누르면 열립니다(웹 버전은 5.1에서 없앴습니다). 두 프로그램을 함께 쓰면 **글은 PyKaki에서, 화면은 렌파이에서** 맞춥니다. 렌파이 코드를 몰라도 됩니다. 앱 쓰는 법은 앱의 [도움말](F1)에 있습니다.
 
 | 하고 싶은 것 | 어디서 |
 |---|---|
-| 대사, 선택지, 이야기 흐름 쓰기 | PyKaki |
-| 대사 글자 크기, 글꼴, 색, 속도, 등장 효과 | PyKaki (오른쪽 편집 탭의 글자 효과 칸). 칸 위의 미리보기에서 바로 보입니다 |
-| 대사와 이름의 위치 | **렌파이 편집기** 대사 탭에서 끌기. 좌표는 PyKaki에 받아 적혀 보입니다 |
-| 줄마다 화면 효과 바꾸기 | **렌파이 편집기** 대사 탭. PyKaki에 받아 적혀서 다시 내보내도 남습니다 |
-| 그림, webm 영상, 음악, 효과음 넣기 | **렌파이 편집기** (PyKaki에서도 칸으로 넣을 수 있음) |
-| 그림 위치 옮기기 | **렌파이 편집기만** |
-| 타이틀 메뉴, 커서 등 게임 전체 모양 | 렌파이 편집기 |
+| 대사, 선택지, 이야기 흐름 쓰기 | PyKaki [대본 편집] |
+| 대사 글자 크기, 글꼴, 색, 속도, 등장 효과 | PyKaki 대사 줄의 글자 효과 카드. 카드 위 미리보기에서 바로 보입니다 |
+| 상자·장면마다 화면 셰이더, 전환, 대사 소리, 커서·클릭 대기 | PyKaki 상자나 label의 **◐ 셰이더** |
+| 그림, webm 영상, 음악, 효과음 넣기 | PyKaki 상자의 배경 / 그림·영상 / 효과음·음악 카드 (게임 안 GUI 편집기에서 넣어도 대본에 받아 적힘) |
+| 대사·선택지·그림의 위치 | 줄의 **[위치 옮기기]** → 게임 화면에서 끌기 → [저장]. 좌표는 PyKaki에 받아 적힙니다 |
+| 타이틀 메뉴, 커서 등 게임 전체 모양 | PyKaki [GUI 편집] (게임 안 GUI 편집기와 같은 것) |
+| 효과 파일 넣고 빼기, 셰이더 구경 | PyKaki [효과], [셰이더] |
 
 ### 처음 한 번만 하는 준비
 
-1. 렌파이로 프로젝트를 만들고 pygaki 플러그인 폴더들을 `game`에 넣습니다.
-2. 크롬이나 엣지로 PyKaki를 엽니다. (폴더 연결은 이 두 브라우저에서만 됩니다)
-3. 왼쪽 **[렌파이 프로젝트 연결]**을 누르고 프로젝트 폴더를 고른 뒤, 권한을 허용합니다.
+1. pygaki 묶음의 `renpy.exe`로 런처를 켜고 **[pygaki로 새 프로젝트]**로 만듭니다. pygaki 플러그인과 커서·클릭 대기 샘플 그림이 처음부터 들어 있습니다. (이미 있는 프로젝트라면 플러그인 폴더들을 `game`에 넣습니다)
+2. 프로젝트를 고르고 **[pygaki로 편집]**을 누릅니다.
 
-이것으로 끝입니다. PyKaki가 `game` 폴더를 찾고, pygaki 플러그인이 있으면 연결을 켜고, `game/script_flow.rpy`를 만듭니다. 렌파이에서 실행하면 PyKaki의 첫 상자부터 시작합니다.
+이것으로 끝입니다. 앱이 그 프로젝트의 대본(`프로젝트이름.flow.json`)을 열고, 고칠 때마다 저장하고, `game/script_flow.rpy`로 내보냅니다. 렌파이에서 실행하면 PyKaki의 첫 상자부터 시작합니다.
 
 `script.rpy`는 그대로 둬도 됩니다. 내보낸 파일에 아래 줄이 들어 있어서 게임 시작이 첫 상자로 이어지고, `script.rpy`의 `label start:`는 실행되지 않습니다.
 
@@ -118,18 +119,15 @@ PyKaki 새 대본의 첫 label 이름은 `prologue`입니다. 다른 이름으�
 - 캐릭터 id를 `e`로 쓰면 `script.rpy`의 `define e`와 겹칩니다. Lint에 경고가 나오고 어느 쪽 이름이 쓰일지 보장되지 않으니, 다른 id를 쓰거나 `script.rpy`를 지우세요.
 - 대본에 이름이 `start`인 label을 직접 만들면 `script.rpy`의 `label start:`와 겹쳐서 렌파이가 오류를 냅니다. 이 경우에만 그 파일의 `label start:`를 지웁니다.
 
-브라우저를 다시 열면 PyKaki가 폴더를 기억하지만, 권한은 다시 물어봅니다. Ctrl+E나 [다시 읽기]를 누를 때 허용하면 됩니다.
-
 ### 평소 작업 순서
 
 ```
-① PyKaki에서 글을 쓰고 Ctrl+E
-② 렌파이에서 게임 실행, Shift+R 한 번 (창 제목에 autoreload가 뜸)
-   → 이제 PyKaki에서 Ctrl+E를 누를 때마다 렌파이가 바로 다시 불러옵니다
-③ 그림을 넣을 대사에서 Shift+M → T로 "이미지/영상" 탭
-④ [그림/영상/소리 고르기] → 파일을 고르고 → [지금 대사 앞에: show] → Ctrl+S
-⑤ 화면의 그림을 끌어서 위치를 맞추고 Ctrl+S
-⑥ PyKaki 창으로 돌아오면 넣은 줄이 대본에 나타납니다
+① PyKaki [대본 편집]에서 글을 씀 (멈추면 저절로 내보냄, Ctrl+E로 바로 내보내기)
+② 오른쪽 위 [▶ 렌파이에서 실행]으로 게임을 켬 (개발 모드)
+   → 이제 내보낼 때마다 게임이 바뀐 원고를 저절로 다시 불러옵니다
+③ 상자 카드의 [렌파이에서 여기로 이동]으로 게임을 그 상자로
+④ 그림은 상자의 그림·영상 카드에서 눌러 넣고, 줄의 [위치 옮기기]로 게임 화면에서 끌어 자리를 맞춘 뒤 [저장]
+⑤ 타이틀, 커서, 대사 상자 처음 모양은 [GUI 편집]에서 게임 화면을 보며 고침
 ```
 
 ### 그림, 영상, 소리 넣기
@@ -150,7 +148,7 @@ PyKaki 새 대본의 첫 label 이름은 `prologue`입니다. 다른 이름으�
 - 이름의 첫 낱말이 캐릭터 id와 같으면 그 캐릭터의 표정입니다. PyKaki에서 캐릭터 `mina`를 등록해 두세요.
 - 파일 이름은 영어, 숫자, `_`로 지으세요. 그래야 어디서나 탈이 없습니다.
 
-PyKaki에서 넣어도 됩니다. 연출 줄(배경, 보이기, 음악, 효과음)을 고르면, 폴더를 연결했을 때 칸에 파일 이름이 추천 목록으로 나옵니다.
+PyKaki에서는 상자의 배경 / 그림·영상 / 효과음·음악 카드에서 같은 파일을 눌러서 넣습니다. 캐릭터 대사를 쓰는 중이면 그림·영상 카드 맨 위에 그 캐릭터의 그림(표정)이 나옵니다.
 
 ### 위치 저장 범위
 
@@ -169,14 +167,14 @@ show ghost at stage.pos(420, 720)
 
 ### 렌파이 편집기에서 저장되지 않는 것
 
-PyKaki가 만든 원고는 다시 내보내면 덮어써지므로, 대사 탭에서는 위치와 화면 효과만 저장되고, 선택지 탭과 화면 효과의 "줄에 넣기"는 저장되지 않고 이유가 나옵니다. **글과 글자 모양, 속도, 등장 효과는 PyKaki에서 고치세요.** 타이틀 메뉴, 커서처럼 게임 전체에 쓰는 값(`*_layout.rpy`)과 그림 줄의 전환, 그림 바꾸기는 그대로 저장됩니다.
+PyKaki가 만든 원고는 다시 내보내면 덮어써지므로, 대사 탭에서는 위치와 셰이더·커서 줄만 저장되어 대본에 받아 적히고, 선택지 탭과 화면 효과의 "줄에 넣기"는 저장되지 않고 이유가 나옵니다. **글과 글자 모양, 속도, 등장 효과는 PyKaki에서 고치세요.** 타이틀 메뉴, 커서처럼 게임 전체에 쓰는 값(`*_layout.rpy`)과 그림 줄의 전환, 그림 바꾸기는 그대로 저장됩니다.
 
 ### 되돌리기
 
 PyKaki의 **[버전 목록]**에서 되돌린 뒤 **Ctrl+E**를 누르면 렌파이도 따라갑니다.
 
 - 저장본은 바뀐 것이 있을 때 5분마다, 내보낼 때, 받아 적기 전에 자동으로 남습니다. 자동 저장본은 최근 30개만 둡니다.
-- 저장본은 브라우저 안에만 있습니다. 중요한 시점에는 **Ctrl+S**로 `.flow.json` 파일을 저장하세요.
+- 대본 원본은 프로젝트 폴더의 `.flow.json`이고 고칠 때마다 저장됩니다. 저장본(버전 목록)은 이 컴퓨터의 앱 안에만 있으니, 프로젝트 폴더를 백업해 두세요.
 - 그림 위치는 저장본으로 되돌아가지 않습니다.
 
 ### 문제가 생겼을 때
@@ -185,8 +183,8 @@ PyKaki의 **[버전 목록]**에서 되돌린 뒤 **Ctrl+E**를 누르면 렌파
 |---|---|
 | `The label start is defined twice` | 대본에 이름이 `start`인 label이 있고 다른 `.rpy`에도 `label start:`가 있습니다. 대본의 label 이름을 바꾸거나 그 파일의 `label start:`를 지웁니다 |
 | `ValueError: unsupported format character` | 대사의 `%` 때문입니다. PyKaki 설정의 **% 를 글자 그대로**를 켭니다. 새 프로젝트는 켜져 있습니다 |
-| 렌파이에서 넣은 그림이 PyKaki에 안 나타남 | PyKaki에서 **[다시 읽기]**를 누르거나 Ctrl+E를 누르세요. 권한을 다시 묻는 경우가 있습니다 |
-| 렌파이에서 넣은 그림이 사라짐 | 폴더를 연결하지 않고 내보냈을 수 있습니다. `showpy_inbox.json`에 남아 있으니 폴더를 연결하고 Ctrl+E를 누르면 돌아옵니다 |
+| 렌파이에서 넣은 그림이 PyKaki에 안 나타남 | PyKaki 위쪽 프로젝트 폴더 메뉴의 **[다시 읽기]**를 누르거나 Ctrl+E를 누르세요 |
+| 렌파이에서 넣은 그림이 사라짐 | `showpy_inbox.json`에 남아 있으니 PyKaki에서 [다시 읽기] 뒤 Ctrl+E를 누르면 돌아옵니다 |
 | "이 줄의 표시가 없습니다" | PyKaki에서 pygaki 플러그인 연결을 켜고 다시 내보내세요 |
 | 캐릭터 id 오류 | `stage`, `ascii`, `t`, `n1` 등은 pygaki 플러그인이 쓰는 이름입니다. 다른 id로 바꾸세요 |
 
@@ -948,7 +946,8 @@ define hotkeys.keyboard_help = [
 | `"halftone"` | 망점 (5.1): 인쇄물 같은 점 무늬, 한 색 / 네 색 | `halftone_config.rpy` |
 | `"hologram"` | 홀로그램 (5.1): 한 색, 흐르는 주사선, 번진 복사본. 인물 하나에 `show 이름 at screen_fx.image_fx("hologram")` | `hologram_config.rpy` |
 | `"nightvision"` | 나이트비전 (5.1): 초록 야간 투시경, 화면 글과 녹화 시간 | `nightvision_config.rpy` |
-| `"tiles"` | 조각 어긋남 (5.1): 네모 칸마다 어긋남. 장면 전환 `scene bg with screen_fx.TileSwap(1.0)` | `tiles_config.rpy` |
+| `"collage"` | 포토 콜라주 (5.3): 같은 장면을 사진으로 여러 번 찍어 겹쳐 붙인 모양. 조각마다 조금 밀리고 확대됨. `$ collage.preset("joiner")` 기본과 비슷, `"scatter"` 넓게 많이, `"calm"` 조각 넷 차분하게. 예전 이름 `"tiles"`(조각 어긋남, 5.3에서 없앰)는 포토 콜라주로 읽음. 장면 전환 `scene bg with screen_fx.TileSwap(1.0)`은 그대로 | `collage_config.rpy` |
+| `"ripple"` | 일렁임 (5.5): 화면을 투명한 액체 너머로 보듯 천천히 일렁임. 예전 타이틀 일렁임을 셰이더로 옮긴 것이라 타이틀·게임 내 메뉴·게임 중 어디에나. `$ ripple.preset("calm")` 살짝, `"dream"` 크게 | `ripple_config.rpy` |
 | `"shards"` | 파편 흩날림 (5.1): 작은 뾰족한 조각이 바람에 날림. `$ shards.preset("embers")` 불티, `"ash"` 재, `"dread"` 어두운 화면에 붉은 파편 | `shards_config.rpy` |
 | `"default"` | 기본 효과로 돌아가기 (= 선택취소) | `screen_fx_config.rpy`의 `screen_fx.base` |
 | (덮개) | VHS. 켬 / 끔만 고르고 모양은 `vhs_crt.settings` | `vhs_crt_config.rpy` |
@@ -1376,13 +1375,46 @@ e "삐빅." (fx="gameboy", font="screen_fx/fonts/neodgm.ttf", size=32)   # 대�
 
 `screen_fx/README.md` 12-1의 흑백 견본 코드를 새 파일로 저장해 이름을 바꾸고(예: `glitch`) 셰이더 부분을 고칩니다. 넣기만 하면 `$ screen_fx.use("glitch")`, 대사 괄호 `(fx="glitch")`, 편집기 "화면 효과" 탭과 대사 탭의 버튼이 저절로 생깁니다. 단계별 방법은 `screen_fx/README.md` 12장. 글자 층만 다르게 그리는 효과(게임보이처럼)는 `layered()`와 `u_sfx_text`를 씁니다(같은 장).
 
-## 타이틀 일렁임 — `screen_fx/watermorph_config.rpy`
+## 효과 폴더 — `ui_kit/effects/` (5.1)
 
-타이틀 화면에서만 켜지는 셰이더입니다. 숫자 값만 바꾸면 됩니다.
+이 폴더에 `.glsl` 파일을 넣으면 그 안의 효과가 게임과 pygaki 앱에 저절로 생기고, 파일을 빼면 없어집니다. 효과 하나에 파일 하나입니다. 파일을 넣거나 뺀 뒤에는 게임을 껐다 켭니다. pygaki 앱의 [효과] 화면에서 샘플을 돌려 보고, 켜고 끄고, 넣고 뺄 수도 있습니다(뺀 파일은 `ui_kit_backup/effects/`에 남음).
+
+| 종류 | 쓰는 곳 | 원고 |
+| --- | --- | --- |
+| 글자 등장 효과 (`@effect`) | PyKaki 글자 효과 카드의 등장 효과 목록 | `e "아래에서 올라온다." (cps=30, effect="maskup")` |
+| 그림 전환 (`@transition`) | PyKaki 배경·보이기 줄의 "나타나는 방식" | `scene bg hall with img_fx.use("irisin")`, 시간과 값은 `img_fx.use("bands", 1.4, count=10)` |
+
+들어 있는 샘플: 글자 `maskup` 아래에서 올라오기, `popin` 뿅 튀어나오기, `tracking` 자간이 좁아지며, `sweep` 빛 지나가기 / 그림 `irisin` 원으로 열리기, `bands` 띠로 덮였다 열리기, `pixelsort` 픽셀소트 (크래시), `datamosh` 데이터모싱 (크래시). 앱의 "효과 모음"에는 `slide` 옆으로 밀기, `mosaic` 모자이크, `blinds` 가로 블라인드가 더 있습니다.
+
+**셰이더가 바뀔 때 그림 전환으로**: `pixelsort`, `datamosh`는 화면 셰이더를 바꿀 때의 전환으로도 씁니다. 앞 화면이 깨진 채 잠깐 멈췄다가 새 화면으로 끊어 넘어가고, 셰이더도 그 순간에 바뀝니다. PyKaki에서는 상자의 ◐ 셰이더 → 전환 "시작할 때", "끝날 때"에서 고르고 그 아래 "방향"을 정합니다. 원고로 직접 쓸 때는 이렇게 적습니다.
+
+```renpy
+$ screen_fx.shaders("glitch", "none", transition="datamosh", duration=1.4, tv={"mode": 1.0})   # 확산 (0이면 회전)
+scene bg room
+with screen_fx.pending_with()
+```
+
+픽셀소트의 방향은 `tv={"dir": 0}` 가로, `1` 세로, `2` 회전, `3` 확산입니다. 새 효과를 적는 법과 클로드에게 줄 요청문은 그 폴더의 `README.md`에 있습니다.
+
+## 상자·장면마다 셰이더, 대사 소리, 커서 (PyKaki, 5.1)
+
+PyKaki에서 상자나 label 오른쪽 위의 **◐ 셰이더**로 정하면, 내보낼 때 상자마다 첫 줄에 아래 같은 줄이 적힙니다. 직접 원고를 쓸 때도 같은 줄을 씁니다.
+
+```renpy
+$ screen_fx.shaders("vhs_crt", "none", transition="tv", tv={"off_time": 0.6}, values={"vhs_crt": {"warp_amount": 2.0}})
+$ custom_ui.scene(typing_sound="audio/beep.ogg", ctc="gui/ctc/heart", cursor="gui/cursor/hand")
+```
+
+- `values`: 그 자리에서만 쓰는 셰이더 세부 값(`{}`면 설정대로). `tv`: 이번 TV 전환에만 쓰는 값.
+- `custom_ui.scene`: 장면마다 대사 소리(`None`이면 끔), 클릭 대기 표시와 커서 그림 폴더(폴더 안 그림을 이름 차례로 돌림). `custom_ui.scene()`이면 게임 처음 값으로. 세이브와 되감기에 남습니다.
+
+## 타이틀 일렁임 — `screen_fx/watermorph_config.rpy` (예전 방식)
+
+5.5부터 타이틀 일렁임은 셰이더 `ripple`(`ripple_config.rpy`, 위 기본 효과 표)로 걸립니다. 새 프로젝트는 `screen_fx_config.rpy`의 `screen_fx.title_shaders = ("ripple", "none")`이 처음 값이고 `watermorph.enabled = False`입니다. 아래는 예전 방식을 그대로 쓸 때의 값입니다(둘을 같이 켜면 두 번 일렁임).
 
 | 값 | 배포 기본값 | 바꾸면 |
 | --- | --- | --- |
-| `watermorph.enabled` | `True` | `False`면 끔 |
+| `watermorph.enabled` | `False` (5.5부터) | `True`면 예전 방식으로 일렁임 (`title_shaders`에서 `"ripple"`을 빼기) |
 | `watermorph.target` | `"screen"` | `"background"`면 배경만 일렁이고 메뉴 글자는 선명 |
 | `watermorph.amount` | `6.0` | 일렁임 세기(픽셀). `"screen"`일 때는 클릭 위치가 어긋나지 않게 8 이하 |
 | `watermorph.scale` | `180.0` | 물결 하나의 크기(픽셀). 클수록 느긋한 큰 물결 |
