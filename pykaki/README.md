@@ -14,7 +14,7 @@ pygaki 묶음(렌파이 SDK + pygaki 플러그인 + 이 앱) 안의 데스크톱
 - 문제(연결 안 된 선, 빈 대사, 잘못된 이름) 검사
 - `.rpy`로 내보내기
 - [pygaki 플러그인](https://github.com/halftomatodev/pygaki/tree/main/showpy)와 연결: 렌파이 편집기에서 넣은 그림, 영상, 소리가 대본에도 나타나요
-- 집중 모드(화면을 비우고 쓰는 줄만 또렷하게), 화면 색·글꼴(Pretendard 400/500/600, Neo둥근모)·단축키 바꾸기
+- 집중 모드(화면을 비우고 쓰는 줄만 또렷하게), 화면 색(사과 스타일, 어둡게, 직접 고르기)·단축키 바꾸기
 
 자세한 사용법은 [사용 가이드](docs/GUIDE.md)를 보세요.
 
@@ -43,4 +43,4 @@ cd app && npm ci && npm start   # 데스크톱 앱
 
 PyKaki는 Ren'Py의 공식 도구가 아니에요.
 
-함께 들어 있는 글꼴 **Pretendard**(길형진)와 **Neo둥근모**(Dalgona, 원작 김중태)는 SIL Open Font License 1.1을 따라요 ([Pretendard](licenses/OFL-Pretendard.txt), [Neo둥근모](licenses/OFL-NeoDunggeunmo.txt)).
+함께 들어 있는 글꼴 **Pretendard**(길형진)는 SIL Open Font License 1.1을 따라요 ([라이선스](licenses/OFL-Pretendard.txt)).

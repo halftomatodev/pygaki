@@ -138,8 +138,6 @@ code { font-family: var(--mono); }
 .fold-all { display: flex; justify-content: flex-end; margin: 0 2px -6px; flex-shrink: 0; }
 .fold-all .fold-btn { color: var(--muted); background: var(--faint); font-weight: 500; font-size: 11.5px; padding: 2px 8px; }
 .fold-all .fold-btn:hover:not(:disabled) { background: var(--line); color: var(--text); text-decoration: none; }
-[data-mono='1'] .sec.folded { background: var(--bg); outline: 1px dashed var(--text); }
-[data-mono='1'] .sec.folded > h3 { color: var(--text); }
 .sec > .tip, .sec .link-panel > .tip { margin: 6px 0 2px; }
 .mini-btns { display: flex; gap: 4px; }
 .mini-btns button { background: var(--faint); padding: 2px 8px; font-size: 11.5px; }
@@ -164,10 +162,6 @@ body.resizing .react-flow { pointer-events: none; }
 .info-row > b { font-weight: 600; text-align: right; min-width: 0; overflow-wrap: anywhere; }
 .info-btn { display: block; width: 100%; margin: 4px 0; background: var(--faint); padding: 5px 6px; }
 .info-btn.primary { background: var(--accent-soft); font-weight: 600; }
-[data-mono='1'] :is(.sec, .tabs, .tab-body:not(.cards)) { background: transparent; border: 1px solid var(--text); border-radius: 0; }
-[data-mono='1'] :is(.sec-btns button, .info-btn) { background: transparent; outline: 1px solid var(--text); border-radius: 0; }
-[data-mono='1'] .toolbar .run { background: var(--text); color: var(--bg); border-radius: 0; }
-[data-mono='1'] .toolbar .follow, [data-mono='1'] .toolbar .follow.on { background: transparent; color: var(--text); outline: 1px solid var(--text); border-radius: 0; }
 .item { display: flex; gap: 4px; align-items: center; margin-bottom: 4px; }
 .item input:not([type='color']) { flex: 1; }
 .item .cid, .item .gname { font-family: var(--mono); }
@@ -281,8 +275,6 @@ input.box-title.ed { flex: 1; min-width: 0; }
 /* 첫 단계의 키 받는 칸은 보이지 않게 */
 .side-flow input.fm-keys { position: absolute; width: 1px; height: 1px; padding: 0; border: 0; opacity: 0; pointer-events: none; }
 .fm-help { font-size: 10.5px; margin-top: 3px; }
-[data-mono='1'] .side-flow { background: var(--bg); -webkit-backdrop-filter: none; backdrop-filter: none; border-style: dashed; }
-[data-mono='1'] .fm-item.cur { background: var(--text); color: var(--bg); }
 .more { color: var(--muted); font-size: 11px; }
 .todo { color: var(--danger); font-style: normal; }
 .box-exit { padding: 5px 8px 8px; font-size: 11.5px; color: var(--muted); }
@@ -483,43 +475,7 @@ pre.rpy { background: #17191f; color: #d4d6dd; padding: 12px; border-radius: 8px
 .key { font-family: var(--mono); font-size: 12px; background: var(--faint); color: var(--text); min-width: 110px; }
 .key.rec { background: var(--accent-soft); color: var(--accent); font-family: inherit; }
 
-/* ── 1비트 테마: 칠하지 않고 모두 같은 바탕에 글자색 선만 ── */
-:root[data-mono='1'] {
-  --line: var(--text); --muted: var(--text); --faint: transparent; --hover: transparent; --accent-soft: transparent;
-  --t-cmd: transparent; --t-note: transparent; --t-stage: transparent; --ok-text: var(--text);
-  --danger: var(--text); --play: var(--text); --box-border: var(--text);
-}
-[data-mono='1'] .box, [data-mono='1'] .side, [data-mono='1'] .modal { background: var(--bg); border: 1px solid var(--text); border-radius: 0; box-shadow: none; }
-[data-mono='1'] .box-lines, [data-mono='1'] .choice, [data-mono='1'] .line, [data-mono='1'] .dbg { background: transparent; border-radius: 0; }
-[data-mono='1'] .choice { border: 1px solid var(--text); }
-[data-mono='1'] .frame { background: transparent; border: var(--frame-w, 3px) dashed var(--text); border-radius: 0; }
-[data-mono='1'] .pl .who, [data-mono='1'] .badge, [data-mono='1'] .badge.start { background: transparent; border-radius: 0; outline: 1px solid var(--text); outline-offset: -1px; color: var(--text); }
-[data-mono='1'] .pl.pl-stage code { background: transparent; padding: 0; }
-[data-mono='1'] .todo { text-decoration: underline dotted; }
-[data-mono='1'] .box.sel { outline: 2px solid var(--text); outline-offset: 2px; }
-[data-mono='1'] .box.editing .pl.active { background: transparent; box-shadow: none; text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--text) 40%, transparent); }
-[data-mono='1'] button:hover:not(:disabled), [data-mono='1'] .tabs button.on { text-decoration: underline; }
-[data-mono='1'] button.on, [data-mono='1'] .swatch.on { outline: 1px solid var(--text); }
-[data-mono='1'] .swatch { border-radius: 0; }
-[data-mono='1'] :is(select, input, textarea) { background: transparent; border-radius: 0; }
-[data-mono='1'] :is(input, textarea, select):focus { border-color: var(--text); }
-[data-mono='1'] .toolbar, [data-mono='1'] .sidebar, [data-mono='1'] .right-panel { background: var(--bg); }
-[data-mono='1'] .react-flow__edge-path, [data-mono='1'] .react-flow__edge.cross .react-flow__edge-path,
-[data-mono='1'] .react-flow__edge.k-call .react-flow__edge-path { stroke: var(--text); }
-[data-mono='1'] .react-flow__edge-text { fill: var(--text); }
-[data-mono='1'] .react-flow__arrowhead polyline { stroke: var(--text); fill: var(--text); }
-[data-mono='1'] .react-flow__handle, [data-mono='1'] .react-flow__handle.h-call { background: var(--bg); border: 1.5px solid var(--text); }
-[data-mono='1'] .react-flow__controls-button { background: var(--bg); border-color: var(--text); fill: var(--text); }
-[data-mono='1'] .warn-item { background: transparent; border: 1px solid var(--text); border-radius: 0; }
-[data-mono='1'] .count { background: transparent; outline: 1px solid var(--text); }
-[data-mono='1'] pre.rpy { background: var(--bg); color: var(--text); border: 1px solid var(--text); border-radius: 0; }
-[data-mono='1'] .cmds span { background: transparent; outline: 1px solid var(--text); color: var(--text); border-radius: 0; }
-[data-mono='1'] :is(.pmenu, .ended) button { background: var(--bg); color: var(--text); border: 1px solid var(--text); border-radius: 0; }
-[data-mono='1'] .toast { border-radius: 0; }
-[data-mono='1'] .ucaret { border-radius: 0; }
 input[type='range'] { flex: 1; padding: 0; background: transparent; border: none; accent-color: var(--accent); }
-[data-mono='1'] .exit-label.call { color: var(--text); }
-[data-mono='1'] .grp { border-left-color: var(--text) !important; border-radius: 0; }
 
 /* ── 사과 스타일: 경계선 없이 둥근 카드와 바탕색 차이로만 구분 ── */
 :root[data-look^='apple'] {
@@ -531,7 +487,7 @@ input[type='range'] { flex: 1; padding: 0; background: transparent; border: none
 }
 [data-look^='apple'] .box {
   border: none; border-radius: 16px;
-  /* 사과 스타일의 상자는 흰 카드 (사과 컬러풀은 아래에서 label 색을 입힌다) */
+  /* 사과 스타일의 상자는 흰 카드 */
   background: var(--panel);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 14px rgba(0, 0, 0, 0.05);
 }
@@ -563,37 +519,26 @@ input[type='range'] { flex: 1; padding: 0; background: transparent; border: none
 [data-look^='apple'] .warn-item { border-radius: 10px; }
 [data-look^='apple'] pre.rpy { border-radius: 12px; }
 
-/* 사과 컬러풀: label 색의 색상(hue)만 따서 Apple 시스템 색처럼 또렷한 색으로 칠한다 */
-[data-look='apple-color'] .box { --gv: var(--g); }
-[data-look='apple-color'] .pl .who { --cv: var(--c); }
-@supports (color: oklch(from red l c h)) {
-  [data-look='apple-color'] .box { --gv: oklch(from var(--g) 0.7 0.16 h); }
-  [data-look='apple-color'] .pl .who { --cv: oklch(from var(--c) 0.63 0.17 h); }
-}
-[data-look='apple-color'] .box { background: color-mix(in srgb, var(--gv) calc(var(--label-tint) * 40%), var(--panel)); }
-[data-look='apple-color'] .pl .who { background: var(--cv); color: #fff; }
-[data-look='apple-color'] .choice { background: rgba(255, 255, 255, 0.7); color: var(--accent); font-weight: 600; }
 .row > label.pick[for] { width: 96px; flex-shrink: 0; }
 
 /* 상자 색 고르기 */
 input[type='color'].bc-big { width: 34px; height: 26px; border-radius: 8px; }
 input[type='color'].bc-big::-webkit-color-swatch { border-radius: 6px; }
 .bc-hex { width: 96px; font-family: var(--mono); }
-/* 상자에 직접 고른 색은 사과 컬러풀에서도 그 색 그대로 쓴다 */
-[data-look='apple-color'] .box.own-color { --gv: var(--g); }
 
 /* 상자를 한 가지 색(--fill-c)으로 칠하는 두 경우: 그라데이션·직접 고르기 테마([data-boxfill]), 설정에서 칠한 상자(.own-color, 더 우선).
    글자와 흐린 글자, 선은 그 색 위에서 읽히게 다시 맞춘다 (옆에 붙는 단추·창은 원래 색을 쓰도록 상자 머리/줄/다음 흐름에만) */
 :root[data-boxfill='1'] .box { --fill-c: var(--theme-box); --bt: var(--theme-box-text); }
-:root:not([data-mono='1']):not([data-grad='1']) .box.own-color { --fill-c: var(--g); --bt: var(--own-bt); }
-/* 밝게/어둡게(그라데이션)에서는 칠한 상자 색을 쓰지 않고 모두 그라데이션을 따른다 */
+:root:not([data-grad='1']) .box.own-color { --fill-c: var(--g); --bt: var(--own-bt); }
+/* 어둡게(그라데이션)에서는 칠한 상자 색을 쓰지 않고 모두 그라데이션을 따른다 */
+/* 아래 :root:root는 우선순위를 예전(1비트 테마를 빼던 선택자)과 같게 두려고 겹쳐 쓴 것 */
 /* 텍스트 색을 직접 골랐으면 상자·label 위 글자도 모두 그 색 */
 :root[data-textfix='1'] .box { --bt: var(--text-fix) !important; }
 :root[data-textfix='1'] .frame span { color: var(--text-fix) !important; }
-:root:not([data-mono='1']) .react-flow :is(.box.own-color, [data-boxfill='1'] .box) {
+:root:root .react-flow :is(.box.own-color, [data-boxfill='1'] .box) {
   background: var(--fill-c); border-color: color-mix(in srgb, var(--fill-c) 82%, var(--bt));
 }
-:root:not([data-mono='1']) :is(.box.own-color, [data-boxfill='1'] .box) :is(.box-head, .box-lines > .pl, .box-exit, .more) {
+:root:root :is(.box.own-color, [data-boxfill='1'] .box) :is(.box-head, .box-lines > .pl, .box-exit, .more) {
   --text: var(--bt); --panel: var(--fill-c);
   --muted: color-mix(in srgb, var(--bt) 62%, var(--fill-c));
   --line: color-mix(in srgb, var(--bt) 22%, var(--fill-c));
@@ -601,9 +546,9 @@ input[type='color'].bc-big::-webkit-color-swatch { border-radius: 6px; }
   --t-stage: color-mix(in srgb, var(--bt) 12%, transparent); --ok-text: var(--bt);
   color: var(--bt);
 }
-:root:not([data-mono='1']) :is(.box.own-color, [data-boxfill='1'] .box) .box-lines { background: transparent; }
-:root:not([data-mono='1']) :is(.box.own-color, [data-boxfill='1'] .box) .badge { background: color-mix(in srgb, var(--bt) 14%, transparent); color: var(--bt); }
-:root:not([data-mono='1']) :is(.box.own-color, [data-boxfill='1'] .box) .choice { background: color-mix(in srgb, var(--bt) 10%, transparent); border-color: color-mix(in srgb, var(--bt) 25%, transparent); color: var(--bt); }
+:root:root :is(.box.own-color, [data-boxfill='1'] .box) .box-lines { background: transparent; }
+:root:root :is(.box.own-color, [data-boxfill='1'] .box) .badge { background: color-mix(in srgb, var(--bt) 14%, transparent); color: var(--bt); }
+:root:root :is(.box.own-color, [data-boxfill='1'] .box) .choice { background: color-mix(in srgb, var(--bt) 10%, transparent); border-color: color-mix(in srgb, var(--bt) 25%, transparent); color: var(--bt); }
 /* 그라데이션·직접 고르기 테마의 label 배경 */
 :root[data-labelfill='1'] .frame { background: var(--theme-label); border-color: color-mix(in srgb, var(--theme-label) 70%, var(--theme-label-text)); }
 :root[data-labelfill='1'] .frame span { color: var(--theme-label-text); }
@@ -960,7 +905,6 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .live-badge { font-size: 12.5px; font-weight: 600; padding: 5px 12px; background: var(--faint); color: var(--muted); }
 .live-badge.reloading, .live-badge.reloading:hover:not(:disabled) { background: color-mix(in srgb, #ff9f0a 14%, var(--panel)); color: color-mix(in srgb, #ff9f0a 70%, var(--text)); }
 .live-badge.on, .live-badge.on:hover:not(:disabled) { background: color-mix(in srgb, var(--live-c) 12%, var(--panel)); color: color-mix(in srgb, var(--live-c) 70%, var(--text)); }
-[data-mono='1'] .toolbar .focus-btn, [data-mono='1'] .live-badge { background: transparent; color: var(--text); outline: 1px solid var(--text); border-radius: 0; }
 
 /* 오른쪽 칸: 탭 없이 카드만 (왼쪽 칸과 같은 모양) */
 .right-panel { padding: 4px 10px 16px 4px; }
@@ -1003,7 +947,6 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .sp-cards > .sp-panel { background: var(--bg); border-left: 0; padding: 6px 10px 16px 4px; display: flex; flex-direction: column; gap: 10px; }
 .sp-panel .card .sp-bar { border-bottom: 0; padding-bottom: 0; margin-bottom: 0; }
 .sp-panel .card p:first-child { margin-top: 0; }
-[data-mono='1'] .sp-cu > section { background: var(--bg); outline: 1px solid var(--text); }
 
 /* 상자 편집의 배경 / 그림·영상 / 소리 카드 (StageCards.tsx) */
 .sc-used { display: flex; flex-direction: column; gap: 1px; margin-bottom: 6px; }
@@ -1050,7 +993,6 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .all-row button { flex: 1; display: inline-flex; gap: 5px; align-items: center; justify-content: center; background: color-mix(in srgb, #eab308 12%, var(--panel)); color: color-mix(in srgb, #a16207 70%, var(--text)); font-size: 12px; }
 .all-row button.danger { background: color-mix(in srgb, var(--danger) 10%, var(--panel)); color: color-mix(in srgb, var(--danger) 80%, var(--text)); }
 .warn-ico { flex-shrink: 0; }
-[data-mono='1'] .all-row button { background: transparent; outline: 1px solid var(--text); color: var(--text); }
 
 /* 나타나는 방식 고르기 창 (TransPicker.tsx) */
 .tp { position: relative; display: inline-flex; min-width: 0; }
@@ -1101,6 +1043,5 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
    [게임 줄 따라가기: 켬]의 녹색보다 살짝 밝게 */
 .card.in-use { background: color-mix(in srgb, #34c759 8%, var(--panel)); box-shadow: inset 0 0 0 1px color-mix(in srgb, #34c759 28%, transparent); }
 .card.in-use > h3 .card-title::after { content: '사용 중'; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 8px; color: color-mix(in srgb, #34c759 62%, var(--text)); background: color-mix(in srgb, #34c759 16%, var(--panel)); }
-[data-mono='1'] .card.in-use { background: var(--panel); box-shadow: inset 0 0 0 2px var(--text); }
 .sc-char { margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed var(--line); }
 .sc-char-h { font-size: 12px; color: var(--muted); margin: 2px 0 6px; }

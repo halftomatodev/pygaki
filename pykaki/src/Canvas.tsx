@@ -8,7 +8,7 @@ import { BoxView, GroupFrame } from './BoxView';
 import * as ops from './ops';
 import { addBoxAt, editBox } from './actions';
 import { isTyping } from './util';
-import { colorsOf, gradOf, isDark, isMono, usePrefs } from './prefs';
+import { colorsOf, gradOf, isDark, usePrefs } from './prefs';
 
 // 좌우 칸은 캔버스 위에 떠 있다(세션 35). 화면 맞추기는 두 칸 사이 보이는 곳에 맞춘다
 function panelsW() {
@@ -44,7 +44,6 @@ export function Canvas() {
   const hideLeft = useStore((s) => s.hideLeft);
   const hideRight = useStore((s) => s.hideRight);
   const dark =usePrefs((p) => isDark(colorsOf(p)));
-  const mono = usePrefs((p) => (isMono(p) ? colorsOf(p) : null));
   const gradBox = usePrefs((p) => (gradOf(p) ? colorsOf(p).box : null));
   const rf = useReactFlow();
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -244,9 +243,8 @@ export function Canvas() {
         <MiniMap
           pannable
           zoomable
-          nodeColor={(n) => (n.type === 'frame' ? 'transparent' : mono ? mono.bg : gradBox ?? ops.findBox(project, n.id)?.color ?? project.labels.find((g) => g.id === ops.findBox(project, n.id)?.group)?.color ?? '#ddd')}
-          nodeStrokeColor={(n) => (mono && n.type !== 'frame' ? mono.text : 'transparent')}
-          nodeStrokeWidth={mono ? 3 : 1}
+          nodeColor={(n) => (n.type === 'frame' ? 'transparent' : gradBox ?? ops.findBox(project, n.id)?.color ?? project.labels.find((g) => g.id === ops.findBox(project, n.id)?.group)?.color ?? '#ddd')}
+          nodeStrokeColor="transparent"
           maskColor="color-mix(in srgb, var(--bg) 70%, transparent)"
           bgColor="var(--panel)"
         />

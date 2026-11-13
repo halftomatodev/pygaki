@@ -1,7 +1,5 @@
 // 환경 설정(화면 색, 단축키). 대본이 아니라 이 브라우저에 붙는 설정이라 localStorage에 둔다.
 import { create } from 'zustand';
-// Neo둥근모 (SIL OFL 1.1, licenses/OFL-NeoDunggeunmo.txt). 빌드할 때 파일 안에 들어간다
-import neodgmUrl from '@kfonts/neodgm/neodgm.woff2?url';
 // Pretendard (SIL OFL 1.1, licenses/OFL-Pretendard.txt). 굵기를 고를 수 있는 가변 글꼴 하나를 파일 안에 넣는다
 import pretendardUrl from 'pretendard/dist/web/variable/woff2/PretendardVariable.woff2?url';
 
@@ -25,25 +23,21 @@ export const ACTIONS: { id: ActionId; label: string; def: string }[] = [
   { id: 'gamePanel', label: '게임 창의 GUI 편집기 보이기/숨기기 (앱, 게임과 연결됐을 때)', def: 'F9' },
 ];
 
-// box·label은 그라데이션 테마와 직접 고르기에서만: 상자와 label 배경을 이 색으로 칠한다
+// box·label은 어둡게(그라데이션) 테마와 직접 고르기에서만: 상자와 label 배경을 이 색으로 칠한다
 export interface Colors { bg: string; panel: string; text: string; accent: string; box?: string; label?: string }
-export type ThemeId = 'apple' | 'apple-color' | 'light' | 'dark' | 'onebit' | 'onebit-light' | 'custom';
+export type ThemeId = 'apple' | 'dark' | 'custom';
 export interface Grad { a: string; b: string } // a: 바탕 쪽 색, b: 끝 색
-export type GradId = 'light' | 'dark';
+export type GradId = 'dark';
 
-// look: 사과 스타일(Apple 디자인 참고, 처음 값). 경계선 없이 둥근 카드와 바탕색 차이로만 구분한다 (apple-color는 label 색을 진하게)
-// grad: 그라데이션 테마. 두 색 사이에서 바탕 → label 배경 → 상자 순서로 색을 정한다
-// mono: 1비트 테마. 칠하지 않고 모두 같은 바탕에 글자색 선만 긋는다
-export type Look = 'apple' | 'apple-color';
-export const THEMES: { id: Exclude<ThemeId, 'custom'>; label: string; colors: Colors; mono?: boolean; look?: Look; grad?: GradId }[] = [
+// look: 사과 스타일(Apple 디자인 참고, 처음 값). 경계선 없이 둥근 카드와 바탕색 차이로만 구분한다
+// grad: 그라데이션 테마(어둡게). 두 색 사이에서 바탕 → label 배경 → 상자 순서로 색을 정한다
+export type Look = 'apple';
+export const THEMES: { id: Exclude<ThemeId, 'custom'>; label: string; colors: Colors; look?: Look; grad?: GradId }[] = [
   { id: 'apple', label: '사과 스타일', colors: { bg: '#f2f2f7', panel: '#ffffff', text: '#1c1c1e', accent: '#007aff' }, look: 'apple' },
-  { id: 'apple-color', label: '사과 컬러풀', colors: { bg: '#f2f2f7', panel: '#ffffff', text: '#1c1c1e', accent: '#007aff' }, look: 'apple-color' },
-  { id: 'light', label: '밝게', colors: { bg: '#ffffff', panel: '#f8f8f8', text: '#1c1c1e', accent: '#58585d' }, grad: 'light' },
   { id: 'dark', label: '어둡게', colors: { bg: '#000000', panel: '#0b0714', text: '#ececf1', accent: '#a684f8' }, grad: 'dark' },
-  { id: 'onebit', label: '1비트', colors: { bg: '#000000', panel: '#000000', text: '#ffffff', accent: '#ffffff' }, mono: true },
-  { id: 'onebit-light', label: '1비트 흰 바탕', colors: { bg: '#ffffff', panel: '#ffffff', text: '#000000', accent: '#000000' }, mono: true },
 ];
-export const GRAD_DEFAULTS: Record<GradId, Grad> = { light: { a: '#ffffff', b: '#8e8e93' }, dark: { a: '#000000', b: '#8b5cf6' } };
+const THEME_IDS: string[] = [...THEMES.map((t) => t.id), 'custom'];
+export const GRAD_DEFAULTS: Record<GradId, Grad> = { dark: { a: '#000000', b: '#8b5cf6' } };
 
 // 두 색 섞기 (t=0이면 a, 1이면 b)
 export function mixHex(a: string, b: string, t: number) {
@@ -72,16 +66,12 @@ export function gradColors(g: Grad): Colors {
 }
 
 
-export type FontId = 'default' | 'pretendard-500' | 'pretendard-600' | 'neodgm';
-// 'default'는 예전 설정과 맞추려고 Pretendard 400의 id로 남겨 둔다
-const PRETENDARD = "'Pretendard Variable', 'Pretendard', 'Malgun Gothic', 'Apple SD Gothic Neo', system-ui, sans-serif";
-const MONO = "Consolas, 'D2Coding', monospace";
-export const FONTS: { id: FontId; label: string; family: string; mono: string; weight: number }[] = [
-  { id: 'default', label: 'Pretendard 400', family: PRETENDARD, mono: MONO, weight: 400 },
-  { id: 'pretendard-500', label: 'Pretendard 500', family: PRETENDARD, mono: MONO, weight: 500 },
-  { id: 'pretendard-600', label: 'Pretendard 600', family: PRETENDARD, mono: MONO, weight: 600 },
-  { id: 'neodgm', label: 'Neo둥근모', family: "'NeoDunggeunmo', 'Malgun Gothic', sans-serif", mono: "'NeoDunggeunmo', Consolas, monospace", weight: 400 },
-];
+// 글꼴은 Pretendard 500 하나만 쓴다 (고르는 칸 없음)
+const FONT = {
+  family: "'Pretendard Variable', 'Pretendard', 'Malgun Gothic', 'Apple SD Gothic Neo', system-ui, sans-serif",
+  mono: "Consolas, 'D2Coding', monospace",
+  weight: 500,
+};
 
 // 집중 모드에서 글을 쓸 때: [같은 상자의 다른 줄, 다른 상자] 불투명도
 export type DimId = 'off' | 'weak' | 'mid' | 'strong';
@@ -96,10 +86,9 @@ interface Prefs {
   theme: ThemeId;
   custom: Colors;
   keys: Record<ActionId, string>;
-  font: FontId;
   dim: DimId;
   frameWidth: number; // label 경계선 굵기 (px, 0이면 안 보임)
-  grads: Record<GradId, Grad>; // 밝게/어둡게 테마의 두 색
+  grads: Record<GradId, Grad>; // 어둡게 테마의 두 색
   textColor: string | null; // 텍스트 색. null이면 테마가 정한 색
   runSkip: boolean; // [렌파이에서 실행]: 게임이 이미 켜져 있으면 무시 (앱)
   leftW: number; // 왼쪽 칸 너비 (px)
@@ -117,7 +106,7 @@ const defKeys = () => Object.fromEntries(ACTIONS.map((a) => [a.id, a.def])) as R
 // 처음 값
 const defaults = (): Prefs => ({
   theme: 'apple', custom: { ...THEMES.find((t) => t.id === 'apple')!.colors, box: '#ffffff' }, keys: defKeys(),
-  font: 'default', dim: 'mid', frameWidth: 3, grads: structuredClone(GRAD_DEFAULTS), textColor: null, runSkip: true,
+  dim: 'mid', frameWidth: 3, grads: structuredClone(GRAD_DEFAULTS), textColor: null, runSkip: true,
   leftW: SIZES.left.def, rightW: SIZES.right.def, sizeLock: false,
 });
 
@@ -125,7 +114,12 @@ function loadPrefs(): Prefs {
   const d = defaults();
   try {
     const raw = JSON.parse(localStorage.getItem(KEY) ?? 'null');
-    if (raw) return { ...d, ...raw, custom: { ...d.custom, ...raw.custom }, keys: { ...d.keys, ...raw.keys }, grads: { light: { ...d.grads.light, ...raw.grads?.light }, dark: { ...d.grads.dark, ...raw.grads?.dark } } };
+    if (raw) {
+      // 없앤 테마(사과 컬러풀, 밝게, 1비트)는 처음 값으로, 글꼴은 고를 수 없어서 버린다
+      delete raw.font;
+      if (!THEME_IDS.includes(raw.theme)) delete raw.theme;
+      return { ...d, ...raw, custom: { ...d.custom, ...raw.custom }, keys: { ...d.keys, ...raw.keys }, grads: { dark: { ...d.grads.dark, ...raw.grads?.dark } } };
+    }
   } catch {
     // 저장소를 못 쓰는 브라우저면 기본값으로
   }
@@ -143,7 +137,6 @@ export const colorsOf = (p: Prefs): Colors => {
   return t.grad ? gradColors(p.grads[t.grad]) : t.colors;
 };
 export const gradOf = (p: Prefs) => (p.theme === 'custom' ? undefined : themeOf(p).grad);
-export const isMono = (p: Prefs) => p.theme !== 'custom' && !!themeOf(p).mono;
 export const lookOf = (p: Prefs) => (p.theme === 'custom' ? undefined : themeOf(p).look);
 
 // 배경이 어두우면 캔버스(React Flow)도 어두운 모드로
@@ -163,7 +156,6 @@ function apply(p: Prefs) {
   r.dataset.grad = gradOf(p) ? '1' : '';
   r.style.setProperty('--accent', c.accent);
   r.dataset.dark = isDark(c) ? '1' : '';
-  r.dataset.mono = isMono(p) ? '1' : '';
   r.style.setProperty('--frame-w', Math.min(6, Math.max(0, p.frameWidth)) + 'px');
   r.dataset.look = lookOf(p) ?? '';
   r.style.setProperty('--left-w', clampSize('left', p.leftW) + 'px');
@@ -173,19 +165,17 @@ function apply(p: Prefs) {
     r.dataset[name + 'fill'] = v ? '1' : '';
     if (v) (r.style.setProperty(`--theme-${name}`, v), r.style.setProperty(`--theme-${name}-text`, textOn(v)));
   };
-  fill('box', isMono(p) ? undefined : c.box);
-  fill('label', isMono(p) ? undefined : c.label);
-  const f = FONTS.find((x) => x.id === p.font) ?? FONTS[0];
-  r.style.setProperty('--font', f.family);
-  r.style.setProperty('--font-weight', String(f.weight));
-  r.style.setProperty('--mono', f.mono);
-  r.dataset.font = f.id;
+  fill('box', c.box);
+  fill('label', c.label);
+  r.style.setProperty('--font', FONT.family);
+  r.style.setProperty('--font-weight', String(FONT.weight));
+  r.style.setProperty('--mono', FONT.mono);
   const dm = DIMS.find((x) => x.id === p.dim) ?? DIMS[2];
   r.style.setProperty('--dim-line', String(dm.line));
   r.style.setProperty('--dim-box', String(dm.box));
 }
 
-// 글꼴은 고르거나 설정 창에서 미리 볼 때만 읽어 들인다
+// 글꼴은 처음 켤 때 한 번 읽어 들인다
 const added = new Set<string>();
 function addFont(family: string, url: string, weight = '400') {
   if (added.has(family) || typeof FontFace === 'undefined') return;
@@ -194,15 +184,12 @@ function addFont(family: string, url: string, weight = '400') {
   document.fonts.add(ff);
   ff.load().catch((e) => console.warn('글꼴을 못 읽었어요', family, e));
 }
-export const ensureNeodgm = () => addFont('NeoDunggeunmo', neodgmUrl);
-export const ensurePretendard = () => addFont('Pretendard Variable', pretendardUrl, '45 930');
-const loadFont = (p: Prefs) => (p.font === 'neodgm' ? ensureNeodgm() : ensurePretendard());
+const ensurePretendard = () => addFont('Pretendard Variable', pretendardUrl, '45 930');
 
 apply(usePrefs.getState());
-loadFont(usePrefs.getState());
+ensurePretendard();
 usePrefs.subscribe((p) => {
   apply(p);
-  loadFont(p);
   try {
     localStorage.setItem(KEY, JSON.stringify(p));
   } catch {

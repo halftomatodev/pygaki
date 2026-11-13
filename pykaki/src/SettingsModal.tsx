@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useStore } from './store';
 import { isDesktop } from './desktop';
-import { ACTIONS, DIMS, FONTS, GRAD_DEFAULTS, THEMES, colorsOf, gradColors, gradOf, ensureNeodgm, ensurePretendard, comboLabel, comboOf, resetKeys, resetPrefs, usePrefs, type ActionId, type Colors } from './prefs';
+import { ACTIONS, DIMS, GRAD_DEFAULTS, THEMES, colorsOf, gradColors, gradOf, comboLabel, comboOf, resetKeys, resetPrefs, usePrefs, type ActionId, type Colors } from './prefs';
 
 const close = () => useStore.setState({ showPrefs: false });
 
@@ -21,8 +21,8 @@ export function SettingsModal() {
         <div className="row end">
           <button
             className="danger"
-            title="화면 테마, 글꼴, 집중 모드 흐림, 단축키를 모두 처음 값으로. 대본과 상자 색은 그대로예요"
-            onClick={() => confirm('화면 테마, 글꼴, 집중 모드 흐림, 단축키를 모두 처음 값으로 되돌릴까요?\n대본과 상자 색은 그대로예요.') && (resetPrefs(), useStore.getState().say('설정을 처음 값으로 되돌렸어요'))}
+            title="화면 테마, 집중 모드 흐림, 단축키를 모두 처음 값으로. 대본과 상자 색은 그대로예요"
+            onClick={() => confirm('화면 테마, 집중 모드 흐림, 단축키를 모두 처음 값으로 되돌릴까요?\n대본과 상자 색은 그대로예요.') && (resetPrefs(), useStore.getState().say('설정을 처음 값으로 되돌렸어요'))}
           >
             모든 설정을 처음 값으로
           </button>
@@ -141,7 +141,7 @@ function BoxColors() {
   return (
     <>
       <h4>상자 색 (이 대본에 저장)</h4>
-      {grad && <p className="tip warn-text">밝게/어둡게 테마에서는 상자가 그라데이션 색을 따라서 칠할 수 없어요. 칠해 둔 색은 다른 테마에서 보여요.</p>}
+      {grad && <p className="tip warn-text">어둡게 테마에서는 상자가 그라데이션 색을 따라서 칠할 수 없어요. 칠해 둔 색은 다른 테마에서 보여요.</p>}
       <fieldset className="plain" disabled={grad}>
       <div className="row">
         <label className="pick" htmlFor="bc-target">바꿀 상자</label>
@@ -183,21 +183,9 @@ function BoxColors() {
 }
 
 function LookPrefs() {
-  const font = usePrefs((p) => p.font);
   const dim = usePrefs((p) => p.dim);
-  useEffect(() => (ensureNeodgm(), ensurePretendard()), []);
   return (
     <>
-      <h4>글꼴</h4>
-      <div className="row">
-        {FONTS.map((f) => (
-          <button key={f.id} className={'swatch' + (font === f.id ? ' on' : '')} style={{ fontFamily: f.family, fontWeight: f.weight }} onClick={() => usePrefs.setState({ font: f.id })}>
-            {f.label} · 가나다 Abc 123
-          </button>
-        ))}
-      </div>
-      <p className="tip">화면 전체에 적용돼요. Pretendard는 숫자가 클수록 굵어요. 두 글꼴 모두 SIL Open Font License로 배포되는 무료 글꼴이고, 파일 안에 들어 있어서 인터넷 없이도 보여요.</p>
-
       <h4>집중 모드 흐림</h4>
       <div className="row">
         {DIMS.map((d) => (
