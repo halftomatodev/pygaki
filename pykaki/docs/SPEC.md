@@ -113,7 +113,7 @@
   - 하나도 안 정한 대본에는 이 줄이 전혀 안 들어간다. `renpyLink`가 꺼져 있으면 왼쪽 검사 카드에 경고 한 줄.
   - 화면: 상자 머리와 label 틀 오른쪽 위의 `ShaderButton`(`BoxView.tsx`) → `store.openShader` → 오른쪽 칸이 `ShaderPanel.tsx`. 그 상자만 골라져 있는 동안(label은 아무 상자도 안 고른 동안)만 열려 있다.
   - **세부 값** (`FEATURE` 6, screen_fx 5.5): `BoxShader.va`(1번) `vb`(2번)는 `{값 이름: 값}`, `tv`는 TV 전환 값. 셰이더 칸에서 고른 셰이더 아래 [세부 값]을 펼치면 `ScreenFxKnobs`(값 이름과 범위는 `shader_list.json`의 `params` `groups`), 전환이 TV면 `TvKnobs`(`shader.ts` `TV_KNOBS`). 셰이더를 바꾸면 그 자리 값은 지운다. 내보낼 때(`shaderCode`) 대본 어디에든 셰이더 값이 있으면(`usesShaderValues`) 모든 셰이더 줄에 `values={이름: {…}}`(두 자리를 이름별로 합침, `slotValues`), 전환이 `"tv"`이고 그 전환의 주인에게 `tv`가 있으면 `tv={…}`. 들어올 때 전환과 TV 값은 `enterTransTv`. 게임 목록의 `screen_fx`가 5.5보다 낮으면(`valuesSupported`) 값을 빼고 검사 경고. 형식은 LINK.md 2장.
-  - 위쪽 [셰이더] 화면(`ShadersView.tsx`): [셰이더](목록, 켜기/끄기, 샘플, 구경용 막대) / [전환](TV 꺼짐·켜짐, 픽셀소트, 데이터모싱, 없음. 픽셀소트·데이터모싱은 효과 폴더 효과를 `PictureSample`로. TV는 CSS로 비슷하게 그리는 샘플 `TvSample`과 구경용 막대, 쓰인 곳).
+  - 위쪽 [셰이더] 화면(`ShadersView.tsx`): [셰이더](목록, 켜기/끄기, 샘플, 구경용 막대) / [전환](TV 꺼짐·켜짐, 픽셀소트, 데이터모싱, TV 지직, 조정 화면, 테이프 늘어짐, 점멸, 없음(`SHADER_TRANS`, 새 넷은 `FEATURE` 11). TV 말고는 효과 폴더 효과를 `PictureSample`로. TV는 CSS로 비슷하게 그리는 샘플 `TvSample`과 구경용 막대, 쓰인 곳).
   - 예전 `fx` 줄(`screen_fx.use`)은 그대로 읽고 내보낸다(새 줄 목록에는 없음).
   - 셰이더 카드 맨 아래 [⚠ 모든 상자에 적용](이 상자·label에 걸린 셰이더를 모든 label에 걸고 상자마다 따로 정한 것은 지움) / [⚠ 전부 삭제](대본 전체에서 지움). 확인 창을 띄우고, ↶로 되돌린다(`UiPanel.tsx` `AllRow`).
 - **대사 소리와 속도** (`Line.say.sound`, `say.cps`, `FEATURE` 10): 대사·내레이션 줄 하나마다. `sound`는 game 기준 경로, `''`이면 이 줄은 끔, 없으면 캐릭터 `cb_typing_sound` → 게임 처음 값. 원고에는 대사 괄호에 `cb_typing_sound=`(연결을 켰을 때만). 상자 편집 칸 글자 효과 카드 아래 `UiPanel.tsx` `SayUiCard`: 값마다 [따름]/[이 대사에], [이 상자의 모든 대사에].

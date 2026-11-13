@@ -88,11 +88,14 @@ export function shaderNames(keep: (string | undefined)[] = []): [string, string]
   for (const k of keep) if (k && !rv.some(([id]) => id === k)) rv.push([k, k + ' (이 게임에 없음)']);
   return rv;
 }
-// 전환: TV 꺼짐·켜짐, 그림 전환 둘(픽셀소트, 데이터모싱), 없음(바로 바뀜, transition=None)
-export const SHADER_TRANS: [string, string][] = [['tv', 'TV 꺼짐·켜짐'], ['pixelsort', '픽셀소트'], ['datamosh', '데이터모싱'], ['none', '없음']];
+// 전환: TV 꺼짐·켜짐, 그림 전환(픽셀소트, 데이터모싱, FEATURE 11부터 TV 지직, 조정 화면, 테이프 늘어짐, 점멸), 없음(바로 바뀜, transition=None)
+export const SHADER_TRANS: [string, string][] = [
+  ['tv', 'TV 꺼짐·켜짐'], ['pixelsort', '픽셀소트'], ['datamosh', '데이터모싱'],
+  ['static', 'TV 지직'], ['calibrate', '조정 화면'], ['tapestretch', '테이프 늘어짐'], ['blink', '점멸'], ['none', '없음'],
+];
 // 그림 전환으로 셰이더를 바꾸기 (screen_fx 5.6, LINK.md 2장): 효과 폴더(ui_kit/effects)의 @transition을 써서
 // 앞 상자 마지막 화면 → 이 상자 첫 화면을 잇고, 셰이더는 그 시간의 절반에 바뀐다. 원고에는 셰이더 줄 + 첫 그림 줄들 + with screen_fx.pending_with()
-export const IMG_SHADER_TRANS = ['pixelsort', 'datamosh'];
+export const IMG_SHADER_TRANS = ['pixelsort', 'datamosh', 'static', 'calibrate', 'tapestretch', 'blink'];
 export const isImgTrans = (t?: string) => !!t && IMG_SHADER_TRANS.includes(t);
 // 그림 전환의 방향 값: [값 이름, [[값, 이름]...]]. 효과 파일에 그 값(u__이름)이 있을 때만 고른다
 export const IMG_TRANS_DIR: Record<string, [string, [number, string][]]> = {

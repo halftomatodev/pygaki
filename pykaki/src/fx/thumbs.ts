@@ -73,12 +73,18 @@ export function transitionThumb(effect: ShaderEffect, args: Record<string, strin
   const [a, b] = [small(old as CanvasImageSource), small(next as CanvasImageSource)];
   let best = 0.5;
   let score = -1;
+  // 모두 0점이면(점멸처럼 온통 한 색이거나 앞·새 그림 그대로인 순간뿐) 가장 덜 단조로운 순간
+  let plain = 0.5;
+  let plainV = -1;
   for (const t of [0.2, 0.35, 0.5, 0.65, 0.8]) {
     r.draw(t, size, values);
     const s = small(c);
     const v = Math.min(diff(s, a), diff(s, b)) * Math.min(1, spread(s) / 20);
     if (v > score + 1) (score = v), (best = t);
+    const sp = spread(s);
+    if (sp > plainV + 1) (plainV = sp), (plain = t);
   }
+  if (score <= 1) best = plain;
   r.draw(best, size, values);
   return grab(c);
 }

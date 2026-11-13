@@ -369,3 +369,42 @@ $ screen_fx.set_values("shards", count=80, colors=2, color="#d22", color2="#811"
 - 렌파이 8.5의 대사는 `TranslateSay` 노드. `call` 뒤 같은 줄의 `Pass`는 건너뜀.
 - 세션: `tree_open`만 기억(저장 → 다시 불러오기 뒤에도 펴진 채). 구간과 고른 전환 점은 저장하면 지움.
 - 한계: 다른 파일로 가는 `jump`/`call`은 따라가지 않음. `while` 안은 한 번 도는 것으로 봄.
+
+## 10. 효과 더하기 (`screen_fx` 5.7, 효과 폴더, 2026-11-13)
+
+참고한 모양(참고 영상·사이트는 저장소에 두지 않음, 코드는 가져오지 않고 모양만 보고 새로 씀): TV 노이즈, 방송 조정 화면, 늘어진 비디오테이프, 색 점멸, 오래된 게임 메뉴의 밀어 올리는 화면 전환, 물결 굴절, SVG 노이즈 변위 일렁임, 셰이더 모음 사이트의 효과 목록, 옛날 필름 영상, 유체로 녹는 그림, 유리 렌즈.
+
+**그림 전환** (효과 폴더 `ui_kit/effects/`, `@transition`, 파일 하나에 하나. 엔진은 안 고침). 시간 값이 없어서 노이즈의 움직임은 진행 `l__t`로 셈(`u__frames` 등).
+
+| 파일 | 한글 이름 | 하는 일 | `u__cut` |
+|---|---|---|---|
+| `static.glsl` | TV 지직 | 앞 화면 위로 흑백(색 섞기 가능) 노이즈가 짙어졌다 걷힘, 줄 흔들림, 흐르는 밝은 띠 | 0.5 |
+| `calibrate.glsl` | 조정 화면 | 끊김 → 셰이더로 그린 조정 화면(`style` 0 컬러 바, 1 원 격자, 브라운관 느낌) → 끊김 → 새 화면 | 0.85 (`u__in`부터 나옴) |
+| `tapestretch.glsl` | 테이프 늘어짐 | 가로 출렁임, 위아래 늘어짐과 처짐, 색 번짐, 흐르는 잡음 띠, 색 바램 | 0.5 |
+| `blink.glsl` | 점멸 | `color`로 `count`번 고르게 깜빡임(가운데가 `(i+0.5)/count`), `on` 켜진 비율, `fade` 서서히 꺼짐. 이름 `flash`는 글자 효과가 쓰고 있어서 `blink` | 0.5 |
+| `pushup.glsl` | 밀어 올리기 | 새 화면이 아래(`dir` 0~3)에서 밀고 들어옴, 경계를 따라오는 어두운 띠, 경계 빛과 화면 번쩍임, 움직임 번짐 | 없음 |
+
+셰이더가 바뀔 때의 전환으로도 `static`, `calibrate`, `tapestretch`, `blink`를 고름(PyKaki `SHADER_TRANS`, `FEATURE` 11, LINK.md 2장). 플러그인은 그림 전환 이름이면 무엇이든 받으므로 고친 곳 없음.
+
+**화면 셰이더** (`screen_fx/engine/<이름>.rpy` + `<이름>_config.rpy`, 다른 효과와 같은 `ShaderEffect`. 모두 `with_overlay = False`, order 61, 63~69)
+
+| 이름 | 한글 이름 | 하는 일 | 주요 값 |
+|---|---|---|---|
+| `waves` | 물결 | 한 점에서 동심원 물결이 퍼지며 굴절(`pulse` 초마다 `rings`개, 0이면 계속), 빗방울 물결(`drops`, 칸마다 정해진 때), 등성이 빛 | `center_x`, `center_y`, `amount`, `wavelength`, `speed`, `decay` |
+| `wobble` | 일렁거림 | 펄린 노이즈 변위. 가로·세로 무늬 크기를 따로(`size_x`, `size_y`), 잔무늬, 흐름, 세기 출렁임, 위로 피어오름(아지랑이), `fps` 뚝뚝 끊기 | `amount`, `detail`, `speed`, `rise` |
+| `filmgrain` | 옛날 필름 | 초당 `fps`번: 덜컹거림(가끔 크게), 바랜 색과 물드는 색, 깜빡임, 입자, 먼지 점(흰·검), 세로 긁힘 셋(몇 초씩 머묾), 머리카락(가끔 한 프레임씩 곡선), 가장자리 어둡게 | `grain`, `dust`, `scratches`, `hair`, `fade`, `tint` |
+| `fisheye` | 어안렌즈 | `tan` 매핑으로 가운데 확대·가장자리 눌림, 채널마다 다른 반지름(색 번짐), `circle` 1이면 높이에 맞춘 원 안을 꽉 채운 렌즈 | `amount`, `zoom`, `chroma`, `circle`, `vignette`, `breathe` |
+| `photocopy` | 복사기 | 어긋난 두 장 겹침, 대비·단계(`levels` 1이면 흑백), 토너 얼룩, 흰 빈 곳, 세로로 끌린 줄, 가장자리 그림자, 종이·토너 색 | `threshold`, `contrast`, `toner`, `streaks`, `paper`, `ink`, `fps` |
+| `relief` | 양각 | 소벨 기울기로 면을 만들고 비스듬한 빛(확산 + 반짝임), 판 색, 원래 색 남기기, `invert` 음각, 도는 빛 | `depth`, `radius`, `angle`, `metal`, `shine`, `gloss` |
+| `gradmap` | 그라데이션 맵 | 밝기 → 세 색(`shadow`, `mid`, `light`, `mid_pos`), `levels` 포스터화, 4x4 바이어 `dither`, 흐르는 색(`shift`) | `brightness`, `contrast` |
+| `rings` | 동심원 어긋남 | 한 점을 둘러싼 고리마다 돌림·밀림·확대가 다르고 천천히 흔들림, `halves` 반으로 가름, 경계선 | `width`, `twist`, `shift`, `zoom`, `speed`, `line` |
+
+**글자 효과** (효과 폴더, `@effect`)
+
+| 파일 | 한글 이름 | 하는 일 |
+|---|---|---|
+| `drip.glsl` | 녹아내리기 | 글자 네모를 아래로 `u__length`배 늘림(`vertex_20`에서 아래 꼭짓점의 `gl_Position.y`, `vertex_250`에서 `v_tex_coord.y`. 가짜 글자는 안 늘림). 몸통은 `u__keep` 아래가 살짝 처지고, `u__width` 기둥마다 맨 아래 획 끝(20곳 읽어 찾음)에서 가늘어지는 줄기와 끝 방울. `@slow u__melt`만큼 다 나온 뒤에도 녹음, `u__flow` > 0이면 계속 흐름(`@redraw u__flow`), `u__color`/`u__tint` 색 들이기 |
+| `meltglitch.glsl` | 녹는 글리치 | 같은 방법으로 늘린 네모 안에서, 가는 세로 줄마다(초당 `u__fps`번 새로) 위쪽 10곳을 읽어 가장 진한 것을 남김(밝은 점이 아래로 끌린 꼬리). 빨강·초록·파랑을 다른 길이로(`u__split`), 꼬리만 밝게(`u__glow`), 가끔 가로 띠가 옆으로 튐(`u__jump`). `u__settle` 1이면 다 나오면 멈춤 |
+| `droplets.glsl` | 물방울 | `gl_Position`(그림 픽셀) 공간에서 칸마다 물방울 하나, 3x3 이웃의 메타볼 장(모양은 각도 사인으로 일렁임). 장이 1을 넘는 곳에서 기울기로 굴절, 가운데 확대, 가장자리 색 갈라짐과 어두운 테, 빛 맺힘(본 글자 겹만). 외곽선 겹도 같이 휨. 글자 네모 안에서만 보임 |
+
+확인: 렌파이 8.5.3에서 `run_rpy.py`로 효과마다 그려 봄(전환은 고정 시간에 그려 진행 0.1~0.9), Lint 통과(템플릿, pygaki_branch), PyKaki [효과]·[셰이더] 화면 갤러리에서 같은 코드로 그려짐. 소리(TV 지직)는 전환에 없음: `play sound`를 같이 적음.

@@ -21,6 +21,14 @@ pygaki 앱의 **[효과]** 화면에서도 같은 일을 할 수 있습니다: �
 | `bands.glsl` | 그림 | `bands` 띠로 덮였다 열리기 | 색 띠가 차례로 화면을 덮고, 걷히면서 새 그림이 나옴 |
 | `pixelsort.glsl` | 그림 | `pixelsort` 픽셀소트 (크래시) | 지금 화면의 밝은 부분이 띠로 늘어나며 깨지고(가로, 세로, 회전, 확산), 깨진 채 멈췄다가 새 화면으로 뚝 끊어 넘어감 |
 | `datamosh.glsl` | 그림 | `datamosh` 데이터모싱 (크래시) | 키프레임을 잃은 동영상처럼 지금 화면이 블록째 끌려가며(회전·확산) 녹고 새 화면의 윤곽이 비치다가, 깨진 채 멈췄다가 새 화면으로 뚝 끊어 넘어감 |
+| `static.glsl` | 그림 | `static` TV 지직 | 앞 화면 위로 TV 노이즈가 덮였다가 걷히면서 새 화면이 나옴. 줄이 흔들리고 밝은 띠가 흐름 |
+| `calibrate.glsl` | 그림 | `calibrate` 조정 화면 | 지직 끊기고 방송 조정 화면(컬러 바 `style=0`, 원 격자 `style=1`)이 잠깐 나왔다가 새 화면으로 |
+| `tapestretch.glsl` | 그림 | `tapestretch` 테이프 늘어짐 | 비디오테이프가 늘어나듯 화면이 출렁이며 위아래로 늘어지고 색이 번졌다가 새 화면으로 |
+| `blink.glsl` | 그림 | `blink` 점멸 | 고른 색(`color`)으로 몇 번(`count`) 깜빡이고 그사이에 새 화면으로. 시간은 두 번째 칸 |
+| `pushup.glsl` | 그림 | `pushup` 밀어 올리기 | 새 화면이 아래에서 올라오며 앞 화면을 밀어냄(`dir`로 방향). 경계에 어두운 띠와 빛 |
+| `drip.glsl` | 글자 | `drip` 녹아내리기 | 글자가 나온 뒤 획 끝에서 촛농처럼 줄기와 방울이 흘러내림. `u__color`, `u__tint`로 피처럼 |
+| `meltglitch.glsl` | 글자 | `meltglitch` 녹는 글리치 | 신호가 깨진 듯 밝은 곳이 가는 세로 줄로 아래로 끌리고, 줄 끝이 파랑·하양으로 갈라져 빛남. 계속 바뀜 |
+| `droplets.glsl` | 글자 | `droplets` 물방울 | 모양이 일정하지 않은 물방울들이 글자 위를 돌아다니며, 그 아래 글자가 렌즈처럼 휘고 커짐 |
 
 ```renpy
 e "아래에서 올라온다." (cps=30, effect="maskup")
@@ -32,9 +40,19 @@ show mina with img_fx.use("irisin", 1.2, x=0.3)
 scene bg hall with img_fx.use("bands", 1.4, count=10, color="#c2185b")
 scene bg hall with img_fx.use("pixelsort", 1.5, dir=3, length=600)
 scene bg hall with img_fx.use("datamosh", 1.5, mode=1.0, strength=1.5)
+scene bg hall with img_fx.use("static", 1.2)
+scene bg hall with img_fx.use("calibrate", 2.5, style=1)
+scene bg hall with img_fx.use("blink", 1.2, count=5, color="#ff0000")
+scene bg hall with img_fx.use("pushup", 0.8, dir=2)
+e "녹아내린다." (cps=20, effect="drip:u__color=#b00020:u__tint=0.8")
+e "신호가 녹는다." (cps=25, effect="meltglitch")
+e "물방울이 지나간다." (cps=30, effect="droplets")
 ```
 
-`pixelsort`, `datamosh`는 셰이더가 바뀔 때의 전환으로도 씁니다. PyKaki 상자의 ◐ 셰이더 → 전환의 "시작할 때", "끝날 때"에서 고르면,
+`drip`, `meltglitch`는 글자 네모를 아래로 늘려 그 안에서 흘러내리므로, 길게 하면 아랫줄 글자와 겹칩니다(`u__length`로 길이).
+TV 지직 소리는 전환에 들어 있지 않습니다. `play sound "static.ogg"`처럼 같은 자리에 적습니다.
+
+`pixelsort`, `datamosh`, `static`, `calibrate`, `tapestretch`, `blink`는 셰이더가 바뀔 때의 전환으로도 씁니다. PyKaki 상자의 ◐ 셰이더 → 전환의 "시작할 때", "끝날 때"에서 고르면,
 앞 상자의 마지막 화면이 깨진 채 멈췄다가 다음 상자의 첫 화면으로 끊어 넘어가고, 셰이더도 끊기는 순간에 바뀝니다(화면 효과 `screen_fx` 5.6부터).
 원고로 직접 쓸 때는 이렇게 적습니다.
 

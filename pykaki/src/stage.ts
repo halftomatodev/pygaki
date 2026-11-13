@@ -43,6 +43,9 @@ export const FX_BASE: [string, string][] = [
   ['', '그대로'], ['ascii', 'ASCII'], ['retro_term', '레트로 터미널'], ['gameboy', '게임보이'],
   // showpy screen_fx 5.1
   ['glitch', '글리치'], ['boil', '지글거림'], ['halftone', '망점'], ['hologram', '홀로그램'], ['nightvision', '나이트비전'], ['collage', '포토 콜라주'], ['shards', '파편 흩날림'],
+  // showpy screen_fx 5.5, 5.7
+  ['ripple', '일렁임'], ['waves', '물결'], ['wobble', '일렁거림'], ['filmgrain', '옛날 필름'], ['fisheye', '어안렌즈'],
+  ['photocopy', '복사기'], ['relief', '양각'], ['gradmap', '그라데이션 맵'], ['rings', '동심원 어긋남'],
   ['none', '효과 없음'], ['default', '기본으로'],
 ];
 
