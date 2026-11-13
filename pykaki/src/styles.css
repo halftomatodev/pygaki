@@ -361,7 +361,7 @@ pre.rpy { background: #17191f; color: #d4d6dd; padding: 12px; border-radius: 8px
 .fx-canvas { position: absolute; pointer-events: none; }
 .fx-dissolve .ch { visibility: visible; opacity: 0; }
 .fx-dissolve .ch.on { opacity: 1; transition: opacity .3s linear; }
-.fx-flip .ch, .fx-zoom .ch, .fx-jitter .ch, .fx-wave .ch, .fx-scatter .ch, .fx-drop .ch, .fx-spin .ch, .fx-slam .ch, .fx-echo .ch, .fx-glitch .ch, .fx-wipe .ch, .fx-blockglitch .ch, .fx-rise .ch, .fx-lean .ch, .fx-stretch .ch { display: inline-block; white-space: pre; }
+.fx-flip .ch, .fx-zoom .ch, .fx-jitter .ch, .fx-wave .ch, .fx-scatter .ch, .fx-drop .ch, .fx-slam .ch, .fx-echo .ch, .fx-glitch .ch, .fx-blockglitch .ch, .fx-rise .ch, .fx-lean .ch, .fx-stretch .ch { display: inline-block; white-space: pre; }
 .svg-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 .fx-flip .ch { transform: rotateY(90deg); }
 .fx-flip .ch.on { transform: none; transition: transform .25s ease-out; }
@@ -377,8 +377,6 @@ pre.rpy { background: #17191f; color: #d4d6dd; padding: 12px; border-radius: 8px
 @keyframes fx-fade { from { opacity: 0; } }
 .fx-drop .ch.on { animation: fx-drop calc(var(--cd) * 8) cubic-bezier(.34, 1.56, .64, 1) backwards, fx-fade calc(var(--cd) * 2) linear backwards; }
 @keyframes fx-drop { from { transform: translateY(-1.3em); } }
-.fx-spin .ch.on { animation: fx-spin calc(var(--cd) * 8) cubic-bezier(.33, 1, .68, 1) backwards, fx-fade calc(var(--cd) * 2.7) linear backwards; }
-@keyframes fx-spin { from { transform: rotate(-90deg) scale(.3); } }
 .fx-shuffle .ch.on { animation: fx-fade calc(var(--cd) * 3) linear backwards; animation-delay: calc(var(--r4) * 10 * var(--cd)); }
 .fx-flash .ch.on { animation: fx-flash calc(var(--cd) * 12) cubic-bezier(.5, 1, .89, 1) backwards; }
 @keyframes fx-flash { from { color: #ffc400; } }
@@ -444,14 +442,10 @@ pre.rpy { background: #17191f; color: #d4d6dd; padding: 12px; border-radius: 8px
 /* 일렁임: 물에 비친 것처럼 출렁인다 (App.tsx의 SVG 물결 필터) */
 .fx-liquid { filter: url(#pk-liquid); }
 /* 빛 번짐: 글자 주변이 흐리게 빛난다 */
-.fx-glow .ch { text-shadow: 0 0 .2em rgba(255, 255, 255, .9), 0 0 .45em rgba(255, 255, 255, .55); }
-.fx-glow .ch.on { animation: fx-fade calc(var(--cd) * 5) linear backwards; }
 /* 흐렸다 또렷해지기 */
 .fx-blurin .ch.on { animation: fx-blurin calc(var(--cd) * 12) cubic-bezier(.5, 1, .89, 1) backwards, fx-fade calc(var(--cd) * 6) linear backwards; }
 @keyframes fx-blurin { from { filter: blur(.25em); } }
 /* 위에서 아래로 그려지기 */
-.fx-wipe .ch.on { animation: fx-wipe calc(var(--cd) * 8) linear backwards; }
-@keyframes fx-wipe { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
 /* 클릭으로 한 번에 보이면 렌파이처럼 효과 없이 */
 .fast .ch.on { animation: none !important; transition: none !important; }
 .dbg { margin-top: 10px; font-size: 12px; background: var(--faint); border-radius: 6px; padding: 8px; line-height: 1.7; color: var(--muted); }

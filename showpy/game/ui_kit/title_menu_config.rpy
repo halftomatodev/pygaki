@@ -146,7 +146,7 @@ define tmenu.background = None
 ## ── 제목, 부제 글자 ───────────────────────────────────────────── (UI Kit 3.19) ──
 ## 타이틀 화면에 보일 제목과 부제. 메뉴 항목처럼 위치, 회전, 크기, 글꼴, 색, 글자 효과를 적습니다.
 ##   "text": None    제목은 게임 이름(config.name). 부제는 "" (안 보임)
-##   "effect": "glitch"   글자 효과 (대사 등장 효과와 같은 이름: scatter, drop, glitch, glow, vhs, liquid …)
+##   "effect": "glitch"   글자 효과 (대사 등장 효과와 같은 이름: scatter, drop, glitch, stamp, vhs, liquid …)
 ## 편집기에서 끌어서 옮기고, 분홍 네모를 끌어서 돌리고, 저장하면 title_menu_layout.rpy에 들어갑니다.
 ## 글 내용은 PyKaki 앱의 "타이틀 메뉴" 칸에서 고칠 수 있습니다.
 
@@ -155,7 +155,7 @@ define tmenu.labels = {
     "subtitle": { "text": "", "xalign": 0.5, "yalign": 0.31, "size": 30 },
 }
 
-## 메뉴 항목 글자에도 효과를 줄 수 있습니다. 위 tmenu.default나 항목마다 "effect": "glow"처럼.
+## 메뉴 항목 글자에도 효과를 줄 수 있습니다. 위 tmenu.default나 항목마다 "effect": "glitch"처럼.
 ## 효과는 글자가 하나씩 나오면서 보이므로, 나오는 속도(초당 글자 수)를 정합니다.
 define tmenu.effect_cps = 30
 

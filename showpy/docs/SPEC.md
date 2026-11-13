@@ -66,7 +66,7 @@ PyKaki가 내보내는 문법이기도 합니다.
 | `size` `font` `color` `outline` `spacing` `bold` `italic` `kerning` `width` `align` | | 글자 모양 |
 | `speed` | 배율 | 나오는 속도. 플레이어 설정에 곱함 (설정이 "즉시"면 효과 없음) |
 | `cps` | 숫자 | 나오는 속도, 1초에 나오는 글자 수. 플레이어 설정과 상관없음 |
-| `effect` | `"dissolve"` `"flip"` `"zoom"` `"jitter"` `"wave"`, pygaki 플러그인이 등록한 `"scatter"` `"drop"` `"spin"` `"shuffle"` `"flash"` `"slam"` `"typecursor"` `"echo"` `"glitch"` `"glow"` `"blurin"` `"wipe"` `"blockglitch"` `"liquid"` `"vhs"` `"rise"` `"lean"` `"stretch"` `"slidein"` `"shake"` `"inkfill"` `"glyphbox"` `"stamp"` `"punch"` `"squash"` `"extrude"` (셰이더는 `ui_kit/engine/text_effects.glsl`, `text_effects.rpy`가 init에서 읽어 등록. PyKaki도 같은 파일의 사본으로 미리보기를 그림. `echo`는 `outlines`가 없으면 `say_style`이 파일의 `@outline` 겹을 넣음) | 등장 효과 |
+| `effect` | `"dissolve"` `"flip"` `"zoom"` `"jitter"` `"wave"`, pygaki 플러그인이 등록한 `"scatter"` `"drop"` `"shuffle"` `"flash"` `"slam"` `"typecursor"` `"echo"` `"glitch"` `"blurin"` `"blockglitch"` `"liquid"` `"vhs"` `"rise"` `"lean"` `"stretch"` `"slidein"` `"shake"` `"glyphbox"` `"stamp"` `"squash"` `"extrude"` (셰이더는 `ui_kit/engine/text_effects.glsl`, `text_effects.rpy`가 init에서 읽어 등록. PyKaki도 같은 파일의 사본으로 미리보기를 그림. `echo`는 `outlines`가 없으면 `say_style`이 파일의 `@outline` 겹을 넣음. ui_kit 4.9에서 `spin` `glow` `wipe` `inkfill` `punch`와 효과 폴더 샘플 `popin`을 뺌: 예전 원고의 그 이름은 `REMOVED_EFFECTS`로 한 글자씩 나옴) | 등장 효과 |
 | `name_x` `name_y` `name_font` `name_size` `name_color` | | 이름 |
 
 `screen_fx` 값은 다시 바꿀 때까지 유지되고 세이브에 저장됩니다. 플러그인을 빼면 이 괄호에서 오류가 납니다.
@@ -294,10 +294,10 @@ $ screen_fx.set_values("shards", count=80, colors=2, color="#d22", color2="#811"
 |---|---|---|---|
 | `slidein` | 미끄러져 들어와 멈춤 | 한쪽에서 빠르게 미끄러져 들어와 관성으로 살짝 지나쳤다가 돌아와 멈춤. 글자마다 조금씩 늦게(`u__stagger`) 또는 줄 통째로(`u__stagger=0`) | `u__dir`(도, 기본 0 = 오른쪽에서), `u__distance`, `u__overshoot`, `u__duration`, `u__stagger` |
 | `shake` | 살짝 흔들림 | 다 나온 뒤에도 글자마다 조금씩 떨림. 다른 효과와 같이 쓰기 좋음(`effect="slidein,shake"`) | `u__amount`(픽셀), `u__speed`, `u__rotate`(도) |
-| `inkfill` | 외곽선에 색 채우기 | 처음에는 외곽선만 다 보이고, 속은 글자가 나오는 차례(cps)대로 색이 차오름. 아래에서 위로 차오르기 / 한 번에 켜지기 | `u__mode`(0 한 번에, 1 아래에서 위로), `u__duration`. 외곽선이 없으면 `@outline 2 #ffffff 0 0` |
+| `inkfill` (ui_kit 4.9에서 뺌) | 외곽선에 색 채우기 | 처음에는 외곽선만 다 보이고, 속은 글자가 나오는 차례(cps)대로 색이 차오름. 아래에서 위로 차오르기 / 한 번에 켜지기 | `u__mode`(0 한 번에, 1 아래에서 위로), `u__duration`. 외곽선이 없으면 `@outline 2 #ffffff 0 0` |
 | `glyphbox` | 글자마다 상자 | 글자 하나하나 뒤에 네모 상자. 상자가 먼저 나오고 글자가 찍힘, 상자마다 살짝 다른 크기·기울기 가능 | `u__box`(색), `u__ink`(글자 색, 비우면 원래 색), `u__pad`, `u__round`(모서리), `u__jitter`, `u__pop` |
 | `stamp` | 도장 | 크게·살짝 기운 채 찍히며 줄어들고, 잉크 번진 결이 남음 | `u__color`, `u__rotate`, `u__grain` |
-| `punch` | 튀어나오는 줌 | 화면 깊은 곳에서 커지며 튀어나오고 뒤로 잔상이 끌림 | `u__zoom`, `u__trail` |
+| `punch` (ui_kit 4.9에서 뺌) | 튀어나오는 줌 | 화면 깊은 곳에서 커지며 튀어나오고 뒤로 잔상이 끌림 | `u__zoom`, `u__trail` |
 | `squash` | 찌그러졌다 튕김 | 납작하게 눌렸다가 고무처럼 튕기며 원래 모양 | `u__amount`, `u__bounce` |
 | `extrude` | 입체 글자 | 같은 글자를 비스듬히 여러 겹 깔아 두께를 만듦, 나올 때 두께가 자라남 | `u__depth`, `u__angle`, `u__shade` |
 

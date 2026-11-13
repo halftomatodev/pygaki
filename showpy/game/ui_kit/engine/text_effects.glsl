@@ -94,30 +94,6 @@
 @fragment_350
     gl_FragColor = gl_FragColor * clamp(v_tfx_drop * 4.0, 0.0, 1.0);
 
-// spin: 회전하며 들어오기: 돌면서 커지며 제자리로
-@effect spin 회전하며
-@cps
-@slow u__duration
-@set u__duration 8.0
-@set u__angle -90.0
-@variables
-    uniform float u__duration;
-    uniform float u__angle;
-    uniform float u_text_slow_duration;
-    uniform float u_text_slow_time;
-    attribute float a_text_min_time;
-    attribute vec2 a_text_center;
-    varying float v_tfx_spin;
-@vertex_30
-@use T
-    float l__e = 1.0 - pow(1.0 - l__t, 3.0);
-    float l__ang = radians(u__angle) * (1.0 - l__e);
-    float l__scale = mix(0.3, 1.0, l__e);
-@use ROTATE
-    v_tfx_spin = l__t;
-@fragment_350
-    gl_FragColor = gl_FragColor * clamp(v_tfx_spin * 3.0, 0.0, 1.0);
-
 // shuffle: 무작위 순서: 순서 없이 하나씩 켜짐
 @effect shuffle 무작위 순서
 @cps
@@ -314,45 +290,6 @@
 @fragment_350
     gl_FragColor = gl_FragColor * (v_tfx_glitch > 0.0 ? 1.0 : 0.0);
 
-// glow: 빛 번짐: 글자 주변이 흐리게 빛남 (한 번에 나와도 보임)
-@effect glow 빛 번짐
-@slow u__duration
-@set u__duration 10.0
-@set u__radius 8.0
-@set u__strength 1.6
-@set u__color #ffffff
-@variables
-    uniform float u__duration;
-    uniform float u__radius;
-    uniform float u__strength;
-    uniform vec4 u__color;
-    uniform float u_text_slow_duration;
-    uniform float u_text_slow_time;
-    uniform float u_text_to_drawable;
-    uniform float u_text_main;
-    uniform sampler2D tex0;
-    uniform vec2 res0;
-    attribute float a_text_min_time;
-    varying vec2 v_tex_coord;
-    varying float v_tfx_glow;
-@vertex_30
-@use T
-    v_tfx_glow = l__t;
-@fragment_340
-    if (u_text_main > 0.5) {
-        float l__h = 0.0;
-        for (int l__i = 0; l__i < 12; l__i++) {
-            float l__ang = float(l__i) * 0.5236;
-            vec2 l__d = vec2(cos(l__ang), sin(l__ang)) * u__radius * u_text_to_drawable / res0;
-            l__h += texture2D(tex0, v_tex_coord + l__d).a + texture2D(tex0, v_tex_coord + l__d * 0.5).a;
-        }
-        l__h = clamp(l__h / 24.0 * u__strength, 0.0, 1.0);
-        vec4 l__g = vec4(u__color.rgb, 1.0) * u__color.a * l__h;
-        gl_FragColor = gl_FragColor + l__g * (1.0 - gl_FragColor.a);
-    }
-@fragment_350
-    gl_FragColor = gl_FragColor * clamp(v_tfx_glow * 2.0, 0.0, 1.0);
-
 // blurin: 흐렸다 또렷해지기
 @effect blurin 흐렸다 또렷해지기
 @cps
@@ -388,32 +325,6 @@
     }
 @fragment_350
     gl_FragColor = gl_FragColor * clamp(v_tfx_blur * 2.0, 0.0, 1.0);
-
-// wipe: 위에서 아래로 그려지기 (글자가 크면 effect="wipe:u__span=80")
-@effect wipe 위에서 그려지기
-@cps
-@slow u__duration
-@set u__duration 8.0
-@set u__span 40.0
-@variables
-    uniform float u__duration;
-    uniform float u__span;
-    uniform float u_text_slow_duration;
-    uniform float u_text_slow_time;
-    uniform float u_text_to_drawable;
-    attribute float a_text_min_time;
-    attribute vec2 a_text_center;
-    varying float v_tfx_wipe;
-    varying float v_tfx_wipe_y;
-@vertex_10
-    v_tfx_wipe_y = (gl_Position.y - a_text_center.y) / u_text_to_drawable;
-@vertex_30
-@use T
-    v_tfx_wipe = l__t;
-@fragment_350
-    float l__edge = mix(-u__span, u__span * 0.35, v_tfx_wipe);
-    float l__show = v_tfx_wipe >= 1.0 ? 1.0 : clamp((l__edge - v_tfx_wipe_y) / 3.0, 0.0, 1.0);
-    gl_FragColor = gl_FragColor * l__show * (v_tfx_wipe > 0.0 ? 1.0 : 0.0);
 
 // blockglitch: 블록 글리치: 네모 칸마다 밀리거나 늘어나거나 색이 바뀌었다가 섬
 @effect blockglitch 블록 글리치
@@ -728,59 +639,6 @@
 @use ROTATE
     gl_Position.xy += l__j.xy * u__amount * u_text_to_drawable;
 
-// inkfill: 외곽선에 색 채우기: 처음에는 외곽선만 보이고, 속은 글자가 나오는 차례대로 채워짐
-// u__mode: 0 한 번에 켜짐, 1 아래에서 위로 차오름. u__line은 외곽선 굵기(대사에 외곽선을 따로 적었으면 그 굵기로)
-@effect inkfill 외곽선 채우기
-@cps
-@slow u__duration
-@outline 2 #ffffff 0 0
-@set u__duration 6.0
-@set u__mode 1.0
-@set u__line 2.0
-@variables
-    uniform float u__duration;
-    uniform float u__mode;
-    uniform float u__line;
-    uniform float u_text_slow_duration;
-    uniform float u_text_slow_time;
-    uniform float u_text_to_drawable;
-    uniform float u_text_main;
-    uniform sampler2D tex0;
-    uniform vec2 res0;
-    attribute float a_text_min_time;
-    attribute vec4 a_text_pos_rect;
-    varying vec2 v_tex_coord;
-    varying float v_tfx_inkfill;
-    varying float v_tfx_inkfill_y;
-@vertex_10
-    v_tfx_inkfill_y = clamp((gl_Position.y - a_text_pos_rect.y) / max(a_text_pos_rect.w, 0.001), 0.0, 1.0);
-@vertex_30
-@use T
-    v_tfx_inkfill = l__t;
-@fragment_340
-    if (u_text_main < 0.5) {
-        // 외곽선 겹: 속을 비워 테두리만 (굵어진 글자에서 원래 글자 모양을 빼냄)
-        float l__m = gl_FragColor.a;
-        float l__r = max(u__line, 0.5) * u_text_to_drawable;
-        for (int l__i = 0; l__i < 8; l__i++) {
-            float l__ang = float(l__i) * 0.7854;
-            l__m = min(l__m, texture2D(tex0, v_tex_coord + vec2(cos(l__ang), sin(l__ang)) * l__r / res0).a);
-        }
-        float l__ring = clamp((gl_FragColor.a - l__m) / max(gl_FragColor.a, 0.001), 0.0, 1.0);
-        float l__fill = v_tfx_inkfill >= 1.0 ? 1.0 : 0.0;
-        gl_FragColor = gl_FragColor * mix(l__ring, 1.0, l__fill);
-    }
-@fragment_350
-    if (u_text_main > 0.5) {
-        float l__show;
-        if (u__mode < 0.5) {
-            l__show = clamp(v_tfx_inkfill * 3.0, 0.0, 1.0);
-        } else {
-            l__show = clamp((v_tfx_inkfill * 1.2 - (1.0 - v_tfx_inkfill_y)) * 12.0, 0.0, 1.0);
-        }
-        gl_FragColor = gl_FragColor * l__show;
-    }
-
 // glyphbox: 글자마다 상자: 글자 뒤에 네모 상자가 먼저 튀어나오고 글자가 찍힘
 // u__ink: 글자 색 (투명 #00000000이면 원래 색). u__jitter: 상자마다 기울기(도). 띄어쓰기에도 상자가 생김
 @effect glyphbox 글자마다 상자
@@ -893,49 +751,6 @@
     l__c = l__c * (1.0 - l__hole * 0.85);
     float l__q = clamp(v_tfx_stamp / 0.6, 0.0, 1.0);
     gl_FragColor = l__c * clamp(l__q * 3.0, 0.0, 1.0) * mix(0.6, 1.0, l__q);
-
-// punch: 튀어나오는 줌: 화면 깊은 곳에서 커지며 튀어나오고 뒤로 잔상이 끌림
-@effect punch 튀어나오는 줌
-@cps
-@slow u__duration
-@set u__duration 5.0
-@set u__zoom 1.3
-@set u__trail 0.6
-@variables
-    uniform float u__duration;
-    uniform float u__zoom;
-    uniform float u__trail;
-    uniform float u_text_slow_duration;
-    uniform float u_text_slow_time;
-    uniform vec2 res0;
-    uniform sampler2D tex0;
-    attribute float a_text_min_time;
-    attribute vec2 a_text_center;
-    varying vec2 v_tex_coord;
-    varying float v_tfx_punch;
-    varying vec2 v_tfx_punch_c;
-@vertex_30
-@use T
-    float l__q = clamp(l__t / 0.7, 0.0, 1.0);
-    float l__up = sin(l__q * 3.14159) * (u__zoom - 1.0);
-    float l__ang = 0.0;
-    float l__scale = mix(0.05, 1.0, 1.0 - pow(1.0 - l__q, 3.0)) + l__up;
-@use ROTATE
-    v_tfx_punch = l__t;
-    v_tfx_punch_c = a_text_center / res0;
-@fragment_340
-    float l__left = (1.0 - v_tfx_punch) * u__trail;
-    if (l__left > 0.01) {
-        vec4 l__best = gl_FragColor;
-        for (int l__k = 1; l__k <= 8; l__k++) {
-            vec2 l__uv = mix(v_tex_coord, v_tfx_punch_c, float(l__k) / 8.0 * l__left);
-            vec4 l__s = texture2D(tex0, l__uv) * (1.0 - float(l__k) / 9.0);
-            l__best = l__s.a > l__best.a ? l__s : l__best;
-        }
-        gl_FragColor = l__best;
-    }
-@fragment_350
-    gl_FragColor = gl_FragColor * clamp(v_tfx_punch * 4.0, 0.0, 1.0);
 
 // squash: 찌그러졌다 튕김: 납작하게 눌렸다가 고무처럼 튕기며 원래 모양
 @effect squash 찌그러졌다 튕김

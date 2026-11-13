@@ -11,16 +11,13 @@
 ##
 ##   scatter     흩어졌다 모이기: 여기저기 돌아간 채 흩어져 있다가 제자리로
 ##   drop        떨어지기: 위에서 떨어져 살짝 튕김
-##   spin        회전하며 들어오기: 돌면서 커지며 제자리로
 ##   shuffle     무작위 순서: 순서 없이 하나씩 켜짐
 ##   flash       색 번쩍: 노란색으로 켜졌다가 원래 색으로
 ##   slam        크게 찍히기: 크게 나타나 줄어들며 쾅, 잠깐 흔들림
 ##   typecursor  커서 타자기: 하나씩 나오고 다음 글자 자리에 밑줄
 ##   echo        색 잔상: 파랑, 노랑 복사본이 한 박자 늦게 따라와 겹침
 ##   glitch      글리치: 가로로 잘려 어긋나고 색이 갈라졌다가 섬
-##   glow        빛 번짐: 글자 주변이 흐리게 빛남 (한 번에 나와도 보임)
 ##   blurin      흐렸다 또렷해지기
-##   wipe        위에서 아래로 그려지기 (글자가 크면 effect="wipe:u__span=80")
 ##   blockglitch 블록 글리치: 네모 칸마다 밀리거나 늘어나거나 색이 바뀌었다가 섬
 ##               (effect="blockglitch:u__hold=0.3"이면 다 나온 뒤에도 계속 깨짐)
 ##   liquid      일렁임: 물에 비친 것처럼 계속 출렁임 (한 번에 나와도 보임)
@@ -31,10 +28,8 @@
 ##   slidein     미끄러져 멈춤: 한쪽에서 빠르게 들어와 살짝 지나쳤다가 돌아와 멈춤
 ##               (u__dir 방향 도: 0 오른쪽, 90 위, 180 왼쪽, 270 아래. u__stagger=0이면 줄 통째로)
 ##   shake       살짝 흔들림: 다 나온 뒤에도 글자마다 조금씩 떨림. 다른 효과와 겹쳐 씀 (effect="slidein|shake")
-##   inkfill     외곽선 채우기: 외곽선만 먼저 보이고 속이 차례대로 차오름 (u__mode=0이면 한 번에)
 ##   glyphbox    글자마다 상자: 글자 뒤에 상자가 먼저 튀어나오고 글자가 찍힘 (띄어쓰기에도 상자)
 ##   stamp       도장: 크게, 기운 채 찍히며 줄어들고 잉크 결이 남음 (u__color 잉크 색, u__grain 결)
-##   punch       튀어나오는 줌: 깊은 곳에서 커지며 튀어나오고 잔상이 끌림 (u__zoom, u__trail)
 ##   squash      찌그러졌다 튕김: 납작하게 눌렸다가 고무처럼 튕기며 원래 모양 (u__amount, u__bounce)
 ##   extrude     입체 글자: 비스듬히 여러 겹 깔아 두께, 나올 때 두께가 자람 (u__depth, u__angle, u__shade)
 ##
@@ -46,7 +41,7 @@
 ##
 ## 글의 일부에만 걸려면 텍스트 태그로 씁니다. (줄에 effect가 없으면 나머지는 한 글자씩 나옵니다)
 ##     e "앞 글 {shader=shake}흔들리는 글{/shader} 뒤 글"
-##   echo, inkfill처럼 외곽선 겹을 쓰는 효과는 줄 전체(effect=)에만 됩니다.
+##   echo처럼 외곽선 겹을 쓰는 효과는 줄 전체(effect=)에만 됩니다.
 ##
 ## 글자가 하나씩 나올 때만 움직입니다. 텍스트 속도가 "즉시"면 cps를 적으세요.
 ##
@@ -262,7 +257,7 @@ init -10 python in say_style:
 
     _tfx_register()
 
-    ## 지운 효과 (ui_kit 4.2). 예전 원고의 effect="melt", "led:u__cell=6" 같은 줄이 오류 없이 돌게
+    ## 지운 효과 (ui_kit 4.2, 4.9). 예전 원고의 effect="melt", "led:u__cell=6" 같은 줄이 오류 없이 돌게
     ## 한 글자씩 나오기(렌파이 typewriter와 같음)로 등록합니다. 예전 값 이름도 받기만 합니다
     REMOVED_EFFECTS = {
         "melt": (("u__duration", 14.0), ("u__length", 28.0), ("u__width", 3.0), ("u__hold", 0.0)),
@@ -270,6 +265,13 @@ init -10 python in say_style:
         "flipin": (("u__duration", 6.0), ("u__axis", 0.0)),
         "led": (("u__duration", 2.0), ("u__cell", 5.0), ("u__dot", 0.8), ("u__off", 0.35), ("u__offcolor", "#3a1408"), ("u__glow", 1.3)),
         "split": (("u__duration", 6.0), ("u__distance", 24.0), ("u__gap", 0.0)),
+        ## ui_kit 4.9에서 지움
+        "spin": (("u__duration", 8.0), ("u__angle", -90.0)),
+        "glow": (("u__duration", 10.0), ("u__radius", 8.0), ("u__strength", 1.6), ("u__color", "#ffffff")),
+        "wipe": (("u__duration", 8.0), ("u__span", 40.0)),
+        "inkfill": (("u__duration", 6.0), ("u__mode", 1.0), ("u__line", 2.0)),
+        "punch": (("u__duration", 5.0), ("u__zoom", 1.3), ("u__trail", 0.6)),
+        "popin": (("u__duration", 6.0), ("u__overshoot", 0.35), ("u__from", 0.0)),
         }
 
     def _tfx_register_removed():
