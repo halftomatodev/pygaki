@@ -162,7 +162,8 @@ async function until(what, fn, ms = 10000) {
   // [효과] 화면 (효과 탭 3단계, src/EffectsView.tsx): 눌러서 넣기 → 샘플 → 끄기/켜기 → 빼기 → 쓰인 곳 [보기]
   const fxCard = (n) => page.locator(`.fxv-card:has(.fxv-name:text-is("${n}"))`);
   await page.click('.view-switch button:has-text("효과")');
-  // 처음은 갤러리 보기: 카드가 나오는지만 보고, 아래 시험은 목록 보기로 (고른 보기는 기억돼서 [셰이더]도 목록)
+  // 갤러리 보기: 카드가 나오는지만 보고, 아래 시험은 목록 보기로 (고른 보기는 기억돼서 [셰이더]도 목록, 다음 시험 때도 목록으로 열림)
+  await page.click('.gal-switch button:has-text("갤러리")');
   await page.waitForSelector('.gal-card:has(.fxv-name:text-is("maskup"))', { timeout: 10000 });
   await page.click('.gal-switch button:has-text("목록")');
   await fxCard('maskup').locator('button:has-text("넣기")').click();
