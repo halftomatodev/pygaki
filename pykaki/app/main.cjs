@@ -29,10 +29,32 @@ function liveInfo(project) {
   }
 }
 
+// 게임이 원고를 다시 읽으면(Shift+R, 자동 다시 읽기) 끊기기 직전에 {"type": "reloading"}을 보낸다.
+// 그 뒤 끊긴 동안은 "게임 수정 중"으로 알린다. 게임 프로세스가 없어지거나 오래 안 붙으면 그냥 끊김으로
+const RELOAD_WAIT = 120000;
+const pidAlive = (pid) => {
+  if (!pid) return false;
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (e) {
+    return e.code === 'EPERM';
+  }
+};
+
 function liveSendStatus(entry) {
   if (entry.win.isDestroyed()) return;
   const l = entry.live;
-  entry.win.webContents.send('pygaki:liveStatus', { on: !!(l && l.ready), showpy: l?.info?.showpy ?? null });
+  const on = !!(l && l.ready);
+  entry.win.webContents.send('pygaki:liveStatus', { on, reloading: !on && !!entry.reloading, showpy: l?.info?.showpy ?? null });
+}
+
+// 끊겨 있는 동안 3초마다: 다시 읽는 중이던 게임이 꺼졌거나 너무 오래 걸리면 그냥 끊김으로
+function reloadCheck(entry) {
+  const r = entry.reloading;
+  if (!r || (pidAlive(r.pid) && Date.now() - r.at < RELOAD_WAIT)) return;
+  entry.reloading = null;
+  liveSendStatus(entry);
 }
 
 function liveDrop(entry) {
@@ -56,6 +78,7 @@ function liveConnect(entry) {
   sock.on('connect', () => {
     sock.write(JSON.stringify({ hello: info.token, client: 'pykaki' }) + '\n');
     l.ready = true;
+    entry.reloading = null;
     liveSendStatus(entry);
   });
   sock.on('data', (d) => {
@@ -68,6 +91,10 @@ function liveConnect(entry) {
       try {
         const m = JSON.parse(line);
         if (m?.type === 'state' || m?.type === 'files') l.last[m.type] = m;
+        if (m?.type === 'reloading') {
+          entry.reloading = { pid: info.pid, at: Date.now() };
+          continue;
+        }
         entry.win.webContents.send('pygaki:live', m);
       } catch {
         /* 깨진 줄은 버림 */
@@ -122,7 +149,7 @@ function open(project) {
     webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, sandbox: true },
   });
   const id = win.webContents.id;
-  const entry = { win, project, watcher: null, rootWatcher: null, live: null, liveTimer: null, game: null };
+  const entry = { win, project, watcher: null, rootWatcher: null, live: null, liveTimer: null, game: null, reloading: null };
   windows.set(id, entry);
   // showpy가 남기는 받아 적기 파일과 미리보기 파일을 지켜본다
   try {
@@ -143,7 +170,10 @@ function open(project) {
   }
   // 끊겨 있으면 3초마다 다시 붙어 본다 (지켜보기를 놓쳐도)
   entry.liveTimer = setInterval(() => {
-    if (!entry.live) liveConnect(entry);
+    if (!entry.live) {
+      reloadCheck(entry);
+      liveConnect(entry);
+    }
   }, 3000);
   liveConnect(entry);
   win.on('closed', () => {
@@ -266,7 +296,9 @@ ipcMain.handle('pygaki:liveSend', (e, msg) => {
 ipcMain.handle('pygaki:liveStatus', (e) => {
   const l = windows.get(e.sender.id)?.live;
   // 게임은 상태가 바뀔 때만 보내므로, 화면이 뜨기 전에 온 것은 여기서 넘겨준다
-  return { on: !!(l && l.ready), showpy: l?.info?.showpy ?? null, last: l ? Object.values(l.last) : [] };
+  const entry = windows.get(e.sender.id);
+  const on = !!(l && l.ready);
+  return { on, reloading: !on && !!entry?.reloading, showpy: l?.info?.showpy ?? null, last: l ? Object.values(l.last) : [] };
 });
 
 ipcMain.handle('pygaki:openFolder', (e, rel) => shell.openPath(inside(projectOf(e), rel)));

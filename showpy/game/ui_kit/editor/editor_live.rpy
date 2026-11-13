@@ -157,6 +157,10 @@ init -8 python in ui_editor:
 
     def live_cleanup():
         """게임을 끌 때 연결 파일을 지웁니다 (내가 쓴 파일일 때만)."""
+        ## 원고를 다시 읽는 것이면(Shift+R, 자동 다시 읽기) 끊기 전에 앱에 알림 (4.9).
+        ## 앱은 다시 붙을 때까지 "게임 수정 중"으로 보여 줌
+        if store.renpy.session.get("_reload"):
+            _live_send(dict(type="reloading"))
         try:
             with open(_live_path(), "rb") as f:
                 d = json.loads(f.read().decode("utf-8"))

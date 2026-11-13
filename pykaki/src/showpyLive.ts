@@ -141,6 +141,7 @@ interface S {
   view: 'script' | 'showpy' | 'effects' | 'shaders'; // 대본 편집 / GUI 편집 / 효과 / 셰이더
   gamePanel: boolean; // 게임 창에도 GUI 편집기 패널을 보일지 (앱이 기억함, F9)
   on: boolean; // 게임과 붙어 있음
+  reloading: boolean; // 게임이 원고를 다시 읽는 중이라 잠깐 끊김 (게임 수정 중)
   showpy: string | null; // 게임의 ui_kit 버전
   st: GameState | null;
   files: GameFiles | null; // 게임 폴더의 소리, 그림 파일 (렌파이 list_files, game 기준)
@@ -166,7 +167,7 @@ const keepGamePanel = (show: boolean) => {
   }
 };
 
-export const useLive = create<S>(() => ({ view: 'script', gamePanel: loadGamePanel(), on: false, showpy: null, st: null, files: null, err: null, section: 'title' }));
+export const useLive = create<S>(() => ({ view: 'script', gamePanel: loadGamePanel(), on: false, reloading: false, showpy: null, st: null, files: null, err: null, section: 'title' }));
 
 export const liveSend = (cmd: Record<string, unknown>) => {
   if (!desktop || !useLive.getState().on) return;
@@ -193,9 +194,12 @@ export function startLive() {
   useLive.subscribe((s, prev) => {
     if (prev.view === 'showpy' && s.view !== 'showpy' && s.st?.editor.open && s.st.editor.hide_panel) liveSend({ cmd: 'editor', open: false });
   });
-  const status = (s: { on: boolean; showpy: string | null }) => {
+  const status = (s: { on: boolean; reloading?: boolean; showpy: string | null }) => {
     const was = useLive.getState().on;
-    useLive.setState(s.on ? { on: s.on, showpy: s.showpy } : { on: false, showpy: s.showpy, st: null, files: null });
+    // 다시 읽는 동안은 파일 목록을 그대로 둠 (다시 붙으면 새로 옴)
+    if (s.on) useLive.setState({ on: true, reloading: false, showpy: s.showpy });
+    else if (s.reloading) useLive.setState({ on: false, reloading: true, showpy: s.showpy, st: null });
+    else useLive.setState({ on: false, reloading: false, showpy: s.showpy, st: null, files: null });
     // 새로 붙으면 기억해 둔 보이기/숨기기를 게임에 알려 줌 (게임은 붙을 때마다 숨김으로 시작)
     if (s.on && !was) liveSend({ cmd: 'panel', hide: !useLive.getState().gamePanel });
   };

@@ -39,6 +39,16 @@ export function SpeakerSelect({ l, set, className }: { l: Line; set: SetLine; cl
   );
 }
 
+// 예전 판에서 대사 줄에 넣은 표정(attr). 대사 줄은 글만 고치고, 표정 그림은 [그림, 영상] 카드에서 보이기 줄로 넣는다.
+// 예전 값은 내보내기에 그대로 남고, 여기서 눌러 뺄 수 있다
+export function OldAttr({ attr, clear }: { attr: string; clear: () => void }) {
+  return (
+    <button className="nodrag old-attr" title={'예전에 이 대사 줄에 넣은 표정이에요 (' + attr + '). 표정은 [그림, 영상] 카드에서 그림 줄로 넣어요. 누르면 이 줄에서 빼요'} onClick={clear}>
+      표정 {attr} ✕
+    </button>
+  );
+}
+
 // 연출 줄의 입력칸. 명령을 몰라도 고르고 채우기만 하면 된다
 // 대사 줄과 화면 효과 줄이 함께 쓰는 showpy 값 칸
 export function FxFields({ l, set, nd = '' }: { l: Line; set: SetLine; nd?: string }) {

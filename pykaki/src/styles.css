@@ -251,7 +251,7 @@ input.box-title.ed { flex: 1; min-width: 0; }
 @keyframes side-in { from { opacity: 0; transform: translateX(var(--from)); } }
 .side select, .side input, .side button { font-size: 11px; padding: 1px 4px; }
 .side-l select { flex: 1; min-width: 0; background: transparent; color: var(--muted); }
-.side-attr { flex: 1 0 100%; order: 9; }
+.old-attr { flex: 1 0 100%; order: 9; font-size: 11px; color: var(--muted); text-align: left; padding: 2px 6px; }
 .side .grip { padding: 0 3px; }
 .side-r .sf { width: 100%; }
 /* 다음 흐름 창: 상자 오른쪽, 다음 흐름 줄 높이. 반투명 유리처럼 보여서 글 상자와 다른 종류의 창이라는 게 드러난다 */
@@ -326,7 +326,6 @@ input.title { width: 100%; font-weight: 700; font-size: 15px; margin-bottom: 8px
 .line { display: grid; grid-template-columns: var(--meta-w) minmax(0, 1fr); align-items: stretch; --meta-w: 136px; }
 .line-top { display: flex; flex-wrap: wrap; gap: 2px 3px; align-items: center; align-content: flex-start; padding: 1px 6px 1px 0; margin: 0; }
 .line-top select { flex: 1; min-width: 0; }
-.line-top .attr { flex: 1 0 100%; order: 9; }
 .line-body { border-left: 1px solid var(--line); padding-left: 6px; min-width: 0; }
 .line.t-command { background: var(--t-cmd); }
 .line.t-note { background: var(--t-note); }
@@ -959,6 +958,7 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .toolbar .focus-btn:hover:not(:disabled) { filter: brightness(0.97); }
 /* 게임 연결 단추: 연결되면 옅은 파란색, 아니면 회색 */
 .live-badge { font-size: 12.5px; font-weight: 600; padding: 5px 12px; background: var(--faint); color: var(--muted); }
+.live-badge.reloading, .live-badge.reloading:hover:not(:disabled) { background: color-mix(in srgb, #ff9f0a 14%, var(--panel)); color: color-mix(in srgb, #ff9f0a 70%, var(--text)); }
 .live-badge.on, .live-badge.on:hover:not(:disabled) { background: color-mix(in srgb, var(--live-c) 12%, var(--panel)); color: color-mix(in srgb, var(--live-c) 70%, var(--text)); }
 [data-mono='1'] .toolbar .focus-btn, [data-mono='1'] .live-badge { background: transparent; color: var(--text); outline: 1px solid var(--text); border-radius: 0; }
 
@@ -1096,3 +1096,11 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .pl:hover > .pl-grip, .pl.dragging > .pl-grip { opacity: 0.6; }
 .pl > .pl-grip:hover { opacity: 1; }
 .side .grip { touch-action: none; }
+
+/* 지금 쓰는 줄과 이어진 카드 (대사를 쓰면 대사·글자 효과, 연출 줄이면 그 종류 카드).
+   [게임 줄 따라가기: 켬]의 녹색보다 살짝 밝게 */
+.card.in-use { background: color-mix(in srgb, #34c759 8%, var(--panel)); box-shadow: inset 0 0 0 1px color-mix(in srgb, #34c759 28%, transparent); }
+.card.in-use > h3 .card-title::after { content: '사용 중'; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 8px; color: color-mix(in srgb, #34c759 62%, var(--text)); background: color-mix(in srgb, #34c759 16%, var(--panel)); }
+[data-mono='1'] .card.in-use { background: var(--panel); box-shadow: inset 0 0 0 2px var(--text); }
+.sc-char { margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed var(--line); }
+.sc-char-h { font-size: 12px; color: var(--muted); margin: 2px 0 6px; }

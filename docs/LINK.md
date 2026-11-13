@@ -278,7 +278,7 @@ PyKaki 데스크톱 앱의 [GUI 편집] 화면이 게임 안 편집기를 바깥
 { "version": 1, "port": 51234, "token": "9f2c...", "pid": 1234, "showpy": "3.14" }
 ```
 
-앱(`pykaki/app/main.cjs`)은 `game` 폴더를 지켜보다가 이 파일이 생기거나 바뀌면 그 포트로 붙습니다. 끊기면 3초마다 다시 해 봅니다. 게임을 Shift+R로 다시 불러오면 포트가 바뀌어 파일이 다시 써지므로 앱이 따라옵니다.
+앱(`pykaki/app/main.cjs`)은 `game` 폴더를 지켜보다가 이 파일이 생기거나 바뀌면 그 포트로 붙습니다. 끊기면 3초마다 다시 해 봅니다. 게임을 Shift+R로 다시 불러오면 포트가 바뀌어 파일이 다시 써지므로 앱이 따라옵니다. 다시 불러오기 직전에 게임이 `reloading`을 보내면(ui_kit 4.9), 앱은 다시 붙을 때까지 "게임 수정 중"으로 보여 줍니다. 그 사이 `pid`의 프로세스가 없어지거나 2분이 지나면 그냥 끊김으로 봅니다.
 
 **주고받기**: TCP, 한 줄에 JSON 하나(UTF-8, 줄 끝 `\n`). 앱이 처음 보내는 줄은 `{"hello": "<token>", "client": "pykaki"}`이고, 토큰이 틀리면 게임이 끊습니다. 붙는 앱은 하나뿐이라 새로 붙으면 앞의 연결을 끊습니다.
 
@@ -289,6 +289,7 @@ PyKaki 데스크톱 앱의 [GUI 편집] 화면이 게임 안 편집기를 바깥
 | `state` | 붙자마자, 그 뒤 바뀔 때마다 (0.1초마다 비교, 같으면 안 보냄) | 아래 |
 | `files` | 붙자마자 한 번, 앱이 `files`를 보낼 때 (3.15) | `{"type": "files", "audio": ["audio/type.ogg"], "images": ["gui/ctc/ctc1.png", ...], "movies": ["movies/title.webm"]}` 게임 폴더 기준(`movies`는 3.19부터). 렌파이 `list_files`라 `.rpa` 안 파일도 들어감 |
 | `error` | 명령 처리가 실패했을 때 | `{"type": "error", "text": "..."}` |
+| `reloading` | 원고를 다시 읽기 직전(Shift+R, 자동 다시 읽기. 렌파이 `renpy.session["_reload"]`), 연결을 닫기 바로 전 (ui_kit 4.9) | `{"type": "reloading"}`. 앱은 다시 붙을 때까지 연결 단추를 "◐ 게임 수정 중"으로 |
 | `panel` | 게임 창에서 F9로 게임 안 편집기 패널을 보이게/숨기게 했을 때 (ui_kit 3.23) | `{"type": "panel", "hide": true}`. 앱은 이 값을 기억했다가(`localStorage` `pygaki-game-panel`) 다음에 붙을 때 `panel` 명령으로 보냄. 앱의 F9(단축키 `gamePanel`)도 같은 명령 |
 
 ```json

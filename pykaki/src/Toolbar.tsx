@@ -32,17 +32,24 @@ function ViewSwitch() {
   );
 }
 
-// 게임과 붙어 있는지 (데스크톱 앱). 붙어 있으면 옅은 파란색, 아니면 회색. 누르면 GUI 편집으로
+// 게임과 붙어 있는지 (데스크톱 앱). 붙어 있으면 옅은 파란색, 게임이 원고를 다시 읽는 중이면 노란색, 아니면 회색. 누르면 GUI 편집으로
 function LiveBadge() {
   const on = useLive((l) => l.on);
+  const reloading = useLive((l) => l.reloading);
   if (!isDesktop) return null;
   return (
     <button
-      className={'live-badge' + (on ? ' on' : '')}
+      className={'live-badge' + (on ? ' on' : reloading ? ' reloading' : '')}
       onClick={() => useLive.setState({ view: 'showpy' })}
-      title={on ? '게임과 연결됐어요. 누르면 GUI 편집으로 가요' : '게임과 연결 안 됨. [▶ 렌파이에서 실행]이나 런처에서 프로젝트를 실행하면 저절로 붙어요'}
+      title={
+        on
+          ? '게임과 연결됐어요. 누르면 GUI 편집으로 가요'
+          : reloading
+            ? '게임이 바뀐 원고를 다시 읽는 중이에요. 끝나면 저절로 다시 붙어요'
+            : '게임과 연결 안 됨. [▶ 렌파이에서 실행]이나 런처에서 프로젝트를 실행하면 저절로 붙어요'
+      }
     >
-      {on ? '● 게임과 연결됨' : '○ 게임 연결 안 됨'}
+      {on ? '● 게임과 연결됨' : reloading ? '◐ 게임 수정 중' : '○ 게임 연결 안 됨'}
     </button>
   );
 }

@@ -7,7 +7,7 @@ import { shaderLabel } from './shader';
 import { isLight, uid } from './util';
 import { changeThenFocus } from './actions';
 import { FlowMenu } from './FlowMenu';
-import { SpeakerSelect, StageFields } from './LineFields';
+import { OldAttr, SpeakerSelect, StageFields } from './LineFields';
 import { isStage, stageCode } from './stage';
 import { hit, keyOf } from './prefs';
 import { TagBar, useTagTarget } from './TagBar';
@@ -200,9 +200,7 @@ function Lines({ b, editing }: { b: BoxNode; editing: boolean }) {
           <div className="side side-l nodrag" style={{ top }} key="l">
             <span {...drag.grip(ai)}>⠿</span>
             <SpeakerSelect className="nodrag" l={al} set={setLine(ai)} />
-            {al.type === 'say' && (
-              <input className="nodrag side-attr" placeholder="표정" value={al.attr ?? ''} onChange={(e) => upd((x) => void (x.lines[ai].attr = e.target.value), 'attr' + al.id)} />
-            )}
+            {al.type === 'say' && al.attr && <OldAttr attr={al.attr} clear={() => upd((x) => void delete x.lines[ai].attr)} />}
             <button className="nodrag" title="아래에 새 줄" onClick={() => addAfter(ai, al)}>＋</button>
             <button className="nodrag" title="줄 삭제" onClick={() => remove(ai)}>✕</button>
           </div>

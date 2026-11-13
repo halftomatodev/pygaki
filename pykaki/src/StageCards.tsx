@@ -13,7 +13,7 @@ import { GoHere, MoveBtn, PickBand } from './PickPos';
 type Kind = 'bg' | 'pic' | 'sound';
 const TYPES: Record<Kind, LineType[]> = { bg: ['scene'], pic: ['show', 'hide'], sound: ['sound', 'music'] };
 
-export function StageCards({ b, upd }: { b: BoxNode; upd: Upd }) {
+export function StageCards({ b, upd, use }: { b: BoxNode; upd: Upd; use: (id: string) => string }) {
   const activeLine = useStore((s) => s.activeLine);
   const add = (l: Omit<Line, 'id' | 'text'>) => {
     const nl: Line = { id: uid('l'), text: '', ...l };
@@ -25,19 +25,52 @@ export function StageCards({ b, upd }: { b: BoxNode; upd: Upd }) {
   };
   return (
     <>
-      <Card id="i-bg" title="배경 (그림, 영상)">
+      <Card id="i-bg" title="배경 (그림, 영상)" className={use('i-bg')}>
         <Used b={b} kind="bg" />
         <BgPicker add={add} />
       </Card>
-      <Card id="i-pic" title="그림, 영상">
+      <Card id="i-pic" title="그림, 영상" className={use('i-pic')}>
+        <CharPics b={b} add={add} />
         <Used b={b} kind="pic" />
         <PicPicker add={add} />
       </Card>
-      <Card id="i-sound" title="효과음, 음악">
+      <Card id="i-sound" title="효과음, 음악" className={use('i-sound')}>
         <Used b={b} kind="sound" />
         <SoundPicker add={add} />
       </Card>
     </>
+  );
+}
+
+// 지금 쓰는 대사 줄의 캐릭터 그림(표정). 대사 줄은 글만 고치고, 표정은 여기서 골라 그 대사 바로 앞에 보이기 줄로 넣는다
+function CharPics({ b, add }: { b: BoxNode; add: (l: Omit<Line, 'id' | 'text'>) => void }) {
+  const activeLine = useStore((s) => s.activeLine);
+  const chars = useStore((s) => s.project.characters);
+  const images = useGameFolder((s) => s.media.images);
+  const linked = useGameFolder((s) => !!s.name);
+  const l = b.lines.find((x) => x.id === activeLine);
+  if (!l || l.type !== 'say' || !l.who) return null;
+  const who = l.who;
+  const c = chars.find((x) => x.id === who);
+  const names = images.filter((n) => words(n)[0] === who);
+  const put = (attr: string) => add({ type: 'show', kind: 'char', who, attr: attr || undefined });
+  return (
+    <div className="sc-char">
+      <div className="sc-char-h">{c?.name ?? who}의 그림 · 지금 쓰는 대사 바로 앞에 넣어요</div>
+      {linked && names.length ? (
+        <div className="sc-grid">
+          {names.map((n) => (
+            <button key={n} onClick={() => put(words(n).slice(1).join(' '))} title={n}>
+              <Pic name={n} />
+              <span>{words(n).slice(1).join(' ') || '(기본)'}</span>
+            </button>
+          ))}
+        </div>
+      ) : (
+        <p className="tip">{linked ? `images 폴더에 "${who}"로 시작하는 그림이 없어요 (예: "${who} smile.png").` : '렌파이 프로젝트를 연결하면 이 캐릭터의 그림을 눌러서 골라요.'}</p>
+      )}
+      <TextAdd placeholder={`표정 (예: smile) → show ${who} smile`} onAdd={put} />
+    </div>
   );
 }
 

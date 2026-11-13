@@ -4,12 +4,14 @@ import * as ops from './ops';
 import type { BoxNode, ExitType, Line, Project } from './types';
 import { uid } from './util';
 import { Card } from './Card';
-import { LineLook, SpeakerSelect, StageFields, useLineDrag } from './LineFields';
+import { LineLook, OldAttr, SpeakerSelect, StageFields, useLineDrag } from './LineFields';
 import { isStage } from './stage';
 import { hit } from './prefs';
 import { ShaderPanel } from './ShaderPanel';
 import { StageCards } from './StageCards';
 import { GameOffTip, GoHere, MoveBtn, PickBand, useSidePop } from './PickPos';
+
+const USED_CARD: Partial<Record<Line['type'], string>> = { scene: 'i-bg', show: 'i-pic', hide: 'i-pic', sound: 'i-sound', music: 'i-sound' };
 
 export type Upd = (fn: (b: BoxNode, p: Project) => void, key?: string) => void;
 
@@ -78,6 +80,10 @@ function BoxInspector({ b }: { b: BoxNode }) {
   const isSay = (l: Line) => l.type === 'say' || l.type === 'narration';
   const activeLine = useStore((s) => s.activeLine);
   const lookLine = b.lines.find((l) => l.id === activeLine && isSay(l)) ?? b.lines.find(isSay);
+  // 지금 쓰는 줄과 이어진 카드에 "사용 중" 녹색 톤 (대사를 쓰면 대사·글자 효과, 연출 줄이면 그 종류 카드)
+  const act = b.lines.find((l) => l.id === activeLine);
+  const used = new Set<string>(!act ? [] : isSay(act) ? ['i-lines', 'i-look'] : ['i-lines', ...(USED_CARD[act.type] ? [USED_CARD[act.type]!] : [])]);
+  const use = (id: string) => (used.has(id) ? 'in-use' : '');
 
   const addLine = () => {
     const last = b.lines[b.lines.length - 1];
@@ -117,12 +123,12 @@ function BoxInspector({ b }: { b: BoxNode }) {
       </Card>
 
       {lookLine && (
-        <Card id="i-look" title="글자 효과" className="look-panel">
+        <Card id="i-look" title="글자 효과" className={'look-panel ' + use('i-look')}>
           <LineLook l={lookLine} set={(fn, key) => upd((x) => fn(x.lines.find((l) => l.id === lookLine.id)!), key)} />
         </Card>
       )}
 
-      <Card id="i-lines" title="대사">
+      <Card id="i-lines" title="대사" className={use('i-lines')}>
       {b.lines.map((l, i) => (
         <LineRow key={l.id} l={l} i={i} upd={upd} drag={drag} />
       ))}
@@ -133,7 +139,7 @@ function BoxInspector({ b }: { b: BoxNode }) {
       <GameOffTip what="대사" />
       </Card>
 
-      <StageCards b={b} upd={upd} />
+      <StageCards b={b} upd={upd} use={use} />
 
       <Card id="i-exit" title="다음 흐름">
       <ExitEditor b={b} upd={upd} />
@@ -179,7 +185,7 @@ function LineRow({ l, i, upd, drag }: { l: Line; i: number; upd: Upd; drag: Retu
         <span className="grip" {...drag.grip(i)}>⠿</span>
         <SpeakerSelect l={l} set={set} />
         <button title="줄 삭제" onClick={() => upd((x) => void x.lines.splice(i, 1))}>✕</button>
-        {l.type === 'say' && <input className="attr" placeholder="속성(표정)" value={l.attr ?? ''} onChange={(e) => upd((x) => void (x.lines[i].attr = e.target.value), 'attr' + l.id)} />}
+        {l.type === 'say' && l.attr && <OldAttr attr={l.attr} clear={() => upd((x) => void delete x.lines[i].attr)} />}
       </div>
       <div className="line-body">
         {isStage(l.type) ? (
