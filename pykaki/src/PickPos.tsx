@@ -2,6 +2,8 @@
 // [렌파이에서 여기로 이동]: 원고를 내보내고 게임을 그 줄(상자면 상자의 첫 줄)로 옮긴다.
 // [위치 옮기기]: 거기에 더해 게임 안 GUI 편집기의 대사(선택지, 이미지/영상) 탭을 연다.
 // 게임 창에서 끌어서 옮기고 저장하면 지금처럼 showpy_inbox.json으로 받아 적는다 (LINK.md 3장, 9장).
+import { useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { create } from 'zustand';
 import { isDesktop } from './desktop';
 import { exportedBoxLineOf, exportedLineOf } from './files';
@@ -68,18 +70,42 @@ export function MoveBtn({ where, tab, what }: { where: Where; tab: PickTab; what
   );
 }
 
-// [위치 옮기기]를 누른 줄 아래에 뜨는 "끌어 옮기고 저장" 띠
+// [위치 옮기기]를 누른 줄 아래에 뜨는 [저장] [끝내기]. 할 일 안내는 단추에 마우스를 올리면 나옴
 export function PickBand({ where, tab, what }: { where: Where; tab: PickTab; what: string }) {
   const st = useLive((s) => (s.on ? s.st : null));
   const mine = usePicked((p) => p.key === keyOf(where));
   if (!mine || !st?.editor.open || st.editor.tab !== tab) return null;
+  const n = st.editor.pending;
   return (
     <div className="pick-pos">
-      <span>게임 창에서 {what}를 끌어 옮기고 저장해요{st.editor.pending ? ` (저장할 것 ${st.editor.pending})` : ''}</span>
-      <button className="primary" disabled={!st.editor.pending} onClick={() => liveSend({ cmd: 'save' })}>저장</button>
-      <button onClick={() => liveSend({ cmd: 'editor', open: false })}>끝내기</button>
+      <button className="primary" disabled={!n} onClick={() => liveSend({ cmd: 'save' })} title={`게임 창에서 ${what}를 끌어 옮기고 저장해요`}>
+        저장{n ? ` (${n})` : ''}
+      </button>
+      <button onClick={() => liveSend({ cmd: 'editor', open: false })} title="게임 창의 GUI 편집기를 닫아요">끝내기</button>
     </div>
   );
+}
+
+// 줄에 마우스를 올리면 카드 왼쪽 바깥에 작게 튀어나오는 단추 묶음 ([위치 옮기기] [여기로 이동]).
+// 줄 안에 두면 화자 이름이 잘려서 밖으로 뺀다. 칸이 스크롤로 잘리지 않게 body에 붙인다
+export function useSidePop() {
+  const ready = useGameReady();
+  const ref = useRef<HTMLDivElement>(null);
+  const [on, setOn] = useState(false);
+  const timer = useRef<number>();
+  const enter = () => (clearTimeout(timer.current), setOn(true));
+  const leave = () => (timer.current = window.setTimeout(() => setOn(false), 180));
+  const Pop = ({ children }: { children: ReactNode }) => {
+    if (!ready || !on || !ref.current) return null;
+    const r = ref.current.getBoundingClientRect();
+    return createPortal(
+      <div className="side-pop" style={{ top: r.top + 2, left: r.left }} onMouseEnter={enter} onMouseLeave={leave}>
+        {children}
+      </div>,
+      document.body,
+    );
+  };
+  return { ref, rowProps: { onMouseEnter: enter, onMouseLeave: leave }, Pop };
 }
 
 // 연결 안 됐을 때 카드 아래에 한 줄

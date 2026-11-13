@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ReactFlow, Background, Controls, MiniMap, MarkerType, applyNodeChanges, useReactFlow,
+  ReactFlow, Background, Controls, MiniMap, MarkerType, applyNodeChanges, useReactFlow, getViewportForBounds,
   type Connection, type Edge, type Viewport, type EdgeChange, type Node, type NodeChange, type OnConnectEnd,
 } from '@xyflow/react';
 import { useStore } from './store';
@@ -9,6 +9,25 @@ import * as ops from './ops';
 import { addBoxAt, editBox } from './actions';
 import { isTyping } from './util';
 import { colorsOf, gradOf, isDark, isMono, usePrefs } from './prefs';
+
+// 좌우 칸은 캔버스 위에 떠 있다(세션 35). 화면 맞추기는 두 칸 사이 보이는 곳에 맞춘다
+function panelsW() {
+  const w = (sel: string) => (document.querySelector(sel) as HTMLElement | null)?.offsetWidth ?? 0;
+  return { l: w('.main > .sidebar'), r: w('.main > .right-panel') };
+}
+
+type RF = ReturnType<typeof useReactFlow>;
+function fitVisible(rf: RF, o: { ids?: string[]; padding: number; maxZoom: number; duration?: number }) {
+  const el = document.querySelector('.canvas');
+  if (!el) return;
+  const nodes = o.ids ? o.ids.map((id) => rf.getNode(id)).filter((n): n is Node => !!n) : rf.getNodes();
+  if (!nodes.length) return;
+  const { width: W, height: H } = el.getBoundingClientRect();
+  const { l, r } = panelsW();
+  const vw = Math.max(200, W - l - r);
+  const vp = getViewportForBounds(rf.getNodesBounds(nodes), vw, H, 0.1, o.maxZoom, o.padding);
+  rf.setViewport({ x: vp.x + l, y: vp.y, zoom: vp.zoom }, { duration: o.duration ?? 0 });
+}
 
 const nodeTypes = { box: BoxView, frame: GroupFrame };
 const FRAME_PAD = 22;
@@ -50,7 +69,9 @@ export function Canvas() {
   useEffect(() => {
     if (fitted.current || !nodes.length || !nodes.every((n) => n.measured)) return;
     fitted.current = true;
-    rf.fitView({ padding: 0.2, maxZoom: 1 });
+    // 화면 이동 장치가 준비되기 전의 setViewport는 무시되므로 기다린다
+    const go = (n: number) => (rf.viewportInitialized || n > 60 ? fitVisible(rf, { padding: 0.2, maxZoom: 1 }) : setTimeout(() => go(n + 1), 30));
+    go(0);
   }, [nodes, rf]);
 
   // label 묶음 배경(프레임)
@@ -111,12 +132,15 @@ export function Canvas() {
       if (!m) return;
       const w = m.measured?.width ?? 250;
       const h = m.measured?.height ?? 150;
-      const { width: W, height: H } = el.getBoundingClientRect();
+      const { width: W0, height: H } = el.getBoundingClientRect();
+      const pw = panelsW();
+      const W = Math.max(200, W0 - pw.l - pw.r);
       // 왼쪽 단추 묶음(SIDE_L)과 오른쪽 연출 입력칸(SIDE_R)까지 화면에 들어오게, 읽기 편한 크기로. 지금보다 작게 하지는 않는다
       const SIDE_L = 170;
       const SIDE_R = 320;
       const zoom = Math.max(rf.getZoom(), Math.min(1.6, (W * 0.94) / (w + SIDE_L + SIDE_R), (H * 0.8) / h));
-      const cx = m.position.x + (w + SIDE_R - SIDE_L) / 2;
+      // 칸이 덮은 만큼 보이는 곳 가운데로 옮긴다
+      const cx = m.position.x + (w + SIDE_R - SIDE_L) / 2 - (pw.l - pw.r) / 2 / zoom;
       const cy = h * zoom > H * 0.8 ? m.position.y + (H * 0.4) / zoom : m.position.y + h / 2;
       rf.setCenter(cx, cy, { zoom, duration: 450 });
     }, 80);
@@ -125,7 +149,7 @@ export function Canvas() {
   }, [inlineEdit, focusMode, rf]);
 
   useEffect(() => {
-    if (focusReq?.ids.length) setTimeout(() => rf.fitView({ nodes: focusReq.ids.map((id) => ({ id })), duration: 400, padding: 0.3, maxZoom: 1.1 }), 30);
+    if (focusReq?.ids.length) setTimeout(() => fitVisible(rf, { ids: focusReq.ids, duration: 400, padding: 0.3, maxZoom: 1.1 }), 30);
   }, [focusReq, rf]);
 
   const onNodesChange = useCallback((changes: NodeChange[]) => {
@@ -216,7 +240,7 @@ export function Canvas() {
         maxZoom={2}
       >
         <Background gap={24} color="var(--line)" />
-        <Controls showInteractive={false} />
+        <Controls showInteractive={false} onFitView={() => fitVisible(rf, { padding: 0.2, maxZoom: 1, duration: 300 })} />
         <MiniMap
           pannable
           zoomable

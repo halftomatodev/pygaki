@@ -24,18 +24,20 @@ label ward.n1:
 # @node:n2 노크
 label ward.n2:
     # @l:l6
-    # 이 상자는 앞 상자에서만 이어져서 label이 생기지 않음
+    # 빈 상자
     # @l:l7
     play sound "audio/knock.wav"
     # @l:l8
     "똑, 똑."
+    # @l:l23
+    show mina scared with dissolve
     # @l:l9
-    mina scared "방금 그 소리 들었어?" (fx_warp=3)
+    mina "방금 그 소리 들었어?" (fx_warp=3)
     # @end:n2
 # @node:n3 고민
 label ward.n3:
     # @l:l10
-    mina scared "어떻게 할까?"
+    mina "어떻게 할까?"
     # @end:n3
     menu:
         "문을 연다":

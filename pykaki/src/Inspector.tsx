@@ -9,7 +9,7 @@ import { isStage } from './stage';
 import { hit } from './prefs';
 import { ShaderPanel } from './ShaderPanel';
 import { StageCards } from './StageCards';
-import { GameOffTip, GoHere, MoveBtn, PickBand } from './PickPos';
+import { GameOffTip, GoHere, MoveBtn, PickBand, useSidePop } from './PickPos';
 
 export type Upd = (fn: (b: BoxNode, p: Project) => void, key?: string) => void;
 
@@ -156,6 +156,7 @@ function LineRow({ l, i, upd, drag }: { l: Line; i: number; upd: Upd; drag: Retu
   const set = (fn: (x: Line) => void, key?: string) => upd((x) => fn(x.lines[i]), key);
   const isSay = l.type === 'say' || l.type === 'narration';
   const movable = l.type === 'show' || l.type === 'scene'; // 숨기기 줄은 자리가 없어서 뺌
+  const pop = useSidePop();
 
   const onKey = (e: React.KeyboardEvent) => {
     if (!hit(e, 'newLine')) return;
@@ -168,13 +169,15 @@ function LineRow({ l, i, upd, drag }: { l: Line; i: number; upd: Upd; drag: Retu
   const placeholder =({ narration: '내레이션', say: '대사', command: '렌파이 명령 (예: show alice smile / scene bg room / play music "a.ogg")', note: '작가용 메모 (주석으로 내보내요)' } as Record<string, string>)[l.type];
 
   return (
-    <div className={'line t-' + l.type + (isStage(l.type) ? ' t-stage' : '') + drag.cls(i)} {...drag.row(i)}>
-      <div className="line-top">
-        <span className="grip" {...drag.grip(i)}>⠿</span>
-        <SpeakerSelect l={l} set={set} />
+    <div className={'line t-' + l.type + (isStage(l.type) ? ' t-stage' : '') + drag.cls(i)} {...drag.row(i)} ref={pop.ref} {...pop.rowProps}>
+      <pop.Pop>
         {isSay && <MoveBtn where={{ line: l.id }} tab="say" what="대사" />}
         {movable && <MoveBtn where={{ line: l.id }} tab="stage" what="이미지/영상" />}
         <GoHere where={{ line: l.id }} short />
+      </pop.Pop>
+      <div className="line-top">
+        <span className="grip" {...drag.grip(i)}>⠿</span>
+        <SpeakerSelect l={l} set={set} />
         <button title="줄 삭제" onClick={() => upd((x) => void x.lines.splice(i, 1))}>✕</button>
         {l.type === 'say' && <input className="attr" placeholder="속성(표정)" value={l.attr ?? ''} onChange={(e) => upd((x) => void (x.lines[i].attr = e.target.value), 'attr' + l.id)} />}
       </div>

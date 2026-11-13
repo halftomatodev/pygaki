@@ -1066,3 +1066,33 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .tp-item.on { background: var(--accent-soft); font-weight: 600; }
 .tp-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sc-pickfile { display: block; width: 100%; margin: 2px 0 6px; background: var(--faint); font-weight: 600; }
+
+/* 좌우 칸을 캔버스 위에 띄움 (세션 35): 카드만 불투명하고, 카드 사이·접힌 카드 아래 빈 곳은 비쳐서 뒤 대본이 보이고 눌림도 캔버스로 간다 */
+.main { position: relative; --lw: var(--left-w, 244px); --rw: var(--right-w, 400px); }
+.main.no-left { --lw: 0px; }
+.main.no-right { --rw: 0px; }
+.main > .sidebar, .main > .right-panel { position: absolute; top: 0; bottom: 0; z-index: 5; background: transparent; pointer-events: none; }
+.main > .sidebar { left: 0; }
+.main > .right-panel { right: 0; }
+.main > .sidebar > *, .right-scroll > *, .right-scroll > .insp > * { pointer-events: auto; }
+.right-scroll > .insp { pointer-events: none; }
+.main > .sidebar .sec, .right-panel .sec { box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); }
+.main > .resizer { position: absolute; top: 0; bottom: 0; width: 6px; }
+.main > .resizer.left { left: var(--lw); }
+.main > .resizer.right { right: var(--rw); }
+.main.no-left > .resizer.left, .main.no-right > .resizer.right { display: none; }
+.main .side-toggle.l { left: calc(var(--lw) + 6px); }
+.main .side-toggle.r { right: calc(var(--rw) + 6px); }
+.main .canvas-hint { left: calc(var(--lw) + 32px); right: calc(var(--rw) + 32px); }
+.main .react-flow__panel.left { left: var(--lw); }
+.main .react-flow__panel.right { right: var(--rw); }
+/* 대사 카드 줄의 [위치 옮기기] [여기로 이동]: 카드 왼쪽 바깥에 작은 팝업 (PickPos.tsx useSidePop) */
+.side-pop { position: fixed; z-index: 60; transform: translateX(-100%); display: flex; flex-direction: column; align-items: stretch; gap: 2px; padding: 3px; background: var(--panel); border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18); }
+.side-pop button { font-size: 11px; padding: 2px 7px; color: var(--accent); white-space: nowrap; text-align: left; }
+.pick-pos > button { font-size: 12px; }
+/* 캔버스 상자 안 줄마다 손잡이: 줄에 마우스를 올리면 왼쪽 여백에 보임 (BoxView.tsx usePtrDrag) */
+.pl { position: relative; }
+.pl > .pl-grip { position: absolute; left: -12px; top: 1px; opacity: 0; touch-action: none; }
+.pl:hover > .pl-grip, .pl.dragging > .pl-grip { opacity: 0.6; }
+.pl > .pl-grip:hover { opacity: 1; }
+.side .grip { touch-action: none; }

@@ -7,7 +7,7 @@ import { shaderLabel } from './shader';
 import { isLight, uid } from './util';
 import { changeThenFocus } from './actions';
 import { FlowMenu } from './FlowMenu';
-import { SpeakerSelect, StageFields, useLineDrag } from './LineFields';
+import { SpeakerSelect, StageFields } from './LineFields';
 import { isStage, stageCode } from './stage';
 import { hit, keyOf } from './prefs';
 import { TagBar, useTagTarget } from './TagBar';
@@ -140,7 +140,7 @@ function Lines({ b, editing }: { b: BoxNode; editing: boolean }) {
   const [active, setActive] = useState<string | null>(null);
   const [top, setTop] = useState<number | null>(null);
   const wrap = useRef<HTMLDivElement>(null);
-  const drag = useLineDrag((from, to) => upd((x) => ops.moveLine(x, from, to)));
+  const drag = usePtrDrag(wrap, (from, to) => upd((x) => ops.moveLine(x, from, to)));
 
   const ai = editing ? b.lines.findIndex((l) => l.id === active) : -1;
   const al = ai >= 0 ? b.lines[ai] : null;
@@ -186,8 +186,8 @@ function Lines({ b, editing }: { b: BoxNode; editing: boolean }) {
           l={l}
           editing={editing}
           active={editing && l.id === active}
-          cls={editing ? drag.cls(i) : ''}
-          rowProps={editing ? drag.row(i) : {}}
+          cls={drag.cls(i, b.lines.length)}
+          grip={drag.grip(i)}
           onFocus={() => setActive(l.id)}
           onKey={(e) => onKey(e, i, l)}
           onText={(v) => upd((x) => void (x.lines[i].text = v), 'text' + l.id)}
@@ -198,7 +198,7 @@ function Lines({ b, editing }: { b: BoxNode; editing: boolean }) {
       {editing && al && top !== null && (
         <>
           <div className="side side-l nodrag" style={{ top }} key="l">
-            <span className="grip" {...drag.grip(ai)}>⠿</span>
+            <span {...drag.grip(ai)}>⠿</span>
             <SpeakerSelect className="nodrag" l={al} set={setLine(ai)} />
             {al.type === 'say' && (
               <input className="nodrag side-attr" placeholder="표정" value={al.attr ?? ''} onChange={(e) => upd((x) => void (x.lines[ai].attr = e.target.value), 'attr' + al.id)} />
@@ -217,19 +217,65 @@ function Lines({ b, editing }: { b: BoxNode; editing: boolean }) {
   );
 }
 
+// 상자 안 줄 순서 바꾸기: 손잡이(⠿)를 누른 채 끌어 놓는다. 캔버스 안이라 HTML 끌어 놓기 대신 포인터로 한다
+// (React Flow의 상자 끌기·화면 이동과 겹치지 않게). 볼 때도 고칠 때도 된다
+function usePtrDrag(wrap: React.RefObject<HTMLDivElement>, move: (from: number, to: number) => void) {
+  const [st, setSt] = useState<{ from: number; to: number | null } | null>(null);
+  const grip = (i: number) => ({
+    className: 'grip nodrag nopan',
+    title: '끌어서 순서 바꾸기',
+    onPointerDown: (e: React.PointerEvent<HTMLElement>) => {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const el = e.currentTarget;
+      el.setPointerCapture(e.pointerId);
+      let to: number | null = null;
+      setSt({ from: i, to });
+      const onMove = (ev: PointerEvent) => {
+        const rows = [...(wrap.current?.querySelectorAll<HTMLElement>('[data-line]') ?? [])];
+        let k = rows.findIndex((r) => {
+          const rc = r.getBoundingClientRect();
+          return ev.clientY < rc.top + rc.height / 2;
+        });
+        if (k < 0) k = rows.length;
+        if (k !== to) setSt({ from: i, to: (to = k) });
+      };
+      const onUp = () => {
+        el.removeEventListener('pointermove', onMove);
+        el.removeEventListener('pointerup', onUp);
+        el.removeEventListener('pointercancel', onUp);
+        if (to !== null && to !== i && to !== i + 1) move(i, to);
+        setSt(null);
+      };
+      el.addEventListener('pointermove', onMove);
+      el.addEventListener('pointerup', onUp);
+      el.addEventListener('pointercancel', onUp);
+    },
+    onClick: (e: React.MouseEvent) => e.stopPropagation(),
+    onDoubleClick: (e: React.MouseEvent) => e.stopPropagation(),
+  });
+  const cls = (i: number, n: number) => {
+    if (!st) return '';
+    const real = st.to !== null && st.to !== st.from && st.to !== st.from + 1;
+    return (st.from === i ? ' dragging' : '') + (real && st.to === i ? ' drop-before' : '') + (real && st.to === n && i === n - 1 ? ' drop-after' : '');
+  };
+  return { grip, cls };
+}
+
 interface RowProps {
   l: Line;
   editing: boolean;
   active: boolean;
   cls: string;
-  rowProps: object;
+  grip: object;
   onFocus: () => void;
   onKey: (e: React.KeyboardEvent) => void;
   onText: (v: string) => void;
 }
 
 // 줄 하나. 볼 때와 고칠 때 같은 자리에 같은 크기로 그린다
-function LineRow({ l, editing, active, cls, rowProps, onFocus, onKey, onText }: RowProps) {
+function LineRow({ l, editing, active, cls, grip, onFocus, onKey, onText }: RowProps) {
   const ch = useStore((s) => (l.type === 'say' ? s.project.characters.find((c) => c.id === l.who) : undefined));
   const tagsOn = useStore((s) => s.project.settings.allowTextTags);
   const stage = isStage(l.type);
@@ -264,13 +310,13 @@ function LineRow({ l, editing, active, cls, rowProps, onFocus, onKey, onText }: 
       className={'pl ' + kind + (editing ? ' nodrag' : '') + (active ? ' active' : '') + cls}
       data-part={l.id}
       data-line={l.id}
-      {...rowProps}
       onFocus={editing ? onFocus : undefined}
       // 연출 줄은 글을 쓰지 않으니 줄 자체가 포커스를 받는다
       id={editing && stage ? 'in-' + l.id : undefined}
       tabIndex={editing && stage ? 0 : undefined}
       onKeyDown={editing && stage ? onKey : undefined}
     >
+      <span {...grip} className="grip pl-grip nodrag nopan">⠿</span>
       {l.type === 'say' && (
         <span className={'who' + (ch ? '' : ' unknown')} style={{ '--c': ch?.color ?? '#ef4444' } as React.CSSProperties}>
           {ch?.name ?? l.who ?? '?'}

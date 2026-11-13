@@ -77,10 +77,9 @@
           "id": "l4",
           "type": "show",
           "text": "",
-          "kind": "char",
-          "who": "mina",
-          "attr": "normal",
-          "trans": "dissolve"
+          "kind": "etc",
+          "trans": "dissolve",
+          "image": "mina normal"
         },
         {
           "id": "l5",
@@ -106,7 +105,7 @@
         {
           "id": "l6",
           "type": "note",
-          "text": "이 상자는 앞 상자에서만 이어져서 label이 생기지 않음"
+          "text": "빈 상자"
         },
         {
           "id": "l7",
@@ -120,10 +119,17 @@
           "text": "똑, 똑."
         },
         {
+          "id": "l23",
+          "type": "show",
+          "text": "",
+          "kind": "etc",
+          "image": "mina scared",
+          "trans": "dissolve"
+        },
+        {
           "id": "l9",
           "type": "say",
           "who": "mina",
-          "attr": "scared",
           "text": "방금 그 소리 들었어?",
           "fx": {
             "warp": "3"
@@ -148,7 +154,6 @@
           "id": "l10",
           "type": "say",
           "who": "mina",
-          "attr": "scared",
           "text": "어떻게 할까?"
         }
       ],
@@ -280,9 +285,9 @@
           "id": "l19",
           "type": "hide",
           "text": "",
-          "kind": "char",
-          "who": "mina",
-          "trans": "dissolve"
+          "kind": "etc",
+          "trans": "dissolve",
+          "image": "mina"
         },
         {
           "id": "l20",
