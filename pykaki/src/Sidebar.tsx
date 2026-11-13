@@ -5,7 +5,7 @@ import { useGameFolder } from './gameFolder';
 import { isDesktop, projectInfo } from './desktop';
 import { newerThanMe, projectFileName } from './files';
 import { addBoxCenter, runLayout } from './actions';
-import { keyOf, SIZES, usePrefs } from './prefs';
+import { keyOf, SIZE_KEYS, SIZES, sizeDefaults, usePrefs } from './prefs';
 import { forgetFlow } from './flowPick';
 import { useStore } from './store';
 import { Card, FoldAll, FoldScope } from './Card';
@@ -21,7 +21,7 @@ export function Sidebar() {
   const sel = useStore((s) => s.selectedIds.length);
   const rf = useReactFlow();
   const sizeLock = usePrefs((p) => p.sizeLock);
-  const resized = usePrefs((p) => p.leftW !== SIZES.left.def || p.rightW !== SIZES.right.def);
+  const resized = usePrefs((p) => SIZE_KEYS.some((k) => p[k] !== SIZES[k].def));
 
   const addChar = () =>
     update((p) => {
@@ -71,9 +71,9 @@ export function Sidebar() {
 
       <Card id="settings" defFolded title="설정" hint="칸 크기와 내보내기 설정. 화면 색과 단축키는 위쪽 [설정]" topic="화면 둘러보기">
         <div className="info-row">
-          <span>양쪽 칸 크기<Hint text="칸과 캔버스 사이 경계를 끌어 바꾸고, 더블클릭하면 그 칸만 처음 크기로" topic="화면 둘러보기" /></span>
+          <span>칸 크기<Hint text="칸 사이 경계를 끌어 바꾸고, 더블클릭하면 그 칸만 처음 크기로. [GUI 편집]·[효과]·[셰이더] 칸도 같아요" topic="화면 둘러보기" /></span>
           <span className="mini-btns">
-            <button disabled={!resized} onClick={() => usePrefs.setState({ leftW: SIZES.left.def, rightW: SIZES.right.def })} title="왼쪽 칸과 오른쪽 칸의 너비를 처음 크기로 되돌려요">
+            <button disabled={!resized} onClick={() => usePrefs.setState(sizeDefaults())} title="모든 화면의 칸 너비를 처음 크기로 되돌려요">
               처음 크기
             </button>
             <button className={sizeLock ? 'on' : ''} onClick={() => usePrefs.setState({ sizeLock: !sizeLock })} title={sizeLock ? '잠겨 있어요. 누르면 칸 경계를 끌어서 크기를 바꿀 수 있어요' : '누르면 칸 경계를 끌어도 크기가 바뀌지 않아요'}>

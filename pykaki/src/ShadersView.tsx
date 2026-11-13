@@ -11,6 +11,9 @@ import { webglOk } from './fx/FxCanvas';
 import { ScreenFxCanvas, ScreenFxKnobs, screenFxBlocked } from './fx/ScreenFxCanvas';
 import { SHADER_TRANS, TV_KNOBS, type ShaderInfo } from './shader';
 import type { Project } from './types';
+import { usePrefs } from './prefs';
+import { Resizer } from './Resizer';
+import { GalleryCard, GallerySwitch, ShaderLive, ShaderStill, TransitionLive, TransitionStill } from './FxGallery';
 import { setShaderOn, shaderBlocked, shaderCatalog, shaderUses, type ShaderCard, type ShaderUse } from './shaderLib';
 
 // 막대 묶음에서 사람이 읽을 이름만 꺼낸다: [묶음 이름, [[값 이름, 보일 글, …], …]]
@@ -49,7 +52,7 @@ function transUses(p: Project, k: string) {
 }
 
 // TV 꺼짐·켜짐 샘플: 게임과 같은 순서로 (꺼짐 → 검은 화면 → 켜짐). 값을 바꾸면 다시
-function TvSample({ values }: { values: Record<string, number> }) {
+export function TvSample({ values }: { values: Record<string, number> }) {
   const look = useGameFolder((s) => s.look);
   const v = (k: string) => values[k] ?? TV_KNOBS.find((x) => x[0] === k)![6];
   const [off, black, on] = [v('off_time'), v('black_time'), v('on_time')];
@@ -111,6 +114,8 @@ function TransList({ bar }: { bar: ReactNode }) {
   const [picked, setPicked] = useState('tv');
   const [vals, setVals] = useState<Record<string, number>>({});
   const [replay, setReplay] = useState(0);
+  const gallery = usePrefs((p) => p.gallery);
+  const fxSeq = useGameFolder((s) => s.fxSeq);
   const uses = transUses(project, picked);
   const imgFx = picked === 'tv' || picked === 'none' ? undefined : shaderEffect(picked);
   const goTo = (u: { kind: 'box' | 'label'; id: string }) => {
@@ -130,10 +135,35 @@ function TransList({ bar }: { bar: ReactNode }) {
   return (
     <div className="sp-view fxv">
       <div className="fxv-list">
-        <div className="fxv-bar">{bar}</div>
+        <div className="fxv-bar">
+          {bar}
+          <span className="grow" />
+          <GallerySwitch />
+        </div>
         <div className="fxv-cards">
           <h4>셰이더가 바뀔 때 <span className="tip">{SHADER_TRANS.length}</span><Hint text="상자나 label의 ◐ 셰이더 → 시작할 때, 끝날 때에서 골라요" topic="셰이더 (상자" /></h4>
-          {SHADER_TRANS.map(([k, t]) => {
+          {gallery && (
+            <div className="gal-grid">
+              {SHADER_TRANS.map(([k, t]) => {
+                const n = transUses(project, k).length;
+                const e = k === 'tv' || k === 'none' ? undefined : shaderEffect(k);
+                const pe = e?.kind === 'transition' ? e : null;
+                return (
+                  <GalleryCard
+                    key={k}
+                    on={picked === k}
+                    label={t}
+                    name={k}
+                    onPick={() => setPicked(k)}
+                    bottom={n > 0 && <span className="fxv-uses" title="이 전환을 고른 상자와 label">{n}곳</span>}
+                    still={k === 'tv' ? <TvSample values={vals} /> : pe ? <TransitionStill effect={pe} args={{}} picture={null} seq={fxSeq} /> : <div className="gal-msg">{k === 'none' ? '바로 바뀌어요' : '효과 폴더에 없어요'}</div>}
+                    live={pe && <TransitionLive effect={pe} args={{}} picture={null} />}
+                  />
+                );
+              })}
+            </div>
+          )}
+          {!gallery && SHADER_TRANS.map(([k, t]) => {
             const n = transUses(project, k).length;
             return (
               <div key={k} className={'fxv-card' + (picked === k ? ' on' : '')} onClick={() => setPicked(k)}>
@@ -146,6 +176,7 @@ function TransList({ bar }: { bar: ReactNode }) {
           })}
         </div>
       </div>
+      <Resizer size="fxSideW" grow={-1} className="right" />
       <div className="fxv-side">
         <h3>
           {SHADER_TRANS.find(([k]) => k === picked)?.[1]} <span className="fxv-name">{picked}</span>
@@ -200,6 +231,7 @@ function ShaderList({ bar }: { bar: ReactNode }) {
   const [query, setQuery] = useState('');
   const [picked, setPicked] = useState('');
   const [busy, setBusy] = useState(false);
+  const gallery = usePrefs((p) => p.gallery);
   const [blocked, setBlocked] = useState('');
   const [args, setArgs] = useState<Record<string, Record<string, unknown>>>({}); // 샘플에서만 쓰는 값: 셰이더 이름 → { 값 이름: 값 }
   const [picture, setPicture] = useState<HTMLImageElement | null>(null); // 샘플 그림 (저장하지 않음)
@@ -240,6 +272,16 @@ function ShaderList({ bar }: { bar: ReactNode }) {
     if (!r.ok) say(r.why);
     else say(c.on ? `"${c.label}"을(를) 껐어요. 고르는 목록에서만 빠지고, 이미 정한 상자는 그대로 돌아요` : `"${c.label}"을(를) 켰어요`);
   };
+  const check = (c: ShaderCard) => (
+      <input
+        type="checkbox"
+        checked={c.on}
+        disabled={!!blocked || busy}
+        title={blocked || (c.on ? '끄기: 고르는 목록에서만 빠져요. 이미 정한 상자는 그대로 돌아요' : '켜기: 고르는 목록에 다시 나와요')}
+        onClick={(e) => e.stopPropagation()}
+        onChange={() => void toggle(c)}
+      />
+  );
   const goTo = (u: ShaderUse) => {
     useLive.setState({ view: 'script' });
     const s = useStore.getState();
@@ -254,20 +296,39 @@ function ShaderList({ bar }: { bar: ReactNode }) {
         <div className="fxv-bar">
           {bar}
           <input className="fxv-find" placeholder="찾기 (이름)" value={query} onChange={(e) => setQuery(e.target.value)} />
+          <span className="grow" />
+          <GallerySwitch />
         </div>
         {blocked && <p className="tip fxv-note">{blocked}. 지금은 구경만 할 수 있어요.</p>}
         <div className="fxv-cards">
           <h4>{blocked ? '기본 셰이더' : '이 프로젝트에 있는 것'} <span className="tip">{shown.length}</span><Hint text="새 셰이더는 게임을 한 번 켠 뒤 [다시 읽기]로 나와요" topic="셰이더" /></h4>
-          {shown.map((c) => (
+          {gallery ? (
+            <div className="gal-grid">
+              {shown.map((c) => (
+                <GalleryCard
+                  key={c.id}
+                  on={sel?.id === c.id}
+                  off={!c.on}
+                  label={c.label}
+                  name={c.id}
+                  onPick={() => setPicked(c.id)}
+                  top={
+                    <>
+                      {!c.on && <span className="sp-badge">끔</span>}
+                      {c.overlay_only && <span className="sp-badge" title="다른 셰이더 위에 덧씌우는 용도로 만든 셰이더예요">덮개</span>}
+                      {check(c)}
+                    </>
+                  }
+                  bottom={c.uses > 0 && <span className="fxv-uses" title="이 셰이더를 건 상자와 label">{c.uses}곳</span>}
+                  still={<ShaderStill info={c} args={args[c.id] ?? {}} picture={picture} seq={fxSeq} />}
+                  live={!screenFxBlocked(c) && <ShaderLive info={c} args={args[c.id] ?? {}} picture={picture} />}
+                />
+              ))}
+            </div>
+          ) : (
+            shown.map((c) => (
             <div key={c.id} className={'fxv-card' + (sel?.id === c.id ? ' on' : '') + (c.on ? '' : ' off')} onClick={() => setPicked(c.id)}>
-              <input
-                type="checkbox"
-                checked={c.on}
-                disabled={!!blocked || busy}
-                title={blocked || (c.on ? '끄기: 고르는 목록에서만 빠져요. 이미 정한 상자는 그대로 돌아요' : '켜기: 고르는 목록에 다시 나와요')}
-                onClick={(e) => e.stopPropagation()}
-                onChange={() => void toggle(c)}
-              />
+              {check(c)}
               <span className="fxv-label">{c.label}</span>
               <span className="fxv-name">{c.id}</span>
               {!c.on && <span className="sp-badge">끔</span>}
@@ -275,10 +336,12 @@ function ShaderList({ bar }: { bar: ReactNode }) {
               {c.uses > 0 && <span className="fxv-uses" title="이 셰이더를 건 상자와 label">{c.uses}곳</span>}
               {c.overlay_only && <span className="sp-badge" title="다른 셰이더 위에 덧씌우는 용도로 만든 셰이더예요">덮개</span>}
             </div>
-          ))}
+            ))
+          )}
           {!shown.length && <p className="tip">{q ? '찾는 셰이더가 없어요.' : '셰이더가 없어요.'}</p>}
         </div>
       </div>
+      <Resizer size="fxSideW" grow={-1} className="right" />
       <div className="fxv-side">
         {!sel ? (
           <p className="tip">왼쪽에서 셰이더를 골라 주세요.</p>

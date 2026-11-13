@@ -210,3 +210,5 @@ export function TransitionCanvas(props: TransitionCanvasProps) {
 
   return <canvas ref={canvas} className={props.className} aria-hidden />;
 }
+
+export { Renderer as TransitionRenderer };

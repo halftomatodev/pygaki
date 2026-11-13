@@ -604,6 +604,7 @@ fieldset.plain:disabled { opacity: 0.4; }
 .live-dot.on { color: #22c55e; opacity: 1; text-shadow: 0 0 2px #fff; }
 .sp-view { flex: 1; display: flex; min-height: 0; }
 /* ── [효과] 화면 (EffectsView.tsx): 왼쪽 카드 목록, 오른쪽 샘플 ── */
+.fxv { position: relative; }
 .fxv .grow { flex: 1; }
 .fxv-list { flex: 1; min-width: 0; display: flex; flex-direction: column; padding: 12px 16px 0; }
 .fxv-bar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
@@ -626,7 +627,7 @@ fieldset.plain:disabled { opacity: 0.4; }
 .fxv-name { font-family: var(--mono); font-size: 11.5px; font-weight: 400; color: var(--muted); }
 .fxv-uses { font-size: 11.5px; color: var(--accent); white-space: nowrap; }
 .fxv-card button { padding: 1px 8px; font-size: 12px; }
-.fxv-side { width: 440px; flex-shrink: 0; overflow: auto; padding: 14px 18px; background: var(--panel); border-left: 1px solid var(--line); }
+.fxv-side { width: var(--fx-side-w, 440px); flex-shrink: 0; overflow: auto; padding: 14px 18px; background: var(--panel); border-left: 1px solid var(--line); }
 .fxv-side h3 { margin: 0 0 2px; font-size: 16px; }
 .fxv-side > .tip { margin: 0 0 10px; }
 .fxv-stage { height: 190px; padding: 0 22px; }
@@ -936,7 +937,12 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .tv-note { position: absolute; right: 6px; bottom: 4px; font-size: 10px; color: rgba(255,255,255,.55); pointer-events: none; }
 
 /* GUI 편집: 맨 위 안내, 왼쪽 목록을 묶음 카드로 */
-.sp-view.sp-cards { display: grid; grid-template-columns: 250px minmax(0, 1fr) 380px; grid-template-rows: auto minmax(0, 1fr); }
+.sp-view.sp-cards { position: relative; display: grid; grid-template-columns: var(--gui-left-w, 250px) minmax(0, 1fr) var(--gui-right-w, 380px); grid-template-rows: auto minmax(0, 1fr); }
+/* 칸 사이 경계 (Resizer.tsx): 대본 편집과 같은 모양 */
+.sp-cards > .resizer, .fxv > .resizer { position: absolute; top: 0; bottom: 0; width: 6px; }
+.sp-cards > .resizer.left { left: calc(var(--gui-left-w, 250px) - 3px); }
+.sp-cards > .resizer.right { right: calc(var(--gui-right-w, 380px) - 3px); }
+.fxv > .resizer.right { right: calc(var(--fx-side-w, 440px) - 3px); }
 .sp-cards > .sp-hint { grid-column: 1 / -1; font-size: 11px; color: var(--muted); opacity: 0.75; padding: 6px 14px 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sp-cards > .sp-nav { width: auto; gap: 10px; padding: 6px 4px 16px 10px; min-height: 0; }
 .sp-cards > .sp-main, .sp-cards > .sp-panel { width: auto; min-height: 0; }
@@ -1072,3 +1078,32 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .help-body th, .help-body td { border: 1px solid var(--line); padding: 4px 8px; text-align: left; vertical-align: top; }
 .help-body blockquote { margin: 8px 0; padding: 6px 10px; border-left: 3px solid var(--line); color: var(--muted); }
 .row > label .hint-i, h3 .hint-i, h4 .hint-i { vertical-align: 1px; }
+
+/* [효과]·[셰이더] 갤러리 보기 (FxGallery.tsx): 미리보기 카드를 바둑판으로. 고르면 오른쪽 칸에서 세부 값 */
+.gal-switch button { font-size: 12px; padding: 3px 10px; }
+.gal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; padding: 2px 2px 4px; }
+.gal-card { display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 8px; cursor: pointer; min-width: 0; transition: border-color 0.15s, box-shadow 0.15s; }
+.gal-card:hover { border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08); }
+.gal-card.on { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent); }
+.gal-card.off .fxv-label { color: var(--muted); text-decoration: line-through; }
+.gal-card.off .gal-pic { opacity: 0.55; }
+.gal-pic { position: relative; background: #15171f; border-radius: 8px; overflow: hidden; }
+.gal-pic > img, .gal-pic > canvas { display: block; width: 100%; height: 100%; object-fit: cover; }
+.gal-pic > .fxv-pic { width: 100%; height: 100%; border-radius: 0; }
+.gal-pic .tv-note { display: none; }
+.gal-msg { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 8px; text-align: center; font-size: 11.5px; color: rgba(255, 255, 255, 0.55); }
+.gal-wait { position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.06) 50%, transparent 70%) #15171f; background-size: 200% 100%; animation: gal-wait 1.2s linear infinite; }
+@keyframes gal-wait { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+.gal-text { position: absolute; inset: 0; display: flex; align-items: center; padding: 0 10px; font-size: 20px; white-space: nowrap; overflow: hidden; }
+.gal-textlive { position: absolute; inset: 0; }
+.gal-textlive .fxv-stage { height: 100%; padding: 0 10px; border-radius: 0; }
+.gal-textlive .fxv-stage .preview-text { font-size: 20px; }
+.gal-meta { display: flex; flex-direction: column; gap: 2px; padding: 8px 2px 0; min-width: 0; }
+.gal-line { display: flex; align-items: center; gap: 6px; min-height: 20px; min-width: 0; }
+.gal-line .fxv-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.gal-line input[type='checkbox'] { margin: 0; flex-shrink: 0; cursor: pointer; }
+.gal-line button { padding: 1px 8px; font-size: 12px; }
+.gal-line .fxv-plus { display: none; }
+.gal-photographer { position: fixed; left: -10000px; top: 0; width: 300px; pointer-events: none; }
+.gal-move { font-size: 12px; padding: 3px 10px; border-radius: 8px; background: var(--faint); border: 1px solid var(--line); margin-right: 4px; }
+.gal-move.on { background: var(--accent-soft); color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }

@@ -13,6 +13,9 @@ import { FxCanvas, webglOk } from './fx/FxCanvas';
 import { TransitionCanvas } from './fx/TransitionCanvas';
 import { Glyphs, useReveal } from './SayPreview';
 import { parseTagged } from './textTags';
+import { usePrefs } from './prefs';
+import { Resizer } from './Resizer';
+import { GalleryCard, GallerySwitch, TextLive, TextPhotographer, TextStill, TransitionLive, TransitionStill } from './FxGallery';
 
 export const SOURCE_LABEL: Record<EffectCard['source'], string> = { renpy: '렌파이', base: '기본', project: '프로젝트', library: '모음' };
 const SAMPLE_CPS = 30;
@@ -22,7 +25,7 @@ const TIME_KEY = '@time'; // 그림 효과 샘플의 걸리는 시간 막대 (�
 const REQUEST_TEXT = /## 클로드에게[\s\S]*?```text\r?\n([\s\S]*?)```/.exec(readme)?.[1].trim() ?? '';
 
 // 글자 효과 샘플: 대사 미리보기와 같은 그리기(FxCanvas). 셰이더 코드가 틀리면 이유를 보여 준다
-function TextSample({ spec, name, text, onReplay }: { spec: string; name: string; text: string; onReplay(): void }) {
+export function TextSample({ spec, name, text, onReplay, onFrame }: { spec: string; name: string; text: string; onReplay(): void; onFrame?(canvas: HTMLCanvasElement, slow: number, maxTime: number): void }) {
   const look = useGameFolder((s) => s.look);
   const parsed = useMemo(() => parseTagged(text.trim() ? text : SAMPLE_TEXT, false, gameFont), [text]);
   const { shown, click, fast, limit, holding } = useReveal(parsed, SAMPLE_CPS);
@@ -60,6 +63,7 @@ function TextSample({ spec, name, text, onReplay }: { spec: string; name: string
           holding={holding}
           fast={fast}
           cps={SAMPLE_CPS}
+          onFrame={onFrame}
           onFail={(e) => setBad(String((e as any)?.message ?? e).split('\n')[0])}
         />
       )}
@@ -192,6 +196,7 @@ export function EffectsView() {
   const [replay, setReplay] = useState(0);
   const [removing, setRemoving] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const gallery = usePrefs((p) => p.gallery);
   const filePick = useRef<HTMLInputElement>(null);
   const picPick = useRef<HTMLInputElement>(null);
   const [picture, setPicture] = useState<HTMLImageElement | null>(null); // 그림 효과 샘플의 새 그림 (저장하지 않음)
@@ -225,6 +230,19 @@ export function EffectsView() {
       return String(e?.message ?? e);
     }
   }, [sel?.name, sel?.ready, fxSeq]);
+
+  // 갤러리는 모음의 효과도 모두 그림으로 보여 주니 한꺼번에 올려 둔다 (틀린 파일은 그 카드만 "못 돌려요")
+  useMemo(() => {
+    if (!gallery) return;
+    for (const file of new Set(library.map((c) => c.file))) {
+      const pack = allPacks().find((p) => p.name === file);
+      try {
+        if (pack) previewPack(pack.name, pack.text);
+      } catch {
+        // 그 카드에 표시
+      }
+    }
+  }, [gallery, fxSeq, kind, library.length]);
 
   const act = async (fn: () => Promise<void>) => {
     setBusy(true);
@@ -272,26 +290,24 @@ export function EffectsView() {
     useStore.setState({ tab: 'edit', hideRight: false, focusLineId: u.lineId });
   };
 
-  const row = (c: EffectCard) => (
-    <div key={c.name} className={'fxv-card' + (sel?.name === c.name ? ' on' : '') + (c.ready && !c.on ? ' off' : '')} onClick={() => setPicked((v) => ({ ...v, [kind]: c.name }))}>
-      {c.ready ? (
-        <input
-          type="checkbox"
-          checked={c.on}
-          disabled={!!blocked || busy}
-          title={blocked || (c.on ? '끄기: 고르는 목록에서만 빠져요. 이미 쓴 줄은 그대로 돌아요' : '켜기: 고르는 목록에 다시 나와요')}
-          onClick={(e) => e.stopPropagation()}
-          onChange={() => toggle(c)}
-        />
-      ) : (
-        <span className="fxv-plus">＋</span>
-      )}
-      <span className="fxv-label">{c.label}</span>
-      <span className="fxv-name">{c.name}</span>
-      {c.ready && !c.on && <span className="sp-badge">끔</span>}
-      <span className="grow" />
-      {c.uses > 0 && <span className="fxv-uses" title="대본에서 이 효과를 쓴 줄">{c.uses}줄</span>}
-      <span className="sp-badge">{SOURCE_LABEL[c.source]}</span>
+  const pick = (c: EffectCard) => setPicked((v) => ({ ...v, [kind]: c.name }));
+  // 켜기 칸 (넣은 것) 또는 ＋ (아직 안 넣은 것)
+  const check = (c: EffectCard) =>
+    c.ready ? (
+      <input
+        type="checkbox"
+        checked={c.on}
+        disabled={!!blocked || busy}
+        title={blocked || (c.on ? '끄기: 고르는 목록에서만 빠져요. 이미 쓴 줄은 그대로 돌아요' : '켜기: 고르는 목록에 다시 나와요')}
+        onClick={(e) => e.stopPropagation()}
+        onChange={() => toggle(c)}
+      />
+    ) : (
+      <span className="fxv-plus">＋</span>
+    );
+  const uses = (c: EffectCard) => c.uses > 0 && <span className="fxv-uses" title="대본에서 이 효과를 쓴 줄">{c.uses}줄</span>;
+  const buttons = (c: EffectCard) => (
+    <>
       {c.source === 'project' && c.file && (
         <button className="danger" disabled={!!blocked || busy} title={blocked || `${c.file}을(를) 효과 폴더에서 빼요`} onClick={(e) => (e.stopPropagation(), setRemoving(c.file!))}>
           빼기
@@ -307,8 +323,65 @@ export function EffectsView() {
           넣기
         </button>
       )}
+    </>
+  );
+  const row = (c: EffectCard) => (
+    <div key={c.name} className={'fxv-card' + (sel?.name === c.name ? ' on' : '') + (c.ready && !c.on ? ' off' : '')} onClick={() => pick(c)}>
+      {check(c)}
+      <span className="fxv-label">{c.label}</span>
+      <span className="fxv-name">{c.name}</span>
+      {c.ready && !c.on && <span className="sp-badge">끔</span>}
+      <span className="grow" />
+      {uses(c)}
+      <span className="sp-badge">{SOURCE_LABEL[c.source]}</span>
+      {buttons(c)}
     </div>
   );
+  // 갤러리 카드: 그림 효과는 반쯤 지난 그림, 글자 효과는 샘플 글. 마우스를 올리면 움직인다
+  const tile = (c: EffectCard) => {
+    const a = args[c.name] ?? {};
+    const e = c.kind === 'transition' ? shaderEffect(c.name, true) : undefined;
+    const pe = e?.kind === 'transition' ? e : null;
+    const pa = Object.fromEntries(Object.entries(a).filter(([k]) => k !== TIME_KEY));
+    return (
+      <GalleryCard
+        key={c.name}
+        on={sel?.name === c.name}
+        off={c.ready && !c.on}
+        label={c.label}
+        name={c.name}
+        onPick={() => pick(c)}
+        top={
+          <>
+            {c.ready && !c.on && <span className="sp-badge">끔</span>}
+            <span className="sp-badge">{SOURCE_LABEL[c.source]}</span>
+            {check(c)}
+          </>
+        }
+        bottom={
+          <>
+            {uses(c)}
+            {buttons(c)}
+          </>
+        }
+        still={
+          c.kind === 'transition' ? (
+            pe ? <TransitionStill effect={pe} args={pa} picture={picture} seq={fxSeq} /> : <div className="gal-msg">샘플을 못 돌려요</div>
+          ) : (
+            <TextStill spec={formatEffect([{ name: c.name, args: Object.entries(a) }]) ?? c.name} name={c.name} text={text} />
+          )
+        }
+        live={
+          c.kind === 'transition' ? (
+            pe && <TransitionLive effect={pe} args={pa} time={a[TIME_KEY] ? Number(a[TIME_KEY]) : undefined} picture={picture} />
+          ) : (
+            <TextLive spec={formatEffect([{ name: c.name, args: Object.entries(a) }]) ?? c.name} name={c.name} text={text} />
+          )
+        }
+      />
+    );
+  };
+  const list = (cs: EffectCard[]) => (gallery ? <div className="gal-grid">{cs.map(tile)}</div> : cs.map(row));
 
   const fx = sel ? shaderEffect(sel.name, true) : undefined;
   const picFx = sel?.kind === 'transition' && fx?.kind === 'transition' ? fx : null;
@@ -328,7 +401,7 @@ export function EffectsView() {
       else next[key] = v;
       return { ...all, [sel.name]: next };
     });
-  const uses = sel ? effectUses(project, sel.kind, sel.name) : [];
+  const selUses = sel ? effectUses(project, sel.kind, sel.name) : [];
   const lineOf = (u: EffectUse) => {
     const n = project.nodes.find((x) => x.id === u.nodeId);
     const l = n?.lines.find((x) => x.id === u.lineId);
@@ -351,22 +424,24 @@ export function EffectsView() {
           <span className="grow" />
           <button disabled={!!blocked || busy} title={blocked || '가진 .glsl 효과 파일을 검사해서 이 게임의 효과 폴더에 넣어요'} onClick={() => filePick.current?.click()}>파일 넣기</button>
           <button title="클로드에게 새 효과를 부탁할 때 같이 줄 글을 복사해요 (앱은 밖으로 통신하지 않아요)" onClick={copyRequest}>새 효과 요청문 복사</button>
+          <GallerySwitch />
           <input ref={filePick} type="file" accept=".glsl" multiple hidden onChange={(e) => void addFiles(e.target.files)} />
         </div>
         {blocked && <p className="tip fxv-note">{blocked}. 지금은 구경만 할 수 있어요.</p>}
         {fxErrors.length > 0 && <p className="tip warn-text fxv-note">효과 폴더에서 못 읽은 파일: {fxErrors.map(([f, why]) => `${f} (${why})`).join(' / ')}</p>}
         <div className="fxv-cards">
           <h4>{blocked ? '쓸 수 있는 효과' : '이 프로젝트에 있는 것'} <span className="tip">{here.length}</span></h4>
-          {here.map(row)}
+          {list(here)}
           {!here.length && <p className="tip">{q ? '찾는 효과가 없어요.' : kind === 'transition' ? '그림 효과 파일이 없어요. 아래 모음에서 넣을 수 있어요.' : '효과가 없어요.'}</p>}
           {library.length > 0 && (
             <>
               <h4>효과 모음 (아직 안 넣은 것) <span className="tip">{library.length}</span></h4>
-              {library.map(row)}
+              {list(library)}
             </>
           )}
         </div>
       </div>
+      <Resizer size="fxSideW" grow={-1} className="right" />
       <div className="fxv-side">
         {!sel ? (
           <p className="tip">왼쪽에서 효과를 골라 주세요.</p>
@@ -444,8 +519,8 @@ export function EffectsView() {
                   )}
                 </>
               )}
-            <h4>쓰인 곳 <span className="tip">{uses.length ? `대본 ${uses.length}줄` : '대본에서 안 써요'}</span></h4>
-            {uses.slice(0, 30).map((u) => {
+            <h4>쓰인 곳 <span className="tip">{selUses.length ? `대본 ${selUses.length}줄` : '대본에서 안 써요'}</span></h4>
+            {selUses.slice(0, 30).map((u) => {
               const { box, text } = lineOf(u);
               return (
                 <div className="fxv-use" key={u.lineId}>
@@ -455,10 +530,11 @@ export function EffectsView() {
                 </div>
               );
             })}
-            {uses.length > 30 && <p className="tip">… 외 {uses.length - 30}줄</p>}
+            {selUses.length > 30 && <p className="tip">… 외 {selUses.length - 30}줄</p>}
           </>
         )}
       </div>
+      {gallery && kind === 'effect' && <TextPhotographer />}
       {removing && <RemoveDialog file={removing} cards={cards} onClose={() => setRemoving(null)} />}
     </div>
   );

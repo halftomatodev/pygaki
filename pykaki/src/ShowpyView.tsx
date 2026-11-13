@@ -2,6 +2,7 @@
 // 왼쪽: 고칠 것 목록 / 가운데: 지금 게임 위치와 대본 / 오른쪽: 고르는 칸.
 // 값은 게임이 갖고 있고(docs/LINK.md 9장), 여기는 보여주고 바꾸라고 보내기만 한다. 저장도 게임이 한다.
 import { Hint } from './Help';
+import { Resizer } from './Resizer';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { desktop } from './desktop';
 import { liveSend, setGamePanel, useLive, type GameState, type TitleItem, type TitleState } from './showpyLive';
@@ -105,9 +106,11 @@ export function ShowpyView() {
           </Card>
         ))}
       </nav>
+      <Resizer size="guiLeftW" grow={1} className="left" />
       <div className="sp-main">
         {!on ? <NotConnected /> : st ? <Where st={st} sec={sec.id} /> : <p className="tip">게임 상태를 기다리는 중...</p>}
       </div>
+      <Resizer size="guiRightW" grow={-1} className="right" />
       {/* 오른쪽 칸도 대본 편집처럼 카드: 저장·편집기 카드 + 고치는 칸 카드 (커서·대사 소리는 칸마다 카드) */}
       <div className="sp-panel">
         <Card id="g-bar" title="저장과 GUI 편집기">

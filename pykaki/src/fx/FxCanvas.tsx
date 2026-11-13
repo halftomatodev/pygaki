@@ -301,9 +301,10 @@ export interface FxCanvasProps {
   fast: boolean; // 클릭으로 한 번에 보였음
   cps: number;
   onFail(e: unknown): void;
+  onFrame?(canvas: HTMLCanvasElement, slow: number, maxTime: number): void; // 한 번 그릴 때마다 (갤러리 카드 사진 찍기, FxGallery.tsx)
 }
 
-export function FxCanvas({ target, ts, tagTs, parsed, shown, limit, holding, fast, cps, onFail }: FxCanvasProps) {
+export function FxCanvas({ target, ts, tagTs, parsed, shown, limit, holding, fast, cps, onFail, onFrame }: FxCanvasProps) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const st = useRef({
     r: null as Renderer | null,
@@ -318,7 +319,7 @@ export function FxCanvas({ target, ts, tagTs, parsed, shown, limit, holding, fas
     props: null as FxCanvasProps | null,
     timing: null as Timing | null,
   });
-  st.current.props = { target, ts, tagTs, parsed, shown, limit, holding, fast, cps, onFail };
+  st.current.props = { target, ts, tagTs, parsed, shown, limit, holding, fast, cps, onFail, onFrame };
 
   // 시간 기록: shown이 늘 때마다 그때를 적는다
   const s = st.current;
@@ -397,6 +398,7 @@ export function FxCanvas({ target, ts, tagTs, parsed, shown, limit, holding, fas
       s.r.clear();
       for (const layer of layerList)
         for (const g of groups) s.r.draw(s.r.program(['renpy.texture', ...g.ts.parts]), g.n, [layerOf(g.ts, layer)]);
+      p.onFrame?.(s.r.canvas, slow, maxTime);
       if (groups.some((g) => g.ts.redraw) || !done || slow < maxTime) s.raf = requestAnimationFrame(frame);
     } catch (e) {
       p.onFail(e);

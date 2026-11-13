@@ -93,12 +93,26 @@ interface Prefs {
   runSkip: boolean; // [렌파이에서 실행]: 게임이 이미 켜져 있으면 무시 (앱)
   leftW: number; // 왼쪽 칸 너비 (px)
   rightW: number; // 오른쪽 칸 너비 (px)
+  guiLeftW: number; // [GUI 편집] 왼쪽 칸 너비 (px)
+  guiRightW: number; // [GUI 편집] 오른쪽 칸 너비 (px)
+  fxSideW: number; // [효과]·[셰이더] 오른쪽 칸 너비 (px)
   sizeLock: boolean; // 칸 경계를 끌어도 크기가 바뀌지 않게
+  gallery: boolean; // [효과]·[셰이더] 왼쪽을 갤러리(미리보기 카드)로 보기
+  galleryMove: boolean; // 갤러리에서 보이는 카드를 계속 움직이기 (FxGallery.tsx MAX_LIVE개까지)
 }
 
-// 양쪽 칸 너비의 처음 값과 범위
-export const SIZES = { left: { def: 244, min: 190, max: 520 }, right: { def: 400, min: 300, max: 760 } } as const;
-export const clampSize = (side: 'left' | 'right', w: number) => Math.round(Math.min(SIZES[side].max, Math.max(SIZES[side].min, w)));
+// 칸 너비의 처음 값과 범위 (대본 편집 양쪽, GUI 편집 양쪽, 효과·셰이더 오른쪽)
+export const SIZES = {
+  leftW: { def: 244, min: 190, max: 520 },
+  rightW: { def: 400, min: 300, max: 760 },
+  guiLeftW: { def: 250, min: 190, max: 520 },
+  guiRightW: { def: 380, min: 300, max: 760 },
+  fxSideW: { def: 440, min: 320, max: 900 },
+} as const;
+export type SizeKey = keyof typeof SIZES;
+export const SIZE_KEYS = Object.keys(SIZES) as SizeKey[];
+export const clampSize = (k: SizeKey, w: number) => Math.round(Math.min(SIZES[k].max, Math.max(SIZES[k].min, w)));
+export const sizeDefaults = () => Object.fromEntries(SIZE_KEYS.map((k) => [k, SIZES[k].def])) as Record<SizeKey, number>;
 
 const KEY = 'pykaki-prefs';
 const defKeys = () => Object.fromEntries(ACTIONS.map((a) => [a.id, a.def])) as Record<ActionId, string>;
@@ -107,7 +121,7 @@ const defKeys = () => Object.fromEntries(ACTIONS.map((a) => [a.id, a.def])) as R
 const defaults = (): Prefs => ({
   theme: 'apple', custom: { ...THEMES.find((t) => t.id === 'apple')!.colors, box: '#ffffff' }, keys: defKeys(),
   dim: 'mid', frameWidth: 3, grads: structuredClone(GRAD_DEFAULTS), textColor: null, runSkip: true,
-  leftW: SIZES.left.def, rightW: SIZES.right.def, sizeLock: false,
+  ...sizeDefaults(), sizeLock: false, gallery: true, galleryMove: false,
 });
 
 function loadPrefs(): Prefs {
@@ -158,8 +172,11 @@ function apply(p: Prefs) {
   r.dataset.dark = isDark(c) ? '1' : '';
   r.style.setProperty('--frame-w', Math.min(6, Math.max(0, p.frameWidth)) + 'px');
   r.dataset.look = lookOf(p) ?? '';
-  r.style.setProperty('--left-w', clampSize('left', p.leftW) + 'px');
-  r.style.setProperty('--right-w', clampSize('right', p.rightW) + 'px');
+  r.style.setProperty('--left-w', clampSize('leftW', p.leftW) + 'px');
+  r.style.setProperty('--right-w', clampSize('rightW', p.rightW) + 'px');
+  r.style.setProperty('--gui-left-w', clampSize('guiLeftW', p.guiLeftW) + 'px');
+  r.style.setProperty('--gui-right-w', clampSize('guiRightW', p.guiRightW) + 'px');
+  r.style.setProperty('--fx-side-w', clampSize('fxSideW', p.fxSideW) + 'px');
   // 그라데이션·직접 고르기 테마: 상자와 label 배경을 테마 색으로 칠한다
   const fill = (name: string, v?: string) => {
     r.dataset[name + 'fill'] = v ? '1' : '';

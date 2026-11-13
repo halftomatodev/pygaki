@@ -263,3 +263,5 @@ export function ScreenFxKnobs({ info, values, onChange }: { info: ShaderInfo; va
     </>
   );
 }
+
+export { Renderer as ScreenFxRenderer };
