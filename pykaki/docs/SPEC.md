@@ -116,7 +116,9 @@
   - 위쪽 [셰이더] 화면(`ShadersView.tsx`): [셰이더](목록, 켜기/끄기, 샘플, 구경용 막대) / [전환](TV 꺼짐·켜짐, 픽셀소트, 데이터모싱, 없음. 픽셀소트·데이터모싱은 효과 폴더 효과를 `PictureSample`로. TV는 CSS로 비슷하게 그리는 샘플 `TvSample`과 구경용 막대, 쓰인 곳).
   - 예전 `fx` 줄(`screen_fx.use`)은 그대로 읽고 내보낸다(새 줄 목록에는 없음).
   - 셰이더 카드 맨 아래 [⚠ 모든 상자에 적용](이 상자·label에 걸린 셰이더를 모든 label에 걸고 상자마다 따로 정한 것은 지움) / [⚠ 전부 삭제](대본 전체에서 지움). 확인 창을 띄우고, ↶로 되돌린다(`UiPanel.tsx` `AllRow`).
-- **대사 소리·속도, 커서, 클릭 대기** (`BoxNode.ui`, `LabelGroup.ui`, `src/boxUi.ts`, `FEATURE` 7): `{ cps?, sound?, ctc?, cursor? }`. 값마다 상자 → label → 게임 처음 값(`uiOfBox`). `sound`는 game 기준 경로이고 `''`이면 끔, `ctc` `cursor`는 그림 폴더(`gui/ctc/heart`). 셰이더 칸 아래 카드 둘(`UiPanel.tsx` `UiCards`): 대사 소리와 속도 / 커서와 클릭 대기. 값마다 [따름]/[이 상자에], 카드 맨 아래 [⚠ 모든 상자에 적용] [⚠ 전부 삭제](`applyAll` `clearAll`). 그림 묶음은 `scanFolder`가 `gui/ctc`, `gui/cursor` 안의 폴더를 읽은 것(`Media.frames`).
+- **대사 소리와 속도** (`Line.say.sound`, `say.cps`, `FEATURE` 10): 대사·내레이션 줄 하나마다. `sound`는 game 기준 경로, `''`이면 이 줄은 끔, 없으면 캐릭터 `cb_typing_sound` → 게임 처음 값. 원고에는 대사 괄호에 `cb_typing_sound=`(연결을 켰을 때만). 상자 편집 칸 글자 효과 카드 아래 `UiPanel.tsx` `SayUiCard`: 값마다 [따름]/[이 대사에], [이 상자의 모든 대사에].
+- **커서, 클릭 대기** (`BoxNode.ui`, `src/boxUi.ts`, `FEATURE` 7, 10부터 상자에만): `{ ctc?, cursor? }`. 값마다 상자 → 게임 처음 값(앞 상자 것을 이어받지 않음). `ctc` `cursor`는 그림 폴더(`gui/ctc/heart`). 상자 편집 칸 `UiPanel.tsx` `CursorCard`: 값마다 [게임 처음 값]/[이 상자에], 카드 맨 아래 [⚠ 모든 상자에 적용] [⚠ 전부 삭제](`applyAll` `clearAll`).
+- **예전 대본 옮기기** (`sample.ts` `moveUi`): `FEATURE` 9까지의 `BoxNode.ui.cps/sound`, `LabelGroup.ui`는 열 때 상자 → label 차례로 찾아서, 속도·소리는 그 상자의 대사·내레이션 줄 가운데 값이 없는 줄로, 커서·클릭 대기는 상자로 옮기고 지운다. 그림 묶음은 `scanFolder`가 `gui/ctc`, `gui/cursor` 안의 폴더를 읽은 것(`Media.frames`).
   - 내보내기: `cps`는 그 상자의 대사·내레이션 줄 가운데 속도를 정하지 않은 줄에 `cps=`로. 나머지는 하나라도 쓰면(`usesSceneUi`) 모든 상자의 첫 줄(셰이더 줄 다음)과 `call` 뒤에 `$ custom_ui.scene(...)`(`sceneCode`). 게임의 `custom_ui.rpy`에 `def scene(`가 없으면(`sceneSupported`, `useGameFolder.sceneUi`) 빼고 검사 경고. 형식은 LINK.md 2장.
 
 ## 5. `.rpy` 내보내기 규칙 (`src/exportRpy.ts`)

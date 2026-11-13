@@ -172,6 +172,7 @@ export const lineCps = (s?: SayStyle, text?: string) =>
 // showpy가 없는 게임에서는 렌파이 원래 이름으로 내보낸다. 그러면 플러그인 없이도 오류가 나지 않는다
 const NATIVE: Record<keyof SayStyle, string> = {
   size: 'what_size', font: 'what_font', color: 'what_color', cps: 'what_slow_cps', effect: 'what_textshader',
+  sound: '', // 대사 소리는 플러그인의 대사 소리 콜백이 받아서 연결을 켰을 때만
   box: '', tail: '', box_rotate: '', // 글 상자는 showpy가 있어야 해서 원래 이름이 없다 (내보내지 않음)
   name_size: 'who_size', name_font: 'who_font', name_color: 'who_color',
   x: 'what_xpos', y: 'what_ypos', name_x: 'namebox_xpos', name_y: 'namebox_ypos',
@@ -191,6 +192,8 @@ export function sayArgs(s0?: SayStyle, native = false, text?: string): string[] 
   str('color');
   const cps = lineCps(s, text);
   if (cps !== undefined) a.push(`${name('cps')}=${cps}`);
+  // 대사 소리: 렌파이 원래 이름 cb_typing_sound (pygaki 플러그인 custom_ui의 대사 소리 콜백이 받음). ''이면 이 줄은 끔
+  if (!native && s.sound !== undefined) a.push(`cb_typing_sound=${s.sound ? pyStr(s.sound) : 'None'}`);
   const before = a.length;
   str('effect');
   // 글의 일부에만 효과({shader=})를 쓴 줄: 줄에 등장 효과가 없으면 렌파이가 그 줄에서 멈춰서, 한 글자씩 나오기를 넣는다

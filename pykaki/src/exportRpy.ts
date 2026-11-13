@@ -177,11 +177,11 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean } = {}): { co
     return { code: shaderCode(mine, t, { tv: canValues ? tr.tv : undefined, time: tr.time, iv, values }), img: isImgTrans(t) };
   };
 
-  // 상자·label의 대사 소리, 커서, 클릭 대기: 상자마다 첫 줄에 $ custom_ui.scene(...) (boxUi.ts, ui_kit 4.7)
+  // 상자의 커서, 클릭 대기: 상자마다 첫 줄에 $ custom_ui.scene(...) (boxUi.ts, ui_kit 4.7). 대사 소리는 대사 줄 괄호에
   const sceneWanted = usesSceneUi(p);
-  if (sceneWanted && !S.renpyLink) W.push({ level: 'warn', msg: '상자와 label의 대사 소리, 커서, 클릭 대기는 pygaki 플러그인 연결을 켜야 내보내요' });
+  if (sceneWanted && !S.renpyLink) W.push({ level: 'warn', msg: '상자의 커서, 클릭 대기는 pygaki 플러그인 연결을 켜야 내보내요' });
   if (sceneWanted && S.renpyLink && !sceneSupported())
-    W.push({ level: 'warn', msg: '상자와 label의 대사 소리, 커서, 클릭 대기는 pygaki 플러그인 ui_kit 4.7부터 돼요. 이 게임은 예전 판이라 내보내지 않아요' });
+    W.push({ level: 'warn', msg: '상자의 커서, 클릭 대기는 pygaki 플러그인 ui_kit 4.7부터 돼요. 이 게임은 예전 판이라 내보내지 않아요' });
   const sceneUi = sceneWanted && S.renpyLink && sceneSupported();
 
   const I = '    ';
@@ -207,8 +207,7 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean } = {}): { co
       const body: string[] = [];
       const enterSh = shaders && S.renpyLink ? shaderLine(b, true) : null;
       if (enterSh) body.push(enterSh.code);
-      const bui = uiOfBox(p, b);
-      const boxCps = bui.cps;
+      const bui = uiOfBox(b);
       if (sceneUi) body.push(sceneCode(bui));
       const pct =(t: string, where: string) => {
         if (!S.escapePercent && loosePercent(t)) W.push({ level: 'error', msg: `${where}의 %에서 렌파이가 멈춰요. 설정에서 "% 를 글자 그대로"를 켜 주세요 (${b.title || b.id})`, nodeId: b.id });
@@ -265,8 +264,9 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean } = {}): { co
           if (!known) W.push({ level: 'warn', msg: `대사: {shader=${n}}는 PyKaki가 모르는 효과예요. 게임에 없는 이름이면 그 줄에서 렌파이가 멈춰요 (${b.title || b.id})`, nodeId: b.id });
           else if (!S.renpyLink && !RENPY_EFFECTS.includes(n)) W.push({ level: 'warn', msg: `대사: {shader=${n}}는 pygaki 플러그인이 있어야 해요. 없는 게임에서는 그 줄에서 렌파이가 멈춰요 (${b.title || b.id})`, nodeId: b.id });
         }
-        // 상자·label의 텍스트 속도는 그 줄에 따로 정하지 않았을 때 대사 줄에 적는다 (boxUi.ts)
-        const ls = boxCps !== undefined && l.say?.cps === undefined ? { ...(l.say ?? {}), cps: boxCps } : l.say;
+        // 대사 소리(say.sound)는 플러그인이 있어야 해서 연결을 끄면 내보내지 않는다 (cb_typing_sound=, stage.ts sayArgs)
+        if (!S.renpyLink && l.say?.sound !== undefined) W.push({ level: 'warn', msg: `대사 소리는 pygaki 플러그인 연결을 켜야 내보내요 (${b.title || b.id})`, nodeId: b.id });
+        const ls = l.say;
         const fa = S.renpyLink ? [...fxArgs(l.fx), ...sayArgs(ls, false, tagText)] : sayArgs(ls, true, tagText);
         const tail = fa.length ? ` (${fa.join(', ')})` : '';
         if (l.type === 'narration') return body.push(q(l.text) + tail);

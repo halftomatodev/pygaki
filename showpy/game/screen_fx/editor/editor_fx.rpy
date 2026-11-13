@@ -1152,7 +1152,11 @@ init -6 python in screen_fx:
             def warp_restore(self, fn, line):
                 """warp(게임을 다시 시작해서 그 줄로 건너뜀)는 $ 줄을 실행하지 않아서, 원고에서 그 줄 앞의
                 마지막 셰이더 줄, 커서 줄을 찾아 맞춤 (4.5). 같은 파일 안에서 줄 순서로만 봄."""
-                rows = [ r for r in self.change_rows(fn) if r["line"] < line ]
+                allrows = self.change_rows(fn)
+                rows = [ r for r in allrows if r["line"] < line ]
+                ## 옮겨 간 줄이 셰이더 줄이면(PyKaki [렌파이에서 여기로 이동]은 상자 첫 줄 = 셰이더 줄로 감) 그 줄이 이미 돌았으니 덮지 않음
+                if any(r["line"] == line and r["kind"] == "code" for r in allrows):
+                    rows = [ ]
                 if rows:
                     a, b = rows[-1]["slots"]
                     shaders(a, b, transition=None)

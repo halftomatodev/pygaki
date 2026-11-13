@@ -85,7 +85,7 @@ label ward.n1:  # @node:n1 도입
 
 상자의 나머지 값(`bubble_color`, `pill_line` 등)은 pygaki 플러그인 원고나 `say_style.box_styles`에서만 고칩니다. 연결을 끈 파일에는 상자와 pygaki 플러그인 효과를 내보내지 않습니다(검사 탭에 경고).
 
-**상자와 label의 셰이더** (PyKaki `FEATURE` 5, `src/shader.ts`): 대본에서 상자나 label에 셰이더를 한 곳이라도 정하면, PyKaki는 **모든 상자의 첫 줄**(상자 label 바로 아래, 첫 `# @l:` 앞)에 표시 없이 `$ screen_fx.shaders("ascii", "vhs_crt", transition="fade")`를, 셰이더가 없는 상자에는 `$ screen_fx.clear()`를 적습니다. `call` 줄 바로 뒤에도 한 번 더 적습니다. PyKaki가 고르게 하는 전환은 `transition="tv"`와 `transition=None` 둘입니다(예전 판으로 쓴 대본에는 `transition="fade"`나 전환을 적지 않은 줄이 남아 있을 수 있고, 그대로 내보냅니다. 플러그인은 셋 다 그대로 받습니다). pygaki 플러그인 `screen_fx.use`가 같은 값이면 전환 없이 넘어가는 것에 기댑니다(이 동작을 바꾸면 PyKaki `exportRpy.ts`도 같이). 이 줄은 `# @l:` 표시가 없어서 받아 적기(3장)의 대상이 아니고, 내보낼 때마다 대본 값으로 다시 만들어집니다. 게임 안 편집기에서 이 줄을 고치거나 지워도 다음 내보내기 때 되돌아옵니다.
+**상자와 label의 셰이더** (PyKaki `FEATURE` 5, `src/shader.ts`): 대본에서 상자나 label에 셰이더를 한 곳이라도 정하면, PyKaki는 **모든 상자의 첫 줄**(상자 label 바로 아래, 첫 `# @l:` 앞)에 표시 없이 `$ screen_fx.shaders("ascii", "vhs_crt", transition="fade")`를, 셰이더가 없는 상자에는 `$ screen_fx.clear()`를 적습니다. `call` 줄 바로 뒤에도 한 번 더 적습니다. PyKaki가 고르게 하는 전환은 `transition="tv"`와 `transition=None` 둘입니다(예전 판으로 쓴 대본에는 `transition="fade"`나 전환을 적지 않은 줄이 남아 있을 수 있고, 그대로 내보냅니다. 플러그인은 셋 다 그대로 받습니다). 적는 전환은 들어오는 상자의 "시작할 때" → (그게 없음이면) 앞 상자의 "끝날 때" 차례로 고르고, 둘 다 없음이면 `transition=None`(그대로 이어짐)입니다. 플러그인은 `shaders()`·`clear()`에 `transition=`을 적으면 셰이더가 지금과 같아도 그 전환을 돌립니다(screen_fx 5.6. 전환을 안 적은 줄은 예전처럼 같은 값이면 전환 없이 넘어감. 이 동작을 바꾸면 PyKaki `shader.ts` `enterTransTv`도 같이). 이 줄은 `# @l:` 표시가 없어서 받아 적기(3장)의 대상이 아니고, 내보낼 때마다 대본 값으로 다시 만들어집니다. 게임 안 편집기에서 이 줄을 고치거나 지워도 다음 내보내기 때 되돌아옵니다.
 
 **셰이더와 TV 전환의 세부 값** (PyKaki `FEATURE` 6, screen_fx 5.5): 상자·label의 셰이더 칸에서 고른 셰이더 아래 막대로 값을 바꾸면 대본에 `shader.va`(1번), `shader.vb`(2번), `shader.tv`(TV 전환)로 저장되고, 원고 줄에 이렇게 붙습니다.
 
@@ -113,7 +113,7 @@ with screen_fx.pending_with(dissolve)
 - 화면 셰이더는 `config.layer_transforms`로 렌파이 전환 바깥에 씌워지므로, 그림 전환이 받는 앞뒤 화면에는 셰이더가 없고, 그 위에 앞 셰이더(앞 절반)와 새 셰이더(뒤 절반)가 씌워집니다. 글자를 빼는 층별 모드에서도 같습니다.
 - PyKaki는 `screen_fx`가 5.6보다 낮거나 게임의 효과 폴더에 그 효과 파일이 없으면 `transition="tv"`로 내보내고 검사 칸에 알립니다. `call` 뒤에 다시 적는 셰이더 줄에서는 그림 전환 대신 `"tv"`를 씁니다.
 
-**상자와 label의 대사 소리, 커서, 클릭 대기** (PyKaki `FEATURE` 7, `src/boxUi.ts`, pygaki 플러그인 ui_kit 4.7 `custom_ui.scene`): 대본 어딘가에 대사 소리, 커서, 클릭 대기를 한 곳이라도 정하면 PyKaki는 **모든 상자의 첫 줄**(셰이더 줄 바로 다음)과 `call` 줄 바로 뒤에 표시 없이 이 줄을 적습니다. 값은 상자 → label → 게임 처음 값 순서로 값마다 따로 찾습니다.
+**상자의 커서, 클릭 대기** (PyKaki `FEATURE` 7, 10부터 상자에만, `src/boxUi.ts`, pygaki 플러그인 ui_kit 4.7 `custom_ui.scene`): 대본 어딘가에 커서, 클릭 대기를 한 상자라도 정하면 PyKaki는 **모든 상자의 첫 줄**(셰이더 줄 바로 다음)과 `call` 줄 바로 뒤에 표시 없이 이 줄을 적습니다. 값은 상자 → 게임 처음 값 순서로 값마다 따로 찾습니다(앞 상자 것을 이어받지 않음). PyKaki는 `FEATURE` 10부터 이 줄에 `typing_sound`를 적지 않습니다(그래서 상자마다 대사 소리가 게임 처음 값으로 돌아감). 플러그인은 예전 원고를 위해 그대로 받습니다.
 
 ```renpy
 $ custom_ui.scene(typing_sound="audio/soft.ogg", ctc="gui/ctc/heart", cursor="gui/cursor/hand")
@@ -124,7 +124,7 @@ $ custom_ui.scene()                    # 모두 게임 처음 값으로
 - `typing_sound`: game 기준 소리 파일, `None`이면 끔, 안 적으면 게임 처음 값. 캐릭터에 정한 `cb_typing_sound`가 먼저입니다.
 - `ctc`, `cursor`: 그림이 든 폴더(game 기준). 플러그인은 그 폴더 바로 아래의 그림(`png` `webp` `jpg`)을 이름 차례(1, 2, 10)로 돌립니다. 그림이 없으면 게임 처음 값. 클릭 대기 표시와 커서는 게임 처음 값(`custom_ui_layout.rpy`)에서 켜 둔 것만 바뀌고, 커서는 소프트웨어 커서일 때만 바뀝니다.
 - 값은 `store.custom_ui_scene`에 두어 세이브와 되감기에 남습니다. 같은 값이면 아무것도 하지 않습니다.
-- **텍스트 속도**는 이 줄에 적지 않고, 그 상자의 대사·내레이션 줄 가운데 속도를 따로 정하지 않은 줄의 괄호에 `cps=`로 적습니다(플러그인 연결을 끄면 `what_slow_cps=`).
+- **대사 소리와 텍스트 속도는 대사 줄마다** (`FEATURE` 10): 대사·내레이션 줄의 `say.sound`, `say.cps`. 괄호에 `cps=30`(플러그인 연결을 끄면 `what_slow_cps=`), `cb_typing_sound="audio/soft.ogg"`(끔은 `cb_typing_sound=None`)로 적습니다. `cb_typing_sound`는 렌파이 원래 이름이라 렌파이가 그 줄의 캐릭터 콜백에 `typing_sound=`로 넘기고, 플러그인 `custom_ui.typing_callback`이 받습니다(이 줄 → 캐릭터의 `cb_typing_sound` → `custom_ui.scene` → 게임 처음 값). 대사 소리는 연결을 켰을 때만 적습니다. 예전 대본의 상자·label `ui.cps`, `ui.sound`는 PyKaki가 열 때 그 상자의 대사 줄로 옮깁니다.
 - PyKaki는 연결한 게임의 `ui_kit/engine/custom_ui.rpy`에 `def scene(`가 있을 때만 이 줄을 적고, 없으면 검사 칸에 알립니다(폴더를 연결하지 않았으면 적음). 이 줄도 받아 적기(3장) 대상이 아니고 내보낼 때마다 다시 만들어집니다.
 
 `renpyLink`를 끈 파일에는 `# @l:`이 없습니다. pygaki 플러그인은 이런 원고에 그림 줄을 저장하지 않고, 연결을 켜고 다시 내보내라고 안내합니다.

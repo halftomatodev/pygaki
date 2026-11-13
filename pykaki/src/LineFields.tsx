@@ -4,7 +4,7 @@ import { useStore } from './store';
 import * as ops from './ops';
 import type { ImageKind, Line, LineFx, SayStyle } from './types';
 import { shaderEffect } from './fx/textShaders';
-import { BOXES, EFFECTS, effectKnobs, formatEffect, formatImageFx, parseEffect, parseImageFx, type EffectKnob, type EffectPart, FX_BASE, TAILS, FX_CURSOR, FX_OVERLAY, FX_TRANS, FX_WARP, POSITIONS, STAGE_LABEL, STAGE_TYPES, fxArgs, lineCps, stageCode } from './stage';
+import { BOXES, EFFECTS, effectKnobs, formatEffect, formatImageFx, parseEffect, parseImageFx, type EffectKnob, type EffectPart, FX_BASE, TAILS, FX_CURSOR, FX_OVERLAY, FX_TRANS, FX_WARP, POSITIONS, STAGE_LABEL, STAGE_TYPES, fxArgs, stageCode } from './stage';
 import { useGameFolder } from './gameFolder';
 import { LinePreview } from './SayPreview';
 import { TransPicker } from './TransPicker';
@@ -225,7 +225,6 @@ export function SayFields({ l, set }: { l: Line; set: SetLine }) {
     <>
       <div className="sf-row">
         {num('size', '크기', '글자 크기', 200)}
-        {num('cps', lineCps(s) !== undefined ? String(lineCps(s)) : '글자/초', '1초에 나오는 글자 수. 효과를 고르면 기본값을 써요. 효과가 없고 비워 두면 게임 설정을 따라요', 500)}
         {color('color', '글자 색')}
         {font('font', '글꼴 파일')}
       </div>

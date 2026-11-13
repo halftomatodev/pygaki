@@ -229,7 +229,7 @@ init -10 python in custom_ui:
         if not interact or not on():
             return
 
-        ## 캐릭터에 정한 소리(cb_typing_sound) → 장면 값(custom_ui.scene) → 게임 처음 값
+        ## 대사 줄 괄호의 cb_typing_sound= → 캐릭터에 정한 소리(cb_typing_sound) → 장면 값(custom_ui.scene) → 게임 처음 값
         if typing_sound is not _NOT_SET:
             sound = typing_sound
         elif "typing_sound" in _scene():

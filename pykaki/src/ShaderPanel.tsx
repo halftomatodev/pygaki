@@ -12,7 +12,7 @@ import { RPY_FILE, useGameFolder } from './gameFolder';
 import { ScreenFxKnobs } from './fx/ScreenFxCanvas';
 import { TvKnobs } from './ShadersView';
 import { shaderEffect } from './fx/textShaders';
-import { AllRow, UiCards } from './UiPanel';
+import { AllRow } from './UiPanel';
 import { sceneCode, sceneSupported, uiOfBox, usesSceneUi } from './boxUi';
 
 type Vals = Record<string, unknown>;
@@ -272,11 +272,9 @@ export function ShaderPanel() {
         </Card>
       )}
 
-      <UiCards so={so} />
-
       {box && (
         <Card id="s-line" title={`${RPY_FILE}에 들어가는 줄`} hint="내보낼 때 이 상자의 첫 줄에 적혀요">
-          <pre className="rpy small">{[line, linked && usesSceneUi(project) && sceneSupported() ? sceneCode(uiOfBox(project, box)) : null].filter(Boolean).join(String.fromCharCode(10))}</pre>
+          <pre className="rpy small">{[line, linked && usesSceneUi(project) && sceneSupported() ? sceneCode(uiOfBox(box)) : null].filter(Boolean).join(String.fromCharCode(10))}</pre>
         </Card>
       )}
     </div>

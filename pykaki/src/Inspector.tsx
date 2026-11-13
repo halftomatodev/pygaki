@@ -10,6 +10,7 @@ import { isStage } from './stage';
 import { hit } from './prefs';
 import { ShaderPanel } from './ShaderPanel';
 import { StageCards } from './StageCards';
+import { CursorCard, SayUiCard } from './UiPanel';
 import { GameOffTip, GoHere, MoveBtn, PickBand, useSidePop } from './PickPos';
 
 const USED_CARD: Partial<Record<Line['type'], string>> = { scene: 'i-bg', show: 'i-pic', hide: 'i-pic', sound: 'i-sound', music: 'i-sound' };
@@ -127,6 +128,9 @@ function BoxInspector({ b }: { b: BoxNode }) {
           <LineLook l={lookLine} set={(fn, key) => upd((x) => fn(x.lines.find((l) => l.id === lookLine.id)!), key)} />
         </Card>
       )}
+      {lookLine && (
+        <SayUiCard l={lookLine} b={b} className={use('i-look')} set={(fn, key) => upd((x) => fn(x.lines.find((l) => l.id === lookLine.id)!), key)} setBox={(fn) => upd((x) => fn(x))} />
+      )}
 
       <Card id="i-lines" title="대사" className={use('i-lines')}>
       {b.lines.map((l, i) => (
@@ -140,6 +144,8 @@ function BoxInspector({ b }: { b: BoxNode }) {
       </Card>
 
       <StageCards b={b} upd={upd} use={use} />
+
+      <CursorCard b={b} />
 
       <Card id="i-exit" title="다음 흐름">
       <ExitEditor b={b} upd={upd} />

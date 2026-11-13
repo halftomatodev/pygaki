@@ -561,6 +561,27 @@ init -6 python in splash:
                 _ed.msg("이 페이지의 '다음부터 보지 않기'와 본 기록을 지웠습니다. 다음에 켤 때 다시 나옵니다.")
                 store.renpy.restart_interaction()
 
+            ## 보이는 방식 (2.3): "keep" 계속 보임 / "click" 클릭 시 안 보임("다음부터 보지 않기") / "once" 한 번만 보임
+            SHOW_MODES = (("keep", "계속 보임"), ("click", "클릭 시 안 보임"), ("once", "한 번만 보임"))
+
+            def show_mode(self):
+                if self.val("once"):
+                    return "once"
+                if self.val("dont_show_again"):
+                    return "click"
+                return "keep"
+
+            def set_show_mode(self, mode):
+                if mode == self.show_mode():
+                    return
+                self.put("once", mode == "once")
+                if mode == "click":
+                    self.put("dont_show_again", self.base("dont_show_again") or self.NEW_TEXT["dont_show_again"])
+                else:
+                    self.put("dont_show_again", None)
+                    if self.sel == self.TEXT_ITEM["dont_show_again"]:
+                        self.sel = None
+
             def toggle(self, key):
                 if key == "skippable" and self.val("skippable") and self.val("duration") is None:
                     _ed.msg("'클릭할 때까지' 넘어가는 페이지는 클릭으로 넘기기를 끌 수 없습니다. 넘어가는 때를 먼저 바꾸세요.")
@@ -1390,6 +1411,15 @@ screen ui_editor_splash_panel(tab):
             text "게임 켤 때" style "ui_editor_text" yalign 0.5 min_width 110
             textbutton "보이기" style "ui_editor_button" text_size 13 action Function(tab.put, "show", True) selected _show
             textbutton "안 보이기" style "ui_editor_button" text_size 13 action Function(tab.put, "show", False) selected (not _show)
+        ## 보이는 방식 (2.3): 계속 / 클릭 시 안 보임("다음부터 보지 않기" 체크) / 처음 한 번만
+        if _show:
+            $ _sm = tab.show_mode()
+            hbox:
+                spacing 6
+                text "보이는 방식" style "ui_editor_text" yalign 0.5 min_width 110
+                for _v, _l in tab.SHOW_MODES:
+                    textbutton _l style "ui_editor_button" text_size 13 action Function(tab.set_show_mode, _v) selected (_sm == _v)
+            text {"keep": "  게임을 켤 때마다 나옴", "click": "  플레이어가 '다음부터 보지 않기'를 누르면 다음부터 안 나옴", "once": "  처음 켤 때 한 번만 나옴"}[_sm] style "ui_editor_small"
         if _why:
             hbox:
                 spacing 6
@@ -1563,8 +1593,6 @@ screen ui_editor_splash_panel(tab):
             spacing 6
             text "클릭으로 넘기기" style "ui_editor_text" yalign 0.5 min_width 110
             textbutton ("됨" if tab.val("skippable") else "안 됨") style "ui_editor_button" text_size 13 action Function(tab.toggle, "skippable") selected bool(tab.val("skippable"))
-            text "처음 한 번만" style "ui_editor_text" yalign 0.5
-            textbutton ("켬" if tab.val("once") else "끔") style "ui_editor_button" text_size 13 action Function(tab.toggle, "once") selected bool(tab.val("once"))
 
         hbox:
             spacing 6

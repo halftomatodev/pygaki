@@ -1013,6 +1013,8 @@ init -110 python in screen_fx:
             $ screen_fx.shaders("none", "none")         # 전부 셰이더 적용 취소 (아무것도 안 함)
         이름: "none"(기본) "ascii"(아스키) "vhs_crt"(VHS) "retro_term"(단말기) "gameboy"(게임보이)
 
+        transition을 직접 적으면 셰이더가 지금과 같아도 그 전환을 돌립니다(5.6). 이어지게 하려면 transition=None.
+
         세부 값과 TV 전환 값을 이 자리에서만 (5.5. PyKaki가 상자마다 적음):
             $ screen_fx.shaders("vhs_crt", "none", values={"vhs_crt": {"warp_amount": 2.0}})
             $ screen_fx.shaders("glitch", "none", transition="tv", tv={"off_time": 0.6})
@@ -1027,8 +1029,9 @@ init -110 python in screen_fx:
         _check_overlay(second, "shaders()의 2번")
         if values is not None:
             _put_values(values, (first, second))
+        ## 전환을 직접 적었으면(PyKaki가 상자마다 적음) 셰이더가 같아도 그 전환을 돌림 (5.6)
         use(first, transition=transition, duration=duration, wait=wait,
-            overlay=(False if second in (NONE, None, False) else second), tv=tv)
+            overlay=(False if second in (NONE, None, False) else second), tv=tv, _force=(transition != DEFAULT))
 
     def _put_values(values, slots):
         """shaders(values=)의 값을 고른 셰이더에 씁니다. 지금 값과 같으면 그대로 둡니다. (5.5)"""
@@ -1253,7 +1256,7 @@ init -110 python in screen_fx:
             return True
         return False
 
-    def use(effect, transition=DEFAULT, duration=None, wait=None, overlay=DEFAULT, target=DEFAULT, exclude=DEFAULT, cursor=_KEEP, tv=None):
+    def use(effect, transition=DEFAULT, duration=None, wait=None, overlay=DEFAULT, target=DEFAULT, exclude=DEFAULT, cursor=_KEEP, tv=None, _force=False):
         """
         화면 효과를 바꿉니다. 다음에 다시 바꿀 때까지 유지되고, 세이브·되감기에 저장됩니다.
 
@@ -1321,11 +1324,17 @@ init -110 python in screen_fx:
         store.screen_fx.cur_target = stored
         new = state_now()
 
-        if old == new or kind is None or _instant():
+        ## _force: shaders()·clear()에 전환을 직접 적었으면 셰이더가 같아도 그 전환을 돌림 (5.6. PyKaki가 상자마다 적음,
+        ##         앞 상자 "끝날 때"와 이 상자 "시작할 때"가 둘 다 없음이면 transition=None이라 그대로 이어짐)
+        if (old == new and not _force) or kind is None or _instant():
             rt.anim = None
             renpy.restart_interaction()
             return
 
+        if img is not None:
+            ## 앞 화면 = 지금까지 적힌 줄을 다 그린 화면. 앞 상자 끝에 show만 하고 아직 화면에 안 나온 그림도 넣어서 깨뜨림
+            ## (with None: 화면은 그리지 않고 다음 with가 전환할 기준만 잡음)
+            renpy.with_statement(None)
         a = _Anim(kind, old, new, duration, tv=tv, cut=cut)
         rt.anim = a
         _play_sounds(a)
@@ -1385,7 +1394,8 @@ init -110 python in screen_fx:
         커서 자리는 그대로입니다. 같이 돌리려면 clear(cursor="default")
         tv: 이번 TV 전환에만 쓰는 값 (5.5)
         """
-        use(DEFAULT, transition=transition, duration=duration, wait=wait, overlay=overlay, target=target, exclude=exclude, cursor=cursor, tv=tv)
+        use(DEFAULT, transition=transition, duration=duration, wait=wait, overlay=overlay, target=target, exclude=exclude, cursor=cursor, tv=tv,
+            _force=(transition != DEFAULT))
 
     def set_overlay(overlay, transition=DEFAULT, duration=None, wait=None):
         """

@@ -39,7 +39,8 @@ ASCII 효과는 [ASCII shader](https://godotshaders.com/shader/ascii-shader/) (D
 
 ### 5.6에서 바뀐 점
 
-- **그림 전환으로 셰이더 바꾸기**: `transition=`에 효과 폴더(`ui_kit/effects/`)의 그림 전환 이름(`"pixelsort"`, `"datamosh"` 등)을 적으면, 바로 다음 `with screen_fx.pending_with()`가 앞 화면 → 새 화면을 그 전환으로 잇고 셰이더는 그 시간의 절반에 바뀝니다(효과 파일에 `@set u__cut 값`이 있으면 그때. 샘플 `pixelsort`, `datamosh`는 끝에서 끊기는 크래시라 1.0). pygaki 앱에서는 상자의 ◐ 셰이더 → 전환 "시작할 때", "끝날 때"에서 "픽셀소트", "데이터모싱"을 고르면 이렇게 적힙니다(`ui_kit`이 같이 있어야 함).
+- **전환을 적으면 셰이더가 같아도 돎**: `shaders()`, `clear()`에 `transition=`을 직접 적으면 셰이더가 지금과 같아도 그 전환(TV, 그림 전환)을 돌립니다. 그대로 이어지게 하려면 `transition=None`. 전환을 적지 않은 줄과 `use()`, 대사 괄호 `fx=`는 예전처럼 같은 값이면 전환 없이 넘어갑니다. PyKaki는 상자의 "시작할 때"와 앞 상자의 "끝날 때"가 둘 다 "없음"일 때만 `transition=None`을 적습니다. [렌파이에서 여기로 이동]으로 상자 첫 줄(셰이더 줄)로 갈 때 셰이더가 그 앞 줄의 것으로 덮이던 것도 고쳤습니다.
+- **그림 전환으로 셰이더 바꾸기**: `transition=`에 효과 폴더(`ui_kit/effects/`)의 그림 전환 이름(`"pixelsort"`, `"datamosh"` 등)을 적으면, 바로 다음 `with screen_fx.pending_with()`가 앞 화면(그때까지 적힌 줄을 다 그린 화면. 대사 뒤에 `show`만 하고 아직 화면에 안 나온 그림도 들어감) → 새 화면을 그 전환으로 잇고 셰이더는 그 시간의 절반에 바뀝니다(효과 파일에 `@set u__cut 값`이 있으면 그때. 샘플 `pixelsort`, `datamosh`는 끝에서 끊기는 크래시라 1.0). pygaki 앱에서는 상자의 ◐ 셰이더 → 전환 "시작할 때", "끝날 때"에서 "픽셀소트", "데이터모싱"을 고르면 이렇게 적힙니다(`ui_kit`이 같이 있어야 함).
   ```renpy
   $ screen_fx.shaders("glitch", "none", transition="pixelsort", duration=1.2)   # 1.2초 (안 적으면 효과 파일의 시간)
   scene bg room

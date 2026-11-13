@@ -108,7 +108,8 @@ export const oldTransLabel = (t?: string) => (SHADER_TRANS.some(([k]) => k === t
 if (typeof window !== 'undefined') (window as any).pykakiShaders = { names: shaderNames, list: shaderList, off: shaderOff };
 
 const nameOf = (n: string) => LIST.find((s) => s.id === n)?.label ?? n;
-export const newShader = (): BoxShader => ({ a: 'none', b: 'none', in: 'tv', out: 'tv' });
+// 시작할 때·끝날 때의 처음 값은 없음(같은 셰이더 상자끼리 그대로 이어짐. 전환을 고른 곳만 돎)
+export const newShader = (): BoxShader => ({ a: 'none', b: 'none', in: 'none', out: 'none' });
 
 // 이 상자에 걸리는 셰이더: 상자 것 → label 것 → 없음(게임 설정대로)
 export function shaderOfBox(p: Project, b: BoxNode): BoxShader | null {
@@ -169,14 +170,17 @@ export function shaderCode(s: BoxShader | null, trans?: string, opt: { tv?: Reco
   return `$ screen_fx.shaders(${[pyStr(s.a || 'none'), pyStr(s.b || 'none'), t, dur, tv, vals].filter(Boolean).join(', ')})`;
 }
 
-// 이 상자로 들어올 때 쓸 전환과 그 TV 값, 그림 전환의 초: 이 상자의 "시작할 때" → 셰이더가 다른 앞 상자의 "끝날 때" → 게임 설정대로
+// 이 상자로 들어올 때 쓸 전환과 그 TV 값, 그림 전환의 초: 이 상자의 "시작할 때" → 앞 상자의 "끝날 때" → 둘 다 '없음'이면 없음(이어짐) → 게임 설정대로.
+// 셰이더가 같아도 전환을 고른 쪽이 있으면 그 전환을 돌린다(화면 효과 5.6: shaders()에 전환을 적으면 셰이더가 같아도 돎)
 export function enterTransTv(p: Project, b: BoxNode, from: BoxNode[]): { t: string; tv?: Record<string, number>; time?: number; iv?: Record<string, number> } {
   const mine = shaderOfBox(p, b);
-  if (mine?.in) return { t: mine.in, tv: mine.tv, time: mine.time, iv: mine.iv?.[mine.in] };
+  if (mine?.in && mine.in !== 'none') return { t: mine.in, tv: mine.tv, time: mine.time, iv: mine.iv?.[mine.in] };
+  let prevNone = false;
   for (const f of from) {
     const s = shaderOfBox(p, f);
-    if (s?.out && !sameShader(s, mine)) return { t: s.out, tv: s.tv, time: s.time, iv: s.iv?.[s.out] };
+    if (s?.out && s.out !== 'none') return { t: s.out, tv: s.tv, time: s.time, iv: s.iv?.[s.out] };
+    if (s?.out === 'none') prevNone = true;
   }
-  return { t: '' };
+  return { t: mine?.in ?? (prevNone ? 'none' : '') };
 }
 export const enterTrans = (p: Project, b: BoxNode, from: BoxNode[]) => enterTransTv(p, b, from).t;

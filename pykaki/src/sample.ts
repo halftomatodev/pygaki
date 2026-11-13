@@ -123,5 +123,35 @@ export function normalizeProject(raw: any): Project {
   }
   p.project.startNode = live(p.project.startNode);
   fixEntries(p);
+  moveUi(p);
   return p;
+}
+
+// FEATURE 9까지의 대본: 상자·label의 대사 속도·소리(ui.cps, ui.sound)는 그 상자의 대사·내레이션 줄 가운데
+// 따로 정하지 않은 줄로, label의 커서·클릭 대기(ui.ctc, ui.cursor)는 따로 정하지 않은 상자로 옮겨 적는다
+function moveUi(p: Project) {
+  const gu = new Map<string, any>(p.labels.map((g: any) => [g.id, g.ui ?? {}]));
+  for (const n of p.nodes) {
+    const m: any = n.ui ?? {};
+    const g = gu.get(n.group) ?? {};
+    const pick = (k: string) => (k in m ? m[k] : g[k]);
+    const cps = pick('cps');
+    const sound = pick('sound');
+    if (cps !== undefined || sound !== undefined)
+      for (const l of n.lines) {
+        if (l.type !== 'say' && l.type !== 'narration') continue;
+        const say = { ...(l.say ?? {}) };
+        if (typeof cps === 'number' && say.cps === undefined) say.cps = cps;
+        if (typeof sound === 'string' && say.sound === undefined) say.sound = sound;
+        if (Object.keys(say).length) l.say = say;
+      }
+    const ui: Record<string, string> = {};
+    for (const k of ['ctc', 'cursor']) {
+      const v = pick(k);
+      if (typeof v === 'string' && v) ui[k] = v;
+    }
+    if (Object.keys(ui).length) n.ui = ui;
+    else delete n.ui;
+  }
+  for (const g of p.labels as any[]) delete g.ui;
 }
