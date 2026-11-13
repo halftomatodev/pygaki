@@ -99,6 +99,20 @@ $ screen_fx.clear(transition="tv", tv={"noise": 0.2})
 - 값 이름과 막대 범위는 11장 `shader_list.json`의 `params`, `groups`에서 옵니다. 목록 값(`choice`)이 여러 칸이면 튜플로 적습니다.
 - PyKaki는 게임의 `shader_list.json`의 `screen_fx`가 5.5 이상일 때만 `values`와 `tv`를 적습니다. 예전 판이면 값 없이 내보내고 검사 칸에 알립니다.
 
+**그림 전환으로 셰이더 바꾸기** (PyKaki `FEATURE` 8, screen_fx 5.6): 셰이더 칸의 "시작할 때", "끝날 때"에서 `pixelsort`(픽셀소트), `datamosh`(데이터모싱)를 고를 수 있습니다. 앞 상자의 마지막 화면 → 이 상자의 첫 화면을 그 그림 전환(효과 폴더 `ui_kit/effects/`의 `@transition`, 8장)으로 잇고, 셰이더는 그 시간의 절반에 바뀝니다. 걸리는 시간은 대본의 `shader.time`(초, 없으면 효과 파일의 `@time`)이고, 원고는 이렇게 됩니다.
+
+```renpy
+$ screen_fx.shaders("glitch", "none", transition="pixelsort", duration=1.2)
+scene bg room  # @l:l1
+show mina  # @l:l2
+with screen_fx.pending_with(dissolve)
+```
+
+- PyKaki는 상자 첫머리에 이어진 그림 줄(`scene`, `show`, `hide`, 사이의 메모)을 **전환 없이** 적고, 그 뒤에 `with screen_fx.pending_with(원래 전환)`을 적습니다. 원래 전환은 그 줄들의 "나타나는 방식" 가운데 처음 것입니다(없으면 빈 괄호). 첫머리에 그림 줄이 없으면 셰이더 줄 바로 뒤에 적습니다. 이 `with` 줄도 `# @l:` 표시가 없어서 내보낼 때마다 다시 만들어집니다.
+- 플러그인: `transition`이 `TRANSITIONS`에 없는 이름이고 `img_fx.EFFECTS`에 있으면, 셰이더는 `"swap"`(자기 모양 없이 시간의 절반에 바꿈, `wait=False`)으로 바꾸고, 그 그림 전환을 `pending_with()`가 돌려주게 둡니다. 셰이더가 그대로라 바꾸지 않았으면(같은 셰이더, 건너뛰기, 되감기, 효과를 끈 플레이어) `pending_with()`는 원래 전환을 돌려줍니다. 효과 폴더에서 그 파일을 뺐으면 `screen_fx.transition` 설정의 전환으로 바뀝니다.
+- 화면 셰이더는 `config.layer_transforms`로 렌파이 전환 바깥에 씌워지므로, 그림 전환이 받는 앞뒤 화면에는 셰이더가 없고, 그 위에 앞 셰이더(앞 절반)와 새 셰이더(뒤 절반)가 씌워집니다. 글자를 빼는 층별 모드에서도 같습니다.
+- PyKaki는 `screen_fx`가 5.6보다 낮거나 게임의 효과 폴더에 그 효과 파일이 없으면 `transition="tv"`로 내보내고 검사 칸에 알립니다. `call` 뒤에 다시 적는 셰이더 줄에서는 그림 전환 대신 `"tv"`를 씁니다.
+
 **상자와 label의 대사 소리, 커서, 클릭 대기** (PyKaki `FEATURE` 7, `src/boxUi.ts`, pygaki 플러그인 ui_kit 4.7 `custom_ui.scene`): 대본 어딘가에 대사 소리, 커서, 클릭 대기를 한 곳이라도 정하면 PyKaki는 **모든 상자의 첫 줄**(셰이더 줄 바로 다음)과 `call` 줄 바로 뒤에 표시 없이 이 줄을 적습니다. 값은 상자 → label → 게임 처음 값 순서로 값마다 따로 찾습니다.
 
 ```renpy

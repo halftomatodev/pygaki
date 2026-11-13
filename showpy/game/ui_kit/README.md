@@ -28,7 +28,7 @@ shake
 bands
 ```
 
-4.3에서 바뀐 점: **효과 폴더** `ui_kit/effects/`가 생겼습니다. 이 폴더에 `.glsl` 파일을 넣으면 그 안의 글자 등장 효과(`effect="maskup"`)와 그림 등장 효과(`scene bg hall with img_fx.use("irisin")`)가 생기고, 파일을 빼면 없어집니다. 샘플 여섯 개(`maskup`, `popin`, `tracking`, `sweep`, `irisin`, `bands`)가 들어 있습니다. 적는 법, 쓸 수 있는 값, 클로드에게 새 효과를 부탁할 때 줄 글은 [effects/README.md](effects/README.md)에 있습니다.
+4.3에서 바뀐 점: **효과 폴더** `ui_kit/effects/`가 생겼습니다. 이 폴더에 `.glsl` 파일을 넣으면 그 안의 글자 등장 효과(`effect="maskup"`)와 그림 등장 효과(`scene bg hall with img_fx.use("irisin")`)가 생기고, 파일을 빼면 없어집니다. 샘플 여섯 개(`maskup`, `popin`, `tracking`, `sweep`, `irisin`, `bands`)가 들어 있습니다(5.1부터 `pixelsort`, `datamosh`를 더해 여덟). 적는 법, 쓸 수 있는 값, 클로드에게 새 효과를 부탁할 때 줄 글은 [effects/README.md](effects/README.md)에 있습니다.
 
 4.3에서 없앤 것: **PyKaki 실시간 미리보기**(PyKaki의 [렌파이에서 보기] 스위치, 게임 화면 위의 "PyKaki 미리보기" 창). 글자 효과는 PyKaki의 미리보기로 보고, 게임에서는 PyKaki가 저절로 내보낸 원고의 그 줄로 가서 봅니다. 예전에 생긴 `game/pykaki_preview.json`은 지워도 됩니다(그대로 두어도 배포판에서 빠짐).
 

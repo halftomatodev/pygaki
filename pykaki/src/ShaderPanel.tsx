@@ -5,11 +5,12 @@ import { Card } from './Card';
 import { useState } from 'react';
 import { useStore } from './store';
 import type { BoxShader } from './types';
-import { SHADER_TRANS, enterTransTv, newShader, oldTransLabel, shaderCode, shaderInfo, shaderLabel, shaderNames, shaderOfBox, usesShaderValues, usesShaders, valuesSupported } from './shader';
+import { SHADER_TRANS, enterTransTv, imgTransSupported, isImgTrans, newShader, oldTransLabel, shaderCode, shaderInfo, shaderLabel, shaderNames, shaderOfBox, usesShaderValues, usesShaders, valuesSupported } from './shader';
 import { exitLinks } from './ops';
 import { RPY_FILE, useGameFolder } from './gameFolder';
 import { ScreenFxKnobs } from './fx/ScreenFxCanvas';
 import { TvKnobs } from './ShadersView';
+import { shaderEffect } from './fx/textShaders';
 import { AllRow, UiCards } from './UiPanel';
 import { sceneCode, sceneSupported, uiOfBox, usesSceneUi } from './boxUi';
 
@@ -127,10 +128,14 @@ export function ShaderPanel() {
     : !usesShaders(project)
       ? '# 셰이더를 정한 곳이 없어서 줄을 넣지 않아요'
       : box
-        ? shaderCode(shaderOfBox(project, box), tr.t, { tv: canValues ? tr.tv : undefined, values: canValues && usesShaderValues(project) })
+        ? shaderCode(shaderOfBox(project, box), tr.t, { tv: canValues ? tr.tv : undefined, time: tr.time, values: canValues && usesShaderValues(project) })
         : '';
   const usesTv = !!sh && (sh.in === 'tv' || sh.out === 'tv');
   const tvVals = sh?.tv ?? {};
+  // 그림 전환(픽셀소트, 데이터모싱): 걸리는 시간 막대 하나. 기본은 그 효과 파일의 @time
+  const imgName = isImgTrans(sh?.in) ? sh!.in! : isImgTrans(sh?.out) ? sh!.out! : null;
+  const imgFx = imgName ? shaderEffect(imgName) : undefined;
+  const imgTime = sh?.time ?? (imgFx?.kind === 'transition' ? imgFx.time : 1);
 
   return (
     <div className="insp shader-panel">
@@ -202,6 +207,26 @@ export function ShaderPanel() {
                 </>
               )}
             </div>
+          )}
+          {imgName && (
+            <>
+              <div className="fx-knobs">
+                <label className={sh.time !== undefined ? 'set' : ''}>
+                  <span className="fx-kn" title="duration">그림 전환 시간(초)</span>
+                  <input type="range" min={0.3} max={4} step={0.1} value={imgTime} onChange={(e) => set((s) => void (s.time = Number(e.target.value)), 'shtime')} />
+                  <span className="fx-kv">{imgTime.toFixed(1)}</span>
+                  <button className="fx-x" style={{ visibility: sh.time !== undefined ? 'visible' : 'hidden' }} title="기본값으로" onClick={(e) => (e.preventDefault(), set((s) => void delete s.time))}>↺</button>
+                </label>
+              </div>
+              <p className="tip">
+                픽셀소트와 데이터모싱은 앞 상자의 마지막 화면을 깨뜨리며 이 상자의 첫 화면으로 이어요. 셰이더는 그 시간의 절반에 바뀌어요.
+                상자 첫머리의 배경, 보이기, 숨기기 줄을 다 그린 뒤에 전환이 돌고, 그 줄들의 "나타나는 방식"은 셰이더가 그대로일 때만 써요.
+              </p>
+              {!imgTransSupported() && <p className="tip warn-text">이 게임의 pygaki 플러그인은 예전 판이라 TV 꺼짐·켜짐으로 내보내요. 화면 효과(screen_fx) 5.6부터 돼요.</p>}
+              {imgTransSupported() && imgFx?.kind !== 'transition' && (
+                <p className="tip warn-text">게임의 효과 폴더에 {imgName} 효과 파일이 없어서 TV 꺼짐·켜짐으로 내보내요. 위쪽 [효과] 화면에서 넣을 수 있어요.</p>
+              )}
+            </>
           )}
           <p className="tip">
             "시작할 때"는 앞 상자와 셰이더가 달라지는 상자에서 이 셰이더로 바뀌는 모양이에요. 같은 셰이더가 이어지는 상자 사이에서는 전환이 없어요.

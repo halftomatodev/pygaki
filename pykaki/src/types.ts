@@ -72,11 +72,12 @@ export type ExitType = Exit['type'];
 export interface BoxShader {
   a: string; // 1번: none | ascii | vhs_crt | retro_term | gameboy | ...
   b: string; // 2번
-  in?: string; // 이 셰이더가 시작할 때 전환: tv | none. 예전 대본에는 fade나 빈 값(게임 설정대로)도 있다
+  in?: string; // 이 셰이더가 시작할 때 전환: tv | pixelsort | datamosh | none. 예전 대본에는 fade나 빈 값(게임 설정대로)도 있다
   out?: string; // 이 셰이더가 끝날 때 전환
   va?: Record<string, unknown>; // 1번 셰이더의 세부 값 (이 상자·label에서만. 없으면 게임 설정대로)
   vb?: Record<string, unknown>; // 2번 셰이더의 세부 값
   tv?: Record<string, number>; // TV 전환의 세부 값 (시작할 때와 끝날 때 같이 씀)
+  time?: number; // 그림 전환(pixelsort, datamosh)의 초. 없으면 그 효과 파일의 @time (시작할 때와 끝날 때 같이 씀)
 }
 
 // 상자나 label에 거는 대사 소리·속도와 커서·클릭 대기 그림 (pygaki 플러그인 ui_kit 4.7 custom_ui.scene, LINK.md 2장).

@@ -88,8 +88,14 @@ export function shaderNames(keep: (string | undefined)[] = []): [string, string]
   for (const k of keep) if (k && !rv.some(([id]) => id === k)) rv.push([k, k + ' (이 게임에 없음)']);
   return rv;
 }
-// 전환은 둘만 고른다: TV 꺼짐·켜짐, 없음(바로 바뀜, transition=None)
-export const SHADER_TRANS: [string, string][] = [['tv', 'TV 꺼짐·켜짐'], ['none', '없음']];
+// 전환: TV 꺼짐·켜짐, 그림 전환 둘(픽셀소트, 데이터모싱), 없음(바로 바뀜, transition=None)
+export const SHADER_TRANS: [string, string][] = [['tv', 'TV 꺼짐·켜짐'], ['pixelsort', '픽셀소트'], ['datamosh', '데이터모싱'], ['none', '없음']];
+// 그림 전환으로 셰이더를 바꾸기 (screen_fx 5.6, LINK.md 2장): 효과 폴더(ui_kit/effects)의 @transition을 써서
+// 앞 상자 마지막 화면 → 이 상자 첫 화면을 잇고, 셰이더는 그 시간의 절반에 바뀐다. 원고에는 셰이더 줄 + 첫 그림 줄들 + with screen_fx.pending_with()
+export const IMG_SHADER_TRANS = ['pixelsort', 'datamosh'];
+export const isImgTrans = (t?: string) => !!t && IMG_SHADER_TRANS.includes(t);
+// 게임의 screen_fx가 그림 전환으로 셰이더를 바꿀 수 있는지 (5.6부터)
+export const imgTransSupported = () => verAtLeast(LIST_VER || '0', '5.6');
 // 예전 판에서 고를 수 있던 값. 대본에 남아 있으면 그대로 내보내고(게임 설정대로는 전환을 적지 않음, 서서히는 "fade"), 칸에 예전 값이라고 알린다
 export const oldTransLabel = (t?: string) => (SHADER_TRANS.some(([k]) => k === t) ? null : t === 'fade' ? '서서히' : !t ? '게임 설정대로' : t);
 
@@ -147,22 +153,23 @@ export function slotValues(s: BoxShader) {
 const transArg = (t?: string) => (!t ? '' : t === 'none' ? 'transition=None' : `transition=${pyStr(t)}`);
 
 // 원고 한 줄. 셰이더가 없는 상자는 게임 설정대로 돌린다.
-// tv: 이 전환의 TV 세부 값. values: 세부 값을 적을지 (대본 어딘가에 값을 정했고 게임이 받을 때)
-export function shaderCode(s: BoxShader | null, trans?: string, opt: { tv?: Record<string, number>; values?: boolean } = {}) {
+// tv: 이 전환의 TV 세부 값. time: 그림 전환의 초. values: 세부 값을 적을지 (대본 어딘가에 값을 정했고 게임이 받을 때)
+export function shaderCode(s: BoxShader | null, trans?: string, opt: { tv?: Record<string, number>; time?: number; values?: boolean } = {}) {
   const t = transArg(trans);
   const tv = opt.tv && hasKeys(opt.tv) && trans === 'tv' ? `tv=${pyDict(opt.tv)}` : '';
-  if (!s) return `$ screen_fx.clear(${[t, tv].filter(Boolean).join(', ')})`;
+  const dur = isImgTrans(trans) && opt.time !== undefined ? `duration=${pyVal(opt.time)}` : '';
+  if (!s) return `$ screen_fx.clear(${[t, dur, tv].filter(Boolean).join(', ')})`;
   const vals = opt.values ? 'values={' + Object.entries(slotValues(s)).map(([k, v]) => `${pyStr(k)}: ${pyDict(v)}`).join(', ') + '}' : '';
-  return `$ screen_fx.shaders(${[pyStr(s.a || 'none'), pyStr(s.b || 'none'), t, tv, vals].filter(Boolean).join(', ')})`;
+  return `$ screen_fx.shaders(${[pyStr(s.a || 'none'), pyStr(s.b || 'none'), t, dur, tv, vals].filter(Boolean).join(', ')})`;
 }
 
-// 이 상자로 들어올 때 쓸 전환과 그 TV 값: 이 상자의 "시작할 때" → 셰이더가 다른 앞 상자의 "끝날 때" → 게임 설정대로
-export function enterTransTv(p: Project, b: BoxNode, from: BoxNode[]): { t: string; tv?: Record<string, number> } {
+// 이 상자로 들어올 때 쓸 전환과 그 TV 값, 그림 전환의 초: 이 상자의 "시작할 때" → 셰이더가 다른 앞 상자의 "끝날 때" → 게임 설정대로
+export function enterTransTv(p: Project, b: BoxNode, from: BoxNode[]): { t: string; tv?: Record<string, number>; time?: number } {
   const mine = shaderOfBox(p, b);
-  if (mine?.in) return { t: mine.in, tv: mine.tv };
+  if (mine?.in) return { t: mine.in, tv: mine.tv, time: mine.time };
   for (const f of from) {
     const s = shaderOfBox(p, f);
-    if (s?.out && !sameShader(s, mine)) return { t: s.out, tv: s.tv };
+    if (s?.out && !sameShader(s, mine)) return { t: s.out, tv: s.tv, time: s.time };
   }
   return { t: '' };
 }

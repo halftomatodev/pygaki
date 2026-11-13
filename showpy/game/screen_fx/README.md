@@ -30,12 +30,23 @@
 
 `ui_kit` 플러그인이 같이 있으면 그 편집기(개발 모드에서 Shift+M)에 **"화면 효과", "타이틀 일렁임" 탭**이 생기고, **대사 탭에서 "이 대사부터 이 효과", 덮개 켬/끔, 덮개 휘어짐을 골라 원고에 바로 저장**할 수 있습니다. 대사가 아닌 줄(show, scene, with, $ 줄 등)에서 바꾸고 싶으면 **"화면 효과" 탭의 "줄에 넣기"** 로 그 줄 바로 위에 `$ screen_fx.use(…)` 줄을 넣습니다(4.1). `ui_kit`이 없어도 효과는 설정 파일과 스크립트로 그대로 동작합니다.
 
-버전 5.5 · 렌파이 8.5.3에서 만들고 테스트했습니다.
+버전 5.6 · 렌파이 8.5.3에서 만들고 테스트했습니다.
 
 VHS 셰이더 원본: [VHS and CRT monitor effect](https://godotshaders.com/shader/vhs-and-crt-monitor-effect/) (Godot Shaders, CC0). 렌파이용으로 옮기면서 채도·대비·전체 세기를 바꿀 수 있게 추가했습니다.
 레트로 터미널은 [cool-retro-term](https://github.com/Swordfish90/cool-retro-term)의 모습과 설정 목록을 참고해 새로 썼습니다(코드는 가져오지 않음).
 게임보이는 [Retro dither](https://godotshaders.com/shader/retro-dither/) (tcmug, CC0)의 4×4 디더링 무늬와 [Gameboy Classic Shader](https://github.com/HarlequinVG/shaders/tree/master/gameboy_shader) (Harlequin, GPL v3)의 LCD 모습(점 격자·점 그림자)을 참고해 새로 썼습니다(코드는 가져오지 않음).
 ASCII 효과는 [ASCII shader](https://godotshaders.com/shader/ascii-shader/) (Daniel Bologna, Acerola의 아이디어, MIT)를 참고해 렌파이용으로 새로 썼습니다. 글꼴은 [Neo둥근모](https://neodgm.dalgona.dev/) (SIL OFL 1.1)입니다.
+
+### 5.6에서 바뀐 점
+
+- **그림 전환으로 셰이더 바꾸기**: `transition=`에 효과 폴더(`ui_kit/effects/`)의 그림 전환 이름(`"pixelsort"`, `"datamosh"` 등)을 적으면, 바로 다음 `with screen_fx.pending_with()`가 앞 화면 → 새 화면을 그 전환으로 잇고 셰이더는 그 시간의 절반에 바뀝니다. pygaki 앱에서는 상자의 ◐ 셰이더 → 전환 "시작할 때", "끝날 때"에서 "픽셀소트", "데이터모싱"을 고르면 이렇게 적힙니다(`ui_kit`이 같이 있어야 함).
+  ```renpy
+  $ screen_fx.shaders("glitch", "none", transition="pixelsort", duration=1.2)   # 1.2초 (안 적으면 효과 파일의 시간)
+  scene bg room
+  with screen_fx.pending_with()            # 셰이더가 그대로면 아무 전환 없이
+  with screen_fx.pending_with(dissolve)    # 셰이더가 그대로면 dissolve로
+  ```
+  `scene`, `show`를 먼저 다 적고 그 뒤에 `with`를 적어야 새 화면까지 이어집니다. 효과 파일을 빼면 `screen_fx.transition` 설정의 전환으로 바뀝니다.
 
 ### 5.5에서 바뀐 점
 

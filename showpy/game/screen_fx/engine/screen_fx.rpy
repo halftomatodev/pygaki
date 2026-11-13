@@ -37,12 +37,13 @@ init offset = 1
 init -110 python in screen_fx:
 
     import os
+    import re
     import time
     import functools
 
     import store
 
-    VERSION = "5.5"
+    VERSION = "5.6"
 
     ## ── 플러그인 폴더 위치 ──
     ## 이 파일은 <플러그인 폴더>/engine/screen_fx.rpy 에 있습니다.
@@ -751,7 +752,9 @@ init -110 python in screen_fx:
         "volume": 1.0,
         }
 
-    TRANSITIONS = ("tv", "fade", None)
+    ## "swap"(5.6): 자기 모양 없이 시간의 절반에 앞 셰이더 → 새 셰이더로 바꾸기만 함.
+    ##   그림 전환(img_fx.use("pixelsort") 등)과 같은 시간에 같이 돌려서, 바뀌는 순간을 그 전환이 가려 줌 (PyKaki가 씀)
+    TRANSITIONS = ("tv", "fade", "swap", None)
 
     def _check_tv(tv):
         """tv={...}에 모르는 이름이 있으면 알립니다. (5.5)"""
@@ -1087,7 +1090,7 @@ init -110 python in screen_fx:
 
     def _check_transition(kind):
         if kind not in TRANSITIONS:
-            raise Exception("screen_fx: 전환 {!r}는 없습니다. \"tv\", \"fade\", None 중에서 고르세요.".format(kind))
+            raise Exception("screen_fx: 전환 {!r}는 없습니다. \"tv\", \"fade\", \"swap\", None 중에서 고르세요.".format(kind))
 
 
     ## ── 전환 애니메이션 (저장되지 않음) ──
@@ -1201,6 +1204,7 @@ init -110 python in screen_fx:
             self.last_say = None        # 마지막 대사 줄: (파일, 줄, 바뀌기 전 효과, 바뀐 뒤 효과, 괄호 fx 값, 바뀌기 전 상태, 바뀐 뒤 상태)
             self.editor_preview = None  # 편집기를 연 동안 효과를 보여줄지 (None = 설정 파일대로, V 키로 바꿈)
             self.cursor_preview = None  # 커서 칸에서 고른 커서 자리 미리 보기 (4.5, 세이브에 안 들어감)
+            self.pending_with = None    # 그림 전환으로 셰이더를 바꿀 때 다음 with에 쓸 전환 (5.6, pending_with())
 
     rt = _Runtime()
 
@@ -1253,6 +1257,7 @@ init -110 python in screen_fx:
             $ screen_fx.use("ascii")                         # ASCII로 (기본 전환: TV 꺼짐·켜짐)
             $ screen_fx.use("ascii", transition="fade")       # 서서히 바꾸기
             $ screen_fx.use("ascii", transition=None)         # 바로 바꾸기
+            $ screen_fx.use("ascii", transition="pixelsort")  # 효과 폴더의 그림 전환으로 (다음 줄에 with screen_fx.pending_with(), 5.6)
             $ screen_fx.use("ascii", duration=2.0)            # 전환 전체를 2초로
             $ screen_fx.use("ascii", overlay=False)           # ASCII로 바꾸고 VHS 덮개는 끔
             $ screen_fx.use("gameboy", overlay=True)          # 게임보이 + VHS 덮개
@@ -1289,7 +1294,17 @@ init -110 python in screen_fx:
         kind = cfg("transition") if transition == DEFAULT else transition
         if kind in ("none", "instant", False):
             kind = None
+        img = _img_transition(kind)
+        if img is not None:
+            ## 그림 전환(효과 폴더의 @transition, 5.6): 셰이더는 그 시간의 절반에 바꾸고(swap), 그림은 다음 with가 이음
+            kind, wait = "swap", False
+            if duration is None:
+                duration = img[1]
+        elif kind not in TRANSITIONS and _img_transition_name(kind):
+            ## 효과 폴더에서 뺀 그림 전환: 설정의 전환으로
+            kind = cfg("transition")
         _check_transition(kind)
+        rt.pending_with = None
 
         old = state_now()
         store.screen_fx.current = None if effect in (None, DEFAULT) else effect
@@ -1305,6 +1320,8 @@ init -110 python in screen_fx:
         a = _Anim(kind, old, new, duration, tv=tv)
         rt.anim = a
         _play_sounds(a)
+        if img is not None:
+            rt.pending_with = store.img_fx.use(img[0], a.total)
 
         if wait is None:
             wait = cfg("wait")
@@ -1317,6 +1334,33 @@ init -110 python in screen_fx:
                 _sounds_now_on(a)
         else:
             renpy.restart_interaction()
+
+    def _img_transition_name(kind):
+        """효과 폴더 그림 전환처럼 생긴 이름인지 (영어 소문자, 숫자, _)."""
+        return isinstance(kind, str) and kind not in TRANSITIONS and re.match(r"^[a-z0-9_]+$", kind) is not None
+
+    def _img_transition(kind):
+        """kind가 효과 폴더(ui_kit/effects)의 그림 전환 이름이면 (이름, 기본 시간). 아니면 None. (5.6)"""
+        if not _img_transition_name(kind):
+            return None
+        m = getattr(store, "img_fx", None)
+        e = getattr(m, "EFFECTS", { }).get(kind) if m is not None else None
+        if e is None:
+            return None
+        return (kind, float(e.get("time", 1.0)))
+
+    def pending_with(fallback=None):
+        """
+        셰이더를 그림 전환으로 바꿀 때 짝이 되는 with (5.6. PyKaki가 상자 첫머리에 적음).
+            $ screen_fx.shaders("glitch", "none", transition="pixelsort", duration=1.2)
+            scene bg room
+            with screen_fx.pending_with()
+        바로 앞 shaders()/use()가 셰이더를 바꿨으면 그 그림 전환(앞 화면 → 지금 화면)을,
+        셰이더가 그대로라 바꾸지 않았으면 fallback(없으면 None = 바로)을 돌려줍니다.
+        """
+        p = rt.pending_with
+        rt.pending_with = None
+        return p if p is not None else fallback
 
     def clear(transition=DEFAULT, duration=None, wait=None, overlay=DEFAULT, target=DEFAULT, exclude=DEFAULT, cursor=_KEEP, tv=None):
         """

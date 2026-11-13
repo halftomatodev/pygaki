@@ -4,7 +4,8 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useStore } from './store';
 import { useLive } from './showpyLive';
 import { useGameFolder } from './gameFolder';
-import { SAMPLE_WIDTH, samplePicture } from './EffectsView';
+import { PictureSample, SAMPLE_WIDTH, samplePicture } from './EffectsView';
+import { shaderEffect } from './fx/textShaders';
 import { webglOk } from './fx/FxCanvas';
 import { ScreenFxCanvas, ScreenFxKnobs, screenFxBlocked } from './fx/ScreenFxCanvas';
 import { SHADER_TRANS, TV_KNOBS, type ShaderInfo } from './shader';
@@ -98,15 +99,19 @@ export function TvKnobs({ values, onChange }: { values: Record<string, number>; 
 
 const TRANS_DESC: Record<string, string> = {
   tv: '화면이 위아래로 눌려 가로선이 되고 점으로 꺼졌다가, 검은 화면 뒤에 다시 켜져요. 검은 화면일 때 셰이더가 바뀌어요.',
+  pixelsort: '앞 상자의 마지막 화면에서 밝은 부분이 가로 띠로 길게 늘어나고, 가장 길 때 번쩍이며 이 상자의 첫 화면으로 이어져요. 셰이더는 그 순간에 바뀌어요. 효과 폴더의 pixelsort를 써요.',
+  datamosh: '앞 상자의 마지막 화면이 네모 블록으로 녹아 흐르다가, 블록씩 이 상자의 첫 화면으로 채워져요. 셰이더는 시간의 절반에 바뀌어요. 효과 폴더의 datamosh를 써요.',
   none: '전환 없이 바로 바뀌어요.',
 };
 
-// 전환 칸: TV 꺼짐·켜짐, 없음. 세부 값은 상자마다 [대본 편집]에서
+// 전환 칸: TV 꺼짐·켜짐, 그림 전환 둘, 없음. 세부 값은 상자마다 [대본 편집]에서
 function TransList({ bar }: { bar: ReactNode }) {
   const project = useStore((s) => s.project);
   const [picked, setPicked] = useState('tv');
   const [vals, setVals] = useState<Record<string, number>>({});
+  const [replay, setReplay] = useState(0);
   const uses = transUses(project, picked);
+  const imgFx = picked === 'tv' || picked === 'none' ? undefined : shaderEffect(picked);
   const goTo = (u: { kind: 'box' | 'label'; id: string }) => {
     useLive.setState({ view: 'script' });
     const s = useStore.getState();
@@ -157,6 +162,11 @@ function TransList({ bar }: { bar: ReactNode }) {
             <TvKnobs values={vals} onChange={put} />
           </>
         )}
+        {picked !== 'tv' && picked !== 'none' && (imgFx?.kind === 'transition' ? (
+          <PictureSample key={picked + replay} effect={imgFx} args={{}} time={imgFx.time} picture={null} onReplay={() => setReplay((v) => v + 1)} />
+        ) : (
+          <p className="tip warn-text">게임의 효과 폴더에 {picked} 효과 파일이 없어요. 위쪽 [효과] 화면에서 넣으면 쓸 수 있어요 (없으면 TV 꺼짐·켜짐으로 내보내요).</p>
+        ))}
         <h4>쓰인 곳 <span className="tip">{uses.length ? `${uses.length}곳` : '대본에서 안 써요'}</span></h4>
         {uses.slice(0, 30).map((u) => (
           <div className="fxv-use" key={u.kind + u.id}>

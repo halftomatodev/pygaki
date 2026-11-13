@@ -869,7 +869,8 @@ init -6 python in screen_fx:
             ## ── 셰이더가 바뀌는 줄 (4.5): 원고를 위에서부터 읽어 두 자리를 셈. 줄마다 전환 ──
 
             def tr_label(self, tr):
-                return dict(self.TR_CHOICES).get(tr, str(tr))
+                ## "swap"(5.6)은 PyKaki가 그림 전환(픽셀소트 등)과 같이 쓰는 값이라 고르는 목록에는 없음
+                return dict(self.TR_CHOICES + (("swap", "그림 전환과 같이"),)).get(tr, str(tr))
 
             def _file_lines(self, fn):
                 se = self.se()

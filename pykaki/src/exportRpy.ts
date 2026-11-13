@@ -6,7 +6,7 @@ import { badImageName, renpyOnlyEffect, fxArgs, isStage, sayArgs, stageCode, tag
 import { shaderEffect } from './fx/textShaders';
 import { checkTags, shaderTags } from './tagEdit';
 import { sceneCode, sceneSupported, uiOfBox, usesSceneUi } from './boxUi';
-import { enterTransTv, shaderCode, shaderOfBox, usesShaderValues, usesShaders, usesTvValues, valuesSupported } from './shader';
+import { enterTransTv, imgTransSupported, isImgTrans, shaderCode, shaderOfBox, usesShaderValues, usesShaders, usesTvValues, valuesSupported } from './shader';
 
 export interface Warn { level: 'error' | 'warn'; msg: string; nodeId?: string }
 
@@ -156,11 +156,22 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean } = {}): { co
   const values = shaders && canValues && usesShaderValues(p);
   if (shaders && S.renpyLink && !canValues && (usesShaderValues(p) || usesTvValues(p)))
     W.push({ level: 'warn', msg: '셰이더와 TV 전환의 세부 값은 pygaki 플러그인의 화면 효과(screen_fx) 5.5부터 돼요. 이 게임은 예전 판이라 값 없이 내보내요' });
-  const shaderLine = (b: BoxNode, enter: boolean) => {
+  // 셰이더 줄. img: 그림 전환(픽셀소트 등)으로 바꾸는지 (그러면 상자 첫 그림 줄들 뒤에 with screen_fx.pending_with()를 붙인다)
+  const shaderLine = (b: BoxNode, enter: boolean): { code: string; img: boolean } => {
     const from = enter ? (incoming.get(b.id) ?? []).map((x) => byId.get(x.from)).filter((x): x is BoxNode => !!x) : [];
     const mine = shaderOfBox(p, b);
-    const tr = enter ? enterTransTv(p, b, from) : { t: mine?.in ?? '', tv: mine?.tv };
-    return shaderCode(mine, tr.t, { tv: canValues ? tr.tv : undefined, values });
+    const tr = enter ? enterTransTv(p, b, from) : { t: mine?.in ?? '', tv: mine?.tv, time: mine?.time };
+    let t = tr.t;
+    // 그림 전환은 셰이더가 바뀌는 상자에 들어올 때만. 불러온 장면에서 돌아올 때(call 뒤)는 TV로
+    if (isImgTrans(t) && !enter) t = 'tv';
+    if (isImgTrans(t) && !imgTransSupported()) {
+      W.push({ level: 'warn', msg: `셰이더 전환 "${t}"는 pygaki 플러그인의 화면 효과(screen_fx) 5.6부터 돼요. 이 게임은 예전 판이라 TV 꺼짐·켜짐으로 내보내요 (${b.title || b.id})`, nodeId: b.id });
+      t = 'tv';
+    } else if (isImgTrans(t) && shaderEffect(t)?.kind !== 'transition') {
+      W.push({ level: 'warn', msg: `셰이더 전환 "${t}"의 효과 파일이 게임의 효과 폴더(ui_kit/effects)에 없어서 TV 꺼짐·켜짐으로 내보내요. [효과] 화면에서 넣을 수 있어요 (${b.title || b.id})`, nodeId: b.id });
+      t = 'tv';
+    }
+    return { code: shaderCode(mine, t, { tv: canValues ? tr.tv : undefined, time: tr.time, values }), img: isImgTrans(t) };
   };
 
   // 상자·label의 대사 소리, 커서, 클릭 대기: 상자마다 첫 줄에 $ custom_ui.scene(...) (boxUi.ts, ui_kit 4.7)
@@ -191,7 +202,8 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean } = {}): { co
       else out.splice(nodeAt, 0, nodeMark);
 
       const body: string[] = [];
-      if (shaders && S.renpyLink) body.push(shaderLine(b, true));
+      const enterSh = shaders && S.renpyLink ? shaderLine(b, true) : null;
+      if (enterSh) body.push(enterSh.code);
       const bui = uiOfBox(p, b);
       const boxCps = bui.cps;
       if (sceneUi) body.push(sceneCode(bui));
@@ -261,7 +273,21 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean } = {}): { co
           body.push(`# 화자 없음: ${l.who ?? ''}`, q(l.text));
         } else body.push(`${c.id}${l.attr?.trim() ? ' ' + l.attr.trim() : ''} ${q(l.text)}${tail}`);
       };
-      b.lines.forEach(lineOut);
+      // 그림 전환으로 셰이더를 바꾸면: 상자 첫머리의 그림 줄(배경, 보이기, 숨기기)을 전환 없이 그리고 나서
+      // with screen_fx.pending_with(원래 전환)으로 앞 상자 마지막 화면 → 이 화면을 잇는다 (셰이더가 그대로면 원래 전환이 돈다)
+      let first = 0;
+      if (enterSh?.img) {
+        let fallback = '';
+        while (first < b.lines.length && ['note', 'scene', 'show', 'hide'].includes(b.lines[first].type)) {
+          const l = b.lines[first++];
+          if (l.type !== 'note' && l.trans) {
+            if (!fallback) fallback = l.trans;
+            lineOut({ ...l, trans: undefined });
+          } else lineOut(l);
+        }
+        body.push(`with screen_fx.pending_with(${fallback})`);
+      }
+      b.lines.slice(first).forEach(lineOut);
 
       const todo = 'return  # TODO: 연결 안 됨';
       const flow = (t: string | null) => (!t ? [todo] : t === nextId ? [] : [`jump ${ref(t)}`]);
@@ -291,7 +317,7 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean } = {}): { co
         } else {
           body.push(`call ${ref(e.target)}`);
           // 불러온 장면이 셰이더를 바꿨으면 돌아와서 이 상자 것으로 되돌린다
-          if (shaders && S.renpyLink) body.push(shaderLine(b, false));
+          if (shaders && S.renpyLink) body.push(shaderLine(b, false).code);
           if (sceneUi) body.push(sceneCode(bui));
           body.push(...(e.then ? flow(e.then) : ['return']));
         }
