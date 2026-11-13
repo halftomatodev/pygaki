@@ -534,7 +534,6 @@ export function TagBar({ targetId, className = '' }: { targetId: string; classNa
               </select>
             )}
           </div>
-          {!linked && <div className="tb-hint">게임 폴더를 연결하면 글 속 그림 {'{image=}'}도 목록에서 골라 넣을 수 있어요</div>}
         </>
       )}
       {palette && (

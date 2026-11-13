@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Hint, openHelp } from './Help';
 import { useStore } from './store';
 import { exportRpyFile, followLine, hasRpyTarget, newProject, openProject, runInRenpy, saveProject, setFollowLine } from './files';
 import { pullInbox, scanFolder, useGameFolder } from './gameFolder';
@@ -98,6 +99,7 @@ export function Toolbar() {
       <button disabled={!s.future.length} onClick={s.redo} title={'다시 실행 ' + keyOf('redo')}>↷</button>
       <button className="focus-btn" onClick={toggleFocus} title={'집중 모드: 캔버스만 남기기 ' + keyOf('focus')}>집중</button>
       <button onClick={() => useStore.setState({ showPrefs: true })} title="화면 색, 단축키">설정</button>
+      <button onClick={() => openHelp()} title="쓰는 법과 설명 모음 (F1)">도움말</button>
       <span className="sep" />
       <button onClick={newProject}>새로</button>
       <button onClick={openProject}>열기</button>
@@ -171,8 +173,7 @@ function Versions({ onClose }: { onClose: () => void }) {
   return (
     <div className="modal-bg" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <h3>버전 목록</h3>
-        <p className="tip">이 브라우저 안에만 저장돼요. 중요한 시점에는 [저장]으로 파일도 남겨 주세요.</p>
+        <h3>버전 목록<Hint text="이 컴퓨터 안에만 저장돼요. 중요한 때는 [저장]으로 파일도 남겨요" topic="저장과 백업" /></h3>
         {!list && <p>불러오는 중…</p>}
         {list?.length === 0 && <p className="tip">저장된 버전이 없어요.</p>}
         {list?.map((v) => (

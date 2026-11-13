@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { Hint } from './Help';
 import { useReactFlow } from '@xyflow/react';
 import { useGameFolder } from './gameFolder';
 import { isDesktop, projectInfo } from './desktop';
@@ -33,7 +34,7 @@ export function Sidebar() {
     <aside className="sidebar">
       <FoldScope name="left">
       <FoldAll />
-      <Card id="labels" defFolded title="label (장면)" extra={<button onClick={() => update((p) => void ops.addGroup(p))}>+ 추가</button>}>
+      <Card id="labels" defFolded title="label (장면)" hint="상자를 묶는 장면. 렌파이 label 하나가 돼요" topic="label(장면) 관리" extra={<button onClick={() => update((p) => void ops.addGroup(p))}>+ 추가</button>}>
         {project.labels.map((g) => (
           <GroupRow key={g.id} g={g} />
         ))}
@@ -53,8 +54,8 @@ export function Sidebar() {
         </label>
       </Card>
 
-      <Card id="chars" defFolded title="캐릭터" extra={<button onClick={addChar}>+ 추가</button>}>
-        {project.characters.length === 0 && <p className="tip">대사를 말할 캐릭터를 추가하세요. 내레이션은 따로 등록하지 않아도 돼요.</p>}
+      <Card id="chars" defFolded title="캐릭터" hint="대사를 말할 캐릭터. 내레이션은 등록하지 않아도 돼요" topic="캐릭터 등록" extra={<button onClick={addChar}>+ 추가</button>}>
+        {project.characters.length === 0 && <p className="tip">캐릭터가 없어요.</p>}
         {project.characters.map((c, i) => (
           <CharRow key={i} c={c} i={i} />
         ))}
@@ -62,15 +63,15 @@ export function Sidebar() {
 
       <WarnCard />
 
-      <Card id="project" defFolded title="렌파이 프로젝트 정보">
+      <Card id="project" defFolded title="렌파이 프로젝트 정보" hint="연결한 프로젝트, 대본 파일, 저장 상태" topic="데스크톱 앱">
         <LinkPanel />
       </Card>
 
       <ScriptCard />
 
-      <Card id="settings" defFolded title="설정">
+      <Card id="settings" defFolded title="설정" hint="칸 크기와 내보내기 설정. 화면 색과 단축키는 위쪽 [설정]" topic="화면 둘러보기">
         <div className="info-row">
-          <span>양쪽 칸 크기</span>
+          <span>양쪽 칸 크기<Hint text="칸과 캔버스 사이 경계를 끌어 바꾸고, 더블클릭하면 그 칸만 처음 크기로" topic="화면 둘러보기" /></span>
           <span className="mini-btns">
             <button disabled={!resized} onClick={() => usePrefs.setState({ leftW: SIZES.left.def, rightW: SIZES.right.def })} title="왼쪽 칸과 오른쪽 칸의 너비를 처음 크기로 되돌려요">
               처음 크기
@@ -80,7 +81,6 @@ export function Sidebar() {
             </button>
           </span>
         </div>
-        <p className="tip">{sizeLock ? '칸 크기를 잠갔어요.' : '칸과 캔버스 사이 경계를 끌면 너비가 바뀌어요. 경계를 더블클릭하면 그 칸만 처음 크기로.'}</p>
         <div className="settings">
             <label>
               <input type="checkbox" checked={project.settings.escapeBrackets} onChange={(e) => update((p) => void (p.settings.escapeBrackets = e.target.checked))} />
@@ -101,7 +101,6 @@ export function Sidebar() {
         </div>
       </Card>
 
-      <Usage />
       </FoldScope>
     </aside>
   );
@@ -146,29 +145,6 @@ function ScriptCard() {
         <button className="primary" onClick={() => exportRpyFile(false)}>.rpy 내보내기</button>
       </div>
       <pre className="rpy side-rpy">{code}</pre>
-    </Card>
-  );
-}
-
-// 사용법 (예전에는 오른쪽 편집 탭에 상자를 고르지 않았을 때 나왔다). 접은 것은 기억한다
-function Usage() {
-  usePrefs((p) => p.keys); // 단축키를 바꾸면 안내도 다시 그린다
-  return (
-    <Card id="usage" defFolded title="사용법" className="usage">
-      <ul>
-          <li>상자를 <b>더블클릭</b>하면 상자 안에서 바로 글을 써요. 대사 줄·제목·선택지를 더블클릭하면 그 칸으로 가요. Esc나 빈 곳 클릭으로 끝내요.</li>
-          <li>상자를 한 번 클릭하면 오른쪽에서 label, 다음 흐름 같은 나머지 설정을 바꿔요.</li>
-          <li>캔버스 빈 곳을 <b>더블클릭</b>하면 새 상자가 생겨요.</li>
-          <li>상자 아래 점(●)을 끌어 다른 상자에 놓으면 연결돼요. 빈 곳에 놓으면 새 상자가 생기며 연결돼요.</li>
-          <li>선을 <b>더블클릭</b>하면 jump ↔ call이 바뀌어요.</li>
-          <li>같은 label(장면)의 상자는 같은 색이에요. label은 위쪽 목록에서 관리해요.</li>
-          <li>상자나 label 오른쪽 위의 <b>◐ 셰이더</b>를 누르면 오른쪽에서 화면 셰이더를 골라요. 상자에 정하면 그 상자에서만, label에 정하면 그 label 전체에 걸려요.</li>
-          <li>대사 칸에서 <b>{keyOf('newLine')}</b>: 같은 화자로 다음 줄 추가.</li>
-          <li><b>{keyOf('focus')}</b>: 집중 모드. 캔버스만 남기고 나머지를 숨겨요. 한 번 더 누르면 돌아와요.</li>
-          <li>{keyOf('save')} 파일 저장 · {keyOf('undo')} 실행 취소 · {keyOf('export')} .rpy 다시 내보내기</li>
-          <li>단축키와 화면 색은 위쪽 둘째 줄 [설정]에서 바꿔요.</li>
-          <li>카드 제목 오른쪽 [접기]를 누르면 이름만 남기고 접혀요.</li>
-      </ul>
     </Card>
   );
 }
@@ -241,7 +217,7 @@ function LinkPanel() {
         <SaveInfo />
         {media}
         {newer}
-        {!f.hasShowpy && <p className="tip">이 프로젝트에는 pygaki 플러그인이 없어요. 위치와 화면 효과를 렌파이에서 고치려면 런처 새 프로젝트 만들기의 "Pygaki"로 만든 프로젝트를 쓰세요.</p>}
+        {!f.hasShowpy && <p className="tip">pygaki 플러그인 없음<Hint text="런처 새 프로젝트 만들기의 Pygaki로 만든 프로젝트에 들어 있어요" topic="pygaki 플러그인과 함께" /></p>}
         {clash}
       </div>
     );
@@ -249,7 +225,7 @@ function LinkPanel() {
   return (
     <div className="link-panel">
       <SaveInfo />
-      <p className="tip">개발용 화면이에요. 렌파이 프로젝트는 pygaki 앱에서 열어요(런처의 [pygaki로 편집]).</p>
+      <p className="tip">개발용 화면 (렌파이 프로젝트는 앱에서)</p>
       {newer}
     </div>
   );

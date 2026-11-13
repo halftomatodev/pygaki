@@ -67,7 +67,7 @@ function CharPics({ b, add }: { b: BoxNode; add: (l: Omit<Line, 'id' | 'text'>) 
           ))}
         </div>
       ) : (
-        <p className="tip">{linked ? `images 폴더에 "${who}"로 시작하는 그림이 없어요 (예: "${who} smile.png").` : '렌파이 프로젝트를 연결하면 이 캐릭터의 그림을 눌러서 골라요.'}</p>
+        <p className="tip">{linked ? `images 폴더에 "${who}"로 시작하는 그림이 없어요 (예: "${who} smile.png").` : '프로젝트 연결 안 됨'}</p>
       )}
       <TextAdd placeholder={`표정 (예: smile) → show ${who} smile`} onAdd={put} />
     </div>
@@ -199,7 +199,7 @@ function SoundPicker({ add }: { add: (l: Omit<Line, 'id' | 'text'>) => void }) {
           ))}
         </div>
       ) : (
-        <p className="tip">{useGameFolder.getState().name ? 'audio 폴더에 소리 파일이 없어요.' : '렌파이 프로젝트를 연결하면 audio 폴더의 소리를 골라요.'}</p>
+        <p className="tip">{useGameFolder.getState().name ? 'audio 폴더에 소리 파일이 없어요.' : '프로젝트 연결 안 됨'}</p>
       )}
       <TextAdd placeholder="파일 이름 (예: door.ogg)" onAdd={put} extra={music ? <button onClick={() => add({ type: 'music', stop: true })}>음악 멈추기</button> : undefined} />
     </>
@@ -209,7 +209,7 @@ function SoundPicker({ add }: { add: (l: Omit<Line, 'id' | 'text'>) => void }) {
 // 그림·영상 이름 격자 (작은 그림과 이름). 폴더를 연결하지 않았으면 안내만
 function Grid({ names, pic, onPick, empty }: { names: string[]; pic: (n: string) => string; onPick: (n: string) => void; empty: string }) {
   const linked = useGameFolder((s) => !!s.name);
-  if (!linked) return <p className="tip">렌파이 프로젝트를 연결하면 game 폴더의 그림·영상을 눌러서 골라요.</p>;
+  if (!linked) return <p className="tip">프로젝트 연결 안 됨</p>;
   if (!names.length) return <p className="tip">{empty}</p>;
   return (
     <div className="sc-grid">

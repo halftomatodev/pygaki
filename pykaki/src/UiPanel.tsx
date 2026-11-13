@@ -34,18 +34,16 @@ export function UiCards({ so }: { so: Owner }) {
 
   return (
     <>
-      <Card id="s-say" title="대사 소리와 속도">
+      <Card id="s-say" title="대사 소리와 속도" hint="정하지 않으면 label → 게임 처음 값. 줄에 따로 적은 속도가 먼저" topic="대사 소리와 속도">
         {row('cps', '텍스트 속도', <CpsField so={so} v={mine.cps} />)}
         {row('sound', '대사 소리', <SoundField so={so} v={mine.sound} />)}
-        <p className="tip">정하지 않은 값은 {box ? 'label 것을, label에도 없으면 ' : ''}게임 처음 값([GUI 편집] → 게임 처음 값)을 써요. 속도는 그 줄에 따로 정한 속도가 먼저예요.</p>
-        {old && <p className="tip warn-text">이 게임의 pygaki 플러그인은 예전 판이라 대사 소리를 상자마다 바꾸지 못해요(속도는 돼요). ui_kit 4.7부터 돼요.</p>}
+        {old && <p className="tip warn-text">예전 플러그인이라 대사 소리는 상자마다 못 바꿔요 (ui_kit 4.7부터).</p>}
         <AllRow what="대사 소리와 속도" keys={['cps', 'sound']} so={so} />
       </Card>
-      <Card id="s-cursor" title="커서와 클릭 대기 (CTC)">
+      <Card id="s-cursor" title="커서와 클릭 대기 (CTC)" hint="game/gui/ctc, gui/cursor 안의 그림 폴더를 이름 차례로 돌려요" topic="대사 소리와 속도">
         {row('ctc', '클릭 대기', <FramesField so={so} k="ctc" v={mine.ctc} />)}
         {row('cursor', '커서', <FramesField so={so} k="cursor" v={mine.cursor} />)}
-        <p className="tip">그림 묶음은 game/gui/ctc, game/gui/cursor 안의 폴더예요. 폴더 하나에 그림을 이름 차례(1, 2, 3…)로 넣어요. 게임 처음 값에서 켜 둔 것만 바뀌고, 커서는 소프트웨어 커서일 때만 바뀌어요.</p>
-        {old && <p className="tip warn-text">이 게임의 pygaki 플러그인은 예전 판이라 상자마다 바꾸지 못해요. ui_kit 4.7부터 돼요.</p>}
+        {old && <p className="tip warn-text">예전 플러그인이라 상자마다 못 바꿔요 (ui_kit 4.7부터).</p>}
         <AllRow what="커서와 클릭 대기" keys={['ctc', 'cursor']} so={so} />
       </Card>
     </>
@@ -136,7 +134,7 @@ function FramesField({ so, k, v }: { so: Owner; k: 'ctc' | 'cursor'; v: string |
           ))}
         </div>
       )}
-      {!sets.length && <p className="tip">{linked ? `game/gui/${k} 안에 그림이 없어요.` : '렌파이 프로젝트를 연결하면 그림 묶음을 눌러서 골라요.'}</p>}
+      {!sets.length && <p className="tip">{linked ? `game/gui/${k} 안에 그림이 없어요.` : '프로젝트 연결 안 됨'}</p>}
       <div className="row">
         <input placeholder={`그림 폴더 (예: gui/${k}/heart)`} value={v ?? ''} onChange={(e) => set(k, e.target.value.trim().replace(/\/+$/, ''), 'ui' + k + so.id)} />
       </div>

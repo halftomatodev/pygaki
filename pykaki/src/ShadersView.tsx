@@ -1,5 +1,6 @@
 // 위쪽 [셰이더] 화면: 화면 전체에 씌우는 셰이더와, 셰이더가 바뀔 때의 전환을 보고 켜고 끈다 (docs/LINK.md 11장).
 // 셰이더 목록은 게임 폴더의 screen_fx/shader_list.json에서 온다. 어느 상자에 걸지와 세부 값은 [대본 편집]의 ◐ 셰이더에서 정한다
+import { Hint } from './Help';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useStore } from './store';
 import { useLive } from './showpyLive';
@@ -99,8 +100,8 @@ export function TvKnobs({ values, onChange }: { values: Record<string, number>; 
 
 const TRANS_DESC: Record<string, string> = {
   tv: '화면이 위아래로 눌려 가로선이 되고 점으로 꺼졌다가, 검은 화면 뒤에 다시 켜져요. 검은 화면일 때 셰이더가 바뀌어요.',
-  pixelsort: '앞 상자의 마지막 화면에서 밝은 부분이 가로 띠로 길게 늘어나고, 가장 길 때 번쩍이며 이 상자의 첫 화면으로 이어져요. 셰이더는 그 순간에 바뀌어요. 효과 폴더의 pixelsort를 써요.',
-  datamosh: '앞 상자의 마지막 화면이 네모 블록으로 녹아 흐르다가, 블록씩 이 상자의 첫 화면으로 채워져요. 셰이더는 시간의 절반에 바뀌어요. 효과 폴더의 datamosh를 써요.',
+  pixelsort: '앞 상자의 마지막 화면이 띠로 늘어나며 깨지고(가로·세로·회전·확산), 깨진 채 멈췄다가 이 상자의 첫 화면으로 뚝 끊어 넘어가요. 셰이더도 끊기는 순간에 바뀌어요.',
+  datamosh: '앞 상자의 마지막 화면이 블록째 소용돌이치거나(회전) 바깥으로 터지며(확산) 깨지고, 깨진 채 멈췄다가 이 상자의 첫 화면으로 뚝 끊어 넘어가요. 셰이더도 끊기는 순간에 바뀌어요.',
   none: '전환 없이 바로 바뀌어요.',
 };
 
@@ -131,7 +132,7 @@ function TransList({ bar }: { bar: ReactNode }) {
       <div className="fxv-list">
         <div className="fxv-bar">{bar}</div>
         <div className="fxv-cards">
-          <h4>셰이더가 바뀔 때 <span className="tip">{SHADER_TRANS.length}</span></h4>
+          <h4>셰이더가 바뀔 때 <span className="tip">{SHADER_TRANS.length}</span><Hint text="상자나 label의 ◐ 셰이더 → 시작할 때, 끝날 때에서 골라요" topic="셰이더 (상자" /></h4>
           {SHADER_TRANS.map(([k, t]) => {
             const n = transUses(project, k).length;
             return (
@@ -143,7 +144,6 @@ function TransList({ bar }: { bar: ReactNode }) {
               </div>
             );
           })}
-          <p className="tip">전환은 상자나 label의 ◐ 셰이더에서 셰이더 바로 아래 "시작할 때", "끝날 때"로 골라요.</p>
         </div>
       </div>
       <div className="fxv-side">
@@ -158,14 +158,14 @@ function TransList({ bar }: { bar: ReactNode }) {
               <span className="grow" />
               {Object.keys(vals).length > 0 && <button onClick={() => setVals({})}>값 모두 기본으로</button>}
             </div>
-            <h4>세부 값 <span className="tip">여기서 맞춘 값은 저장하지 않아요 (구경용). 상자마다 [대본 편집]의 ◐ 셰이더에서 정해요</span></h4>
+            <h4>세부 값<Hint text="여기 값은 구경용이라 저장하지 않아요. 상자마다 ◐ 셰이더에서 정해요" topic="셰이더 (상자" /></h4>
             <TvKnobs values={vals} onChange={put} />
           </>
         )}
         {picked !== 'tv' && picked !== 'none' && (imgFx?.kind === 'transition' ? (
           <PictureSample key={picked + replay} effect={imgFx} args={{}} time={imgFx.time} picture={null} onReplay={() => setReplay((v) => v + 1)} />
         ) : (
-          <p className="tip warn-text">게임의 효과 폴더에 {picked} 효과 파일이 없어요. 위쪽 [효과] 화면에서 넣으면 쓸 수 있어요 (없으면 TV 꺼짐·켜짐으로 내보내요).</p>
+          <p className="tip warn-text">효과 폴더에 {picked}이 없어요 ([효과]에서 넣기). 없으면 TV 꺼짐·켜짐으로 내보내요.</p>
         ))}
         <h4>쓰인 곳 <span className="tip">{uses.length ? `${uses.length}곳` : '대본에서 안 써요'}</span></h4>
         {uses.slice(0, 30).map((u) => (
@@ -257,7 +257,7 @@ function ShaderList({ bar }: { bar: ReactNode }) {
         </div>
         {blocked && <p className="tip fxv-note">{blocked}. 지금은 구경만 할 수 있어요.</p>}
         <div className="fxv-cards">
-          <h4>{blocked ? '기본 셰이더' : '이 프로젝트에 있는 것'} <span className="tip">{shown.length}</span></h4>
+          <h4>{blocked ? '기본 셰이더' : '이 프로젝트에 있는 것'} <span className="tip">{shown.length}</span><Hint text="새 셰이더는 게임을 한 번 켠 뒤 [다시 읽기]로 나와요" topic="셰이더" /></h4>
           {shown.map((c) => (
             <div key={c.id} className={'fxv-card' + (sel?.id === c.id ? ' on' : '') + (c.on ? '' : ' off')} onClick={() => setPicked(c.id)}>
               <input
@@ -277,7 +277,6 @@ function ShaderList({ bar }: { bar: ReactNode }) {
             </div>
           ))}
           {!shown.length && <p className="tip">{q ? '찾는 셰이더가 없어요.' : '셰이더가 없어요.'}</p>}
-          <p className="tip">게임에 새 셰이더를 넣었으면 게임을 한 번 켠 뒤 위쪽 [다시 읽기]를 누르면 여기에 나와요.</p>
         </div>
       </div>
       <div className="fxv-side">
@@ -301,8 +300,7 @@ function ShaderList({ bar }: { bar: ReactNode }) {
               {Object.keys(mine).length > 0 && <button onClick={() => setArgs((all) => ({ ...all, [sel.id]: {} }))}>값 모두 기본으로</button>}
               <input ref={picPick} type="file" accept="image/*" hidden onChange={(e) => pickPicture(e.target.files?.[0])} />
             </div>
-            <p className="tip">어느 상자에 걸지와 그 상자의 세부 값은 [대본 편집]에서 상자나 label의 ◐ 셰이더로 정해요.</p>
-            <h4>세부 값 <span className="tip">여기서 맞춘 값은 저장하지 않아요 (구경용)</span></h4>
+            <h4>세부 값<Hint text="여기 값은 구경용이라 저장하지 않아요. 상자마다 ◐ 셰이더에서 정해요" topic="셰이더 (상자" /></h4>
             {screenFxBlocked(sel) ? (
               groupNames(sel.groups).map(([title, names]) => (
                 <div className="fxv-use" key={title}>

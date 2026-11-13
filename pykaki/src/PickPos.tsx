@@ -2,6 +2,7 @@
 // [렌파이에서 여기로 이동]: 원고를 내보내고 게임을 그 줄(상자면 상자의 첫 줄)로 옮긴다.
 // [위치 옮기기]: 거기에 더해 게임 안 GUI 편집기의 대사(선택지, 이미지/영상) 탭을 연다.
 // 게임 창에서 끌어서 옮기고 저장하면 지금처럼 showpy_inbox.json으로 받아 적는다 (LINK.md 3장, 9장).
+import { Hint } from './Help';
 import { useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { create } from 'zustand';
@@ -112,5 +113,5 @@ export function useSidePop() {
 export function GameOffTip({ what }: { what: string }) {
   const ready = useGameReady();
   if (ready || !isDesktop) return null;
-  return <p className="tip">{what}: 게임과 연결하면 줄마다 [여기로 이동] [위치 옮기기]가 생겨요.</p>;
+  return <p className="tip">게임 연결 안 됨<Hint text={`게임과 연결하면 ${what} 줄마다 [여기로 이동] [위치 옮기기]가 생겨요`} topic="렌파이에서 여기로" /></p>;
 }

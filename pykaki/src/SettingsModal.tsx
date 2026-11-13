@@ -1,6 +1,7 @@
 // 환경 설정 창: 화면 색, 단축키 바꾸기
 import { useEffect, useState } from 'react';
 import { useStore } from './store';
+import { Hint } from './Help';
 import { isDesktop } from './desktop';
 import { ACTIONS, DIMS, GRAD_DEFAULTS, THEMES, colorsOf, gradColors, gradOf, comboLabel, comboOf, resetKeys, resetPrefs, usePrefs, type ActionId, type Colors } from './prefs';
 
@@ -10,8 +11,7 @@ export function SettingsModal() {
   return (
     <div className="modal-bg" onClick={close}>
       <div className="modal prefs" onClick={(e) => e.stopPropagation()}>
-        <h3>환경 설정</h3>
-        <p className="tip">화면 설정은 이 브라우저에만 저장돼요. 상자 색만 대본 파일에 저장돼요.</p>
+        <h3>환경 설정<Hint text="화면 설정은 이 컴퓨터에만, 상자 색만 대본 파일에 저장돼요" topic="환경 설정" /></h3>
         <TextColor />
         <ColorPrefs />
         <LookPrefs />
@@ -46,7 +46,7 @@ function TextColor() {
         <button className={'swatch' + (p.textColor ? '' : ' on')} onClick={() => usePrefs.setState({ textColor: null })}>
           자동 (테마 색)
         </button>
-        <span className="tip">{p.textColor ? '직접 고른 색을 모든 테마에서 써요.' : '테마가 바탕 밝기에 맞춰 정해요.'}</span>
+        <span className="tip">{p.textColor ? '모든 테마에 씀' : '테마대로'}</span>
       </div>
     </>
   );
@@ -62,7 +62,7 @@ function ColorPrefs() {
   const preview = (c: Colors) => ({ background: c.bg, color: c.text, borderColor: c.box ?? c.accent });
   return (
     <>
-      <h4>화면 테마</h4>
+      <h4>화면 테마<Hint text="그라데이션 테마는 두 색으로 바탕·label·상자를 칠해요. label 경계선 0이면 선 없음" topic="환경 설정" /></h4>
       <div className="row">
         {THEMES.map((t) => {
           const c = t.grad ? gradColors(p.grads[t.grad]) : t.colors;
@@ -96,7 +96,6 @@ function ColorPrefs() {
             </label>
             <button onClick={() => usePrefs.setState({ grads: { ...p.grads, [grad]: { ...GRAD_DEFAULTS[grad] } } })}>처음 색</button>
           </div>
-          <p className="tip">두 색 사이를 이어서 바탕 → label 배경(30%) → 상자(55%) 순서로 자동으로 칠해요. 이 테마에서는 상자 색을 따로 칠할 수 없어요.</p>
         </>
       )}
       {p.theme === 'custom' && (
@@ -114,7 +113,6 @@ function ColorPrefs() {
         <input id="frame-w" type="range" min={0} max={6} step={0.5} value={p.frameWidth} onChange={(e) => usePrefs.setState({ frameWidth: +e.target.value })} />
         <span className="tip">{p.frameWidth ? p.frameWidth + 'px' : '안 보임'}</span>
       </div>
-      <p className="tip">label 경계선은 같은 label 상자를 묶는 선의 굵기예요. 0이면 선이 안 보여요. 사과 스타일은 label 배경을 왼쪽 label 목록의 색으로 칠해요.</p>
     </>
   );
 }
@@ -140,7 +138,7 @@ function BoxColors() {
   };
   return (
     <>
-      <h4>상자 색 (이 대본에 저장)</h4>
+      <h4>상자 색 (이 대본에 저장)<Hint text="고른 상자를 칠해요. hex 코드도 돼요. Ctrl+Z로 되돌려요" topic="환경 설정" /></h4>
       {grad && <p className="tip warn-text">어둡게 테마에서는 상자가 그라데이션 색을 따라서 칠할 수 없어요. 칠해 둔 색은 다른 테마에서 보여요.</p>}
       <fieldset className="plain" disabled={grad}>
       <div className="row">
@@ -176,7 +174,6 @@ function BoxColors() {
         <button className="primary" disabled={!ids.length} onClick={() => paint(color)}>칠하기</button>
         <button disabled={!ids.length} onClick={() => paint(undefined)}>label 색으로 되돌리기</button>
       </div>
-      <p className="tip">색 칸을 눌러 고르거나 hex 코드(#RRGGBB)를 직접 적어요. 고른 색은 대본 파일에 저장되고 실행 취소(Ctrl+Z)가 돼요.</p>
       </fieldset>
     </>
   );
@@ -186,7 +183,7 @@ function LookPrefs() {
   const dim = usePrefs((p) => p.dim);
   return (
     <>
-      <h4>집중 모드 흐림</h4>
+      <h4>집중 모드 흐림<Hint text="상자 안에서 쓸 때 커서 줄 말고는 흐려져요" topic="집중 모드" /></h4>
       <div className="row">
         {DIMS.map((d) => (
           <button key={d.id} className={'swatch' + (dim === d.id ? ' on' : '')} onClick={() => usePrefs.setState({ dim: d.id })}>
@@ -194,7 +191,6 @@ function LookPrefs() {
           </button>
         ))}
       </div>
-      <p className="tip">집중 모드에서 상자 안에 글을 쓰는 동안, 커서가 있는 줄 말고는 흐려지고 다른 상자는 더 흐려져요. 흐린 상자에 마우스를 올리면 잠깐 또렷해져요.</p>
     </>
   );
 }
@@ -204,15 +200,11 @@ function RunPrefs() {
   const skip = usePrefs((p) => p.runSkip);
   return (
     <>
-      <h4>렌파이에서 실행</h4>
+      <h4>렌파이에서 실행<Hint text="켜 두면 게임이 켜져 있을 때 대본만 내보내고 게임은 그대로 둬요" topic="데스크톱 앱" /></h4>
       <label className="row">
         <input type="checkbox" checked={skip} onChange={(e) => usePrefs.setState({ runSkip: e.target.checked })} />
         게임이 이미 켜져 있으면 무시 (다시 켜지 않음)
       </label>
-      <p className="tip">
-        켜 두면 게임이 켜져 있을 때 [▶ 렌파이에서 실행]을 눌러도 대본만 내보내고 게임은 그대로 둬요. 끄면 누를 때마다 게임을 하나 더 켜요.
-        켜져 있는지는 pygaki 플러그인이 든 게임과의 연결, 그리고 이 창에서 켠 게임으로 알아요.
-      </p>
     </>
   );
 }
@@ -231,8 +223,9 @@ function KeyPrefs() {
       if (e.key === 'Escape') return setRec(null);
       const c = comboOf(e);
       if (!c) return;
+      if (e.code === 'F1' && !e.ctrlKey && !e.altKey && !e.metaKey) return setMsg('F1은 도움말이라 쓸 수 없어요.');
       const fn = /^F\d+$/.test(e.code);
-      if (!fn && !e.ctrlKey && !e.metaKey && !e.altKey) return setMsg('글자를 칠 때 겹치지 않게 Ctrl이나 Alt를 함께 눌러 주세요 (F1~F12는 혼자 써도 돼요).');
+      if (!fn && !e.ctrlKey && !e.metaKey && !e.altKey) return setMsg('글자를 칠 때 겹치지 않게 Ctrl이나 Alt를 함께 눌러 주세요 (F2~F12는 혼자 써도 돼요).');
       const next = { ...usePrefs.getState().keys, [rec]: c };
       const other = ACTIONS.find((a) => a.id !== rec && next[a.id] === c);
       if (other) next[other.id] = '';
@@ -246,7 +239,7 @@ function KeyPrefs() {
 
   return (
     <>
-      <h4>단축키</h4>
+      <h4>단축키<Hint text="누르고 새 키를 눌러 바꿔요. Esc, Delete는 못 바꿔요" topic="단축키" /></h4>
       <table className="keys">
         <tbody>
           {ACTIONS.map((a) => (
@@ -269,7 +262,7 @@ function KeyPrefs() {
       {msg && <p className="tip warn-text">{msg}</p>}
       <div className="row">
         <button onClick={() => (resetKeys(), setMsg('기본값으로 되돌렸어요.'))}>기본값으로</button>
-        <span className="tip">Esc(편집 끝내기), Delete(삭제)는 바꿀 수 없어요.</span>
+        
       </div>
     </>
   );

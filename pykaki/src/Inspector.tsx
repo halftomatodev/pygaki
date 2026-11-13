@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { Hint } from './Help';
 import { useStore } from './store';
 import * as ops from './ops';
 import type { BoxNode, ExitType, Line, Project } from './types';
@@ -25,7 +26,7 @@ export function Inspector() {
       <div className="insp">
         <section className="sec">
           <h3>상자 편집</h3>
-          <p className="tip">상자를 한 번 클릭하면 여기서 label, 대사, 다음 흐름을 고쳐요. 쓰는 법은 왼쪽 칸 아래의 [사용법]에 있어요.</p>
+          <p className="tip">상자를 골라 주세요.<Hint text="상자를 한 번 클릭하면 여기서 label, 대사, 다음 흐름을 고쳐요. 쓰는 법은 위쪽 [도움말]" topic="대본 쓰기" /></p>
         </section>
       </div>
     );
@@ -40,7 +41,7 @@ function MultiInspector({ ids }: { ids: string[] }) {
   return (
     <div className="insp">
       <section className="sec">
-      <h3>상자 {ids.length}개 선택</h3>
+      <h3>상자 {ids.length}개 선택<Hint text="왼쪽 상자와 정렬의 [선택 정렬]로 이 상자들만 정렬해요" topic="정리" /></h3>
       <div className="row">
         <label>label</label>
         <select
@@ -64,7 +65,6 @@ function MultiInspector({ ids }: { ids: string[] }) {
           선택한 상자 삭제
         </button>
       </div>
-      <p className="tip">왼쪽 "상자와 정렬"의 [선택 정렬]로 이 상자들만 흐름 순서로 정렬할 수 있어요.</p>
       </section>
     </div>
   );
@@ -249,10 +249,9 @@ export function ExitEditor({ b, upd }: { b: BoxNode; upd: Upd }) {
             <TargetSelect self={b.id} value={e.target} onChange={(v) => upd((x) => ops.setLink(x, 'call', v))} />
           </div>
           <div className="row">
-            <label>복귀 후</label>
+            <label>복귀 후<Hint text="call한 장면이 return으로 끝나면 이 상자로. 비우면 여기서도 return" topic="흐름 잇기" /></label>
             <TargetSelect self={b.id} value={e.then} onChange={(v) => upd((x) => ops.setLink(x, 'then', v))} />
           </div>
-          <p className="tip">call한 장면이 return으로 끝나면 "복귀 후" 상자로 이어져요. 비워 두면 여기서도 return해요.</p>
         </>
       )}
       {e.type === 'menu' && (
@@ -277,7 +276,7 @@ export function ExitEditor({ b, upd }: { b: BoxNode; upd: Upd }) {
           )}
         </>
       )}
-      {e.type === 'return' && <p className="tip">이 상자에서 흐름이 끝나요. call로 불린 장면이면 부른 곳으로 돌아가요.</p>}
+      {e.type === 'return' && <p className="tip">여기서 끝 (call로 불렸으면 부른 곳으로)</p>}
     </div>
   );
 }

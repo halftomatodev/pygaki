@@ -2,10 +2,11 @@
 // 상자에 정하면 그 상자에서만, label에 정하면 그 label의 상자 모두에 걸린다 (상자에 따로 정한 것이 먼저).
 // 카드 셋: 셰이더(1번, 2번, 고른 것 아래에 세부 값) / 전환(시작할 때, 끝날 때, TV 세부 값) / 원고 파일에 들어가는 줄
 import { Card } from './Card';
+import { Hint } from './Help';
 import { useState } from 'react';
 import { useStore } from './store';
 import type { BoxShader } from './types';
-import { SHADER_TRANS, enterTransTv, imgTransSupported, isImgTrans, newShader, oldTransLabel, shaderCode, shaderInfo, shaderLabel, shaderNames, shaderOfBox, usesShaderValues, usesShaders, valuesSupported } from './shader';
+import { IMG_TRANS_DIR, SHADER_TRANS, enterTransTv, imgTransSupported, isImgTrans, newShader, oldTransLabel, shaderCode, shaderInfo, shaderLabel, shaderNames, shaderOfBox, usesShaderValues, usesShaders, valuesSupported } from './shader';
 import { exitLinks } from './ops';
 import { RPY_FILE, useGameFolder } from './gameFolder';
 import { ScreenFxKnobs } from './fx/ScreenFxCanvas';
@@ -108,13 +109,56 @@ export function ShaderPanel() {
     const old = oldTransLabel(sh?.[key]);
     return (
       <div className="row">
-        <label>{label}</label>
+        <label>
+          {label}
+          <Hint text={key === 'in' ? '앞 상자와 셰이더가 달라질 때 이 셰이더로 바뀌는 모양' : '이 셰이더가 끝나고 셰이더 없는 상자로 갈 때의 모양'} topic="셰이더 (상자" />
+        </label>
         <select value={old ? '__old' : (sh?.[key] ?? '')} onChange={(e) => e.target.value !== '__old' && set((s) => void (s[key] = e.target.value))}>
           {SHADER_TRANS.map(([k, t]) => (
             <option key={k} value={k}>{t}</option>
           ))}
           {old && <option value="__old">{old} (예전 값)</option>}
         </select>
+      </div>
+    );
+  };
+  // 그림 전환의 방향 (데이터모싱: 회전·확산, 픽셀소트: 가로·세로·회전·확산). 효과 파일에 그 값이 있을 때만
+  const dirRow = (fxName: string) => {
+    const d = IMG_TRANS_DIR[fxName];
+    const fx = shaderEffect(fxName);
+    if (!d || fx?.kind !== 'transition') return null;
+    const [k, opts] = d;
+    const def = fx.uniforms.find(([u]) => u === 'u__' + k);
+    if (!def) return null;
+    const cur = sh?.iv?.[fxName]?.[k] ?? Number(def[1]);
+    return (
+      <div className="row" key={'dir' + fxName}>
+        <label>
+          방향
+          <Hint text={`${SHADER_TRANS.find(([n]) => n === fxName)?.[1] ?? fxName}이 깨지는 방향. 깨진 채 멈췄다가 다음 화면으로 끊어 넘어가요`} topic="셰이더 (상자" />
+        </label>
+        <div className="seg">
+          {opts.map(([v, t]) => (
+            <button
+              key={v}
+              className={Math.round(cur) === v ? 'on' : ''}
+              onClick={() =>
+                set((s) => {
+                  const all = { ...(s.iv ?? {}) };
+                  const mine = { ...(all[fxName] ?? {}) };
+                  if (v === Math.round(Number(def[1]))) delete mine[k];
+                  else mine[k] = v;
+                  if (Object.keys(mine).length) all[fxName] = mine;
+                  else delete all[fxName];
+                  if (Object.keys(all).length) s.iv = all;
+                  else delete s.iv;
+                })
+              }
+            >
+              {t}
+            </button>
+          ))}
+        </div>
       </div>
     );
   };
@@ -128,7 +172,7 @@ export function ShaderPanel() {
     : !usesShaders(project)
       ? '# 셰이더를 정한 곳이 없어서 줄을 넣지 않아요'
       : box
-        ? shaderCode(shaderOfBox(project, box), tr.t, { tv: canValues ? tr.tv : undefined, time: tr.time, values: canValues && usesShaderValues(project) })
+        ? shaderCode(shaderOfBox(project, box), tr.t, { tv: canValues ? tr.tv : undefined, time: tr.time, iv: tr.iv, values: canValues && usesShaderValues(project) })
         : '';
   const usesTv = !!sh && (sh.in === 'tv' || sh.out === 'tv');
   const tvVals = sh?.tv ?? {};
@@ -139,7 +183,7 @@ export function ShaderPanel() {
 
   return (
     <div className="insp shader-panel">
-      <Card id="s-shader" title="셰이더" extra={<button onClick={close}>{box ? '← 상자 편집으로' : '닫기'}</button>}>
+      <Card id="s-shader" title="셰이더" hint="1번과 2번이 겹쳐 보여요. 둘 다 없음이면 셰이더를 꺼요" topic="셰이더" extra={<button onClick={close}>{box ? '← 상자 편집으로' : '닫기'}</button>}>
         <p className="tip">{name}{!box && ` · 상자 ${nBoxes}개`}</p>
 
         <div className="seg">
@@ -155,9 +199,9 @@ export function ShaderPanel() {
           <p className="tip">
             {box
               ? group?.shader
-                ? `지금은 label의 셰이더(${shaderLabel(group.shader)})가 걸려요.`
-                : 'label에도 정한 것이 없어서 게임 설정대로 보여요.'
-              : '이 label의 상자는 게임 설정대로 보여요. 상자에 따로 정한 것은 그대로예요.'}
+                ? `지금: label의 ${shaderLabel(group.shader)}`
+                : '지금: 게임 설정대로'
+              : '지금: 게임 설정대로'}
           </p>
         )}
 
@@ -165,11 +209,10 @@ export function ShaderPanel() {
           <>
             {slot('a', '1번')}
             {slot('b', '2번')}
-            <p className="tip">1번과 2번이 겹쳐서 보여요. 둘 다 "없음"이면 이 {box ? '상자' : 'label'}에서는 셰이더를 꺼요. 세부 값은 이 {box ? '상자' : 'label'}에서만 쓰고, 바꾸지 않은 값은 게임 설정대로예요.</p>
           </>
         )}
-        {sh && !canValues && <p className="tip warn-text">이 게임의 pygaki 플러그인은 예전 판이라 세부 값을 받지 못해요. 화면 효과(screen_fx) 5.5부터 돼요.</p>}
-        {!linked && <p className="tip warn-text">셰이더는 pygaki 플러그인이 있어야 해요. 왼쪽 [설정]에서 "pygaki 플러그인 연결"을 켜 주세요.</p>}
+        {sh && !canValues && <p className="tip warn-text">예전 플러그인이라 세부 값은 안 돼요 (screen_fx 5.5부터).</p>}
+        {!linked && <p className="tip warn-text">pygaki 플러그인 연결이 꺼져 있어요 (왼쪽 [설정]).</p>}
         <AllRow
           what="셰이더"
           so={so}
@@ -190,9 +233,11 @@ export function ShaderPanel() {
       </Card>
 
       {sh && (
-        <Card id="s-trans" title="전환">
+        <Card id="s-trans" title="전환" hint="셰이더가 바뀔 때의 모양. 미리 보기는 위쪽 [셰이더] 화면" topic="셰이더 (상자">
           {trans('in', '시작할 때')}
+          {isImgTrans(sh.in) && dirRow(sh.in!)}
           {trans('out', '끝날 때')}
+          {isImgTrans(sh.out) && sh.out !== sh.in && dirRow(sh.out!)}
           {usesTv && (
             <div className="sh-vals">
               {fold('tv', Object.keys(tvVals).length)}
@@ -218,29 +263,20 @@ export function ShaderPanel() {
                   <button className="fx-x" style={{ visibility: sh.time !== undefined ? 'visible' : 'hidden' }} title="기본값으로" onClick={(e) => (e.preventDefault(), set((s) => void delete s.time))}>↺</button>
                 </label>
               </div>
-              <p className="tip">
-                픽셀소트와 데이터모싱은 앞 상자의 마지막 화면을 깨뜨리며 이 상자의 첫 화면으로 이어요. 셰이더는 그 시간의 절반에 바뀌어요.
-                상자 첫머리의 배경, 보이기, 숨기기 줄을 다 그린 뒤에 전환이 돌고, 그 줄들의 "나타나는 방식"은 셰이더가 그대로일 때만 써요.
-              </p>
-              {!imgTransSupported() && <p className="tip warn-text">이 게임의 pygaki 플러그인은 예전 판이라 TV 꺼짐·켜짐으로 내보내요. 화면 효과(screen_fx) 5.6부터 돼요.</p>}
+              {!imgTransSupported() && <p className="tip warn-text">예전 플러그인이라 TV 꺼짐·켜짐으로 내보내요 (screen_fx 5.6부터).</p>}
               {imgTransSupported() && imgFx?.kind !== 'transition' && (
-                <p className="tip warn-text">게임의 효과 폴더에 {imgName} 효과 파일이 없어서 TV 꺼짐·켜짐으로 내보내요. 위쪽 [효과] 화면에서 넣을 수 있어요.</p>
+                <p className="tip warn-text">효과 폴더에 {imgName}이 없어서 TV 꺼짐·켜짐으로 내보내요 ([효과]에서 넣기).</p>
               )}
             </>
           )}
-          <p className="tip">
-            "시작할 때"는 앞 상자와 셰이더가 달라지는 상자에서 이 셰이더로 바뀌는 모양이에요. 같은 셰이더가 이어지는 상자 사이에서는 전환이 없어요.
-            "끝날 때"는 이 셰이더가 끝나고 셰이더가 없는 상자로 넘어갈 때 써요. "없음"이면 바로 바뀌어요. 모양은 위쪽 [셰이더] → 전환에서 미리 봐요.
-          </p>
         </Card>
       )}
 
       <UiCards so={so} />
 
       {box && (
-        <Card id="s-line" title={`${RPY_FILE}에 들어가는 줄`}>
+        <Card id="s-line" title={`${RPY_FILE}에 들어가는 줄`} hint="내보낼 때 이 상자의 첫 줄에 적혀요">
           <pre className="rpy small">{[line, linked && usesSceneUi(project) && sceneSupported() ? sceneCode(uiOfBox(project, box)) : null].filter(Boolean).join(String.fromCharCode(10))}</pre>
-          <p className="tip">내보낼 때 이 상자의 첫 줄에 적혀요.</p>
         </Card>
       )}
     </div>

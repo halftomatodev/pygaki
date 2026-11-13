@@ -20,8 +20,8 @@ pygaki 앱의 **[효과]** 화면에서도 같은 일을 할 수 있습니다: �
 | `sweep.glsl` | 글자 | `sweep` 빛 지나가기 | 어둡게 나온 글자 위로 빛 띠가 지나가며 제 밝기가 됨 |
 | `irisin.glsl` | 그림 | `irisin` 원으로 열리기 | 한 점에서 커지는 원 안으로 새 그림이 나타남 |
 | `bands.glsl` | 그림 | `bands` 띠로 덮였다 열리기 | 색 띠가 차례로 화면을 덮고, 걷히면서 새 그림이 나옴 |
-| `pixelsort.glsl` | 그림 | `pixelsort` 픽셀소트로 바뀌기 | 화면의 밝은 부분이 가로 띠로 길게 늘어나 번지고, 가장 길 때 번쩍이며 새 화면의 띠가 줄어들어 제자리로 |
-| `datamosh.glsl` | 그림 | `datamosh` 데이터모싱으로 바뀌기 | 앞 화면이 네모 블록으로 녹아 흐르고, 새 화면의 윤곽이 비치다가 블록씩 새 화면으로 채워짐 |
+| `pixelsort.glsl` | 그림 | `pixelsort` 픽셀소트 (크래시) | 지금 화면의 밝은 부분이 띠로 늘어나며 깨지고(가로, 세로, 회전, 확산), 깨진 채 멈췄다가 새 화면으로 뚝 끊어 넘어감 |
+| `datamosh.glsl` | 그림 | `datamosh` 데이터모싱 (크래시) | 지금 화면이 블록째 소용돌이치거나(회전) 바깥으로 터지며(확산) 깨지고, 깨진 채 멈췄다가 새 화면으로 뚝 끊어 넘어감 |
 
 ```renpy
 e "아래에서 올라온다." (cps=30, effect="maskup")
@@ -31,12 +31,12 @@ e "둘을 겹친다." (cps=30, effect="maskup|sweep")
 scene bg hall with img_fx.use("irisin")
 show mina with img_fx.use("irisin", 1.2, x=0.3)
 scene bg hall with img_fx.use("bands", 1.4, count=10, color="#c2185b")
-scene bg hall with img_fx.use("pixelsort", 1.6, length=1200)
-scene bg hall with img_fx.use("datamosh", 2.0, block=24, strength=200)
+scene bg hall with img_fx.use("pixelsort", 1.5, dir=3, length=600)
+scene bg hall with img_fx.use("datamosh", 1.5, mode=1.0, strength=1.5)
 ```
 
 `pixelsort`, `datamosh`는 셰이더가 바뀔 때의 전환으로도 씁니다. PyKaki 상자의 ◐ 셰이더 → 전환의 "시작할 때", "끝날 때"에서 고르면,
-앞 상자의 마지막 화면이 깨지며 다음 상자의 첫 화면으로 이어지고 셰이더는 그 시간의 절반에 바뀝니다(화면 효과 `screen_fx` 5.6부터).
+앞 상자의 마지막 화면이 깨진 채 멈췄다가 다음 상자의 첫 화면으로 끊어 넘어가고, 셰이더도 끊기는 순간에 바뀝니다(화면 효과 `screen_fx` 5.6부터).
 원고로 직접 쓸 때는 이렇게 적습니다.
 
 ```renpy
@@ -46,7 +46,10 @@ with screen_fx.pending_with()
 ```
 
 `pixelsort`는 진짜로 줄을 정렬하지 않고 정렬한 것처럼 보이는 띠를 그립니다. 띠가 길수록 그래픽 카드가 할 일이 늘어납니다.
-`datamosh`는 동영상이 깨질 때의 모양을 흉내 냅니다. 멈춘 그림에는 움직임이 없어서, 블록마다 새 화면의 윤곽과 무작위 방향을 섞어 움직임을 만듭니다.
+`datamosh`는 동영상이 깨질 때의 모양을 흉내 냅니다. 블록마다 가운데를 도는 각도나 바깥으로 밀리는 거리를 조금씩 다르게 줍니다.
+둘 다 다음 화면과 섞지 않습니다. 시간의 앞쪽(`crash`, 기본 0.4)에 깨지고 나머지는 멈춰 있다가, 끝에서 새 화면으로 바뀝니다.
+
+그림 전환 파일에 `@set u__cut 값`(0~1)을 적으면 셰이더 전환으로 쓸 때 화면 셰이더가 그때 바뀝니다(없으면 0.5, 절반). 효과 코드도 `l__t >= u__cut`부터 새 그림을 그리게 맞춥니다.
 
 ## 적는 법
 

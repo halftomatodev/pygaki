@@ -78,6 +78,7 @@ export interface BoxShader {
   vb?: Record<string, unknown>; // 2번 셰이더의 세부 값
   tv?: Record<string, number>; // TV 전환의 세부 값 (시작할 때와 끝날 때 같이 씀)
   time?: number; // 그림 전환(pixelsort, datamosh)의 초. 없으면 그 효과 파일의 @time (시작할 때와 끝날 때 같이 씀)
+  iv?: Record<string, Record<string, number>>; // 그림 전환의 값 {효과 이름: {값 이름: 값}}. 예: {datamosh: {mode: 1}} (방향)
 }
 
 // 상자나 label에 거는 대사 소리·속도와 커서·클릭 대기 그림 (pygaki 플러그인 ui_kit 4.7 custom_ui.scene, LINK.md 2장).

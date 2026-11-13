@@ -5,6 +5,7 @@ import { Sidebar } from './Sidebar';
 import { Canvas } from './Canvas';
 import { RightPanel } from './Panels';
 import { SettingsModal } from './SettingsModal';
+import { HelpModal, HintTip, openHelp } from './Help';
 import { EditCaret } from './Caret';
 import { useStore } from './store';
 import { exportRpyFile, saveProject } from './files';
@@ -24,6 +25,8 @@ function Keys() {
     const onKey = (e: KeyboardEvent) => {
       const s = useStore.getState();
       const run = (fn: () => void) => (e.preventDefault(), fn());
+      // 도움말은 어느 화면에서나
+      if (e.key === 'F1') return run(() => openHelp());
       // 게임 창의 GUI 편집기 보이기/숨기기는 어느 화면에서나 (데스크톱 앱)
       if (isDesktop && hit(e, 'gamePanel')) return run(() => s.say(toggleGamePanel()));
       // showpy 화면에서는 저장 키가 게임 안 편집기의 저장(Ctrl+S)
@@ -125,6 +128,8 @@ export function App() {
         </filter>
       </svg>
       {showPrefs && <SettingsModal />}
+      <HelpModal />
+      <HintTip />
       <EditCaret />
     </ReactFlowProvider>
   );

@@ -160,7 +160,7 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean } = {}): { co
   const shaderLine = (b: BoxNode, enter: boolean): { code: string; img: boolean } => {
     const from = enter ? (incoming.get(b.id) ?? []).map((x) => byId.get(x.from)).filter((x): x is BoxNode => !!x) : [];
     const mine = shaderOfBox(p, b);
-    const tr = enter ? enterTransTv(p, b, from) : { t: mine?.in ?? '', tv: mine?.tv, time: mine?.time };
+    const tr = enter ? enterTransTv(p, b, from) : { t: mine?.in ?? '', tv: mine?.tv, time: mine?.time, iv: undefined };
     let t = tr.t;
     // 그림 전환은 셰이더가 바뀌는 상자에 들어올 때만. 불러온 장면에서 돌아올 때(call 뒤)는 TV로
     if (isImgTrans(t) && !enter) t = 'tv';
@@ -171,7 +171,10 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean } = {}): { co
       W.push({ level: 'warn', msg: `셰이더 전환 "${t}"의 효과 파일이 게임의 효과 폴더(ui_kit/effects)에 없어서 TV 꺼짐·켜짐으로 내보내요. [효과] 화면에서 넣을 수 있어요 (${b.title || b.id})`, nodeId: b.id });
       t = 'tv';
     }
-    return { code: shaderCode(mine, t, { tv: canValues ? tr.tv : undefined, time: tr.time, values }), img: isImgTrans(t) };
+    // 그림 전환의 값은 게임의 효과 파일에 있는 값만 (모르는 이름은 게임에서 오류)
+    const fx = isImgTrans(t) ? shaderEffect(t) : undefined;
+    const iv = fx && tr.iv ? Object.fromEntries(Object.entries(tr.iv).filter(([k]) => fx.uniforms.some(([u]) => u === 'u__' + k))) : undefined;
+    return { code: shaderCode(mine, t, { tv: canValues ? tr.tv : undefined, time: tr.time, iv, values }), img: isImgTrans(t) };
   };
 
   // 상자·label의 대사 소리, 커서, 클릭 대기: 상자마다 첫 줄에 $ custom_ui.scene(...) (boxUi.ts, ui_kit 4.7)

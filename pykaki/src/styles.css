@@ -177,7 +177,8 @@ input[type='color']::-webkit-color-swatch { border: none; border-radius: 50%; }
 /* 캔버스 */
 .canvas { flex: 1; position: relative; min-width: 0; }
 .react-flow { --xy-background-color: var(--bg); }
-.canvas-hint { position: absolute; left: 12px; top: 8px; right: 12px; font-size: 11px; color: var(--muted); opacity: 0.6; pointer-events: none; }
+.canvas-hint { position: absolute; left: 12px; top: 8px; font-size: 11px; color: var(--muted); opacity: 0.7; pointer-events: none; z-index: 5; }
+.canvas-hint .hint-i { pointer-events: auto; }
 .animating .react-flow__node { transition: transform 0.4s ease; }
 .react-flow__node-frame { pointer-events: none !important; }
 .react-flow__controls, .react-flow__minimap { opacity: 0.35; transition: opacity 0.2s; box-shadow: none; }
@@ -870,7 +871,7 @@ fieldset.plain:disabled { opacity: 0.4; }
 .frame .sh-btn { position: absolute; top: 3px; right: 12px; pointer-events: auto; color: var(--gt); font-size: 11px; }
 .frame .sh-btn.set { color: #fff; }
 .grow { flex: 1; }
-.shader-panel .row > label { flex: 0 0 64px; color: var(--muted); }
+.shader-panel .row > label { flex: 0 0 76px; color: var(--muted); white-space: nowrap; }
 .shader-panel .row > select { flex: 1; min-width: 0; }
 .shader-panel .row > .seg { flex: 1; margin: 0; }
 .shader-panel pre.rpy { margin: 0 0 6px; }
@@ -889,7 +890,7 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .side-toggle.off { color: var(--accent); border-color: var(--accent); }
 .side-toggle.l { left: 6px; }
 .side-toggle.r { right: 6px; }
-.canvas-hint { left: 32px; right: 32px; }
+.canvas-hint { left: 32px; }
 .app.focus .side-toggle { display: none; }
 
 /* ── 2026-11-12 화면 정리 ── */
@@ -1025,7 +1026,7 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .main.no-left > .resizer.left, .main.no-right > .resizer.right { display: none; }
 .main .side-toggle.l { left: calc(var(--lw) + 6px); }
 .main .side-toggle.r { right: calc(var(--rw) + 6px); }
-.main .canvas-hint { left: calc(var(--lw) + 32px); right: calc(var(--rw) + 32px); }
+.main .canvas-hint { left: calc(var(--lw) + 32px); }
 .main .react-flow__panel.left { left: var(--lw); }
 .main .react-flow__panel.right { right: var(--rw); }
 /* 대사 카드 줄의 [위치 옮기기] [여기로 이동]: 카드 왼쪽 바깥에 작은 팝업 (PickPos.tsx useSidePop) */
@@ -1045,3 +1046,29 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .card.in-use > h3 .card-title::after { content: '사용 중'; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 8px; color: color-mix(in srgb, #34c759 62%, var(--text)); background: color-mix(in srgb, #34c759 16%, var(--panel)); }
 .sc-char { margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed var(--line); }
 .sc-char-h { font-size: 12px; color: var(--muted); margin: 2px 0 6px; }
+
+/* ---------- 도움말과 ⓘ (Help.tsx) ---------- */
+.hint-i { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; margin-left: 5px; border-radius: 50%; border: 1px solid var(--line); color: var(--muted); font: italic 600 9.5px/1 Georgia, serif; cursor: help; position: relative; vertical-align: 1px; flex: none; user-select: none; }
+.hint-i:hover { color: var(--text); border-color: var(--muted); }
+.hint-tip { position: fixed; z-index: 1000; max-width: 260px; padding: 6px 9px; border-radius: 7px; background: var(--text); color: var(--panel); font-size: 11.5px; line-height: 1.45; pointer-events: none; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18); white-space: normal; }
+.help-modal { width: min(980px, 94vw); height: 84vh; display: flex; flex-direction: column; padding: 14px 16px; overflow: hidden; }
+.help-head { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+.help-head h3 { margin: 0 8px 0 0; }
+.help-head input { flex: 1; }
+.help-main { flex: 1; display: flex; gap: 14px; min-height: 0; }
+.help-toc { width: 220px; flex: none; overflow: auto; display: flex; flex-direction: column; gap: 1px; padding-right: 4px; }
+.help-toc button { text-align: left; background: transparent; border: none; padding: 4px 8px; border-radius: 6px; font-size: 12px; color: var(--muted); }
+.help-toc button.lv2 { color: var(--text); font-weight: 600; margin-top: 6px; }
+.help-toc button.lv3 { padding-left: 18px; }
+.help-toc button.on { background: var(--hover); color: var(--text); }
+.help-body { flex: 1; overflow: auto; font-size: 13px; line-height: 1.65; padding-right: 8px; }
+.help-body h2 { font-size: 16px; margin: 22px 0 6px; padding-top: 6px; border-top: 1px solid var(--line); }
+.help-body section:first-child h2 { border-top: none; margin-top: 0; }
+.help-body h3 { font-size: 13.5px; margin: 16px 0 4px; }
+.help-body ul { margin: 4px 0 8px; padding-left: 18px; }
+.help-body li { margin: 2px 0; }
+.help-body code { font-size: 12px; padding: 0 3px; border-radius: 4px; background: var(--hover); }
+.help-body table { border-collapse: collapse; margin: 6px 0 10px; font-size: 12.5px; }
+.help-body th, .help-body td { border: 1px solid var(--line); padding: 4px 8px; text-align: left; vertical-align: top; }
+.help-body blockquote { margin: 8px 0; padding: 6px 10px; border-left: 3px solid var(--line); color: var(--muted); }
+.row > label .hint-i, h3 .hint-i, h4 .hint-i { vertical-align: 1px; }

@@ -1,6 +1,7 @@
 // showpy 화면의 "커서, 클릭 대기(CTC), 대사 소리" 칸 (게임 안 편집기의 custom_ui 탭, ui_kit 3.15).
 // 값은 게임이 갖고 있고 여기서는 custom_ui.set으로 보내기만 한다. 저장은 게임이 custom_ui_layout.rpy에.
 // 그림 미리보기는 앱이 프로젝트의 game 폴더에서 그림을 직접 읽어 24fps로 돌린다.
+import { Hint } from './Help';
 import { useEffect, useMemo, useState } from 'react';
 import { desktop } from './desktop';
 import { liveSend, useLive, type CursorLines, type CustomUIState, type CustomUIValues, type GameFiles } from './showpyLive';
@@ -24,7 +25,7 @@ export function CustomUIPanel({ cu }: { cu: CustomUIState | null | undefined }) 
 
   if (!cu) return <p className="sp-warn">이 게임에는 커서/대사 소리 기능(custom_ui)이 없어요.</p>;
   if (!cu.ok) return <p className="sp-warn">{cu.why || '지금은 쓸 수 없어요.'}</p>;
-  if (!cu.values) return <p className="tip">게임의 showpy가 예전 판이에요. ui_kit 3.15 이상에서 여기서 고칠 수 있어요.</p>;
+  if (!cu.values) return <p className="tip">예전 플러그인이라 여기서 못 고쳐요 (ui_kit 3.15부터).</p>;
 
   const v = cu.values;
   const edited = new Set(cu.edited ?? []);
@@ -154,7 +155,8 @@ export function CustomUIPanel({ cu }: { cu: CustomUIState | null | undefined }) 
               })}
             </div>
             <p className="tip">
-              그림 폴더: <code>{FOLDER[key]}</code> ({key === 'cursor' ? 'cursor1.png' : 'ctc1.png'}부터 순서대로, 12장까지, 64×64 권장). 같은 이름으로 덮어쓰면 바로 바뀌어요.
+              <code>{FOLDER[key]}</code>
+              <Hint text={`${key === 'cursor' ? 'cursor1.png' : 'ctc1.png'}부터 순서대로, 12장까지, 64×64 권장. 같은 이름으로 덮어쓰면 바로 바뀌어요`} topic="GUI 편집] 화면" />
             </p>
             {missing.length > 0 && (
               <p className="sp-warn">
@@ -211,7 +213,7 @@ export function CustomUIPanel({ cu }: { cu: CustomUIState | null | undefined }) 
         <Preview v={v} cps={cu.cps ?? 0} fps={fps} />
       </section>
 
-      {needReload && <p className="sp-warn">커서나 클릭 대기 표시를 켜고 끈 것, 커서 그림과 방식은 저장하면 게임을 다시 불러온 뒤 적용돼요. (저장할 때 저절로 다시 불러와요)</p>}
+      {needReload && <p className="sp-warn">저장하면 게임을 다시 불러온 뒤 적용돼요.</p>}
     </div>
   );
 }

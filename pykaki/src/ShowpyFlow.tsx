@@ -2,6 +2,7 @@
 // 게임이 state.flow로 행을 보내 주면 그대로 그리고, 끌면 구간(flow range), 누르면 그 줄로(flow pick),
 // 오른쪽 네모 점을 누르면 전환 점 고르기(flow point). 형식은 docs/LINK.md 9장.
 // [이 구간에 적용], 전환 고르기 같은 버튼은 오른쪽 패널(게임 패널 통째로)에 있다.
+import { Hint } from './Help';
 import { useEffect, useRef, useState } from 'react';
 import { liveSend, type FlowRow, type FlowState } from './showpyLive';
 
@@ -155,7 +156,7 @@ export function FlowTree({ flow, onLine }: { flow: FlowState; onLine: (line: num
           );
         })}
       </div>
-      <p className="tip">누르기: 그 줄로 (원고 칸도 그 줄로) | 끌기: 구간 고르기 → 오른쪽 [이 구간에 적용] | 네모 점: 전환 점 | Delete: 고른 구간, 점의 셰이더 지우기 | 색 띠: 왼쪽 1번, 오른쪽 2번 셰이더</p>
+      <p className="tip">조작<Hint text="누르기: 그 줄로 · 끌기: 구간 고르기 → [이 구간에 적용] · 네모 점: 전환 점 · Delete: 고른 구간·점의 셰이더 지우기 · 색 띠: 왼쪽 1번, 오른쪽 2번" topic="GUI 편집] 화면" /></p>
     </div>
   );
 }

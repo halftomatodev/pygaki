@@ -753,6 +753,7 @@ init -110 python in screen_fx:
         }
 
     ## "swap"(5.6): 자기 모양 없이 시간의 절반에 앞 셰이더 → 새 셰이더로 바꾸기만 함.
+    ##   그림 전환 파일에 @set u__cut 값(0~1)이 있으면 그때 바꿈 (크래시처럼 끝에서 끊기는 datamosh, pixelsort는 1.0)
     ##   그림 전환(img_fx.use("pixelsort") 등)과 같은 시간에 같이 돌려서, 바뀌는 순간을 그 전환이 가려 줌 (PyKaki가 씀)
     TRANSITIONS = ("tv", "fade", "swap", None)
 
@@ -1017,7 +1018,8 @@ init -110 python in screen_fx:
             $ screen_fx.shaders("glitch", "none", transition="tv", tv={"off_time": 0.6})
         values: {셰이더 이름: {값 이름: 값}}. 고른 셰이더의 값을 이 값으로 바꿉니다(적지 않은 값은 설정대로).
                 {}를 주면 설정대로 돌아갑니다. values를 아예 적지 않으면 바꾼 값을 그대로 둡니다.
-        tv: 이번 TV 전환에만 쓰는 값 (screen_fx.tv와 같은 이름)
+        tv: 이번 TV 전환에만 쓰는 값 (screen_fx.tv와 같은 이름).
+            그림 전환이면 그 효과의 값 (img_fx.use와 같은 이름): transition="datamosh", tv={"mode": 1.0}
         """
         first = alias(first or NONE)
         second = alias(second or NONE)
@@ -1103,7 +1105,7 @@ init -110 python in screen_fx:
 
     class _Anim(store.python_object):
 
-        def __init__(self, kind, old, new, duration=None, preview=False, tv=None):
+        def __init__(self, kind, old, new, duration=None, preview=False, tv=None, cut=0.5):
             self.kind = kind
             self.old = _as_state(old)
             self.new = _as_state(new)
@@ -1122,7 +1124,8 @@ init -110 python in screen_fx:
                     parts = [ p * float(duration) / s for p in parts ]
             else:
                 d = float(cfg("fade_time") if duration is None else duration)
-                parts = [ d / 2.0, 0.0, d / 2.0 ]
+                c = min(1.0, max(0.0, float(cut))) if kind == "swap" else 0.5
+                parts = [ d * c, 0.0, d * (1.0 - c) ]
 
             self.parts = parts
             self.total = sum(parts)
@@ -1275,6 +1278,7 @@ init -110 python in screen_fx:
         wait: True면 전환이 끝날 때까지 기다렸다가 다음 줄로 (기본은 screen_fx.wait)
         cursor: 커서를 그릴 자리 (set_cursor와 같음). 안 적으면 그대로 둠 (4.2)
         tv: 이번 TV 전환에만 쓰는 값. 예: tv={"off_time": 0.6, "noise": 0.2} (5.5)
+            그림 전환이면 그 효과의 값. 예: transition="pixelsort", tv={"dir": 3} (5.6)
         """
 
         effect = alias(effect)
@@ -1295,14 +1299,19 @@ init -110 python in screen_fx:
         if kind in ("none", "instant", False):
             kind = None
         img = _img_transition(kind)
+        cut, img_values = 0.5, { }
         if img is not None:
-            ## 그림 전환(효과 폴더의 @transition, 5.6): 셰이더는 그 시간의 절반에 바꾸고(swap), 그림은 다음 with가 이음
+            ## 그림 전환(효과 폴더의 @transition, 5.6): 셰이더는 그 시간의 절반(효과 파일에 u__cut이 있으면 그때)에 바꾸고(swap), 그림은 다음 with가 이음
             kind, wait = "swap", False
             if duration is None:
                 duration = img[1]
+            cut = img[2]
+            img_values, tv = (tv or { }), None
+            if not isinstance(img_values, dict):
+                raise Exception("screen_fx: 그림 전환의 tv에는 {\"mode\": 1.0} 같은 사전을 적습니다. 받은 값: {!r}".format(img_values))
         elif kind not in TRANSITIONS and _img_transition_name(kind):
-            ## 효과 폴더에서 뺀 그림 전환: 설정의 전환으로
-            kind = cfg("transition")
+            ## 효과 폴더에서 뺀 그림 전환: 설정의 전환으로 (그 전환의 값은 버림)
+            kind, tv = cfg("transition"), None
         _check_transition(kind)
         rt.pending_with = None
 
@@ -1317,11 +1326,11 @@ init -110 python in screen_fx:
             renpy.restart_interaction()
             return
 
-        a = _Anim(kind, old, new, duration, tv=tv)
+        a = _Anim(kind, old, new, duration, tv=tv, cut=cut)
         rt.anim = a
         _play_sounds(a)
         if img is not None:
-            rt.pending_with = store.img_fx.use(img[0], a.total)
+            rt.pending_with = store.img_fx.use(img[0], a.total, **img_values)
 
         if wait is None:
             wait = cfg("wait")
@@ -1340,14 +1349,19 @@ init -110 python in screen_fx:
         return isinstance(kind, str) and kind not in TRANSITIONS and re.match(r"^[a-z0-9_]+$", kind) is not None
 
     def _img_transition(kind):
-        """kind가 효과 폴더(ui_kit/effects)의 그림 전환 이름이면 (이름, 기본 시간). 아니면 None. (5.6)"""
+        """kind가 효과 폴더(ui_kit/effects)의 그림 전환 이름이면 (이름, 기본 시간, 셰이더 바꿀 때 0~1). 아니면 None. (5.6)"""
         if not _img_transition_name(kind):
             return None
         m = getattr(store, "img_fx", None)
         e = getattr(m, "EFFECTS", { }).get(kind) if m is not None else None
         if e is None:
             return None
-        return (kind, float(e.get("time", 1.0)))
+        cut = dict(e.get("uniforms", [ ])).get("u__cut", 0.5)
+        try:
+            cut = float(cut)
+        except (TypeError, ValueError):
+            cut = 0.5
+        return (kind, float(e.get("time", 1.0)), cut)
 
     def pending_with(fallback=None):
         """

@@ -1,5 +1,6 @@
 // [효과] 화면: 글자 효과와 그림 효과를 한곳에서 보고, 켜고 끄고, 넣고 뺀다 (docs/EFFECTS_TAB_SPEC.md 3장).
 // 목록과 파일 다루기는 effectsLib.ts가 하고, 여기는 화면만 그린다. 샘플에서 맞춘 값은 저장하지 않는다 (값은 대사 줄마다 정함)
+import { Hint } from './Help';
 import { useMemo, useRef, useState } from 'react';
 import readme from '../../showpy/game/ui_kit/effects/README.md?raw';
 import { useStore } from './store';
@@ -141,9 +142,7 @@ function RemoveDialog({ file, cards, onClose }: { file: string; cards: EffectCar
     <div className="modal-bg" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <h3>효과 빼기: {file}</h3>
-        <p className="tip">
-          효과 파일을 게임의 효과 폴더에서 지워요. 지운 파일은 프로젝트 폴더의 ui_kit_backup/effects에 남겨요. 게임은 껐다 켜야 반영돼요.
-        </p>
+        <p className="tip">백업: ui_kit_backup/effects · 게임은 껐다 켜야 반영돼요.</p>
         {inside.map((c) => (
           <div className="fxv-rm-row" key={c.name}>
             <b>{c.label}</b> <span className="fxv-name">{c.name}</span>
@@ -420,7 +419,7 @@ export function EffectsView() {
                   )}
                   {knobs.length > 0 && (
                     <>
-                      <h4>세부 값 <span className="tip">{picFx ? '여기서 맞춘 값은 저장하지 않아요. 원고에는 위의 글처럼 적어요' : '여기서 맞춘 값은 저장하지 않아요. 값은 [대본 편집]의 대사 줄마다 정해요'}</span></h4>
+                      <h4>세부 값<Hint text={picFx ? '구경용이라 저장하지 않아요. 원고에는 위의 글처럼 적어요' : '구경용이라 저장하지 않아요. 값은 대사 줄마다 정해요'} topic="효과 관리" /></h4>
                       <div className="fx-knobs">
                         {knobs.map((k) => {
                           const set = mine[k.key];

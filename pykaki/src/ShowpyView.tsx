@@ -1,6 +1,7 @@
 // showpy 화면 (데스크톱 앱 전용). 게임 창은 옆에 그대로 두고, 게임 창의 GUI 편집기를 여기서 조종한다.
 // 왼쪽: 고칠 것 목록 / 가운데: 지금 게임 위치와 대본 / 오른쪽: 고르는 칸.
 // 값은 게임이 갖고 있고(docs/LINK.md 9장), 여기는 보여주고 바꾸라고 보내기만 한다. 저장도 게임이 한다.
+import { Hint } from './Help';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { desktop } from './desktop';
 import { liveSend, setGamePanel, useLive, type GameState, type TitleItem, type TitleState } from './showpyLive';
@@ -72,7 +73,8 @@ export function ShowpyView() {
   return (
     <div className="sp-view sp-cards">
       <div className="sp-hint">
-        게임 창 옆에 두고 써요 · 왼쪽에서 고칠 곳을 고르면 게임도 그 화면으로 · 게임 화면에서 끌어서 옮기고 숫자는 오른쪽에서 · {keyOf('save')} 저장 · 게임 창에서 Esc: 편집 닫고 게임 진행
+        GUI 편집
+        <Hint text={`게임 창 옆에 두고 써요 · 왼쪽에서 고칠 곳을 고르면 게임도 그 화면으로 · 게임 화면에서 끌어서 옮기고 숫자는 오른쪽에서 · ${keyOf('save')} 저장 · 게임 창에서 Esc: 편집 닫고 게임 진행`} topic="GUI 편집] 화면" />
       </div>
       <nav className="sp-nav">
         {GROUPS.map((g) => (
@@ -116,7 +118,7 @@ export function ShowpyView() {
         {on && st && (sec.id === 'custom_ui' && st.custom_ui !== undefined ? (
           <CustomUIPanel cu={st.custom_ui} />
         ) : (
-          <Card id={'g-' + sec.id} title={sec.id === 'splash' && st.splash?.cur ? '스플래시: ' + pageLabel(st.splash.pages.find((p) => p.id === st.splash!.cur) ?? { id: st.splash.cur, title: '' }) : sec.label}>
+          <Card id={'g-' + sec.id} title={sec.id === 'splash' && st.splash?.cur ? '스플래시: ' + pageLabel(st.splash.pages.find((p) => p.id === st.splash!.cur) ?? { id: st.splash.cur, title: '' }) : sec.label} hint={sec.note || undefined} topic="GUI 편집] 화면">
             {sec.id === 'title' || sec.id === 'pause' ? (
               <TitlePanel st={st} want={sec.id} />
             ) : sec.mirror && mirrorOk ? (
@@ -134,13 +136,12 @@ export function ShowpyView() {
 function NotConnected() {
   return (
     <div className="sp-help">
-      <h3>게임을 개발 모드로 켜 주세요</h3>
+      <h3>게임을 개발 모드로 켜 주세요<Hint text="pygaki 플러그인(ui_kit 3.14 이상)이 든 게임을 개발 모드로 켜면 저절로 붙어요. 배포판에서는 안 붙어요" topic="GUI 편집] 화면" /></h3>
       <ol>
         <li>렌파이 런처에서 이 프로젝트를 고르고 [프로젝트 실행]을 눌러요. (개발 모드로 켜져요)</li>
         <li>게임이 켜지면 game 폴더에 showpy_live.json이 생기고, 이 앱이 저절로 붙어요.</li>
         <li>게임 창과 이 창을 나란히 놓고 써요. 게임 화면에서는 끌어서 옮기고, 숫자와 목록은 여기서 봐요.</li>
       </ol>
-      <p className="tip">showpy(ui_kit) 3.14 이상이 들어 있어야 해요. 배포판(개발 모드 꺼짐)에서는 연결되지 않아요.</p>
     </div>
   );
 }
@@ -395,7 +396,6 @@ function MirrorSection({ st, sec }: { st: GameState; sec: Section }) {
   if (!t)
     return (
       <div>
-        {sec.note && <p>{sec.note}</p>}
         <p className="tip">이 게임에는 이 편집기 탭이 없어요. (플러그인이 빠져 있거나 예전 판일 수 있어요)</p>
       </div>
     );
@@ -423,13 +423,12 @@ function MirrorSection({ st, sec }: { st: GameState; sec: Section }) {
     );
   return (
     <div>
-      {sec.note && <p>{sec.note}</p>}
       {!t.ok && <p className="sp-warn">{t.why || '지금 화면에서는 쓸 수 없어요.'}</p>}
       {go}
       <button className="primary" onClick={open}>
         편집 시작
       </button>
-      {st.editor.open && !st.editor.hide_panel && st.editor.tab === sec.tab && <p className="tip">지금은 게임 창의 패널에 열려 있어요. [게임 창의 GUI 편집기]를 숨김으로 바꾸면({keyOf('gamePanel')}) 여기로 와요.</p>}
+      {st.editor.open && !st.editor.hide_panel && st.editor.tab === sec.tab && <p className="tip">게임 창 패널에 열려 있어요 ({keyOf('gamePanel')}로 숨기면 여기로)</p>}
     </div>
   );
 }
@@ -441,7 +440,6 @@ function InGamePanel({ st, sec }: { st: GameState; sec: Section }) {
   const here = st.editor.open && st.editor.tab === sec.tab;
   return (
     <div>
-      {sec.note && <p>{sec.note}</p>}
       <p className="tip">이 칸은 아직 앱으로 옮기지 않았어요. 지금은 게임 창의 GUI 편집기 패널에서 고쳐요.</p>
       {sec.tab &&
         (!t ? (
@@ -505,7 +503,6 @@ function TitlePanel({ st, want }: { st: GameState; want: 'title' | 'pause' }) {
   if (!st.editor.open || st.editor.tab !== 'title') {
     return (
       <div>
-        <p className="tip">게임 창의 GUI 편집기의 타이틀 메뉴 탭을 열어야 끌어서 옮길 수 있어요.</p>
         <button className="primary" onClick={() => (liveSend({ cmd: 'panel', hide: true }), liveSend({ cmd: 'editor', open: true, tab: 'title' }))}>
           편집 시작
         </button>
@@ -542,7 +539,7 @@ function TitlePanel({ st, want }: { st: GameState; want: 'title' | 'pause' }) {
       <div className="sp-row">
         <button onClick={() => liveSend({ cmd: 'title.reset' })}>{t.scope === 'all' ? '공통 값 되돌리기' : '이 항목 되돌리기'}</button>
       </div>
-      <p className="tip">게임 화면에서 항목을 끌어서 옮기고, 분홍 네모를 끌어서 돌리고(Shift: 15도씩), Shift+휠로 글자 크기를 바꿀 수도 있어요. 여기 숫자가 같이 바뀌어요.</p>
+      <p className="tip">게임 화면에서도 고쳐요<Hint text="항목 끌기: 옮기기 · 분홍 네모 끌기: 돌리기(Shift: 15도씩) · Shift+휠: 글자 크기. 여기 숫자도 같이 바뀌어요" topic="GUI 편집] 화면" /></p>
     </div>
   );
 }

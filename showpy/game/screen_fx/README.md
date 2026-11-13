@@ -39,7 +39,7 @@ ASCII 효과는 [ASCII shader](https://godotshaders.com/shader/ascii-shader/) (D
 
 ### 5.6에서 바뀐 점
 
-- **그림 전환으로 셰이더 바꾸기**: `transition=`에 효과 폴더(`ui_kit/effects/`)의 그림 전환 이름(`"pixelsort"`, `"datamosh"` 등)을 적으면, 바로 다음 `with screen_fx.pending_with()`가 앞 화면 → 새 화면을 그 전환으로 잇고 셰이더는 그 시간의 절반에 바뀝니다. pygaki 앱에서는 상자의 ◐ 셰이더 → 전환 "시작할 때", "끝날 때"에서 "픽셀소트", "데이터모싱"을 고르면 이렇게 적힙니다(`ui_kit`이 같이 있어야 함).
+- **그림 전환으로 셰이더 바꾸기**: `transition=`에 효과 폴더(`ui_kit/effects/`)의 그림 전환 이름(`"pixelsort"`, `"datamosh"` 등)을 적으면, 바로 다음 `with screen_fx.pending_with()`가 앞 화면 → 새 화면을 그 전환으로 잇고 셰이더는 그 시간의 절반에 바뀝니다(효과 파일에 `@set u__cut 값`이 있으면 그때. 샘플 `pixelsort`, `datamosh`는 끝에서 끊기는 크래시라 1.0). pygaki 앱에서는 상자의 ◐ 셰이더 → 전환 "시작할 때", "끝날 때"에서 "픽셀소트", "데이터모싱"을 고르면 이렇게 적힙니다(`ui_kit`이 같이 있어야 함).
   ```renpy
   $ screen_fx.shaders("glitch", "none", transition="pixelsort", duration=1.2)   # 1.2초 (안 적으면 효과 파일의 시간)
   scene bg room

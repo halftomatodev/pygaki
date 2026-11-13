@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Hint } from './Help';
 import {
   ReactFlow, Background, Controls, MiniMap, MarkerType, applyNodeChanges, useReactFlow, getViewportForBounds,
   type Connection, type Edge, type Viewport, type EdgeChange, type Node, type NodeChange, type OnConnectEnd,
@@ -256,7 +257,7 @@ export function Canvas() {
       <button className={'side-toggle r' + (hideRight ? ' off' : '')} title={hideRight ? '오른쪽 칸 펴기' : '오른쪽 칸 접기'} onClick={() => useStore.getState().togglePanel('right')}>
         {hideRight ? '‹' : '›'}
       </button>
-      <div className="canvas-hint">빈 곳 더블클릭: 새 상자 · 상자 더블클릭: 글 쓰기 · 선을 빈 곳에 놓기: 새 상자로 연결 · 선 더블클릭: jump↔call · Shift+드래그: 여러 개 선택 · Delete: 삭제</div>
+      <div className="canvas-hint">캔버스 조작<Hint text="빈 곳 더블클릭: 새 상자 · 상자 더블클릭: 글 쓰기 · 선을 빈 곳에 놓기: 새 상자로 연결 · 선 더블클릭: jump↔call · Shift+드래그: 여러 개 선택 · Delete: 삭제" topic="흐름 잇기" /></div>
     </div>
   );
 }

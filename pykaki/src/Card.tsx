@@ -3,6 +3,7 @@
 // 왼쪽 칸 카드(FRESH)는 기억을 안 쓰고 켤 때마다 접혀서 시작한다.
 import { createContext, useContext, useEffect, type ReactNode } from 'react';
 import { create } from 'zustand';
+import { Hint } from './Help';
 
 const KEY = 'pygaki-folded';
 export const FRESH = ['labels', 'chars', 'warn', 'project', 'script', 'settings', 'usage'];
@@ -67,9 +68,11 @@ interface Props {
   className?: string;
   domId?: string;
   children?: ReactNode;
+  hint?: string; // 제목 옆 ⓘ에 올리면 나오는 짧은 설명
+  topic?: string; // ⓘ를 누르면 열 도움말 항목 (제목의 일부)
 }
 
-export function Card({ id, title, extra, defFolded = false, className = '', domId, children }: Props) {
+export function Card({ id, title, extra, defFolded = false, className = '', domId, children, hint, topic }: Props) {
   const folded = useFolded((s) => s[id] ?? defFolded);
   const scope = useContext(Scope);
   useEffect(() => {
@@ -87,6 +90,7 @@ export function Card({ id, title, extra, defFolded = false, className = '', domI
       <h3>
         <span className="card-title" onDoubleClick={() => toggleFold(id, defFolded)}>
           {title}
+          {hint && <Hint text={hint} topic={topic} />}
         </span>
         <span className="card-acts">
           {!folded && extra}
