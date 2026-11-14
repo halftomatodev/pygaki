@@ -64,10 +64,10 @@ export function setSpeaker(l: Line, v: string) {
   }
 }
 
-// 줄을 from 자리에서 빼서 to 자리(빼기 전 기준, 그 줄 앞)에 넣는다
-export function moveLine(b: BoxNode, from: number, to: number) {
-  const [l] = b.lines.splice(from, 1);
-  b.lines.splice(to > from ? to - 1 : to, 0, l);
+// 줄(선택지·조건 갈래도)을 from 자리에서 빼서 to 자리(빼기 전 기준, 그 줄 앞)에 넣는다
+export function moveIn<T>(a: T[], from: number, to: number) {
+  const [l] = a.splice(from, 1);
+  a.splice(to > from ? to - 1 : to, 0, l);
 }
 
 // 새 상자 id: n01, n02 … (만든 순서). 원고의 label 이름(label 장면.n03)이고 세이브와 showpy가 상자를 찾는 열쇠라

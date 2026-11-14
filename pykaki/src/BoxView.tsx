@@ -18,6 +18,8 @@ import { TagView } from './textTags';
 // 볼 때와 글을 고칠 때 상자 모양이 같다. 고칠 때는 글자 자리가 입력칸으로 바뀌고,
 // 줄 종류·순서·삭제 단추는 상자 왼쪽 바깥에, 연출 입력칸은 오른쪽 바깥에 붙는다
 export const BoxView = memo(function BoxView({ id, selected }: NodeProps) {
+  // 지금 커서가 있는 줄이나 선택지·조건 (그 자리 왼쪽에 단추 묶음이 붙는다)
+  const [active, setActive] = useState<string | null>(null);
   const project = useStore((s) => s.project);
   const editing = useStore((s) => s.inlineEdit === id);
   const update = useStore((s) => s.update);
@@ -32,18 +34,6 @@ export const BoxView = memo(function BoxView({ id, selected }: NodeProps) {
   const tb = project.layout.direction === 'TB';
   const cls = ['box', selected && 'sel', editing && 'editing'].filter(Boolean).join(' ');
   const onEsc = (e: React.KeyboardEvent) => e.key === 'Escape' && useStore.setState({ inlineEdit: null });
-  // 선택지 하나 지우기 (하나는 남김). 커서는 앞 선택지(없으면 다음)로
-  const delChoice = (i: number) => {
-    if (b.exit.type !== 'menu') return;
-    const cs = b.exit.choices;
-    const near = cs[i - 1] ?? cs[i + 1];
-    update((p) => {
-      const x = ops.findBox(p, b.id)!.exit;
-      if (x.type === 'menu' && x.choices.length > 1) x.choices.splice(i, 1);
-    });
-    if (near) requestAnimationFrame(() => document.getElementById('in-' + near.id)?.focus());
-  };
-
   return (
     <div className={cls + (b.color ? ' own-color' : '')} style={{ '--g': b.color ?? g?.color ?? 'var(--panel)', ...(b.color && { '--own-bt': isLight(b.color) ? '#1c1c1e' : '#ffffff' }) } as React.CSSProperties}>
       {editing && <FlowMenu b={b} />}
@@ -69,17 +59,78 @@ export const BoxView = memo(function BoxView({ id, selected }: NodeProps) {
         )}
         <ShaderButton kind="box" id={b.id} own={b.shader} inherited={g?.shader} />
       </div>
-      <Lines b={b} editing={editing} />
-      <div className="box-exit">
-        {b.exit.type === 'next' && (
+      <Lines b={b} editing={editing} active={active} setActive={setActive} />
+      <Exits b={b} editing={editing} tb={tb} active={active} setActive={setActive} />
+    </div>
+  );
+});
+
+const isSayLine = (l: Line) => l.type === 'say' || l.type === 'narration';
+
+// 상자 아래 다음 흐름. 선택지와 조건 갈래는 대사 줄처럼 커서가 들어가면 왼쪽 바깥에 ⠿ ＋ ✕ 묶음이 붙고,
+// ⠿로 끌어 순서를 바꾼다. 선은 선택지·갈래 id에 붙어 있어서 순서를 바꿔도 끊기지 않는다. "그 밖"은 늘 맨 끝
+function Exits({ b, editing, tb, active, setActive }: { b: BoxNode; editing: boolean; tb: boolean } & ActiveProps) {
+  const update = useStore((s) => s.update);
+  const wrap = useRef<HTMLDivElement>(null);
+  const [top, setTop] = useState<number | null>(null);
+  const ex = b.exit;
+  const isMenu = ex.type === 'menu';
+  const rows: { id: string }[] = ex.type === 'menu' ? ex.choices : ex.type === 'if' ? ex.branches : [];
+  // 고칠 갈래 목록 (선택지면 choices, 조건이면 branches)
+  const list = (p: Parameters<Parameters<typeof update>[0]>[0]): { id: string }[] | null => {
+    const x = ops.findBox(p, b.id)!.exit;
+    return x.type === 'menu' ? x.choices : x.type === 'if' ? x.branches : null;
+  };
+  const drag = usePtrDrag(wrap, '[data-row]', (from, to) => update((p) => void (list(p) && ops.moveIn(list(p)!, from, to))));
+  const onEsc = (e: React.KeyboardEvent) => e.key === 'Escape' && useStore.setState({ inlineEdit: null });
+
+  const ai = editing ? rows.findIndex((r) => r.id === active) : -1;
+
+  // 단추 묶음이 지금 갈래 높이를 따라가게 (상자 안 좌표)
+  useLayoutEffect(() => {
+    const row = ai >= 0 ? (wrap.current?.querySelector(`[data-row="${rows[ai].id}"]`) as HTMLElement | null) : null;
+    const t = row ? row.offsetTop : null;
+    if (t !== top) setTop(t);
+  });
+
+  const focus = (id: string) => requestAnimationFrame(() => document.getElementById('in-' + id)?.focus());
+  const addAfter = (i: number) => {
+    const c = isMenu ? ops.newChoice() : ops.newBranch();
+    changeThenFocus(() => update((p) => void list(p)?.splice(i + 1, 0, c as never)), 'in-' + c.id);
+  };
+  // 하나 지우기 (하나는 남김). 커서는 앞 갈래(없으면 다음)로
+  const remove = (i: number) => {
+    if (rows.length <= 1) return;
+    const near = rows[i - 1] ?? rows[i + 1];
+    update((p) => {
+      const a = list(p);
+      if (a && a.length > 1) a.splice(i, 1);
+    });
+    if (near) {
+      setActive(near.id);
+      focus(near.id);
+    }
+  };
+  const rowProps = (id: string, i: number, cls: string) => ({
+    className: cls + drag.cls(i, rows.length) + (editing && id === active ? ' active' : ''),
+    'data-part': id,
+    'data-row': id,
+    onFocus: editing ? () => setActive(id) : undefined,
+  });
+
+  return (
+    <>
+      <div className="box-exit" ref={wrap}>
+        {ex.type === 'next' && (
           <>
-            <div className="exit-label">→ 다음{!b.exit.target && <span className="todo"> (연결 안 됨)</span>}</div>
+            <div className="exit-label">→ 다음{!ex.target && <span className="todo"> (연결 안 됨)</span>}</div>
             <Handle type="source" id="next" position={tb ? Position.Bottom : Position.Right} />
           </>
         )}
-        {b.exit.type === 'menu' &&
-          b.exit.choices.map((c, i) => (
-            <div className="choice" key={c.id} data-part={c.id}>
+        {ex.type === 'menu' &&
+          ex.choices.map((c, i) => (
+            <div key={c.id} {...rowProps(c.id, i, 'choice')}>
+              <span {...drag.grip(i)} className="grip pl-grip nodrag nopan">⠿</span>
               ◆{' '}
               {editing ? (
                 <input
@@ -90,9 +141,9 @@ export const BoxView = memo(function BoxView({ id, selected }: NodeProps) {
                   onKeyDown={(e) => {
                     onEsc(e);
                     // 빈 선택지에서 BackSpace: 그 선택지를 지우고 앞 선택지로
-                    if (e.key === 'Backspace' && !c.text && b.exit.type === 'menu' && b.exit.choices.length > 1) {
+                    if (e.key === 'Backspace' && !c.text && ex.choices.length > 1) {
                       e.preventDefault();
-                      delChoice(i);
+                      remove(i);
                     }
                   }}
                   onChange={(e) => update((p) => void ((ops.findBox(p, b.id)!.exit as any).choices[i].text = e.target.value), 'choice' + c.id)}
@@ -101,34 +152,19 @@ export const BoxView = memo(function BoxView({ id, selected }: NodeProps) {
                 c.text || <i className="todo">(빈 선택지)</i>
               )}
               {(c.condition || c.actions.length > 0) && <ChoiceFlags cond={c.condition} actions={c.actions} />}
-              {editing && b.exit.type === 'menu' && b.exit.choices.length > 1 && (
-                <button
-                  className="nodrag br-del"
-                  title="이 선택지 지우기 (빈 칸에서 BackSpace도 돼요)"
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => delChoice(i)}
-                >
-                  ✕
-                </button>
-              )}
               <Handle type="source" id={'c:' + c.id} position={Position.Right} />
             </div>
           ))}
-        {editing && b.exit.type === 'menu' && (
-          <button
-            className="nodrag faint-add"
-            onClick={() => {
-              const c = ops.newChoice();
-              changeThenFocus(() => update((p) => void (ops.findBox(p, b.id)!.exit as any).choices.push(c)), 'in-' + c.id);
-            }}
-          >
+        {editing && ex.type === 'menu' && (
+          <button className="nodrag faint-add" onClick={() => addAfter(ex.choices.length - 1)}>
             + 선택지
           </button>
         )}
-        {b.exit.type === 'if' && (
+        {ex.type === 'if' && (
           <>
-            {b.exit.branches.map((c, i) => (
-              <div className="choice branch" key={c.id} data-part={c.id}>
+            {ex.branches.map((c, i) => (
+              <div key={c.id} {...rowProps(c.id, i, 'choice branch')}>
+                <span {...drag.grip(i)} className="grip pl-grip nodrag nopan">⠿</span>
                 <span className="br-kw">{i === 0 ? '만약' : '아니고'}</span>
                 {editing ? (
                   <CondInput
@@ -147,60 +183,50 @@ export const BoxView = memo(function BoxView({ id, selected }: NodeProps) {
                 ) : (
                   <span className="br-cond" title={c.cond}>{c.cond ? condWords(c.cond) : <i className="todo">(빈 조건)</i>}</span>
                 )}
-                {editing && b.exit.type === 'if' && b.exit.branches.length > 1 && (
-                  <button
-                    className="nodrag br-del"
-                    title="이 조건 지우기"
-                    onClick={() =>
-                      update((p) => {
-                        const x = ops.findBox(p, b.id)!.exit;
-                        if (x.type === 'if') x.branches.splice(i, 1);
-                      })
-                    }
-                  >
-                    ✕
-                  </button>
-                )}
                 <Handle type="source" id={'b:' + c.id} position={Position.Right} />
               </div>
             ))}
             {editing && (
-              <button
-                className="nodrag faint-add"
-                onClick={() => {
-                  const c = ops.newBranch();
-                  changeThenFocus(() => update((p) => {
-                    const x = ops.findBox(p, b.id)!.exit;
-                    if (x.type === 'if') x.branches.push(c);
-                  }), 'in-' + c.id);
-                }}
-              >
+              <button className="nodrag faint-add" onClick={() => addAfter(ex.branches.length - 1)}>
                 + 조건
               </button>
             )}
             <div className="choice branch else" data-part="else">
               <span className="br-kw">그 밖</span>
-              {!b.exit.else && <span className="todo"> (연결 안 됨)</span>}
+              {!ex.else && <span className="todo"> (연결 안 됨)</span>}
               <Handle type="source" id="else" position={Position.Right} />
             </div>
           </>
         )}
-        {b.exit.type === 'call' && (
+        {ex.type === 'call' && (
           <>
             <div className="exit-label call">
-              ⤷ call{!b.exit.target && <span className="todo"> (대상 없음)</span>} · 복귀 후{!b.exit.then && ' return'}
+              ⤷ call{!ex.target && <span className="todo"> (대상 없음)</span>} · 복귀 후{!ex.then && ' return'}
             </div>
             <Handle type="source" id="call" className="h-call" position={tb ? Position.Bottom : Position.Right} style={tb ? { left: '30%' } : { top: '75%' }} />
             <Handle type="source" id="then" position={tb ? Position.Bottom : Position.Right} style={tb ? { left: '70%' } : { top: '90%' }} />
           </>
         )}
-        {b.exit.type === 'return' && <div className="exit-label end">■ 끝 (return)</div>}
+        {ex.type === 'return' && <div className="exit-label end">■ 끝 (return)</div>}
       </div>
-    </div>
+      {ai >= 0 && top !== null && (
+        <div className="side side-l side-exit nodrag" style={{ top }}>
+          <span {...drag.grip(ai)}>⠿</span>
+          <span className="side-kind">{isMenu ? '◆ 선택지' : '◇ 조건'}</span>
+          <button className="nodrag" title={isMenu ? '아래에 새 선택지' : '아래에 새 조건'} onClick={() => addAfter(ai)}>＋</button>
+          <button
+            className="nodrag"
+            title={rows.length > 1 ? (isMenu ? '이 선택지 지우기 (빈 칸에서 BackSpace도 돼요)' : '이 조건 지우기') : '하나는 남겨야 해요'}
+            disabled={rows.length <= 1}
+            onClick={() => remove(ai)}
+          >
+            ✕
+          </button>
+        </div>
+      )}
+    </>
   );
-});
-
-const isSayLine = (l: Line) => l.type === 'say' || l.type === 'narration';
+}
 
 // 상자와 label 오른쪽 위의 [셰이더] 버튼. 누르면 오른쪽 편집 칸이 셰이더 고르기로 바뀐다
 // 정해 둔 셰이더가 있으면 켜진 색, label 것을 따르는 상자는 흐린 테두리
@@ -225,20 +251,24 @@ function ShaderButton({ kind, id, own, inherited }: { kind: 'box' | 'label'; id:
 
 const STAGE_ICON: Record<string, string> = { scene: '🖼', show: '🧍', hide: '🙈', music: '🎵', sound: '🔊', fx: '✨' };
 
-function Lines({ b, editing }: { b: BoxNode; editing: boolean }) {
+interface ActiveProps {
+  active: string | null;
+  setActive: (id: string | null) => void;
+}
+
+function Lines({ b, editing, active, setActive }: { b: BoxNode; editing: boolean } & ActiveProps) {
   const update = useStore((s) => s.update);
   const upd = (fn: (x: BoxNode) => void, key?: string) => update((p) => fn(ops.findBox(p, b.id)!), key);
-  const [active, setActive] = useState<string | null>(null);
   const [top, setTop] = useState<number | null>(null);
   const wrap = useRef<HTMLDivElement>(null);
-  const drag = usePtrDrag(wrap, (from, to) => upd((x) => ops.moveLine(x, from, to)));
+  const drag = usePtrDrag(wrap, '[data-line]', (from, to) => upd((x) => ops.moveIn(x.lines, from, to)));
 
   const ai = editing ? b.lines.findIndex((l) => l.id === active) : -1;
   const al = ai >= 0 ? b.lines[ai] : null;
 
   // 오른쪽 글자 효과 칸이 지금 쓰는 줄을 따라가게 알린다
   useEffect(() => {
-    if (editing && active) useStore.setState({ activeLine: active });
+    if (editing && active && b.lines.some((l) => l.id === active)) useStore.setState({ activeLine: active });
   }, [editing, active]);
 
   // 단추 묶음이 지금 줄 높이를 따라 내려가게 한다 (상자 안 좌표라 확대해도 그대로)
@@ -313,7 +343,8 @@ function Lines({ b, editing }: { b: BoxNode; editing: boolean }) {
 
 // 상자 안 줄 순서 바꾸기: 손잡이(⠿)를 누른 채 끌어 놓는다. 캔버스 안이라 HTML 끌어 놓기 대신 포인터로 한다
 // (React Flow의 상자 끌기·화면 이동과 겹치지 않게). 볼 때도 고칠 때도 된다
-function usePtrDrag(wrap: React.RefObject<HTMLDivElement>, move: (from: number, to: number) => void) {
+// 선택지·조건 갈래도 같은 것으로 끈다 (sel로 고를 줄을 찾는다)
+function usePtrDrag(wrap: React.RefObject<HTMLDivElement>, sel: string, move: (from: number, to: number) => void) {
   const [st, setSt] = useState<{ from: number; to: number | null } | null>(null);
   const grip = (i: number) => ({
     className: 'grip nodrag nopan',
@@ -327,7 +358,7 @@ function usePtrDrag(wrap: React.RefObject<HTMLDivElement>, move: (from: number, 
       let to: number | null = null;
       setSt({ from: i, to });
       const onMove = (ev: PointerEvent) => {
-        const rows = [...(wrap.current?.querySelectorAll<HTMLElement>('[data-line]') ?? [])];
+        const rows = [...(wrap.current?.querySelectorAll<HTMLElement>(sel) ?? [])];
         let k = rows.findIndex((r) => {
           const rc = r.getBoundingClientRect();
           return ev.clientY < rc.top + rc.height / 2;

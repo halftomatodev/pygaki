@@ -77,7 +77,7 @@ function BoxInspector({ b }: { b: BoxNode }) {
   const update = useStore((s) => s.update);
   const upd: Upd = (fn, key) => update((p) => fn(ops.findBox(p, b.id)!, p), key);
   const g = project.labels.find((l) => l.id === b.group);
-  const drag = useLineDrag((from, to) => upd((x) => ops.moveLine(x, from, to)));
+  const drag = useLineDrag((from, to) => upd((x) => ops.moveIn(x.lines, from, to)));
   // 글자 효과 칸: 지금 쓰는 대사 줄, 그 줄이 대사가 아니면 상자의 첫 대사 줄
   const isSay = (l: Line) => l.type === 'say' || l.type === 'narration';
   const activeLine = useStore((s) => s.activeLine);
