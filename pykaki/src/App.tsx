@@ -13,6 +13,13 @@ import { addBoxCenter, goNextBox, toggleFocus } from './actions';
 import { hit } from './prefs';
 import { Resizer } from './Resizer';
 import { isTyping } from './util';
+
+// 실행 취소를 앱이 받을지. 창(설정·도움말) 안의 칸과, 고칠 때까지 대본에 안 들어가는 칸(data-native-undo)은 브라우저에 맡긴다
+function appUndo(t: EventTarget | null) {
+  if (!isTyping(t)) return true;
+  const el = t as HTMLElement;
+  return !el.closest('.modal, [data-native-undo]');
+}
 import { isDesktop } from './desktop';
 import { liveSend, startLive, toggleGamePanel, useLive } from './showpyLive';
 import { ShowpyView } from './ShowpyView';
@@ -38,8 +45,8 @@ function Keys() {
       // 효과 화면에서는 저장과 되돌리기만 (효과를 바꾸고 빼면 대본이 바뀜)
       if (useLive.getState().view === 'effects' || useLive.getState().view === 'shaders') {
         if (hit(e, 'save')) run(() => saveProject());
-        else if (!isTyping(e.target) && hit(e, 'undo')) run(s.undo);
-        else if (!isTyping(e.target) && hit(e, 'redo')) run(s.redo);
+        else if (appUndo(e.target) && hit(e, 'undo')) run(s.undo);
+        else if (appUndo(e.target) && hit(e, 'redo')) run(s.redo);
         return;
       }
       if (hit(e, 'focus')) run(toggleFocus);
@@ -49,9 +56,9 @@ function Keys() {
       else if (hit(e, 'saveAs')) run(() => saveProject(true));
       else if (hit(e, 'export')) run(() => exportRpyFile(true));
       else if (hit(e, 'newBox')) run(() => addBoxCenter(rf));
-      // 입력칸 안에서는 브라우저의 글자 되돌리기를 쓴다
-      else if (!isTyping(e.target) && hit(e, 'undo')) run(s.undo);
-      else if (!isTyping(e.target) && hit(e, 'redo')) run(s.redo);
+      // 대본 입력칸 안에서도 앱의 실행 취소를 쓴다 (React 칸은 브라우저 되돌리기가 잘 안 먹음)
+      else if (appUndo(e.target) && hit(e, 'undo')) run(s.undo);
+      else if (appUndo(e.target) && hit(e, 'redo')) run(s.redo);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);

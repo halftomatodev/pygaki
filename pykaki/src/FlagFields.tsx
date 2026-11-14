@@ -4,7 +4,7 @@ import { useStore } from './store';
 import { Card } from './Card';
 import type { Flag, FlagKind } from './types';
 import { uid } from './util';
-import { actionText, condSnippet, exprNames, fitInit, flagNameProblem, flagUses, KIND_LABEL, newFlagName, parseAction, renameFlag, type Op } from './flags';
+import { actionText, CMP_LABEL, condSnippet, condText, exprNames, firstClause, fitInit, flagNameProblem, flagUses, KIND_LABEL, newFlagName, parseAction, parseCond, renameFlag, type Clause, type CmpOp, type Cond, type Op } from './flags';
 
 export function FlagsCard() {
   const flags = useStore((s) => s.project.variables);
@@ -66,7 +66,7 @@ function FlagRow({ f }: { f: Flag }) {
   return (
     <div className="flag">
       <div className="item">
-        <input className={'fname' + (why ? ' invalid' : '')} value={name} spellCheck={false} onChange={(e) => setName(e.target.value.replace(/\s/g, '_'))} onBlur={commit} onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()} title={why || '렌파이 변수 이름 (영문·숫자·_)'} />
+        <input data-native-undo className={'fname' + (why ? ' invalid' : '')} value={name} spellCheck={false} onChange={(e) => setName(e.target.value.replace(/\s/g, '_'))} onBlur={commit} onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()} title={why || '렌파이 변수 이름 (영문·숫자·_)'} />
         <select value={f.kind} onChange={(e) => set((x) => void ((x.kind = e.target.value as FlagKind), (x.init = fitInit(x.kind, x.init))))} title="종류">
           {(Object.keys(KIND_LABEL) as FlagKind[]).map((k) => (
             <option key={k} value={k}>{KIND_LABEL[k]}</option>
@@ -101,8 +101,101 @@ function InitInput({ f, set }: { f: Flag; set: (fn: (x: Flag) => void, key?: str
   return <input className="finit" value={String(f.init)} placeholder="처음 글" onChange={(e) => set((x) => void (x.init = e.target.value), 'finit' + f.id)} title="처음 값" />;
 }
 
-// 조건 칸: 렌파이 조건식을 그대로 쓰고, 옆 [플래그 ▾]로 이름을 골라 넣는다. 플래그 카드에 없는 이름이면 빨간 테두리
-export function CondInput({ value, onChange, id, placeholder, className = '' }: { value: string; onChange: (v: string) => void; id?: string; placeholder?: string; className?: string }) {
+interface CondProps { value: string; onChange: (v: string) => void; id?: string; placeholder?: string; className?: string; compact?: boolean }
+
+const strVal = (v: string) => '"' + v.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
+const unStr = (v: string) => {
+  const m = /^"(.*)"$/.exec(v);
+  return m ? m[1].replace(/\\"/g, '"').replace(/\\\\/g, '\\') : v;
+};
+
+// 조건 칸 (선택지의 보이는 조건, 조건 분기). 플래그가 있으면 [플래그] [어떻게] [값]을 골라 만들고,
+// 여러 개는 "그리고(모두)/또는(하나라도)"로 묶는다. 고르는 칸으로 못 읽는 식이나 { }를 누르면 글 칸
+export function CondInput(props: CondProps) {
+  const { value, onChange, id, compact } = props;
+  const flags = useStore((s) => s.project.variables);
+  const [raw, setRaw] = useState(false);
+  const c = parseCond(value);
+  if (raw || !flags.length || !c) return <CondText {...props} back={flags.length && c ? () => setRaw(false) : undefined} />;
+  const put = (fn: (x: Cond) => void) => {
+    const n = structuredClone(c);
+    fn(n);
+    onChange(condText(n));
+  };
+  const add = (fid: string) => {
+    const f = flags.find((x) => x.id === fid);
+    if (f) put((x) => void x.clauses.push(firstClause(f)));
+  };
+  return (
+    <span className={'cond-gui' + (compact ? ' compact' : '') + (props.className ? ' ' + props.className : '')}>
+      {c.clauses.map((k, i) => {
+        const f = flags.find((x) => x.name === k.name);
+        const setK = (fn: (x: Clause) => void) => put((x) => fn(x.clauses[i]));
+        return (
+          <span className="cond-row" key={i}>
+            {i > 0 && (
+              <select className="cond-join" value={c.join} onChange={(e) => put((x) => void (x.join = e.target.value as Cond['join']))} title="그리고: 모두 맞아야 / 또는: 하나만 맞아도">
+                <option value="and">그리고</option>
+                <option value="or">또는</option>
+              </select>
+            )}
+            <select
+              id={i === 0 ? id : undefined}
+              className={'cond-flag' + (f ? '' : ' invalid')}
+              value={f?.id ?? ''}
+              title={f ? f.note || KIND_LABEL[f.kind] : '플래그 카드에 없는 이름이에요'}
+              onChange={(e) => {
+                const nf = flags.find((x) => x.id === e.target.value);
+                if (nf) setK((x) => Object.assign(x, nf.kind === f?.kind ? { name: nf.name } : firstClause(nf)));
+              }}
+            >
+              {!f && <option value="">{k.name} (없음)</option>}
+              {flags.map((x) => (
+                <option key={x.id} value={x.id}>{x.name}</option>
+              ))}
+            </select>
+            {(!f || f.kind === 'bool') && (k.op === 'on' || k.op === 'off') ? (
+              <select className="cond-op" value={k.op} onChange={(e) => setK((x) => void (x.op = e.target.value as CmpOp))}>
+                <option value="on">켜져 있으면</option>
+                <option value="off">꺼져 있으면</option>
+              </select>
+            ) : f?.kind === 'str' ? (
+              <>
+                <input className="cond-val" value={unStr(k.value)} placeholder="글" onChange={(e) => setK((x) => void (x.value = strVal(e.target.value)))} />
+                <select className="cond-op" value={k.op === '!=' ? '!=' : '=='} onChange={(e) => setK((x) => void (x.op = e.target.value as CmpOp))}>
+                  <option value="==">이면</option>
+                  <option value="!=">이 아니면</option>
+                </select>
+              </>
+            ) : (
+              <>
+                <input className="cond-val num" type="number" value={Number.isFinite(parseFloat(k.value)) ? parseFloat(k.value) : ''} onChange={(e) => setK((x) => void (x.value = e.target.value || '0'))} />
+                <select className="cond-op" value={k.op in CMP_LABEL ? k.op : '>='} onChange={(e) => setK((x) => void (x.op = e.target.value as CmpOp))}>
+                  {(Object.keys(CMP_LABEL) as (keyof typeof CMP_LABEL)[]).map((o) => (
+                    <option key={o} value={o}>{CMP_LABEL[o]}</option>
+                  ))}
+                </select>
+              </>
+            )}
+            <button className="x" title="이 조건 빼기" onClick={() => put((x) => void x.clauses.splice(i, 1))}>✕</button>
+          </span>
+        );
+      })}
+      <span className="cond-row cond-add">
+        <select id={c.clauses.length ? undefined : id} className="cond-flag" value="" onChange={(e) => add(e.target.value)} title="플래그를 골라 조건을 더해요">
+          <option value="">{c.clauses.length ? '+ 조건 더하기' : props.placeholder?.startsWith('비우면') ? '늘 보임 (+ 조건 고르기)' : '플래그 고르기'}</option>
+          {flags.map((x) => (
+            <option key={x.id} value={x.id}>{x.name} ({KIND_LABEL[x.kind]})</option>
+          ))}
+        </select>
+        <button className="cond-mode" title="조건식을 글로 직접 쓰기 (예: love >= 5 and not rich)" onClick={() => setRaw(true)}>{'{ }'}</button>
+      </span>
+    </span>
+  );
+}
+
+// 조건을 글로 쓰는 칸: 렌파이 조건식을 그대로 쓰고, 옆 [플래그 ▾]로 이름을 골라 넣는다. 플래그 카드에 없는 이름이면 빨간 테두리
+function CondText({ value, onChange, id, placeholder, className = '', back }: CondProps & { back?: () => void }) {
   const flags = useStore((s) => s.project.variables);
   const chars = useStore((s) => s.project.characters);
   const ref = useRef<HTMLInputElement>(null);
@@ -130,6 +223,7 @@ export function CondInput({ value, onChange, id, placeholder, className = '' }: 
           ))}
         </select>
       )}
+      {back && <button className="cond-mode" title="플래그에서 골라 만드는 칸으로" onClick={back}>▾</button>}
     </span>
   );
 }
@@ -155,11 +249,6 @@ export function ActionInput({ value, onChange, id }: { value: string; onChange: 
   const op = a?.op ?? '=';
   const setOp = (o: Op) => a && onChange(actionText({ ...a, op: o }));
   const setVal = (v: string) => a && onChange(actionText({ ...a, value: v }));
-  const strVal = (v: string) => '"' + v.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
-  const unStr = (v: string) => {
-    const m = /^"(.*)"$/.exec(v);
-    return m ? m[1].replace(/\\"/g, '"').replace(/\\\\/g, '\\') : v;
-  };
   return (
     <span className="act-in">
       <select id={id} value={f?.id ?? ''} onChange={(e) => pick(e.target.value)} title="바꿀 플래그">

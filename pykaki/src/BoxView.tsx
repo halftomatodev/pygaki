@@ -9,8 +9,8 @@ import { changeThenFocus } from './actions';
 import { FlowMenu } from './FlowMenu';
 import { OldAttr, SpeakerSelect, StageFields } from './LineFields';
 import { isStage, stageCode } from './stage';
-import { actionWords } from './flags';
-import { ActionInput } from './FlagFields';
+import { actionWords, condWords } from './flags';
+import { ActionInput, CondInput } from './FlagFields';
 import { hit, keyOf } from './prefs';
 import { TagBar, useTagTarget } from './TagBar';
 import { TagView } from './textTags';
@@ -32,6 +32,17 @@ export const BoxView = memo(function BoxView({ id, selected }: NodeProps) {
   const tb = project.layout.direction === 'TB';
   const cls = ['box', selected && 'sel', editing && 'editing'].filter(Boolean).join(' ');
   const onEsc = (e: React.KeyboardEvent) => e.key === 'Escape' && useStore.setState({ inlineEdit: null });
+  // 선택지 하나 지우기 (하나는 남김). 커서는 앞 선택지(없으면 다음)로
+  const delChoice = (i: number) => {
+    if (b.exit.type !== 'menu') return;
+    const cs = b.exit.choices;
+    const near = cs[i - 1] ?? cs[i + 1];
+    update((p) => {
+      const x = ops.findBox(p, b.id)!.exit;
+      if (x.type === 'menu' && x.choices.length > 1) x.choices.splice(i, 1);
+    });
+    if (near) requestAnimationFrame(() => document.getElementById('in-' + near.id)?.focus());
+  };
 
   return (
     <div className={cls + (b.color ? ' own-color' : '')} style={{ '--g': b.color ?? g?.color ?? 'var(--panel)', ...(b.color && { '--own-bt': isLight(b.color) ? '#1c1c1e' : '#ffffff' }) } as React.CSSProperties}>
@@ -76,13 +87,30 @@ export const BoxView = memo(function BoxView({ id, selected }: NodeProps) {
                   className="nodrag ed"
                   value={c.text}
                   placeholder={`선택지 ${i + 1}`}
-                  onKeyDown={onEsc}
+                  onKeyDown={(e) => {
+                    onEsc(e);
+                    // 빈 선택지에서 BackSpace: 그 선택지를 지우고 앞 선택지로
+                    if (e.key === 'Backspace' && !c.text && b.exit.type === 'menu' && b.exit.choices.length > 1) {
+                      e.preventDefault();
+                      delChoice(i);
+                    }
+                  }}
                   onChange={(e) => update((p) => void ((ops.findBox(p, b.id)!.exit as any).choices[i].text = e.target.value), 'choice' + c.id)}
                 />
               ) : (
                 c.text || <i className="todo">(빈 선택지)</i>
               )}
               {(c.condition || c.actions.length > 0) && <ChoiceFlags cond={c.condition} actions={c.actions} />}
+              {editing && b.exit.type === 'menu' && b.exit.choices.length > 1 && (
+                <button
+                  className="nodrag br-del"
+                  title="이 선택지 지우기 (빈 칸에서 BackSpace도 돼요)"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => delChoice(i)}
+                >
+                  ✕
+                </button>
+              )}
               <Handle type="source" id={'c:' + c.id} position={Position.Right} />
             </div>
           ))}
@@ -103,22 +131,21 @@ export const BoxView = memo(function BoxView({ id, selected }: NodeProps) {
               <div className="choice branch" key={c.id} data-part={c.id}>
                 <span className="br-kw">{i === 0 ? '만약' : '아니고'}</span>
                 {editing ? (
-                  <input
+                  <CondInput
                     id={'in-' + c.id}
-                    className="nodrag ed br-cond"
+                    className="nodrag"
+                    compact
                     value={c.cond}
                     placeholder="조건 (예: love >= 5)"
-                    spellCheck={false}
-                    onKeyDown={onEsc}
-                    onChange={(e) =>
+                    onChange={(v) =>
                       update((p) => {
                         const x = ops.findBox(p, b.id)!.exit;
-                        if (x.type === 'if') x.branches[i].cond = e.target.value;
+                        if (x.type === 'if') x.branches[i].cond = v;
                       }, 'branch' + c.id)
                     }
                   />
                 ) : (
-                  <span className="br-cond">{c.cond || <i className="todo">(빈 조건)</i>}</span>
+                  <span className="br-cond" title={c.cond}>{c.cond ? condWords(c.cond) : <i className="todo">(빈 조건)</i>}</span>
                 )}
                 {editing && b.exit.type === 'if' && b.exit.branches.length > 1 && (
                   <button
@@ -405,7 +432,7 @@ function ChoiceFlags({ cond, actions }: { cond: string | null; actions: string[]
   const project = useStore((s) => s.project);
   return (
     <span className="ch-flags">
-      {cond && <span className="ch-cond" title="이 조건일 때만 보여요">if {cond}</span>}
+      {cond && <span className="ch-cond" title={'이 조건일 때만 보여요: ' + cond}>if {condWords(cond)}</span>}
       {actions.filter((a) => a.trim()).map((a, i) => (
         <span key={i} className="ch-act" title="고르면 바뀌어요">⚑ {actionWords(project, a)}</span>
       ))}

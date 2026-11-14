@@ -1178,6 +1178,30 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .act-in .act-num { flex: 0 0 56px; min-width: 0; }
 .act-in .act-str { flex: 1; min-width: 0; }
 .act-in button { flex: none; padding: 2px 5px; font-family: var(--mono); font-size: 10.5px; }
+.cond-in .cond-mode { flex: none; padding: 2px 5px; font-size: 10.5px; }
+/* 조건을 고르는 칸: 조건 하나가 한 줄, 맨 아래 [+ 조건 더하기] */
+.cond-gui { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
+.cond-row { display: flex; gap: 4px; align-items: center; min-width: 0; }
+.cond-row select, .cond-row input { min-width: 0; font-size: 11.5px; }
+.cond-row .cond-flag { flex: 1 1 70px; }
+.cond-row .cond-op { flex: 0 1 auto; width: auto; }
+.cond-row .cond-join { flex: none; width: auto; color: var(--accent, inherit); }
+.cond-row .cond-val { flex: 1 1 40px; }
+.cond-row .cond-val.num { flex: 0 0 52px; }
+.cond-row button { flex: none; padding: 2px 5px; font-size: 10.5px; }
+.cond-row .cond-flag.invalid { border-color: #e5484d; }
+.cond-add .cond-flag { color: var(--muted); }
+.cond-gui.compact { gap: 2px; }
+.cond-gui.compact select, .cond-gui.compact input { font-size: 11px; padding: 1px 3px; }
+.choice.branch .cond-gui { flex: 1; }
+/* 오른쪽 칸의 조건 분기: 첫 줄은 [만약] [갈 곳] ↑ ✕, 둘째 줄부터 조건을 넓게 */
+.choice-ed:has(> .cond-gui) { flex-wrap: wrap; align-items: center; }
+.choice-ed:has(> .cond-gui) > select { flex: 1 1 0; }
+.choice-ed > .cond-gui { order: 10; flex: 1 1 100%; padding-left: 14px; }
+.choice-ed .cond-row select { flex: 0 1 auto; }
+.choice-ed .cond-row .cond-flag { flex: 1 1 70px; }
+.cf-row .cond-gui { flex: 1; }
+.cf-row:has(.cond-gui) { align-items: flex-start; }
 .choice-box { margin-bottom: 5px; }
 .choice-box .choice-ed { margin-bottom: 0; }
 .choice-box.open { background: var(--faint); border-radius: 8px; padding: 4px; }

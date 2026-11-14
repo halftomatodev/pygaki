@@ -430,7 +430,7 @@ mark{background:var(--mark);color:inherit;border-radius:2px}
 </div>
 <div class="blk"><h2 id="4-흐름-잇기">4. 흐름 잇기</h2>
 <p>상자를 <b>한 번 클릭</b>하면 오른쪽 <b>편집</b> 탭에서 "다음 흐름"을 정해요.</p>
-<div class="tbl"><table><thead><tr><th>종류</th><th>뜻</th></tr></thead><tbody><tr><td><b>→ 다음 상자로</b></td><td>다음 상자로 이어져요.</td></tr><tr><td><b>◆ 선택지</b></td><td>선택지마다 다른 상자로 가요.</td></tr><tr><td><b>◇ 조건 분기</b></td><td>조건에 따라 다른 상자로 가요. <b>만약</b> 줄에 렌파이 조건을 그대로 써요(예: <code>love &gt;= 5</code>, <code>met_alice</code>, <code>not rich</code>). 옆 [플래그 ▾]에서 플래그를 골라 넣을 수도 있어요. [+ 조건]으로 <b>아니고</b> 줄을 더하고, 위 조건이 모두 아니면 <b>그 밖</b> 상자로 가요.</td></tr><tr><td><b>⤷ call 후 계속</b></td><td>다른 장면을 불렀다가 끝나면 돌아와서 "복귀 후" 상자로 이어져요. 공통 장면을 여러 번 쓸 때 편해요.</td></tr><tr><td><b>■ 끝 (return)</b></td><td>여기서 끝나요. call로 불린 장면이면 부른 곳으로 돌아가요.</td></tr></tbody></table></div>
+<div class="tbl"><table><thead><tr><th>종류</th><th>뜻</th></tr></thead><tbody><tr><td><b>→ 다음 상자로</b></td><td>다음 상자로 이어져요.</td></tr><tr><td><b>◆ 선택지</b></td><td>선택지마다 다른 상자로 가요. 상자 안에서 쓸 때 선택지 옆 <b>✕</b>나 빈 선택지에서 <b>BackSpace</b>로 지워요.</td></tr><tr><td><b>◇ 조건 분기</b></td><td>조건에 따라 다른 상자로 가요. <b>만약</b> 줄에서 [플래그 고르기]로 플래그를 고르고, 켜짐/꺼짐 플래그는 <b>켜져 있으면·꺼져 있으면</b>, 숫자 플래그는 숫자와 <b>이상·이하·보다 크면·보다 작으면·이면·이 아니면</b>, 글자 플래그는 글과 <b>이면·이 아니면</b>을 골라요. [+ 조건 더하기]로 조건을 더하면 <b>그리고</b>(모두 맞아야)나 <b>또는</b>(하나만 맞아도)로 묶여요. <code>{ }</code>를 누르면 렌파이 조건식을 직접 써요(예: <code>love &gt;= 5 and (met_alice or rich)</code>. 고르는 칸으로 못 나타내는 식은 글 칸으로 보여요). [+ 조건]으로 <b>아니고</b> 줄을 더하고, 위 조건이 모두 아니면 <b>그 밖</b> 상자로 가요.</td></tr><tr><td><b>⤷ call 후 계속</b></td><td>다른 장면을 불렀다가 끝나면 돌아와서 "복귀 후" 상자로 이어져요. 공통 장면을 여러 번 쓸 때 편해요.</td></tr><tr><td><b>■ 끝 (return)</b></td><td>여기서 끝나요. call로 불린 장면이면 부른 곳으로 돌아가요.</td></tr></tbody></table></div>
 <h3 id="선으로-잇기">선으로 잇기</h3>
 <ul>
 <li>상자 아래(선택지와 조건 분기는 줄마다 오른쪽)의 <b>점(●)을 끌어서</b> 다른 상자에 놓으면 연결돼요.
@@ -450,7 +450,7 @@ mark{background:var(--mark);color:inherit;border-radius:2px}
 </li>
 <li><b>바꾸기</b>: 선택지 줄의 <b>⚑</b>를 누르고 <b>고르면</b>에서 [+ 플래그 바꾸기]. 플래그를 고르고 켜기·끄기·뒤집기(켜짐/꺼짐), 더하기·빼기·정하기(숫자), 글(글자)을 정해요. 상자 안 아무 자리에서 바꾸려면 <b>⚑ 플래그 바꾸기</b> 줄을 넣어요. <code>{ }</code>를 누르면 식으로 직접 써요(예: <code>love += 2</code>).
 </li>
-<li><b>보기</b>: 선택지의 <b>보이는 조건</b>에 조건을 쓰면 그 조건일 때만 선택지가 보여요(비우면 늘 보여요). 다음 흐름 <b>◇ 조건 분기</b>로 저절로 갈래를 나눌 수도 있어요. 조건 칸 옆 [플래그 ▾]로 플래그를 골라 넣어요.
+<li><b>보기</b>: 선택지의 <b>보이는 조건</b>에 조건을 쓰면 그 조건일 때만 선택지가 보여요(비우면 늘 보여요). 다음 흐름 <b>◇ 조건 분기</b>로 저절로 갈래를 나눌 수도 있어요. 조건은 조건 분기처럼 플래그를 골라 만들어요.
 </li>
 <li>내보내면 원고 맨 위에 <code>default love = 0</code>처럼 처음 값이, 바꾸는 곳에는 <code>$ love += 1</code>이, 선택지에는 <code>&quot;문구&quot; if love &gt;= 5:</code>가 들어가요. 플래그 카드에 없는 이름을 조건에 쓰면 [검사]가 알려 줘요(게임의 다른 파일에서 만든 변수면 그대로 써도 돼요).
 </li></ul>
@@ -724,7 +724,7 @@ mark{background:var(--mark);color:inherit;border-radius:2px}
 </li></ul>
 </div>
 <div class="blk"><h2 id="11-단축키-기본값">11. 단축키 (기본값)</h2>
-<div class="tbl"><table><thead><tr><th>키</th><th>동작</th></tr></thead><tbody><tr><td>상자 더블클릭</td><td>상자 안에서 편집</td></tr><tr><td>빈 곳 더블클릭</td><td>새 상자</td></tr><tr><td>Ctrl+\\</td><td>집중 모드 켜기/끄기</td></tr><tr><td>Ctrl+Enter</td><td>(편집 중) 같은 화자로 새 줄</td></tr><tr><td>Ctrl+Shift+Enter</td><td>(편집 중) 다음 상자로 이어 쓰기 (없으면 새 상자)</td></tr><tr><td>Alt+Enter</td><td>(편집 중) 다음 흐름 창을 키보드로 열기/닫기 (방향키 고르기, Enter 정하기, Esc 닫기)</td></tr><tr><td>Ctrl+B / Ctrl+I / Ctrl+U</td><td>(대사 글 칸에서) 고른 글 굵게 / 기울임 / 밑줄 태그</td></tr><tr><td>Esc</td><td>상자 편집 끝</td></tr><tr><td>Delete</td><td>고른 상자/선 삭제</td></tr><tr><td>Shift+드래그</td><td>여러 상자 선택</td></tr><tr><td>Ctrl+S / Ctrl+Shift+S</td><td>저장 / 다른 이름으로 저장</td></tr><tr><td>Ctrl+E</td><td><code>.rpy</code> 같은 곳에 다시 내보내기</td></tr><tr><td>Ctrl+Z / Ctrl+Y</td><td>실행 취소 / 다시 실행</td></tr><tr><td>Alt+N</td><td>새 상자</td></tr><tr><td>F1</td><td>도움말</td></tr></tbody></table></div>
+<div class="tbl"><table><thead><tr><th>키</th><th>동작</th></tr></thead><tbody><tr><td>상자 더블클릭</td><td>상자 안에서 편집</td></tr><tr><td>빈 곳 더블클릭</td><td>새 상자</td></tr><tr><td>Ctrl+\\</td><td>집중 모드 켜기/끄기</td></tr><tr><td>Ctrl+Enter</td><td>(편집 중) 같은 화자로 새 줄</td></tr><tr><td>Ctrl+Shift+Enter</td><td>(편집 중) 다음 상자로 이어 쓰기 (없으면 새 상자)</td></tr><tr><td>Alt+Enter</td><td>(편집 중) 다음 흐름 창을 키보드로 열기/닫기 (방향키 고르기, Enter 정하기, Esc 닫기)</td></tr><tr><td>Ctrl+B / Ctrl+I / Ctrl+U</td><td>(대사 글 칸에서) 고른 글 굵게 / 기울임 / 밑줄 태그</td></tr><tr><td>Esc</td><td>상자 편집 끝</td></tr><tr><td>Delete</td><td>고른 상자/선 삭제</td></tr><tr><td>Shift+드래그</td><td>여러 상자 선택</td></tr><tr><td>Ctrl+S / Ctrl+Shift+S</td><td>저장 / 다른 이름으로 저장</td></tr><tr><td>Ctrl+E</td><td><code>.rpy</code> 같은 곳에 다시 내보내기</td></tr><tr><td>Ctrl+Z / Ctrl+Y</td><td>실행 취소 / 다시 실행 (글 칸 안에서도. 설정 창과 플래그 이름 칸은 그 칸의 글자만)</td></tr><tr><td>Alt+N</td><td>새 상자</td></tr><tr><td>F1</td><td>도움말</td></tr></tbody></table></div>
 <p>Esc, Delete, 더블클릭 말고는 [설정]에서 바꿀 수 있어요.</p>
 </div>
 <div class="blk"><h2 id="12-자주-묻는-것">12. 자주 묻는 것</h2>

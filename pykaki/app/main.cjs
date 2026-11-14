@@ -379,6 +379,15 @@ ipcMain.handle('pygaki:importFile', (e, token, dir) => {
   return dir + '/' + name;
 });
 
+// 윈도우의 Electron은 alert/confirm을 닫은 뒤 글 칸에 커서가 안 들어가는 일이 있음 → 창 포커스를 한 번 뺐다가 돌려준다
+ipcMain.handle('pygaki:refocus', (e) => {
+  const win = BrowserWindow.fromWebContents(e.sender);
+  if (!win || win.isDestroyed()) return;
+  win.blur();
+  win.focus();
+  e.sender.focus();
+});
+
 // 다른 프로젝트 열기: 새 창으로
 ipcMain.handle('pygaki:choose', async (e) => {
   const w = windows.get(e.sender.id);

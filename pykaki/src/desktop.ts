@@ -16,6 +16,7 @@ interface PygakiApi {
   // 탐색기로 파일 하나 고르기. game 안이면 rel(game 기준), 밖이면 token(importFile로 복사할 때 씀). 취소면 null
   pickFile?(kind: 'image' | 'sound'): Promise<{ name: string; rel?: string; token?: string } | null>;
   importFile?(token: string, dir: 'images' | 'movies' | 'audio'): Promise<string>; // 복사한 자리 (game 기준)
+  refocus?(): Promise<void>; // alert/confirm을 닫은 뒤 창 포커스를 돌려준다
   onChange(fn: (rel: string) => void): () => void;
   // showpy 실시간 연결 (docs/LINK.md 9장)
   liveSend(msg: object): Promise<boolean>;
@@ -26,6 +27,21 @@ interface PygakiApi {
 
 export const desktop: PygakiApi | null = (window as any).pygaki ?? null;
 export const isDesktop = !!desktop;
+
+// 윈도우 Electron에서 alert/confirm을 닫으면 그 뒤로 글 칸을 눌러도 커서가 안 들어가는 일이 있다(창 포커스가 꼬임).
+// 알림 창을 닫을 때마다 앱이 창 포커스를 한 번 돌려주게 감싼다
+if (desktop?.refocus) {
+  const fix = <T extends (...a: any[]) => any>(fn: T) =>
+    ((...a: any[]) => {
+      try {
+        return fn.apply(window, a);
+      } finally {
+        desktop.refocus!().catch(() => {});
+      }
+    }) as T;
+  window.alert = fix(window.alert);
+  window.confirm = fix(window.confirm);
+}
 
 const join = (a: string, b: string) => (a ? a + '/' + b : b);
 const notFound = (rel: string) => Object.assign(new Error('파일이 없어요: ' + rel), { name: 'NotFoundError' });

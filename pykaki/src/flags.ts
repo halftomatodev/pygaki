@@ -152,3 +152,67 @@ export function normalizeFlags(raw: unknown): Flag[] {
   }
   return out;
 }
+
+// ── 조건을 고르는 칸 (GUI). 조건식을 [플래그] [어떻게] [값] 줄 여러 개와 "모두/하나라도"로 읽고 다시 쓴다.
+// 저장은 예전처럼 렌파이 조건식 글 하나라서 형식은 그대로. 이 모양으로 못 읽는 식은 글 칸으로 고친다
+export type CmpOp = 'on' | 'off' | '==' | '!=' | '>=' | '<=' | '>' | '<';
+export interface Clause { name: string; op: CmpOp; value: string }
+export interface Cond { join: 'and' | 'or'; clauses: Clause[] }
+
+const NAME = '[A-Za-z_][A-Za-z0-9_]*';
+const VALUE = /-?\d+(?:\.\d+)?|"(?:[^"\\]|\\.)*"|True|False/.source;
+const CLAUSE_RE = new RegExp(`^(?:(not\\s+)?(${NAME})|(${NAME})\\s*(==|!=|>=|<=|>|<)\\s*(${VALUE}))$`);
+
+export function parseCond(s: string): Cond | null {
+  const t = s.trim();
+  if (!t) return { join: 'and', clauses: [] };
+  // 글자 안의 and/or는 나누지 않게 글자를 잠깐 가린다
+  const strs: string[] = [];
+  const masked = t.replace(/"(?:[^"\\]|\\.)*"/g, (m) => (strs.push(m), `\u0000${strs.length - 1}\u0000`));
+  const hasAnd = /\band\b/.test(masked);
+  const hasOr = /\bor\b/.test(masked);
+  if (hasAnd && hasOr) return null; // 섞인 것은 괄호 뜻이 달라질 수 있어서 글 칸으로
+  if (/[()]/.test(masked)) return null;
+  const join = hasOr ? 'or' : 'and';
+  const parts = masked.split(join === 'or' ? /\s+or\s+/ : /\s+and\s+/).map((p) => p.replace(/\u0000(\d+)\u0000/g, (_, i) => strs[+i]).trim());
+  const clauses: Clause[] = [];
+  for (const p of parts) {
+    const m = CLAUSE_RE.exec(p);
+    if (!m) return null;
+    if (m[2]) {
+      if (PY_NAMES.has(m[2])) return null;
+      clauses.push({ name: m[2], op: m[1] ? 'off' : 'on', value: '' });
+    } else {
+      // 켜짐/꺼짐 플래그를 == True / == False로 쓴 것도 읽는다
+      if ((m[4] === '==' || m[4] === '!=') && (m[5] === 'True' || m[5] === 'False')) clauses.push({ name: m[3], op: (m[4] === '==') === (m[5] === 'True') ? 'on' : 'off', value: '' });
+      else clauses.push({ name: m[3], op: m[4] as CmpOp, value: m[5] });
+    }
+  }
+  return { join, clauses };
+}
+
+export function clauseText(c: Clause) {
+  if (c.op === 'on') return c.name;
+  if (c.op === 'off') return `not ${c.name}`;
+  return `${c.name} ${c.op} ${c.value || '0'}`;
+}
+
+export const condText = (c: Cond) => c.clauses.map(clauseText).join(` ${c.join} `);
+
+// 플래그를 고를 때 처음 조건 (켜짐/꺼짐은 켜져 있으면, 숫자는 1 이상, 글자는 빈 글과 같으면)
+export const firstClause = (f: Flag): Clause => (f.kind === 'bool' ? { name: f.name, op: 'on', value: '' } : f.kind === 'int' ? { name: f.name, op: '>=', value: '1' } : { name: f.name, op: '==', value: '""' });
+
+export const CMP_LABEL: Record<Exclude<CmpOp, 'on' | 'off'>, string> = { '>=': '이상', '<=': '이하', '>': '보다 크면', '<': '보다 작으면', '==': '이면', '!=': '이 아니면' };
+
+// 조건을 사람 말로 (상자 안에 보여 줄 때). 못 읽으면 식 그대로
+export function condWords(s: string) {
+  const c = parseCond(s);
+  if (!c || !c.clauses.length) return s;
+  const one = (x: Clause) => {
+    if (x.op === 'on') return `${x.name} 켜짐`;
+    if (x.op === 'off') return `${x.name} 꺼짐`;
+    const sym = { '>=': '≥', '<=': '≤', '>': '>', '<': '<', '==': '=', '!=': '≠' }[x.op];
+    return `${x.name} ${sym} ${x.value}`;
+  };
+  return c.clauses.map(one).join(c.join === 'and' ? ' 그리고 ' : ' 또는 ');
+}
