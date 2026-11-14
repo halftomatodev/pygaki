@@ -279,17 +279,17 @@ function ShaderList({ bar }: { bar: ReactNode }) {
     const r = await setShaderOn(c.id, !c.on);
     setBusy(false);
     if (!r.ok) say(r.why);
-    else say(c.on ? `"${c.label}"을(를) 껐어요. 고르는 목록에서만 빠지고, 이미 정한 상자는 그대로 돌아요` : `"${c.label}"을(를) 켰어요`);
+    else say(c.on ? `"${c.label}"을(를) 숨겼어요. 고르는 목록에서만 빠지고, 이미 정한 상자는 그대로 돌아요` : `"${c.label}"의 숨김을 풀었어요`);
   };
   const check = (c: ShaderCard) => (
-      <input
-        type="checkbox"
-        checked={c.on}
+      <button
+        className={'fxv-hide' + (c.on ? '' : ' on')}
         disabled={!!blocked || busy}
-        title={blocked || (c.on ? '끄기: 고르는 목록에서만 빠져요. 이미 정한 상자는 그대로 돌아요' : '켜기: 고르는 목록에 다시 나와요')}
-        onClick={(e) => e.stopPropagation()}
-        onChange={() => void toggle(c)}
-      />
+        title={blocked || (c.on ? '숨김: 고르는 목록에서만 빠져요. 이미 정한 상자는 그대로 돌아요' : '숨김 해제: 고르는 목록에 다시 나와요')}
+        onClick={(e) => (e.stopPropagation(), void toggle(c))}
+      >
+        {c.on ? '숨김' : '숨김 해제'}
+      </button>
   );
   const goTo = (u: ShaderUse) => {
     useLive.setState({ view: 'script' });
@@ -323,7 +323,7 @@ function ShaderList({ bar }: { bar: ReactNode }) {
                   onPick={() => setPicked(c.id)}
                   top={
                     <>
-                      {!c.on && <span className="sp-badge">끔</span>}
+                      {!c.on && <span className="sp-badge">숨김</span>}
                       {c.overlay_only && <span className="sp-badge" title="다른 셰이더 위에 덧씌우는 용도로 만든 셰이더예요">덮개</span>}
                       {check(c)}
                     </>
@@ -340,7 +340,7 @@ function ShaderList({ bar }: { bar: ReactNode }) {
               {check(c)}
               <span className="fxv-label">{c.label}</span>
               <span className="fxv-name">{c.id}</span>
-              {!c.on && <span className="sp-badge">끔</span>}
+              {!c.on && <span className="sp-badge">숨김</span>}
               <span className="grow" />
               {c.uses > 0 && <span className="fxv-uses" title="이 셰이더를 건 상자와 label">{c.uses}곳</span>}
               {c.overlay_only && <span className="sp-badge" title="다른 셰이더 위에 덧씌우는 용도로 만든 셰이더예요">덮개</span>}
@@ -361,7 +361,7 @@ function ShaderList({ bar }: { bar: ReactNode }) {
             <Card id="sh-sample" title={<>{sel.label} <span className="fxv-name">{sel.id}</span></>}>
             <p className="tip">
               화면 전체에 씌우는 셰이더{sel.name !== sel.label ? ` · ${sel.name}` : ''}
-              {!sel.on ? ' · 꺼 둠 (고르는 목록에 안 나와요)' : ''}
+              {!sel.on ? ' · 숨겨 둠 (고르는 목록에 안 나와요)' : ''}
             </p>
             <ShaderSample key={sel.id + '|' + fxSeq} info={sel} args={mine} picture={picture} />
             <div className="fxv-row">

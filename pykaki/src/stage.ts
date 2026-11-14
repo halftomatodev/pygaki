@@ -97,9 +97,9 @@ export function refreshEffects() {
 refreshEffects();
 // 목록에서 뺀 효과 (ui_kit 4.2). 예전 대본에 남은 값은 그대로 두고 내보낸다
 // - typewriter, slowalpha: 렌파이에 그대로 있어서 showpy 없이도 돎
-// - melt, mosh, flipin, led, split, (ui_kit 4.9) spin, glow, wipe, inkfill, punch, popin: showpy가 한 글자씩 나오기로 받아 줌 (text_effects.rpy REMOVED_EFFECTS)
+// - melt, mosh, flipin, led, split, (ui_kit 4.9) spin, glow, wipe, inkfill, punch, popin, (효과 폴더 샘플) drip: showpy가 한 글자씩 나오기로 받아 줌 (text_effects.rpy REMOVED_EFFECTS)
 const REMOVED_RENPY = ['typewriter', 'slowalpha'];
-export const REMOVED_EFFECTS = [...REMOVED_RENPY, 'melt', 'mosh', 'flipin', 'led', 'split', 'spin', 'glow', 'wipe', 'inkfill', 'punch', 'popin'];
+export const REMOVED_EFFECTS = [...REMOVED_RENPY, 'melt', 'mosh', 'flipin', 'led', 'split', 'spin', 'glow', 'wipe', 'inkfill', 'punch', 'popin', 'drip'];
 // 렌파이에 들어 있는 효과. 나머지는 showpy가 있어야 한다
 export const RENPY_EFFECTS = [...RENPY_SHADERS.map((e) => e.name), ...REMOVED_RENPY];
 // 효과 값의 이름들: "slidein:u__dir=90|shake" → ["slidein", "shake"]

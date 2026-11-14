@@ -34,6 +34,9 @@ init -9 python in img_fx:
     ## (이름, 한글 이름) 목록. 파일 이름 순서
     ORDER = [ ]
 
+    ## 없는 전환을 알린 이름 (한 번씩만)
+    MISSING = set()
+
     _VARIABLES = """
         uniform sampler2D tex0;
         uniform sampler2D tex1;
@@ -152,11 +155,11 @@ init -9 python in img_fx:
             scene bg hall with img_fx.use("bands", 1.2, count=10)"""
         e = EFFECTS.get(name)
         if e is None:
-            ## 효과 파일을 뺀 뒤에도 예전 원고가 멈추지 않게, 배포판에서는 서서히 바뀌기로
-            if store.config.developer:
-                raise Exception("img_fx.use: {!r}라는 전환이 없습니다. ui_kit/effects 폴더에 있는 이름: {}".format(
-                    name, ", ".join(n for n, _l in ORDER) or "(없음)"))
-            return store.dissolve
+            ## 효과 파일을 지운 뒤에도 예전 원고가 멈추지 않게 서서히 바뀌기로 (개발 모드에서는 이름마다 한 번 알림)
+            if store.config.developer and name not in MISSING:
+                MISSING.add(name)
+                store.renpy.notify("그림 전환 {!r}이 효과 폴더에 없어서 서서히 바뀌기로 했어요".format(name))
+            return store.Dissolve(float(time) if time is not None else 0.5)
         known = dict((k[3:], v) for k, v in e["uniforms"])
         for k in values:
             if k not in known:

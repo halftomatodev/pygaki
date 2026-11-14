@@ -164,7 +164,7 @@ const transArg = (t?: string) => (!t ? '' : t === 'none' ? 'transition=None' : `
 // 원고 한 줄. 셰이더가 없는 상자는 게임 설정대로 돌린다.
 // tv: 이 전환의 TV 세부 값. time: 그림 전환의 초. iv: 그림 전환의 값. values: 세부 값을 적을지 (대본 어딘가에 값을 정했고 게임이 받을 때)
 // 그림 전환의 값도 플러그인의 tv=로 적는다 (screen_fx 5.6: 그림 전환이면 tv=가 그 효과의 값)
-export function shaderCode(s: BoxShader | null, trans?: string, opt: { tv?: Record<string, number>; time?: number; iv?: Record<string, number>; values?: boolean } = {}) {
+export function shaderCode(s: BoxShader | null, trans?: string, opt: { tv?: Record<string, number>; time?: number; iv?: Record<string, number | string>; values?: boolean } = {}) {
   const t = transArg(trans);
   const tv = opt.tv && hasKeys(opt.tv) && trans === 'tv' ? `tv=${pyDict(opt.tv)}` : isImgTrans(trans) && hasKeys(opt.iv) ? `tv=${pyDict(opt.iv!)}` : '';
   const dur = isImgTrans(trans) && opt.time !== undefined ? `duration=${pyVal(opt.time)}` : '';
@@ -175,7 +175,7 @@ export function shaderCode(s: BoxShader | null, trans?: string, opt: { tv?: Reco
 
 // 이 상자로 들어올 때 쓸 전환과 그 TV 값, 그림 전환의 초: 이 상자의 "시작할 때" → 앞 상자의 "끝날 때" → 둘 다 '없음'이면 없음(이어짐) → 게임 설정대로.
 // 셰이더가 같아도 전환을 고른 쪽이 있으면 그 전환을 돌린다(화면 효과 5.6: shaders()에 전환을 적으면 셰이더가 같아도 돎)
-export function enterTransTv(p: Project, b: BoxNode, from: BoxNode[]): { t: string; tv?: Record<string, number>; time?: number; iv?: Record<string, number> } {
+export function enterTransTv(p: Project, b: BoxNode, from: BoxNode[]): { t: string; tv?: Record<string, number>; time?: number; iv?: Record<string, number | string> } {
   const mine = shaderOfBox(p, b);
   if (mine?.in && mine.in !== 'none') return { t: mine.in, tv: mine.tv, time: mine.time, iv: mine.iv?.[mine.in] };
   let prevNone = false;

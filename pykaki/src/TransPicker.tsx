@@ -1,13 +1,12 @@
 // 배경·보이기·숨기기 줄의 "나타나는 방식" 고르기 창 (세션 34).
-// [효과] 화면의 그림 효과와 같은 목록(effectCatalog)에 샘플을 붙여 보여 준다. 모음에만 있는 효과는 게임에 넣은 뒤 고른다.
+// [효과] 화면의 그림 효과와 같은 목록(effectCatalog)에 샘플을 붙여 보여 준다. 게임의 효과 폴더에 있는 것만 (숨긴 것은 빠짐).
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { addFromLibrary, effectCatalog, effectsLinked, type EffectCard } from './effectsLib';
+import { effectCatalog, type EffectCard } from './effectsLib';
 import { PictureSample, SOURCE_LABEL } from './EffectsView';
 import { shaderEffect } from './fx/textShaders';
 import { imageFxCode, parseImageFx } from './stage';
 import { useGameFolder } from './gameFolder';
-import { useStore } from './store';
 
 const BASIC: [string, string, string][] = [
   ['', '바로', '전환 없이 바로 나와요'],
@@ -24,14 +23,12 @@ interface Props {
 export function TransPicker({ value, onPick, className = '' }: Props) {
   const [open, setOpen] = useState(false);
   const [hover, setHover] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
   const box = useRef<HTMLDivElement>(null);
   const pop = useRef<HTMLDivElement>(null);
   const [at, setAt] = useState<{ left: number; top: number; maxH: number } | null>(null);
   useGameFolder((f) => f.fxSeq); // 효과를 넣거나 끄면 목록을 다시 그린다
   const cards = open ? effectCatalog().filter((c) => c.kind === 'transition') : [];
   const ready = cards.filter((c) => c.ready && c.on);
-  const lib = effectsLinked() ? cards.filter((c) => !c.ready && c.file) : [];
 
   const cur = parseImageFx(value)?.name;
   const curLabel =
@@ -67,20 +64,7 @@ export function TransPicker({ value, onPick, className = '' }: Props) {
     onPick(v);
     setOpen(false);
   };
-  const pickCard = async (c: EffectCard) => {
-    if (c.ready) return pick(imageFxCode(c.name));
-    if (!c.file || busy) return;
-    if (!confirm(`"${c.label}"은(는) 아직 이 게임에 없는 효과예요. 효과 모음의 ${c.file}을(를) 게임의 효과 폴더에 넣고 고를까요?\n(게임은 껐다 켜야 새 효과를 읽어요)`)) return;
-    setBusy(true);
-    try {
-      const r = await addFromLibrary(c.file);
-      if (!r.ok) return alert('효과를 넣지 못했어요: ' + r.why);
-      useStore.getState().say(`${c.file}을(를) 게임에 넣었어요`);
-      pick(imageFxCode(c.name));
-    } finally {
-      setBusy(false);
-    }
-  };
+  const pickCard = (c: EffectCard) => pick(imageFxCode(c.name));
 
   // 샘플: 마우스를 올린 효과, 없으면 지금 고른 효과
   const show = hover ?? cur ?? null;
@@ -111,13 +95,7 @@ export function TransPicker({ value, onPick, className = '' }: Props) {
             {BASIC.map(([k, label, title]) => row('b' + k, label, '렌파이', (value ?? '') === k, () => pick(k), title))}
             <div className="tp-sub">그림 효과</div>
             {!ready.length && <p className="tip">게임에 그림 효과가 없어요.</p>}
-            {ready.map((c) => row(c.name, c.label, SOURCE_LABEL[c.source], cur === c.name, () => void pickCard(c), c.name, c.name))}
-            {lib.length > 0 && (
-              <>
-                <div className="tp-sub">효과 모음 (아직 안 넣은 것)</div>
-                {lib.map((c) => row('l' + c.name, c.label, '모음', false, () => void pickCard(c), `${c.name} · 고르면 게임에 넣어요`, c.name))}
-              </>
-            )}
+            {ready.map((c) => row(c.name, c.label, SOURCE_LABEL[c.source], cur === c.name, () => pickCard(c), c.name, c.name))}
             {value && !BASIC.some(([k]) => k === value) && !cur && <p className="tip">지금 값: {value}</p>}
           </div>
         </div>,

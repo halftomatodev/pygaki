@@ -599,10 +599,28 @@ init -110 python in screen_fx:
     ALIASES = { }
 
     def alias(name):
+        """예전 이름 → 지금 이름. 없는 셰이더(설정 파일과 엔진을 지운 것)는 "none"으로 바꿉니다 (5.7)."""
         try:
-            return ALIASES.get(name, name)
+            name = ALIASES.get(name, name)
         except TypeError:
             return name
+        if isinstance(name, str) and EFFECTS and name not in EFFECTS and name not in (NONE, DEFAULT, _KEEP):
+            missing(name)
+            return NONE
+        return name
+
+    ## 없는 셰이더를 만났을 때 (5.7): 멈추지 않고 "none"으로. 개발 모드에서는 이름마다 한 번 알림
+    MISSING = set()
+
+    def missing(name, where="셰이더"):
+        if name in MISSING:
+            return
+        MISSING.add(name)
+        if renpy.config.developer:
+            try:
+                renpy.notify("{} {!r}가 이 게임에 없어서 기본값(없음)으로 바꿨어요".format(where, name))
+            except Exception:
+                pass
 
     ## 특별한 이름
     NONE = "none"           # 효과 없음 (깨끗한 화면)
@@ -688,7 +706,9 @@ init -110 python in screen_fx:
             self.kwargs = kwargs
 
         def __call__(self):
-            EFFECTS[self.fx_id].set(duration=self.duration, **self.kwargs)
+            fx = EFFECTS.get(self.fx_id)
+            if fx is not None:
+                fx.set(duration=self.duration, **self.kwargs)
             renpy.restart_interaction()
 
     class SetPreset(store.Action, store.DictEquality):
@@ -700,7 +720,9 @@ init -110 python in screen_fx:
             self.duration = duration
 
         def __call__(self):
-            EFFECTS[self.fx_id].preset(self.name, self.duration)
+            fx = EFFECTS.get(self.fx_id)
+            if fx is not None:
+                fx.preset(self.name, self.duration)
             renpy.restart_interaction()
 
     class TogglePlayer(store.Action, store.DictEquality):
@@ -1040,7 +1062,7 @@ init -110 python in screen_fx:
         for name, vals in values.items():
             fx = EFFECTS.get(alias(name))
             if fx is None:
-                raise Exception("screen_fx.shaders: values에 {!r}라는 효과가 없습니다. 쓸 수 있는 이름: {}".format(name, ", ".join(names())))
+                continue    # 없는 셰이더의 값은 건너뜀 (5.7)
         for name in slots:
             fx = EFFECTS.get(name)
             if fx is None:
@@ -1420,7 +1442,7 @@ init -110 python in screen_fx:
         name = alias(name)
         fx = EFFECTS.get(name)
         if fx is None:
-            raise Exception("screen_fx.set_values: {!r}라는 효과가 없습니다. 쓸 수 있는 이름: {}".format(name, ", ".join(names())))
+            return      # 없는 셰이더면 아무것도 안 함 (5.7)
         if values:
             fx.set(duration=duration, **values)
         else:
@@ -2029,7 +2051,8 @@ init -110 python in screen_fx:
         name = alias(name)
         fx = EFFECTS.get(name)
         if fx is None:
-            raise Exception("screen_fx.image_fx: {!r}라는 효과가 없습니다. 쓸 수 있는 이름: {}".format(name, ", ".join(names())))
+            ## 없는 셰이더면 그림을 그대로 (5.7)
+            return store.Transform()
         if values:
             fx.check(values, "screen_fx.image_fx({!r})".format(name))
         return store.Transform(function=_ImageFX(name, values))
@@ -2230,6 +2253,36 @@ init 998 python in screen_fx:
     _lt[None] = list(_lt.get(None, [ ])) + [ cursor_effect_wrap, fx_layer, cursor_overlay_wrap, ovl_layer, cursor_split_wrap, tv_wrap ]
     store.config.layer_transforms = _lt
 
+
+init 900 python in screen_fx:
+
+    ## 지운 셰이더의 이름공간 (5.7): 엔진 파일을 지워도 원고의 waves.set(), waves.preset("rain"),
+    ## action waves.Toggle() 같은 줄이 멈추지 않고 아무 일도 안 하게 합니다. 셰이더 줄은 alias()가 "none"으로 바꿈
+    SHIPPED = ("vhs_crt", "ascii", "retro_term", "gameboy", "glitch", "boil", "halftone", "hologram", "nightvision",
+               "shards", "ripple", "collage", "waves", "wobble", "filmgrain", "fisheye", "photocopy", "relief", "gradmap", "rings")
+
+    class _StubNS(object):
+        pass
+
+    def _stub_ns(name):
+        ns = getattr(store, name, None)
+        if ns is None:
+            ## 설정 파일까지 지웠으면 빈 이름공간을 만듦 (init 때 만든 것이라 세이브에는 안 들어감)
+            ns = _StubNS()
+            setattr(store, name, ns)
+        def _nothing(*args, **kwargs):
+            missing(name)
+        def _action(*args, **kwargs):
+            return store.NullAction()
+        for k, v in (("set", _nothing), ("preset", _nothing), ("reset", _nothing), ("off", _nothing), ("on", _nothing),
+                     ("values", lambda *a, **k: { }), ("is_enabled", lambda *a, **k: False), ("player_enabled", lambda *a, **k: False),
+                     ("Set", _action), ("Preset", _action), ("Toggle", _action), ("Use", _action), ("effect", store.Transform())):
+            if not hasattr(ns, k):
+                setattr(ns, k, v)
+
+    for _n in SHIPPED:
+        if _n not in EFFECTS:
+            _stub_ns(_n)
 
 init 800 python in screen_fx:
 

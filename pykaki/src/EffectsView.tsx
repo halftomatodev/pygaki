@@ -7,8 +7,8 @@ import readme from '../../showpy/game/ui_kit/effects/README.md?raw';
 import { useStore } from './store';
 import { useLive } from './showpyLive';
 import { folderReady, gameFont, useGameFolder } from './gameFolder';
-import { addEffectFile, addFromLibrary, allPacks, effectCatalog, effectUses, removeEffectFile, setEffectOn, type EffectCard, type EffectUse, type FxKind } from './effectsLib';
-import { EFFECTS, TRANSITIONS, effectKnobs, formatEffect, imageFxCode, type EffectKnob } from './stage';
+import { allPacks, effectCatalog, effectUses, setEffectOn, type EffectCard, type EffectUse, type FxKind } from './effectsLib';
+import { effectKnobs, formatEffect, type EffectKnob } from './stage';
 import { parseTextShader, previewPack, shaderEffect, type ShaderEffect } from './fx/textShaders';
 import { FxCanvas, webglOk } from './fx/FxCanvas';
 import { TransitionCanvas } from './fx/TransitionCanvas';
@@ -126,63 +126,6 @@ export function PictureSample({ effect, args, time, picture, onReplay }: { effec
   );
 }
 
-// 빼기 창: 이 파일에 든 효과가 대본에 쓰였으면 무엇으로 바꿀지 고른다
-function RemoveDialog({ file, cards, onClose }: { file: string; cards: EffectCard[]; onClose(): void }) {
-  const say = useStore((s) => s.say);
-  const inside = cards.filter((c) => c.file === file && c.source === 'project');
-  const used = inside.filter((c) => c.uses > 0);
-  const [to, setTo] = useState<Record<string, string>>({});
-  const [busy, setBusy] = useState(false);
-  const gone = (v: string) => inside.some((c) => v === c.name || v === imageFxCode(c.name));
-  const choices = (kind: FxKind) => (kind === 'effect' ? EFFECTS.map(([k, t]): [string, string] => [k, k ? t : '효과 없이']) : TRANSITIONS).filter(([k]) => !gone(k));
-  const run = async (replace?: Record<string, string>) => {
-    setBusy(true);
-    const r = await removeEffectFile(file, replace);
-    setBusy(false);
-    if (!r.ok) return say(r.why);
-    say(`${file}을(를) 뺐어요. 백업: ${r.backup}` + (r.changed ? ` · 대본 ${r.changed}줄을 바꿨어요` : '') + (r.left ? ` · 글에 직접 적은 ${r.left}줄은 그대로예요` : ''));
-    onClose();
-  };
-  return (
-    <div className="modal-bg" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <h3>효과 빼기: {file}</h3>
-        <p className="tip">백업: ui_kit_backup/effects · 게임은 껐다 켜야 반영돼요.</p>
-        {inside.map((c) => (
-          <div className="fxv-rm-row" key={c.name}>
-            <b>{c.label}</b> <span className="fxv-name">{c.name}</span>
-            <span className="grow" />
-            {c.uses > 0 ? (
-              <>
-                <span>대본 {c.uses}줄에서 씀 →</span>
-                <select value={to[c.name] ?? ''} onChange={(e) => setTo((v) => ({ ...v, [c.name]: e.target.value }))} title="바꾸고 뺄 때 이 효과 대신 넣을 것">
-                  {choices(c.kind).map(([k, t]) => (
-                    <option key={k} value={k}>{t}</option>
-                  ))}
-                </select>
-              </>
-            ) : (
-              <span className="tip">대본에서 안 씀</span>
-            )}
-          </div>
-        ))}
-        {used.length > 0 && <p className="tip warn-text">그냥 빼면 그 줄은 게임에서 "모르는 효과" 오류가 나요 (그림 효과는 배포판에서 서서히 바뀌기로 보여요).</p>}
-        <div className="row end">
-          <button onClick={onClose}>취소</button>
-          {used.length > 0 ? (
-            <>
-              <button className="danger" disabled={busy} onClick={() => run()}>그냥 빼기</button>
-              <button className="primary" disabled={busy} onClick={() => run(Object.fromEntries(used.map((c) => [c.name, to[c.name] ?? ''])))}>다른 효과로 바꾸고 빼기</button>
-            </>
-          ) : (
-            <button className="danger" disabled={busy} onClick={() => run()}>빼기</button>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export function EffectsView() {
   const project = useStore((s) => s.project);
   const say = useStore((s) => s.say);
@@ -195,10 +138,8 @@ export function EffectsView() {
   const [args, setArgs] = useState<Record<string, Record<string, string>>>({}); // 샘플에서만 쓰는 값: 효과 이름 → { u__값: 값 }
   const [text, setText] = useState(SAMPLE_TEXT);
   const [replay, setReplay] = useState(0);
-  const [removing, setRemoving] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const gallery = usePrefs((p) => p.gallery);
-  const filePick = useRef<HTMLInputElement>(null);
   const picPick = useRef<HTMLInputElement>(null);
   const [picture, setPicture] = useState<HTMLImageElement | null>(null); // 그림 효과 샘플의 새 그림 (저장하지 않음)
   const pickPicture = (f: File | undefined) => {
@@ -216,8 +157,7 @@ export function EffectsView() {
   const q = query.trim().toLowerCase();
   const shownCards = cards.filter((c) => c.kind === kind && (!q || c.label.toLowerCase().includes(q) || c.name.includes(q)));
   const here = shownCards.filter((c) => c.ready);
-  const library = shownCards.filter((c) => !c.ready);
-  const sel = cards.find((c) => c.kind === kind && c.name === picked[kind]) ?? here[0] ?? library[0] ?? null;
+  const sel = cards.find((c) => c.kind === kind && c.name === picked[kind]) ?? here[0] ?? null;
 
   // 아직 넣지 않은 효과도 샘플로 돌릴 수 있게 올려 둔다
   const sampleError = useMemo(() => {
@@ -232,19 +172,6 @@ export function EffectsView() {
     }
   }, [sel?.name, sel?.ready, fxSeq]);
 
-  // 갤러리는 모음의 효과도 모두 그림으로 보여 주니 한꺼번에 올려 둔다 (틀린 파일은 그 카드만 "못 돌려요")
-  useMemo(() => {
-    if (!gallery) return;
-    for (const file of new Set(library.map((c) => c.file))) {
-      const pack = allPacks().find((p) => p.name === file);
-      try {
-        if (pack) previewPack(pack.name, pack.text);
-      } catch {
-        // 그 카드에 표시
-      }
-    }
-  }, [gallery, fxSeq, kind, library.length]);
-
   const act = async (fn: () => Promise<void>) => {
     setBusy(true);
     try {
@@ -257,28 +184,8 @@ export function EffectsView() {
     act(async () => {
       const r = await setEffectOn(c.name, !c.on);
       if (!r.ok) say(r.why);
-      else say(c.on ? `"${c.label}"을(를) 껐어요. 고르는 목록에서만 빠지고, 이미 쓴 줄은 그대로 돌아요` : `"${c.label}"을(를) 켰어요`);
+      else say(c.on ? `"${c.label}"을(를) 숨겼어요. 고르는 목록에서만 빠지고, 이미 쓴 줄은 그대로 돌아요` : `"${c.label}"의 숨김을 풀었어요`);
     });
-  // 같은 이름의 파일이 있으면 물어보고 바꿔 넣는다
-  const put = (file: string, add: (overwrite: boolean) => ReturnType<typeof addEffectFile>) =>
-    act(async () => {
-      let r = await add(false);
-      if (!r.ok && r.exists && confirm(`효과 폴더에 ${file}이(가) 이미 있어요. 바꿔 넣을까요?`)) r = await add(true);
-      if (!r.ok) return void (r.exists || alert('넣지 못했어요.\n' + r.why));
-      const first = r.effects[0];
-      say(`${r.file}을(를) 넣었어요: ${r.effects.map((e) => e.label).join(', ')}. 게임은 껐다 켜면 반영돼요`);
-      if (first) {
-        setKind(first.kind);
-        setPicked((v) => ({ ...v, [first.kind]: first.name }));
-      }
-    });
-  const addFiles = async (files: FileList | null) => {
-    for (const f of [...(files ?? [])]) {
-      const body = await f.text();
-      await put(f.name, (overwrite) => addEffectFile(f.name, body, { overwrite }));
-    }
-    if (filePick.current) filePick.current.value = '';
-  };
   const copyRequest = () =>
     navigator.clipboard.writeText(REQUEST_TEXT).then(
       () => say('새 효과 요청문을 복사했어요. 만들고 싶은 모양과 같이 클로드에게 주세요'),
@@ -292,50 +199,28 @@ export function EffectsView() {
   };
 
   const pick = (c: EffectCard) => setPicked((v) => ({ ...v, [kind]: c.name }));
-  // 켜기 칸 (넣은 것) 또는 ＋ (아직 안 넣은 것)
+  // 숨김 단추: 숨긴 효과는 고르는 목록에서만 빠지고, 이미 쓴 줄은 그대로 돈다 (효과 파일은 지우지 않음)
   const check = (c: EffectCard) =>
     c.ready ? (
-      <input
-        type="checkbox"
-        checked={c.on}
+      <button
+        className={'fxv-hide' + (c.on ? '' : ' on')}
         disabled={!!blocked || busy}
-        title={blocked || (c.on ? '끄기: 고르는 목록에서만 빠져요. 이미 쓴 줄은 그대로 돌아요' : '켜기: 고르는 목록에 다시 나와요')}
-        onClick={(e) => e.stopPropagation()}
-        onChange={() => toggle(c)}
-      />
-    ) : (
-      <span className="fxv-plus">＋</span>
-    );
+        title={blocked || (c.on ? '숨김: 고르는 목록에서만 빠져요. 이미 쓴 줄은 그대로 돌아요' : '숨김 해제: 고르는 목록에 다시 나와요')}
+        onClick={(e) => (e.stopPropagation(), toggle(c))}
+      >
+        {c.on ? '숨김' : '숨김 해제'}
+      </button>
+    ) : null;
   const uses = (c: EffectCard) => c.uses > 0 && <span className="fxv-uses" title="대본에서 이 효과를 쓴 줄">{c.uses}줄</span>;
-  const buttons = (c: EffectCard) => (
-    <>
-      {c.source === 'project' && c.file && (
-        <button className="danger" disabled={!!blocked || busy} title={blocked || `${c.file}을(를) 효과 폴더에서 빼요`} onClick={(e) => (e.stopPropagation(), setRemoving(c.file!))}>
-          빼기
-        </button>
-      )}
-      {!c.ready && c.file && (
-        <button
-          className="primary"
-          disabled={!!blocked || busy}
-          title={blocked || `${c.file}을(를) 이 게임의 효과 폴더에 넣어요`}
-          onClick={(e) => (e.stopPropagation(), void put(c.file!, (overwrite) => addFromLibrary(c.file!, { overwrite })))}
-        >
-          넣기
-        </button>
-      )}
-    </>
-  );
   const row = (c: EffectCard) => (
     <div key={c.name} className={'fxv-card' + (sel?.name === c.name ? ' on' : '') + (c.ready && !c.on ? ' off' : '')} onClick={() => pick(c)}>
       {check(c)}
       <span className="fxv-label">{c.label}</span>
       <span className="fxv-name">{c.name}</span>
-      {c.ready && !c.on && <span className="sp-badge">끔</span>}
+      {c.ready && !c.on && <span className="sp-badge">숨김</span>}
       <span className="grow" />
       {uses(c)}
       <span className="sp-badge">{SOURCE_LABEL[c.source]}</span>
-      {buttons(c)}
     </div>
   );
   // 갤러리 카드: 그림 효과는 반쯤 지난 그림, 글자 효과는 샘플 글. 마우스를 올리면 움직인다
@@ -354,7 +239,7 @@ export function EffectsView() {
         onPick={() => pick(c)}
         top={
           <>
-            {c.ready && !c.on && <span className="sp-badge">끔</span>}
+            {c.ready && !c.on && <span className="sp-badge">숨김</span>}
             <span className="sp-badge">{SOURCE_LABEL[c.source]}</span>
             {check(c)}
           </>
@@ -362,8 +247,7 @@ export function EffectsView() {
         bottom={
           <>
             {uses(c)}
-            {buttons(c)}
-          </>
+                </>
         }
         still={
           c.kind === 'transition' ? (
@@ -423,23 +307,15 @@ export function EffectsView() {
           {kindBar}
           <input className="fxv-find" placeholder="찾기 (이름)" value={query} onChange={(e) => setQuery(e.target.value)} />
           <span className="grow" />
-          <button disabled={!!blocked || busy} title={blocked || '가진 .glsl 효과 파일을 검사해서 이 게임의 효과 폴더에 넣어요'} onClick={() => filePick.current?.click()}>파일 넣기</button>
           <button title="클로드에게 새 효과를 부탁할 때 같이 줄 글을 복사해요 (앱은 밖으로 통신하지 않아요)" onClick={copyRequest}>새 효과 요청문 복사</button>
           <GallerySwitch />
-          <input ref={filePick} type="file" accept=".glsl" multiple hidden onChange={(e) => void addFiles(e.target.files)} />
         </div>
         {blocked && <p className="tip fxv-note">{blocked}. 지금은 구경만 할 수 있어요.</p>}
         {fxErrors.length > 0 && <p className="tip warn-text fxv-note">효과 폴더에서 못 읽은 파일: {fxErrors.map(([f, why]) => `${f} (${why})`).join(' / ')}</p>}
         <div className="fxv-cards">
           <h4>{blocked ? '쓸 수 있는 효과' : '이 프로젝트에 있는 것'} <span className="tip">{here.length}</span></h4>
           {list(here)}
-          {!here.length && <p className="tip">{q ? '찾는 효과가 없어요.' : kind === 'transition' ? '그림 효과 파일이 없어요. 아래 모음에서 넣을 수 있어요.' : '효과가 없어요.'}</p>}
-          {library.length > 0 && (
-            <>
-              <h4>효과 모음 (아직 안 넣은 것) <span className="tip">{library.length}</span></h4>
-              {list(library)}
-            </>
-          )}
+          {!here.length && <p className="tip">{q ? '찾는 효과가 없어요.' : kind === 'transition' ? '그림 효과 파일이 없어요. pygaki 플러그인의 효과 폴더(ui_kit/effects)를 새 판으로 바꾸면 생겨요.' : '효과가 없어요.'}</p>}
         </div>
       </div>
       <Resizer size="fxSideW" grow={-1} className="right" />
@@ -454,7 +330,7 @@ export function EffectsView() {
             <Card id="fx-sample" title={<>{sel.label} <span className="fxv-name">{sel.name}</span></>}>
             <p className="tip">
               {SOURCE_LABEL[sel.source]} 효과{sel.file ? ` · ${sel.file}` : ''}
-              {!sel.ready ? ' · 아직 이 게임에 넣지 않았어요' : !sel.on ? ' · 꺼 둠 (고르는 목록에 안 나와요)' : ''}
+              {!sel.ready ? ' · 이 게임의 효과 폴더에 없어요' : !sel.on ? ' · 숨겨 둠 (고르는 목록에 안 나와요)' : ''}
             </p>
             {sampleError || (sel.kind === 'transition' && !picFx) ? (
               <p className="tip warn-text">이 파일은 샘플을 돌릴 수 없어요: {sampleError ?? '효과를 읽지 못했어요'}</p>
@@ -538,7 +414,6 @@ export function EffectsView() {
         )}
       </div>
       {gallery && kind === 'effect' && <TextPhotographer />}
-      {removing && <RemoveDialog file={removing} cards={cards} onClose={() => setRemoving(null)} />}
     </div>
   );
 }

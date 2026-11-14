@@ -13,6 +13,7 @@ import { ScreenFxKnobs } from './fx/ScreenFxCanvas';
 import { TvKnobs } from './ShadersView';
 import { shaderEffect } from './fx/textShaders';
 import { AllRow } from './UiPanel';
+import { effectKnobs } from './stage';
 import { sceneCode, sceneSupported, uiOfBox, usesSceneUi } from './boxUi';
 
 type Vals = Record<string, unknown>;
@@ -130,7 +131,7 @@ export function ShaderPanel() {
     const [k, opts] = d;
     const def = fx.uniforms.find(([u]) => u === 'u__' + k);
     if (!def) return null;
-    const cur = sh?.iv?.[fxName]?.[k] ?? Number(def[1]);
+    const cur = Number(sh?.iv?.[fxName]?.[k] ?? def[1]);
     return (
       <div className="row" key={'dir' + fxName}>
         <label>
@@ -159,6 +160,53 @@ export function ShaderPanel() {
             </button>
           ))}
         </div>
+      </div>
+    );
+  };
+
+  // 그림 전환의 나머지 세부 값 (점멸의 색·횟수 등, FEATURE 12). 방향과 끊는 때(u__cut)는 빼고, 효과 파일의 @set·@param대로
+  const putIv = (fxName: string, k: string, v: number | string | undefined) =>
+    set((s) => {
+      const all = { ...(s.iv ?? {}) };
+      const mine = { ...(all[fxName] ?? {}) };
+      if (v === undefined) delete mine[k];
+      else mine[k] = v;
+      if (Object.keys(mine).length) all[fxName] = mine;
+      else delete all[fxName];
+      if (Object.keys(all).length) s.iv = all;
+      else delete s.iv;
+    }, 'shiv' + fxName + k);
+  const ivRows = (fxName: string) => {
+    const fx = shaderEffect(fxName);
+    if (fx?.kind !== 'transition') return null;
+    const skip = new Set(['cut', IMG_TRANS_DIR[fxName]?.[0]]);
+    const knobs = effectKnobs(fxName).map((k) => ({ ...k, key: k.key.replace(/^u__/, '') })).filter((k) => !skip.has(k.key));
+    if (!knobs.length) return null;
+    return (
+      <div className="fx-knobs" key={'iv' + fxName}>
+        {knobs.map((k) => {
+          const cur = sh?.iv?.[fxName]?.[k.key];
+          const v = cur ?? k.def;
+          return (
+            <label key={k.key} className={cur !== undefined ? 'set' : ''}>
+              <span className="fx-kn" title={k.key}>{k.label}</span>
+              {k.kind === 'color' ? (
+                <input type="color" value={String(v).slice(0, 7)} onChange={(e) => putIv(fxName, k.key, e.target.value)} />
+              ) : (
+                <>
+                  <input type="range" min={k.min} max={k.max} step={k.step} value={Number(v)} onChange={(e) => putIv(fxName, k.key, Number(e.target.value))} />
+                  <span className="fx-kv">{Number(v)}</span>
+                </>
+              )}
+              <button className="fx-x" style={{ visibility: cur !== undefined ? 'visible' : 'hidden' }} title="기본값으로" onClick={(e) => (e.preventDefault(), putIv(fxName, k.key, undefined))}>↺</button>
+            </label>
+          );
+        })}
+        {knobs.some((k) => k.key === 'count') && (() => {
+          const n = Math.max(1, Math.round(Number(sh?.iv?.[fxName]?.count ?? knobs.find((k) => k.key === 'count')!.def)));
+          const t = sh?.time ?? fx.time;
+          return <p className="tip">한 번 깜빡임 {(t / n).toFixed(2)}초 (그림 전환 시간 {t.toFixed(1)}초 ÷ {n}번)</p>;
+        })()}
       </div>
     );
   };
@@ -236,8 +284,10 @@ export function ShaderPanel() {
         <Card id="s-trans" title="전환" hint="셰이더가 바뀔 때의 모양. 미리 보기는 위쪽 [셰이더] 화면" topic="셰이더 (상자">
           {trans('in', '시작할 때')}
           {isImgTrans(sh.in) && dirRow(sh.in!)}
+          {isImgTrans(sh.in) && ivRows(sh.in!)}
           {trans('out', '끝날 때')}
           {isImgTrans(sh.out) && sh.out !== sh.in && dirRow(sh.out!)}
+          {isImgTrans(sh.out) && sh.out !== sh.in && ivRows(sh.out!)}
           {usesTv && (
             <div className="sh-vals">
               {fold('tv', Object.keys(tvVals).length)}
@@ -258,7 +308,7 @@ export function ShaderPanel() {
               <div className="fx-knobs">
                 <label className={sh.time !== undefined ? 'set' : ''}>
                   <span className="fx-kn" title="duration">그림 전환 시간(초)</span>
-                  <input type="range" min={0.3} max={4} step={0.1} value={imgTime} onChange={(e) => set((s) => void (s.time = Number(e.target.value)), 'shtime')} />
+                  <input type="range" min={0.1} max={4} step={0.1} value={imgTime} onChange={(e) => set((s) => void (s.time = Number(e.target.value)), 'shtime')} />
                   <span className="fx-kv">{imgTime.toFixed(1)}</span>
                   <button className="fx-x" style={{ visibility: sh.time !== undefined ? 'visible' : 'hidden' }} title="기본값으로" onClick={(e) => (e.preventDefault(), set((s) => void delete s.time))}>↺</button>
                 </label>

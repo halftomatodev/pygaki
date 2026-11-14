@@ -1,7 +1,8 @@
-// meltglitch: 녹는 글리치: 신호가 깨진 화면처럼 글자의 밝은 곳이 가는 세로 줄로 아래로 길게 끌려 내려감. 줄 끝은 색이 갈라져 파랑, 하양으로 빛나고 몇 프레임마다 모양이 바뀜
+// meltglitch: 녹는 글리치: 신호가 깨진 화면처럼 글자의 밝은 곳이 가는 세로 줄로 아래로 천천히 흘러내림. 줄마다 꼬리가 자라다가 흐려지고 다시 시작하며, 줄 끝은 색이 갈라져 파랑, 하양으로 빛남
 // 렌파이는 글자를 하나씩 네모로 그려서, 글자 네모를 아래로 u__length배만큼 늘려 그 안에서 끌려 내려갑니다 (아랫줄과 겹칠 수 있음).
 // u__fade: 글자가 나타나는 시간(글자 수). u__length: 가장 길게 끌린 길이 (글자 높이의 몇 배). u__width: 줄 굵기 (픽셀)
-// u__amount: 끌리는 줄의 비율 (0~1). u__split: 색 갈라짐 (0~1). u__glow: 밝은 곳이 더 밝게 타는 정도. u__fps: 1초에 모양이 바뀌는 번
+// u__amount: 끌리는 줄의 비율 (0~1). u__split: 색 갈라짐 (0~1). u__glow: 밝은 곳이 더 밝게 타는 정도
+// u__speed: 흘러내리는 빠르기 (1이면 1초쯤에 끝까지). u__fps: 옆으로 튀는 깨짐이 1초에 바뀌는 번
 // u__settle: 1이면 다 나온 뒤 멈춤, 0이면 계속 깨짐. u__jump: 가끔 조각이 옆으로 튐 (픽셀)
 // 쓰는 법:  e "신호가 녹는다." (cps=25, effect="meltglitch")      e "멈춘다." (cps=25, effect="meltglitch:u__settle=1:u__length=0.6")
 @effect meltglitch 녹는 글리치
@@ -14,16 +15,18 @@
 @set u__amount 0.55
 @set u__split 0.6
 @set u__glow 0.8
-@set u__fps 12.0
+@set u__fps 4.0
+@set u__speed 0.35
 @set u__settle 0.0
-@set u__jump 6.0
+@set u__jump 4.0
 @param u__fade 0 20 나타나는 시간
 @param u__length 0.1 3 끌리는 길이
 @param u__width 1 12 줄 굵기
 @param u__amount 0 1 끌리는 줄 비율
 @param u__split 0 1 색 갈라짐
 @param u__glow 0 2 밝게 타기
-@param u__fps 1 30 바뀌는 빠르기
+@param u__speed 0.05 2 흘러내리는 빠르기
+@param u__fps 0.5 30 깨지는 빠르기
 @param u__settle 0 1 다 나오면 멈춤
 @param u__jump 0 40 옆으로 튐
 @variables
@@ -34,6 +37,7 @@
     uniform float u__split;
     uniform float u__glow;
     uniform float u__fps;
+    uniform float u__speed;
     uniform float u__settle;
     uniform float u__jump;
     uniform float u_time;
@@ -73,18 +77,28 @@
     float l__bj = fract(sin(dot(vec2(l__band, l__tick), vec2(12.9898, 78.233))) * 43758.5453);
     float l__dx = l__bj > 0.9 ? (l__bj - 0.95) * 20.0 * u__jump * u_text_to_drawable * l__amt : 0.0;
 
-    // 줄마다 끌리는 길이 (몇 프레임마다 새로)
-    float l__r1 = fract(sin(dot(vec2(l__col, l__tick), vec2(39.346, 11.135))) * 43758.5453);
-    float l__r2 = fract(sin(dot(vec2(l__col * 0.37, floor(l__tick / 3.0)), vec2(73.156, 52.235))) * 43758.5453);
-    float l__on = step(1.0 - u__amount, l__r1) * l__amt;
-    float l__len = l__on * (0.15 + 0.85 * l__r2 * l__r2) * l__h * max(u__length, 0.0);
+    // 줄마다 꼬리가 아래로 천천히 자라고, 끝까지 가면 흐려졌다가 다시 시작 (줄마다 빠르기와 시작하는 때가 다름)
+    float l__r0 = fract(sin(l__col * 91.7 + 3.1) * 43758.5453);
+    float l__per = (0.7 + 0.8 * l__r0) / max(u__speed, 0.01);
+    float l__cyc = u_time / l__per + l__r0 * 7.0;
+    float l__ph = fract(l__cyc);
+    float l__ci = floor(l__cyc);
+    float l__r1 = fract(sin(dot(vec2(l__col, l__ci), vec2(39.346, 11.135))) * 43758.5453);
+    float l__r2 = fract(sin(dot(vec2(l__col * 0.37, l__ci), vec2(73.156, 52.235))) * 43758.5453);
+    float l__grow = 1.0 - pow(1.0 - l__ph, 2.0);
+    float l__fadeout = 1.0 - smoothstep(0.8, 1.0, l__ph);
+    float l__on = step(1.0 - u__amount, l__r1) * l__amt * l__fadeout;
+    float l__len = l__on * (0.2 + 0.8 * l__r2 * l__r2) * l__grow * l__h * max(u__length, 0.0);
+    // 아주 가끔 몇 프레임 동안 줄 길이가 튐 (깨지는 느낌)
+    float l__kick = fract(sin(dot(vec2(l__col, l__tick), vec2(12.7, 3.3))) * 43758.5453);
+    l__len *= l__kick > 0.97 ? 1.6 : 1.0;
 
     // 위쪽 몇 곳을 읽어 가장 진한 것을 남김: 밝은 점이 아래로 끌린 꼬리가 됨 (빨강, 초록, 파랑을 다른 길이로)
     vec3 l__lens = vec3(1.0 - 0.25 * u__split, 1.0, 1.0 + 0.35 * u__split) * l__len;
     vec4 l__acc = vec4(0.0);
     vec3 l__head = vec3(0.0);
-    for (int l__k = 0; l__k < 10; l__k++) {
-        float l__s = float(l__k) / 9.0;
+    for (int l__k = 0; l__k < 16; l__k++) {
+        float l__s = float(l__k) / 15.0;
         float l__fall = 1.0 - l__s * 0.65;
         vec3 l__ys = vec3(v__q.y) - l__lens * l__s;
         float l__xs = v__q.x + l__dx;

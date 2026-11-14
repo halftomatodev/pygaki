@@ -257,7 +257,7 @@ init -10 python in say_style:
 
     _tfx_register()
 
-    ## 지운 효과 (ui_kit 4.2, 4.9). 예전 원고의 effect="melt", "led:u__cell=6" 같은 줄이 오류 없이 돌게
+    ## 지운 효과 (ui_kit 4.2, 4.9, 효과 폴더의 drip). 예전 원고의 effect="melt", "led:u__cell=6" 같은 줄이 오류 없이 돌게
     ## 한 글자씩 나오기(렌파이 typewriter와 같음)로 등록합니다. 예전 값 이름도 받기만 합니다
     REMOVED_EFFECTS = {
         "melt": (("u__duration", 14.0), ("u__length", 28.0), ("u__width", 3.0), ("u__hold", 0.0)),
@@ -272,6 +272,8 @@ init -10 python in say_style:
         "inkfill": (("u__duration", 6.0), ("u__mode", 1.0), ("u__line", 2.0)),
         "punch": (("u__duration", 5.0), ("u__zoom", 1.3), ("u__trail", 0.6)),
         "popin": (("u__duration", 6.0), ("u__overshoot", 0.35), ("u__from", 0.0)),
+        ## 효과 폴더 샘플에서 뺌 (screen_fx 5.7과 같은 판)
+        "drip": (("u__fade", 3.0), ("u__melt", 40.0), ("u__length", 1.0), ("u__width", 8.0), ("u__keep", 0.35), ("u__color", "#c00018"), ("u__tint", 0.0), ("u__flow", 0.0)),
         }
 
     def _tfx_register_removed():
@@ -288,6 +290,33 @@ init -10 python in say_style:
                 **kw)
 
     _tfx_register_removed()
+
+    ## 없는 글자 효과 (효과 파일을 지운 것, 5.7과 같은 판): 대사 괄호 effect=, {shader=…} 태그, Text(textshader=)
+    ## 어디서든 멈추지 않고 한 글자씩 나오기(typewriter)로. 렌파이의 이름 풀이(renpy.text.shader.parse_textshader)를
+    ## 감싸서 모르는 이름만 바꿉니다. 개발 모드에서는 이름마다 한 번 알림
+    TFX_MISSING = set()
+
+    def _tfx_safe_parse():
+        import renpy.text.shader as _ts
+        orig = getattr(_ts, "_pygaki_orig_parse", None) or _ts.parse_textshader
+        _ts._pygaki_orig_parse = orig
+
+        def parse(o):
+            if isinstance(o, str) and "|" not in o:
+                name = o.partition(":")[0].strip()
+                if name and name not in store.renpy.config.textshaders and "typewriter" in store.renpy.config.textshaders:
+                    if store.config.developer and name not in TFX_MISSING:
+                        TFX_MISSING.add(name)
+                        try:
+                            store.renpy.notify("글자 효과 {!r}가 효과 폴더에 없어서 한 글자씩 나오기로 했어요".format(name))
+                        except Exception:
+                            pass
+                    return orig("typewriter")
+            return orig(o)
+
+        _ts.parse_textshader = parse
+
+    _tfx_safe_parse()
 
     ## 색 잔상의 복사본 (외곽선 굵기 0, 색, 가로, 세로). 예전 이름이라 남겨 둡니다
     ECHO_OUTLINES = TFX_OUTLINES.get("echo", [ ])

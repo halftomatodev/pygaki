@@ -381,7 +381,7 @@ $ screen_fx.set_values("shards", count=80, colors=2, color="#d22", color2="#811"
 | `static.glsl` | TV 지직 | 앞 화면 위로 흑백(색 섞기 가능) 노이즈가 짙어졌다 걷힘, 줄 흔들림, 흐르는 밝은 띠 | 0.5 |
 | `calibrate.glsl` | 조정 화면 | 끊김 → 셰이더로 그린 조정 화면(`style` 0 컬러 바, 1 원 격자, 브라운관 느낌) → 끊김 → 새 화면 | 0.85 (`u__in`부터 나옴) |
 | `tapestretch.glsl` | 테이프 늘어짐 | 가로 출렁임, 위아래 늘어짐과 처짐, 색 번짐, 흐르는 잡음 띠, 색 바램 | 0.5 |
-| `blink.glsl` | 점멸 | `color`로 `count`번 고르게 깜빡임(가운데가 `(i+0.5)/count`), `on` 켜진 비율, `fade` 서서히 꺼짐. 이름 `flash`는 글자 효과가 쓰고 있어서 `blink` | 0.5 |
+| `blink.glsl` | 점멸 | `color`로 `count`번 고르게 깜빡임(가운데가 `(i+0.5)/count`), `on` 켜진 비율, `fade` 서서히 꺼짐. 이름 `flash`는 글자 효과가 쓰고 있어서 `blink`. 한 번 깜빡이는 시간 = 걸리는 시간 ÷ `count`(전환 셰이더는 진행만 알아서 초로 받지 못함). PyKaki 셰이더 전환 칸에서도 색·횟수를 고름(`FEATURE` 12) | 0.5 |
 | `pushup.glsl` | 밀어 올리기 | 새 화면이 아래(`dir` 0~3)에서 밀고 들어옴, 경계를 따라오는 어두운 띠, 경계 빛과 화면 번쩍임, 움직임 번짐 | 없음 |
 
 셰이더가 바뀔 때의 전환으로도 `static`, `calibrate`, `tapestretch`, `blink`를 고름(PyKaki `SHADER_TRANS`, `FEATURE` 11, LINK.md 2장). 플러그인은 그림 전환 이름이면 무엇이든 받으므로 고친 곳 없음.
@@ -399,12 +399,20 @@ $ screen_fx.set_values("shards", count=80, colors=2, color="#d22", color2="#811"
 | `gradmap` | 그라데이션 맵 | 밝기 → 세 색(`shadow`, `mid`, `light`, `mid_pos`), `levels` 포스터화, 4x4 바이어 `dither`, 흐르는 색(`shift`) | `brightness`, `contrast` |
 | `rings` | 동심원 어긋남 | 한 점을 둘러싼 고리마다 돌림·밀림·확대가 다르고 천천히 흔들림, `halves` 반으로 가름, 경계선 | `width`, `twist`, `shift`, `zoom`, `speed`, `line` |
 
-**글자 효과** (효과 폴더, `@effect`)
+**글자 효과** (효과 폴더, `@effect`. 처음에 넣은 `drip` 녹아내리기는 사용자 말로 뺌: `REMOVED_EFFECTS`로 한 글자씩)
 
 | 파일 | 한글 이름 | 하는 일 |
 |---|---|---|
-| `drip.glsl` | 녹아내리기 | 글자 네모를 아래로 `u__length`배 늘림(`vertex_20`에서 아래 꼭짓점의 `gl_Position.y`, `vertex_250`에서 `v_tex_coord.y`. 가짜 글자는 안 늘림). 몸통은 `u__keep` 아래가 살짝 처지고, `u__width` 기둥마다 맨 아래 획 끝(20곳 읽어 찾음)에서 가늘어지는 줄기와 끝 방울. `@slow u__melt`만큼 다 나온 뒤에도 녹음, `u__flow` > 0이면 계속 흐름(`@redraw u__flow`), `u__color`/`u__tint` 색 들이기 |
-| `meltglitch.glsl` | 녹는 글리치 | 같은 방법으로 늘린 네모 안에서, 가는 세로 줄마다(초당 `u__fps`번 새로) 위쪽 10곳을 읽어 가장 진한 것을 남김(밝은 점이 아래로 끌린 꼬리). 빨강·초록·파랑을 다른 길이로(`u__split`), 꼬리만 밝게(`u__glow`), 가끔 가로 띠가 옆으로 튐(`u__jump`). `u__settle` 1이면 다 나오면 멈춤 |
+| `meltglitch.glsl` | 녹는 글리치 | 글자 네모를 아래로 `u__length`배 늘림(`vertex_20`에서 아래 꼭짓점의 `gl_Position.y`, `vertex_250`에서 `v_tex_coord.y`. 가짜 글자는 안 늘림). 가는 세로 줄마다 꼬리가 아래로 천천히 자라다가(줄마다 빠르기 0.7~1.5배, `u__speed`) 끝에서 흐려지고 다시 시작, 위쪽 16곳을 읽어 가장 진한 것을 남김(밝은 점이 끌린 꼬리). 빨강·초록·파랑을 다른 길이로(`u__split`), 꼬리만 밝게(`u__glow`), 가끔 가로 띠가 옆으로 튐(`u__jump`, 초당 `u__fps`번). `u__settle` 1이면 다 나오면 멈춤 |
+| `backbox.glsl` | 뒤에 상자 | 맨 뒤 겹(`u_text_depth == u_text_max_depth`, 외곽선이 없으면 본 글자 겹)에 상자를 칠함. 글자 네모가 빈틈없이 붙어 있어서(렌파이 8.5.3에서 확인) 이음매가 없음. 점마다 `a_text_time`(꼭짓점마다 다름, 글자 안에서 이어짐)이 지금 + `u__lead`보다 이르면 칠해서 끊기지 않고 길어짐. 앞뒤 여백 `u__pad_x`: 줄 끝 빈 글자(오른쪽으로 넓힘), 줄 앞 빈 글자(Text 왼쪽 끝에 붙은 것, 왼쪽으로 넓힘), 줄 앞 빈 글자의 폭이 0이면(왼쪽 정렬) 줄 첫 글자를 왼쪽으로 넓힘. 바깥 모서리 `u__round`, 위아래 `u__top`·`u__bottom` 비율로 잘라 줄 사이 틈. `u__hide` 0이면 글자를 한꺼번에(노래방과 겹칠 때) |
+| `karaoke.glsl` | 노래방 | 글자를 처음부터 다 보이고(`@cps`지만 숨기지 않음), `a_text_time`이 지금보다 이른 곳을 `u__color`(본 글자)·`u__outline`(외곽선 겹)으로 칠함. 경계 `u__soft`(글자 수), 경계 빛 `u__glow`, 안 칠한 글자 색 `u__base`·`u__base_amount`. `@outline 3 #000000 0 0`(대사에 외곽선이 없을 때). 상자와는 `backbox:u__grow=0:u__hide=0\|karaoke` |
 | `droplets.glsl` | 물방울 | `gl_Position`(그림 픽셀) 공간에서 칸마다 물방울 하나, 3x3 이웃의 메타볼 장(모양은 각도 사인으로 일렁임). 장이 1을 넘는 곳에서 기울기로 굴절, 가운데 확대, 가장자리 색 갈라짐과 어두운 테, 빛 맺힘(본 글자 겹만). 외곽선 겹도 같이 휨. 글자 네모 안에서만 보임 |
 
 확인: 렌파이 8.5.3에서 `run_rpy.py`로 효과마다 그려 봄(전환은 고정 시간에 그려 진행 0.1~0.9), Lint 통과(템플릿, pygaki_branch), PyKaki [효과]·[셰이더] 화면 갤러리에서 같은 코드로 그려짐. 소리(TV 지직)는 전환에 없음: `play sound`를 같이 적음.
+
+**없는 효과는 기본값으로, 앱은 숨김만 (2026-11-14, 사용자 말)**: 효과 파일·셰이더 엔진을 지운 게임에서도 멈추지 않게 함.
+- 글자 효과: `text_effects.rpy` `_tfx_safe_parse`가 렌파이 `renpy.text.shader.parse_textshader`를 감싸 모르는 이름을 `typewriter`로(대사 괄호, `{shader=}` 태그, `Text(textshader=)`, `|` 겹치기의 한쪽만 없어도). 원래 함수는 `_pygaki_orig_parse`
+- 그림 전환: `img_fx.use`가 모르는 이름이면 `Dissolve(적은 시간 또는 0.5)` (개발 모드도 멈추지 않음)
+- 화면 셰이더: `screen_fx.alias()`가 모르는 이름을 `"none"`으로(`shaders`, `use`, `title_shaders`, 세이브의 지금 값 …), `values=`의 모르는 이름은 건너뜀, `set_values`·`image_fx`는 아무 일도 안 함. 지운 셰이더의 이름공간(`waves.set()`, `waves.Toggle()` …)은 `init 900`에서 `SHIPPED` 목록을 보고 아무 일도 안 하는 함수로 채움(설정 파일까지 지웠으면 빈 이름공간을 만듦)
+- 개발 모드에서는 이름마다 한 번 `renpy.notify`. 확인: 렌파이 8.5.3에서 없는 이름 여덟 가지와 엔진을 지운 복사본으로 돌려 봄
+- 앱: [넣기]·[빼기]·[파일 넣기]·효과 모음을 없애고 [숨김]/[숨김 해제]만. 효과 모음 셋(`slide`, `mosaic`, `blinds`)은 효과 폴더 샘플로 옮김

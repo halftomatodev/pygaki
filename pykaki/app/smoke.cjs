@@ -159,32 +159,33 @@ async function until(what, fn, ms = 10000) {
   if (kept === 'removed' || !fs.existsSync(path.join(proj, 'game', 'gui.rpy'))) fail('효과 파일이 아닌 것을 지울 수 있음');
   console.log('효과 바꾸고 빼기: 됨, 백업', r.backup);
 
-  // [효과] 화면 (효과 탭 3단계, src/EffectsView.tsx): 눌러서 넣기 → 샘플 → 끄기/켜기 → 빼기 → 쓰인 곳 [보기]
+  // [효과] 화면 (src/EffectsView.tsx): 샘플 → 숨김/숨김 해제. 배포판 사용자는 숨김만 써서 [넣기]·[빼기]·[파일 넣기]가 없어야 함
+  // (효과 파일 넣기·빼기는 effectsLib에 남아 있어 위에서 함수로 시험함. 화면에는 효과 폴더에 있는 것만 보임)
+  for (const f of ['maskup.glsl', 'irisin.glsl', 'bands.glsl', 'slide.glsl', 'mosaic.glsl', 'blinds.glsl']) {
+    r = await fx('addFromLibrary', f);
+    if (!r.ok) fail('샘플을 효과 폴더에 넣지 못함: ' + f + ' ' + JSON.stringify(r));
+  }
   const fxCard = (n) => page.locator(`.fxv-card:has(.fxv-name:text-is("${n}"))`);
   await page.click('.view-switch button:has-text("효과")');
   // 갤러리 보기: 카드가 나오는지만 보고, 아래 시험은 목록 보기로 (고른 보기는 기억돼서 [셰이더]도 목록, 다음 시험 때도 목록으로 열림)
   await page.click('.gal-switch button:has-text("갤러리")');
   await page.waitForSelector('.gal-card:has(.fxv-name:text-is("maskup"))', { timeout: 10000 });
   await page.click('.gal-switch button:has-text("목록")');
-  await fxCard('maskup').locator('button:has-text("넣기")').click();
-  await until('[넣기]를 눌러도 효과 파일이 안 생김', () => fs.existsSync(path.join(fxDir, 'maskup.glsl')));
-  await fxCard('maskup').locator('button:has-text("빼기")').waitFor({ timeout: 10000 });
-  await page.waitForSelector('.fxv-side h3:has-text("maskup")', { timeout: 10000 }); // 넣은 효과를 고른 채로
+  if (await page.locator('.fxv button:has-text("빼기"), .fxv button:has-text("파일 넣기"), .fxv-card button:text-is("넣기")').count()) fail('[효과] 화면에 넣기·빼기 단추가 남아 있음');
+  await fxCard('maskup').click();
+  await page.waitForSelector('.fxv-side h3:has-text("maskup")', { timeout: 10000 });
   await page.waitForSelector('.fxv-stage canvas', { timeout: 10000 });
   await wait(800); // 샘플이 한 번 도는 동안 셰이더 오류가 없는지
   if (await page.locator('.fxv-bad').count()) fail('효과 샘플을 못 그림: ' + (await page.locator('.fxv-bad').innerText()));
-  await fxCard('maskup').locator('input[type=checkbox]').click();
-  await until('체크를 꺼도 끈 효과 목록에 안 적힘', () => /^maskup$/m.test(fs.readFileSync(offFile, 'utf8')));
+  await fxCard('maskup').locator('button.fxv-hide').click();
+  await until('[숨김]을 눌러도 숨긴 효과 목록에 안 적힘', () => /^maskup$/m.test(fs.readFileSync(offFile, 'utf8')));
   await page.waitForSelector('.fxv-card.off:has(.fxv-name:text-is("maskup"))', { timeout: 10000 });
-  await fxCard('maskup').locator('input[type=checkbox]').click();
-  await until('체크를 켜도 끈 효과 목록에 남음', () => !/^maskup$/m.test(fs.readFileSync(offFile, 'utf8')));
-  await fxCard('maskup').locator('button:has-text("빼기")').click();
-  await page.click('.modal button.danger:has-text("빼기")');
-  await until('[빼기]를 눌러도 효과 파일이 남음', () => !fs.existsSync(path.join(fxDir, 'maskup.glsl')));
-  await fxCard('maskup').locator('button:has-text("넣기")').waitFor({ timeout: 10000 });
+  await fxCard('maskup').locator('button.fxv-hide:has-text("숨김 해제")').click();
+  await until('[숨김 해제]를 눌러도 숨긴 효과 목록에 남음', () => !/^maskup$/m.test(fs.readFileSync(offFile, 'utf8')));
+  console.log('효과 숨김/숨김 해제: 됨');
   // 그림 효과 샘플 (효과 탭 4단계, src/fx/TransitionCanvas.tsx): 두 샘플이 셰이더 오류 없이 한 번 도는지
   await page.click('.fxv-kind button:has-text("그림 효과")');
-  for (const name of ['irisin', 'bands', 'slide', 'mosaic', 'blinds']) { // 뒤의 셋은 효과 모음(showpy/effects_library)
+  for (const name of ['irisin', 'bands', 'slide', 'mosaic', 'blinds']) { // 뒤의 셋은 예전 효과 모음에서 옮긴 것
     await fxCard(name).click();
     await page.waitForSelector(`.fxv-side h3:has-text("${name}")`, { timeout: 10000 });
     await page.waitForSelector('.fxv-pic canvas', { timeout: 10000 });
@@ -289,10 +290,10 @@ async function until(what, fn, ms = 10000) {
     await page.waitForSelector('.fxv-card:has-text("흑백")', { timeout: 10000 });
     if ((await page.locator('.fxv-card').count()) !== 2) fail('셰이더 카드 수가 다름');
     if (!(await page.locator('.fxv-card.off:has-text("세피아")').count())) fail('끈 셰이더 카드에 끔 표시가 없음');
-    await page.locator('.fxv-card:has-text("세피아") input').click();
+    await page.locator('.fxv-card:has-text("세피아") button.fxv-hide:has-text("숨김 해제")').click();
     await page.waitForFunction(() => window.pykakiShaders.names().map((x) => x[0]).join() === 'none,mono,sepia', null, { timeout: 10000 });
     await page.locator('.toolbar .view-switch button', { hasText: '대본 편집' }).click();
-    console.log('셰이더 켜기/끄기와 [셰이더] 칸: 됨');
+    console.log('셰이더 숨김/숨김 해제와 [셰이더] 칸: 됨');
     fs.rmSync(sfx, { recursive: true, force: true });
     await page.locator('.tb-right button', { hasText: '다시 읽기' }).click();
     await page.waitForFunction(() => window.pykakiShaders.names().includes !== undefined && window.pykakiShaders.names().some((x) => x[0] === 'ascii'), null, { timeout: 10000 });

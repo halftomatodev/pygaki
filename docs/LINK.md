@@ -99,7 +99,7 @@ $ screen_fx.clear(transition="tv", tv={"noise": 0.2})
 - 값 이름과 막대 범위는 11장 `shader_list.json`의 `params`, `groups`에서 옵니다. 목록 값(`choice`)이 여러 칸이면 튜플로 적습니다.
 - PyKaki는 게임의 `shader_list.json`의 `screen_fx`가 5.5 이상일 때만 `values`와 `tv`를 적습니다. 예전 판이면 값 없이 내보내고 검사 칸에 알립니다.
 
-**그림 전환으로 셰이더 바꾸기** (PyKaki `FEATURE` 8, screen_fx 5.6): 셰이더 칸의 "시작할 때", "끝날 때"에서 `pixelsort`(픽셀소트), `datamosh`(데이터모싱)를 고를 수 있습니다. `FEATURE` 11(screen_fx 5.7)부터 `static`(TV 지직, 끊는 때 0.5), `calibrate`(조정 화면, 0.85), `tapestretch`(테이프 늘어짐, 0.5), `blink`(점멸, 0.5)도 고릅니다(효과 폴더의 같은 이름 파일. 플러그인 쪽은 이름만 보고 어느 그림 전환이든 받음). 앞 상자의 마지막 화면 → 이 상자의 첫 화면을 그 그림 전환(효과 폴더 `ui_kit/effects/`의 `@transition`, 8장)으로 잇고, 셰이더는 그 시간의 절반에 바뀝니다. 효과 파일에 `@set u__cut 값`(0~1)이 있으면 그때 바뀝니다(샘플 `pixelsort`, `datamosh`는 1.0: 깨진 채 멈췄다가 끝에서 새 화면과 새 셰이더로 끊김). 걸리는 시간은 대본의 `shader.time`(초, 없으면 효과 파일의 `@time`)입니다. 그림 전환의 값(방향)은 대본의 `shader.iv`(`{효과 이름: {값 이름: 값}}`, PyKaki `FEATURE` 9. 예: `{"datamosh": {"mode": 1}}` 확산, `{"pixelsort": {"dir": 2}}` 회전)이고, 원고에는 `tv=`로 적습니다(그림 전환이면 플러그인이 `tv=`를 그 효과의 값으로 받음. 효과 파일에 없는 값 이름은 PyKaki가 빼고 적음). 원고는 이렇게 됩니다.
+**그림 전환으로 셰이더 바꾸기** (PyKaki `FEATURE` 8, screen_fx 5.6): 셰이더 칸의 "시작할 때", "끝날 때"에서 `pixelsort`(픽셀소트), `datamosh`(데이터모싱)를 고를 수 있습니다. `FEATURE` 11(screen_fx 5.7)부터 `static`(TV 지직, 끊는 때 0.5), `calibrate`(조정 화면, 0.85), `tapestretch`(테이프 늘어짐, 0.5), `blink`(점멸, 0.5)도 고릅니다(효과 폴더의 같은 이름 파일. 플러그인 쪽은 이름만 보고 어느 그림 전환이든 받음). 앞 상자의 마지막 화면 → 이 상자의 첫 화면을 그 그림 전환(효과 폴더 `ui_kit/effects/`의 `@transition`, 8장)으로 잇고, 셰이더는 그 시간의 절반에 바뀝니다. 효과 파일에 `@set u__cut 값`(0~1)이 있으면 그때 바뀝니다(샘플 `pixelsort`, `datamosh`는 1.0: 깨진 채 멈췄다가 끝에서 새 화면과 새 셰이더로 끊김). 걸리는 시간은 대본의 `shader.time`(초, 없으면 효과 파일의 `@time`)입니다. 그림 전환의 값(방향)은 대본의 `shader.iv`(`{효과 이름: {값 이름: 값}}`, PyKaki `FEATURE` 9. 예: `{"datamosh": {"mode": 1}}` 확산, `{"pixelsort": {"dir": 2}}` 회전)이고, 원고에는 `tv=`로 적습니다(그림 전환이면 플러그인이 `tv=`를 그 효과의 값으로 받음. 효과 파일에 없는 값 이름은 PyKaki가 빼고 적음). `FEATURE` 12부터 방향 말고도 그 효과 파일의 세부 값을 다 고를 수 있고(`u__cut`은 빼고), 색은 `"#rrggbb"` 글자로 들어갑니다(예: `{"blink": {"count": 5, "color": "#ff0000"}}` → `tv={"count": 5, "color": "#ff0000"}`). 그림 전환 시간은 0.1초부터. 원고는 이렇게 됩니다.
 
 ```renpy
 $ screen_fx.shaders("glitch", "none", transition="pixelsort", duration=1.2, tv={"dir": 3})
@@ -274,9 +274,11 @@ bands
 - pygaki 플러그인: `say_style.TFX_OFF`(`text_effects.rpy`), 목록은 `say_style.tfx_listed`, `tmenu.effect_names`, `img_fx.listed`. 게임을 껐다 켜거나 Shift+R로 다시 읽음
 - PyKaki: `scanFolder` 때 읽어 `EFFECTS`, `TRANSITIONS`(고르는 목록)에서 뺌. 그 효과를 쓴 줄의 칸에는 이름이 그대로 보이고 내보내기도 그대로. 켜고 끌 때(`effectsLib.ts` `setEffectOn`) 이 파일을 고쳐 씀: 그 이름의 줄만 더하거나 빼고, 설명 줄과 다른 이름은 그대로 둠
 
-### 8-3. 효과 모음 (`showpy/effects_library/*.glsl`)
+### 8-3. 효과 모음 (없앰)
 
-pygaki와 같이 오지만 게임에 저절로 들어가지 않는 효과 파일입니다. 형식은 효과 폴더와 같고, PyKaki가 빌드할 때 그대로 가져갑니다(사본 없음). 앱에서 [넣기]를 하면 그 게임의 `game/ui_kit/effects/`로 복사됩니다. 새 프로젝트마다 들어가는 샘플(`showpy/game/ui_kit/effects/`)도 게임에서 빼면 모음으로 보입니다. pygaki 플러그인은 이 폴더를 읽지 않습니다. 지금 들어 있는 것: 그림 효과 `slide`, `mosaic`, `blinds`.
+예전에는 `showpy/effects_library/`의 효과를 앱의 [넣기]로 게임에 복사했지만, 2026-11-14에 없앴습니다(그 셋 `slide`, `mosaic`, `blinds`는 효과 폴더 샘플로 옮김). 앱 [효과] 화면은 숨김·숨김 해제(`effects_off.txt`, 8-2)만 하고 파일을 넣거나 빼지 않습니다. `effectsLib.ts`의 넣기·빼기 함수는 남아 있지만 화면에서 부르지 않습니다(smoke 시험만 씀).
+
+**없는 효과 이름** (2026-11-14): 효과 파일이나 셰이더 엔진을 지운 게임에서도 멈추지 않습니다. 글자 효과는 `typewriter`(pygaki 플러그인이 렌파이 `renpy.text.shader.parse_textshader`를 감쌈), 그림 전환 `img_fx.use`는 `Dissolve(시간)`, 화면 셰이더 이름은 `screen_fx.alias()`에서 `"none"`으로 바뀌고 지운 셰이더의 이름공간 함수(`set`, `preset`, `Toggle` …)는 아무 일도 안 합니다(`screen_fx.SHIPPED`). 개발 모드에서는 이름마다 한 번 `renpy.notify`.
 
 대본에는 글자 효과가 이름 그대로(`say.effect`), 그림 전환이 `trans` 칸에 `img_fx.use("이름")`로 들어갑니다. pygaki 플러그인 연결이 꺼진 대본은 그림 전환을 `dissolve`로 내보냅니다. 적는 법 전체는 `showpy/game/ui_kit/effects/README.md`.
 
