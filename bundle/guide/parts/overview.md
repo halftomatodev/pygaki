@@ -12,7 +12,7 @@
 | 그림 위치 | `game/ui_kit/stage_layout.rpy` | 줄의 [위치 옮기기]로 저장한 자리. 저장본으로 되돌아가지 않습니다 |
 | GUI 편집기에서 저장한 값 | 각 플러그인 폴더의 `*_layout.rpy` (예: `ui_kit/title_menu_layout.rpy`, `screen_fx/screen_fx_layout.rpy`) | 설정 파일(`*_config.rpy`)의 같은 값보다 먼저 쓰입니다. 새 판으로 바꿀 때 따로 두었다가 다시 넣습니다 |
 | 내가 고친 설정 | 각 플러그인 폴더의 `*_config.rpy` | 엔진 파일(`engine/`, `editor/`)은 고치지 않습니다 |
-| 원고를 고치기 전 원본 | 프로젝트 폴더의 `ui_kit_backup/` | GUI 편집기가 원고 괄호를 바꾸기 전에 남깁니다. 개발용이라 배포판에서 뺍니다 |
+| 원고를 고치기 전 원본, 올리기 전 플러그인 | 프로젝트 폴더의 `ui_kit_backup/` | GUI 편집기가 원고 괄호를 바꾸기 전에, 런처 [플러그인 올리기]가 바꾸기 전에(`plugins/`) 남깁니다. 개발용이라 배포판에서 뺍니다 |
 | 게임과 앱이 주고받는 파일 | `game/showpy_inbox.json`, `game/showpy_live.json`, `game/pykaki_preview.json`, `game/pykaki_goto.json` | 개발 중에만 생기는 연결 파일입니다. 게임 배포판에는 넣지 않습니다(지워도 다시 생깁니다) |
 
 게임을 배포용으로 빌드할 때는 `*.flow.json`, `ui_kit_backup/`, 위의 연결 파일을 빼 주세요. 각 플러그인의 `README.md`는 빌드할 때 저절로 빠집니다.
@@ -22,7 +22,7 @@
 | 자리 | 무엇 |
 | --- | --- |
 | `renpy.exe`, `launcher/`, `renpy/`, `lib/` … | 렌파이 SDK 그대로 (덧붙임 zip에는 없음) |
-| `launcher/game/pygaki_launcher.rpy` | 런처 첫 화면의 [pygaki로 편집], [pygaki 안내서] 단추와, 새 프로젝트 만들기의 "기본 (Vanilla)" / "Pygaki" 고르기. 렌파이의 원래 파일은 고치지 않고 이 파일 하나만 더합니다 |
+| `launcher/game/pygaki_launcher.rpy` | 런처 첫 화면의 [pygaki로 편집], [pygaki 안내서], [플러그인 올리기] 단추와, 새 프로젝트 만들기의 "기본 (Vanilla)" / "Pygaki" 고르기. 렌파이의 원래 파일은 고치지 않고 이 파일 하나만 더합니다 |
 | `pygaki/template/` | Pygaki 새 프로젝트에 얹을 플러그인 템플릿 |
 | `pygaki/app/pygaki.exe` | pygaki 데스크톱 앱. 앱만 따로 켜면 프로젝트 폴더를 고르는 창이 뜹니다 |
 | `pygaki/pygaki_안내서.html` | 이 안내서 |

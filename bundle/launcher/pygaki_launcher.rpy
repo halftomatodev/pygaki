@@ -4,6 +4,7 @@
 ## 런처에 두 가지를 더합니다.
 ##   [pygaki로 편집]        첫 화면 아래쪽 버튼. 지금 고른 프로젝트를 pygaki 앱으로 엽니다 (대본 편집, GUI 편집)
 ##   [pygaki 안내서]        그 옆 버튼. pygaki/pygaki_안내서.html을 기본 브라우저로 엽니다 (인터넷 없이 열리는 한 파일)
+##   [플러그인 올리기]      그 옆 버튼. 고른 프로젝트의 pygaki 플러그인을 이 묶음의 판으로 바꿉니다 (설정·저장 값은 그대로)
 ##   [+ Create New Project]  누르면 "기본 (Vanilla)"과 "Pygaki" 가운데 고릅니다.
 ##                           기본 = 렌파이 원래 새 프로젝트
 ##                           Pygaki = 기본처럼 해상도와 색을 골라 만든 한국어 프로젝트에 pygaki 플러그인을 얹은 것
@@ -116,6 +117,79 @@ init python:
                 with open(common, "ab") as f:
                     f.write("\r\ndefine gui.system_font = {!r}\r\n".format(PYGAKI_FONT).encode("utf-8"))
 
+    ## [플러그인 올리기]: 고른 프로젝트의 pygaki 플러그인을 이 묶음의 판으로 바꾼다.
+    ## 엔진·편집기 파일만 바꾸고, 사용자가 고치는 파일(설정 *_config.rpy, GUI 편집기 저장 *_layout.rpy, 숨김 *_off.txt)은
+    ## 없을 때만 넣는다. 예전 판에만 있던 파일은 치운다. 바꾸기 전 플러그인 폴더는 프로젝트의 ui_kit_backup/plugins/에 남긴다.
+    PYGAKI_PLUGINS = ( "ui_kit", "screen_fx", "splash", "hotkeys" )
+    PYGAKI_KEEP = ( "_config.rpy", "_layout.rpy", "_off.txt" )
+    ## 예전 판에만 있던 파일 (남아 있으면 지금 판과 부딪힘). 판을 낼 때 지운 파일을 여기에 더한다
+    PYGAKI_RETIRED = (
+        "screen_fx/engine/tiles.rpy", "screen_fx/tiles_config.rpy",     # 5.3에 포토 콜라주로 바뀜
+        "ui_kit/effects/popin.glsl", "ui_kit/effects/drip.glsl",          # 5.1 만드는 중에 지운 효과
+    )
+    PYGAKI_VERSION_FILES = (
+        ( "ui_kit", "ui_kit/engine/ui_kit.rpy" ),
+        ( "screen_fx", "screen_fx/engine/screen_fx.rpy" ),
+        ( "splash", "splash/engine/splash.rpy" ),
+        ( "hotkeys", "hotkeys/hotkeys.rpy" ),
+    )
+
+    def pygaki_versions(gamedir):
+        import re
+        out = { }
+        for name, rel in PYGAKI_VERSION_FILES:
+            try:
+                with open(os.path.join(gamedir, rel), "rb") as f:
+                    m = re.search(br'VERSION\s*=\s*"([^"]+)"', f.read())
+                out[name] = m.group(1).decode("utf-8") if m else "?"
+            except Exception:
+                out[name] = None
+        return out
+
+    def pygaki_update_plan(gamedir):
+        """바꿀 파일 [(템플릿 파일, 프로젝트 파일)], 치울 파일 [프로젝트 파일]."""
+        src = os.path.join(PYGAKI_TEMPLATE, "game")
+        copy = [ ]
+        for plugin in PYGAKI_PLUGINS:
+            top = os.path.join(src, plugin)
+            if not os.path.isdir(top):
+                continue
+            for root, dirs, files in os.walk(top):
+                dirs[:] = [ d for d in dirs if not PYGAKI_SKIP(root, [ d ]) ]
+                for name in files:
+                    if PYGAKI_SKIP(root, [ name ]):
+                        continue
+                    a = os.path.join(root, name)
+                    b = os.path.join(gamedir, os.path.relpath(a, src))
+                    if name.endswith(PYGAKI_KEEP) and os.path.exists(b):
+                        continue
+                    copy.append((a, b))
+        retire = [ os.path.join(gamedir, *r.split("/")) for r in PYGAKI_RETIRED ]
+        retire = [ r for r in retire if os.path.exists(r) ]
+        return copy, retire
+
+    def pygaki_update_plugins(gamedir):
+        import time
+        copy, retire = pygaki_update_plan(gamedir)
+        backup = os.path.join(os.path.dirname(gamedir), "ui_kit_backup", "plugins", time.strftime("%Y%m%d_%H%M%S"))
+        for plugin in PYGAKI_PLUGINS:
+            d = os.path.join(gamedir, plugin)
+            if os.path.isdir(d):
+                shutil.copytree(d, os.path.join(backup, plugin), ignore=PYGAKI_SKIP)
+        for a, b in copy:
+            if not os.path.isdir(os.path.dirname(b)):
+                os.makedirs(os.path.dirname(b))
+            shutil.copy(a, b)
+        for r in retire:
+            os.remove(r)
+        ## 지난 판의 .rpyc가 남으면 렌파이가 지운 .rpy도 읽으므로 플러그인 폴더의 .rpyc는 모두 지운다 (켤 때 다시 생김)
+        for plugin in PYGAKI_PLUGINS:
+            for root, dirs, files in os.walk(os.path.join(gamedir, plugin)):
+                for name in files:
+                    if name.endswith((".rpyc", ".rpymc")):
+                        os.remove(os.path.join(root, name))
+        return len(copy), len(retire), backup
+
     def pygaki_number(title, ask, wrong):
         while True:
             v = interface.input(title, ask, cancel=Jump("front_page"), allow=interface.DIGITS_LETTERS)
@@ -157,6 +231,13 @@ screen pygaki_buttons():
                 text_color "#F96854"
                 action Jump("pygaki_guide")
 
+            textbutton "플러그인 올리기":
+                style "l_link"
+                text_font "SourceHanSansLite.ttf"
+                text_size 16
+                text_color "#F96854"
+                action Jump("pygaki_update")
+
 
 ## 버튼 동작은 label에서 한다 (안내 창을 띄우려면 화면 동작 밖이어야 함)
 label pygaki_open:
@@ -165,6 +246,43 @@ label pygaki_open:
 
 label pygaki_guide:
     $ pygaki_guide()
+    jump front_page
+
+## 고른 프로젝트의 플러그인을 이 묶음의 판으로 (판을 보여 주고 물은 뒤)
+label pygaki_update:
+    python:
+        p = project.current
+        if p is None:
+            interface.error(KO("먼저 왼쪽 목록에서 프로젝트를 고르세요."), label=None)
+            renpy.jump("front_page")
+        if not os.path.isdir(os.path.join(PYGAKI_TEMPLATE, "game", "ui_kit")):
+            interface.error(KO("이 묶음에 플러그인 템플릿(pygaki/template)이 없어요."), label=None)
+            renpy.jump("front_page")
+        if not os.path.isdir(os.path.join(p.gamedir, "ui_kit")):
+            interface.error(KO("이 프로젝트에는 pygaki 플러그인이 없어요. 새 프로젝트 만들기에서 \"Pygaki\"로 만든 프로젝트만 올릴 수 있어요."), label=None)
+            renpy.jump("front_page")
+
+        pygaki_old = pygaki_versions(p.gamedir)
+        pygaki_new = pygaki_versions(os.path.join(PYGAKI_TEMPLATE, "game"))
+        pygaki_lines = "\n".join(
+            "{}  {} → {}".format(n, pygaki_old[n] or "없음", pygaki_new[n] or "없음")
+            for n in PYGAKI_PLUGINS
+        )
+        pygaki_same = all(pygaki_old[n] == pygaki_new[n] for n in PYGAKI_PLUGINS)
+        pygaki_head = "판이 같아요. 그래도 다시 넣을까요?" if pygaki_same else "이 프로젝트의 pygaki 플러그인을 새 판으로 바꿀까요?"
+
+        pygaki_ok = interface.yesno(
+            KO(pygaki_head + "\n\n" + pygaki_lines + "\n\n엔진·편집기 파일만 바꾸고, 설정(*_config.rpy)과 GUI 편집기에서 저장한 값(*_layout.rpy)은 그대로 둬요. 바꾸기 전 것은 프로젝트 폴더의 ui_kit_backup/plugins에 남아요. 게임을 끄고 해 주세요."),
+        )
+
+        if pygaki_ok:
+            with interface.error_handling(KO("플러그인을 바꾸는 중")):
+                pygaki_n, pygaki_gone, pygaki_backup = pygaki_update_plugins(p.gamedir)
+            interface.info(
+                KO("바꿨어요. 파일 {}개를 새 판으로, 예전 판에만 있던 파일 {}개를 치웠어요. 게임을 켜면 새 판으로 돌아요.".format(pygaki_n, pygaki_gone)),
+                KO("바꾸기 전 것:") + "\n[pygaki_backup!q]",
+                pygaki_backup=pygaki_backup,
+            )
     jump front_page
 
 
