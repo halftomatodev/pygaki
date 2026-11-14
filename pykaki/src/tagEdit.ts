@@ -6,7 +6,7 @@ const RENPY_TAGS: Record<string, boolean> = {
   alpha: true, alt: true, art: true, axis: true, done: false, instance: true, image: false, p: false, w: false, fast: false,
   feature: true, b: true, i: true, u: true, a: true, plain: true, font: true, color: true, outlinecolor: true, size: true,
   noalt: true, nw: false, s: true, shader: true, rt: true, rb: true, k: true, cps: true, space: false, vspace: false,
-  clear: false, // NVL 화면 지우기 (nvl 모드에서만 뜻이 있다)
+  clear: false, // 렌파이에서는 NVL 화면 지우기. PyKaki에서는 [지우고 이어서]: 내보낼 때 그 자리에서 대사를 나눈다 (splitClear)
 };
 
 export interface Tok {
@@ -49,6 +49,44 @@ export function tokenize(t: string): Tok[] {
     i = j + 1;
   }
   return out;
+}
+
+// [지우고 이어서] {clear}: 그 자리에서 대사를 여러 줄로 나눈다 (같은 화자의 대사 여러 줄 = 클릭하면 앞 글이 지워지고 이어짐).
+// 걸쳐 있는 짝 태그({b}, {cps=20} 등)는 나누는 자리에서 닫고 다음 조각 첫머리에서 다시 연다. 나누는 자리 앞뒤 빈칸은 뺀다.
+// 글이 없는 조각(태그만 있거나 빈 것)은 버린다. {clear}가 없으면 [글 그대로]
+export function splitClear(text: string): string[] {
+  const toks = tokenize(text);
+  if (!toks.some((t) => t.k === 'self' && t.name === 'clear')) return [text];
+  const out: { s: string; has: boolean }[] = [];
+  const open: Tok[] = [];
+  let cur = '';
+  let has = false;
+  let lead = false; // 나눈 바로 뒤라 앞 빈칸을 뺄 때
+  for (const t of toks) {
+    const raw = text.slice(t.s, t.e);
+    if (t.k === 'self' && t.name === 'clear') {
+      cur = cur.replace(/\s+$/, '') + open.slice().reverse().map((o) => `{/${o.name}}`).join('');
+      out.push({ s: cur, has });
+      cur = open.map((o) => text.slice(o.s, o.e)).join('');
+      has = false;
+      lead = true;
+      continue;
+    }
+    if (t.k === 'text') {
+      const v = lead ? raw.replace(/^\s+/, '') : raw;
+      if (v) lead = false;
+      if (v.trim()) has = true;
+      cur += v;
+      continue;
+    }
+    if (t.k === 'esc') (has = true), (lead = false);
+    if (t.k === 'open') open.push(t);
+    else if (t.k === 'close') open.pop();
+    cur += raw;
+  }
+  out.push({ s: cur, has });
+  const kept = out.filter((x) => x.has).map((x) => x.s);
+  return kept.length ? kept : [''];
 }
 
 export interface Pair { o: Tok; c: Tok }

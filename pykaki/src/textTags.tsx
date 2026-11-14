@@ -1,4 +1,5 @@
 // 렌파이 텍스트 태그 일부를 흉내 내서 보여 준다: {b} {i} {u} {s} {color=} {size=} {p} {w} {nw} {fast} {a=} {space=} {vspace=}
+// 그리고 PyKaki의 {clear}(지우고 이어서): 클릭을 기다리고, 다음 글자가 나오면 앞 글을 지운다
 import type { CSSProperties, ReactNode } from 'react';
 import { tokenize } from './tagEdit';
 
@@ -6,10 +7,10 @@ import { tokenize } from './tagEdit';
 // shader: 이 글자에만 거는 등장 효과 ({shader=이름}글{/shader}. 가장 안쪽 것)
 export interface Glyph { ch: string; style: CSSProperties; rate: number; shader?: string } // rate: 글자 속도 배율, 또는 fixed면 글자/초
 export interface Stop { at: number; sec: number | null } // at번째 글자 앞에서 멈춤. sec가 null이면 클릭할 때까지
-export interface Tagged { glyphs: (Glyph & { fixed: boolean })[]; stops: Stop[]; noWait: boolean; fastTo: number }
+export interface Tagged { glyphs: (Glyph & { fixed: boolean })[]; stops: Stop[]; noWait: boolean; fastTo: number; clears: number[] } // clears: {clear} 자리(글자 번호)
 
 export function parseTagged(text: string, tagsOn: boolean, fontOf: (path: string) => string | undefined): Tagged {
-  const out: Tagged = { glyphs: [], stops: [], noWait: false, fastTo: 0 };
+  const out: Tagged = { glyphs: [], stops: [], noWait: false, fastTo: 0, clears: [] };
   const stack: { name: string; style: CSSProperties; rate?: number; fixed?: boolean; shader?: string }[] = [];
   const add = (s: string) => {
     let rate = 1;
@@ -78,6 +79,10 @@ export function parseTagged(text: string, tagsOn: boolean, fontOf: (path: string
     } else if (name === 'w' || name === 'p') {
       out.stops.push({ at: out.glyphs.length, sec: val ? Number(val) : null });
       if (name === 'p') add('\n');
+    } else if (name === 'clear') {
+      // 렌파이로는 대사를 둘로 나눠 내보낸다(splitClear). 앞 조각이 다 나오면 클릭을 기다린다
+      out.stops.push({ at: out.glyphs.length, sec: null });
+      out.clears.push(out.glyphs.length);
     } else if (name === 'nw') out.noWait = true;
     else if (name === 'fast') out.fastTo = out.glyphs.length;
     else if (name === 'space' || name === 'vspace') {

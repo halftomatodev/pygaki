@@ -66,10 +66,14 @@ const rand = (i: number, seed: number) => {
 };
 
 export function Glyphs({ parsed, shown }: { parsed: Tagged; shown: number }) {
+  // {clear}(지우고 이어서): 그 뒤 글자가 나오기 시작하면 앞 글은 감춘다
+  const cut = parsed.clears.reduce((m, c) => (shown > c ? Math.max(m, c) : m), 0);
   return (
     <>
       {parsed.glyphs.map((g, i) =>
-        g.ch === '\n' ? (
+        i < cut ? (
+          <span key={i} data-i={i} className="ch" style={{ display: 'none' }} />
+        ) : g.ch === '\n' ? (
           <br key={i} />
         ) : (
           <span

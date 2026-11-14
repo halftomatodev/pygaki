@@ -4,7 +4,7 @@ import { exitLinks, fallTarget } from './ops';
 import { IDENT, PLUGIN_NAMES, RESERVED } from './util';
 import { badImageName, renpyOnlyEffect, fxArgs, isStage, sayArgs, stageCode, tagEffectNames, REMOVED_EFFECTS, RENPY_EFFECTS } from './stage';
 import { shaderEffect } from './fx/textShaders';
-import { checkTags, shaderTags } from './tagEdit';
+import { checkTags, shaderTags, splitClear } from './tagEdit';
 import { sceneCode, sceneSupported, uiOfBox, usesSceneUi } from './boxUi';
 import { exprNames, flagNameProblem, parseAction, pyValue } from './flags';
 import { enterTransTv, imgTransSupported, isImgTrans, shaderCode, shaderOfBox, usesShaderValues, usesShaders, usesTvValues, valuesSupported } from './shader';
@@ -299,12 +299,14 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean } = {}): { co
         const ls = l.say;
         const fa = S.renpyLink ? [...fxArgs(l.fx), ...sayArgs(ls, false, tagText)] : sayArgs(ls, true, tagText);
         const tail = fa.length ? ` (${fa.join(', ')})` : '';
-        if (l.type === 'narration') return body.push(q(l.text) + tail);
+        // {clear}(지우고 이어서): 그 자리에서 같은 화자의 대사 여러 줄로 나눈다. 클릭하면 앞 글이 지워지고 이어진다
+        const parts = S.allowTextTags ? splitClear(l.text) : [l.text];
+        if (l.type === 'narration') return parts.forEach((t) => body.push(q(t) + tail));
         const c = l.who ? charById.get(l.who) : undefined;
         if (!c) {
           W.push({ level: 'error', msg: `등록되지 않은 화자 "${l.who ?? ''}" (${b.title || b.id})`, nodeId: b.id });
-          body.push(`# 화자 없음: ${l.who ?? ''}`, q(l.text));
-        } else body.push(`${c.id}${l.attr?.trim() ? ' ' + l.attr.trim() : ''} ${q(l.text)}${tail}`);
+          body.push(`# 화자 없음: ${l.who ?? ''}`, ...parts.map(q));
+        } else parts.forEach((t) => body.push(`${c.id}${l.attr?.trim() ? ' ' + l.attr.trim() : ''} ${q(t)}${tail}`));
       };
       // 그림 전환으로 셰이더를 바꾸면: 상자 첫머리의 그림 줄(배경, 보이기, 숨기기)을 전환 없이 그리고 나서
       // with screen_fx.pending_with(원래 전환)으로 앞 상자 마지막 화면 → 이 화면을 잇는다 (셰이더가 그대로면 원래 전환이 돈다)

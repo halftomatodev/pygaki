@@ -98,9 +98,17 @@ function Exits({ b, editing, tb, active, setActive }: { b: BoxNode; editing: boo
     const c = isMenu ? ops.newChoice() : ops.newBranch();
     changeThenFocus(() => update((p) => void list(p)?.splice(i + 1, 0, c as never)), 'in-' + c.id);
   };
-  // 하나 지우기 (하나는 남김). 커서는 앞 갈래(없으면 다음)로
+  // 하나 지우기. 커서는 앞 갈래(없으면 다음)로. 마지막 하나를 지우면 선택지·조건 분기 자체를 없애고
+  // "→ 다음"으로 돌린다(그 갈래가 이어져 있던 상자로 이어짐). 커서는 상자 마지막 줄로
   const remove = (i: number) => {
-    if (rows.length <= 1) return;
+    if (rows.length <= 1) {
+      const last = b.lines[b.lines.length - 1];
+      changeThenFocus(() => {
+        setActive(null);
+        update((p) => ops.setExitType(ops.findBox(p, b.id)!, 'next'));
+      }, 'in-' + (last ? last.id : 'title-' + b.id));
+      return;
+    }
     const near = rows[i - 1] ?? rows[i + 1];
     update((p) => {
       const a = list(p);
@@ -216,8 +224,7 @@ function Exits({ b, editing, tb, active, setActive }: { b: BoxNode; editing: boo
           <button className="nodrag" title={isMenu ? '아래에 새 선택지' : '아래에 새 조건'} onClick={() => addAfter(ai)}>＋</button>
           <button
             className="nodrag"
-            title={rows.length > 1 ? (isMenu ? '이 선택지 지우기 (빈 칸에서 BackSpace도 돼요)' : '이 조건 지우기') : '하나는 남겨야 해요'}
-            disabled={rows.length <= 1}
+            title={rows.length > 1 ? (isMenu ? '이 선택지 지우기 (빈 칸에서 BackSpace도 돼요)' : '이 조건 지우기') : isMenu ? '선택지 없애기 (→ 다음 상자로)' : '조건 분기 없애기 (→ 다음 상자로)'}
             onClick={() => remove(ai)}
           >
             ✕

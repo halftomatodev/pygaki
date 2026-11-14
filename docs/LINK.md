@@ -80,6 +80,7 @@ label ward.n1:  # @node:n1 도입
 | `size=30`, `font="…"`, `color="#…"`, `cps=30` | `size`, `font`, `color`, `cps` | 글자 모양과 속도 |
 | `effect="slidein"`, `effect="slidein|shake"` | `effect` | 등장 효과. 두 효과 겹치기는 `|` (pygaki 2.0, `FEATURE` 3) |
 | 글 안의 `{shader=shake}글{/shader}` | 대사 글 그대로 | 글의 일부에만 등장 효과(렌파이 텍스트 태그). 값은 `effect`와 같은 문법. 줄에 `effect`가 없으면 PyKaki가 `effect="typewriter"`를 붙여 내보내고(없으면 렌파이가 멈춤), 손으로 쓴 원고는 `say_style`이 같은 일을 함(`ui_kit` 4.4) |
+| 글 안의 `{clear}` (PyKaki 태그 상자 [지우고 이어서]) | 대사 글 그대로 | 원고에는 없다. PyKaki가 그 자리에서 같은 화자·괄호 값의 대사 여러 줄로 나눠 쓰고(걸친 짝 태그는 조각마다 닫고 다시 염), `# @l:` 표시는 첫 조각에만 붙인다. 그래서 둘째 조각부터는 게임 안 편집(대사 위치 등)이 PyKaki로 돌아가지 않는다 |
 | `box="bubble"`, `box="pill"` | `box` | 글 상자: 말풍선, 둥근 테두리 (pygaki 플러그인 `ui_kit` 4.0 `text_box.rpy`, `FEATURE` 3) |
 | `tail="top"`, `tail=None` | `tail` (`bottom` `top` `left` `right` `none`) | 말풍선 꼬리. 비우면 상자 기본(말풍선은 아래, 둥근 테두리는 없음) |
 | `box_rotate=-4` | `box_rotate` | 상자와 글 기울기 (도) |

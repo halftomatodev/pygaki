@@ -1,4 +1,4 @@
-// 태그 상자: 대사·내레이션 글 칸에 커서가 있으면 뜨는 작은 창. 고른 글을 렌파이 텍스트 태그로 감싸거나 멈춤 태그를 넣는다
+// 태그 상자: 대사·내레이션 글 칸에 커서가 있으면 뜨는 작은 창. 고른 글을 렌파이 텍스트 태그로 감싸거나 진행 태그(멈춤, 지우고 이어서)를 넣는다
 // 상자 안 편집에서는 상자 오른쪽 위 바깥에, 오른쪽 편집 탭에서는 글자 효과 칸 위쪽에 붙는다
 import { useEffect, useReducer, useRef, useState } from 'react';
 import { create } from 'zustand';
@@ -262,6 +262,7 @@ const TIPS: Record<string, Tip> = {
   w05: { label: '잠깐', code: '{w=0.5}', desc: '여기서 0.5초 쉬었다가 저절로 이어서 나와요. 숫자는 바꿀 수 있어요', demo: '잠깐 쉬었다가{w=0.8} 저절로 이어져요' },
   p: { label: '줄 바꾸며 대기', code: '{p}', desc: '클릭할 때까지 기다리고, 줄을 바꿔서 이어 나와요', demo: '첫 줄이 나오고{p}줄을 바꿔 이어져요' },
   nw: { label: '자동 넘김', code: '{nw}', desc: '글이 다 나오면 클릭 없이 다음 줄로 넘어가요. 글 끝에 넣어요', demo: '다 나오면 기다리지 않고{nw}', next: '다음 줄이 바로 나와요' },
+  clear: { label: '지우고 이어서', code: '{clear}', desc: '여기까지 나오면 클릭을 기다리고, 앞 글을 지운 뒤 같은 사람이 이어서 말해요. 원고에는 같은 화자의 대사 여러 줄로 나눠 내보내요', demo: '앞 글은 클릭하면{clear}지워지고 여기부터 새로 나와요' },
   fast: { label: '여기까지 한 번에', code: '{fast}', desc: '이 앞의 글은 한 번에 보이고, 뒤의 글부터 한 글자씩 나와요', demo: '앞은 한 번에 보이고{fast} 여기부터 한 글자씩' },
   space: { label: '가로 띄우기', code: '{space=30}', desc: '커서 자리에 가로로 빈 자리를 넣어요. 숫자는 픽셀', demo: '가로로{space=60}띄웠어요' },
   vspace: { label: '세로 띄우기', code: '{vspace=30}', desc: '여기서 줄을 바꾸고 세로로 빈 자리를 넣어요. 숫자는 픽셀', demo: '첫 줄{vspace=24}세로로 띄운 줄' },
@@ -492,12 +493,13 @@ export function TagBar({ targetId, className = '' }: { targetId: string; classNa
       </div>
       <div className="tb-card" style={{ '--hue': 28 } as React.CSSProperties}>
         <div className="tb-row">
-          <span className="tb-chip">멈춤</span>
+          <span className="tb-chip">진행</span>
           {ins('{w}', 'w')}
           {ins('{w=0.5}', 'w05', '0.5')}
           {ins('{p}', 'p')}
           {ins('{nw}', 'nw')}
           {ins('{fast}', 'fast')}
+          {ins('{clear}', 'clear')}
         </div>
       </div>
       <div className="tb-card" style={{ '--hue': 150 } as React.CSSProperties}>
