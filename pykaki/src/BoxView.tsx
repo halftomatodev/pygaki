@@ -94,6 +94,67 @@ export const BoxView = memo(function BoxView({ id, selected }: NodeProps) {
             + 선택지
           </button>
         )}
+        {b.exit.type === 'if' && (
+          <>
+            {b.exit.branches.map((c, i) => (
+              <div className="choice branch" key={c.id} data-part={c.id}>
+                <span className="br-kw">{i === 0 ? '만약' : '아니고'}</span>
+                {editing ? (
+                  <input
+                    id={'in-' + c.id}
+                    className="nodrag ed br-cond"
+                    value={c.cond}
+                    placeholder="조건 (예: love >= 5)"
+                    spellCheck={false}
+                    onKeyDown={onEsc}
+                    onChange={(e) =>
+                      update((p) => {
+                        const x = ops.findBox(p, b.id)!.exit;
+                        if (x.type === 'if') x.branches[i].cond = e.target.value;
+                      }, 'branch' + c.id)
+                    }
+                  />
+                ) : (
+                  <span className="br-cond">{c.cond || <i className="todo">(빈 조건)</i>}</span>
+                )}
+                {editing && b.exit.type === 'if' && b.exit.branches.length > 1 && (
+                  <button
+                    className="nodrag br-del"
+                    title="이 조건 지우기"
+                    onClick={() =>
+                      update((p) => {
+                        const x = ops.findBox(p, b.id)!.exit;
+                        if (x.type === 'if') x.branches.splice(i, 1);
+                      })
+                    }
+                  >
+                    ✕
+                  </button>
+                )}
+                <Handle type="source" id={'b:' + c.id} position={Position.Right} />
+              </div>
+            ))}
+            {editing && (
+              <button
+                className="nodrag faint-add"
+                onClick={() => {
+                  const c = ops.newBranch();
+                  changeThenFocus(() => update((p) => {
+                    const x = ops.findBox(p, b.id)!.exit;
+                    if (x.type === 'if') x.branches.push(c);
+                  }), 'in-' + c.id);
+                }}
+              >
+                + 조건
+              </button>
+            )}
+            <div className="choice branch else" data-part="else">
+              <span className="br-kw">그 밖</span>
+              {!b.exit.else && <span className="todo"> (연결 안 됨)</span>}
+              <Handle type="source" id="else" position={Position.Right} />
+            </div>
+          </>
+        )}
         {b.exit.type === 'call' && (
           <>
             <div className="exit-label call">

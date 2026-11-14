@@ -238,6 +238,7 @@ export function ExitEditor({ b, upd }: { b: BoxNode; upd: Upd }) {
         <select value={e.type} onChange={(ev) => upd((x) => ops.setExitType(x, ev.target.value as ExitType))}>
           <option value="next">→ 다음 상자로 (jump)</option>
           <option value="menu">◆ 선택지 (menu)</option>
+          <option value="if">◇ 조건 분기 (if)</option>
           <option value="call">⤷ call 후 계속</option>
           <option value="return">■ 끝 (return)</option>
         </select>
@@ -280,6 +281,24 @@ export function ExitEditor({ b, upd }: { b: BoxNode; upd: Upd }) {
               <PickBand where={{ line: last }} tab="choice" what="선택지" />
             </>
           )}
+        </>
+      )}
+      {e.type === 'if' && (
+        <>
+          {e.branches.map((c, i) => (
+            <div className="choice-ed" key={c.id}>
+              <span className="br-kw">{i === 0 ? '만약' : '아니고'}</span>
+              <input id={'ed-' + c.id} className="br-cond" spellCheck={false} value={c.cond} placeholder="조건 (예: love >= 5)" onChange={(ev) => upd((x) => void (x.exit.type === 'if' && (x.exit.branches[i].cond = ev.target.value)), 'branch' + c.id)} />
+              <TargetSelect self={b.id} value={c.target} onChange={(v) => upd((x) => ops.setLink(x, 'b:' + c.id, v))} />
+              <button disabled={i === 0} onClick={() => upd((x) => { if (x.exit.type === 'if') { const cs = x.exit.branches; cs.splice(i - 1, 0, ...cs.splice(i, 1)); } })}>↑</button>
+              <button disabled={e.branches.length < 2} onClick={() => upd((x) => void (x.exit.type === 'if' && x.exit.branches.splice(i, 1)))}>✕</button>
+            </div>
+          ))}
+          <button onClick={() => upd((x) => void (x.exit.type === 'if' && x.exit.branches.push(ops.newBranch())))}>+ 조건 추가</button>
+          <div className="row">
+            <label>그 밖<Hint text="위 조건이 모두 아니면 이 상자로. 렌파이 조건식을 그대로 써요 (예: love >= 5, met_alice, not rich)" topic="흐름 잇기" /></label>
+            <TargetSelect self={b.id} value={e.else} onChange={(v) => upd((x) => ops.setLink(x, 'else', v))} />
+          </div>
         </>
       )}
       {e.type === 'return' && <p className="tip">여기서 끝 (call로 불렸으면 부른 곳으로)</p>}

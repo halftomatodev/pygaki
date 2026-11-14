@@ -51,7 +51,7 @@ label ward.n1:
 | `# @node:ID 제목` | 상자의 시작 | 그 줄이 어느 상자인지 찾을 때 |
 | `label 그룹.ID:` | 모든 상자에 붙는 로컬 label | 실행 중 지금 상자를 알 때 (`config.label_callbacks`) |
 | `# @l:ID` | 바로 다음 줄이 그 id의 대본 줄 | 줄 넣기, 줄 바꾸기의 기준 |
-| `# @end:ID` | 여기부터 상자의 나가는 부분(선택지, jump, return) | 선택지 앞에 줄을 넣을 때 |
+| `# @end:ID` | 여기부터 상자의 나가는 부분(선택지, 조건 분기 `if`, jump, return) | 선택지 앞에 줄을 넣을 때 |
 
 **줄 끝 표시** (pygaki 플러그인 `ui_kit` 4.5, PyKaki `generateRpy`의 `endMarks`): 연결한 게임의 `game/ui_kit/engine/script_edit.rpy`에 `PK_END_MARKS = True`가 있으면, PyKaki는 표시를 윗줄에 따로 두지 않고 그 줄 끝에 빈칸 두 개를 두고 붙입니다. 뜻은 위 표와 같습니다.
 

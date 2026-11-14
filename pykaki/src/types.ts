@@ -61,8 +61,16 @@ export interface Choice {
   actions: string[]; // 2단계(플래그)용, 지금은 비어 있음
 }
 
+// 조건 분기의 갈래 하나 (FEATURE 13). cond는 렌파이 조건식 그대로 (예: love >= 5)
+export interface Branch {
+  id: string;
+  cond: string;
+  target: string | null;
+}
+
 export type Exit =
   | { type: 'next'; target: string | null }
+  | { type: 'if'; branches: Branch[]; else: string | null }
   | { type: 'menu'; choices: Choice[] }
   | { type: 'call'; target: string | null; then: string | null }
   | { type: 'return' };

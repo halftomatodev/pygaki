@@ -148,9 +148,16 @@ export function goNextBox(fromId: string) {
   const s = useStore.getState();
   const b = ops.findBox(s.project, fromId);
   if (!b) return;
+  // 선택지·조건 분기: 아직 안 이어진 첫 갈래(없으면 첫 갈래)로
+  if (b.exit.type === 'menu' || b.exit.type === 'if') {
+    const links = ops.exitLinks(b);
+    const l = links.find((x) => !x.target) ?? links[0];
+    if (!l) return;
+    return l.target ? editBox(l.target, null) : continueInNewBox(fromId, l.handle);
+  }
   const next = ops.fallTarget(b);
   if (next && ops.findBox(s.project, next)) return editBox(next, null);
   if (b.exit.type === 'next') return continueInNewBox(fromId, 'next');
   if (b.exit.type === 'call') return continueInNewBox(fromId, 'then');
-  s.say(b.exit.type === 'menu' ? '선택지는 오른쪽 "다음 흐름"에서 골라서 이어 써요' : '이 상자는 여기서 끝나요 (return)');
+  s.say('이 상자는 여기서 끝나요 (return)');
 }

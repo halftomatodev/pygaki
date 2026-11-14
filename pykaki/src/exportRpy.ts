@@ -313,6 +313,21 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean } = {}): { co
             body.push(I + I + (c.target ? `jump ${ref(c.target)}` : todo));
           }
         }
+      } else if (e.type === 'if') {
+        // 조건 분기: 렌파이 if / elif / else. 그 밖이 비어 있으면 아래 label로 흘러가지 않게 return
+        const name = b.title || b.id;
+        if (!e.branches.length) W.push({ level: 'error', msg: `조건이 없어요 (${name})`, nodeId: b.id });
+        e.branches.forEach((c, i) => {
+          const cond = oneLine(c.cond).trim().replace(/:\s*$/, '');
+          if (!cond) W.push({ level: 'error', msg: `조건 칸이 비어 있어요 (${name})`, nodeId: b.id });
+          if (!c.target) W.push({ level: 'warn', msg: `조건 "${cond || '(빈 조건)'}"의 갈래가 연결되지 않았어요 (${name})`, nodeId: b.id });
+          body.push(`${i === 0 ? 'if' : 'elif'} ${cond || 'False  # TODO: 조건 없음'}:`);
+          body.push(I + (c.target ? `jump ${ref(c.target)}` : todo));
+        });
+        if (!e.else) W.push({ level: 'warn', msg: `조건 분기의 "그 밖"이 연결되지 않았어요 (${name})`, nodeId: b.id });
+        const rest = flow(e.else);
+        // 그 밖이 바로 다음 상자면 else 없이 아래로 이어진다
+        if (rest.length) body.push(...(e.branches.length ? ['else:', ...rest.map((x) => I + x)] : rest));
       } else if (e.type === 'call') {
         if (!e.target) {
           W.push({ level: 'error', msg: `call 대상이 없어요 (${b.title || b.id})`, nodeId: b.id });

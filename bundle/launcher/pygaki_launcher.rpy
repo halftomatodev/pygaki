@@ -47,7 +47,29 @@ init python:
         if not os.path.exists(PYGAKI_GUIDE):
             interface.error(KO("안내서를 찾지 못했어요:") + "\n[pygaki_guide!q]", label=None, pygaki_guide=PYGAKI_GUIDE)
             return
-        os.startfile(PYGAKI_GUIDE)
+        if not pygaki_open_in_browser(PYGAKI_GUIDE):
+            os.startfile(PYGAKI_GUIDE)
+
+    ## .html을 VS Code 같은 편집기가 맡고 있어도 브라우저로 열리게, 윈도우에 정해 둔 기본 브라우저
+    ## (https 주소를 여는 프로그램)를 찾아 file 주소를 넘긴다. 못 찾으면 False (그때는 파일에 붙은 프로그램으로)
+    def pygaki_open_in_browser(path):
+        try:
+            import winreg
+            from urllib.request import pathname2url
+            key = r"Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice"
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, key) as k:
+                progid = winreg.QueryValueEx(k, "ProgId")[0]
+            with winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, progid + r"\shell\open\command") as k:
+                cmd = winreg.QueryValueEx(k, "")[0]
+            url = "file:" + pathname2url(os.path.abspath(path))
+            if "%1" in cmd:
+                cmd = cmd.replace("%1", url)
+            else:
+                cmd = cmd + ' "' + url + '"'
+            subprocess.Popen(cmd)
+            return True
+        except Exception:
+            return False
 
     ## 런처 언어가 영어여도 한글이 네모로 나오지 않게 SDK의 한글 글꼴로 적는다
     def KO(s):

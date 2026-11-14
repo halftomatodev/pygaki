@@ -1,11 +1,11 @@
 // 글을 고치는 동안 상자 오른쪽에 붙는 "다음 흐름" 창.
-// 네 가지만: 다음 상자로 / 끝(return) / 선택지 / 다음 상자로 이어 쓰기. 어디로 이어지는지는 캔버스에서 선을 끌어 붙인다
+// 다섯 가지: 다음 상자로 / 끝(return) / 선택지 / 조건 분기 / 다음 상자로 이어 쓰기. 어디로 이어지는지는 캔버스에서 선을 끌어 붙인다
 // 단축키(기본 Alt+Enter)로 들어가 ↑↓(←→)·Enter·Esc로 키보드만으로 고른다
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useStore } from './store';
 import * as ops from './ops';
 import type { BoxNode, ExitType } from './types';
-import { continueInNewBox, editBox, focusField, goNextBox } from './actions';
+import { continueInNewBox, focusField, goNextBox } from './actions';
 import { hit, keyOf } from './prefs';
 
 interface Item {
@@ -20,6 +20,7 @@ const TYPES: [ExitType, string][] = [
   ['next', '→ 다음 상자로'],
   ['return', '■ 끝 (return)'],
   ['menu', '◆ 선택지'],
+  ['if', '◇ 조건 분기'],
 ];
 
 export function FlowMenu({ b }: { b: BoxNode }) {
@@ -78,19 +79,20 @@ export function FlowMenu({ b }: { b: BoxNode }) {
     close(false);
     if (x?.exit.type === 'menu' && x.exit.choices[0]) focusField('in-' + x.exit.choices[0].id);
   };
+  // 조건 분기로 바꾸면(이미 조건 분기면 그대로) 첫 조건 칸에서 조건을 쓴다
+  const toIf = () => {
+    if (b.exit.type !== 'if') update((p) => ops.setExitType(ops.findBox(p, b.id)!, 'if'));
+    const x = ops.findBox(useStore.getState().project, b.id);
+    close(false);
+    if (x?.exit.type === 'if' && x.exit.branches[0]) focusField('in-' + x.exit.branches[0].id);
+  };
   // 다음 상자로 이어 쓰기: 이어진 상자가 있으면 그리로, 없으면 새 상자를 만들어 잇는다.
-  // 끝(return)이면 다음 상자로 바꾸고, 선택지면 아직 안 이어진 첫 선택지(없으면 첫 선택지)로
+  // 끝(return)이면 다음 상자로 바꾸고, 선택지·조건 분기면 아직 안 이어진 첫 갈래(없으면 첫 갈래)로
   const goOn = () => {
     close(false);
     if (b.exit.type === 'return') {
       update((p) => ops.setExitType(ops.findBox(p, b.id)!, 'next'));
       return continueInNewBox(b.id, 'next');
-    }
-    if (b.exit.type === 'menu') {
-      const links = ops.exitLinks(b);
-      const l = links.find((x) => !x.target) ?? links[0];
-      if (!l) return;
-      return l.target ? editBox(l.target, null) : continueInNewBox(b.id, l.handle);
     }
     goNextBox(b.id);
   };
@@ -100,7 +102,7 @@ export function FlowMenu({ b }: { b: BoxNode }) {
       key: 'type:' + t,
       label,
       on: b.exit.type === t,
-      run: t === 'menu' ? toMenu : () => (b.exit.type !== t && update((p) => ops.setExitType(ops.findBox(p, b.id)!, t)), close()),
+      run: t === 'menu' ? toMenu : t === 'if' ? toIf : () => (b.exit.type !== t && update((p) => ops.setExitType(ops.findBox(p, b.id)!, t)), close()),
     })),
     { key: 'go', label: '↪ 다음 상자로 이어 쓰기', hint: keyOf('nextBox'), run: goOn },
   ];
@@ -153,16 +155,15 @@ export function FlowMenu({ b }: { b: BoxNode }) {
       />
       <div className="fm-list">
         {items.map((it, i) => (
-          <div key={it.key}>
-            <div
-              className={'fm-item' + (active && i === at ? ' cur' : '') + (it.on ? ' on' : '')}
-              onMouseEnter={() => active && setCur(i)}
-              onClick={() => it.run()}
-            >
-              <span className="fm-dot">{it.on ? '●' : ''}</span>
-              <span className="fm-label">{it.label}</span>
-              {it.hint && <span className="fm-hint">{it.hint}</span>}
-            </div>
+          <div
+            key={it.key}
+            className={'fm-item' + (it.key === 'go' ? ' fm-act' : '') + (active && i === at ? ' cur' : '') + (it.on ? ' on' : '')}
+            onMouseEnter={() => active && setCur(i)}
+            onClick={() => it.run()}
+          >
+            <span className="fm-dot">{it.on ? '●' : ''}</span>
+            <span className="fm-label">{it.label}</span>
+            {it.hint && <span className="fm-hint">{it.hint}</span>}
           </div>
         ))}
       </div>

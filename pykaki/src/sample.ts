@@ -116,6 +116,13 @@ export function normalizeProject(raw: any): Project {
     else if (e.type === 'menu') {
       e.choices = Array.isArray(e.choices) ? e.choices : [];
       for (const c of e.choices) c.target = live(c.target);
+    } else if (e.type === 'if') {
+      e.branches = Array.isArray(e.branches) ? e.branches : [];
+      for (const c of e.branches) {
+        c.target = live(c.target);
+        c.cond = typeof c.cond === 'string' ? c.cond : '';
+      }
+      e.else = live(e.else);
     } else if (e.type === 'call') {
       e.target = live(e.target);
       e.then = live(e.then);

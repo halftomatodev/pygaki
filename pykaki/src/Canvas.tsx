@@ -1,3 +1,4 @@
+import type { BoxNode } from './types';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Hint } from './Help';
 import {
@@ -96,6 +97,12 @@ export function Canvas() {
 
   const allNodes = useMemo(() => [...frames, ...nodes], [frames, nodes]);
 
+  // 조건 분기 선에는 조건을 짧게 적는다
+  const condLabel = (b: BoxNode, handle: string) => {
+    const c = b.exit.type === 'if' ? b.exit.branches.find((x) => 'b:' + x.id === handle) : null;
+    const t = c?.cond.trim() || '(빈 조건)';
+    return t.length > 18 ? t.slice(0, 17) + '…' : t;
+  };
   const edges = useMemo<Edge[]>(() => {
     const groupOf = new Map(project.nodes.map((b) => [b.id, b.group]));
     const res: Edge[] = [];
@@ -107,7 +114,7 @@ export function Canvas() {
         res.push({
           id, source: b.id, sourceHandle: l.handle, target: l.target, targetHandle: 'in',
           className: cls.join(' '), selected: id === selEdge,
-          label: l.kind === 'call' ? 'call' : l.kind === 'then' ? '복귀 후' : undefined,
+          label: l.kind === 'call' ? 'call' : l.kind === 'then' ? '복귀 후' : l.kind === 'else' ? '그 밖' : l.kind === 'if' ? condLabel(b, l.handle) : undefined,
           markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16 },
         });
       }

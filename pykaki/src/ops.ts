@@ -1,8 +1,8 @@
 // 프로젝트를 고치는 함수들. 모두 store.update() 안에서 복사본(draft)에 대해 호출한다.
-import type { BoxNode, Choice, ExitType, Line, Project } from './types';
+import type { BoxNode, Branch, Choice, ExitType, Line, Project } from './types';
 import { PALETTE, uid } from './util';
 
-export type LinkKind = 'next' | 'choice' | 'call' | 'then';
+export type LinkKind = 'next' | 'choice' | 'call' | 'then' | 'if' | 'else';
 export interface Link { handle: string; target: string | null; kind: LinkKind }
 
 // 상자에서 나가는 선 목록. handle은 React Flow의 sourceHandle id와 같다.
@@ -10,6 +10,11 @@ export function exitLinks(b: BoxNode): Link[] {
   const e = b.exit;
   if (e.type === 'next') return [{ handle: 'next', target: e.target, kind: 'next' }];
   if (e.type === 'menu') return e.choices.map((c) => ({ handle: 'c:' + c.id, target: c.target, kind: 'choice' as const }));
+  if (e.type === 'if')
+    return [
+      ...e.branches.map((c) => ({ handle: 'b:' + c.id, target: c.target, kind: 'if' as const })),
+      { handle: 'else', target: e.else, kind: 'else' as const },
+    ];
   if (e.type === 'call')
     return [
       { handle: 'call', target: e.target, kind: 'call' },
@@ -22,6 +27,7 @@ export function exitLinks(b: BoxNode): Link[] {
 export function fallTarget(b: BoxNode) {
   if (b.exit.type === 'next') return b.exit.target;
   if (b.exit.type === 'call') return b.exit.then;
+  if (b.exit.type === 'if') return b.exit.else; // 조건이 모두 아니면 아래로 이어진다
   return null;
 }
 
@@ -30,7 +36,11 @@ export function setLink(b: BoxNode, handle: string, target: string | null) {
   if (handle === 'next' && e.type === 'next') e.target = target;
   else if (handle === 'call' && e.type === 'call') e.target = target;
   else if (handle === 'then' && e.type === 'call') e.then = target;
-  else if (handle.startsWith('c:') && e.type === 'menu') {
+  else if (handle === 'else' && e.type === 'if') e.else = target;
+  else if (handle.startsWith('b:') && e.type === 'if') {
+    const c = e.branches.find((c) => 'b:' + c.id === handle);
+    if (c) c.target = target;
+  } else if (handle.startsWith('c:') && e.type === 'menu') {
     const c = e.choices.find((c) => 'c:' + c.id === handle);
     if (c) c.target = target;
   }
@@ -83,6 +93,8 @@ export const newChoice = (target: string | null = null, text = ''): Choice => ({
   id: uid('c'), text, target, mode: 'jump', condition: null, actions: [],
 });
 
+export const newBranch = (target: string | null = null, cond = ''): Branch => ({ id: uid('b'), cond, target });
+
 export function addGroup(p: Project, name?: string) {
   let i = p.labels.length + 1;
   while (p.labels.some((l) => l.name === 'scene_' + i)) i++;
@@ -134,6 +146,7 @@ export function setExitType(b: BoxNode, t: ExitType) {
   const first = exitLinks(b).map((l) => l.target).find(Boolean) ?? null;
   if (t === 'next') b.exit = { type: 'next', target: first };
   else if (t === 'menu') b.exit = { type: 'menu', choices: [newChoice(first), newChoice(null)] };
+  else if (t === 'if') b.exit = { type: 'if', branches: [newBranch(first)], else: null };
   else if (t === 'call') b.exit = { type: 'call', target: first, then: null };
   else b.exit = { type: 'return' };
 }

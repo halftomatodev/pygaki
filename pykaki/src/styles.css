@@ -262,12 +262,21 @@ input.box-title.ed { flex: 1; min-width: 0; }
 .side-flow.active { background: color-mix(in srgb, var(--panel) 78%, transparent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 45%, transparent), 0 8px 30px rgba(0, 0, 0, 0.14); }
 .side-flow .side-title { display: flex; justify-content: space-between; font-weight: 700; color: var(--muted); font-size: 11px; }
 .fm-key { font-weight: 400; font-family: var(--mono); opacity: 0.8; }
-.fm-list { max-height: 300px; overflow: auto; margin: 2px -4px; padding: 0 4px; }
+/* 흐름마다 카드 한 장. 지금 고른 흐름은 테두리를 강조색으로 */
+.fm-list { max-height: 300px; overflow: auto; margin: 3px -4px 2px; padding: 2px 4px; display: flex; flex-direction: column; gap: 5px; }
 .fm-sec { font-size: 10.5px; color: var(--muted); margin: 6px 0 1px; }
-.fm-item { display: flex; align-items: baseline; gap: 4px; padding: 3px 6px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+.fm-item {
+  display: flex; align-items: baseline; gap: 4px; padding: 6px 8px; border-radius: 8px; cursor: pointer; font-size: 12px;
+  background: color-mix(in srgb, var(--panel) 90%, transparent);
+  border: 1px solid color-mix(in srgb, var(--text) 12%, transparent); box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
 .fm-item:hover { background: var(--hover); }
-.fm-item.cur { background: var(--accent); color: var(--panel); }
+.fm-item.on { border-color: color-mix(in srgb, var(--accent) 60%, transparent); }
+.fm-item.cur { background: var(--accent); border-color: var(--accent); color: var(--panel); }
 .fm-item.on .fm-label { font-weight: 700; }
+/* 이어 쓰기는 흐름을 고르는 것이 아니라 움직이는 일이라 조금 떼어 둔다 */
+.fm-item.fm-act { margin-top: 4px; border-style: dashed; }
+.fm-item.fm-act.cur { border-style: solid; }
 .fm-dot { width: 9px; flex: none; font-size: 8px; color: var(--accent); }
 .fm-item.cur .fm-dot, .fm-item.cur .fm-hint { color: inherit; }
 .fm-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -280,6 +289,17 @@ input.box-title.ed { flex: 1; min-width: 0; }
 .todo { color: var(--danger); font-style: normal; }
 .box-exit { padding: 5px 8px 8px; font-size: 11.5px; color: var(--muted); }
 .exit-label.call { color: #7c5cd6; }
+/* 조건 분기 갈래: 선택지 줄 모양에 "만약 / 아니고 / 그 밖" 머리와 조건식 */
+.choice.branch { display: flex; align-items: baseline; gap: 5px; }
+.br-kw { flex: none; font-size: 10.5px; font-weight: 700; color: #c26a00; }
+.br-kw::before { content: '◇ '; }
+.br-cond { flex: 1; min-width: 0; font-family: var(--mono); font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.choice.branch input.br-cond { width: auto; }
+.choice.branch.else { color: var(--muted); }
+.br-del { flex: none; font-size: 10px; padding: 0 3px; opacity: 0.5; }
+.br-del:hover { opacity: 1; }
+.react-flow__edge.k-if .react-flow__edge-path, .react-flow__edge.k-else .react-flow__edge-path { stroke: #d08a2a; }
+.react-flow__edge.k-else .react-flow__edge-path { stroke-dasharray: 5 3; }
 .choice { position: relative; background: color-mix(in srgb, var(--panel) calc(var(--box-strength) * 100%), transparent); border: 1px solid var(--box-border); border-radius: 6px; padding: 3px 14px 3px 7px; margin-top: 4px; color: var(--text); }
 .react-flow__handle { width: 9px; height: 9px; background: var(--muted); border: 2px solid var(--panel); }
 .react-flow__handle.h-call { background: #7c5cd6; }
@@ -790,7 +810,7 @@ fieldset.plain:disabled { opacity: 0.4; }
   --hue: 215; display: flex; flex-direction: column; gap: 4px; padding: 5px 7px;
   background: color-mix(in srgb, var(--panel) 90%, transparent);
   -webkit-backdrop-filter: blur(10px) saturate(1.2); backdrop-filter: blur(10px) saturate(1.2);
-  border: 1px solid color-mix(in srgb, var(--text) 12%, transparent); border-left: 3px solid hsl(var(--hue) 70% 58% / 0.75); border-radius: 9px;
+  border: 1px solid color-mix(in srgb, var(--text) 12%, transparent); border-radius: 9px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 .tb-chip {
