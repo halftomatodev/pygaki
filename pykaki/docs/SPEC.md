@@ -65,7 +65,7 @@
   "version": 1,
   "project": { "title": "내 게임", "startNode": "n1" },
   "characters": [{ "id": "a", "name": "앨리스", "color": "#ff8fb1" }],
-  "variables": [],                          // 2단계(플래그)용 자리
+  "variables": [{ "id": "v1", "name": "love", "kind": "int", "init": 0, "note": "호감" }],  // 플래그 (FEATURE 14). kind bool | int | str
   "labels": [{ "id": "g1", "name": "scene_rain", "title": "비 오는 날", "color": "#dbeafe", "entry": "n1" }],
   "layout": { "direction": "TB" },          // TB | LR
   "settings": { "escapeBrackets": true, "allowTextTags": true, "escapePercent": true, "renpyLink": false },
@@ -98,11 +98,17 @@
 - **대사 줄의 `say`** (`SayStyle`): `size` `font` `color` `cps` `effect` `box` `tail` `box_rotate` `name_size` `name_font` `name_color`는 PyKaki에서 고친다. `effect`는 두 효과를 `|`로 겹칠 수 있다(`slidein|shake`). `box`는 글 상자(`bubble` 말풍선, `pill` 둥근 테두리, pygaki 플러그인 `ui_kit` 4.0)이고 연결을 켰을 때만 내보낸다. 미리보기는 CSS로 비슷하게 그린다(`.sbox`, 셰이더 효과일 때는 기울기를 안 보여 줌). `x` `y` `name_x` `name_y`는 showpy에서 받아 적은 값을 보여 주고 지우기만 한다. 연결을 켜면 짧은 이름으로(`sayArgs`), 끄면 플러그인 없이 동작하는 렌파이 원래 이름(`what_size`, `what_slow_cps`, `what_textshader` 등)으로 내보낸다. 모두 선택 칸이라 예전 파일은 그대로 열린다.
 - **나가는 방식(exit)**:
   - `next` `{ target }`: 다음 상자로
-  - `menu` `{ choices: [{ id, text, target, mode:"jump", condition:null, actions:[] }] }`: 선택지
+  - `menu` `{ choices: [{ id, text, target, mode:"jump", condition, actions }] }`: 선택지. condition은 보이는 조건(렌파이 조건식, 없으면 null), actions는 고르면 바꾸는 식 목록(`love += 1`, `met_alice = True`) (`FEATURE` 14)
   - `if` `{ branches: [{ id, cond, target }], else }`: 조건 분기(`FEATURE` 13). cond는 렌파이 조건식 그대로, 위에서부터 맞는 갈래로, 모두 아니면 else로
   - `call` `{ target, then }`: target을 call하고, 돌아오면 then으로. then이 없으면 return
   - `return`: 끝
-- `condition`, `actions`, `variables`는 2단계(플래그)를 위해 비워 둔 자리다. 지금은 쓰지 않는다.
+- **플래그** (세션 50, `FEATURE` 14, `src/flags.ts`, `src/FlagFields.tsx`): `variables`는 `{ id, name, kind, init, note? }`. 줄 종류 `flag`는 `text`에 바꾸는 식 하나(`name op value`, op는 `=` `+=` `-=`). `normalizeProject`가 예전 빈 배열·모양이 다른 값을 맞추고(`normalizeFlags`, 종류가 없으면 init으로 정함), 선택지의 condition(빈 글은 null)·actions(글만)를 맞춘다.
+  - 오른쪽 칸 맨 위 **플래그 카드**(`FlagsCard`, 카드 id `i-flags`, 상자를 고르지 않아도 늘 보임): 이름(입력을 마치면 확정, `renameFlag`가 조건·고르면·바꾸기 줄의 이름도 바꿈. 명령 줄과 글자 안은 그대로), 종류(바꾸면 `fitInit`), 처음 값(켜짐/꺼짐은 고르기, 숫자, 글), 메모, 쓰인 곳(`flagUses`: 바꾸기 줄·선택지 고르면은 ✎, 선택지 조건·조건 분기·명령 줄은 ?, 누르면 그 상자를 골라 보여 줌). 이름 검사 `flagNameProblem`: 파이썬 이름, 예약어·파이썬 내장 이름, 연결을 켜면 플러그인 이름, 캐릭터 id, 다른 플래그.
+  - 조건 칸 `CondInput`(선택지 보이는 조건, 조건 분기 갈래): 글 칸 + [플래그 ▾](커서 자리에 넣음. 켜짐/꺼짐은 이름, 숫자는 `이름 >= 1`, 글자는 `이름 == ""`, 앞에 식이 있으면 `and`로 잇기). 플래그 카드와 캐릭터 id에 없는 이름(`exprNames`: 글자 안, 점 뒤, 함수 부르기, 파이썬 키워드·내장 이름은 뺌)이 있으면 빨간 테두리.
+  - 바꾸기 칸 `ActionInput`: [플래그][어떻게][값]. 켜짐/꺼짐은 켜기 `True`·끄기 `False`·뒤집기 `not 이름`, 숫자는 더하기·빼기·정하기와 숫자, 글자는 글(따옴표로 감쌈). `{ }`나 이 모양으로 못 읽는 식, 카드에 없는 플래그면 글 칸으로 그대로 고친다.
+  - 선택지 줄(오른쪽 칸 `ChoiceRow`)의 **⚑**: 보이는 조건과 고르면 목록을 펼침(값이 있으면 처음부터 펼침, 단추는 주황). 상자 안 선택지에는 `if 조건`(주황), `⚑ love +1`(초록) 작은 표시(`ChoiceFlags`, `actionWords`).
+  - 바꾸기 줄: 화자 칸 "기타"의 ⚑ 플래그 바꾸기, 대사 카드 [+ 플래그 바꾸기](첫 플래그로 채움). 상자 안에서는 연출 줄처럼 `⚑ love +1`로 그리고, 고르면 오른쪽 옆 칸에 `ActionInput`.
+  - 내보내기: 캐릭터 `define` 아래에 `default 이름 = 값  # 메모`(세이브를 불러오면 세이브 값이 이김). 바꾸기 줄은 `$ 식`(비면 `pass`와 경고). 선택지는 `"문구" if 조건:`, 그 아래 `$ 식`들, 다음 `jump`. 검사: 플래그 이름 오류, 식으로 못 읽는 바꾸기는 오류, 카드에 없는 이름은 경고(조건 분기 조건도).
 - id는 툴이 만든다. 상자는 `n01`, `n02` … 만든 순서 번호(`ops.nextBoxId`: 지금 있는 가장 큰 번호 다음, 지운 번호는 다시 안 씀, 99를 넘으면 `n100`. 한번 붙으면 안 바뀜. 예전 상자의 `n` + 영숫자 6자는 그대로 둠), 줄·선택지·조건 갈래·label은 `l`/`c`/`b`/`g` + 영숫자 6자. 로컬 label 이름으로도 쓰이므로 영문 식별자 규칙을 지킨다.
 - 불러올 때 `normalizeProject()`가 빠진 값을 채우고, 그룹이 없는 상자를 첫 그룹에 넣는다.
 - **셰이더** (`BoxNode.shader`, `LabelGroup.shader`, `src/shader.ts`, `FEATURE` 5): `{ a, b, in?, out? }`. `a` `b`는 pygaki 플러그인 `screen_fx.shaders`의 1번, 2번 이름(`none`, `ascii`, `vhs_crt` …), `in` `out`은 전환. 고를 수 있는 것은 `tv`와 `none`(없음, `transition=None`) 둘이고(`SHADER_TRANS`), 새로 정하면 둘 다 `tv`로 시작한다(`newShader`). 예전 판의 `fade`와 빈 값(게임 설정대로)은 대본에 그대로 두고 그대로 내보내며, 칸에 "예전 값"으로 알린다(`oldTransLabel`). 상자에 없으면 label 것, label에도 없으면 없음(`shaderOfBox`). 값이 없는 것이 기본이라 예전 파일은 그대로 열린다.
@@ -195,6 +201,7 @@
   - **옆에 붙는 단추**: 지금 줄(`active`, 포커스를 받은 줄)의 높이에 맞춰 상자 왼쪽 바깥에 손잡이·줄 종류·＋·✕ 묶음(세션 36부터 대사 줄에 표정 칸 없음, 예전 `attr`이 있으면 빼기 단추 `OldAttr`만), 연출 줄이면 오른쪽 바깥에 `StageFields` 카드가 붙는다. 줄을 옮기면 `top`이 0.22초 동안 따라 움직인다. 연출 줄은 줄 자체가 `tabIndex`로 포커스를 받는다.
   - **다음 흐름 창** (`src/FlowMenu.tsx`): 편집 중 상자 오른쪽 바깥, 다음 흐름 줄 높이(연출 입력칸과 겹치면 그 아래. 상자 안이 바뀌면 `MutationObserver`로 다시 잰다)에 붙는 반투명(바탕 62%, 배경 흐림) 창. 항목은 다섯(세션 48, 사용자 그림. 세션 49에 조건 분기를 더하고 항목마다 카드 `.fm-item`, 고른 흐름은 테두리 강조, 이어 쓰기는 떨어진 점선 카드 `.fm-act`): 다음 상자로 / 끝(return) / 선택지(첫 선택지 칸으로 포커스) / 조건 분기(첫 조건 칸으로) / 다음 상자로 이어 쓰기(`goOn`: 끝이면 다음으로 바꾸고 새 상자, 나머지는 `goNextBox`). 이어지는 곳 목록·call·바로 가기 묶음은 없앴다(선을 끌어 붙임, call은 선 더블클릭). 기본 Alt+Enter(`flowMenu`, 바꿀 수 있음)로 들어가면 지금 흐름 항목에서 시작하고, 숨은 입력칸이 키를 받아 방향키(↑↓←→)/Enter/Esc·Backspace로 움직인다. 흐름 종류를 고르면 닫고 글 칸으로 돌아간다. 나가면 들어오기 전의 글 칸으로 커서를 돌려준다. 마우스로도 누를 수 있다.
   - **다음 상자로 이어 쓰기** (`goNextBox`, 기본 Ctrl+Shift+Enter): 선택지·조건 분기는 안 이어진 첫 갈래(모두 이어졌으면 첫 갈래)로. `next`/call의 `then`이 이어져 있으면 그 상자를 편집, 없으면 `continueInNewBox`로 같은 label에 새 상자를 만들어 잇고 편집한다. 새 상자는 흐름 방향(TB면 아래, LR이면 오른쪽)에 놓고, 다른 상자와 겹치면 60px씩 비켜 놓는다.
+  - **흐름 창 툴팁** (세션 50, `src/FlowDemo.tsx`): 카드에 마우스를 올리거나(키로 고르는 중이면 고른 카드) 350ms 뒤 툴팁. 이름, 설명, 움직이는 견본(SVG `animate`·`animateMotion`, 3.6초 돌기, 색은 화면 테마 변수), 내보내는 원고 몇 줄. 창이 캔버스 안이라 오른쪽 칸에 가려지지 않게 `document.body`에 `position: fixed`로 띄우고, 창 오른쪽에 자리가 없으면 왼쪽. 대본 화면을 감추면 안 보임. 모양은 태그 상자 툴팁(`.tb-tip`)과 같다.
   - **조건 분기** (세션 49, `FEATURE` 13): `exit = { type: 'if', branches: [{ id, cond, target }], else }`. 선 handle은 `b:<id>`와 `else`(`exitLinks` kind `if` `else`, 선 이름은 조건 18글자 / "그 밖", 주황, 그 밖은 점선). 상자 안에서는 갈래마다 "◇ 만약 / 아니고 [조건 칸]"(`in-<id>`), [+ 조건], "◇ 그 밖". 오른쪽 칸 `ExitEditor`도 같음(↑ ✕, 갈래가 하나면 ✕ 막음). 내보내기: `if 조건:` / `elif 조건:` 아래 `jump`, 그 밖은 `else:` 아래. 그 밖이 바로 다음에 놓인 상자면 else 없이 이어지고(`fallTarget`이 if면 else), 비면 `return  # TODO`(아래 label로 흘러가지 않게). 조건은 한 줄로 모으고 끝의 `:`는 뗀다. 빈 조건은 `False  # TODO`와 오류, 안 이어진 갈래·그 밖은 경고. 조건식은 검사하지 않는다(렌파이 Lint가 봄).
   - 누른 곳의 `data-part`(줄 id, `title`, 선택지 id)로 커서가 간다.
   - 끝내는 방법: Esc, 빈 곳 클릭, 다른 상자 선택.
@@ -341,13 +348,11 @@
 | `src/SettingsModal.tsx` | 환경 설정 창 |
 | `src/Caret.tsx` | 상자 안 편집의 밑줄 커서 |
 | `src/FlowMenu.tsx` | 편집 중 오른쪽에 붙는 다음 흐름 창 |
+| `src/FlowDemo.tsx` | 다음 흐름 창의 툴팁과 움직이는 견본 |
+| `src/flags.ts`, `src/FlagFields.tsx` | 플래그: 이름 검사, 식 읽기, 쓰인 곳, 플래그 카드, 조건 칸, 바꾸기 칸 |
 | `licenses/` | 함께 배포하는 글꼴의 라이선스 |
 
 ## 11. 남은 단계
 
-- **2단계 (플래그)**:
-  - `variables` → `default 이름 = 값`
-  - 선택지/상자 동작 → `$ 이름 = 값`
-  - 선택지 조건 → `"텍스트" if 조건:`
-  - 조건 분기 상자 → `if/elif/else` + `jump`
+- **2단계 (플래그)**: 세션 50에 함(위 "플래그"). 남은 것: 플래그 값을 PyKaki 안에서 따라가 보기(어느 갈래로 가는지 미리 보기)
 - **확인됨**: 내보낸 `.rpy`가 렌파이 8.5.3에서 실행된다(로컬 label 포함). 연결 쪽 확인 상태는 [LINK.md](../../docs/LINK.md) 9장.

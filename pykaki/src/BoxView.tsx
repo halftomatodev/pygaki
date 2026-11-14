@@ -9,6 +9,8 @@ import { changeThenFocus } from './actions';
 import { FlowMenu } from './FlowMenu';
 import { OldAttr, SpeakerSelect, StageFields } from './LineFields';
 import { isStage, stageCode } from './stage';
+import { actionWords } from './flags';
+import { ActionInput } from './FlagFields';
 import { hit, keyOf } from './prefs';
 import { TagBar, useTagTarget } from './TagBar';
 import { TagView } from './textTags';
@@ -80,6 +82,7 @@ export const BoxView = memo(function BoxView({ id, selected }: NodeProps) {
               ) : (
                 c.text || <i className="todo">(빈 선택지)</i>
               )}
+              {(c.condition || c.actions.length > 0) && <ChoiceFlags cond={c.condition} actions={c.actions} />}
               <Handle type="source" id={'c:' + c.id} position={Position.Right} />
             </div>
           ))}
@@ -270,6 +273,11 @@ function Lines({ b, editing }: { b: BoxNode; editing: boolean }) {
               <StageFields l={al} nd="nodrag" set={setLine(ai)} />
             </div>
           )}
+          {al.type === 'flag' && (
+            <div className="side side-r nodrag" style={{ top }}>
+              <ActionInput value={al.text} onChange={(v) => upd((x) => void (x.lines[ai].text = v), 'text' + al.id)} />
+            </div>
+          )}
         </>
       )}
     </div>
@@ -337,12 +345,16 @@ interface RowProps {
 function LineRow({ l, editing, active, cls, grip, onFocus, onKey, onText }: RowProps) {
   const ch = useStore((s) => (l.type === 'say' ? s.project.characters.find((c) => c.id === l.who) : undefined));
   const tagsOn = useStore((s) => s.project.settings.allowTextTags);
-  const stage = isStage(l.type);
-  const kind = stage ? 'pl-stage' : l.type === 'command' ? 'cmd' : l.type === 'note' ? 'note' : l.type === 'narration' ? 'narr' : 'say';
+  const project = useStore((s) => (l.type === 'flag' ? s.project : null));
+  // 플래그 바꾸기 줄은 글을 쓰지 않아 연출 줄처럼 그린다 (오른쪽 칸에서 고름)
+  const stage = isStage(l.type) || l.type === 'flag';
+  const kind = l.type === 'flag' ? 'pl-stage pl-flag' : stage ? 'pl-stage' : l.type === 'command' ? 'cmd' : l.type === 'note' ? 'note' : l.type === 'narration' ? 'narr' : 'say';
   const empty = { narration: '(빈 내레이션)', say: '(빈 대사)', command: '(빈 명령)', note: '(빈 메모)' }[l.type as 'say'];
 
   let body;
-  if (stage) {
+  if (l.type === 'flag')
+    body = <span className="pl-text">⚑ {l.text.trim() ? <code>{actionWords(project!, l.text)}</code> : <i className="todo">(플래그를 고르세요)</i>}</span>;
+  else if (stage) {
     const { code, problem } = stageCode(l);
     body = (
       <span className="pl-text">
@@ -385,6 +397,19 @@ function LineRow({ l, editing, active, cls, grip, onFocus, onKey, onText }: RowP
       {l.type === 'note' && <span className="mark">#</span>}
       {body}
     </div>
+  );
+}
+
+// 상자 안 선택지의 플래그 표시: 보이는 조건과 고르면 바꾸기
+function ChoiceFlags({ cond, actions }: { cond: string | null; actions: string[] }) {
+  const project = useStore((s) => s.project);
+  return (
+    <span className="ch-flags">
+      {cond && <span className="ch-cond" title="이 조건일 때만 보여요">if {cond}</span>}
+      {actions.filter((a) => a.trim()).map((a, i) => (
+        <span key={i} className="ch-act" title="고르면 바뀌어요">⚑ {actionWords(project, a)}</span>
+      ))}
+    </span>
   );
 }
 

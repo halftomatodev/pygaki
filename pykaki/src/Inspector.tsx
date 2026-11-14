@@ -1,8 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Hint } from './Help';
 import { useStore } from './store';
 import * as ops from './ops';
-import type { BoxNode, ExitType, Line, Project } from './types';
+import type { BoxNode, Choice, ExitType, Line, Project } from './types';
 import { uid } from './util';
 import { Card } from './Card';
 import { LineLook, OldAttr, SpeakerSelect, StageFields, useLineDrag } from './LineFields';
@@ -11,6 +11,7 @@ import { hit } from './prefs';
 import { ShaderPanel } from './ShaderPanel';
 import { StageCards } from './StageCards';
 import { CursorCard, SayUiCard } from './UiPanel';
+import { ActionInput, CondInput, firstAction } from './FlagFields';
 import { GameOffTip, GoHere, MoveBtn, PickBand, useSidePop } from './PickPos';
 
 const USED_CARD: Partial<Record<Line['type'], string>> = { scene: 'i-bg', show: 'i-pic', hide: 'i-pic', sound: 'i-sound', music: 'i-sound' };
@@ -93,6 +94,11 @@ function BoxInspector({ b }: { b: BoxNode }) {
     useStore.setState({ focusLineId: nl.id });
   };
 
+  const addFlagLine = () => {
+    const nl: Line = { id: uid('l'), type: 'flag', text: firstAction(project.variables) };
+    upd((x) => void x.lines.push(nl));
+  };
+
   return (
     <div className="insp">
       <Card id="i-box" title="상자">
@@ -138,6 +144,7 @@ function BoxInspector({ b }: { b: BoxNode }) {
       ))}
       <div className="row">
         <button onClick={addLine}>+ 줄 추가</button>
+        <button onClick={addFlagLine} title="이 자리에서 플래그를 바꿔요 (예: met_alice 켜기, love +1)">+ 플래그 바꾸기</button>
         <span className="tip">Ctrl+Enter: 같은 화자로 아래에 새 줄</span>
       </div>
       <GameOffTip what="대사" />
@@ -196,6 +203,8 @@ function LineRow({ l, i, upd, drag }: { l: Line; i: number; upd: Upd; drag: Retu
       <div className="line-body">
         {isStage(l.type) ? (
           <StageFields l={l} set={set} />
+        ) : l.type === 'flag' ? (
+          <ActionInput id={'ed-' + l.id} value={l.text} onChange={(v) => upd((x) => void (x.lines[i].text = v), 'text' + l.id)} />
         ) : (
           <textarea id={'ed-' + l.id} ref={ref} rows={1} value={l.text} placeholder={placeholder} data-tags={isSay ? '1' : undefined} onFocus={() => useStore.setState({ activeLine: l.id })} onKeyDown={onKey} onChange={(e) => upd((x) => void (x.lines[i].text = e.target.value), 'text' + l.id)} />
         )}
@@ -225,6 +234,44 @@ function TargetSelect({ value, onChange, self }: { value: string | null; onChang
         </optgroup>
       ))}
     </select>
+  );
+}
+
+// 선택지 한 줄: 문구, 갈 곳. [⚑]를 누르면 보이는 조건과 고르면 바꾸기 (FEATURE 14)
+function ChoiceRow({ b, c, i, upd }: { b: BoxNode; c: Choice; i: number; upd: Upd }) {
+  const flags = useStore((s) => s.project.variables);
+  const has = !!c.condition || c.actions.length > 0;
+  const [open, setOpen] = useState(has);
+  const setC = (fn: (x: Choice) => void, key?: string) => upd((x) => void (x.exit.type === 'menu' && fn(x.exit.choices[i])), key);
+  return (
+    <div className={'choice-box' + (open ? ' open' : '')}>
+      <div className="choice-ed">
+        <input id={'ed-' + c.id} value={c.text} placeholder={`선택지 ${i + 1} 문구`} onChange={(ev) => setC((x) => void (x.text = ev.target.value), 'choice' + c.id)} />
+        <TargetSelect self={b.id} value={c.target} onChange={(v) => upd((x) => ops.setLink(x, 'c:' + c.id, v))} />
+        <button className={'flag-btn' + (has ? ' on' : '')} onClick={() => setOpen(!open)} title="플래그: 보이는 조건, 고르면 바꾸기">⚑</button>
+        <button disabled={i === 0} onClick={() => upd((x) => { const cs = (x.exit as any).choices; cs.splice(i - 1, 0, ...cs.splice(i, 1)); })}>↑</button>
+        <button onClick={() => upd((x) => void (x.exit as any).choices.splice(i, 1))}>✕</button>
+      </div>
+      {open && (
+        <div className="choice-flags">
+          <div className="cf-row">
+            <span className="cf-kw">보이는 조건</span>
+            <CondInput value={c.condition ?? ''} placeholder="비우면 늘 보여요 (예: love >= 5)" onChange={(v) => setC((x) => void (x.condition = v.trim() ? v : null), 'ccond' + c.id)} />
+          </div>
+          {c.actions.map((a, k) => (
+            <div className="cf-row" key={k}>
+              <span className="cf-kw">{k === 0 ? '고르면' : ''}</span>
+              <ActionInput value={a} onChange={(v) => setC((x) => void (x.actions[k] = v), 'cact' + c.id + k)} />
+              <button className="x" title="빼기" onClick={() => setC((x) => void x.actions.splice(k, 1))}>✕</button>
+            </div>
+          ))}
+          <div className="cf-row">
+            <span className="cf-kw">{c.actions.length ? '' : '고르면'}</span>
+            <button onClick={() => setC((x) => void x.actions.push(firstAction(flags)))}>+ 플래그 바꾸기</button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -264,12 +311,7 @@ export function ExitEditor({ b, upd }: { b: BoxNode; upd: Upd }) {
       {e.type === 'menu' && (
         <>
           {e.choices.map((c, i) => (
-            <div className="choice-ed" key={c.id}>
-              <input id={'ed-' + c.id} value={c.text} placeholder={`선택지 ${i + 1} 문구`} onChange={(ev) => upd((x) => void ((x.exit as any).choices[i].text = ev.target.value), 'choice' + c.id)} />
-              <TargetSelect self={b.id} value={c.target} onChange={(v) => upd((x) => ops.setLink(x, 'c:' + c.id, v))} />
-              <button disabled={i === 0} onClick={() => upd((x) => { const cs = (x.exit as any).choices; cs.splice(i - 1, 0, ...cs.splice(i, 1)); })}>↑</button>
-              <button onClick={() => upd((x) => void (x.exit as any).choices.splice(i, 1))}>✕</button>
-            </div>
+            <ChoiceRow key={c.id} b={b} c={c} i={i} upd={upd} />
           ))}
           <button onClick={() => upd((x) => void (x.exit as any).choices.push(ops.newChoice()))}>+ 선택지 추가</button>
           {/* 게임은 이 상자의 마지막 줄로 가요. 한 번 넘기면 선택지가 나와요 */}
@@ -288,7 +330,7 @@ export function ExitEditor({ b, upd }: { b: BoxNode; upd: Upd }) {
           {e.branches.map((c, i) => (
             <div className="choice-ed" key={c.id}>
               <span className="br-kw">{i === 0 ? '만약' : '아니고'}</span>
-              <input id={'ed-' + c.id} className="br-cond" spellCheck={false} value={c.cond} placeholder="조건 (예: love >= 5)" onChange={(ev) => upd((x) => void (x.exit.type === 'if' && (x.exit.branches[i].cond = ev.target.value)), 'branch' + c.id)} />
+              <CondInput id={'ed-' + c.id} value={c.cond} placeholder="조건 (예: love >= 5)" onChange={(v) => upd((x) => void (x.exit.type === 'if' && (x.exit.branches[i].cond = v)), 'branch' + c.id)} />
               <TargetSelect self={b.id} value={c.target} onChange={(v) => upd((x) => ops.setLink(x, 'b:' + c.id, v))} />
               <button disabled={i === 0} onClick={() => upd((x) => { if (x.exit.type === 'if') { const cs = x.exit.branches; cs.splice(i - 1, 0, ...cs.splice(i, 1)); } })}>↑</button>
               <button disabled={e.branches.length < 2} onClick={() => upd((x) => void (x.exit.type === 'if' && x.exit.branches.splice(i, 1)))}>✕</button>

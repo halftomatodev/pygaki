@@ -32,6 +32,7 @@ export function SpeakerSelect({ l, set, className }: { l: Line; set: SetLine; cl
         ))}
       </optgroup>
       <optgroup label="기타">
+        <option value="flag">⚑ 플래그 바꾸기</option>
         <option value="command">⚙ 직접 명령</option>
         <option value="note"># 메모</option>
       </optgroup>

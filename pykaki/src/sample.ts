@@ -1,6 +1,7 @@
 import type { Project } from './types';
 import { fixEntries, newChoice } from './ops';
 import { PALETTE, uid } from './util';
+import { normalizeFlags } from './flags';
 
 const defaults = (): Project => ({
   format: 'renpy-flow',
@@ -32,12 +33,14 @@ export function createSample(): Project {
   const p = defaults();
   p.project = { title: '예제: 비 오는 날', startNode: 'n1' };
   p.characters = [{ id: 'a', name: '앨리스', color: '#ff8fb1' }];
+  p.variables = [{ id: 'v1', name: 'kindness', kind: 'int', init: 0, note: '친절 점수. 우산을 빌려주면 오름' }];
   p.labels = [
     { id: 'g1', name: 'scene_rain', title: '비 오는 날', color: PALETTE[0], entry: 'n1' },
     { id: 'g2', name: 'ending_kind', title: '친절 엔딩', color: PALETTE[1], entry: 'n4' },
     { id: 'g3', name: 'talk_weather', title: '날씨 잡담 (call)', color: PALETTE[2], entry: 'n6' },
   ];
   const c1 = newChoice('n4', '우산을 빌려준다');
+  c1.actions = ['kindness += 1'];
   const c2 = newChoice('n3', '모른 척한다');
   const c3 = newChoice('n5', '날씨 이야기를 한다');
   p.nodes = [
@@ -97,13 +100,14 @@ export function normalizeProject(raw: any): Project {
     settings: { ...d.settings, ...raw.settings },
     layout: { ...d.layout, ...raw.layout },
     characters: raw.characters ?? [],
-    variables: raw.variables ?? [],
+    variables: normalizeFlags(raw.variables),
     labels: raw.labels ?? [],
   };
   if (!p.labels.length && p.nodes.length) p.labels.push({ id: uid('g'), name: 'chapter_1', title: '', color: PALETTE[0], entry: null });
   for (const n of p.nodes) {
     if (!p.labels.some((l) => l.id === n.group)) n.group = p.labels[0].id;
     n.lines ??= [];
+    for (const l of n.lines) if (typeof l.text !== 'string') l.text = '';
     n.exit ??= { type: 'return' };
     n.pos ??= { x: 0, y: 0 };
   }
@@ -115,7 +119,12 @@ export function normalizeProject(raw: any): Project {
     if (e.type === 'next') e.target = live(e.target);
     else if (e.type === 'menu') {
       e.choices = Array.isArray(e.choices) ? e.choices : [];
-      for (const c of e.choices) c.target = live(c.target);
+      for (const c of e.choices) {
+        c.target = live(c.target);
+        c.mode = 'jump';
+        c.condition = typeof c.condition === 'string' && c.condition.trim() ? c.condition : null;
+        c.actions = Array.isArray(c.actions) ? c.actions.filter((a: unknown) => typeof a === 'string') : [];
+      }
     } else if (e.type === 'if') {
       e.branches = Array.isArray(e.branches) ? e.branches : [];
       for (const c of e.branches) {

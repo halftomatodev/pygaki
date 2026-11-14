@@ -1,7 +1,8 @@
 // 프로젝트 저장 파일(JSON)의 구조. 설계 문서 5장 참고.
 
 // scene/show/hide/music/sound는 렌파이 명령을 몰라도 칸만 채우면 되는 연출 줄
-export type LineType = 'narration' | 'say' | 'scene' | 'show' | 'hide' | 'music' | 'sound' | 'fx' | 'command' | 'note';
+// flag: 플래그 바꾸기 줄 (FEATURE 14). text에 바꾸는 식 (예: love += 1, met_alice = True)을 두고 $ 줄로 내보낸다
+export type LineType = 'narration' | 'say' | 'scene' | 'show' | 'hide' | 'music' | 'sound' | 'fx' | 'command' | 'note' | 'flag';
 
 // showpy 화면 효과 값. 대사 줄은 괄호로, 연출 줄(fx)은 명령으로 내보낸다. 빈 칸은 안 내보낸다
 export interface LineFx {
@@ -57,8 +58,8 @@ export interface Choice {
   text: string;
   target: string | null;
   mode: 'jump';
-  condition: string | null; // 2단계(플래그)용, 지금은 null
-  actions: string[]; // 2단계(플래그)용, 지금은 비어 있음
+  condition: string | null; // 보이는 조건 (렌파이 조건식, 예: love >= 5). 비우면 늘 보임 (FEATURE 14)
+  actions: string[]; // 고르면 바꾸는 식 (예: love += 1, met_alice = True). 선택지 아래 $ 줄로 (FEATURE 14)
 }
 
 // 조건 분기의 갈래 하나 (FEATURE 13). cond는 렌파이 조건식 그대로 (예: love >= 5)
@@ -111,6 +112,16 @@ export interface BoxNode {
   exit: Exit;
 }
 
+// 플래그 = 렌파이 변수 (FEATURE 14). 원고 맨 위에 default name = init 으로 내보낸다
+export type FlagKind = 'bool' | 'int' | 'str';
+export interface Flag {
+  id: string;
+  name: string; // 렌파이 변수 이름
+  kind: FlagKind; // 켜짐/꺼짐 | 숫자 | 글자
+  init: boolean | number | string; // 처음 값
+  note?: string; // 작가 메모 (원고에 주석으로)
+}
+
 export interface Character {
   id: string; // 렌파이 변수 이름
   name: string;
@@ -140,7 +151,7 @@ export interface Project {
   app?: { by: string; build: string; needs: number };
   project: { title: string; startNode: string | null };
   characters: Character[];
-  variables: unknown[];
+  variables: Flag[]; // 플래그 (FEATURE 14. 그 전에는 늘 빈 배열)
   labels: LabelGroup[];
   layout: { direction: 'TB' | 'LR' };
   settings: Settings;

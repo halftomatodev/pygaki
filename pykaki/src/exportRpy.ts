@@ -6,6 +6,7 @@ import { badImageName, renpyOnlyEffect, fxArgs, isStage, sayArgs, stageCode, tag
 import { shaderEffect } from './fx/textShaders';
 import { checkTags, shaderTags } from './tagEdit';
 import { sceneCode, sceneSupported, uiOfBox, usesSceneUi } from './boxUi';
+import { exprNames, flagNameProblem, parseAction, pyValue } from './flags';
 import { enterTransTv, imgTransSupported, isImgTrans, shaderCode, shaderOfBox, usesShaderValues, usesShaders, usesTvValues, valuesSupported } from './shader';
 
 export interface Warn { level: 'error' | 'warn'; msg: string; nodeId?: string }
@@ -102,6 +103,23 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean } = {}): { co
     cids.add(c.id);
   }
 
+  // 플래그 이름 (FEATURE 14)
+  for (const v of p.variables) {
+    const why = flagNameProblem(p, v.name, v.id);
+    if (why) W.push({ level: 'error', msg: `플래그 이름 "${v.name}": ${why}` });
+  }
+  const flagNames = new Set(p.variables.map((v) => v.name));
+  // 조건식·바꾸는 식에 플래그 카드에 없는 이름을 쓰면 알린다 (게임의 다른 파일에서 만든 변수일 수도 있어 경고만)
+  const checkExpr = (expr: string, where: string, b: BoxNode) => {
+    for (const n of new Set(exprNames(expr)))
+      if (!flagNames.has(n) && !cids.has(n)) W.push({ level: 'warn', msg: `${where}: "${n}"는 플래그 카드에 없는 이름이에요. 게임에 없으면 렌파이가 멈춰요 (${b.title || b.id})`, nodeId: b.id });
+  };
+  const checkAction = (a: string, where: string, b: BoxNode) => {
+    const x = parseAction(a);
+    if (!x || !x.value) W.push({ level: 'error', msg: `${where}: "${a}"는 바꾸는 식이 아니에요 (예: love += 1, met_alice = True) (${b.title || b.id})`, nodeId: b.id });
+    else checkExpr(a, where, b);
+  };
+
   const orders = new Map<string, BoxNode[]>();
   const entryOf = new Map<string, string>();
   for (const g of p.labels) {
@@ -129,6 +147,9 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean } = {}): { co
   out.push('');
   for (const c of p.characters) out.push(`define ${c.id} = Character(${pyStr(c.name)}${c.color ? `, color=${pyStr(c.color)}` : ''}, image=${pyStr(c.id)})`);
   if (p.characters.length) out.push('');
+  // 플래그의 처음 값. default라 세이브를 불러오면 세이브의 값이 이긴다
+  for (const v of p.variables) out.push(`default ${v.name} = ${pyValue(v)}${v.note ? '  # ' + oneLine(v.note) : ''}`);
+  if (p.variables.length) out.push('');
 
   // 시작
   const start = p.project.startNode ? byId.get(p.project.startNode) : undefined;
@@ -235,6 +256,15 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean } = {}): { co
       const emit = (l: Line) => {
         if (l.type === 'note') return l.text.split('\n').forEach((x) => body.push('# ' + x));
         if (l.type === 'command') return l.text.split('\n').forEach((x) => x.trim() && body.push(x.trimEnd()));
+        if (l.type === 'flag') {
+          const a = oneLine(l.text);
+          if (!a) {
+            W.push({ level: 'warn', msg: `빈 플래그 바꾸기 줄이 있어요 (${b.title || b.id})`, nodeId: b.id });
+            return body.push('pass  # 빈 플래그 바꾸기');
+          }
+          checkAction(a, '플래그 바꾸기', b);
+          return body.push('$ ' + a);
+        }
         if (isStage(l.type)) {
           const { code, problem } = stageCode(l);
           if (problem) W.push({ level: 'warn', msg: `${problem} (${b.title || b.id})`, nodeId: b.id });
@@ -308,7 +338,17 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean } = {}): { co
           for (const c of e.choices) {
             if (!c.text.trim()) W.push({ level: 'warn', msg: `선택지 문구가 비어 있어요 (${b.title || b.id})`, nodeId: b.id });
             pct(c.text, '선택지');
-            body.push(`${I}${q(c.text)}:`);
+            // 보이는 조건: "문구" if 조건:
+            const cond = c.condition ? oneLine(c.condition).replace(/:\s*$/, '') : '';
+            if (cond) checkExpr(cond, `선택지 "${c.text}"의 조건`, b);
+            body.push(`${I}${q(c.text)}${cond ? ' if ' + cond : ''}:`);
+            // 고르면 바꾸기: jump 앞에 $ 줄
+            for (const a0 of c.actions) {
+              const a = oneLine(a0);
+              if (!a) continue;
+              checkAction(a, `선택지 "${c.text}"의 고르면`, b);
+              body.push(I + I + '$ ' + a);
+            }
             if (!c.target) W.push({ level: 'warn', msg: `선택지 "${c.text}"가 연결되지 않았어요`, nodeId: b.id });
             body.push(I + I + (c.target ? `jump ${ref(c.target)}` : todo));
           }
@@ -320,6 +360,7 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean } = {}): { co
         e.branches.forEach((c, i) => {
           const cond = oneLine(c.cond).trim().replace(/:\s*$/, '');
           if (!cond) W.push({ level: 'error', msg: `조건 칸이 비어 있어요 (${name})`, nodeId: b.id });
+          else checkExpr(cond, '조건 분기', b);
           if (!c.target) W.push({ level: 'warn', msg: `조건 "${cond || '(빈 조건)'}"의 갈래가 연결되지 않았어요 (${name})`, nodeId: b.id });
           body.push(`${i === 0 ? 'if' : 'elif'} ${cond || 'False  # TODO: 조건 없음'}:`);
           body.push(I + (c.target ? `jump ${ref(c.target)}` : todo));

@@ -33,6 +33,8 @@ pygaki 앱의 **[효과]** 화면에서는 효과를 샘플로 돌려 보고, **
 | `backbox.glsl` | 글자 | `backbox` 뒤에 상자 | 줄마다 글자 뒤에 색 상자가 깔리고, 글자가 나오는 만큼 끊기지 않고 길어짐(자막처럼) |
 | `karaoke.glsl` | 글자 | `karaoke` 노래방 | 줄이 처음부터 다 보이고, 부르는 만큼(대사의 글자/초) 왼쪽부터 노란 글자, 파란 외곽선으로 칠해짐 |
 | `droplets.glsl` | 글자 | `droplets` 물방울 | 모양이 일정하지 않은 물방울들이 글자 위를 돌아다니며, 그 아래 글자가 렌즈처럼 휘고 커짐 |
+| `spring.glsl` | 글자 | `spring` 튕기며 자리 잡기 | 글자가 아래에서 작게 튀어 올라와 제자리를 조금 지나쳤다가 되돌아오며, 몇 번 작게 흔들린 뒤 멈춤(`u__bounce`, `u__wobble`, `u__lift`, `u__grow`) |
+| `marquee.glsl` | 글자 | `marquee` 옆으로 흐르기 | 줄이 처음부터 다 보이고 오른쪽에서 왼쪽으로 끝없이 흘러감. 양 끝은 흐려짐(`u__speed`, `u__gap`, `u__dir`, `u__fade`) |
 
 ```renpy
 e "아래에서 올라온다." (cps=30, effect="maskup")
@@ -53,7 +55,11 @@ e "자막처럼." (cps=25, effect="backbox:u__color=#1e6fff")
 e "미안해 솔직하지 못한 내가" (cps=8, effect="karaoke")
 e "상자 위에서 노래방." (cps=8, effect="backbox:u__grow=0:u__hide=0|karaoke")
 e "물방울이 지나간다." (cps=30, effect="droplets")
+e "튕긴다!" (cps=20, effect="spring")
+e "오늘의 소식: 비가 옵니다." (effect="marquee:u__speed=60")
 ```
+
+`marquee`는 그 대사 글의 폭 안에서 돕니다. 글이 짧으면 흐르는 폭도 짧아서, 넓게 흐르게 하려면 글 뒤에 빈칸을 넣습니다. 마우스를 올려도 멈추지 않습니다.
 
 `meltglitch`는 글자 네모를 아래로 늘려 그 안에서 흘러내리므로, 길게 하면 아랫줄 글자와 겹칩니다(`u__length`로 길이).
 TV 지직 소리는 전환에 들어 있지 않습니다. `play sound "static.ogg"`처럼 같은 자리에 적습니다.

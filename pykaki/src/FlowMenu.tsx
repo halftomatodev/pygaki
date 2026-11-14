@@ -7,6 +7,7 @@ import * as ops from './ops';
 import type { BoxNode, ExitType } from './types';
 import { continueInNewBox, focusField, goNextBox } from './actions';
 import { hit, keyOf } from './prefs';
+import { FlowTipView } from './FlowDemo';
 
 interface Item {
   key: string;
@@ -111,6 +112,16 @@ export function FlowMenu({ b }: { b: BoxNode }) {
 
   const at = Math.min(cur, items.length - 1);
 
+  // 툴팁: 마우스를 올린 카드, 키로 고르는 중이면 고른 카드. 350ms 뒤에 (태그 상자 툴팁과 같음)
+  const [hover, setHover] = useState<string | null>(null);
+  const want = hover ?? (active ? items[at]?.key ?? null : null);
+  const [tip, setTip] = useState<string | null>(null);
+  useEffect(() => {
+    if (!want) return setTip(null);
+    const t = setTimeout(() => setTip(want), 350);
+    return () => clearTimeout(t);
+  }, [want]);
+
   // 고른 항목이 보이게 굴린다
   useLayoutEffect(() => {
     if (active) ref.current?.querySelector('.fm-item.cur')?.scrollIntoView({ block: 'nearest' });
@@ -158,7 +169,8 @@ export function FlowMenu({ b }: { b: BoxNode }) {
           <div
             key={it.key}
             className={'fm-item' + (it.key === 'go' ? ' fm-act' : '') + (active && i === at ? ' cur' : '') + (it.on ? ' on' : '')}
-            onMouseEnter={() => active && setCur(i)}
+            onMouseEnter={() => (active && setCur(i), setHover(it.key))}
+            onMouseLeave={() => setHover(null)}
             onClick={() => it.run()}
           >
             <span className="fm-dot">{it.on ? '●' : ''}</span>
@@ -167,6 +179,7 @@ export function FlowMenu({ b }: { b: BoxNode }) {
           </div>
         ))}
       </div>
+      {tip && <FlowTipView k={tip} anchor={ref.current} />}
       {isCall && <div className="tip fm-help">지금은 call로 이어져요. 선을 두 번 누르면 바뀌어요</div>}
       <div className="tip fm-help">
         {active ? '방향키 고르기 · Enter 정하기 · Esc 글로 돌아가기' : `${keyOf('flowMenu')}: 방향키로 고르기 · 이어지는 곳은 선을 끌어 붙여요`}
