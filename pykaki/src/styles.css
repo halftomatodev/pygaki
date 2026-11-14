@@ -784,17 +784,44 @@ fieldset.plain:disabled { opacity: 0.4; }
 .sp-line.here .ln { color: #ff3b8d; }
 
 /* 태그 상자: 대사 글 칸에 커서가 있을 때. 상자 안 편집에서는 상자 오른쪽 위 바깥, 편집 탭에서는 글자 효과 칸 안 */
-.tagbar {
-  display: flex; flex-direction: column; gap: 3px; padding: 6px; font-size: 11px; cursor: default;
-  background: color-mix(in srgb, var(--panel) 86%, transparent);
+.tagbar { position: relative; display: flex; flex-direction: column; gap: 5px; font-size: 11px; cursor: default; animation: side-in 0.18s ease; --from: 0; }
+/* 묶음마다 카드 한 장, 줄마다 소제목 버블. 색은 카드의 --hue */
+.tb-card {
+  --hue: 215; display: flex; flex-direction: column; gap: 4px; padding: 5px 7px;
+  background: color-mix(in srgb, var(--panel) 90%, transparent);
   -webkit-backdrop-filter: blur(10px) saturate(1.2); backdrop-filter: blur(10px) saturate(1.2);
-  border: 1px solid color-mix(in srgb, var(--text) 12%, transparent); border-radius: 10px;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12); animation: side-in 0.18s ease; --from: 0;
+  border: 1px solid color-mix(in srgb, var(--text) 12%, transparent); border-left: 3px solid hsl(var(--hue) 70% 58% / 0.75); border-radius: 9px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
-.tagbar-box { position: absolute; left: calc(100% + 14px); bottom: calc(100% - 28px); z-index: 6; width: max-content; max-width: 330px; }
-.tagbar-look { box-shadow: none; margin: 2px 0; }
+.tb-chip {
+  flex: none; min-width: 40px; text-align: center; margin-right: 3px; padding: 1px 7px; border-radius: 999px;
+  font-size: 10.5px; font-weight: 600; line-height: 1.6; color: var(--text);
+  background: hsl(var(--hue) 75% 58% / 0.18); box-shadow: inset 0 0 0 1px hsl(var(--hue) 70% 50% / 0.35);
+}
+.tagbar-box { position: absolute; left: calc(100% + 14px); bottom: calc(100% - 28px); z-index: 6; width: max-content; max-width: 340px; }
+.tagbar-look { margin: 2px 0; }
+.tagbar-look .tb-card { box-shadow: none; }
+.tb-slide { display: inline-flex; align-items: center; gap: 2px; }
+.tagbar input.tb-num { width: 40px; flex: none; font-size: 11px; padding: 1px 3px; text-align: center; font-family: var(--mono); }
+.tb-num.on { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent); }
+.tb-unit { color: var(--muted); font-size: 10.5px; margin-left: 1px; }
+/* 툴팁: 상자 아래에 이름, 태그, 설명, 견본 글 */
+.tb-tip {
+  position: absolute; top: calc(100% + 6px); left: 0; z-index: 20; width: 280px; padding: 7px 9px; pointer-events: none;
+  display: flex; flex-direction: column; gap: 5px; background: var(--panel);
+  border: 1px solid color-mix(in srgb, var(--text) 14%, transparent); border-radius: 9px; box-shadow: 0 8px 26px rgba(0, 0, 0, 0.18);
+  animation: side-in 0.14s ease;
+}
+.tb-tip-head { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.tb-tip-head b { font-size: 12px; }
+.tb-tip-head code { font-family: var(--mono); font-size: 10.5px; color: var(--accent); }
+.tb-tip-desc { color: var(--muted); font-size: 10.5px; line-height: 1.45; }
+.tb-demo { position: relative; min-height: 46px; padding: 8px 10px; background: #15171f; border-radius: 6px; overflow: hidden; }
+.tb-demo .preview-text { font-size: 14px; line-height: 1.45; }
+.tb-demo-ctc { display: inline-block; margin-left: 4px; font-size: 0.7em; opacity: 0.8; animation: tb-ctc 0.6s ease-in-out infinite alternate; }
+@keyframes tb-ctc { to { transform: translateY(3px); opacity: 0.35; } }
+.tb-demo-note { position: absolute; right: 6px; bottom: 3px; font-size: 9.5px; color: rgba(255, 255, 255, 0.5); }
 .tb-row { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; }
-.tb-label { color: var(--muted); font-size: 10.5px; min-width: 28px; }
 .tb-sep { width: 1px; align-self: stretch; margin: 0 3px; background: var(--line); }
 .tagbar button { font-size: 11px; padding: 1px 6px; line-height: 1.5; }
 .tb-btn.on { background: color-mix(in srgb, var(--accent) 22%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent); }
@@ -809,7 +836,7 @@ fieldset.plain:disabled { opacity: 0.4; }
 .tb-msg { color: var(--danger); font-size: 10.5px; }
 .tb-fill { flex: 1; }
 .tb-more { color: var(--muted); }
-.tagbar input.tb-range { width: 110px; flex: none; margin: 0 4px 0 0; }
+.tagbar input.tb-range { width: 96px; flex: none; margin: 0 4px 0 0; }
 .tb-val { font-family: var(--mono); font-size: 10.5px; color: var(--muted); min-width: 28px; }
 .tb-val.on { color: var(--text); }
 .tb-ring { background: transparent; border-width: 3px; }
@@ -817,10 +844,10 @@ fieldset.plain:disabled { opacity: 0.4; }
 .tb-sel.on { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent); }
 .tb-sel-s { max-width: 96px; }
 .tb-hint { color: var(--muted); font-size: 10.5px; }
-.tb-knobs { margin: 0 0 2px 30px; max-width: 290px; }
+.tb-knobs { margin: 0 0 2px 46px; max-width: 280px; }
 .tagbar .tb-knobs input[type='range'] { margin: 0; }
-.tb-off { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; color: var(--muted); }
-.tb-palette { display: flex; flex-direction: column; gap: 4px; margin-top: 3px; padding-top: 5px; border-top: 1px solid var(--line); }
+.tb-off { flex-direction: row; align-items: center; gap: 6px; flex-wrap: wrap; color: var(--muted); }
+.tb-palette { display: flex; flex-direction: column; gap: 4px; }
 .tb-grid { display: flex; flex-direction: column; gap: 4px; outline: none; border-radius: 6px; }
 .tb-grid:focus-visible { box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent); }
 .tb-prow { display: flex; align-items: flex-start; gap: 6px; }

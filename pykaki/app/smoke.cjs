@@ -218,11 +218,25 @@ async function until(what, fn, ms = 10000) {
     await ta.evaluate((el) => el.setSelectionRange(0, 2));
     const bar = page.locator('.tagbar');
     await bar.waitFor({ timeout: 10000 });
-    if (!(await bar.locator('.tb-range').count())) await bar.locator('.tb-more').click();
-    await bar.locator('.tb-range').waitFor({ timeout: 10000 });
-    await bar.locator('button:text-is("넓게")').click();
+    // 막대 옆 숫자 칸: 적고 Enter면 태그가 들어가고, 기본값(속도 1, 자간 0)이면 태그를 뺀다
+    const num = (title) => bar.locator(`input.tb-num[title^="${title}"]`);
+    const putNum = async (title, v) => {
+      await num(title).click();
+      await num(title).fill(v);
+      await num(title).press('Enter');
+    };
+    await putNum('고른 글만 빠르기', '0.5');
+    await taIs('속도 태그', '{cps=*0.5}가나{/cps}다라');
+    await ta.evaluate((el) => el.setSelectionRange(10, 12));
+    await putNum('고른 글만 빠르기', '1');
+    await taIs('속도 태그 빼기', '가나다라');
+    await ta.evaluate((el) => el.setSelectionRange(0, 2));
+    if (!(await num('고른 글의 자간').count())) await bar.locator('.tb-more').click();
+    await num('고른 글의 자간').waitFor({ timeout: 10000 });
+    await putNum('고른 글의 자간', '1');
     await taIs('자간 태그', '{k=1}가나{/k}다라');
-    await bar.locator('button:text-is("좁게")').click();
+    await ta.evaluate((el) => el.setSelectionRange(5, 7));
+    await putNum('고른 글의 자간', '0');
     await taIs('자간 태그 빼기', '가나다라');
     await bar.locator('button:text-is("루비")').click();
     await taIs('루비 태그', '{rb}가나{/rb}{rt}읽는 법{/rt}다라');

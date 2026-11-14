@@ -1,4 +1,4 @@
-// 렌파이 텍스트 태그 일부를 흉내 내서 보여 준다: {b} {i} {u} {s} {color=} {size=} {p} {w} {nw} {fast} {a=}
+// 렌파이 텍스트 태그 일부를 흉내 내서 보여 준다: {b} {i} {u} {s} {color=} {size=} {p} {w} {nw} {fast} {a=} {space=} {vspace=}
 import type { CSSProperties, ReactNode } from 'react';
 import { tokenize } from './tagEdit';
 
@@ -80,7 +80,11 @@ export function parseTagged(text: string, tagsOn: boolean, fontOf: (path: string
       if (name === 'p') add('\n');
     } else if (name === 'nw') out.noWait = true;
     else if (name === 'fast') out.fastTo = out.glyphs.length;
-    else if (!['image', 'space', 'vspace', 'rt', 'rb', 'art', 'done'].includes(name)) add('{' + tag + '}');
+    else if (name === 'space' || name === 'vspace') {
+      // 빈 자리: 픽셀 값을 대사 글자 크기(대강 30픽셀)에 맞춰 em으로. 세로 띄우기는 줄을 바꾸고 그만큼 아래로
+      const em = (Number(val) || 0) / 30 + 'em';
+      out.glyphs.push({ ch: '​', style: name === 'space' ? { display: 'inline-block', width: em } : { display: 'block', height: em }, rate: 1, fixed: false });
+    } else if (!['image', 'rt', 'rb', 'art', 'done'].includes(name)) add('{' + tag + '}');
   }
   return out;
 }
