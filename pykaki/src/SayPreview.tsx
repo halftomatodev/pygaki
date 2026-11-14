@@ -66,13 +66,15 @@ const rand = (i: number, seed: number) => {
 };
 
 export function Glyphs({ parsed, shown }: { parsed: Tagged; shown: number }) {
-  // {clear}(지우고 이어서): 그 뒤 글자가 나오기 시작하면 앞 글은 감춘다
+  // {clear}(지우고 이어서): 그 뒤 글자가 나오기 시작하면 앞 글은 자리는 둔 채 안 보이게 (렌파이 원고도 같음, tagEdit.splitClear)
   const cut = parsed.clears.reduce((m, c) => (shown > c ? Math.max(m, c) : m), 0);
   return (
     <>
       {parsed.glyphs.map((g, i) =>
-        i < cut ? (
-          <span key={i} data-i={i} className="ch" style={{ display: 'none' }} />
+        i < cut && g.ch !== '\n' ? (
+          <span key={i} data-i={i} className="ch on" style={{ ...g.style, visibility: 'hidden' }}>
+            {g.ch}
+          </span>
         ) : g.ch === '\n' ? (
           <br key={i} />
         ) : (

@@ -51,42 +51,42 @@ export function tokenize(t: string): Tok[] {
   return out;
 }
 
-// [지우고 이어서] {clear}: 그 자리에서 대사를 여러 줄로 나눈다 (같은 화자의 대사 여러 줄 = 클릭하면 앞 글이 지워지고 이어짐).
-// 걸쳐 있는 짝 태그({b}, {cps=20} 등)는 나누는 자리에서 닫고 다음 조각 첫머리에서 다시 연다. 나누는 자리 앞뒤 빈칸은 뺀다.
-// 글이 없는 조각(태그만 있거나 빈 것)은 버린다. {clear}가 없으면 [글 그대로]
+// [지우고 이어서] {clear}: 그 자리에서 대사를 여러 줄로 나눈다 (같은 화자의 대사 여러 줄 = 클릭하면 다음 조각).
+// 앞 글은 지우지 않고 자리는 둔 채 안 보이게: 둘째 조각부터 앞 조각들을 투명하게({alpha=0}, 외곽선은 {outlinecolor=#0000})
+// 앞에 다시 넣고 {fast}로 바로 지나가게 한다. 그래서 대본에 쓴 줄바꿈·빈칸 그대로 새 글이 원래 자리(둘째 줄, 셋째 줄 …)에 나온다.
+// 걸쳐 있는 짝 태그({b}, {cps=20} 등)는 나누는 자리에서 닫고 다음 조각 첫머리에서 다시 연다.
+// 숨긴 앞 글에서는 기다림·속도·투명도 태그({w} {p} {nw} {fast} {cps} {alpha} {outlinecolor})를 뺀다.
+// 글이 없는 조각(태그만 있거나 빈칸·줄바꿈뿐)은 대사로 내보내지 않는다(자리는 다음 조각의 숨긴 글에 남음). {clear}가 없으면 [글 그대로]
+const HIDE_DROP = new Set(['w', 'p', 'nw', 'fast', 'clear', 'cps', 'alpha', 'outlinecolor']);
+
 export function splitClear(text: string): string[] {
   const toks = tokenize(text);
   if (!toks.some((t) => t.k === 'self' && t.name === 'clear')) return [text];
-  const out: { s: string; has: boolean }[] = [];
-  const open: Tok[] = [];
-  let cur = '';
-  let has = false;
-  let lead = false; // 나눈 바로 뒤라 앞 빈칸을 뺄 때
+  const raw = (t: Tok) => text.slice(t.s, t.e);
+  const hide = (ts: Tok[]) => ts.filter((t) => !((t.k === 'open' || t.k === 'close' || t.k === 'self') && HIDE_DROP.has(t.name))).map(raw).join('');
+  const out: string[] = [];
+  const open: Tok[] = []; // 지금 자리에서 열려 있는 짝 태그
+  let prefix = ''; // 앞 조각들 (숨길 글)
+  let seg: Tok[] = [];
+  const flush = () => {
+    const reopen = open.slice();
+    for (const t of seg) {
+      if (t.k === 'open') open.push(t);
+      else if (t.k === 'close') open.pop();
+    }
+    const close = (ts: Tok[]) => ts.slice().reverse().map((o) => `{/${o.name}}`).join('');
+    const body = reopen.map(raw).join('') + seg.map(raw).join('') + close(open);
+    const has = seg.some((t) => t.k === 'esc' || (t.k === 'text' && raw(t).trim() !== ''));
+    if (has) out.push((prefix ? `{alpha=0}{outlinecolor=#0000}${prefix}{/outlinecolor}{/alpha}{fast}` : '') + body);
+    prefix += hide(reopen) + hide(seg) + close(open.filter((o) => !HIDE_DROP.has(o.name)));
+    seg = [];
+  };
   for (const t of toks) {
-    const raw = text.slice(t.s, t.e);
-    if (t.k === 'self' && t.name === 'clear') {
-      cur = cur.replace(/\s+$/, '') + open.slice().reverse().map((o) => `{/${o.name}}`).join('');
-      out.push({ s: cur, has });
-      cur = open.map((o) => text.slice(o.s, o.e)).join('');
-      has = false;
-      lead = true;
-      continue;
-    }
-    if (t.k === 'text') {
-      const v = lead ? raw.replace(/^\s+/, '') : raw;
-      if (v) lead = false;
-      if (v.trim()) has = true;
-      cur += v;
-      continue;
-    }
-    if (t.k === 'esc') (has = true), (lead = false);
-    if (t.k === 'open') open.push(t);
-    else if (t.k === 'close') open.pop();
-    cur += raw;
+    if (t.k === 'self' && t.name === 'clear') flush();
+    else seg.push(t);
   }
-  out.push({ s: cur, has });
-  const kept = out.filter((x) => x.has).map((x) => x.s);
-  return kept.length ? kept : [''];
+  flush();
+  return out.length ? out : [''];
 }
 
 export interface Pair { o: Tok; c: Tok }

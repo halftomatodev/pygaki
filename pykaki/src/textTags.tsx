@@ -80,7 +80,7 @@ export function parseTagged(text: string, tagsOn: boolean, fontOf: (path: string
       out.stops.push({ at: out.glyphs.length, sec: val ? Number(val) : null });
       if (name === 'p') add('\n');
     } else if (name === 'clear') {
-      // 렌파이로는 대사를 둘로 나눠 내보낸다(splitClear). 앞 조각이 다 나오면 클릭을 기다린다
+      // 렌파이로는 대사를 나눠 내보낸다(splitClear, 앞 글은 투명하게 자리만). 앞 조각이 다 나오면 클릭을 기다린다
       out.stops.push({ at: out.glyphs.length, sec: null });
       out.clears.push(out.glyphs.length);
     } else if (name === 'nw') out.noWait = true;

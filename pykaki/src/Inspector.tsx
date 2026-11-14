@@ -200,7 +200,8 @@ function LineRow({ l, i, upd, drag }: { l: Line; i: number; upd: Upd; drag: Retu
         <button title="줄 삭제" onClick={() => upd((x) => void x.lines.splice(i, 1))}>✕</button>
         {l.type === 'say' && l.attr && <OldAttr attr={l.attr} clear={() => upd((x) => void delete x.lines[i].attr)} />}
       </div>
-      <div className="line-body">
+      {/* 연출·플래그 줄은 고르는 칸이라 칸을 감싼 곳에서 Ctrl+Enter를 받음 (글 칸은 자기 onKeyDown) */}
+      <div className="line-body" onKeyDown={isStage(l.type) || l.type === 'flag' ? onKey : undefined}>
         {isStage(l.type) ? (
           <StageFields l={l} set={set} />
         ) : l.type === 'flag' ? (

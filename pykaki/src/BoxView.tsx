@@ -306,6 +306,13 @@ function Lines({ b, editing, active, setActive }: { b: BoxNode; editing: boolean
 
   const setLine = (i: number) => (fn: (x: Line) => void, key?: string) => upd((x) => fn(x.lines[i]), key);
 
+  // 연출·플래그 줄의 오른쪽 칸(고르는 칸, 숫자 칸)에서도 Ctrl+Enter로 아래에 새 줄
+  const onSideKey = (e: React.KeyboardEvent) => {
+    if (!al || !hit(e, 'newLine')) return;
+    e.preventDefault();
+    addAfter(ai, al);
+  };
+
   return (
     <div className="box-lines" ref={wrap}>
       {b.lines.map((l, i) => (
@@ -333,12 +340,12 @@ function Lines({ b, editing, active, setActive }: { b: BoxNode; editing: boolean
             <button className="nodrag" title="줄 삭제" onClick={() => remove(ai)}>✕</button>
           </div>
           {isStage(al.type) && (
-            <div className="side side-r nodrag" style={{ top }}>
+            <div className="side side-r nodrag" style={{ top }} onKeyDown={onSideKey}>
               <StageFields l={al} nd="nodrag" set={setLine(ai)} />
             </div>
           )}
           {al.type === 'flag' && (
-            <div className="side side-r nodrag" style={{ top }}>
+            <div className="side side-r nodrag" style={{ top }} onKeyDown={onSideKey}>
               <ActionInput value={al.text} onChange={(v) => upd((x) => void (x.lines[ai].text = v), 'text' + al.id)} />
             </div>
           )}
