@@ -35,6 +35,7 @@ pygaki 앱의 **[효과]** 화면에서는 효과를 샘플로 돌려 보고, **
 | `droplets.glsl` | 글자 | `droplets` 물방울 | 모양이 일정하지 않은 물방울들이 글자 위를 돌아다니며, 그 아래 글자가 렌즈처럼 휘고 커짐 |
 | `spring.glsl` | 글자 | `spring` 튕기며 자리 잡기 | 글자가 아래에서 작게 튀어 올라와 제자리를 조금 지나쳤다가 되돌아오며, 몇 번 작게 흔들린 뒤 멈춤(`u__bounce`, `u__wobble`, `u__lift`, `u__grow`) |
 | `marquee.glsl` | 글자 | `marquee` 옆으로 흐르기 | 줄이 처음부터 다 보이고 오른쪽에서 왼쪽으로 끝없이 흘러감. 양 끝은 흐려짐(`u__speed`, `u__gap`, `u__dir`, `u__fade`) |
+| `bubble.glsl` | 글자 | `bubble` 말풍선 | 대사 글 전체를 만화 말풍선이 감싸고, 퐁 커지며 나온 뒤 글자가 나옴. 모양 넷(`u__shape` 0 둥근, 1 손그림, 2 외침, 3 집중선), 꼬리 길이와 방향(`u__tail`, `u__tail_dir`), 바탕색, 선 색, 글자 색 |
 
 ```renpy
 e "아래에서 올라온다." (cps=30, effect="maskup")
@@ -57,9 +58,19 @@ e "상자 위에서 노래방." (cps=8, effect="backbox:u__grow=0:u__hide=0|kara
 e "물방울이 지나간다." (cps=30, effect="droplets")
 e "튕긴다!" (cps=20, effect="spring")
 e "오늘의 소식: 비가 옵니다." (effect="marquee:u__speed=60")
+e "괜찮아?" (cps=25, effect="bubble")
+e "앗! 뭐야!!" (effect="bubble:u__shape=2")
+e "まさか" (effect="bubble:u__shape=3:u__fill=#000000:u__ink=#ffffff")
 ```
 
 `marquee`는 그 대사 글의 폭 안에서 돕니다. 글이 짧으면 흐르는 폭도 짧아서, 넓게 흐르게 하려면 글 뒤에 빈칸을 넣습니다. 마우스를 올려도 멈추지 않습니다.
+
+`bubble`은 글 크기에 맞춰 말풍선을 그리므로 대사 글보다 크게, 대사 창 밖으로 조금 나갈 수 있습니다. 글자 외곽선은 말풍선에 가려 그리지 않고, 글자 색은 `u__ink`(기본 검정)로 바꿉니다(`u__recolor=0`이면 원래 색).
+모양을 그림으로 바꿔 끼울 수도 있습니다. `u__image`에 그림 파일, `u__image_on=1`이면 셰이더로 그린 모양 대신 그 그림을 글 크기에 맞춰 깝니다. 모서리(`u__slice` 그림의 비율, `u__slice_px` 화면 픽셀)는 늘리지 않아서, 글이 길어져도 선 굵기와 해상도가 그대로입니다. 꼬리나 집중선이 그려진 그림은 `u__image_out`(픽셀)만큼 글 둘레보다 크게 깝니다. 그림을 바꾸려면 파일만 바꾸면 되고, 대사마다 다른 그림도 됩니다. PyKaki 미리보기에서는 셰이더로 그린 모양으로 보입니다.
+
+```renpy
+e "그림 말풍선." (effect="bubble:u__image=gui/bubble.png:u__image_on=1:u__slice=0.3:u__slice_px=36:u__image_out=14")
+```
 
 `meltglitch`는 글자 네모를 아래로 늘려 그 안에서 흘러내리므로, 길게 하면 아랫줄 글자와 겹칩니다(`u__length`로 길이).
 TV 지직 소리는 전환에 들어 있지 않습니다. `play sound "static.ogg"`처럼 같은 자리에 적습니다.

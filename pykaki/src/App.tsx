@@ -13,6 +13,7 @@ import { addBoxCenter, goNextBox, toggleFocus } from './actions';
 import { hit } from './prefs';
 import { Resizer } from './Resizer';
 import { isTyping } from './util';
+import { copyText, pasteClip, readClip, type BoxClip } from './boxClip';
 
 // 실행 취소를 앱이 받을지. 창(설정·도움말) 안의 칸과, 고칠 때까지 대본에 안 들어가는 칸(data-native-undo)은 브라우저에 맡긴다
 function appUndo(t: EventTarget | null) {
@@ -56,14 +57,66 @@ function Keys() {
       else if (hit(e, 'saveAs')) run(() => saveProject(true));
       else if (hit(e, 'export')) run(() => exportRpyFile(true));
       else if (hit(e, 'newBox')) run(() => addBoxCenter(rf));
+      else if (!isTyping(e.target) && hit(e, 'duplicate')) run(() => duplicateBoxes());
       // 대본 입력칸 안에서도 앱의 실행 취소를 쓴다 (React 칸은 브라우저 되돌리기가 잘 안 먹음)
       else if (appUndo(e.target) && hit(e, 'undo')) run(s.undo);
       else if (appUndo(e.target) && hit(e, 'redo')) run(s.redo);
     };
+    // 상자 복사·붙여넣기: 글 칸 밖에서 Ctrl+C / Ctrl+V. 클립보드에 상자 JSON을 글자로 넣어서 창이나 대본 사이에도 됨
+    let mouse: { x: number; y: number } | null = null;
+    const onMove = (e: PointerEvent) => (mouse = { x: e.clientX, y: e.clientY });
+    // 붙일 자리: 마우스가 캔버스 위면 그 자리, 아니면 원래 자리에서 조금 옆
+    const pasteAt = () => {
+      const el = document.querySelector('.canvas')?.getBoundingClientRect();
+      if (!mouse || !el || mouse.x < el.left || mouse.x > el.right || mouse.y < el.top || mouse.y > el.bottom) return null;
+      return rf.screenToFlowPosition(mouse);
+    };
+    const scriptView = () => useLive.getState().view === 'script' && !document.querySelector('.modal');
+    const onCopy = (e: ClipboardEvent) => {
+      const s = useStore.getState();
+      if (!scriptView() || isTyping(e.target) || isTyping(document.activeElement) || !s.selectedIds.length) return;
+      const text = copyText(s.project, s.selectedIds);
+      if (!text || !e.clipboardData) return;
+      e.clipboardData.setData('text/plain', text);
+      e.preventDefault();
+      s.say(`상자 ${s.selectedIds.length}개를 복사했어요 (Ctrl+V로 붙여넣기)`);
+    };
+    const onPaste = (e: ClipboardEvent) => {
+      if (!scriptView() || isTyping(e.target) || isTyping(document.activeElement)) return;
+      const clip = readClip(e.clipboardData?.getData('text/plain'));
+      if (!clip) return;
+      e.preventDefault();
+      pasteBoxes(clip, pasteAt());
+    };
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    window.addEventListener('pointermove', onMove);
+    document.addEventListener('copy', onCopy);
+    document.addEventListener('paste', onPaste);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('pointermove', onMove);
+      document.removeEventListener('copy', onCopy);
+      document.removeEventListener('paste', onPaste);
+    };
   }, [rf]);
   return null;
+}
+
+// 붙인 상자를 골라 둠 (실행 취소 한 번으로 되돌림)
+function pasteBoxes(clip: BoxClip, at: { x: number; y: number } | null) {
+  let ids: string[] = [];
+  const s = useStore.getState();
+  s.update((p) => void (ids = pasteClip(p, clip, at)));
+  s.select(ids);
+  s.say(`상자 ${ids.length}개를 붙였어요`);
+}
+
+// 고른 상자를 바로 옆에 복제 (클립보드는 그대로)
+function duplicateBoxes() {
+  const s = useStore.getState();
+  const clip = readClip(copyText(s.project, s.selectedIds));
+  if (!clip) return s.say('복제할 상자를 먼저 고르세요');
+  pasteBoxes(clip, null);
 }
 
 // 칸과 캔버스 사이 경계 (칸을 숨기면 같이 숨김)

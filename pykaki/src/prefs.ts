@@ -3,7 +3,7 @@ import { create } from 'zustand';
 // Pretendard (SIL OFL 1.1, licenses/OFL-Pretendard.txt). 굵기를 고를 수 있는 가변 글꼴 하나를 파일 안에 넣는다
 import pretendardUrl from 'pretendard/dist/web/variable/woff2/PretendardVariable.woff2?url';
 
-export type ActionId = 'focus' | 'nextBox' | 'flowMenu' | 'save' | 'saveAs' | 'export' | 'undo' | 'redo' | 'newBox' | 'newLine' | 'tagBold' | 'tagItalic' | 'tagUnderline' | 'gamePanel';
+export type ActionId = 'focus' | 'nextBox' | 'flowMenu' | 'save' | 'saveAs' | 'export' | 'undo' | 'redo' | 'newBox' | 'duplicate' | 'newLine' | 'tagBold' | 'tagItalic' | 'tagUnderline' | 'gamePanel';
 
 // 키는 e.code(자판 위치)로 적는다. 한글 입력 상태에서도 같은 키로 동작한다
 export const ACTIONS: { id: ActionId; label: string; def: string }[] = [
@@ -17,6 +17,7 @@ export const ACTIONS: { id: ActionId; label: string; def: string }[] = [
   { id: 'undo', label: '실행 취소', def: 'Ctrl+KeyZ' },
   { id: 'redo', label: '다시 실행', def: 'Ctrl+KeyY' },
   { id: 'newBox', label: '새 상자', def: 'Alt+KeyN' },
+  { id: 'duplicate', label: '고른 상자 복제 (복사는 Ctrl+C, 붙여넣기는 Ctrl+V)', def: 'Ctrl+KeyD' },
   { id: 'tagBold', label: '대사 굵게 {b} (글 칸에서)', def: 'Ctrl+KeyB' },
   { id: 'tagItalic', label: '대사 기울임 {i} (글 칸에서)', def: 'Ctrl+KeyI' },
   { id: 'tagUnderline', label: '대사 밑줄 {u} (글 칸에서)', def: 'Ctrl+KeyU' },

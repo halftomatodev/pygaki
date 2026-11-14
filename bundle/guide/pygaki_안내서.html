@@ -250,6 +250,8 @@ mark{background:var(--mark);color:inherit;border-radius:2px}
 <li>캔버스 <b>빈 곳을 더블클릭</b>하면 새 상자가 생겨요. label 배경 안에서 더블클릭하면 그 label에 들어가요.
 </li>
 <li>왼쪽 "상자와 정렬"의 <b>[+ 상자]</b>로도 만들 수 있어요.
+</li>
+<li><b>상자 복사</b>: 상자를 고르고(여러 개는 끌어서 고르기) <b>Ctrl+C</b>, 캔버스에서 마우스를 둔 자리에 <b>Ctrl+V</b>로 붙여요. <b>Ctrl+D</b>는 고른 상자를 바로 옆에 복제해요. 같이 복사한 상자끼리 이어진 선은 새 상자끼리 다시 이어지고, 다른 상자로 가는 선은 원래 상자를 그대로 가리켜요. 새 상자는 새 이름(n07 같은)을 받아서 원고에서 겹치지 않아요. 글 칸에 커서가 있을 때는 Ctrl+C/V가 글자만 복사해요. 대본 창 두 개 사이에도 붙일 수 있어요(다른 대본에 없는 상자로 가던 선은 끊겨요). Ctrl+Z 한 번이면 붙인 것이 모두 없어져요.
 </li></ul>
 <h3 id="상자-안에서-글쓰기">상자 안에서 글쓰기</h3>
 <ul>
@@ -263,6 +265,8 @@ mark{background:var(--mark);color:inherit;border-radius:2px}
 </li>
 <li><b>＋</b> 아래에 새 줄, <b>✕</b> 줄 삭제
 </li></ul>
+</li>
+<li>선택지나 조건 분기 줄에 커서가 있어도 왼쪽 바깥에 <b>⠿ ◆ 선택지(◇ 조건) ＋ ✕</b> 묶음이 붙어요. ⠿로 끌어 순서를 바꾸고(선은 그대로 붙어 있어요), ＋로 바로 아래에 하나 더 넣고, ✕로 지워요. 마지막 하나를 ✕로 지우면 선택지(조건 분기)가 아예 없어지고 <b>→ 다음 상자로</b>로 돌아가요(이어져 있던 상자로 이어져요. Ctrl+Z로 되돌려요). 마우스를 올리면 볼 때도 줄 왼쪽에 ⠿가 보여요.
 </li>
 <li>연출 줄(🖼 배경, 🎵 음악 등)을 누르면 <b>오른쪽 바깥</b>에 입력칸이 붙어요.
 </li>
@@ -279,13 +283,13 @@ mark{background:var(--mark);color:inherit;border-radius:2px}
 </li>
 <li><b>Esc</b>나 빈 곳 클릭: 편집 끝. 화면이 원래 보던 곳으로 돌아가요.
 </li></ul>
-<h3 id="글-꾸미기와-멈춤-태그-상자">글 꾸미기와 멈춤 (태그 상자)</h3>
+<h3 id="글-꾸미기와-진행-태그-상자">글 꾸미기와 진행 (태그 상자)</h3>
 <ul>
 <li>대사나 내레이션 글 칸에 커서가 있으면 <b>태그 상자</b>가 떠요. 상자 안에서 쓸 때는 상자 <b>오른쪽 위 바깥</b>에, 오른쪽 칸에서 쓸 때는 글자 효과 칸 위쪽에 나와요.
 </li>
-<li>상자는 묶음마다 카드 한 장(글자, 멈춤, 속도, 더 보기의 모양·글꼴과 효과·넣기)이고, 줄마다 이름이 색 버블로 붙어 있어요.
+<li>상자는 묶음마다 카드 한 장(글자, 진행, 속도, 더 보기의 모양·글꼴과 효과·넣기)이고, 줄마다 이름이 색 버블로 붙어 있어요.
 </li>
-<li>멈춤, 속도, 투명도, 자간, 넣기 단추 위에 마우스를 잠깐 올리면 <b>툴팁</b>에 넣는 태그, 설명, 그리고 견본 글에 그 태그를 넣어 한 글자씩 나오는 모습이 돌아요(클릭 대기는 ▼를 보이고 저절로 넘어가요). 막대를 끄는 동안에는 그 값으로 견본이 돌아요.
+<li>진행, 속도, 투명도, 자간, 넣기 단추 위에 마우스를 잠깐 올리면 <b>툴팁</b>에 넣는 태그, 설명, 그리고 견본 글에 그 태그를 넣어 한 글자씩 나오는 모습이 돌아요(클릭 대기는 ▼를 보이고 저절로 넘어가요). 막대를 끄는 동안에는 그 값으로 견본이 돌아요.
 </li>
 <li>글을 고르고 단추를 누르면 그 부분만 렌파이 텍스트 태그로 감싸요. 고른 글이 없으면 태그 짝을 넣고 커서를 그 사이에 둬요.
 <ul>
@@ -295,7 +299,10 @@ mark{background:var(--mark);color:inherit;border-radius:2px}
 </li>
 <li><b>색</b>: 팔레트가 펼쳐져요. 기본 색 32칸, 이 프로젝트 색(대사창 기본 글자 색, 캐릭터 이름 색), 최근에 쓴 색 8칸, <code>#rrggbb</code> 칸과 [직접 고르기]. ←↑→↓로 옮기고 Enter로 골라요. 이미 색 태그 안이면 색 값만 바뀌고, [색 빼기]로 뺄 수 있어요.
 </li>
-<li><b>멈춤</b>: [클릭 대기] <code>{w}</code>, [잠깐] <code>{w=0.5}</code>(넣으면 숫자가 골라져 있어서 바로 초를 고쳐 쓸 수 있어요), [줄 바꾸며 대기] <code>{p}</code>, [자동 넘김] <code>{nw}</code>(글 끝에 들어가요), [여기까지 한 번에] <code>{fast}</code>
+<li><b>진행</b>: [클릭 대기] <code>{w}</code>, [잠깐] <code>{w=0.5}</code>(넣으면 숫자가 골라져 있어서 바로 초를 고쳐 쓸 수 있어요), [줄 바꾸며 대기] <code>{p}</code>, [자동 넘김] <code>{nw}</code>(글 끝에 들어가요), [여기까지 한 번에] <code>{fast}</code>, [지우고 이어서] <code>{clear}</code>
+<ul>
+<li><b>지우고 이어서</b>: 여기까지 나오면 클릭을 기다리고, 앞 글을 지운 뒤 같은 사람이 이어서 말해요(한 줄씩 넘어가며 앞 줄을 지우는 효과). 원고에는 그 자리에서 같은 화자의 대사 여러 줄로 나눠 내보내요. 굵게·색·속도처럼 걸쳐 있는 태그는 나뉜 줄마다 다시 붙고, 글자 효과·대사 소리 같은 줄 설정도 나뉜 줄마다 똑같이 붙어요. [렌파이에서 여기로 이동]은 첫 조각으로 가고, 게임 안 GUI 편집기에서 대사 위치를 바꿔 PyKaki로 받아 오는 것은 첫 조각에서만 돼요.
+</li></ul>
 </li>
 <li><b>속도</b>: 막대를 끌거나 숫자 칸에 적고 Enter. 고른 글만 <b>1초에 그 글자 수</b>로 나와요 <code>{cps=20}</code>(대사 칸의 텍스트 속도와 같은 단위). [보통]을 누르면 태그가 빠져요. 예전에 넣은 배율 태그 <code>{cps=*2}</code>는 옆에 <code>보통의 2배</code>로 보이고, 막대를 움직이면 글자 수로 바뀌어요
 </li>
@@ -430,7 +437,7 @@ mark{background:var(--mark);color:inherit;border-radius:2px}
 </div>
 <div class="blk"><h2 id="4-흐름-잇기">4. 흐름 잇기</h2>
 <p>상자를 <b>한 번 클릭</b>하면 오른쪽 <b>편집</b> 탭에서 "다음 흐름"을 정해요.</p>
-<div class="tbl"><table><thead><tr><th>종류</th><th>뜻</th></tr></thead><tbody><tr><td><b>→ 다음 상자로</b></td><td>다음 상자로 이어져요.</td></tr><tr><td><b>◆ 선택지</b></td><td>선택지마다 다른 상자로 가요. 상자 안에서 쓸 때 선택지 옆 <b>✕</b>나 빈 선택지에서 <b>BackSpace</b>로 지워요.</td></tr><tr><td><b>◇ 조건 분기</b></td><td>조건에 따라 다른 상자로 가요. <b>만약</b> 줄에서 [플래그 고르기]로 플래그를 고르고, 켜짐/꺼짐 플래그는 <b>켜져 있으면·꺼져 있으면</b>, 숫자 플래그는 숫자와 <b>이상·이하·보다 크면·보다 작으면·이면·이 아니면</b>, 글자 플래그는 글과 <b>이면·이 아니면</b>을 골라요. [+ 조건 더하기]로 조건을 더하면 <b>그리고</b>(모두 맞아야)나 <b>또는</b>(하나만 맞아도)로 묶여요. <code>{ }</code>를 누르면 렌파이 조건식을 직접 써요(예: <code>love &gt;= 5 and (met_alice or rich)</code>. 고르는 칸으로 못 나타내는 식은 글 칸으로 보여요). [+ 조건]으로 <b>아니고</b> 줄을 더하고, 위 조건이 모두 아니면 <b>그 밖</b> 상자로 가요.</td></tr><tr><td><b>⤷ call 후 계속</b></td><td>다른 장면을 불렀다가 끝나면 돌아와서 "복귀 후" 상자로 이어져요. 공통 장면을 여러 번 쓸 때 편해요.</td></tr><tr><td><b>■ 끝 (return)</b></td><td>여기서 끝나요. call로 불린 장면이면 부른 곳으로 돌아가요.</td></tr></tbody></table></div>
+<div class="tbl"><table><thead><tr><th>종류</th><th>뜻</th></tr></thead><tbody><tr><td><b>→ 다음 상자로</b></td><td>다음 상자로 이어져요.</td></tr><tr><td><b>◆ 선택지</b></td><td>선택지마다 다른 상자로 가요. 상자 안에서 쓸 때 왼쪽 바깥 묶음의 <b>✕</b>나 빈 선택지에서 <b>BackSpace</b>로 지워요.</td></tr><tr><td><b>◇ 조건 분기</b></td><td>조건에 따라 다른 상자로 가요. <b>만약</b> 줄에서 [플래그 고르기]로 플래그를 고르고, 켜짐/꺼짐 플래그는 <b>켜져 있으면·꺼져 있으면</b>, 숫자 플래그는 숫자와 <b>이상·이하·보다 크면·보다 작으면·이면·이 아니면</b>, 글자 플래그는 글과 <b>이면·이 아니면</b>을 골라요. [+ 조건 더하기]로 조건을 더하면 <b>그리고</b>(모두 맞아야)나 <b>또는</b>(하나만 맞아도)로 묶여요. <code>{ }</code>를 누르면 렌파이 조건식을 직접 써요(예: <code>love &gt;= 5 and (met_alice or rich)</code>. 고르는 칸으로 못 나타내는 식은 글 칸으로 보여요). [+ 조건]으로 <b>아니고</b> 줄을 더하고, 위 조건이 모두 아니면 <b>그 밖</b> 상자로 가요.</td></tr><tr><td><b>⤷ call 후 계속</b></td><td>다른 장면을 불렀다가 끝나면 돌아와서 "복귀 후" 상자로 이어져요. 공통 장면을 여러 번 쓸 때 편해요.</td></tr><tr><td><b>■ 끝 (return)</b></td><td>여기서 끝나요. call로 불린 장면이면 부른 곳으로 돌아가요.</td></tr></tbody></table></div>
 <h3 id="선으로-잇기">선으로 잇기</h3>
 <ul>
 <li>상자 아래(선택지와 조건 분기는 줄마다 오른쪽)의 <b>점(●)을 끌어서</b> 다른 상자에 놓으면 연결돼요.
@@ -724,7 +731,7 @@ mark{background:var(--mark);color:inherit;border-radius:2px}
 </li></ul>
 </div>
 <div class="blk"><h2 id="11-단축키-기본값">11. 단축키 (기본값)</h2>
-<div class="tbl"><table><thead><tr><th>키</th><th>동작</th></tr></thead><tbody><tr><td>상자 더블클릭</td><td>상자 안에서 편집</td></tr><tr><td>빈 곳 더블클릭</td><td>새 상자</td></tr><tr><td>Ctrl+\\</td><td>집중 모드 켜기/끄기</td></tr><tr><td>Ctrl+Enter</td><td>(편집 중) 같은 화자로 새 줄</td></tr><tr><td>Ctrl+Shift+Enter</td><td>(편집 중) 다음 상자로 이어 쓰기 (없으면 새 상자)</td></tr><tr><td>Alt+Enter</td><td>(편집 중) 다음 흐름 창을 키보드로 열기/닫기 (방향키 고르기, Enter 정하기, Esc 닫기)</td></tr><tr><td>Ctrl+B / Ctrl+I / Ctrl+U</td><td>(대사 글 칸에서) 고른 글 굵게 / 기울임 / 밑줄 태그</td></tr><tr><td>Esc</td><td>상자 편집 끝</td></tr><tr><td>Delete</td><td>고른 상자/선 삭제</td></tr><tr><td>Shift+드래그</td><td>여러 상자 선택</td></tr><tr><td>Ctrl+S / Ctrl+Shift+S</td><td>저장 / 다른 이름으로 저장</td></tr><tr><td>Ctrl+E</td><td><code>.rpy</code> 같은 곳에 다시 내보내기</td></tr><tr><td>Ctrl+Z / Ctrl+Y</td><td>실행 취소 / 다시 실행 (글 칸 안에서도. 설정 창과 플래그 이름 칸은 그 칸의 글자만)</td></tr><tr><td>Alt+N</td><td>새 상자</td></tr><tr><td>F1</td><td>도움말</td></tr></tbody></table></div>
+<div class="tbl"><table><thead><tr><th>키</th><th>동작</th></tr></thead><tbody><tr><td>상자 더블클릭</td><td>상자 안에서 편집</td></tr><tr><td>빈 곳 더블클릭</td><td>새 상자</td></tr><tr><td>Ctrl+\\</td><td>집중 모드 켜기/끄기</td></tr><tr><td>Ctrl+Enter</td><td>(편집 중) 같은 화자로 새 줄</td></tr><tr><td>Ctrl+Shift+Enter</td><td>(편집 중) 다음 상자로 이어 쓰기 (없으면 새 상자)</td></tr><tr><td>Alt+Enter</td><td>(편집 중) 다음 흐름 창을 키보드로 열기/닫기 (방향키 고르기, Enter 정하기, Esc 닫기)</td></tr><tr><td>Ctrl+B / Ctrl+I / Ctrl+U</td><td>(대사 글 칸에서) 고른 글 굵게 / 기울임 / 밑줄 태그</td></tr><tr><td>Esc</td><td>상자 편집 끝</td></tr><tr><td>Delete</td><td>고른 상자/선 삭제</td></tr><tr><td>Shift+드래그</td><td>여러 상자 선택</td></tr><tr><td>Ctrl+S / Ctrl+Shift+S</td><td>저장 / 다른 이름으로 저장</td></tr><tr><td>Ctrl+E</td><td><code>.rpy</code> 같은 곳에 다시 내보내기</td></tr><tr><td>Ctrl+Z / Ctrl+Y</td><td>실행 취소 / 다시 실행 (글 칸 안에서도. 설정 창과 플래그 이름 칸은 그 칸의 글자만)</td></tr><tr><td>Alt+N</td><td>새 상자</td></tr><tr><td>Ctrl+C / Ctrl+V</td><td>(글 칸 밖에서) 고른 상자 복사 / 마우스 자리에 붙여넣기</td></tr><tr><td>Ctrl+D</td><td>고른 상자 복제</td></tr><tr><td>F1</td><td>도움말</td></tr></tbody></table></div>
 <p>Esc, Delete, 더블클릭 말고는 [설정]에서 바꿀 수 있어요.</p>
 </div>
 <div class="blk"><h2 id="12-자주-묻는-것">12. 자주 묻는 것</h2>
@@ -1885,6 +1892,7 @@ $ screen_fx.set_warp(5.0, duration=2.0)   # 스크립트로: 2초 동안 서서�
 </div>
 <div class="fx-grid">
 <figure class="fx-card"><div class="fx-none">영상 없음 · 앱 [효과]에서 보기</div><figcaption><b>뒤에 상자</b><code>backbox</code><span>효과 폴더</span></figcaption></figure>
+<figure class="fx-card"><div class="fx-none">영상 없음 · 앱 [효과]에서 보기</div><figcaption><b>말풍선</b><code>bubble</code><span>효과 폴더</span></figcaption></figure>
 <figure class="fx-card"><div class="fx-none">영상 없음 · 앱 [효과]에서 보기</div><figcaption><b>물방울</b><code>droplets</code><span>효과 폴더</span></figcaption></figure>
 <figure class="fx-card"><div class="fx-none">영상 없음 · 앱 [효과]에서 보기</div><figcaption><b>노래방</b><code>karaoke</code><span>효과 폴더</span></figcaption></figure>
 <figure class="fx-card"><div class="fx-none">영상 없음 · 앱 [효과]에서 보기</div><figcaption><b>옆으로 흐르기</b><code>marquee</code><span>효과 폴더</span></figcaption></figure>
@@ -1935,6 +1943,7 @@ $ screen_fx.set_warp(5.0, duration=2.0)   # 스크립트로: 2초 동안 서서�
 <tr><td><code>relief</code></td><td>양각</td><td></td></tr>
 <tr><td><code>gradmap</code></td><td>그라데이션 맵</td><td></td></tr>
 <tr><td><code>rings</code></td><td>동심원 어긋남</td><td></td></tr>
+<tr><td><code>camcorder</code></td><td>옛 캠코더</td><td></td></tr>
 </tbody></table></div></div></section>
 <section class="chapter" id="develop"><h1 id="develop-h"><span class="n">6</span>직접 고치기</h1>
 <div class="blk"><p>pygaki를 내 게임에 맞게 고치거나, 기능을 더하거나, 고친 것을 다른 사람과 나누려는 사람을 위한 장입니다. 설정 값만 바꾸려면 "플러그인 커스텀 가이드" 장으로 충분하고, 이 장은 코드와 효과 파일을 직접 고칠 때 봅니다.</p>

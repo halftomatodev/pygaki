@@ -201,6 +201,7 @@ async function until(what, fn, ms = 10000) {
   if (await page.locator('.fxv').count()) fail('쓰인 곳 [보기]를 눌러도 대본 화면으로 안 감');
   console.log('[효과] 화면: 됨');
 
+
   // 태그 상자 [더 보기]: 자간, 루비, 띄우기를 눌러 글에 태그가 들어가는지 (끝나면 글을 되돌림)
   {
     const ta = page.locator('textarea[data-tags]').first();
@@ -450,6 +451,34 @@ async function until(what, fn, ms = 10000) {
   console.log('파일 고르기 단추: 됨,', imp.slice(0, 30));
   console.log('showpy 연결: 됨, 받은 명령', got.length);
   srv.close();
+
+  // 상자 복사·붙여넣기·복제 (Ctrl+C, Ctrl+V, Ctrl+D): 진짜 Electron 메뉴가 copy/paste 이벤트를 주는지. 끝나면 Ctrl+Z로 되돌림
+  {
+    const boxes = () => page.locator('.react-flow__node-box').count();
+    const countIs = async (what, want) => {
+      for (let i = 0; i < 50; i++) {
+        if ((await boxes()) === want) return;
+        await wait(200);
+      }
+      fail(what + ': 상자 ' + (await boxes()) + '개');
+    };
+    await page.locator('.view-switch button', { hasText: '대본 편집' }).click();
+    await page.waitForSelector('.react-flow__node-box', { timeout: 10000 });
+    const n0 = await boxes();
+    await page.locator('.react-flow__pane').click({ position: { x: 5, y: 5 } });
+    await page.locator('.react-flow__node-box .box-head').first().click();
+    await page.keyboard.press('Control+c');
+    const r = await page.locator('.canvas').boundingBox();
+    await page.mouse.move(r.x + r.width / 2, r.y + r.height / 2);
+    await page.keyboard.press('Control+v');
+    await countIs('Ctrl+V로 상자가 안 붙음', n0 + 1);
+    await page.keyboard.press('Control+d');
+    await countIs('Ctrl+D로 상자가 복제 안 됨', n0 + 2);
+    await page.keyboard.press('Control+z');
+    await page.keyboard.press('Control+z');
+    await countIs('Ctrl+Z로 붙인 상자가 안 없어짐', n0);
+    console.log('상자 복사, 붙여넣기, 복제: 됨');
+  }
 
   if (errors.length) fail('화면 오류: ' + errors.join(' / '));
   await app.close();

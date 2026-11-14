@@ -2259,7 +2259,7 @@ init 900 python in screen_fx:
     ## 지운 셰이더의 이름공간 (5.7): 엔진 파일을 지워도 원고의 waves.set(), waves.preset("rain"),
     ## action waves.Toggle() 같은 줄이 멈추지 않고 아무 일도 안 하게 합니다. 셰이더 줄은 alias()가 "none"으로 바꿈
     SHIPPED = ("vhs_crt", "ascii", "retro_term", "gameboy", "glitch", "boil", "halftone", "hologram", "nightvision",
-               "shards", "ripple", "collage", "waves", "wobble", "filmgrain", "fisheye", "photocopy", "relief", "gradmap", "rings")
+               "shards", "ripple", "collage", "waves", "wobble", "filmgrain", "fisheye", "photocopy", "relief", "gradmap", "rings", "camcorder")
 
     class _StubNS(object):
         pass
