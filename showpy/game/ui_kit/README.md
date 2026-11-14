@@ -1053,7 +1053,7 @@ e "어디 갔었어?" (name_x=820, name_y=-60, speed=0.5, effect="jitter")
 | `align` | 줄 정렬 (0.0 왼쪽 ~ 1.0 오른쪽) | `align=0.5` |
 | `speed` | 나오는 속도 배율 (플레이어 텍스트 속도에 곱함. 0.5 = 절반 속도). 텍스트 속도가 "즉시"면 효과가 없음 | `speed=0.5` |
 | `cps` | 나오는 속도, 1초에 나오는 글자 수. 플레이어 텍스트 속도와 상관없이 이 값 | `cps=20` |
-| `effect` | 등장 효과: `"dissolve"` 서서히, `"typewriter"` 타자기, `"slowalpha"` 흐리게 대기, `"flip"` 뒤집히며, `"zoom"` 커지며, `"jitter"` 떨림, `"wave"` 물결. pygaki 플러그인 효과(3.5~3.6): `"scatter"` 흩어졌다 모이기, `"drop"` 떨어지기, `"spin"` 회전하며, `"shuffle"` 무작위 순서, `"flash"` 색 번쩍, `"slam"` 크게 찍히기, `"typecursor"` 커서 타자기, `"echo"` 색 잔상, `"glitch"` 글리치, `"glow"` 빛 번짐, `"blurin"` 흐렸다 또렷해지기, `"wipe"` 위에서 그려지기, `"blockglitch"` 블록 글리치, `"melt"` 녹아내림, `"mosh"` 데이터모싱 흉내, `"liquid"` 일렁임, `"vhs"` VHS 지직거림, `"rise"` 떠오르기, `"lean"` 기울며 들어오기, `"stretch"` 늘어나며 들어오기, `"slidein"` 미끄러져 멈춤, `"shake"` 살짝 흔들림, `"inkfill"` 외곽선 채우기, `"glyphbox"` 글자마다 상자, `"stamp"` 도장, `"punch"` 튀어나오는 줌, `"squash"` 찌그러졌다 튕김, `"extrude"` 입체 글자, `"flipin"` 뒤집으며 나오기, `"led"` LED 전광판, `"split"` 위아래 갈라짐. 두 효과 겹치기는 `|` | `effect="wave"` |
+| `effect` | 등장 효과: `"dissolve"` 서서히, `"typewriter"` 타자기, `"slowalpha"` 흐리게 대기, `"flip"` 뒤집히며, `"zoom"` 커지며, `"jitter"` 떨림, `"wave"` 물결. pygaki 플러그인 효과: `"scatter"` 흩어졌다 모이기, `"drop"` 떨어지기, `"shuffle"` 무작위 순서, `"flash"` 색 번쩍, `"slam"` 크게 찍히기, `"typecursor"` 커서 타자기, `"echo"` 색 잔상, `"glitch"` 글리치, `"blurin"` 흐렸다 또렷해지기, `"blockglitch"` 블록 글리치, `"liquid"` 일렁임, `"vhs"` VHS 지직거림, `"rise"` 떠오르기, `"lean"` 기울며 들어오기, `"stretch"` 늘어나며 들어오기, `"slidein"` 미끄러져 멈춤, `"shake"` 살짝 흔들림, `"glyphbox"` 글자마다 상자, `"stamp"` 도장, `"squash"` 찌그러졌다 튕김, `"extrude"` 입체 글자. 효과 폴더(`ui_kit/effects/`): `"maskup"` 아래에서 올라오기, `"tracking"` 자간이 좁아지며, `"sweep"` 빛 지나가기, `"backbox"` 뒤에 상자, `"karaoke"` 노래방, `"meltglitch"` 녹는 글리치, `"droplets"` 물방울. 지운 효과 이름이 남은 원고는 멈추지 않고 한 글자씩 나옵니다. 두 효과 겹치기는 `|` | `effect="wave"` |
 | `name_x`, `name_y` | 이름 상자 위치 (대사 창 왼쪽 위 기준. 이름 배경 그림째 움직임) | `name_x=820, name_y=-60` |
 | `name_font`, `name_size`, `name_color` | 이름 글꼴, 크기, 색 | `name_size=34` |
 | `fx` | (`screen_fx`가 있을 때) 이 대사부터 켤 화면 효과. `"default"` = 선택취소. 다음에 바꿀 때까지 이어짐 | `fx="ascii"` |
@@ -1065,7 +1065,7 @@ e "어디 갔었어?" (name_x=820, name_y=-60, speed=0.5, effect="jitter")
 
 - `what_alpha` 같은 렌파이 원래 이름도 그대로 적을 수 있습니다. 자주 쓰는 이름은 설정 파일의 `say_style.alias`에 `"짧은이름": "렌파이 속성"`으로 추가하세요.
 - 적지 않은 값은 그 캐릭터의 기본값을 따릅니다. `x`만 적으면 높이는 그대로입니다.
-- 한 줄 안의 **일부 글자만** 바꿀 때는 텍스트 태그를 씁니다: `"그건 {color=#a00}{size=30}거짓말{/size}{/color}이야"`. 일부 글자에만 등장 효과를 걸 때는 `"앞 글 {shader=shake}흔들리는 글{/shader} 뒤 글"`처럼 씁니다(효과 이름과 값은 `effect`와 같음. 줄에 효과가 없으면 나머지 글자는 한 글자씩 나옵니다. 색 잔상 `echo`, 외곽선 채우기 `inkfill`은 줄 전체에만 됩니다).
+- 한 줄 안의 **일부 글자만** 바꿀 때는 텍스트 태그를 씁니다: `"그건 {color=#a00}{size=30}거짓말{/size}{/color}이야"`. 일부 글자에만 등장 효과를 걸 때는 `"앞 글 {shader=shake}흔들리는 글{/shader} 뒤 글"`처럼 씁니다(효과 이름과 값은 `effect`와 같음. 줄에 효과가 없으면 나머지 글자는 한 글자씩 나옵니다. 색 잔상 `echo`는 줄 전체에만 됩니다).
 - 설정 파일에는 화면 어디에나 대사를 놓을 수 있는 내레이션용 캐릭터 `t`와 위치 프리셋 `n1`~`n3`가 정의되어 있습니다. 이름을 바꾸거나 같은 방식으로 더 만들어도 됩니다.
 - `effect`에는 렌파이 텍스트 셰이더 문법을 그대로 쓸 수 있습니다. 예: `effect="wave:u__amplitude=10"`(물결 높이 10), `effect="dissolve|wave"`(서서히 나타나며 물결)
 - `name_x`, `name_y`는 렌파이 새 프로젝트의 `screens.rpy`에 들어 있는 `config.character_id_prefixes.append('namebox')` 줄이 있어야 동작합니다. 없으면 무엇을 넣어야 하는지 오류로 알려줍니다.

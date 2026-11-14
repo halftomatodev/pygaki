@@ -64,10 +64,12 @@ PyKaki가 내보내는 문법이기도 합니다.
 | `fx_exclude` | `()` `("say",)` `("say", "choice", "screens")` | 효과에서 뺄 글자 |
 | `x` `y` `pos` | 숫자 | 대사 위치 |
 | `size` `font` `color` `outline` `spacing` `bold` `italic` `kerning` `width` `align` | | 글자 모양 |
-| `speed` | 배율 | 나오는 속도. 플레이어 설정에 곱함 (설정이 "즉시"면 효과 없음) |
-| `cps` | 숫자 | 나오는 속도, 1초에 나오는 글자 수. 플레이어 설정과 상관없음 |
+| `cps` | 숫자 | 나오는 속도, 1초에 몇 글자 (플레이어 설정과 상관없이). GUI 편집기 [대사]의 속도 단추도 이것 |
+| `speed` | 배율 | 예전 원고용. 플레이어 설정에 곱함 (편집기는 더 쓰지 않고, 속도를 고르면 지움) |
 | `effect` | `"dissolve"` `"flip"` `"zoom"` `"jitter"` `"wave"`, pygaki 플러그인이 등록한 `"scatter"` `"drop"` `"shuffle"` `"flash"` `"slam"` `"typecursor"` `"echo"` `"glitch"` `"blurin"` `"blockglitch"` `"liquid"` `"vhs"` `"rise"` `"lean"` `"stretch"` `"slidein"` `"shake"` `"glyphbox"` `"stamp"` `"squash"` `"extrude"` (셰이더는 `ui_kit/engine/text_effects.glsl`, `text_effects.rpy`가 init에서 읽어 등록. PyKaki도 같은 파일의 사본으로 미리보기를 그림. `echo`는 `outlines`가 없으면 `say_style`이 파일의 `@outline` 겹을 넣음. ui_kit 4.9에서 `spin` `glow` `wipe` `inkfill` `punch`와 효과 폴더 샘플 `popin`을 뺌: 예전 원고의 그 이름은 `REMOVED_EFFECTS`로 한 글자씩 나옴) | 등장 효과 |
 | `name_x` `name_y` `name_font` `name_size` `name_color` | | 이름 |
+
+**루비** (ui_kit 4.9, `say_style._ruby_style`): 대사 글에 `{rt}`/`{art}`가 있으면 그 줄의 `what_ruby_style`/`what_altruby_style`을 만들어 넣습니다. 루비 스타일에 그 줄의 글자 효과(없으면 None)를 넣어 "The ruby style removes a textshader" 오류를 막고, 게임에서 `style ruby_text`의 `yoffset`을 정하지 않았으면 본문 크기의 절반 크기로 본문 바로 위(yoffset = -0.85 × 본문 크기)에 두고 `ruby_line_leading`을 줍니다. 루비 글의 크기·색은 PyKaki가 `{rt}` 안에 `{size=}` `{color=}`로 그 자리에서 적습니다.
 
 `screen_fx` 값은 다시 바꿀 때까지 유지되고 세이브에 저장됩니다. 플러그인을 빼면 이 괄호에서 오류가 납니다.
 

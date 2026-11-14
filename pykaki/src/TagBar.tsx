@@ -7,7 +7,7 @@ import { useGameFolder } from './gameFolder';
 import { hit, keyOf } from './prefs';
 import { EFFECTS, effectKnobs, formatEffect, parseEffect } from './stage';
 import { shaderEffect } from './fx/textShaders';
-import { RUBY_NOTE, insertRuby, insertTag, removeTag, retag, setTagValue, stepSize, tagsAt, toggleTag, type Edit } from './tagEdit';
+import { RUBY_NOTE, insertRuby, insertTag, removeTag, retag, rubyAt, setRubyStyle, setTagValue, stepSize, tagsAt, toggleTag, type Edit } from './tagEdit';
 import { TagDemo, type Tip } from './TagDemo';
 
 // 지금 태그를 넣을 글 칸(textarea id). 태그 상자 안으로 포커스가 옮겨 가도 그대로 둔다
@@ -199,8 +199,8 @@ function Palette({ current, onPick, onRemove, onClose }: { current?: string; onP
 // 막대 + 숫자 칸: 끄는 동안 값만 보여 주고, 놓을 때(또는 숫자 칸에서 Enter) 한 번만 글에 넣는다 (실행 취소가 한 번으로 묶이게)
 // stops가 있으면 막대는 그 값들 사이를 칸칸이 옮긴다 (속도처럼 1 둘레를 촘촘히). 숫자 칸에는 그 사이 값도 적을 수 있다
 const fmt = (x: number) => String(Math.round(x * 100) / 100);
-function Slide({ cur, def, min, max, step = 1, stops, unit, title, onCommit, onLive }: {
-  cur?: number; def: number; min: number; max: number; step?: number; stops?: number[]; unit?: string; title: string;
+function Slide({ cur, def, min, max, step = 1, stops, pre, unit, title, onCommit, onLive }: {
+  cur?: number; def: number; min: number; max: number; step?: number; stops?: number[]; pre?: string; unit?: string; title: string;
   onCommit(v: number): void; onLive?(v: number | null): void;
 }) {
   const [drag, setDrag] = useState<number | null>(null);
@@ -239,6 +239,7 @@ function Slide({ cur, def, min, max, step = 1, stops, unit, title, onCommit, onL
         onKeyUp={commit}
         onBlur={commit}
       />
+      {pre && <span className="tb-unit">{pre}</span>}
       <input
         className={'tb-num' + (cur !== undefined ? ' on' : '')}
         value={typing ?? fmt(v)}
@@ -268,11 +269,14 @@ const TIPS: Record<string, Tip> = {
   ruby: {
     label: '루비',
     code: '{rb}글{/rb}{rt}읽는 법{/rt}',
-    desc: '고른 글 위에 작은 글(읽는 법)을 올려요. 고른 글이 없으면 바로 앞 글자 위에. 게임에서 style ruby_text의 크기와 자리를 정해 줘야 글 위에 작게 올라가요 (견본은 작은 글로만)',
+    desc: '고른 글 위에 작은 글(읽는 법)을 올려요. 고른 글이 없으면 바로 앞 글자 위에. 루비 글에 커서를 두면 [루비 글] 줄에서 크기와 색을 그 자리에서 정해요. 자리는 pygaki 플러그인이 본문 바로 위로 맞춰요 (견본은 작은 글로만)',
     demo: '{rb}夢{/rb}{rt}꿈{/rt}을 꿨어요',
   },
 };
-const CPS_STOPS = [0.25, 0.33, 0.5, 0.67, 0.75, 1, 1.25, 1.5, 2, 3, 4];
+// 속도 막대: 1초에 몇 글자 {cps=N}
+const CPS_STOPS = [3, 5, 7, 10, 12, 15, 20, 25, 30, 40, 50, 60, 80, 100, 150];
+const RUBY_SIZE_DEF = 14;
+const DEMO_BASE = 14; // 견본 글의 보통 속도 (TagDemo DEMO_CPS와 같음)
 
 // ── 태그 상자 ──
 // 묶음마다 카드 한 장. 카드 안 줄마다 소제목 버블(색은 카드마다 다름)
@@ -280,7 +284,7 @@ export function TagBar({ targetId, className = '' }: { targetId: string; classNa
   const tagsOn = useStore((s) => s.project.settings.allowTextTags);
   const update = useStore((s) => s.update);
   const [, redraw] = useReducer((x: number) => x + 1, 0);
-  const [palette, setPalette] = useState<false | 'color' | 'outlinecolor'>(false);
+  const [palette, setPalette] = useState<false | 'color' | 'outlinecolor' | 'rubycolor'>(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [size, setSize] = useState<string | null>(null); // 크기 칸에 치는 중인 값
   const [more, setMore] = useState(readMore);
@@ -289,7 +293,7 @@ export function TagBar({ targetId, className = '' }: { targetId: string; classNa
   const knobRef = useRef(knob); // 놓은 뒤 blur가 또 와도 한 번만 넣게
   knobRef.current = knob;
   const [tip, setTip] = useState<string | null>(null); // 툴팁을 띄운 단추
-  const [liveV, setLiveV] = useState<{ cps?: number; alpha?: number; k?: number }>({}); // 막대를 끄는 중인 값 (툴팁 견본에 바로)
+  const [liveV, setLiveV] = useState<{ cps?: number; alpha?: number; k?: number; ruby?: number }>({}); // 막대를 끄는 중인 값 (툴팁 견본에 바로)
   const tipTimer = useRef<ReturnType<typeof setTimeout>>();
   const media = useGameFolder((f) => f.media);
   const linked = useGameFolder((f) => !!f.name);
@@ -389,6 +393,7 @@ export function TagBar({ targetId, className = '' }: { targetId: string; classNa
     const name = palette || 'color';
     saveRecent(c);
     setPalette(false);
+    if (name === 'rubycolor') return run((x, s, e) => setRubyStyle(x, s, e, 'color', c));
     run((x, s, e) => setTagValue(x, s, e, name, c));
   };
   const outline = at.get('outlinecolor');
@@ -433,21 +438,23 @@ export function TagBar({ targetId, className = '' }: { targetId: string; classNa
     }
     setMore(!more);
   };
-  // 속도 {cps=*배}: 막대는 배율. {cps=20}처럼 글자/초로 적은 태그는 그 값을 따로 알려 준다
+  // 속도 {cps=N}: 1초에 N글자 (대사 칸의 텍스트 속도와 같은 단위). 예전 {cps=*배}는 그 배율을 따로 알려 준다
   const cpsTag = at.get('cps');
-  const cpsMul = cpsTag?.startsWith('*') ? Number(cpsTag.slice(1)) || undefined : undefined;
-  const cpsFixed = cpsTag !== undefined && !cpsTag.startsWith('*') ? cpsTag : undefined;
+  const cpsMul = cpsTag?.startsWith('*') ? cpsTag.slice(1) : undefined;
+  const cpsFixed = cpsTag !== undefined && !cpsTag.startsWith('*') && Number(cpsTag) >= 0 ? Number(cpsTag) : undefined;
+  const ruby = t ? rubyAt(t.value, t.selectionStart, t.selectionEnd) : null;
+  const rubySize = ruby?.size !== undefined && /^\d+$/.test(ruby.size) ? Number(ruby.size) : undefined;
   const curAlpha = at.has('alpha') ? Number(at.get('alpha')) : NaN;
   const alphaV = curAlpha >= 0 && curAlpha <= 1 ? curAlpha : undefined;
   const curK = at.has('k') ? Number(at.get('k')) : NaN;
   const kV = Number.isFinite(curK) ? curK : undefined;
-  const live = (name: 'cps' | 'alpha' | 'k') => (v: number | null) => setLiveV((o) => ({ ...o, [name]: v ?? undefined }));
+  const live = (name: 'cps' | 'alpha' | 'k' | 'ruby') => (v: number | null) => setLiveV((o) => ({ ...o, [name]: v ?? undefined }));
   // 막대 툴팁은 지금 값(끄는 중이면 그 값)으로 견본을 돌린다
-  const cpsNow = liveV.cps ?? cpsMul ?? 1;
+  const cpsNow = liveV.cps ?? cpsFixed ?? DEMO_BASE;
   const alphaNow = liveV.alpha ?? alphaV ?? 1;
   const kNow = liveV.k ?? kV ?? 0;
   const slideTips: Record<string, Tip> = {
-    cps: { label: '속도', code: `{cps=*${fmt(cpsNow)}}`, desc: '고른 글만 나오는 빠르기를 바꿔요. 1보다 작으면 느리게, 크면 빠르게. 1에 놓으면 태그를 빼요', demo: `보통으로 나오다가 {cps=*${cpsNow}}이 부분만 ${cpsNow < 1 ? '느리게' : cpsNow > 1 ? '빠르게' : '그대로'}{/cps} 다시 보통` },
+    cps: { label: '속도', code: `{cps=${fmt(cpsNow)}}`, desc: `고른 글만 1초에 ${fmt(cpsNow)}글자로 나와요. 대사 칸의 텍스트 속도와 같은 단위예요. [보통]을 누르면 태그를 빼요`, demo: `1초에 ${DEMO_BASE}글자로 나오다가 {cps=${cpsNow}}이 부분은 ${fmt(cpsNow)}글자{/cps} 다시 보통` },
     alpha: { label: '투명도', code: `{alpha=${fmt(alphaNow)}}`, desc: '고른 글을 흐리게 해요. 왼쪽으로 갈수록 흐려요. 1에 놓으면 태그를 빼요', demo: `보통 글 {alpha=${alphaNow}}흐리게 한 글{/alpha} 보통 글` },
     k: { label: '자간', code: `{k=${fmt(kNow)}}`, desc: '고른 글의 글자 사이를 그만큼(픽셀) 넓혀요. 음수는 좁게. 0에 놓으면 태그를 빼요', demo: `보통 글 {k=${kNow}}자간을 바꾼 글{/k}` },
   };
@@ -498,23 +505,52 @@ export function TagBar({ targetId, className = '' }: { targetId: string; classNa
           <span className="tb-chip">속도</span>
           <span className="tb-slide" {...tipOn('cps')}>
             <Slide
-              cur={cpsMul}
-              def={1}
-              min={0.1}
-              max={10}
+              cur={cpsFixed}
+              def={20}
+              min={1}
+              max={300}
               stops={CPS_STOPS}
-              unit="배"
-              title="고른 글만 빠르기를 바꿔요 {cps=*배}"
+              pre="1초에"
+              unit="글자"
+              title="고른 글만 1초에 몇 글자로 나올지 {cps=N}"
               onLive={live('cps')}
-              onCommit={(v) => putOrDrop('cps', '속도', v === 1 ? null : '*' + fmt(v))}
+              onCommit={(v) => putOrDrop('cps', '속도', String(Math.round(v)))}
             />
           </span>
-          {cpsFixed !== undefined && <span className="tb-hint" title="{cps=}에 숫자만 적으면 1초에 그만큼 글자가 나와요">{cpsFixed}자/초</span>}
+          {cpsMul !== undefined && <span className="tb-hint" title="예전 배율 태그 {cps=*배}. 막대를 움직이면 1초에 몇 글자로 바뀌어요">보통의 {cpsMul}배</span>}
           {at.has('cps') && <button className="tb-btn" title="속도 태그 빼기" onClick={() => run((x, s, e) => removeTag(x, s, e, 'cps', '속도'))}>보통</button>}
           <span className="tb-fill" />
           <button className={'tb-btn tb-more' + (more ? ' on' : '')} title="투명도, 자간, 외곽선 색, 글꼴, 고른 글에만 효과, 띄우기, 루비, 글 속 그림" onClick={toggleMore}>{more ? '접기 ▴' : '더 보기 ▾'}</button>
         </div>
       </div>
+      {ruby && (
+        <div className="tb-card" style={{ '--hue': 330 } as React.CSSProperties}>
+          <div className="tb-row">
+            <span className="tb-chip">루비 글</span>
+            <span className="tb-slide">
+              <Slide
+                cur={rubySize}
+                def={RUBY_SIZE_DEF}
+                min={6}
+                max={60}
+                unit="크기"
+                title="루비 글 크기 {rt}{size=N}…{/rt}. 비워 두면 본문의 절반"
+                onLive={live('ruby')}
+                onCommit={(v) => run((x, s, e) => setRubyStyle(x, s, e, 'size', String(Math.round(v))))}
+              />
+            </span>
+            <button className={'tb-btn tb-color' + (palette === 'rubycolor' ? ' on' : '')} title="루비 글 색 {rt}{color=}…{/rt}" onClick={() => setPalette((v) => (v === 'rubycolor' ? false : 'rubycolor'))}>
+              <span className="tb-dot" style={{ background: ruby.color ?? 'conic-gradient(#ef4444, #eab308, #22c55e, #0ea5e9, #8b5cf6, #ef4444)' }} />색
+            </button>
+            {(ruby.size !== undefined || ruby.color !== undefined) && (
+              <button className="tb-btn" title="루비 글의 크기·색을 빼고 기본으로 (본문의 절반 크기)" onClick={() => run((x, s, e) => {
+                const r = setRubyStyle(x, s, e, 'size', null);
+                return 'error' in r ? r : setRubyStyle(r.text, r.s, r.e, 'color', null);
+              })}>기본</button>
+            )}
+          </div>
+        </div>
+      )}
       {more && (
         <>
           <div className="tb-card" style={{ '--hue': 268 } as React.CSSProperties}>
@@ -641,14 +677,15 @@ export function TagBar({ targetId, className = '' }: { targetId: string; classNa
         </>
       )}
       {palette && (
-        <div className="tb-card" style={{ '--hue': palette === 'color' ? 215 : 268 } as React.CSSProperties}>
+        <div className="tb-card" style={{ '--hue': palette === 'color' ? 215 : palette === 'rubycolor' ? 330 : 268 } as React.CSSProperties}>
           <Palette
             key={palette}
-            current={palette === 'color' ? color : outline}
+            current={palette === 'color' ? color : palette === 'rubycolor' ? ruby?.color : outline}
             onPick={pickColor}
             onRemove={() => {
               const name = palette;
               setPalette(false);
+              if (name === 'rubycolor') return run((x, s, e) => setRubyStyle(x, s, e, 'color', null));
               run((x, s, e) => removeTag(x, s, e, name, name === 'color' ? '색' : '외곽선 색'));
             }}
             onClose={() => (setPalette(false), el()?.focus())}

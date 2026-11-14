@@ -97,11 +97,11 @@ PyKaki는 상자와 선으로 대본을 쓰는 에디터입니다. pygaki 묶음
 | 그림, webm 영상, 음악, 효과음 넣기 | PyKaki 상자의 배경 / 그림·영상 / 효과음·음악 카드 (게임 안 GUI 편집기에서 넣어도 대본에 받아 적힘) |
 | 대사·선택지·그림의 위치 | 줄의 **[위치 옮기기]** → 게임 화면에서 끌기 → [저장]. 좌표는 PyKaki에 받아 적힙니다 |
 | 타이틀 메뉴, 커서 등 게임 전체 모양 | PyKaki [GUI 편집] (게임 안 GUI 편집기와 같은 것) |
-| 효과 파일 넣고 빼기, 셰이더 구경 | PyKaki [효과], [셰이더] |
+| 효과·셰이더 구경, 목록에서 숨기기 | PyKaki [효과], [셰이더] (효과를 넣고 빼는 것은 `ui_kit/effects/` 폴더에서) |
 
 ### 처음 한 번만 하는 준비
 
-1. pygaki 묶음의 `renpy.exe`로 런처를 켜고 **[pygaki로 새 프로젝트]**로 만듭니다. pygaki 플러그인과 커서·클릭 대기 샘플 그림이 처음부터 들어 있습니다. (이미 있는 프로젝트라면 플러그인 폴더들을 `game`에 넣습니다)
+1. pygaki 묶음의 `renpy.exe`로 런처를 켜고 **[+ Create New Project]**(새 프로젝트 만들기)에서 **Pygaki**를 골라 만듭니다. pygaki 플러그인과 커서·클릭 대기 샘플 그림이 처음부터 들어 있습니다. (이미 있는 프로젝트라면 플러그인 폴더들을 `game`에 넣습니다)
 2. 프로젝트를 고르고 **[pygaki로 편집]**을 누릅니다.
 
 이것으로 끝입니다. 앱이 그 프로젝트의 대본(`프로젝트이름.flow.json`)을 열고, 고칠 때마다 저장하고, `game/script_flow.rpy`로 내보냅니다. 렌파이에서 실행하면 PyKaki의 첫 상자부터 시작합니다.
@@ -779,7 +779,7 @@ define n2 = Character(kind=t, what_xpos=400, what_ypos=210)   # 위치 프리셋
 | `width` | `what_xmaximum` | 한 줄 최대 너비 |
 | `align` | `what_text_align` | 줄 정렬 0.0 ~ 1.0 |
 | `speed` | `what_slow_cps_multiplier` | 나오는 속도 배율 (플레이어 텍스트 속도에 곱함. 0.5 = 절반) |
-| `effect` | `what_textshader` | 등장 효과: `"dissolve"` 서서히, `"typewriter"` 타자기, `"slowalpha"` 흐리게 대기, `"flip"` 뒤집히며, `"zoom"` 커지며, `"jitter"` 떨림, `"wave"` 물결. pygaki 플러그인 효과: `"scatter"` 흩어졌다 모이기, `"drop"` 떨어지기, `"spin"` 회전하며, `"shuffle"` 무작위 순서, `"flash"` 색 번쩍, `"slam"` 크게 찍히기, `"typecursor"` 커서 타자기, `"echo"` 색 잔상, `"glitch"` 글리치, `"glow"` 빛 번짐, `"blurin"` 흐렸다 또렷해지기, `"wipe"` 위에서 그려지기, `"blockglitch"` 블록 글리치, `"melt"` 녹아내림, `"mosh"` 데이터모싱 흉내, `"liquid"` 일렁임, `"vhs"` VHS 지직거림, `"rise"` 떠오르기, `"lean"` 기울며 들어오기, `"stretch"` 늘어나며 들어오기, `"slidein"` 미끄러져 멈춤, `"shake"` 살짝 흔들림, `"inkfill"` 외곽선 채우기, `"glyphbox"` 글자마다 상자, `"stamp"` 도장, `"punch"` 튀어나오는 줌, `"squash"` 찌그러졌다 튕김, `"extrude"` 입체 글자, `"flipin"` 뒤집으며 나오기, `"led"` LED 전광판, `"split"` 위아래 갈라짐. 두 효과 겹치기는 `effect="slidein|shake"` |
+| `effect` | `what_textshader` | 등장 효과: `"dissolve"` 서서히, `"typewriter"` 타자기, `"slowalpha"` 흐리게 대기, `"flip"` 뒤집히며, `"zoom"` 커지며, `"jitter"` 떨림, `"wave"` 물결. pygaki 플러그인 효과: `"scatter"` 흩어졌다 모이기, `"drop"` 떨어지기, `"shuffle"` 무작위 순서, `"flash"` 색 번쩍, `"slam"` 크게 찍히기, `"typecursor"` 커서 타자기, `"echo"` 색 잔상, `"glitch"` 글리치, `"blurin"` 흐렸다 또렷해지기, `"blockglitch"` 블록 글리치, `"liquid"` 일렁임, `"vhs"` VHS 지직거림, `"rise"` 떠오르기, `"lean"` 기울며 들어오기, `"stretch"` 늘어나며 들어오기, `"slidein"` 미끄러져 멈춤, `"shake"` 살짝 흔들림, `"glyphbox"` 글자마다 상자, `"stamp"` 도장, `"squash"` 찌그러졌다 튕김, `"extrude"` 입체 글자. 효과 폴더(`ui_kit/effects/`): `"maskup"` 아래에서 올라오기, `"tracking"` 자간이 좁아지며, `"sweep"` 빛 지나가기, `"backbox"` 뒤에 상자, `"karaoke"` 노래방, `"meltglitch"` 녹는 글리치, `"droplets"` 물방울. 지운 효과 이름이 남은 원고는 멈추지 않고 한 글자씩 나옵니다. 두 효과 겹치기는 `effect="slidein|shake"` |
 | `name_x`, `name_y` | `namebox_xpos`, `namebox_ypos` | 이름 상자 위치 (대사 창 왼쪽 위 기준, 이름 배경째 움직임) |
 | `name_font`, `name_size`, `name_color` | `who_font`, `who_size`, `who_color` | 이름 글꼴, 크기, 색 |
 
@@ -809,7 +809,7 @@ e "속까지." (box="pill", pill_fill="#ffd23b", pill_line=None, color="#000000"
 - 새 짧은 이름이 필요하면 설정 파일의 `say_style.alias`에 `"alpha": "what_alpha",`처럼 추가합니다.
 - 보통 캐릭터는 대사 창이 화면 아래에 있어서, 이름을 창 위로 올리면 `name_y`가 음수가 됩니다. 편집기 패널에는 화면 기준 위치도 같이 나옵니다.
 - 텍스트 속도가 "즉시"(렌파이 새 프로젝트 기본값)면 `speed`와 서서히 같은 효과가 안 보입니다. 물결·떨림은 보입니다. `custom_ui.text_cps`를 정하거나 환경설정에서 속도를 낮추세요.
-- 한 줄 안에서 일부 글자만 바꿀 때는 텍스트 태그: `"그건 {color=#a00}거짓말{/color}이야"`. 일부 글자에만 등장 효과를 걸 때는 `"앞 글 {shader=shake}흔들리는 글{/shader} 뒤 글"`처럼 씁니다(효과 이름과 값은 `effect`와 같음. 줄에 효과가 없으면 나머지 글자는 한 글자씩 나옵니다. 색 잔상 `echo`, 외곽선 채우기 `inkfill`은 줄 전체에만 됩니다).
+- 한 줄 안에서 일부 글자만 바꿀 때는 텍스트 태그: `"그건 {color=#a00}거짓말{/color}이야"`. 일부 글자에만 등장 효과를 걸 때는 `"앞 글 {shader=shake}흔들리는 글{/shader} 뒤 글"`처럼 씁니다(효과 이름과 값은 `effect`와 같음. 줄에 효과가 없으면 나머지 글자는 한 글자씩 나옵니다. 색 잔상 `echo`는 줄 전체에만 됩니다).
 - 스크립트에서 이미 `n1`~`n3`이나 `t`를 정의했다면 설정 파일 쪽 정의를 지우세요. 같은 이름이 두 번 정의됩니다.
 
 ## 편집기로 고치기 (Shift+M)
@@ -1384,7 +1384,7 @@ e "삐빅." (fx="gameboy", font="screen_fx/fonts/neodgm.ttf", size=32)   # 대�
 | 글자 등장 효과 (`@effect`) | PyKaki 글자 효과 카드의 등장 효과 목록 | `e "아래에서 올라온다." (cps=30, effect="maskup")` |
 | 그림 전환 (`@transition`) | PyKaki 배경·보이기 줄의 "나타나는 방식" | `scene bg hall with img_fx.use("irisin")`, 시간과 값은 `img_fx.use("bands", 1.4, count=10)` |
 
-들어 있는 샘플: 글자 `maskup` 아래에서 올라오기, `popin` 뿅 튀어나오기, `tracking` 자간이 좁아지며, `sweep` 빛 지나가기 / 그림 `irisin` 원으로 열리기, `bands` 띠로 덮였다 열리기, `pixelsort` 픽셀소트 (크래시), `datamosh` 데이터모싱 (크래시). 앱의 "효과 모음"에는 `slide` 옆으로 밀기, `mosaic` 모자이크, `blinds` 가로 블라인드가 더 있습니다.
+들어 있는 효과: 글자 `maskup` 아래에서 올라오기, `tracking` 자간이 좁아지며, `sweep` 빛 지나가기, `backbox` 뒤에 상자, `karaoke` 노래방, `meltglitch` 녹는 글리치, `droplets` 물방울 / 그림 `irisin` 원으로 열리기, `bands` 띠로 덮였다 열리기, `pixelsort` 픽셀소트 (크래시), `datamosh` 데이터모싱 (크래시), `slide` 옆으로 밀기, `mosaic` 모자이크로 바뀌기, `blinds` 가로 블라인드, `static` TV 지직, `calibrate` 조정 화면, `tapestretch` 테이프 늘어짐, `blink` 점멸, `pushup` 밀어 올리기. 앱의 [효과] 화면에서는 목록에서 [숨김]만 할 수 있고, 넣거나 빼려면 이 폴더에 파일을 넣거나 지웁니다.
 
 **셰이더가 바뀔 때 그림 전환으로**: `pixelsort`, `datamosh`는 화면 셰이더를 바꿀 때의 전환으로도 씁니다. 앞 화면이 깨진 채 잠깐 멈췄다가 새 화면으로 끊어 넘어가고, 셰이더도 그 순간에 바뀝니다. PyKaki에서는 상자의 ◐ 셰이더 → 전환 "시작할 때", "끝날 때"에서 고르고 그 아래 "방향"을 정합니다. 원고로 직접 쓸 때는 이렇게 적습니다.
 

@@ -3,6 +3,7 @@
 ##
 ## 런처에 두 가지를 더합니다.
 ##   [pygaki로 편집]        첫 화면 아래쪽 버튼. 지금 고른 프로젝트를 pygaki 앱으로 엽니다 (대본 편집, GUI 편집)
+##   [pygaki 안내서]        그 옆 버튼. pygaki/pygaki_안내서.html을 기본 브라우저로 엽니다 (인터넷 없이 열리는 한 파일)
 ##   [+ Create New Project]  누르면 "기본 (Vanilla)"과 "Pygaki" 가운데 고릅니다.
 ##                           기본 = 렌파이 원래 새 프로젝트
 ##                           Pygaki = 기본처럼 해상도와 색을 골라 만든 한국어 프로젝트에 pygaki 플러그인을 얹은 것
@@ -21,6 +22,7 @@ init python:
     ## SDK 폴더 기준 자리
     PYGAKI_APP = os.path.join(config.renpy_base, "pygaki", "app", "pygaki.exe")
     PYGAKI_TEMPLATE = os.path.join(config.renpy_base, "pygaki", "template")
+    PYGAKI_GUIDE = os.path.join(config.renpy_base, "pygaki", "pygaki_안내서.html")
 
     ## 예전 묶음은 템플릿이 SDK 폴더 바로 아래 showpy에 있었다. 새 자리에 없으면 그것을 쓴다
     if not os.path.isdir(os.path.join(PYGAKI_TEMPLATE, "game")):
@@ -40,6 +42,12 @@ init python:
             interface.error(KO("pygaki 앱을 찾지 못했어요:") + "\n[pygaki_app!q]", label=None, pygaki_app=PYGAKI_APP)
             return
         subprocess.Popen([ PYGAKI_APP, "--project", p.path ], cwd=os.path.dirname(PYGAKI_APP))
+
+    def pygaki_guide():
+        if not os.path.exists(PYGAKI_GUIDE):
+            interface.error(KO("안내서를 찾지 못했어요:") + "\n[pygaki_guide!q]", label=None, pygaki_guide=PYGAKI_GUIDE)
+            return
+        os.startfile(PYGAKI_GUIDE)
 
     ## 런처 언어가 영어여도 한글이 네모로 나오지 않게 SDK의 한글 글꼴로 적는다
     def KO(s):
@@ -120,10 +128,21 @@ screen pygaki_buttons():
                 text_color "#F96854"
                 action Jump("pygaki_open")
 
+            textbutton "pygaki 안내서":
+                style "l_link"
+                text_font "SourceHanSansLite.ttf"
+                text_size 16
+                text_color "#F96854"
+                action Jump("pygaki_guide")
+
 
 ## 버튼 동작은 label에서 한다 (안내 창을 띄우려면 화면 동작 밖이어야 함)
 label pygaki_open:
     $ pygaki_open()
+    jump front_page
+
+label pygaki_guide:
+    $ pygaki_guide()
     jump front_page
 
 

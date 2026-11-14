@@ -15,7 +15,7 @@
 ##       e "대사창까지." (fx="ascii", fx_exclude=())             # 글자 빼기: () 안 뺌 / ("say", "choice") 대사·선택지 빼기
 ##
 ## Ctrl+S로 저장하면 원고(.rpy)의 그 대사 줄 괄호에 바로 적힙니다.
-##     e "어디 갔었어?" (x=520, y=60, name_x=820, name_y=-60, speed=0.5, effect="jitter")
+##     e "어디 갔었어?" (x=520, y=60, name_x=820, name_y=-60, cps=20, effect="jitter")
 ## 원래 괄호에 적혀 있던 다른 값은 그대로 두고, 바꾼 값만 고칩니다.
 ## 원고에 바로 쓸 수 없는 줄(여러 줄에 걸친 대사 등)은 Ctrl+C로 복사해서
 ## 붙여넣으세요.
@@ -51,7 +51,8 @@ init -8 python in ui_editor:
         WIDGETS = (("what", "say_dialogue"), ("who", "say_label"), ("namebox", "namebox"), ("window", "window"))
 
         ## 속도 배율 버튼
-        SPEEDS = (0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 4.0)
+        ## 대사 속도: 1초에 몇 글자 (None = 게임 설정 그대로). 예전 원고의 speed=배율도 읽어서 보여 줌
+        CPS_CHOICES = (None, 10, 20, 30, 45, 60, 90)
 
         ## 등장 효과 버튼 (렌파이 내장 텍스트 셰이더)
         EFFECTS = (
@@ -332,6 +333,22 @@ init -8 python in ui_editor:
             except Exception:
                 return 1.0
 
+        def cps(self):
+            v = self.cur("cps")
+            try:
+                return int(v) if v is not None else None
+            except Exception:
+                return None
+
+        def speed_label(self):
+            c = self.cps()
+            if c is not None:
+                return "한 번에" if c == 0 else "1초에 {}글자".format(c)
+            sp = self.speed()
+            if abs(sp - 1.0) > 1e-9:
+                return "게임 설정의 {:g}배 (예전 speed=)".format(sp)
+            return "게임 설정"
+
         def effect(self):
             v = self.cur("effect")
             return v if isinstance(v, str) else None
@@ -465,8 +482,9 @@ init -8 python in ui_editor:
 
         ## ── 속도·효과 (바꾸면 그 줄을 다시 보여줌) ──
 
-        def set_speed(self, v):
-            self._set_or_default("speed", None if abs(v - 1.0) < 1e-9 else v)
+        def set_cps(self, v):
+            self._set_or_default("cps", v)
+            self._set_or_default("speed", None)
             self.replay()
 
         def set_effect(self, name):
@@ -894,7 +912,7 @@ init -8 python in ui_editor:
             if self.pk():
                 rv.append("PyKaki 원고입니다. 여기서는 위치를 고치고, 글자 모양, 속도, 등장 효과, 상자는 PyKaki에서 고칩니다.")
             else:
-                rv.append("속도 ×{:g}   효과 {}   상자 {}".format(self.speed(), self.effect_label(),
+                rv.append("속도 {}   효과 {}   상자 {}".format(self.speed_label(), self.effect_label(),
                     dict(self.BOXES).get(self.box_kind(), "없음")))
 
             fxi = self.fx_info()
@@ -968,8 +986,9 @@ screen ui_editor_say_panel(tab):
             box_wrap_spacing 4
             xmaximum 632
             text "속도:" style "ui_editor_text" yalign 0.5
-            for _v in tab.SPEEDS:
-                textbutton ("×{:g}".format(_v)) style "ui_editor_button" text_size 13 action Function(tab.set_speed, _v) selected (abs(tab.speed() - _v) < 0.001)
+            for _v in tab.CPS_CHOICES:
+                textbutton ("설정대로" if _v is None else "{}자".format(_v)) style "ui_editor_button" text_size 13 action Function(tab.set_cps, _v) selected (tab.cps() == _v and (_v is not None or abs(tab.speed() - 1.0) < 1e-9))
+            text "(1초에 몇 글자)" style "ui_editor_text" size 12 yalign 0.5
 
         hbox:
             spacing 4

@@ -7,7 +7,7 @@
 ## 그 한 줄에만 적용됩니다.
 ##
 ##     t "글쎄, 난 봤다니까요." (x=520, y=264, size=30, color="#aa0000")
-##     e "어디 갔었어?" (name_x=820, name_y=-60, speed=0.5, effect="jitter")
+##     e "어디 갔었어?" (name_x=820, name_y=-60, cps=20, effect="jitter")
 ##
 ## say_style.enabled = False면 괄호의 짧은 이름(x, size ...)은 무시하고
 ## 캐릭터 기본값으로 보여줍니다. (렌파이 원래 이름 what_xpos 등은 그대로 적용)
@@ -34,8 +34,7 @@ init -10 python in say_style:
         "width": "what_xmaximum",
         "align": "what_text_align",
 
-        ## 대사 나오는 속도 (배율. 0.5 = 절반 속도, 2 = 두 배 빠르게)
-        ## 플레이어가 환경설정에서 고른 텍스트 속도에 곱해집니다.
+        ## 대사 나오는 속도 (예전 배율. 지금은 아래 cps=1초에 몇 글자를 씁니다. 예전 원고를 위해 남겨 둠)
         "speed": "what_slow_cps_multiplier",
 
         ## 대사 나오는 속도 (1초에 몇 글자. 플레이어의 텍스트 속도 설정과 상관없이 이 값으로)
@@ -55,7 +54,7 @@ init -10 python in say_style:
         }
 
     ## 편집기가 다루는 짧은 이름 (저장·복사할 때 이 순서로 적습니다).
-    EDIT_KEYS = ("x", "y", "size", "font", "color", "speed", "effect",
+    EDIT_KEYS = ("x", "y", "size", "font", "color", "cps", "speed", "effect",
                  "name_x", "name_y", "name_size", "name_font", "name_color")
 
     ## 편집기가 "이 값은 원고에서 지움"을 나타낼 때 쓰는 표시
@@ -120,6 +119,60 @@ init -10 python in say_style:
         except Exception:
             return False
 
+    def _line_what():
+        try:
+            node = store.renpy.game.script.lookup(store.renpy.game.context().current)
+            what = getattr(node, "what", None)
+            return what if isinstance(what, str) else ""
+        except Exception:
+            return ""
+
+    _ruby_cache = { }
+
+    def _ruby_style(who, kwargs):
+        """루비가 있는 줄의 루비 스타일.
+
+        렌파이는 루비 글에 style ruby_text를 쓰는데, 두 가지가 걸립니다.
+        - 대사에 글자 효과(textshader)가 있으면 루비 스타일에도 같은 효과가 있어야 합니다
+          (없으면 "The ruby style removes a textshader" 오류로 멈춤). 그래서 이 줄의 효과를 그대로 넣습니다.
+        - 기본 ruby_text는 본문 기준선에 붙어 글에 겹칩니다. 게임에서 ruby_text의 yoffset을 따로 정하지 않았으면
+          본문 크기의 절반 크기로 본문 바로 위에 올리고, 줄 위에 그만큼 자리를 둡니다.
+        루비 글의 크기·색은 PyKaki 태그 상자가 {rt} 안에 {size=}, {color=}로 그 자리에서 적습니다.
+        """
+        what = _line_what()
+        if "{rt}" not in what and "{art}" not in what:
+            return None
+        ts = kwargs.get("what_textshader")
+        if ts is None and who is not None:
+            ts = getattr(who, "what_args", { }).get("textshader")
+        if ts is None:
+            ts = store.style.say_dialogue.textshader or store.config.default_textshader
+        base = kwargs.get("what_size")
+        if base is None and who is not None:
+            base = getattr(who, "what_args", { }).get("size")
+        if not isinstance(base, (int, float)):
+            base = store.style.say_dialogue.size or 22
+        custom = bool(store.style.ruby_text.yoffset)
+        key = (ts, base, custom)
+        st = _ruby_cache.get(key)
+        if st is None:
+            st = store.Style(store.style.ruby_text)
+            st.textshader = ts
+            if not custom:
+                st.size = max(8, int(round(base * 0.5)))
+                st.yoffset = -int(round(base * 0.85))
+            alt = store.Style(store.style.altruby_text)
+            alt.textshader = ts
+            if not store.style.altruby_text.yoffset:
+                alt.size = max(8, int(round(base * 0.5)))
+                alt.yoffset = int(round(base * 0.6))
+            st = (st, alt)
+            _ruby_cache[key] = st
+        rv = { "what_ruby_style": st[0], "what_altruby_style": st[1] }
+        if not custom and not store.style.say_dialogue.ruby_line_leading:
+            rv["what_ruby_line_leading"] = int(round(base * 0.55))
+        return rv
+
     def say_arguments(who, *args, **kwargs):
         a = alias_map()
 
@@ -166,6 +219,12 @@ init -10 python in say_style:
         ## 오류로 멈춥니다. 줄에도 캐릭터에도 효과가 없으면 한 글자씩 나오기(typewriter)를 넣어 줍니다.
         if "what_textshader" not in kwargs and _needs_textshader(who):
             kwargs["what_textshader"] = "typewriter"
+
+        ## 루비({rb}글{/rb}{rt}읽는 법{/rt})가 있는 줄: 루비 스타일을 이 줄에 맞게 만들어 줍니다 (_ruby_style).
+        if "what_ruby_style" not in kwargs:
+            rs = _ruby_style(who, kwargs)
+            if rs is not None:
+                kwargs.update(rs)
 
         ## 글 상자: 대사 글의 background에 넣으면 text_box.rpy가 글 둘레에 그립니다.
         tb = box_from_args(box_args) if box_args else None

@@ -219,7 +219,7 @@ export function CustomUIPanel({ cu }: { cu: CustomUIState | null | undefined }) 
 }
 
 function cpsLabel(raw: number | null, cps: number) {
-  const s = cps === 0 ? '한 번에' : `${cps}글자/초`;
+  const s = cps === 0 ? '한 번에' : `1초에 ${cps}글자`;
   return raw === null ? `options.rpy 값 (${s})` : s;
 }
 

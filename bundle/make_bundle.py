@@ -17,6 +17,7 @@
     pygaki/template/                   Pygaki 새 프로젝트에 얹을 플러그인을 담은 템플릿 (런처처럼 만든 1280x720 한국어 기본 프로젝트 + 플러그인.
                                        새 프로젝트는 런처가 고른 해상도로 새로 만들고 여기서 플러그인만 가져감)
     pygaki/app/pygaki.exe              pygaki 데스크톱 앱 (GitHub Actions "pygaki 앱" 결과물을 풀어 둔 폴더)
+    pygaki/pygaki_안내서.html          모든 안내를 모은 HTML 한 파일 (bundle/guide/build_guide.py가 저장소 문서로 만듦)
     pygaki/읽어주세요.txt
 
 필요한 것: 파이썬 3, 렌파이 SDK 폴더, pygaki 앱 폴더(win-unpacked).
@@ -102,13 +103,14 @@ README = """pygaki ({version})
    define screen_fx.overlay = False 를 True로 바꿉니다.
 3. 왼쪽 목록에서 프로젝트를 고르고 [pygaki로 편집]을 누르면 pygaki 앱이 그 프로젝트로 열립니다.
    위쪽 [대본 편집]에서 대본을 쓰고, [GUI 편집]에서 실행 중인 게임의 화면을 고칩니다.
-   [효과]에서는 글자 효과와 그림 효과를 샘플로 돌려 보고, 켜고 끄고, 효과 파일을 넣고 뺍니다.
+   [효과], [셰이더]에서는 글자 효과, 그림 효과, 화면 셰이더를 샘플로 돌려 보고 목록에서 숨깁니다.
    - 대본은 프로젝트 폴더 맨 위의 "프로젝트이름.flow.json"에 자동 저장됩니다.
    - Ctrl+E로 game/script_flow.rpy에 내보내면 렌파이가 바로 다시 불러옵니다.
 4. [Launch Project]로 게임을 켜면 앱의 [GUI 편집]이 게임에 붙습니다(초록 점).
    앱 없이 게임 안에서 고치려면 Shift+M으로 GUI 편집기를 엽니다.
    편집기에서 넣은 그림, 소리 줄은 대본에 바로 받아 적힙니다.
 
+자세한 안내는 pygaki\\pygaki_안내서.html (런처의 [pygaki 안내서] 단추로도 열림).
 앱만 따로 켜려면 pygaki\\app\\pygaki.exe (프로젝트 폴더를 고르는 창이 뜹니다).
 처음 켤 때 윈도우가 "PC 보호" 창을 띄우면 [추가 정보] → [실행]을 누릅니다 (앱에 서명이 없어서 그렇습니다).
 
@@ -272,6 +274,10 @@ def main():
     shutil.copytree(app, os.path.join(out, "pygaki", "app"))
     with open(os.path.join(out, "pygaki", "읽어주세요.txt"), "w", encoding="utf-8-sig") as f:
         f.write(README.format(version=prefix, renpy=renpy_ver, showpy=showpy_ver).replace("\n", "\r\n"))
+    ## 안내서: 저장소 문서로 지금 다시 만들어 넣는다 (bundle/guide/build_guide.py)
+    sys.path.insert(0, os.path.join(HERE, "guide"))
+    import build_guide
+    build_guide.build(os.path.join(out, "pygaki", "pygaki_안내서.html"))
     for lic in ("LICENSE",):
         shutil.copy(os.path.join(ROOT, lic), os.path.join(out, "pygaki", "LICENSE-pygaki.txt"))
 

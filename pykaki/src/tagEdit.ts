@@ -82,8 +82,10 @@ export function pairTags(toks: Tok[]): { pairs: Pair[]; problems: TagProblem[] }
 export const shaderTags = (text: string) => (text.includes('{shader') ? tokenize(text).filter((t) => t.k === 'open' && t.name === 'shader' && t.val.trim()).map((t) => t.val.trim()) : []);
 // 내보내기 검사용
 export const checkTags = (text: string) => pairTags(tokenize(text)).problems;
-// 렌파이 기본 루비 스타일(ruby_text)은 본문과 같은 크기, 같은 자리라서 그대로 두면 글에 겹쳐 보인다
-export const RUBY_NOTE = '루비는 게임에서 style ruby_text의 크기(size)와 자리(yoffset)를 정해 줘야 글 위에 작게 올라가요';
+// 렌파이 기본 루비 스타일(ruby_text)은 본문 기준선에 붙어 글에 겹치고, 글자 효과가 있는 대사에서는 오류로 멈춘다.
+// pygaki 플러그인(ui_kit 4.9, say_style.rpy)이 루비가 있는 대사 줄마다 루비 스타일을 그 줄에 맞게 만들어 준다.
+// 루비 글의 크기·색은 그 자리에서 {rt} 안에 {size=}, {color=}로 적는다 (rubyAt, setRubyStyle)
+export const RUBY_NOTE = '루비를 넣었어요. 루비 글에 커서가 있으면 [루비 글] 줄에서 크기와 색을 그 자리에서 바꿔요';
 
 // ── 고치기 ──
 
@@ -233,6 +235,34 @@ export function insertRuby(text: string, s0: number, e0: number, hint: string): 
   const head = s === e ? '{rt}' : `{rb}${text.slice(s, e)}{/rb}{rt}`;
   const at = s + head.length;
   return { text: text.slice(0, s) + head + hint + '{/rt}' + text.slice(e), s: at, e: at + hint.length };
+}
+
+// 커서가 루비 글({rt}…{/rt}) 안에 있으면 그 루비 글의 크기·색 (없으면 null)
+const RUBY_IN = /^((?:\{(?:size|color)=[^}]*\})*)([\s\S]*?)((?:\{\/(?:size|color)\})*)$/;
+function rubyPair(text: string, s0: number, e0: number) {
+  const { pairs, s, e } = prep(text, s0, e0);
+  return pairs.filter((p) => (p.o.name === 'rt' || p.o.name === 'art') && p.o.s <= s && e <= p.c.e).sort((a, b) => b.o.s - a.o.s)[0];
+}
+export function rubyAt(text: string, s0: number, e0: number): { size?: string; color?: string } | null {
+  const p = rubyPair(text, s0, e0);
+  if (!p) return null;
+  const head = RUBY_IN.exec(text.slice(p.o.e, p.c.s))![1];
+  const out: { size?: string; color?: string } = {};
+  for (const m of head.matchAll(/\{(size|color)=([^}]*)\}/g)) out[m[1] as 'size' | 'color'] = m[2];
+  return out;
+}
+// 루비 글의 크기·색을 바꾼다 (val이 null이면 뺀다). {rt}{size=14}{color=#f00}읽는 법{/color}{/size}{/rt} 꼴로 다시 적는다
+export function setRubyStyle(text: string, s0: number, e0: number, key: 'size' | 'color', val: string | null): Edit {
+  const p = rubyPair(text, s0, e0);
+  if (!p) return { error: '루비 글({rt}) 안에 커서를 두세요' };
+  const cur = rubyAt(text, s0, e0)!;
+  if (val === null) delete cur[key];
+  else cur[key] = val;
+  const core = RUBY_IN.exec(text.slice(p.o.e, p.c.s))![2];
+  const open = (cur.size ? `{size=${cur.size}}` : '') + (cur.color ? `{color=${cur.color}}` : '');
+  const close = (cur.color ? '{/color}' : '') + (cur.size ? '{/size}' : '');
+  const at = p.o.e + open.length;
+  return { text: text.slice(0, p.o.e) + open + core + close + text.slice(p.c.s), s: at, e: at + core.length };
 }
 
 // 혼자 쓰는 태그를 커서 자리에 넣는다. {nw}는 렌파이에서 글 끝에 있어야 해서 끝에 넣는다
