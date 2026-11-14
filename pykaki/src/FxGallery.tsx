@@ -12,6 +12,23 @@ import type { ShaderEffect } from './fx/textShaders';
 import type { ShaderInfo } from './shader';
 
 // [갤러리] [목록] 고르기 (앱 설정에 기억)
+// [숨김 아래로]: 숨긴 효과·셰이더를 목록 아래로 모은다 (나머지 차례는 그대로)
+export function HiddenLastSwitch({ count }: { count: number }) {
+  const on = usePrefs((p) => p.hiddenLast);
+  return (
+    <button
+      className={'gal-move' + (on ? ' on' : '')}
+      onClick={() => usePrefs.setState({ hiddenLast: !on })}
+      title={on ? `숨긴 것 ${count}개를 목록 아래로 모아 두는 중이에요. 누르면 원래 차례로` : '숨긴 것을 목록 아래로 모아요'}
+    >
+      숨김 아래로{count > 0 ? ` (${count})` : ''}
+    </button>
+  );
+}
+export function hiddenLastSort<T>(list: T[], hidden: (c: T) => boolean, on: boolean): T[] {
+  return on ? [...list.filter((c) => !hidden(c)), ...list.filter(hidden)] : list;
+}
+
 export function GallerySwitch() {
   const gallery = usePrefs((p) => p.gallery);
   const move = usePrefs((p) => p.galleryMove);

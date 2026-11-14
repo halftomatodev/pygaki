@@ -100,6 +100,7 @@ interface Prefs {
   sizeLock: boolean; // 칸 경계를 끌어도 크기가 바뀌지 않게
   gallery: boolean; // [효과]·[셰이더] 왼쪽을 갤러리(미리보기 카드)로 보기
   galleryMove: boolean; // 갤러리에서 보이는 카드를 계속 움직이기 (FxGallery.tsx MAX_LIVE개까지)
+  hiddenLast: boolean; // [효과]·[셰이더] 목록에서 숨긴 것을 아래로 모으기
 }
 
 // 칸 너비의 처음 값과 범위 (대본 편집 양쪽, GUI 편집 양쪽, 효과·셰이더 오른쪽)
@@ -122,7 +123,7 @@ const defKeys = () => Object.fromEntries(ACTIONS.map((a) => [a.id, a.def])) as R
 const defaults = (): Prefs => ({
   theme: 'apple', custom: { ...THEMES.find((t) => t.id === 'apple')!.colors, box: '#ffffff' }, keys: defKeys(),
   dim: 'mid', frameWidth: 3, grads: structuredClone(GRAD_DEFAULTS), textColor: null, runSkip: true,
-  ...sizeDefaults(), sizeLock: false, gallery: true, galleryMove: false,
+  ...sizeDefaults(), sizeLock: false, gallery: true, galleryMove: false, hiddenLast: true,
 });
 
 function loadPrefs(): Prefs {

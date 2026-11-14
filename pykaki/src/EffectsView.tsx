@@ -16,7 +16,7 @@ import { Glyphs, useReveal } from './SayPreview';
 import { parseTagged } from './textTags';
 import { usePrefs } from './prefs';
 import { Resizer } from './Resizer';
-import { GalleryCard, GallerySwitch, TextLive, TextPhotographer, TextStill, TransitionLive, TransitionStill } from './FxGallery';
+import { GalleryCard, GallerySwitch, HiddenLastSwitch, hiddenLastSort, TextLive, TextPhotographer, TextStill, TransitionLive, TransitionStill } from './FxGallery';
 
 export const SOURCE_LABEL: Record<EffectCard['source'], string> = { renpy: '렌파이', base: '기본', project: '프로젝트', library: '모음' };
 const SAMPLE_CPS = 30;
@@ -140,6 +140,7 @@ export function EffectsView() {
   const [replay, setReplay] = useState(0);
   const [busy, setBusy] = useState(false);
   const gallery = usePrefs((p) => p.gallery);
+  const hiddenLast = usePrefs((p) => p.hiddenLast);
   const picPick = useRef<HTMLInputElement>(null);
   const [picture, setPicture] = useState<HTMLImageElement | null>(null); // 그림 효과 샘플의 새 그림 (저장하지 않음)
   const pickPicture = (f: File | undefined) => {
@@ -156,7 +157,7 @@ export function EffectsView() {
   const blocked = !folderReady() ? '프로젝트를 연결하면 쓸 수 있어요' : !hasShowpy ? '이 게임에 pygaki 플러그인(ui_kit 폴더)이 없어요' : '';
   const q = query.trim().toLowerCase();
   const shownCards = cards.filter((c) => c.kind === kind && (!q || c.label.toLowerCase().includes(q) || c.name.includes(q)));
-  const here = shownCards.filter((c) => c.ready);
+  const here = hiddenLastSort(shownCards.filter((c) => c.ready), (c) => !c.on, hiddenLast);
   const sel = cards.find((c) => c.kind === kind && c.name === picked[kind]) ?? here[0] ?? null;
 
   // 아직 넣지 않은 효과도 샘플로 돌릴 수 있게 올려 둔다
@@ -307,6 +308,7 @@ export function EffectsView() {
           {kindBar}
           <input className="fxv-find" placeholder="찾기 (이름)" value={query} onChange={(e) => setQuery(e.target.value)} />
           <span className="grow" />
+          <HiddenLastSwitch count={here.filter((c) => !c.on).length} />
           <button title="클로드에게 새 효과를 부탁할 때 같이 줄 글을 복사해요 (앱은 밖으로 통신하지 않아요)" onClick={copyRequest}>새 효과 요청문 복사</button>
           <GallerySwitch />
         </div>

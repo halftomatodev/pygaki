@@ -77,7 +77,7 @@ pygaki 플러그인 5.1을 받은 사람이 **어떤 파일의 어떤 값을 고
 | 게임보이 디더링/픽셀화, 점 크기, 4가지 색, LCD 느낌 | `screen_fx/gameboy_config.rpy` | `gameboy.settings`의 `"mode"`, `"pixel_size"`, `"color1"`~`"color4"`, `"grid"`, `"shadow"`, `gameboy.presets` | 화면 효과 탭 → 게임보이 |
 | 스크린에 넣은 그림에도 장면 효과 | 그 스크린 | `add "map.png" at screen_fx.scene` |  |
 | 타이틀 일렁임 세기 (5.5부터 셰이더) | `screen_fx/ripple_config.rpy` | `ripple.settings`의 `"amount"`, `"scale"`, `"speed"`, `"shine"`, `ripple.presets`. 타이틀에 걸지는 `screen_fx_config.rpy`의 `screen_fx.title_shaders` | GUI 편집 → 타이틀 셰이더, 셰이더 기본 값 |
-| 고르는 목록에서 효과·셰이더 감추기 (5.1) | `ui_kit/effects/effects_off.txt`, `screen_fx/shaders_off.txt` | 한 줄에 이름 하나 (`#` 뒤는 설명). 이미 쓴 원고는 그대로 돎 | 앱 [효과], [셰이더]의 체크 |
+| 고르는 목록에서 효과·셰이더 감추기 (5.1) | `ui_kit/effects/effects_off.txt`, `screen_fx/shaders_off.txt` | 한 줄에 이름 하나 (`#` 뒤는 설명). 이미 쓴 원고는 그대로 돎 | 앱 [효과], [셰이더]의 [숨김] (숨긴 것은 [숨김 아래로]로 목록 아래에 모음) |
 | 글자 등장 효과, 그림 전환 더하기·빼기 (5.1) | `ui_kit/effects/` 폴더 | `.glsl` 파일 하나가 효과 하나. 아래 "효과 폴더" | 앱 [효과] |
 | VHS 덮개 세기·범위 | `screen_fx/vhs_crt_config.rpy` | `vhs_crt.settings`, `vhs_crt.scope` | 화면 효과 탭 → VHS 덮개 |
 | VHS 프리셋 (게임 중 바꿀 묶음) | `screen_fx/vhs_crt_config.rpy` | `vhs_crt.presets` | 화면 효과 탭 → VHS 덮개, "고칠 대상"에서 프리셋 고르기 |
@@ -779,7 +779,7 @@ define n2 = Character(kind=t, what_xpos=400, what_ypos=210)   # 위치 프리셋
 | `width` | `what_xmaximum` | 한 줄 최대 너비 |
 | `align` | `what_text_align` | 줄 정렬 0.0 ~ 1.0 |
 | `speed` | `what_slow_cps_multiplier` | 나오는 속도 배율 (플레이어 텍스트 속도에 곱함. 0.5 = 절반) |
-| `effect` | `what_textshader` | 등장 효과: `"dissolve"` 서서히, `"typewriter"` 타자기, `"slowalpha"` 흐리게 대기, `"flip"` 뒤집히며, `"zoom"` 커지며, `"jitter"` 떨림, `"wave"` 물결. pygaki 플러그인 효과: `"scatter"` 흩어졌다 모이기, `"drop"` 떨어지기, `"shuffle"` 무작위 순서, `"flash"` 색 번쩍, `"slam"` 크게 찍히기, `"typecursor"` 커서 타자기, `"echo"` 색 잔상, `"glitch"` 글리치, `"blurin"` 흐렸다 또렷해지기, `"blockglitch"` 블록 글리치, `"liquid"` 일렁임, `"vhs"` VHS 지직거림, `"rise"` 떠오르기, `"lean"` 기울며 들어오기, `"stretch"` 늘어나며 들어오기, `"slidein"` 미끄러져 멈춤, `"shake"` 살짝 흔들림, `"glyphbox"` 글자마다 상자, `"stamp"` 도장, `"squash"` 찌그러졌다 튕김, `"extrude"` 입체 글자. 효과 폴더(`ui_kit/effects/`): `"maskup"` 아래에서 올라오기, `"tracking"` 자간이 좁아지며, `"sweep"` 빛 지나가기, `"backbox"` 뒤에 상자, `"karaoke"` 노래방, `"meltglitch"` 녹는 글리치, `"droplets"` 물방울. 지운 효과 이름이 남은 원고는 멈추지 않고 한 글자씩 나옵니다. 두 효과 겹치기는 `effect="slidein|shake"` |
+| `effect` | `what_textshader` | 등장 효과: `"dissolve"` 서서히, `"typewriter"` 타자기, `"slowalpha"` 흐리게 대기, `"flip"` 뒤집히며, `"zoom"` 커지며, `"jitter"` 떨림, `"wave"` 물결. pygaki 플러그인 효과: `"scatter"` 흩어졌다 모이기, `"drop"` 떨어지기, `"shuffle"` 무작위 순서, `"flash"` 색 번쩍, `"slam"` 크게 찍히기, `"typecursor"` 커서 타자기, `"echo"` 색 잔상, `"glitch"` 글리치, `"blurin"` 흐렸다 또렷해지기, `"blockglitch"` 블록 글리치, `"liquid"` 일렁임, `"vhs"` VHS 지직거림, `"rise"` 떠오르기, `"lean"` 기울며 들어오기, `"stretch"` 늘어나며 들어오기, `"slidein"` 미끄러져 멈춤, `"shake"` 살짝 흔들림, `"glyphbox"` 글자마다 상자, `"stamp"` 도장, `"squash"` 찌그러졌다 튕김, `"extrude"` 입체 글자. 효과 폴더(`ui_kit/effects/`): `"maskup"` 아래에서 올라오기, `"tracking"` 자간이 좁아지며, `"sweep"` 빛 지나가기, `"backbox"` 뒤에 상자, `"karaoke"` 노래방, `"meltglitch"` 녹는 글리치, `"droplets"` 물방울, `"spring"` 튕기며 자리 잡기, `"marquee"` 옆으로 흐르기, `"bubble"` 말풍선. 지운 효과 이름이 남은 원고는 멈추지 않고 한 글자씩 나옵니다. 두 효과 겹치기는 `effect="slidein|shake"` |
 | `name_x`, `name_y` | `namebox_xpos`, `namebox_ypos` | 이름 상자 위치 (대사 창 왼쪽 위 기준, 이름 배경째 움직임) |
 | `name_font`, `name_size`, `name_color` | `who_font`, `who_size`, `who_color` | 이름 글꼴, 크기, 색 |
 
@@ -949,6 +949,15 @@ define hotkeys.keyboard_help = [
 | `"collage"` | 포토 콜라주 (5.3): 같은 장면을 사진으로 여러 번 찍어 겹쳐 붙인 모양. 조각마다 조금 밀리고 확대됨. `$ collage.preset("joiner")` 기본과 비슷, `"scatter"` 넓게 많이, `"calm"` 조각 넷 차분하게. 예전 이름 `"tiles"`(조각 어긋남, 5.3에서 없앰)는 포토 콜라주로 읽음. 장면 전환 `scene bg with screen_fx.TileSwap(1.0)`은 그대로 | `collage_config.rpy` |
 | `"ripple"` | 일렁임 (5.5): 화면을 투명한 액체 너머로 보듯 천천히 일렁임. 예전 타이틀 일렁임을 셰이더로 옮긴 것이라 타이틀·게임 내 메뉴·게임 중 어디에나. `$ ripple.preset("calm")` 살짝, `"dream"` 크게 | `ripple_config.rpy` |
 | `"shards"` | 파편 흩날림 (5.1): 작은 뾰족한 조각이 바람에 날림. `$ shards.preset("embers")` 불티, `"ash"` 재, `"dread"` 어두운 화면에 붉은 파편 | `shards_config.rpy` |
+| `"waves"` | 물결 (5.7): 한 점에서 동그란 물결이 퍼지며 화면이 굴절 | `waves_config.rpy` |
+| `"wobble"` | 일렁거림 (5.7): 노이즈 무늬로 아지랑이·손그림처럼 일렁거림 | `wobble_config.rpy` |
+| `"filmgrain"` | 옛날 필름 (5.7): 입자, 먼지, 긁힘, 깜빡임, 덜컹거림, 바랜 색 | `filmgrain_config.rpy` |
+| `"fisheye"` | 어안렌즈 (5.7): 가운데가 부풀고 가장자리가 휨, 둥근 렌즈 화면도 | `fisheye_config.rpy` |
+| `"photocopy"` | 복사기 (5.7): 여러 번 복사해 닳은 종이 | `photocopy_config.rpy` |
+| `"relief"` | 양각 (5.7): 금속판에 눌러 찍은 모양, 음각도 | `relief_config.rpy` |
+| `"gradmap"` | 그라데이션 맵 (5.7): 밝기에 따라 고른 색으로 다시 칠함, 포스터처럼도 | `gradmap_config.rpy` |
+| `"rings"` | 동심원 어긋남 (5.7): 동그란 고리마다 돌리고 밀어 어긋나게 | `rings_config.rpy` |
+| `"camcorder"` | 옛 캠코더 (5.7): 낮은 화질로 옮긴 옛날 캠코더 영상의 화면 톤. 프리셋 `light`, `tape`, `cold` | `camcorder_config.rpy` |
 | `"default"` | 기본 효과로 돌아가기 (= 선택취소) | `screen_fx_config.rpy`의 `screen_fx.base` |
 | (덮개) | VHS. 켬 / 끔만 고르고 모양은 `vhs_crt.settings` | `vhs_crt_config.rpy` |
 
@@ -1384,7 +1393,7 @@ e "삐빅." (fx="gameboy", font="screen_fx/fonts/neodgm.ttf", size=32)   # 대�
 | 글자 등장 효과 (`@effect`) | PyKaki 글자 효과 카드의 등장 효과 목록 | `e "아래에서 올라온다." (cps=30, effect="maskup")` |
 | 그림 전환 (`@transition`) | PyKaki 배경·보이기 줄의 "나타나는 방식" | `scene bg hall with img_fx.use("irisin")`, 시간과 값은 `img_fx.use("bands", 1.4, count=10)` |
 
-들어 있는 효과: 글자 `maskup` 아래에서 올라오기, `tracking` 자간이 좁아지며, `sweep` 빛 지나가기, `backbox` 뒤에 상자, `karaoke` 노래방, `meltglitch` 녹는 글리치, `droplets` 물방울 / 그림 `irisin` 원으로 열리기, `bands` 띠로 덮였다 열리기, `pixelsort` 픽셀소트 (크래시), `datamosh` 데이터모싱 (크래시), `slide` 옆으로 밀기, `mosaic` 모자이크로 바뀌기, `blinds` 가로 블라인드, `static` TV 지직, `calibrate` 조정 화면, `tapestretch` 테이프 늘어짐, `blink` 점멸, `pushup` 밀어 올리기. 앱의 [효과] 화면에서는 목록에서 [숨김]만 할 수 있고, 넣거나 빼려면 이 폴더에 파일을 넣거나 지웁니다.
+들어 있는 효과: 글자 `maskup` 아래에서 올라오기, `tracking` 자간이 좁아지며, `sweep` 빛 지나가기, `backbox` 뒤에 상자, `karaoke` 노래방, `meltglitch` 녹는 글리치, `droplets` 물방울, `spring` 튕기며 자리 잡기, `marquee` 옆으로 흐르기, `bubble` 말풍선(모양 넷, 그림으로 바꿔 끼우기는 효과 폴더 README) / 그림 `irisin` 원으로 열리기, `bands` 띠로 덮였다 열리기, `pixelsort` 픽셀소트 (크래시), `datamosh` 데이터모싱 (크래시), `slide` 옆으로 밀기, `mosaic` 모자이크로 바뀌기, `blinds` 가로 블라인드, `static` TV 지직, `calibrate` 조정 화면, `tapestretch` 테이프 늘어짐, `blink` 점멸, `pushup` 밀어 올리기. 앱의 [효과] 화면에서는 목록에서 [숨김]만 할 수 있고, 넣거나 빼려면 이 폴더에 파일을 넣거나 지웁니다.
 
 **셰이더가 바뀔 때 그림 전환으로**: `pixelsort`, `datamosh`는 화면 셰이더를 바꿀 때의 전환으로도 씁니다. 앞 화면이 깨진 채 잠깐 멈췄다가 새 화면으로 끊어 넘어가고, 셰이더도 그 순간에 바뀝니다. PyKaki에서는 상자의 ◐ 셰이더 → 전환 "시작할 때", "끝날 때"에서 고르고 그 아래 "방향"을 정합니다. 원고로 직접 쓸 때는 이렇게 적습니다.
 

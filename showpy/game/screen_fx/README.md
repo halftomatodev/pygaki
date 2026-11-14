@@ -1,4 +1,4 @@
-# Screen FX 플러그인 (기본 효과 + VHS 덮개 + ASCII + 레트로 터미널 + 게임보이 + 새 효과 일곱 + 타이틀 일렁임)
+# Screen FX 플러그인 (기본 효과 + VHS 덮개 + ASCII + 레트로 터미널 + 게임보이 + 셰이더 열일곱 + 타이틀 일렁임)
 
 화면 전체에 씌우는 렌파이 셰이더 플러그인입니다. 화면은 **셰이더 두 개를 겹쳐** 그립니다.
 
@@ -24,18 +24,34 @@
 | 나이트비전 (`nightvision`) | 초록 한 색으로 밝게, 노이즈, 가장자리 어둡게, 동그란 테두리, **화면 글**(왼쪽 위 글, REC, 숫자 시간, [ZOOM]을 하나씩 켜고 끔)과 **화면 이미지**(테두리, 조준선 그림) (5.1) | `nightvision_config.rpy` |
 | 포토 콜라주 (`collage`) | 한 장면을 사진으로 여러 번 찍어 겹쳐 붙인 것처럼. 화면 가운데에만 크기가 제각각인 네모 조각(최대 10장)이 겹치고, 조각마다 조금 밀리고 확대됨. 하얀 테두리, 그림자. 장면 전환 `screen_fx.TileSwap`도 (5.3, 예전 조각 어긋남 `tiles`를 바꿈) | `collage_config.rpy` |
 | 파편 흩날림 (`shards`) | 화면 위로 작은 뾰족한 조각이 바람에 날림. 깊이 세 겹, 돌고 뒤집히고 깜빡임. 색 1~3개, 바탕 어둡게 (5.1) | `shards_config.rpy` |
+| 일렁임 (`ripple`) | 화면을 투명한 액체 너머로 보는 것처럼 천천히 일렁임. 타이틀·메뉴·게임 중 어디에나 (5.5) | `ripple_config.rpy` |
+| 물결 (`waves`) | 잔잔한 물에 돌을 던진 것처럼 한 점에서 동그란 물결이 퍼지며 화면이 굴절 (5.7) | `waves_config.rpy` |
+| 일렁거림 (`wobble`) | 노이즈 무늬로 아지랑이나 손그림처럼 일렁거림 (5.7) | `wobble_config.rpy` |
+| 옛날 필름 (`filmgrain`) | 오래된 필름 영사기처럼 입자, 먼지, 세로 긁힘, 머리카락, 깜빡임, 덜컹거림, 바랜 색 (5.7) | `filmgrain_config.rpy` |
+| 어안렌즈 (`fisheye`) | 가운데가 부풀고 가장자리가 휘어 눌림. `circle = 1`이면 둥근 렌즈 화면 (5.7) | `fisheye_config.rpy` |
+| 복사기 (`photocopy`) | 여러 번 복사해서 닳은 종이처럼 밝기가 뭉개지고 얼룩, 끌린 줄, 종이 색 (5.7) | `photocopy_config.rpy` |
+| 양각 (`relief`) | 금속판에 눌러 찍은 것처럼 밝은 곳이 튀어나오고 가장자리가 반짝임. `invert = True`면 음각 (5.7) | `relief_config.rpy` |
+| 그라데이션 맵 (`gradmap`) | 밝기만 보고 어두운 곳·중간·밝은 곳을 고른 색으로 다시 칠함. `levels`를 올리면 포스터처럼 (5.7) | `gradmap_config.rpy` |
+| 동심원 어긋남 (`rings`) | 화면을 동그란 고리로 잘라 고리마다 조금씩 돌리고 밀어 어긋나게. `halves = True`면 고리를 반으로 (5.7) | `rings_config.rpy` |
+| 옛 캠코더 (`camcorder`) | 옛날 캠코더로 찍어 낮은 화질로 옮긴 영상처럼 화면 톤만: 가로로 뭉개짐, 어두운 물체 둘레 하얀 테두리, 색 번짐, 따뜻한 색감, 들뜬 검정, 비네팅. 프리셋 `light`, `tape`, `cold` (5.7) | `camcorder_config.rpy` |
 | 타이틀 일렁임 (`watermorph`) | 타이틀 화면을 투명한 액체 너머로 보는 것처럼. 바꾸기 기능과 상관없이 타이틀에서만 따로 켜짐 | `watermorph_config.rpy` |
 
 효과마다 **글자 빼기**로 대사, 이름 / 선택지 / 메뉴, 화면 중 효과를 씌우지 않을 글자를 골라서 뺄 수 있습니다. (기본은 글자까지 전부 씌움. ASCII만 글자를 전부 빼는 게 기본)
 
 `ui_kit` 플러그인이 같이 있으면 그 편집기(개발 모드에서 Shift+M)에 **"화면 효과", "타이틀 일렁임" 탭**이 생기고, **대사 탭에서 "이 대사부터 이 효과", 덮개 켬/끔, 덮개 휘어짐을 골라 원고에 바로 저장**할 수 있습니다. 대사가 아닌 줄(show, scene, with, $ 줄 등)에서 바꾸고 싶으면 **"화면 효과" 탭의 "줄에 넣기"** 로 그 줄 바로 위에 `$ screen_fx.use(…)` 줄을 넣습니다(4.1). `ui_kit`이 없어도 효과는 설정 파일과 스크립트로 그대로 동작합니다.
 
-버전 5.6 · 렌파이 8.5.3에서 만들고 테스트했습니다.
+버전 5.7 · 렌파이 8.5.3에서 만들고 테스트했습니다.
 
 VHS 셰이더 원본: [VHS and CRT monitor effect](https://godotshaders.com/shader/vhs-and-crt-monitor-effect/) (Godot Shaders, CC0). 렌파이용으로 옮기면서 채도·대비·전체 세기를 바꿀 수 있게 추가했습니다.
 레트로 터미널은 [cool-retro-term](https://github.com/Swordfish90/cool-retro-term)의 모습과 설정 목록을 참고해 새로 썼습니다(코드는 가져오지 않음).
 게임보이는 [Retro dither](https://godotshaders.com/shader/retro-dither/) (tcmug, CC0)의 4×4 디더링 무늬와 [Gameboy Classic Shader](https://github.com/HarlequinVG/shaders/tree/master/gameboy_shader) (Harlequin, GPL v3)의 LCD 모습(점 격자·점 그림자)을 참고해 새로 썼습니다(코드는 가져오지 않음).
 ASCII 효과는 [ASCII shader](https://godotshaders.com/shader/ascii-shader/) (Daniel Bologna, Acerola의 아이디어, MIT)를 참고해 렌파이용으로 새로 썼습니다. 글꼴은 [Neo둥근모](https://neodgm.dalgona.dev/) (SIL OFL 1.1)입니다.
+
+### 5.7에서 바뀐 점
+
+- **새 셰이더 아홉**: 물결(`waves`), 일렁거림(`wobble`), 옛날 필름(`filmgrain`), 어안렌즈(`fisheye`), 복사기(`photocopy`), 양각(`relief`), 그라데이션 맵(`gradmap`), 동심원 어긋남(`rings`), 옛 캠코더(`camcorder`). 셰이더마다 `<이름>_config.rpy`와 `engine/<이름>.rpy`가 하나씩입니다(위 표).
+- **없는 셰이더는 "없음"으로**: 설정 파일과 엔진을 지운 셰이더를 원고·세이브가 가리켜도 멈추지 않고 "none"으로 읽습니다(개발 모드에서는 이름마다 한 번 알림). 그 셰이더의 값은 건너뜁니다. 그래서 안 쓰는 셰이더는 두 파일을 지워도 되지만, 목록에서만 감추려면 `shaders_off.txt`(pygaki 앱 [셰이더] 화면의 [숨김])를 씁니다.
+- 셰이더 전환에 효과 폴더의 그림 전환이 더 생겼습니다(TV 지직 `static`, 조정 화면 `calibrate`, 테이프 늘어짐 `tapestretch`, 점멸 `blink`, 밀어 올리기 `pushup`. `ui_kit/effects/README.md`).
 
 ### 5.6에서 바뀐 점
 
@@ -259,6 +275,11 @@ game/screen_fx/
 ├── nightvision_config.rpy   설정: 나이트비전과 화면 글 (5.1)               ← 여기를 고침
 ├── collage_config.rpy       설정: 포토 콜라주, TileSwap 전환 (5.3)         ← 여기를 고침
 ├── shards_config.rpy        설정: 파편 흩날림 (5.1)                       ← 여기를 고침
+├── ripple_config.rpy        설정: 일렁임 (5.5)                            ← 여기를 고침
+├── waves_config.rpy, wobble_config.rpy, filmgrain_config.rpy, fisheye_config.rpy,
+│   photocopy_config.rpy, relief_config.rpy, gradmap_config.rpy, rings_config.rpy,
+│   camcorder_config.rpy     설정: 5.7에 더한 셰이더 아홉                   ← 여기를 고침
+├── shaders_off.txt          고르는 목록에서 감출 셰이더 이름 (앱의 [숨김], 처음에는 없음)
 ├── *_layout.rpy             편집기에서 저장하면 생기는 파일 (처음에는 없음)
 ├── engine/                  엔진 (고치지 않음. 새 효과를 넣을 때만 여기에 파일 추가)
 │   ├── screen_fx.rpy            공통: 효과 목록, 바꾸기, 전환, 대사 괄호 fx
@@ -270,7 +291,10 @@ game/screen_fx/
 │   ├── glitch.rpy, boil.rpy, halftone.rpy, hologram.rpy   새 효과 셰이더 (5.1)
 │   ├── nightvision.rpy          나이트비전 셰이더 + 화면 글 스크린 (5.1)
 │   ├── shards.rpy               파편 흩날림 셰이더 (5.1)
-│   └── collage.rpy              포토 콜라주 셰이더, TileSwap 전환 (5.3, 예전 tiles.rpy)
+│   ├── collage.rpy              포토 콜라주 셰이더, TileSwap 전환 (5.3, 예전 tiles.rpy)
+│   ├── ripple.rpy               일렁임 셰이더 (5.5)
+│   └── waves.rpy, wobble.rpy, filmgrain.rpy, fisheye.rpy, photocopy.rpy,
+│       relief.rpy, gradmap.rpy, rings.rpy, camcorder.rpy   5.7에 더한 셰이더
 ├── editor/
 │   └── editor_fx.rpy            UI Kit 편집기 탭 (UI Kit이 없으면 아무것도 안 함)
 ├── fonts/

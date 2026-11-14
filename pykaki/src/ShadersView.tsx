@@ -14,7 +14,7 @@ import { SHADER_TRANS, TV_KNOBS, type ShaderInfo } from './shader';
 import type { Project } from './types';
 import { usePrefs } from './prefs';
 import { Resizer } from './Resizer';
-import { GalleryCard, GallerySwitch, ShaderLive, ShaderStill, TransitionLive, TransitionStill } from './FxGallery';
+import { GalleryCard, GallerySwitch, HiddenLastSwitch, hiddenLastSort, ShaderLive, ShaderStill, TransitionLive, TransitionStill } from './FxGallery';
 import { setShaderOn, shaderBlocked, shaderCatalog, shaderUses, type ShaderCard, type ShaderUse } from './shaderLib';
 
 // 막대 묶음에서 사람이 읽을 이름만 꺼낸다: [묶음 이름, [[값 이름, 보일 글, …], …]]
@@ -241,6 +241,7 @@ function ShaderList({ bar }: { bar: ReactNode }) {
   const [picked, setPicked] = useState('');
   const [busy, setBusy] = useState(false);
   const gallery = usePrefs((p) => p.gallery);
+  const hiddenLast = usePrefs((p) => p.hiddenLast);
   const [blocked, setBlocked] = useState('');
   const [args, setArgs] = useState<Record<string, Record<string, unknown>>>({}); // 샘플에서만 쓰는 값: 셰이더 이름 → { 값 이름: 값 }
   const [picture, setPicture] = useState<HTMLImageElement | null>(null); // 샘플 그림 (저장하지 않음)
@@ -261,7 +262,7 @@ function ShaderList({ bar }: { bar: ReactNode }) {
 
   const cards = useMemo(() => shaderCatalog(project), [project, fxSeq]);
   const q = query.trim().toLowerCase();
-  const shown = cards.filter((c) => !q || c.label.toLowerCase().includes(q) || c.name.toLowerCase().includes(q) || c.id.includes(q));
+  const shown = hiddenLastSort(cards.filter((c) => !q || c.label.toLowerCase().includes(q) || c.name.toLowerCase().includes(q) || c.id.includes(q)), (c) => !c.on, hiddenLast);
   const sel = cards.find((c) => c.id === picked) ?? shown[0] ?? null;
   const uses = sel ? shaderUses(project, sel.id) : [];
   const mine = (sel && args[sel.id]) || {};
@@ -306,6 +307,7 @@ function ShaderList({ bar }: { bar: ReactNode }) {
           {bar}
           <input className="fxv-find" placeholder="찾기 (이름)" value={query} onChange={(e) => setQuery(e.target.value)} />
           <span className="grow" />
+          <HiddenLastSwitch count={shown.filter((c) => !c.on).length} />
           <GallerySwitch />
         </div>
         {blocked && <p className="tip fxv-note">{blocked}. 지금은 구경만 할 수 있어요.</p>}
