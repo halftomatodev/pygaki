@@ -33,17 +33,16 @@ const SECTIONS: Section[] = [
   { id: 'say', label: '대사 상자', tab: 'say', app: false, mirror: true, note: '대사 상자의 처음 위치와 모양이에요. 줄마다 다른 위치는 [대본 편집] 대사 카드의 줄마다 있는 [위치 옮기기]로 정해요.' },
   { id: 'choice', label: '선택지', tab: 'choice', app: false, mirror: true, note: '선택지의 처음 위치와 모양이에요. 상자마다 다른 위치는 [대본 편집] 다음 흐름 카드의 [위치 옮기기]로 정해요.' },
   { id: 'stage', label: '그림, 영상 배치', tab: 'stage', app: false, mirror: true, note: '그림을 넣는 것은 [대본 편집] 상자의 배경, 그림·영상 카드에서 해요. 여기서는 게임 화면에서 자리를 끌어 정해요.' },
-  { id: 'hotkeys', label: '단축키, 조작 방법', tab: 'hotkeys', app: false, mirror: true, note: '새 단축키를 만들고 렌파이 기본 단축키에서 키를 빼요. 설명을 적으면 조작방법 화면 목록에 붙고, 스플래시 조작 방법 페이지의 표가 "auto"면 거기도 같이 바뀌어요. 키는 아래 키 단추로 고르거나 게임 창에서 눌러요. pygaki 플러그인 hotkeys 1.1부터 있어요.' },
+  { id: 'hotkeys', label: '단축키 수정', tab: 'hotkeys', app: false, mirror: true, note: '기능 옆 키 단추를 누르고 게임 창에서 바꿀 키를 눌러요. 다른 기능이 쓰는 키면 경고와 안내가 나와요. [안내 화면으로 내보내기]를 누르면 조작 안내 화면의 표가 이 설정을 따라가고, 보여 줄 기능은 조작 안내 화면에서 골라요. pygaki 플러그인 hotkeys 1.2부터 있어요.' },
   { id: 'ui_text', label: '종료 메시지, 버튼 글', tab: 'ui_text', app: false, mirror: true, note: '종료 확인 창, 퀵메뉴 버튼 같은 글을 바꿔요. pygaki 플러그인 ui_kit 3.23부터 있어요.' },
 ];
 
 // 왼쪽 목록의 카드 묶음
 const GROUPS: { title: string; ids: string[] }[] = [
-  { title: '스플래시', ids: ['splash'] },
+  { title: '스플래시', ids: ['splash', 'hotkeys'] },
   { title: '타이틀 메뉴', ids: ['title', 'title_fx', 'screen_fx'] },
   { title: '게임 내 메뉴', ids: ['pause', 'pause_fx'] },
   { title: '확인 창, UI 글', ids: ['ui_text'] },
-  { title: '단축키', ids: ['hotkeys'] },
   // 상자마다 바꾸는 것은 [대본 편집]으로 옮겼다(세션 32). 여기는 상자에서 정하지 않았을 때 쓰는 게임 처음 값만
   { title: '게임 처음 값', ids: ['say', 'choice', 'stage', 'custom_ui'] },
 ];
@@ -51,7 +50,7 @@ const GROUPS: { title: string; ids: string[] }[] = [
 const FLOW_IN_APP = false;
 
 // 스플래시 기본 페이지는 우리말 이름, 사용자가 만든 페이지는 제목(없으면 id)
-const PAGE_NAMES: Record<string, string> = { logo: '로고', warning: '경고', controls: '조작 방법' };
+const PAGE_NAMES: Record<string, string> = { logo: '로고', warning: '경고', controls: '조작 안내 화면' };
 const pageLabel = (p: { id: string; title: string }) => PAGE_NAMES[p.id] ?? (p.title.replace(/\{[^}]*\}/g, '').trim() || p.id);
 
 export function ShowpyView() {
@@ -84,9 +83,21 @@ export function ShowpyView() {
           <Card key={g.title} id={'gn-' + g.title} title={g.title} className="sp-group">
             {g.ids.map((id) => {
               const s = SECTIONS.find((x) => x.id === id)!;
+              const t = s.tab ? st?.editor.tabs.find((x) => x.id === s.tab) : null;
+              const item = (sub = false) => (
+                <button key={s.id} className={'sp-nav-item' + (sub ? ' sub' : '') + (s.id === sec.id ? ' on' : '')} onClick={() => choose(s)} title={t && !t.ok ? t.why : ''}>
+                  {s.label}
+                  {!inApp(s) && <span className="sp-badge">게임 안</span>}
+                </button>
+              );
+              // 단축키 수정: 게임에 그 탭이 있을 때만, 조작 안내 화면 바로 아래 (hotkeys 1.2, splash 2.5)
+              const keysPage = st?.splash?.pages.some((p) => p.keys);
+              if (s.id === 'hotkeys') return !st || t ? (keysPage ? null : item()) : null;
               // 스플래시는 페이지마다 항목 (splash 2.2. 예전 판이면 항목 하나)
-              if (s.id === 'splash' && st?.splash?.pages.length)
-                return st.splash.pages.map((p) => (
+              if (s.id === 'splash' && st?.splash?.pages.length) {
+                const hk = SECTIONS.find((x) => x.id === 'hotkeys')!;
+                const hkTab = st.editor.tabs.find((x) => x.id === 'hotkeys');
+                return st.splash.pages.map((p) => [
                   <button
                     key={'splash-' + p.id}
                     className={'sp-nav-item' + (sec.id === 'splash' && st.splash?.cur === p.id ? ' on' : '')}
@@ -95,15 +106,16 @@ export function ShowpyView() {
                   >
                     {pageLabel(p)}
                     {!inApp(s) && <span className="sp-badge">게임 안</span>}
-                  </button>
-                ));
-              const t = s.tab ? st?.editor.tabs.find((x) => x.id === s.tab) : null;
-              return (
-                <button key={s.id} className={'sp-nav-item' + (s.id === sec.id ? ' on' : '')} onClick={() => choose(s)} title={t && !t.ok ? t.why : ''}>
-                  {s.label}
-                  {!inApp(s) && <span className="sp-badge">게임 안</span>}
-                </button>
-              );
+                  </button>,
+                  p.keys && hkTab ? (
+                    <button key="hotkeys" className={'sp-nav-item sub' + (sec.id === 'hotkeys' ? ' on' : '')} onClick={() => choose(hk)} title={hkTab.ok ? '' : hkTab.why}>
+                      {hk.label}
+                      {!inApp(hk) && <span className="sp-badge">게임 안</span>}
+                    </button>
+                  ) : null,
+                ]);
+              }
+              return item();
             })}
           </Card>
         ))}

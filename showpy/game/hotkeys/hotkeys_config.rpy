@@ -13,15 +13,15 @@ init offset = 1
 ##       "preferences" 환경설정, "save" 저장, "load" 불러오기, "history" 대사록,
 ##       "help" 조작방법 화면, "quick_save", "quick_load", "skip", "auto" 자동 진행,
 ##       "rollback" 이전 대사, "hide" UI 숨기기, "screenshot", "fullscreen", "mute",
-##       "main_menu" 타이틀로, "quit" 끝내기, "controls_page" 스플래시 조작 방법 페이지
+##       "main_menu" 타이틀로, "quit" 끝내기, "controls_page" 스플래시 조작 안내 화면
 ## "help": 조작방법 화면 목록 아래에 붙는 설명 (1.1, 없으면 안 붙음)
 ##
 ## 예: V를 누르면 환경설정 열기
 ##     { "keys": [ "K_v" ], "action": ShowMenu("preferences") },
 ##     { "keys": [ "K_F5" ], "do": "quick_save", "help": _("퀵세이브") },
 ##
-## 게임 안 편집 화면(Shift+M)의 [단축키] 탭에서 고친 것은 hotkeys_layout.rpy에 저장되고
-## 이 파일의 목록에 더해집니다. 그 파일을 지우면 이 파일 값만 남습니다.
+## 게임 안 편집 화면(Shift+M)의 [단축키 수정] 탭에서 고친 것은 hotkeys_layout.rpy에 저장되고
+## 이 파일의 목록에 더해집니다(렌파이 기본 기능의 키를 바꾼 것도 거기에). 그 파일을 지우면 이 파일 값만 남습니다.
 
 define hotkeys.bindings = [
 ]

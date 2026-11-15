@@ -3,13 +3,15 @@
 ##
 ## 이 파일은 고칠 필요가 없습니다. 설정은 hotkeys_config.rpy에서 하세요.
 ##
-## 버전 1.1 · Ren'Py 8.5.3에서 제작·테스트
+## 버전 1.2 · Ren'Py 8.5.3에서 제작·테스트
 ##
 ## - 단축키를 추가하거나, 렌파이 기본 단축키에서 키를 뺍니다.
 ## - 조작방법 화면의 키보드 설명을 설정 파일의 목록으로 보여줍니다.
 ##   (렌파이 기본 screens.rpy의 keyboard_help 스크린을 대신 정의합니다)
-## - 게임 안 편집 화면(Shift+M)의 [단축키] 탭이 저장한 hotkeys_layout.rpy를 읽습니다 (1.1).
+## - 게임 안 편집 화면(Shift+M)의 [단축키 수정] 탭이 저장한 hotkeys_layout.rpy를 읽습니다 (1.1).
 ##   그 탭은 editor/editor_hotkeys.rpy에 있고, UI Kit 플러그인이 있을 때만 생깁니다.
+## - 1.2: 기능마다 키를 바꿉니다(렌파이 기본 기능도). hotkeys_layout.rpy의 "keys"와 "desc".
+##   스플래시 조작 안내 화면이 "keys": "hotkeys"면 이 표에서 고른 기능을 보여 줍니다(guide_rows).
 ################################################################################
 
 init offset = 1
@@ -19,7 +21,7 @@ init -10 python in hotkeys:
     import store
     from store import python_object
 
-    VERSION = "1.1"
+    VERSION = "1.2"
 
     DEFAULTS = dict(
         bindings=[ ],
@@ -59,7 +61,7 @@ init -10 python in hotkeys:
         ("mute", "소리 끄기/켜기", lambda: store.Preference("all mute", "toggle")),
         ("main_menu", "타이틀로 (물어봄)", lambda: store.MainMenu()),
         ("quit", "게임 끝내기 (물어봄)", lambda: store.Quit()),
-        ("controls_page", "스플래시 조작 방법 페이지 보기", _splash_controls),
+        ("controls_page", "조작 안내 화면 보기", _splash_controls),
         ]
 
     ACTION_IDS = [ a[0] for a in ACTIONS ]
@@ -75,6 +77,53 @@ init -10 python in hotkeys:
             if i == aid:
                 return f()
         raise Exception("[hotkeys] '{}'라는 동작이 없습니다. 쓸 수 있는 것: {}".format(aid, ", ".join(ACTION_IDS)))
+
+    ## ── 단축키 수정 표의 기능 (1.2) ──
+    ## (id, 이름, 종류, 대상). 종류 "keymap"은 렌파이 기본 단축키(config.keymap 이름),
+    ## "do"는 위 ACTIONS의 동작 (처음에는 키 없음). hotkeys_layout.rpy의 "keys"와 "desc"에 id를 적습니다.
+
+    KEYMAP_FUNCS = [
+        ("dismiss", "대사 넘기기"),
+        ("game_menu", "게임 메뉴"),
+        ("skip", "누르는 동안 스킵"),
+        ("toggle_skip", "스킵 켜기/끄기"),
+        ("rollback", "이전 대사로"),
+        ("rollforward", "다음 대사로"),
+        ("hide_windows", "UI 숨기기"),
+        ("screenshot", "스크린샷"),
+        ("toggle_fullscreen", "전체 화면"),
+        ("self_voicing", "대사 읽어주기"),
+        ("accessibility", "접근성 메뉴"),
+        ]
+
+    ## ACTIONS 가운데 위 기본 기능과 같은 것은 표에 따로 두지 않음
+    _DO_SAME = { "skip": "toggle_skip", "rollback": "rollback", "hide": "hide_windows",
+        "screenshot": "screenshot", "fullscreen": "toggle_fullscreen" }
+
+    FUNCS = [ (n, l, "keymap", n) for n, l in KEYMAP_FUNCS ] + [
+        (a[0], a[1], "do", a[0]) for a in ACTIONS if a[0] not in _DO_SAME ]
+
+    FUNC_IDS = [ f[0] for f in FUNCS ]
+
+    def func(fid):
+        for f in FUNCS:
+            if f[0] == fid:
+                return f
+        return None
+
+    def func_label(fid):
+        f = func(fid)
+        return f[1] if f else str(fid)
+
+    ## 조작방법 화면 기본 목록에서 그 기능의 키 칸 (키를 바꾸면 이 칸 글도 바꿈)
+    HELP_KEY = {
+        "game_menu": "이스케이프(Esc)", "skip": "컨트롤(Ctrl)", "toggle_skip": "탭(Tab)",
+        "rollback": "페이지 업(Page Up)", "rollforward": "페이지 다운(Page Down)",
+        "hide_windows": "H", "screenshot": "S", "self_voicing": "V", "accessibility": "Shift+A",
+        }
+
+    ## 표와 안내 화면에 안 보이는 키 (게임패드, 특수 키)
+    QUIET_KEYS = ("K_KP_ENTER", "K_SELECT", "K_MENU", "K_PAUSE", "K_AC_BACK")
 
     ## ── 키 이름 ──
     ## 렌파이 키 이름: "K_v", "shift_K_s", "ctrl_K_l", "noshift_K_v"(Shift 없이만) ...
@@ -132,6 +181,25 @@ init -10 python in hotkeys:
             keys = [ keys ]
         return " / ".join(key_label(k) for k in keys)
 
+    def keyboard_keys(keys):
+        """키보드 키만 (마우스, 게임패드 이름은 뺌)."""
+        return [ k for k in (keys or [ ]) if parse_key(k) is not None ]
+
+    def main_keys(keys):
+        """표와 안내 화면에 보일 키: 특수 키를 빼고, Alt/Ctrl/Win 없이 누르는 키가 있으면 그것만."""
+        kb = [ k for k in keyboard_keys(keys) if parse_key(k)[1] not in QUIET_KEYS ]
+        plain = [ k for k in kb if not (parse_key(k)[0] & set(("alt", "ctrl", "meta"))) ]
+        return plain or kb
+
+    def keys_text(keys):
+        """보일 키 이름 ("F11 / F"). 같은 이름은 한 번만 (왼쪽, 오른쪽 Ctrl 등)."""
+        rv = [ ]
+        for k in main_keys(keys):
+            l = key_label(k)
+            if l not in rv:
+                rv.append(l)
+        return " / ".join(rv)
+
     def _shift_state(mods):
         if "shift" in mods:
             return "shift"
@@ -167,9 +235,20 @@ init -10 python in hotkeys:
     def _copy_layout(d):
         d = d or { }
         rv = store.python_dict()
-        rv["bindings"] = store.python_list(
-            store.python_dict(keys=list(b.get("keys") or [ ]), do=b.get("do"), help=b.get("help"))
-            for b in (d.get("bindings") or [ ]))
+        rv["keys"] = store.python_dict((k, list(v) if not isinstance(v, str) else [ v ]) for k, v in (d.get("keys") or { }).items())
+        rv["desc"] = store.python_dict((k, v) for k, v in (d.get("desc") or { }).items() if v)
+        rv["bindings"] = store.python_list()
+        for b in (d.get("bindings") or [ ]):
+            keys = list(b.get("keys") or [ ])
+            do = b.get("do")
+            f = func(do) if do else None
+            ## 1.1에서 편집 화면이 만든 줄(표에 있는 동작)은 표의 키로 옮김
+            if f is not None and f[2] == "do" and keys and do not in rv["keys"]:
+                rv["keys"][do] = keys
+                if b.get("help"):
+                    rv["desc"][do] = b["help"]
+                continue
+            rv["bindings"].append(store.python_dict(keys=keys, do=do, help=b.get("help")))
         rv["unbind"] = store.python_dict((k, list(v) if not isinstance(v, str) else [ v ]) for k, v in (d.get("unbind") or { }).items())
         h = d.get("help")
         rv["help"] = None if h is None else store.python_list((a, b) for a, b in h)
@@ -210,6 +289,53 @@ init -10 python in hotkeys:
                         rv[name].append(k)
         return rv
 
+    ## ── 기능마다 키 (1.2) ──
+
+    def _orig_keymap():
+        if state.orig is None:
+            return dict((k, list(v)) for k, v in store.config.keymap.items())
+        return state.orig
+
+    def default_keys(fid):
+        """편집 화면에서 바꾸기 전의 키 (키보드 키만).
+        기본 기능은 렌파이 기본에서 뺀 키를 빼고, 동작은 설정 파일 bindings의 "do"가 같은 줄."""
+        f = func(fid)
+        if f is None:
+            return [ ]
+        if f[2] == "keymap":
+            ub = all_unbind().get(f[3], [ ])
+            return [ k for k in keyboard_keys(_orig_keymap().get(f[3], [ ])) if k not in ub ]
+        rv = [ ]
+        for b in _config_bindings():
+            if b.get("do") == fid:
+                rv += [ k for k in b["keys"] if k not in rv ]
+        return rv
+
+    def func_keys(fid):
+        """지금 그 기능에 걸린 키보드 키."""
+        lay = current_layout()["keys"]
+        if fid in lay:
+            return list(lay[fid])
+        return default_keys(fid)
+
+    def func_changed(fid):
+        return fid in current_layout()["keys"]
+
+    def func_desc(fid):
+        """안내 화면에 보일 설명. 비우면 기능 이름."""
+        return current_layout()["desc"].get(fid) or func_label(fid)
+
+    def guide_rows(show=None):
+        """스플래시 조작 안내 화면 표 [(키, 설명)]. show: 보일 기능 id 목록 (None이면 키가 있는 것 모두)."""
+        rv = [ ]
+        for f in FUNCS:
+            if show is not None and f[0] not in show:
+                continue
+            t = keys_text(func_keys(f[0]))
+            if t:
+                rv.append((t, func_desc(f[0])))
+        return rv
+
     ## ── 조작방법 화면 목록 ──
 
     def _default_help():
@@ -240,17 +366,41 @@ init -10 python in hotkeys:
         return list(lines)
 
     def binding_help():
-        """설명("help")을 적은 단축키 줄. 조작방법 목록 아래에 붙습니다 (1.1)."""
+        """설명("help")을 적은 단축키 줄과, 키를 건 동작(1.2). 조작방법 목록 아래에 붙습니다 (1.1)."""
         rv = [ ]
+        lay = current_layout()["keys"]
         for src, b in all_bindings():
+            if src == "config" and b.get("do") in lay:
+                continue
             h = b.get("help")
             if h:
                 rv.append((keys_label(b["keys"]), h))
+        for f in FUNCS:
+            if f[2] == "do" and f[0] in lay:
+                t = keys_text(lay[f[0]])
+                if t:
+                    rv.append((t, func_desc(f[0])))
         return rv
+
+    def _remap_help(rows):
+        """기본 기능의 키를 바꿨으면 목록의 그 키 칸도 바꿈 (키를 다 빼면 그 줄을 뺌)."""
+        lay = current_layout()["keys"]
+        for fid, old in HELP_KEY.items():
+            if fid not in lay:
+                continue
+            new = keys_text(lay[fid])
+            for i, (a, d) in enumerate(rows):
+                if isinstance(a, str) and a == old:
+                    if new:
+                        rows[i] = (new, d)
+                    else:
+                        del rows[i]
+                    break
+        return rows
 
     def help_lines():
         """조작방법 목록. 단축키 줄의 키가 목록에 이미 있으면(같은 키 이름) 그 줄의 설명을 바꾸고, 없으면 아래에 붙입니다."""
-        rv = [ tuple(r) for r in base_help() ]
+        rv = _remap_help([ tuple(r) for r in base_help() ])
         for k, h in binding_help():
             for i, (a, d) in enumerate(rv):
                 if isinstance(a, str) and a.strip().lower() == k.lower():
@@ -287,13 +437,32 @@ init -10 python in hotkeys:
                 while k in current:
                     current.remove(k)
 
-        ## 새 단축키
         actions = { }
         mine = [ ]
 
+        ## 기능마다 바꾼 키 (1.2): 기본 기능은 키보드 키만 바꾸고 마우스, 게임패드는 그대로
+        lay_keys = current_layout()["keys"]
+        for fid, keys in lay_keys.items():
+            f = func(fid)
+            if f is None:
+                state.errors.append("'{}'라는 기능이 없습니다 (hotkeys_layout.rpy의 \"keys\").".format(fid))
+                continue
+            keys = [ k for k in keys if k ]
+            if f[2] == "keymap":
+                km[f[3]] = [ k for k in state.orig.get(f[3], [ ]) if parse_key(k) is None ] + keys
+                mine.append(f[3])
+            elif keys:
+                name = "hotkeys_do_" + fid
+                km[name] = keys
+                actions[name] = make_action(fid)
+                mine.append(name)
+
+        ## 새 단축키
         for i, (src, b) in enumerate(all_bindings()):
             keys = [ k for k in b["keys"] if k ]
             if not keys:
+                continue
+            if src == "config" and b.get("do") in lay_keys:
                 continue
             if b.get("action") is not None:
                 act = b["action"]

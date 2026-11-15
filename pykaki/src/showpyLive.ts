@@ -139,7 +139,8 @@ export interface GameState {
 }
 
 // 스플래시 페이지 (LINK.md 9장). new는 splash_config.rpy에 없고 편집기에서 만든 페이지
-export interface SplashPages { pages: { id: string; title: string; new: boolean }[]; cur: string | null }
+// keys: 조작 안내 화면(표가 있는 첫 페이지, splash 2.5). 앱 목록에서 그 아래에 [단축키 수정]
+export interface SplashPages { pages: { id: string; title: string; new: boolean; keys?: boolean }[]; cur: string | null }
 
 interface S {
   view: 'script' | 'showpy' | 'effects' | 'shaders' | 'screens'; // 대본 편집 / GUI 편집 / 효과 / 셰이더 / 화면 만들기

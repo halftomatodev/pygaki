@@ -1,5 +1,5 @@
 ################################################################################
-## Splash — UI Kit 편집기 탭 "스플래시" (splash 2.0)
+## Splash — UI Kit 편집기 탭 "스플래시" (splash 2.0, 조작 안내 화면과 단축키 수정 2.5)
 ##
 ## UI Kit 플러그인이 있으면 그 편집기(개발 모드에서 Shift+M)에 탭을 더합니다.
 ## UI Kit이 없으면 이 파일은 아무것도 하지 않고, 페이지는 splash_config.rpy대로 나옵니다.
@@ -13,6 +13,8 @@
 ##   패널에서 바탕색, 바탕·로고 그림, 글꼴·색, 시간, 넘어가는 때를 바꾸고
 ##   페이지를 더하고, 복제하고, 지우고, 순서를 바꿉니다.
 ##   [이 페이지 보기]로 지금 값으로 그 페이지를 진짜 시간대로 띄워 봅니다 (클릭하면 닫힘).
+##   조작 안내 화면(표가 있는 페이지) 바로 뒤에 [단축키 수정] 버튼이 있습니다(hotkeys 1.2가 있을 때).
+##   표를 "hotkeys"로 두면 단축키 수정 표를 따라가고, 보여 줄 기능을 패널에서 고릅니다 (2.5).
 ##
 ##   저장하면 이 폴더의 splash_layout.rpy에 페이지마다 바꾼 값만 적습니다.
 ##   글은 _("…")로 적어서 번역 목록에 그대로 잡힙니다. 그 파일의 값은 splash_config.rpy의
@@ -35,6 +37,12 @@ init -6 python in splash:
 
     ## 글 값 (저장할 때 _("…")로 적음)
     TEXT_KEYS = ("title", "body", "prompt", "dont_show_again")
+
+    ## 편집기와 앱 목록에 보일 기본 페이지 이름 (그 밖의 페이지는 id)
+    PAGE_NAMES = { "logo": "로고", "warning": "경고", "controls": "조작 안내 화면" }
+
+    def page_name(pid):
+        return PAGE_NAMES.get(pid, pid)
 
     def _tr(s):
         """글 하나를 번역할 수 있는 모양으로: _("…")"""
@@ -409,7 +417,7 @@ init -6 python in splash:
                         title = ""
                     if not isinstance(title, str):
                         title = ""
-                    rv.append(dict(id=str(pid), title=title, new=bool(self.is_new_page(pid))))
+                    rv.append(dict(id=str(pid), title=title, new=bool(self.is_new_page(pid)), keys=(pid == self.keys_page())))
                 return dict(pages=rv, cur=self.cur())
 
             def available(self):
@@ -645,13 +653,99 @@ init -6 python in splash:
             def keys_auto(self):
                 return self.val("keys") == "auto"
 
+            ## 단축키 수정 표 따라가기 "hotkeys" (2.5)
+            def hk(self):
+                """hotkeys 1.2 (단축키 수정 표)가 있으면 그 이름 공간."""
+                h = getattr(store, "hotkeys", None)
+                return h if (h is not None and hasattr(h, "guide_rows") and _ed.get_tab("hotkeys") is not None) else None
+
+            def keys_hotkeys(self):
+                return self.val("keys") == "hotkeys"
+
+            def hotkeys_linked(self):
+                """조작 안내 화면(표가 있는 첫 페이지)이 단축키 수정 표를 따라가는지."""
+                pid = self.keys_page()
+                if pid is None:
+                    return False
+                e = state.edits.get(pid, { })
+                for r in self.raws():
+                    if r.get("id") == pid:
+                        v = e["keys"] if "keys" in e else merged(r).get("keys")
+                        return v == "hotkeys"
+                return False
+
+            def link_hotkeys(self):
+                """단축키 수정의 [안내 화면으로 내보내기]: 조작 안내 화면의 표가 단축키 수정 표를 따라가게."""
+                pid = self.keys_page()
+                if pid is None:
+                    pid = "controls" if "controls" in self.ids() else self.cur()
+                self.set_page(pid)
+                if self.keys_hotkeys():
+                    _ed.msg("조작 안내 화면이 벌써 단축키 수정 표를 따라갑니다. 보여 줄 기능은 아래에서 고르세요.")
+                    return
+                h = self.hk()
+                self.put("keys", "hotkeys")
+                if h is not None:
+                    self.put("keys_show", [ f[0] for f in h.FUNCS if h.func_keys(f[0]) and h.keys_text(h.func_keys(f[0])) ])
+                self.keys_sel = None
+                _ed.msg("조작 안내 화면이 단축키 수정 표를 따라갑니다. 아래 목록에서 보여 줄 기능을 고르세요.")
+
+            def guide_funcs(self):
+                """[(id, 이름, 키 글, 보이는지)] (키가 없는 기능은 뺌)"""
+                h = self.hk()
+                if h is None:
+                    return [ ]
+                show = self.val("keys_show")
+                rv = [ ]
+                for f in h.FUNCS:
+                    t = h.keys_text(h.func_keys(f[0]))
+                    if t:
+                        rv.append((f[0], f[1], t, show is None or f[0] in show))
+                return rv
+
+            def toggle_guide(self, fid):
+                h = self.hk()
+                show = self.val("keys_show")
+                if show is None:
+                    show = [ x[0] for x in self.guide_funcs() ]
+                show = [ x for x in show if x != fid ] if fid in show else list(show) + [ fid ]
+                ## 단축키 수정 표의 순서대로
+                if h is not None:
+                    order = [ f[0] for f in h.FUNCS ]
+                    show.sort(key=lambda x: order.index(x) if x in order else len(order))
+                self.put("keys_show", show)
+
+            def guide_all(self, on):
+                self.put("keys_show", [ x[0] for x in self.guide_funcs() ] if on else [ ])
+
+            def keys_to_hotkeys(self):
+                self.put("keys", "hotkeys")
+                h = self.hk()
+                if h is not None and self.val("keys_show") is None:
+                    self.put("keys_show", [ x[0] for x in self.guide_funcs() ])
+                self.keys_sel = None
+                _ed.msg("단축키 수정 표를 따라갑니다. 아래 목록에서 보여 줄 기능을 고르세요.")
+
+            def go_hotkeys(self):
+                self.end_edit()
+                _ed.switch_tab("hotkeys")
+
+            def shown_rows(self):
+                """지금 표에 보이는 줄 (auto, hotkeys도 풀어서)."""
+                k = self.val("keys")
+                if k == "auto":
+                    return _keys_auto()
+                if k == "hotkeys":
+                    return _keys_hotkeys(self.val("keys_show"))
+                return self.key_rows()
+
             def keys_to_auto(self):
                 self.put("keys", "auto")
                 self.keys_sel = None
                 _ed.msg("조작방법 화면 목록을 그대로 씁니다. 단축키 탭에서 고치면 여기도 바뀝니다.")
 
             def keys_page(self):
-                """표("keys")가 있는 첫 페이지 (단축키 탭의 [[스플래시 조작 방법 페이지로])."""
+                """표("keys")가 있는 첫 페이지 = 조작 안내 화면 (단축키 수정의 [[안내 화면으로 내보내기])."""
                 for r in self.raws():
                     pid = r.get("id")
                     e = state.edits.get(pid, { })
@@ -664,8 +758,10 @@ init -6 python in splash:
                 return _ed.get_tab("hotkeys")
 
             def keys_to_manual(self):
-                self.put("keys", [ (a, b) for a, b in _keys_auto() ])
-                _ed.msg("조작방법 화면 목록을 복사해 넣었습니다. 이제 칸마다 고칠 수 있습니다.")
+                rows = [ (a, b) for a, b in self.shown_rows() ]
+                self.put("keys", rows)
+                self.put("keys_show", None)
+                _ed.msg("지금 보이는 표를 복사해 넣었습니다. 이제 칸마다 고칠 수 있습니다.")
 
             def set_cell(self, index, part, s):
                 rows = [ list(r) for r in self.key_rows() ]
@@ -819,6 +915,8 @@ init -6 python in splash:
                 if d.get("keys") == "auto":
                     ## 단축키 탭에서 고친 조작방법 목록도 바로 보이게 (splash 2.4)
                     key = key + (repr(_keys_auto()),)
+                elif d.get("keys") == "hotkeys":
+                    key = key + (repr(_keys_hotkeys(d.get("keys_show"))),)
                 if key != self._run_key:
                     p = resolve(raw)
                     p.duration = None           # 편집 중에는 영상을 반복
@@ -1126,7 +1224,10 @@ init -6 python in splash:
                         return self.start_edit((key,))
                 if name == "keys":
                     if self.keys_auto():
-                        _ed.msg("이 표는 조작방법 화면의 목록을 그대로 씁니다(\"auto\"). 패널의 [직접 적기로 바꾸기]를 누르면 고칠 수 있습니다.")
+                        _ed.msg("이 표는 조작방법 화면의 목록을 그대로 씁니다(\"auto\"). 패널의 [[직접 적기로 바꾸기]를 누르면 고칠 수 있습니다.")
+                        return True
+                    if self.keys_hotkeys():
+                        _ed.msg("이 표는 단축키 수정 표를 따라갑니다. 키는 [[단축키 수정]에서, 보여 줄 기능은 패널에서 고릅니다.")
                         return True
                     if self.val("keys_rotate"):
                         _ed.msg("돌린 표는 패널의 글 칸에서 고칩니다. (또는 회전을 0으로)")
@@ -1330,6 +1431,11 @@ init -6 python in splash:
 
         _ed.register(SplashTab())
 
+        ## hotkeys 1.2의 [단축키 수정] 탭을 스플래시 바로 뒤로 (그 파일이 먼저 등록됨)
+        _hk = getattr(store, "hotkeys", None)
+        if _hk is not None and hasattr(_hk, "place_tab"):
+            _hk.place_tab()
+
 
 ## 가운데 화면 (게임 화면 위에 고른 페이지를 그대로)
 screen ui_editor_splash_overlay():
@@ -1391,8 +1497,11 @@ screen ui_editor_splash_panel(tab):
             box_wrap_spacing 4
             xmaximum 632
             text "페이지:" style "ui_editor_text" yalign 0.5
+            $ _kp = tab.keys_page()
             for _id in _ids:
-                textbutton _id style "ui_editor_tab" action Function(tab.set_page, _id) selected (_cur == _id)
+                textbutton splash.page_name(_id) style "ui_editor_tab" action Function(tab.set_page, _id) selected (_cur == _id)
+                if _id == _kp and tab.hk() is not None:
+                    textbutton "단축키 수정" style "ui_editor_tab" action Function(tab.go_hotkeys)
 
         hbox:
             spacing 4
@@ -1539,21 +1648,42 @@ screen ui_editor_splash_panel(tab):
                 if not tab.has(_what):
                     textbutton (_label + " 넣기") style "ui_editor_button" text_size 13 action Function(tab.add_text, _what)
             if tab.val("keys") is None:
-                textbutton "조작 방법 표 넣기" style "ui_editor_button" text_size 13 action Function(tab.add_keys)
+                textbutton "조작 안내 표 넣기" style "ui_editor_button" text_size 13 action Function(tab.add_keys)
 
-        ## 조작 방법 표
+        ## 조작 안내 표
         if tab.val("keys") is not None:
-            text "조작 방법 표" style "ui_editor_text"
-            if tab.keys_auto():
+            text "조작 안내 표" style "ui_editor_text"
+            if tab.keys_hotkeys():
+                hbox:
+                    spacing 6
+                    text "  단축키 수정 표를 따라감 (\"hotkeys\")" style "ui_editor_small" yalign 0.5
+                    textbutton "단축키 수정에서 키 고치기" style "ui_editor_button" text_size 13 action Function(tab.go_hotkeys) sensitive (tab.hk() is not None)
+                if tab.hk() is None:
+                    text "  hotkeys 플러그인(1.2 이상)이 없어서 조작방법 화면 목록을 대신 보여 줍니다." style "ui_editor_small" color "#ffb74d"
+                else:
+                    text "  보여 줄 기능 (누르면 보임/안 보임, 키가 없는 기능은 목록에 없음)" style "ui_editor_small"
+                    hbox:
+                        spacing 3
+                        box_wrap True
+                        box_wrap_spacing 3
+                        xmaximum 620
+                        for _fid, _fl, _kt, _on in tab.guide_funcs():
+                            textbutton (_fl + "  " + _kt) style "ui_editor_button" text_size 13 action Function(tab.toggle_guide, _fid) selected _on
+                    hbox:
+                        spacing 4
+                        textbutton "모두 보이기" style "ui_editor_button" text_size 13 action Function(tab.guide_all, True)
+                        textbutton "모두 숨기기" style "ui_editor_button" text_size 13 action Function(tab.guide_all, False)
+                        textbutton "직접 적기로 바꾸기" style "ui_editor_button" text_size 13 action Function(tab.keys_to_manual)
+            elif tab.keys_auto():
                 hbox:
                     spacing 6
                     text "  조작방법 화면 목록을 그대로 씀 (\"auto\")" style "ui_editor_small" yalign 0.5
                     textbutton "직접 적기로 바꾸기" style "ui_editor_button" text_size 13 action Function(tab.keys_to_manual)
-                if tab.hotkeys_tab() is not None:
+                if tab.hk() is not None:
                     hbox:
                         spacing 6
                         text "  " style "ui_editor_small" min_width 110
-                        textbutton "단축키 탭에서 고치기" style "ui_editor_button" text_size 13 action Function(ui_editor.switch_tab, "hotkeys")
+                        textbutton "단축키 수정 표 따라가기" style "ui_editor_button" text_size 13 action Function(tab.keys_to_hotkeys)
             else:
                 for _i in range(len(tab.key_rows())):
                     hbox:
@@ -1578,6 +1708,10 @@ screen ui_editor_splash_panel(tab):
                     textbutton "위로" style "ui_editor_button" text_size 13 action Function(tab.move_row, -1) sensitive (tab.keys_sel is not None)
                     textbutton "아래로" style "ui_editor_button" text_size 13 action Function(tab.move_row, 1) sensitive (tab.keys_sel is not None)
                     textbutton "조작방법 화면 목록 쓰기" style "ui_editor_button" text_size 13 action Function(tab.keys_to_auto)
+                if tab.hk() is not None:
+                    hbox:
+                        spacing 4
+                        textbutton "단축키 수정 표 따라가기" style "ui_editor_button" text_size 13 action Function(tab.keys_to_hotkeys)
             hbox:
                 spacing 6
                 text "  회전" style "ui_editor_small" yalign 0.5 min_width 110

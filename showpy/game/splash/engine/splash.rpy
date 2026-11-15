@@ -33,7 +33,7 @@ init -10 python in splash:
     import store
     from store import Action, DictEquality, Movie, Solid, Text, Transform, python_object
 
-    VERSION = "2.4"
+    VERSION = "2.5"
 
     def scene_fx():
         """screen_fx 플러그인의 '장면만' 효과를 페이지의 바탕·로고 그림에도 씌우는 트랜스폼.
@@ -67,7 +67,7 @@ init -10 python in splash:
         "duration", "min_time", "fade_in", "fade_out",
         "sound", "music",
         "xalign", "yalign", "spacing", "width",
-        "key_width", "key_gap", "keys_spacing", "keys_xalign",
+        "key_width", "key_gap", "keys_spacing", "keys_xalign", "keys_show",
         ## 편집기에서 끌고 돌린 값 (2.0)
         "image_offset", "title_offset", "body_offset", "keys_offset",
         "image_rotate", "title_rotate", "body_rotate", "keys_rotate", "prompt_rotate",
@@ -349,11 +349,14 @@ init -10 python in splash:
                 out.append("{}: \"skippable\": False면 'duration'을 정해야 합니다. (안 그러면 넘어갈 방법이 없음)".format(where))
 
             keys = d.get("keys")
-            if keys is not None and keys != "auto":
+            if keys is not None and keys not in ("auto", "hotkeys"):
                 ok = isinstance(keys, (list, tuple)) and all(
                     isinstance(k, (list, tuple)) and len(k) == 2 for k in keys)
                 if not ok:
-                    out.append("{} 'keys': [ (\"키\", \"설명\"), … ] 모양이거나 \"auto\"여야 합니다.".format(where))
+                    out.append("{} 'keys': [ (\"키\", \"설명\"), … ] 모양이거나 \"auto\", \"hotkeys\"여야 합니다.".format(where))
+            show = d.get("keys_show")
+            if show is not None and not (isinstance(show, (list, tuple)) and all(isinstance(x, str) for x in show)):
+                out.append("{} 'keys_show'는 기능 이름 목록이어야 합니다. 예: [ \"toggle_skip\", \"screenshot\" ]".format(where))
 
         return out
 
@@ -377,6 +380,14 @@ init -10 python in splash:
         if callable(c):
             return bool(c())
         return bool(eval(c, vars(store)))
+
+    def _keys_hotkeys(show=None):
+        """조작 안내 표 "hotkeys" (2.5): hotkeys 플러그인 단축키 수정 표에서 고른 기능. 없으면 "auto"와 같음."""
+        hk = getattr(store, "hotkeys", None)
+        f = getattr(hk, "guide_rows", None)
+        if callable(f):
+            return list(f(show))
+        return _keys_auto()
 
     def _keys_auto():
         """조작 방법 목록 "auto": hotkeys 플러그인 설정, 없으면 렌파이 기본 설명."""
@@ -482,6 +493,7 @@ init -10 python in splash:
         p.title = d.get("title")
         p.body = d.get("body")
         p.keys = d.get("keys")
+        p.keys_show = d.get("keys_show")
         p.prompt = d.get("prompt")
         p.dont_show_again = d.get("dont_show_again")
 
@@ -839,6 +851,8 @@ init -10 python in splash:
             keys = page.keys
             if keys == "auto":
                 keys = _keys_auto()
+            elif keys == "hotkeys":
+                keys = _keys_hotkeys(page.keys_show)
             self.keys = [
                 (Text(k, style="splash_key", **page.key_props), Text(v, style="splash_desc", **page.desc_props))
                 for k, v in (keys or [ ])
