@@ -23,8 +23,15 @@ export function MirrorPanel({ panel }: { panel: PanelState }) {
   );
 }
 
+// 게임 픽셀 → 앱 픽셀 (앱 패널 글자가 게임보다 조금 작아서)
+const PX = 0.75;
+
 function Node({ n }: { n: MirrorNode }) {
+  // 들여쓰기 (ui_kit 4.11): 세부 속성처럼 게임에서 안쪽으로 들어간 묶음
+  if (n.i) return <div style={{ paddingLeft: Math.min(n.i * PX, 80) }}><Node n={{ ...n, i: undefined }} /></div>;
   switch (n.k) {
+    case 'sp':
+      return <span className="sp-m-sp" style={{ width: Math.min(n.w * PX, 60) }} />;
     case 'h':
       return (
         <div className="sp-m-h">

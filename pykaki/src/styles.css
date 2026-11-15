@@ -1309,3 +1309,6 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .scv-side label { min-width: 56px; font-size: 12px; color: var(--muted); }
 .scv-code { font-size: 11px; white-space: pre-wrap; margin: 0; }
 .linklike { border: none; background: none; color: var(--accent); padding: 0 4px; cursor: pointer; }
+
+/* 게임 패널 미러의 빈 칸 (ui_kit 4.11) */
+.sp-m-sp { display: inline-block; flex: none; }

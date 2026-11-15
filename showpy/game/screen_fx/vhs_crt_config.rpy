@@ -82,6 +82,11 @@ define vhs_crt.settings = {
     "clip_warp": False,              # 휘어서 생긴 바깥 검은 테두리를 투명하게
     "vignette_intensity": 0.4,       # 가장자리 어둡게 하는 범위
     "vignette_opacity": 0.5,         # 가장자리 어둡기 (0~1)
+
+    ## 낡은 테이프 (5.8, 0 = 없음)
+    "head_switch": 0.0,              # 화면 맨 아래가 옆으로 찢기고 지글거리는 띠 (0~1)
+    "tracking": 0.0,                 # 두꺼운 띠가 천천히 올라가며 그 안이 흔들림 (0~1)
+    "color_bleed": 0.0,              # 색만 가로로 번짐, 밝기는 그대로 (0~1)
 }
 
 ## 게임 중에 $ vhs_crt.preset("이름")으로 바꿀 수 있는 묶음.
@@ -100,6 +105,11 @@ define vhs_crt.presets = {
         "noise_opacity": 0.9,
         "static_noise_intensity": 0.2,
         "aberration": 0.3,
+    },
+    "worn": {                        # 낡은 테이프 (5.8)
+        "head_switch": 0.7,
+        "tracking": 0.5,
+        "color_bleed": 0.6,
     },
 }
 

@@ -1,5 +1,5 @@
 {
- "screen_fx": "5.7",
+ "screen_fx": "5.8",
  "shaders": [
   {
    "extra": true,
@@ -239,12 +239,12 @@
      "fragment": [
       [
        300,
-       "\n        vec2 vc_uv0 = v_tex_coord.xy;\n        vec4 vc_orig = texture2D(tex0, vc_uv0, u_lod_bias);\n        vec2 vc_res = u_vhs_crt_resolution;\n\n        vec2 vc_uv = vhs_crt_warp(vc_uv0, u_vhs_crt_warp_amount);\n        vec2 vc_tuv = vc_uv;\n        vec2 vc_roll_uv = vec2(0.0);\n        float vc_time = (u_vhs_crt_roll > 0.5) ? u_time : 0.0;\n\n        if (u_vhs_crt_pixelate > 0.5) {\n            vc_tuv = ceil(vc_uv * vc_res) / vc_res;\n        }\n\n        float vc_roll_line = 0.0;\n        if (u_vhs_crt_roll > 0.5 || u_vhs_crt_noise_opacity > 0.0) {\n            vc_roll_line = smoothstep(0.3, 0.9, sin(vc_uv.y * u_vhs_crt_roll_size - (vc_time * u_vhs_crt_roll_speed)));\n            vc_roll_line *= vc_roll_line * smoothstep(0.3, 0.9, sin(vc_uv.y * u_vhs_crt_roll_size * u_vhs_crt_roll_variation - (vc_time * u_vhs_crt_roll_speed * u_vhs_crt_roll_variation)));\n            vc_roll_uv = vec2(vc_roll_line * u_vhs_crt_distort_intensity * (1.0 - vc_uv0.x), 0.0);\n        }\n\n        vec2 vc_ab = vec2(u_vhs_crt_aberration, 0.0) * 0.1;\n        float vc_r;\n        float vc_g;\n        float vc_b;\n        float vc_a;\n\n        // 텍스처는 투명도가 곱해진 색이라, 투명도로 나눠 원래 색으로 되돌린 뒤 계산합니다.\n        // (불투명한 화면에서는 그대로, 반투명한 대사창 등에 씌울 때 두 번 어두워지지 않게)\n        vec2 vc_ruv = (u_vhs_crt_roll > 0.5) ? vc_roll_uv : vec2(0.0);\n        vec4 vc_sr = texture2D(tex0, vc_tuv + vc_ruv * 0.8 + vc_ab, u_lod_bias);\n        vec4 vc_sg = texture2D(tex0, vc_tuv + vc_ruv * 1.2 - vc_ab, u_lod_bias);\n        vec4 vc_s = texture2D(tex0, vc_tuv + vc_ruv, u_lod_bias);\n        vc_r = vc_sr.r / max(vc_sr.a, 0.0001);\n        vc_g = vc_sg.g / max(vc_sg.a, 0.0001);\n        vc_b = vc_s.b / max(vc_s.a, 0.0001);\n        vc_a = vc_s.a;\n\n        if (u_vhs_crt_grille_opacity > 0.0) {\n            float vc_gr = smoothstep(0.85, 0.95, abs(sin(vc_uv.x * (vc_res.x * 3.14159265))));\n            vc_r = mix(vc_r, vc_r * vc_gr, u_vhs_crt_grille_opacity);\n            float vc_gg = smoothstep(0.85, 0.95, abs(sin(1.05 + vc_uv.x * (vc_res.x * 3.14159265))));\n            vc_g = mix(vc_g, vc_g * vc_gg, u_vhs_crt_grille_opacity);\n            float vc_gb = smoothstep(0.85, 0.95, abs(sin(2.1 + vc_uv.x * (vc_res.x * 3.14159265))));\n            vc_b = mix(vc_b, vc_b * vc_gb, u_vhs_crt_grille_opacity);\n        }\n\n        vec3 vc_col = clamp(vec3(vc_r, vc_g, vc_b) * u_vhs_crt_brightness, 0.0, 1.0);\n\n        float vc_scan = 0.5;\n        if (u_vhs_crt_scanlines_opacity > 0.0) {\n            vc_scan = smoothstep(u_vhs_crt_scanlines_width, u_vhs_crt_scanlines_width + 0.5, abs(sin(vc_uv.y * (vc_res.y * 3.14159265))));\n            vc_col = mix(vc_col, vc_col * vec3(vc_scan), u_vhs_crt_scanlines_opacity);\n        }\n\n        if (u_vhs_crt_noise_opacity > 0.0) {\n            float vc_n = smoothstep(0.4, 0.5, vhs_crt_noise(vc_uv * vec2(2.0, 200.0) + vec2(10.0, u_time * u_vhs_crt_noise_speed)));\n            vc_roll_line *= vc_n * vc_scan * clamp(vhs_crt_random((ceil(vc_uv * vc_res) / vc_res) + vec2(u_time * 0.8, 0.0)).x + 0.8, 0.0, 1.0);\n            vc_col = clamp(mix(vc_col, vc_col + vc_roll_line, u_vhs_crt_noise_opacity), vec3(0.0), vec3(1.0));\n        }\n\n        if (u_vhs_crt_static_noise_intensity > 0.0) {\n            vc_col += clamp(vhs_crt_random((ceil(vc_uv * vc_res) / vc_res) + fract(u_time)).x, 0.0, 1.0) * u_vhs_crt_static_noise_intensity;\n        }\n\n        float vc_border = vhs_crt_border(vc_uv, u_vhs_crt_warp_amount);\n        vc_col *= vc_border;\n        vc_col *= vhs_crt_vignette(vc_uv, u_vhs_crt_vignette_intensity, u_vhs_crt_vignette_opacity);\n\n        if (u_vhs_crt_discolor > 0.5) {\n            vec3 vc_grey = vec3(vc_col.r + vc_col.g + vc_col.b) / 3.0;\n            vc_col = mix(vc_col, vc_grey, u_vhs_crt_saturation);\n            float vc_mid = pow(0.5, 2.2);\n            vc_col = (vc_col - vec3(vc_mid)) * u_vhs_crt_contrast + vc_mid;\n        }\n\n        // 화면 전체에 쓸 때는 불투명(1.0) 그대로, 투명한 부분이 있는 이미지에 쓸 때는\n        // 그 투명도를 유지합니다.\n        float vc_alpha = vc_a * ((u_vhs_crt_clip_warp > 0.5) ? vc_border : 1.0);\n        vec4 vc_fx = vec4(clamp(vc_col, 0.0, 1.0) * vc_alpha, vc_alpha);\n\n        gl_FragColor = mix(vc_orig, vc_fx, clamp(u_vhs_crt_strength, 0.0, 1.0));\n    "
+       "\n        vec2 vc_uv0 = v_tex_coord.xy;\n        vec4 vc_orig = texture2D(tex0, vc_uv0, u_lod_bias);\n        vec2 vc_res = u_vhs_crt_resolution;\n\n        vec2 vc_uv = vhs_crt_warp(vc_uv0, u_vhs_crt_warp_amount);\n        vec2 vc_tuv = vc_uv;\n        vec2 vc_roll_uv = vec2(0.0);\n        float vc_time = (u_vhs_crt_roll > 0.5) ? u_time : 0.0;\n\n        if (u_vhs_crt_pixelate > 0.5) {\n            vc_tuv = ceil(vc_uv * vc_res) / vc_res;\n        }\n\n        float vc_roll_line = 0.0;\n        if (u_vhs_crt_roll > 0.5 || u_vhs_crt_noise_opacity > 0.0) {\n            vc_roll_line = smoothstep(0.3, 0.9, sin(vc_uv.y * u_vhs_crt_roll_size - (vc_time * u_vhs_crt_roll_speed)));\n            vc_roll_line *= vc_roll_line * smoothstep(0.3, 0.9, sin(vc_uv.y * u_vhs_crt_roll_size * u_vhs_crt_roll_variation - (vc_time * u_vhs_crt_roll_speed * u_vhs_crt_roll_variation)));\n            vc_roll_uv = vec2(vc_roll_line * u_vhs_crt_distort_intensity * (1.0 - vc_uv0.x), 0.0);\n        }\n\n        vec2 vc_ab = vec2(u_vhs_crt_aberration, 0.0) * 0.1;\n        float vc_r;\n        float vc_g;\n        float vc_b;\n        float vc_a;\n\n        // 텍스처는 투명도가 곱해진 색이라, 투명도로 나눠 원래 색으로 되돌린 뒤 계산합니다.\n        // (불투명한 화면에서는 그대로, 반투명한 대사창 등에 씌울 때 두 번 어두워지지 않게)\n        vec2 vc_ruv = (u_vhs_crt_roll > 0.5) ? vc_roll_uv : vec2(0.0);\n\n        // ── 5.8 낡은 테이프: 아래쪽 헤드 전환 띠, 트래킹 어긋남 ──\n        float vc_hs = 0.0;\n        if (u_vhs_crt_head_switch > 0.0) {\n            // 화면 맨 아래 몇 %가 옆으로 크게 밀리고 지글거림\n            float vc_hh = 0.025 + 0.035 * u_vhs_crt_head_switch;\n            vc_hs = smoothstep(1.0 - vc_hh, 1.0, vc_uv0.y);\n            float vc_hj = vhs_crt_random(vec2(floor(vc_uv0.y * vc_res.y), floor(u_time * 30.0))).x;\n            vc_ruv.x += vc_hs * (0.03 + 0.02 * vc_hj) * u_vhs_crt_head_switch;\n        }\n        float vc_tb = 0.0;\n        if (u_vhs_crt_tracking > 0.0) {\n            // 두꺼운 띠 하나가 천천히 위로 흐르며 그 안이 옆으로 흔들림\n            float vc_ty = fract(u_time * 0.07);\n            float vc_td = abs(fract(1.0 - vc_uv0.y) - vc_ty);\n            vc_td = min(vc_td, 1.0 - vc_td);\n            vc_tb = smoothstep(0.06 * u_vhs_crt_tracking + 0.01, 0.0, vc_td);\n            float vc_tj = vhs_crt_noise(vec2(vc_uv0.y * 80.0, u_time * 12.0)) - 0.5;\n            vc_ruv.x += vc_tb * vc_tj * 0.06 * u_vhs_crt_tracking;\n        }\n        vec4 vc_sr = texture2D(tex0, vc_tuv + vc_ruv * 0.8 + vc_ab, u_lod_bias);\n        vec4 vc_sg = texture2D(tex0, vc_tuv + vc_ruv * 1.2 - vc_ab, u_lod_bias);\n        vec4 vc_s = texture2D(tex0, vc_tuv + vc_ruv, u_lod_bias);\n        vc_r = vc_sr.r / max(vc_sr.a, 0.0001);\n        vc_g = vc_sg.g / max(vc_sg.a, 0.0001);\n        vc_b = vc_s.b / max(vc_s.a, 0.0001);\n        vc_a = vc_s.a;\n\n        // 5.8 가로 색 번짐: 색(크로마)만 옆으로 퍼짐, 밝기는 그대로\n        if (u_vhs_crt_color_bleed > 0.0) {\n            vec3 vc_acc = vec3(0.0);\n            float vc_bw = 0.006 * u_vhs_crt_color_bleed;\n            for (int vc_i = 1; vc_i <= 4; vc_i++) {\n                vec4 vc_t = texture2D(tex0, vc_tuv + vc_ruv - vec2(vc_bw * float(vc_i), 0.0), u_lod_bias);\n                vc_acc += vc_t.rgb / max(vc_t.a, 0.0001);\n            }\n            vec3 vc_c0 = vec3(vc_r, vc_g, vc_b);\n            vec3 vc_cb = (vc_c0 + vc_acc) / 5.0;\n            float vc_l0 = dot(vc_c0, vec3(0.299, 0.587, 0.114));\n            float vc_lb = dot(vc_cb, vec3(0.299, 0.587, 0.114));\n            vec3 vc_mix = vc_cb - vec3(vc_lb) + vec3(vc_l0);\n            vc_r = vc_mix.r;\n            vc_g = vc_mix.g;\n            vc_b = vc_mix.b;\n        }\n\n        if (u_vhs_crt_grille_opacity > 0.0) {\n            float vc_gr = smoothstep(0.85, 0.95, abs(sin(vc_uv.x * (vc_res.x * 3.14159265))));\n            vc_r = mix(vc_r, vc_r * vc_gr, u_vhs_crt_grille_opacity);\n            float vc_gg = smoothstep(0.85, 0.95, abs(sin(1.05 + vc_uv.x * (vc_res.x * 3.14159265))));\n            vc_g = mix(vc_g, vc_g * vc_gg, u_vhs_crt_grille_opacity);\n            float vc_gb = smoothstep(0.85, 0.95, abs(sin(2.1 + vc_uv.x * (vc_res.x * 3.14159265))));\n            vc_b = mix(vc_b, vc_b * vc_gb, u_vhs_crt_grille_opacity);\n        }\n\n        vec3 vc_col = clamp(vec3(vc_r, vc_g, vc_b) * u_vhs_crt_brightness, 0.0, 1.0);\n\n        float vc_scan = 0.5;\n        if (u_vhs_crt_scanlines_opacity > 0.0) {\n            vc_scan = smoothstep(u_vhs_crt_scanlines_width, u_vhs_crt_scanlines_width + 0.5, abs(sin(vc_uv.y * (vc_res.y * 3.14159265))));\n            vc_col = mix(vc_col, vc_col * vec3(vc_scan), u_vhs_crt_scanlines_opacity);\n        }\n\n        if (u_vhs_crt_noise_opacity > 0.0) {\n            float vc_n = smoothstep(0.4, 0.5, vhs_crt_noise(vc_uv * vec2(2.0, 200.0) + vec2(10.0, u_time * u_vhs_crt_noise_speed)));\n            vc_roll_line *= vc_n * vc_scan * clamp(vhs_crt_random((ceil(vc_uv * vc_res) / vc_res) + vec2(u_time * 0.8, 0.0)).x + 0.8, 0.0, 1.0);\n            vc_col = clamp(mix(vc_col, vc_col + vc_roll_line, u_vhs_crt_noise_opacity), vec3(0.0), vec3(1.0));\n        }\n\n        // 5.8 찢긴 띠·트래킹 띠 안의 하얀 지지직\n        if (vc_hs + vc_tb > 0.0) {\n            float vc_sn = vhs_crt_random(vec2(floor(vc_uv0.x * vc_res.x * 0.5), floor(vc_uv0.y * vc_res.y)) + fract(u_time * 7.0)).x;\n            vc_col = mix(vc_col, vec3(0.9), step(0.75, vc_sn) * clamp(vc_hs * u_vhs_crt_head_switch + vc_tb * u_vhs_crt_tracking, 0.0, 1.0) * 0.7);\n        }\n\n        if (u_vhs_crt_static_noise_intensity > 0.0) {\n            vc_col += clamp(vhs_crt_random((ceil(vc_uv * vc_res) / vc_res) + fract(u_time)).x, 0.0, 1.0) * u_vhs_crt_static_noise_intensity;\n        }\n\n        float vc_border = vhs_crt_border(vc_uv, u_vhs_crt_warp_amount);\n        vc_col *= vc_border;\n        vc_col *= vhs_crt_vignette(vc_uv, u_vhs_crt_vignette_intensity, u_vhs_crt_vignette_opacity);\n\n        if (u_vhs_crt_discolor > 0.5) {\n            vec3 vc_grey = vec3(vc_col.r + vc_col.g + vc_col.b) / 3.0;\n            vc_col = mix(vc_col, vc_grey, u_vhs_crt_saturation);\n            float vc_mid = pow(0.5, 2.2);\n            vc_col = (vc_col - vec3(vc_mid)) * u_vhs_crt_contrast + vc_mid;\n        }\n\n        // 화면 전체에 쓸 때는 불투명(1.0) 그대로, 투명한 부분이 있는 이미지에 쓸 때는\n        // 그 투명도를 유지합니다.\n        float vc_alpha = vc_a * ((u_vhs_crt_clip_warp > 0.5) ? vc_border : 1.0);\n        vec4 vc_fx = vec4(clamp(vc_col, 0.0, 1.0) * vc_alpha, vc_alpha);\n\n        gl_FragColor = mix(vc_orig, vc_fx, clamp(u_vhs_crt_strength, 0.0, 1.0));\n    "
       ]
      ],
      "fragment_functions": "\n        vec2 vhs_crt_random(vec2 uv) {\n            uv = vec2(dot(uv, vec2(127.1, 311.7)),\n                      dot(uv, vec2(269.5, 183.3)));\n            return -1.0 + 2.0 * fract(sin(uv) * 43758.5453123);\n        }\n\n        float vhs_crt_noise(vec2 uv) {\n            vec2 uv_index = floor(uv);\n            vec2 uv_fract = fract(uv);\n            vec2 blur = smoothstep(0.0, 1.0, uv_fract);\n\n            return mix(mix(dot(vhs_crt_random(uv_index + vec2(0.0, 0.0)), uv_fract - vec2(0.0, 0.0)),\n                           dot(vhs_crt_random(uv_index + vec2(1.0, 0.0)), uv_fract - vec2(1.0, 0.0)), blur.x),\n                       mix(dot(vhs_crt_random(uv_index + vec2(0.0, 1.0)), uv_fract - vec2(0.0, 1.0)),\n                           dot(vhs_crt_random(uv_index + vec2(1.0, 1.0)), uv_fract - vec2(1.0, 1.0)), blur.x),\n                       blur.y) * 0.5 + 0.5;\n        }\n\n        vec2 vhs_crt_warp(vec2 uv, float amount) {\n            vec2 delta = uv - 0.5;\n            float delta2 = dot(delta, delta);\n            return uv + delta * (delta2 * delta2 * amount);\n        }\n\n        float vhs_crt_border(vec2 uv, float amount) {\n            float radius = min(amount, 0.08);\n            radius = max(min(abs(radius * 2.0), 1.0), 1e-5);\n            vec2 abs_uv = abs(uv * 2.0 - 1.0) - vec2(1.0, 1.0) + radius;\n            float dist = length(max(vec2(0.0), abs_uv)) / radius;\n            float square = smoothstep(0.96, 1.0, dist);\n            return clamp(1.0 - square, 0.0, 1.0);\n        }\n\n        float vhs_crt_vignette(vec2 uv, float intensity, float opacity) {\n            uv = clamp(uv, 0.0, 1.0);\n            uv *= 1.0 - uv;\n            float v = max(uv.x * uv.y * 15.0, 1e-6);\n            return pow(v, intensity * opacity);\n        }\n    ",
      "name": "vhs_crt.effect",
-     "variables": "\n        uniform sampler2D tex0;\n        uniform float u_lod_bias;\n        uniform float u_time;\n        attribute vec2 a_tex_coord;\n        varying vec2 v_tex_coord;\n\n        uniform float u_vhs_crt_strength;\n        uniform float u_vhs_crt_scanlines_opacity;\n        uniform float u_vhs_crt_scanlines_width;\n        uniform float u_vhs_crt_grille_opacity;\n        uniform vec2 u_vhs_crt_resolution;\n        uniform float u_vhs_crt_pixelate;\n        uniform float u_vhs_crt_roll;\n        uniform float u_vhs_crt_roll_speed;\n        uniform float u_vhs_crt_roll_size;\n        uniform float u_vhs_crt_roll_variation;\n        uniform float u_vhs_crt_distort_intensity;\n        uniform float u_vhs_crt_noise_opacity;\n        uniform float u_vhs_crt_noise_speed;\n        uniform float u_vhs_crt_static_noise_intensity;\n        uniform float u_vhs_crt_aberration;\n        uniform float u_vhs_crt_brightness;\n        uniform float u_vhs_crt_discolor;\n        uniform float u_vhs_crt_saturation;\n        uniform float u_vhs_crt_contrast;\n        uniform float u_vhs_crt_warp_amount;\n        uniform float u_vhs_crt_clip_warp;\n        uniform float u_vhs_crt_vignette_intensity;\n        uniform float u_vhs_crt_vignette_opacity;\n    ",
+     "variables": "\n        uniform sampler2D tex0;\n        uniform float u_lod_bias;\n        uniform float u_time;\n        attribute vec2 a_tex_coord;\n        varying vec2 v_tex_coord;\n\n        uniform float u_vhs_crt_strength;\n        uniform float u_vhs_crt_scanlines_opacity;\n        uniform float u_vhs_crt_scanlines_width;\n        uniform float u_vhs_crt_grille_opacity;\n        uniform vec2 u_vhs_crt_resolution;\n        uniform float u_vhs_crt_pixelate;\n        uniform float u_vhs_crt_roll;\n        uniform float u_vhs_crt_roll_speed;\n        uniform float u_vhs_crt_roll_size;\n        uniform float u_vhs_crt_roll_variation;\n        uniform float u_vhs_crt_distort_intensity;\n        uniform float u_vhs_crt_noise_opacity;\n        uniform float u_vhs_crt_noise_speed;\n        uniform float u_vhs_crt_static_noise_intensity;\n        uniform float u_vhs_crt_aberration;\n        uniform float u_vhs_crt_brightness;\n        uniform float u_vhs_crt_discolor;\n        uniform float u_vhs_crt_saturation;\n        uniform float u_vhs_crt_contrast;\n        uniform float u_vhs_crt_warp_amount;\n        uniform float u_vhs_crt_clip_warp;\n        uniform float u_vhs_crt_vignette_intensity;\n        uniform float u_vhs_crt_vignette_opacity;\n        uniform float u_vhs_crt_head_switch;\n        uniform float u_vhs_crt_tracking;\n        uniform float u_vhs_crt_color_bleed;\n    ",
      "vertex": [
       [
        200,
@@ -453,6 +453,35 @@
        "bool"
       ]
      ]
+    ],
+    [
+     "낡은 테이프 (5.8)",
+     [
+      [
+       "head_switch",
+       "아래쪽 찢긴 띠",
+       0.0,
+       1.0,
+       0.01,
+       2
+      ],
+      [
+       "tracking",
+       "트래킹 어긋남",
+       0.0,
+       1.0,
+       0.01,
+       2
+      ],
+      [
+       "color_bleed",
+       "가로 색 번짐",
+       0.0,
+       1.0,
+       0.01,
+       2
+      ]
+     ]
     ]
    ],
    "id": "vhs_crt",
@@ -473,6 +502,10 @@
      "bool",
      false
     ],
+    "color_bleed": [
+     "float",
+     0.0
+    ],
     "contrast": [
      "float",
      1.2
@@ -488,6 +521,10 @@
     "grille_opacity": [
      "float",
      0.3
+    ],
+    "head_switch": [
+     "float",
+     0.0
     ],
     "noise_opacity": [
      "float",
@@ -540,6 +577,10 @@
     "strength": [
      "float",
      1.0
+    ],
+    "tracking": [
+     "float",
+     0.0
     ],
     "vignette_intensity": [
      "float",
@@ -1581,6 +1622,166 @@
     ]
    },
    "prefix": "u_boil_"
+  },
+  {
+   "extra": false,
+   "glsl": [
+    {
+     "fragment": [
+      [
+       300,
+       "\n        vec2 mb_size = max(u_model_size, vec2(1.0));\n        vec2 mb_p = v_tex_coord * mb_size;\n        vec4 mb_orig = texture2D(tex0, v_tex_coord, u_lod_bias);\n\n        // ── 지금 깨지는 중인지: 시간을 \"한 번 길이\" 칸으로 나눠 주사위 ──\n        float mb_len = max(u_macroblock_length, 0.02);\n        float mb_slot = floor(u_time / mb_len);\n        float mb_on = (u_macroblock_always > 0.5) ? 1.0 : step(mb_hash(vec2(mb_slot, 5.3)), clamp(u_macroblock_rate * mb_len, 0.0, 1.0));\n        // 깨진 동안 1초에 8번 모양이 바뀜 (영상 프레임처럼 툭툭)\n        float mb_sub = floor(u_time * 8.0);\n\n        vec4 mb_out = mb_orig;\n        if (mb_on > 0.5 && u_macroblock_amount > 0.0) {\n            float mb_bs = max(u_macroblock_block, 4.0);\n            vec2 mb_cell = floor(mb_p / mb_bs);\n            vec2 mb_in = mb_p - mb_cell * mb_bs;   // 칸 안 자리 (픽셀)\n            // 깨지는 칸: 큰 덩어리(4칸 묶음)로 몰려서 깨짐\n            float mb_big = mb_hash(floor(mb_cell / 4.0) + vec2(mb_sub * 0.37, mb_slot));\n            float mb_k = mb_hash(mb_cell + vec2(mb_sub, mb_slot * 1.3));\n            float mb_hit = step(mb_k, u_macroblock_amount) * step(mb_big, u_macroblock_amount * 1.6 + 0.1);\n\n            if (mb_hit > 0.5) {\n                vec2 mb_q = mb_p;\n                // 밀림: 다른 칸의 그림을 가져오거나, 같은 줄의 옆 칸을 늘여 씀\n                float mb_m = mb_hash(mb_cell + 31.0 + mb_sub);\n                if (mb_m < u_macroblock_shift) {\n                    vec2 mb_jump = floor((vec2(mb_hash(mb_cell + 7.0 + mb_sub), mb_hash(mb_cell + 13.0 + mb_sub)) - 0.5) * 8.0);\n                    if (mb_m < u_macroblock_shift * 0.5) mb_jump.y = 0.0;\n                    mb_q += mb_jump * mb_bs;\n                }\n                vec4 mb_c = mb_tex(mb_q, mb_size);\n\n                // 한 색 뭉개짐: 칸 네 귀퉁이와 가운데의 평균\n                if (mb_hash(mb_cell + 47.0 + mb_sub) < u_macroblock_flat) {\n                    vec2 mb_o = mb_q - mb_in;\n                    vec4 mb_avg = mb_tex(mb_o + vec2(0.5, 0.5) * mb_bs, mb_size)\n                                + mb_tex(mb_o + vec2(0.15, 0.15) * mb_bs, mb_size)\n                                + mb_tex(mb_o + vec2(0.85, 0.15) * mb_bs, mb_size)\n                                + mb_tex(mb_o + vec2(0.15, 0.85) * mb_bs, mb_size)\n                                + mb_tex(mb_o + vec2(0.85, 0.85) * mb_bs, mb_size);\n                    mb_avg /= 5.0;\n                    // 칸 안에서 아주 완만한 기울기만 남김 (압축 블록 느낌)\n                    vec3 mb_grad = (mb_tex(mb_o + vec2(0.85, 0.5) * mb_bs, mb_size).rgb - mb_tex(mb_o + vec2(0.15, 0.5) * mb_bs, mb_size).rgb) * (mb_in.x / mb_bs - 0.5);\n                    mb_c = vec4(mb_avg.rgb + mb_grad * 0.6, mb_avg.a);\n                }\n\n                // 줄무늬: 칸 안에 가로나 세로 코사인 무늬\n                if (u_macroblock_stripes > 0.0 && mb_hash(mb_cell + 59.0 + mb_sub) < u_macroblock_stripes) {\n                    float mb_f = 1.0 + floor(mb_hash(mb_cell + 61.0) * 4.0);\n                    float mb_dir = step(0.5, mb_hash(mb_cell + 67.0 + mb_sub));\n                    float mb_t = mix(mb_in.x, mb_in.y, mb_dir) / mb_bs;\n                    float mb_w = cos(mb_t * 3.14159265 * mb_f);\n                    mb_c.rgb += mb_w * 0.18 * vec3(1.0, 0.9, 1.1);\n                }\n\n                // 색 틀어짐: 채널을 바꾸거나 초록·자주로 쏠림\n                float mb_cc = mb_hash(mb_cell + 71.0 + mb_sub);\n                if (mb_cc < u_macroblock_color) {\n                    if (mb_cc < u_macroblock_color * 0.33) mb_c.rgb = mb_c.gbr;\n                    else if (mb_cc < u_macroblock_color * 0.66) mb_c.rgb = mb_c.rgb * vec3(0.6, 1.25, 0.7);\n                    else mb_c.rgb = mb_c.rgb * vec3(1.2, 0.65, 1.2);\n                }\n\n                float mb_a = max(mb_c.a, mb_orig.a);\n                mb_out = vec4(clamp(mb_c.rgb, 0.0, 1.0) * mb_a, mb_a);\n            }\n        }\n\n        gl_FragColor = mix(mb_orig, mb_out, clamp(u_macroblock_strength, 0.0, 1.0));\n    "
+      ]
+     ],
+     "fragment_functions": "\n        float mb_hash(vec2 p) {\n            p = fract(p * vec2(443.897, 441.423));\n            p += dot(p, p.yx + 19.19);\n            return fract((p.x + p.y) * p.x);\n        }\n\n        // 투명도를 곱한 색 → 원래 색과 투명도\n        vec4 mb_tex(vec2 px, vec2 size) {\n            vec2 lo = 0.5 / size;\n            vec4 c = texture2D(tex0, clamp(px / size, lo, 1.0 - lo), u_lod_bias);\n            return vec4(c.rgb / max(c.a, 0.0001), c.a);\n        }\n    ",
+     "name": "macroblock.effect",
+     "variables": "\n        uniform sampler2D tex0;\n        uniform float u_lod_bias;\n        uniform float u_time;\n        uniform vec2 u_model_size;\n        attribute vec2 a_tex_coord;\n        varying vec2 v_tex_coord;\n\n        uniform float u_macroblock_strength;\n        uniform float u_macroblock_rate;\n        uniform float u_macroblock_length;\n        uniform float u_macroblock_always;\n        uniform float u_macroblock_block;\n        uniform float u_macroblock_amount;\n        uniform float u_macroblock_flat;\n        uniform float u_macroblock_stripes;\n        uniform float u_macroblock_shift;\n        uniform float u_macroblock_color;\n    ",
+     "vertex": [
+      [
+       200,
+       "\n            v_tex_coord = a_tex_coord;\n        "
+      ]
+     ],
+     "vertex_functions": ""
+    }
+   ],
+   "groups": [
+    [
+     "언제",
+     [
+      [
+       "strength",
+       "전체 세기",
+       0.0,
+       1.0,
+       0.01,
+       2
+      ],
+      [
+       "rate",
+       "1초에 몇 번",
+       0.0,
+       5.0,
+       0.05,
+       2
+      ],
+      [
+       "length",
+       "한 번 길이 (초)",
+       0.05,
+       2.0,
+       0.01,
+       2
+      ],
+      [
+       "always",
+       "늘 깨짐",
+       "bool"
+      ]
+     ]
+    ],
+    [
+     "모양",
+     [
+      [
+       "block",
+       "칸 크기 (픽셀)",
+       8.0,
+       128.0,
+       1.0,
+       0
+      ],
+      [
+       "amount",
+       "깨지는 칸의 양",
+       0.0,
+       1.0,
+       0.01,
+       2
+      ],
+      [
+       "flat",
+       "한 색 뭉개짐",
+       0.0,
+       1.0,
+       0.01,
+       2
+      ],
+      [
+       "stripes",
+       "줄무늬",
+       0.0,
+       1.0,
+       0.01,
+       2
+      ],
+      [
+       "shift",
+       "밀림",
+       0.0,
+       1.0,
+       0.01,
+       2
+      ],
+      [
+       "color",
+       "색 틀어짐",
+       0.0,
+       1.0,
+       0.01,
+       2
+      ]
+     ]
+    ]
+   ],
+   "id": "macroblock",
+   "label": "블록 깨짐",
+   "name": "블록 깨짐",
+   "order": 52,
+   "overlay_only": false,
+   "params": {
+    "always": [
+     "bool",
+     false
+    ],
+    "amount": [
+     "float",
+     0.35
+    ],
+    "block": [
+     "float",
+     32.0
+    ],
+    "color": [
+     "float",
+     0.25
+    ],
+    "flat": [
+     "float",
+     0.6
+    ],
+    "length": [
+     "float",
+     0.4
+    ],
+    "rate": [
+     "float",
+     0.6
+    ],
+    "shift": [
+     "float",
+     0.5
+    ],
+    "strength": [
+     "float",
+     1.0
+    ],
+    "stripes": [
+     "float",
+     0.4
+    ]
+   },
+   "prefix": "u_macroblock_"
   },
   {
    "extra": false,

@@ -94,6 +94,11 @@ export function Toolbar() {
           ▶ 렌파이에서 실행
         </button>
       )}
+      {isDesktop && desktop?.snapToGame && (
+        <button onClick={() => void snapGame()} title="이 창을 게임 창 옆 빈 곳으로 옮겨요 (게임이 켜져 있을 때). [설정]에서 연결될 때마다 저절로 하게 할 수 있어요">
+          ⇔ 게임 옆
+        </button>
+      )}
       <FollowLine />
       </div>
       {/* 메뉴: 둘째 줄 왼쪽부터. 자주 쓰는 되돌리기, 집중, 설정이 맨 앞 */}
@@ -195,4 +200,13 @@ function Versions({ onClose }: { onClose: () => void }) {
       </div>
     </div>
   );
+}
+
+// 앱 창을 게임 창 옆으로 (앱 main.cjs snapToGame)
+async function snapGame() {
+  const r = await desktop?.snapToGame?.();
+  const say = useStore.getState().say;
+  if (r === 'no-game') say('켜진 게임을 찾지 못했어요. [▶ 렌파이에서 실행]으로 켜거나 게임과 연결된 뒤에 눌러 주세요');
+  else if (r === 'no-window') say('게임 창을 찾지 못했어요 (내려 둔 창이면 다시 띄워 주세요)');
+  else if (r === 'over') say('게임 창 옆이 좁아서 화면 끝에 겹쳐 두었어요');
 }

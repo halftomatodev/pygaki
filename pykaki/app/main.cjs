@@ -3,7 +3,7 @@
 //   pygaki.exe                               프로젝트 폴더를 고르는 창이 뜬다
 // 화면은 웹 버전과 같은 web/index.html이고, 파일은 이 프로세스가 대신 읽고 쓴다(preload.cjs의 window.pygaki).
 // 읽고 쓸 수 있는 곳은 연 프로젝트 폴더 안으로만 막는다.
-const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, screen } = require('electron');
 const fs = require('node:fs');
 const path = require('node:path');
 const net = require('node:net');
@@ -337,6 +337,60 @@ ipcMain.handle('pygaki:runGame', (e, always) => {
   } catch {
     return 'failed';
   }
+});
+
+// ── 게임 창 옆에 붙이기 ──
+// 게임 프로세스(실시간 연결 파일의 pid, 없으면 이 창이 켠 렌파이)의 창 자리를 PowerShell로 읽고(GetWindowRect, 실제 픽셀),
+// 앱 창을 그 오른쪽(자리가 없으면 왼쪽) 빈 곳으로 옮긴다. 게임 창은 건드리지 않는다. 윈도우에서만
+const RECT_PS = `$ErrorActionPreference='Stop'
+Add-Type -Namespace P -Name W -MemberDefinition '[DllImport("user32.dll")] public static extern bool SetProcessDPIAware(); [DllImport("user32.dll")] public static extern bool GetWindowRect(System.IntPtr h, out RECT r); [DllImport("user32.dll")] public static extern bool IsIconic(System.IntPtr h); public struct RECT { public int L; public int T; public int R; public int B; }'
+[P.W]::SetProcessDPIAware() | Out-Null
+$h = (Get-Process -Id $env:PYGAKI_PID).MainWindowHandle
+if ($h -eq 0 -or [P.W]::IsIconic($h)) { 'none'; exit }
+$r = New-Object P.W+RECT
+[P.W]::GetWindowRect($h, [ref]$r) | Out-Null
+"$($r.L) $($r.T) $($r.R) $($r.B)"`;
+function gameRect(pid) {
+  return new Promise((resolve) => {
+    if (process.platform !== 'win32' || !pid) return resolve(null);
+    const ps = spawn('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', RECT_PS], { env: { ...process.env, PYGAKI_PID: String(pid) }, windowsHide: true });
+    let out = '';
+    ps.stdout.on('data', (d) => (out += d));
+    ps.on('error', () => resolve(null));
+    ps.on('close', () => {
+      const n = out.trim().split(/\s+/).map(Number);
+      if (n.length !== 4 || n.some((x) => !Number.isFinite(x))) return resolve(null);
+      // 실제 픽셀 → Electron 화면 단위
+      const r = screen.screenToDipRect(null, { x: n[0], y: n[1], width: n[2] - n[0], height: n[3] - n[1] });
+      resolve(r.width > 50 && r.height > 50 ? r : null);
+    });
+  });
+}
+// 돌려주는 값: 'right' | 'left' | 'over'(빈 곳이 좁아 화면 오른쪽 끝에 겹쳐 둠) | 'no-game' | 'no-window'
+async function snapToGame(entry) {
+  const pid = entry.live?.info?.pid ?? entry.game?.pid;
+  if (!pid || !pidAlive(pid)) return 'no-game';
+  const g = await gameRect(pid);
+  if (!g || entry.win.isDestroyed()) return 'no-window';
+  const wa = screen.getDisplayMatching(g).workArea;
+  const MIN = 560;
+  const right = wa.x + wa.width - (g.x + g.width);
+  const left = g.x - wa.x;
+  const h = Math.min(wa.height, Math.max(g.height, 600));
+  const y = Math.max(wa.y, Math.min(g.y, wa.y + wa.height - h));
+  if (entry.win.isMaximized()) entry.win.unmaximize();
+  if (right >= MIN || right >= left) {
+    const w = Math.max(Math.min(right, 1400), Math.min(MIN, wa.width));
+    entry.win.setBounds({ x: wa.x + wa.width - w, y, width: w, height: h });
+    return right >= MIN ? 'right' : 'over';
+  }
+  const w = Math.min(left, 1400);
+  entry.win.setBounds({ x: g.x - w, y, width: Math.max(w, MIN), height: h });
+  return left >= MIN ? 'left' : 'over';
+}
+ipcMain.handle('pygaki:snapToGame', (e) => {
+  const entry = windows.get(e.sender.id);
+  return entry ? snapToGame(entry) : 'no-game';
 });
 
 // ── 파일 고르기 (그림·영상·소리 카드의 [📂 파일 고르기]) ──

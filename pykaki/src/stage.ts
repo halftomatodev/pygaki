@@ -58,6 +58,8 @@ export const FX_BASE: [string, string][] = [
   // showpy screen_fx 5.5, 5.7
   ['ripple', '일렁임'], ['waves', '물결'], ['wobble', '일렁거림'], ['filmgrain', '옛날 필름'], ['fisheye', '어안렌즈'],
   ['photocopy', '복사기'], ['relief', '양각'], ['gradmap', '그라데이션 맵'], ['rings', '동심원 어긋남'], ['camcorder', '옛 캠코더'],
+  // showpy screen_fx 5.8
+  ['macroblock', '블록 깨짐'],
   ['none', '효과 없음'], ['default', '기본으로'],
 ];
 

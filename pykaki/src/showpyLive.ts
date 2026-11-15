@@ -2,6 +2,7 @@
 // 형식은 저장소 맨 위 docs/LINK.md 9장. 연결은 app/main.cjs가 맺고 여기는 받기만 한다.
 import { create } from 'zustand';
 import { desktop } from './desktop';
+import { usePrefs } from './prefs';
 
 export interface TitleLook {
   rotate: number;
@@ -82,14 +83,17 @@ export interface CursorLines {
   changes: { line: number; target: [string, number]; label: string; kind: 'code' | 'say'; pending: boolean }[];
 }
 // 게임 안 편집기 패널을 통째로 (ui_kit 3.16). k: h 가로 / v 세로 / g 격자 / t 글 / b 버튼 / bar 막대 / in 입력칸 / img 그림 / col 색 견본
-export type MirrorNode =
+// / sp 가로 줄의 빈 칸(w 게임 픽셀, ui_kit 4.11). 어느 것이든 i가 있으면 그만큼 들여씀 (게임 픽셀, ui_kit 4.11)
+export type MirrorNode = (
   | { k: 'h' | 'v' | 'g'; c: MirrorNode[] }
+  | { k: 'sp'; w: number }
   | { k: 't'; t: string; c?: string }
   | { k: 'b'; id: string; t: string; on: boolean; ok: boolean; c?: MirrorNode[] }
   | { k: 'bar'; id: string; r: number; v: number; s: number }
   | { k: 'in'; id: string; t: string; w?: number } // w: 넓은 글 칸 (여러 줄, ui_kit 3.23)
   | { k: 'img'; p: string }
-  | { k: 'col'; v: string | null };
+  | { k: 'col'; v: string | null }
+) & { i?: number };
 export interface PanelState {
   tab: string | null;
   body: MirrorNode | null;
@@ -196,12 +200,15 @@ export function startLive() {
   });
   const status = (s: { on: boolean; reloading?: boolean; showpy: string | null }) => {
     const was = useLive.getState().on;
+    const reloadingBefore = useLive.getState().reloading;
     // 다시 읽는 동안은 파일 목록을 그대로 둠 (다시 붙으면 새로 옴)
     if (s.on) useLive.setState({ on: true, reloading: false, showpy: s.showpy });
     else if (s.reloading) useLive.setState({ on: false, reloading: true, showpy: s.showpy, st: null });
     else useLive.setState({ on: false, reloading: false, showpy: s.showpy, st: null, files: null });
     // 새로 붙으면 기억해 둔 보이기/숨기기를 게임에 알려 줌 (게임은 붙을 때마다 숨김으로 시작)
     if (s.on && !was) liveSend({ cmd: 'panel', hide: !useLive.getState().gamePanel });
+    // 새로 붙으면(다시 읽은 뒤는 빼고) 설정에 따라 앱 창을 게임 창 옆으로. 게임 창이 뜰 때까지 조금 기다림
+    if (s.on && !was && !reloadingBefore && usePrefs.getState().snapGame) setTimeout(() => void desktop?.snapToGame?.(), 1500);
   };
   const take = (m: any) => {
     if (m?.type === 'state') useLive.setState({ st: m as GameState, err: null });

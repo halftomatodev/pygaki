@@ -93,6 +93,7 @@ interface Prefs {
   grads: Record<GradId, Grad>; // 어둡게 테마의 두 색
   textColor: string | null; // 텍스트 색. null이면 테마가 정한 색
   runSkip: boolean; // [렌파이에서 실행]: 게임이 이미 켜져 있으면 무시 (앱)
+  snapGame?: boolean; // 게임이 연결되면 앱 창을 게임 창 옆으로 (앱)
   leftW: number; // 왼쪽 칸 너비 (px)
   rightW: number; // 오른쪽 칸 너비 (px)
   guiLeftW: number; // [GUI 편집] 왼쪽 칸 너비 (px)

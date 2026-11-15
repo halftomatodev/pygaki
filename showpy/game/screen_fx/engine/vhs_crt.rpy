@@ -52,6 +52,10 @@ init -100 python in vhs_crt:
         "clip_warp":              ("bool",  False),
         "vignette_intensity":     ("float", 0.4),
         "vignette_opacity":       ("float", 0.5),
+        ## 5.8 보강 (0이면 예전 모양 그대로)
+        "head_switch":            ("float", 0.0),
+        "tracking":               ("float", 0.0),
+        "color_bleed":            ("float", 0.0),
     }
 
     ## 편집기 막대 (묶음 이름, [(이름, 표시, 최소, 최대, 간격, 소수 자리) 또는 (이름, 표시, 종류)])
@@ -90,6 +94,11 @@ init -100 python in vhs_crt:
             ("vignette_intensity", "어둡게 하는 범위", 0.0, 2.0, 0.05, 2),
             ("vignette_opacity", "가장자리 어둡기", 0.0, 1.0, 0.01, 2),
             ("clip_warp", "바깥 테두리 투명", "bool"),
+            )),
+        ("낡은 테이프 (5.8)", (
+            ("head_switch", "아래쪽 찢긴 띠", 0.0, 1.0, 0.01, 2),
+            ("tracking", "트래킹 어긋남", 0.0, 1.0, 0.01, 2),
+            ("color_bleed", "가로 색 번짐", 0.0, 1.0, 0.01, 2),
             )),
         )
 
@@ -135,6 +144,9 @@ init -100 python in vhs_crt:
         uniform float u_vhs_crt_clip_warp;
         uniform float u_vhs_crt_vignette_intensity;
         uniform float u_vhs_crt_vignette_opacity;
+        uniform float u_vhs_crt_head_switch;
+        uniform float u_vhs_crt_tracking;
+        uniform float u_vhs_crt_color_bleed;
     """
 
     _functions = """
@@ -209,6 +221,26 @@ init -100 python in vhs_crt:
         // 텍스처는 투명도가 곱해진 색이라, 투명도로 나눠 원래 색으로 되돌린 뒤 계산합니다.
         // (불투명한 화면에서는 그대로, 반투명한 대사창 등에 씌울 때 두 번 어두워지지 않게)
         vec2 vc_ruv = (u_vhs_crt_roll > 0.5) ? vc_roll_uv : vec2(0.0);
+
+        // ── 5.8 낡은 테이프: 아래쪽 헤드 전환 띠, 트래킹 어긋남 ──
+        float vc_hs = 0.0;
+        if (u_vhs_crt_head_switch > 0.0) {
+            // 화면 맨 아래 몇 %가 옆으로 크게 밀리고 지글거림
+            float vc_hh = 0.025 + 0.035 * u_vhs_crt_head_switch;
+            vc_hs = smoothstep(1.0 - vc_hh, 1.0, vc_uv0.y);
+            float vc_hj = vhs_crt_random(vec2(floor(vc_uv0.y * vc_res.y), floor(u_time * 30.0))).x;
+            vc_ruv.x += vc_hs * (0.03 + 0.02 * vc_hj) * u_vhs_crt_head_switch;
+        }
+        float vc_tb = 0.0;
+        if (u_vhs_crt_tracking > 0.0) {
+            // 두꺼운 띠 하나가 천천히 위로 흐르며 그 안이 옆으로 흔들림
+            float vc_ty = fract(u_time * 0.07);
+            float vc_td = abs(fract(1.0 - vc_uv0.y) - vc_ty);
+            vc_td = min(vc_td, 1.0 - vc_td);
+            vc_tb = smoothstep(0.06 * u_vhs_crt_tracking + 0.01, 0.0, vc_td);
+            float vc_tj = vhs_crt_noise(vec2(vc_uv0.y * 80.0, u_time * 12.0)) - 0.5;
+            vc_ruv.x += vc_tb * vc_tj * 0.06 * u_vhs_crt_tracking;
+        }
         vec4 vc_sr = texture2D(tex0, vc_tuv + vc_ruv * 0.8 + vc_ab, u_lod_bias);
         vec4 vc_sg = texture2D(tex0, vc_tuv + vc_ruv * 1.2 - vc_ab, u_lod_bias);
         vec4 vc_s = texture2D(tex0, vc_tuv + vc_ruv, u_lod_bias);
@@ -216,6 +248,24 @@ init -100 python in vhs_crt:
         vc_g = vc_sg.g / max(vc_sg.a, 0.0001);
         vc_b = vc_s.b / max(vc_s.a, 0.0001);
         vc_a = vc_s.a;
+
+        // 5.8 가로 색 번짐: 색(크로마)만 옆으로 퍼짐, 밝기는 그대로
+        if (u_vhs_crt_color_bleed > 0.0) {
+            vec3 vc_acc = vec3(0.0);
+            float vc_bw = 0.006 * u_vhs_crt_color_bleed;
+            for (int vc_i = 1; vc_i <= 4; vc_i++) {
+                vec4 vc_t = texture2D(tex0, vc_tuv + vc_ruv - vec2(vc_bw * float(vc_i), 0.0), u_lod_bias);
+                vc_acc += vc_t.rgb / max(vc_t.a, 0.0001);
+            }
+            vec3 vc_c0 = vec3(vc_r, vc_g, vc_b);
+            vec3 vc_cb = (vc_c0 + vc_acc) / 5.0;
+            float vc_l0 = dot(vc_c0, vec3(0.299, 0.587, 0.114));
+            float vc_lb = dot(vc_cb, vec3(0.299, 0.587, 0.114));
+            vec3 vc_mix = vc_cb - vec3(vc_lb) + vec3(vc_l0);
+            vc_r = vc_mix.r;
+            vc_g = vc_mix.g;
+            vc_b = vc_mix.b;
+        }
 
         if (u_vhs_crt_grille_opacity > 0.0) {
             float vc_gr = smoothstep(0.85, 0.95, abs(sin(vc_uv.x * (vc_res.x * 3.14159265))));
@@ -238,6 +288,12 @@ init -100 python in vhs_crt:
             float vc_n = smoothstep(0.4, 0.5, vhs_crt_noise(vc_uv * vec2(2.0, 200.0) + vec2(10.0, u_time * u_vhs_crt_noise_speed)));
             vc_roll_line *= vc_n * vc_scan * clamp(vhs_crt_random((ceil(vc_uv * vc_res) / vc_res) + vec2(u_time * 0.8, 0.0)).x + 0.8, 0.0, 1.0);
             vc_col = clamp(mix(vc_col, vc_col + vc_roll_line, u_vhs_crt_noise_opacity), vec3(0.0), vec3(1.0));
+        }
+
+        // 5.8 찢긴 띠·트래킹 띠 안의 하얀 지지직
+        if (vc_hs + vc_tb > 0.0) {
+            float vc_sn = vhs_crt_random(vec2(floor(vc_uv0.x * vc_res.x * 0.5), floor(vc_uv0.y * vc_res.y)) + fract(u_time * 7.0)).x;
+            vc_col = mix(vc_col, vec3(0.9), step(0.75, vc_sn) * clamp(vc_hs * u_vhs_crt_head_switch + vc_tb * u_vhs_crt_tracking, 0.0, 1.0) * 0.7);
         }
 
         if (u_vhs_crt_static_noise_intensity > 0.0) {

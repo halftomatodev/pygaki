@@ -483,7 +483,12 @@ init -8 python in ui_editor:
             return dict(k="img", p=str(d.filename))
 
         if isinstance(d, disp.layout.Null):
-            return None
+            ## 가로 줄의 빈 칸(세모 없는 줄의 왼쪽 자리 등)은 너비만 보냄 (4.11)
+            try:
+                w = int(d.width or 0)
+            except Exception:
+                w = 0
+            return dict(k="sp", w=w) if w >= 4 else None
 
         if isinstance(d, disp.layout.MultiBox):
             kind = "h" if d.default_layout == "horizontal" else "v"
@@ -493,9 +498,13 @@ init -8 python in ui_editor:
             kind = "g"
             kids = d.children
         elif isinstance(d, disp.layout.Window):
-            ## frame, window: 바탕 그림은 빼고 안쪽만
+            ## frame, window: 바탕 그림은 빼고 안쪽만. 왼쪽 여백(세부 속성 들여쓰기)은 i로 (4.11)
             kind = "v"
             kids = [ d.child ]
+            try:
+                indent = int((d.style.left_padding or 0) + (d.style.xoffset or 0))
+            except Exception:
+                indent = 0
         else:
             kind = "v"
             kids = _kids(d)
@@ -505,8 +514,16 @@ init -8 python in ui_editor:
             n = _mirror(k, path + "." + str(i), reg, depth + 1)
             if n is not None:
                 out.append(n)
-        if not out:
+        ## 빈 칸만 남은 묶음은 그리지 않음. 세로 묶음의 빈 칸은 뜻이 없어서 뺌
+        if kind == "v":
+            out = [ n for n in out if n["k"] != "sp" ]
+        if not out or all(n["k"] == "sp" for n in out):
             return None
+        if isinstance(d, disp.layout.Window) and indent >= 4:
+            node = out[0] if len(out) == 1 else dict(k=kind, c=out)
+            node = dict(node)
+            node["i"] = indent
+            return node
         ## 색 띠(색상 막대 뒤의 무지개 같은 것)는 빼기
         if len(out) > 4 and all(n["k"] == "col" for n in out):
             return None

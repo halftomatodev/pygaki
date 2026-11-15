@@ -198,12 +198,17 @@ function LookPrefs() {
 // [렌파이에서 실행] 단추 (앱)
 function RunPrefs() {
   const skip = usePrefs((p) => p.runSkip);
+  const snap = usePrefs((p) => p.snapGame);
   return (
     <>
       <h4>렌파이에서 실행<Hint text="켜 두면 게임이 켜져 있을 때 대본만 내보내고 게임은 그대로 둬요" topic="데스크톱 앱" /></h4>
       <label className="row">
         <input type="checkbox" checked={skip} onChange={(e) => usePrefs.setState({ runSkip: e.target.checked })} />
         게임이 이미 켜져 있으면 무시 (다시 켜지 않음)
+      </label>
+      <label className="row">
+        <input type="checkbox" checked={!!snap} onChange={(e) => usePrefs.setState({ snapGame: e.target.checked })} />
+        게임과 연결되면 이 창을 게임 창 옆으로 옮기기
       </label>
     </>
   );

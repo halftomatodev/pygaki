@@ -34,6 +34,7 @@
 | 그라데이션 맵 (`gradmap`) | 밝기만 보고 어두운 곳·중간·밝은 곳을 고른 색으로 다시 칠함. `levels`를 올리면 포스터처럼 (5.7) | `gradmap_config.rpy` |
 | 동심원 어긋남 (`rings`) | 화면을 동그란 고리로 잘라 고리마다 조금씩 돌리고 밀어 어긋나게. `halves = True`면 고리를 반으로 (5.7) | `rings_config.rpy` |
 | 옛 캠코더 (`camcorder`) | 옛날 캠코더로 찍어 낮은 화질로 옮긴 영상처럼 화면 톤만: 가로로 뭉개짐, 어두운 물체 둘레 하얀 테두리, 색 번짐, 따뜻한 색감, 들뜬 검정, 비네팅. 프리셋 `light`, `tape`, `cold` (5.7) | `camcorder_config.rpy` |
+| 블록 깨짐 (`macroblock`) | 디지털 영상이 깨질 때처럼 네모 칸이 한 색으로 뭉개지고, 줄무늬가 생기고, 엉뚱한 자리의 그림이 들어가고 색이 틀어짐. 평소에는 가끔, `always`면 계속. 프리셋 `subtle`, `broken`, `smear` (5.8) | `macroblock_config.rpy` |
 | 타이틀 일렁임 (`watermorph`) | 타이틀 화면을 투명한 액체 너머로 보는 것처럼. 바꾸기 기능과 상관없이 타이틀에서만 따로 켜짐 | `watermorph_config.rpy` |
 
 효과마다 **글자 빼기**로 대사, 이름 / 선택지 / 메뉴, 화면 중 효과를 씌우지 않을 글자를 골라서 뺄 수 있습니다. (기본은 글자까지 전부 씌움. ASCII만 글자를 전부 빼는 게 기본)
@@ -279,6 +280,7 @@ game/screen_fx/
 ├── waves_config.rpy, wobble_config.rpy, filmgrain_config.rpy, fisheye_config.rpy,
 │   photocopy_config.rpy, relief_config.rpy, gradmap_config.rpy, rings_config.rpy,
 │   camcorder_config.rpy     설정: 5.7에 더한 셰이더 아홉                   ← 여기를 고침
+│   macroblock_config.rpy    설정: 블록 깨짐 (5.8)                          ← 여기를 고침
 ├── shaders_off.txt          고르는 목록에서 감출 셰이더 이름 (앱의 [숨김], 처음에는 없음)
 ├── *_layout.rpy             편집기에서 저장하면 생기는 파일 (처음에는 없음)
 ├── engine/                  엔진 (고치지 않음. 새 효과를 넣을 때만 여기에 파일 추가)
@@ -295,6 +297,7 @@ game/screen_fx/
 │   ├── ripple.rpy               일렁임 셰이더 (5.5)
 │   └── waves.rpy, wobble.rpy, filmgrain.rpy, fisheye.rpy, photocopy.rpy,
 │       relief.rpy, gradmap.rpy, rings.rpy, camcorder.rpy   5.7에 더한 셰이더
+│       macroblock.rpy                                     5.8에 더한 셰이더 (블록 깨짐)
 ├── editor/
 │   └── editor_fx.rpy            UI Kit 편집기 탭 (UI Kit이 없으면 아무것도 안 함)
 ├── fonts/
