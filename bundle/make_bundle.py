@@ -185,6 +185,28 @@ def add_common_translation(sdk, tdir):
             sys.exit("공통 문구 한국어 번역을 만들지 못했어요: " + fn)
 
 
+# 템플릿의 script.rpy. generate_gui는 환경에 따라 렌파이 영어 기본 대본(scene bg room 등, 그림이 없어 Lint 경고)을
+# 쓰기도 해서(GitHub Actions) 늘 이 한국어 대본으로 덮는다
+KO_SCRIPT = '''# 이 파일에 게임 스크립트를 입력합니다.
+
+# image 문을 사용해 이미지를 정의합니다.
+# image eileen happy = "eileen_happy.png"
+
+# 게임에서 사용할 캐릭터를 정의합니다.
+define e = Character('아이린', color="#c8ffc8")
+
+
+# 여기에서부터 게임이 시작합니다.
+label start:
+
+    e "새로운 렌파이 게임을 만들었군요."
+
+    e "이야기와 그림, 음악을 더하면 여러분의 게임을 세상에 배포할 수 있어요!"
+
+    return
+'''
+
+
 def make_base_project(sdk, tdir):
     """런처의 [새 프로젝트 만들기]와 같은 방법으로 그림까지 다 만든 기본 프로젝트를 만든다.
 
@@ -199,6 +221,8 @@ def make_base_project(sdk, tdir):
     run([tdir, "gui_images"], {"RENPY_VARIANT": "small phone"})
     run([tdir, "gui_images"])
     add_common_translation(sdk, tdir)
+    with open(os.path.join(tdir, "game", "script.rpy"), "w", encoding="utf-8-sig") as f:
+        f.write(KO_SCRIPT)
     for fn in ("log.txt", "errors.txt", "traceback.txt"):
         if os.path.exists(os.path.join(tdir, fn)):
             os.remove(os.path.join(tdir, fn))

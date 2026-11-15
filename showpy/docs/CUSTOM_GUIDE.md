@@ -958,6 +958,7 @@ define hotkeys.keyboard_help = [
 | `"gradmap"` | 그라데이션 맵 (5.7): 밝기에 따라 고른 색으로 다시 칠함, 포스터처럼도 | `gradmap_config.rpy` |
 | `"rings"` | 동심원 어긋남 (5.7): 동그란 고리마다 돌리고 밀어 어긋나게 | `rings_config.rpy` |
 | `"camcorder"` | 옛 캠코더 (5.7): 낮은 화질로 옮긴 옛날 캠코더 영상의 화면 톤. 프리셋 `light`, `tape`, `cold` | `camcorder_config.rpy` |
+| `"macroblock"` | 블록 깨짐 (5.8): 디지털 영상이 깨질 때처럼 네모 칸이 한 색으로 뭉개지고, 줄무늬·밀림·색 틀어짐. 평소에는 가끔, `always`면 계속. 프리셋 `subtle`, `broken`, `smear` | `macroblock_config.rpy` |
 | `"default"` | 기본 효과로 돌아가기 (= 선택취소) | `screen_fx_config.rpy`의 `screen_fx.base` |
 | (덮개) | VHS. 켬 / 끔만 고르고 모양은 `vhs_crt.settings` | `vhs_crt_config.rpy` |
 

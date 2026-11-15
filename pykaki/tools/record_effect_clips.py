@@ -55,9 +55,11 @@ label before_main_menu:
 
 
 def effects_from_pykaki():
-    """셰이더 파일(PyKaki 렌파이 내장 효과, showpy text_effects.glsl)의 효과 목록과, 글자/초 기본값을 쓰는 효과(@cps)."""
+    """셰이더 파일(PyKaki 렌파이 내장 효과, showpy text_effects.glsl, 효과 폴더 ui_kit/effects)의 효과 목록과, 글자/초 기본값을 쓰는 효과(@cps)."""
     names, typed = [], set()
-    for path in (os.path.join(PYKAKI, "src", "fx", "renpy_textshaders.glsl"), os.path.join(SHOWPY, "game", "ui_kit", "engine", "text_effects.glsl")):
+    fxdir = os.path.join(SHOWPY, "game", "ui_kit", "effects")  # 효과 폴더의 파일 하나에 효과 하나 (ui_kit 4.3)
+    extra = [os.path.join(fxdir, f) for f in sorted(os.listdir(fxdir)) if f.endswith(".glsl")] if os.path.isdir(fxdir) else []
+    for path in [os.path.join(PYKAKI, "src", "fx", "renpy_textshaders.glsl"), os.path.join(SHOWPY, "game", "ui_kit", "engine", "text_effects.glsl")] + extra:
         cur = None
         for line in open(path, encoding="utf-8"):
             m = re.match(r"@effect (\w+)", line)

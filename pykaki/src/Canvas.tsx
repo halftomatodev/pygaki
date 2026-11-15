@@ -6,6 +6,7 @@ import {
   type Connection, type Edge, type Viewport, type EdgeChange, type Node, type NodeChange, type OnConnectEnd,
 } from '@xyflow/react';
 import { useStore } from './store';
+import { useLive } from './showpyLive';
 import { BoxView, GroupFrame } from './BoxView';
 import * as ops from './ops';
 import { addBoxAt, editBox } from './actions';
@@ -36,6 +37,7 @@ const FRAME_PAD = 22;
 const FRAME_HEAD = 24;
 
 export function Canvas() {
+  const scriptView = useLive((l) => l.view === 'script');
   const project = useStore((s) => s.project);
   const selectedIds = useStore((s) => s.selectedIds);
   const focusReq = useStore((s) => s.focusReq);
@@ -247,7 +249,8 @@ export function Canvas() {
         minZoom={0.1}
         maxZoom={2}
       >
-        <Background gap={24} color="var(--line)" />
+        {/* 다른 탭을 보는 동안(캔버스가 숨어 크기 0) 점 무늬가 NaN을 내서 그리지 않는다 */}
+        {scriptView && <Background gap={24} color="var(--line)" />}
         <Controls showInteractive={false} onFitView={() => fitVisible(rf, { padding: 0.2, maxZoom: 1, duration: 300 })} />
         <MiniMap
           pannable
