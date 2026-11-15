@@ -90,6 +90,6 @@ jobs:
 
           pygaki 앱은 서명이 없어서 처음 켤 때 윈도우가 "PC 보호" 창을 띄울 수 있습니다. [추가 정보] → [실행]을 누릅니다.
 
-          안내서 웹판: https://halftomatodev.github.io/pygaki/
+          안내서 웹판: https://halftomatodev.github.io/pygaki/ (日本語: https://halftomatodev.github.io/pygaki/pygaki_guide_ja.html · English: https://halftomatodev.github.io/pygaki/pygaki_guide_en.html)
           EOF
           gh release create "$TAG" out/*.zip --draft --title "pygaki $TAG" --notes-file notes.md

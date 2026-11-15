@@ -16,7 +16,7 @@ pygaki를 내 게임에 맞게 고치거나, 기능을 더하거나, 고친 것�
 | `docs/LINK.md` | 두 프로그램이 서로 맞추는 형식(대본 파일, 원고의 표시, 실시간 연결, 효과 파일) |
 | `bundle/` | 렌파이 SDK + 플러그인 + 앱을 윈도우용 묶음으로 만드는 스크립트, 런처 버튼, 이 안내서(`guide/`) |
 
-이 안내서도 저장소 문서에서 만들어집니다. "pygaki로 대본 쓰기"는 `pykaki/docs/GUIDE.md`, "플러그인 커스텀 가이드"는 `showpy/docs/CUSTOM_GUIDE.md`를 그대로 읽고, 나머지 장은 `bundle/guide/parts/`의 글, "효과 견본"은 효과 파일과 견본 영상에서 만듭니다. 고친 뒤 `python bundle/guide/build_guide.py`를 돌리면 `bundle/guide/pygaki_안내서.html`이 다시 생기고, 묶음을 만들 때도 저절로 다시 만들어 넣습니다.
+이 안내서도 저장소 문서에서 만들어집니다. "pygaki로 대본 쓰기"는 `pykaki/docs/GUIDE.md`, "플러그인 커스텀 가이드"는 `showpy/docs/CUSTOM_GUIDE.md`를 그대로 읽고, 나머지 장은 `bundle/guide/parts/`의 글, "효과 견본"은 효과 파일과 견본 영상에서 만듭니다. 일본어판·영어판은 `bundle/guide/ja/`, `bundle/guide/en/`의 번역을 읽습니다(원본 문서가 번역보다 새로우면 만들 때 알려 줌). 고친 뒤 `python bundle/guide/build_guide.py`를 돌리면 `bundle/guide/`에 세 언어의 HTML이 다시 생기고, 묶음을 만들 때도 저절로 다시 만들어 넣습니다.
 
 ## 준비
 
@@ -80,6 +80,7 @@ cd pykaki/app && npm run dist  # 윈도우 앱 폴더 (pykaki/app/out/win-unpack
 * 새 글자 효과를 넣으면 견본 영상(`pykaki/public/effects/*.webm`)을 `pykaki/tools/record_effect_clips.py`로 다시 찍고, 안내서도 다시 만듭니다.
 * 앱 쪽(`pykaki/app/`)을 고쳤으면 `npm run web && node smoke.cjs`로 진짜 Electron을 켜 보는 시험을 돌립니다. GitHub Actions "pygaki 앱"도 같은 시험을 돌리고 윈도우 앱 폴더를 만듭니다.
 * 도움말 글은 `pykaki/docs/GUIDE.md`를 고치면 다음 빌드에 들어갑니다.
+* 화면 글을 더하거나 바꾸면 `pykaki/i18n/strings.tsv`에 일본어·영어를 더하고 `pykaki/i18n/README.md`대로 사전을 다시 만듭니다.
 * 대본 파일(`.flow.json`)에 예전 판이 모르는 값을 더하면 `pykaki/src/version.ts`의 `FEATURE`를 1 올립니다(예전 앱이 "더 새 판" 경고를 띄움). 저장 형식 이름 `"format": "renpy-flow"`, 파일 이름 `.flow.json`은 바꾸지 않습니다.
 * 앱은 사용자 허락 없이 밖으로 통신하지 않습니다. 게임과의 실시간 연결은 `127.0.0.1`만 씁니다.
 

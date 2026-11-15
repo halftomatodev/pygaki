@@ -1,13 +1,17 @@
-"""pygaki 안내서(HTML 한 파일) 만들기.
+"""pygaki 안내서(HTML 한 파일) 만들기. 한국어, 일본어, 영어 세 벌.
 
-    python bundle/guide/build_guide.py            # bundle/guide/pygaki_안내서.html
-    python bundle/guide/build_guide.py --out 경로
+    python bundle/guide/build_guide.py                 # bundle/guide/에 세 언어 (FILES 이름)
+    python bundle/guide/build_guide.py --out-dir 폴더
+    python bundle/guide/build_guide.py --web 폴더       # 웹판: 한국어는 index.html
+    python bundle/guide/build_guide.py --stamp         # 번역 파일 첫 줄의 원본 지문을 지금 것으로 (번역을 원본에 맞춘 뒤)
 
 저장소 문서를 읽어서 그대로 붙인다(사본을 따로 두지 않아 문서를 고치면 다시 돌리기만 하면 됨).
     시작하기, 한눈에, 직접 고치기, 주의와 라이선스   bundle/guide/parts/*.md
     pygaki로 대본 쓰기                              pykaki/docs/GUIDE.md (앱의 [도움말])
     플러그인 커스텀 가이드                           showpy/docs/CUSTOM_GUIDE.md
     효과 견본                                       효과 파일(@effect, @transition)과 화면 셰이더 목록, 견본 영상 pykaki/public/effects/*.webm
+일본어·영어는 bundle/guide/ja/, en/의 <장 id>.md를 읽는다(첫 줄 <!-- 원본: 경로 @ 지문 -->, 지문은 원본 글의 sha1 앞 10자리). 원본이 바뀌어 지문이 다르면 만들 때 알린다.
+효과 이름·셰이더 이름의 번역은 대본 편집기 언어 사전(pykaki/src/i18n/dict.json)을 쓴다.
 견본 영상은 파일 안에 넣는다(data: 주소). 밖으로 나가는 요청이 없는 한 파일이라 묶음 어디에 두어도 열린다.
 make_bundle.py가 묶을 때 이 스크립트를 불러 pygaki/pygaki_안내서.html로 넣는다. 파이썬 3 표준 라이브러리만 쓴다.
 """
@@ -17,23 +21,111 @@ import glob
 import html
 import json
 import os
+import hashlib
 import re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 REPO_URL = "https://github.com/halftomatodev/pygaki"
-OUT = os.path.join(HERE, "pygaki_안내서.html")
+LANGS = ("ko", "ja", "en")
+LANG_NAME = {"ko": "한국어", "ja": "日本語", "en": "English"}
+## 언어마다 파일 이름 (묶음 pygaki/ 안에 나란히, 서로 이 이름으로 잇는다)
+FILES = {"ko": "pygaki_안내서.html", "ja": "pygaki_guide_ja.html", "en": "pygaki_guide_en.html"}
+OUT = os.path.join(HERE, FILES["ko"])
 
-## 장 순서: (id, 제목, 원본 파일, 원본 첫 줄 제목을 뺄지)
+## 장 순서: (id, {언어: 제목}, 한국어 원본 파일). 번역은 bundle/guide/<언어>/<id>.md
 CHAPTERS = [
-    ("start", "시작하기", "bundle/guide/parts/start.md"),
-    ("overview", "한눈에: 문서와 파일 자리", "bundle/guide/parts/overview.md"),
-    ("pykaki", "pygaki로 대본 쓰기", "pykaki/docs/GUIDE.md"),
-    ("custom", "플러그인 커스텀 가이드", "showpy/docs/CUSTOM_GUIDE.md"),
-    ("effects", "효과 견본", None),
-    ("develop", "직접 고치기", "bundle/guide/parts/develop.md"),
-    ("license", "주의와 라이선스", "bundle/guide/parts/license.md"),
+    ("start", {"ko": "시작하기", "ja": "はじめに", "en": "Getting started"}, "bundle/guide/parts/start.md"),
+    ("overview", {"ko": "한눈에: 문서와 파일 자리", "ja": "ひと目で:文書とファイルの場所", "en": "At a glance: where docs and files are"}, "bundle/guide/parts/overview.md"),
+    ("pykaki", {"ko": "pygaki로 대본 쓰기", "ja": "pygaki でシナリオを書く", "en": "Writing scripts with pygaki"}, "pykaki/docs/GUIDE.md"),
+    ("custom", {"ko": "플러그인 커스텀 가이드", "ja": "プラグイン カスタムガイド", "en": "Plugin customization guide"}, "showpy/docs/CUSTOM_GUIDE.md"),
+    ("effects", {"ko": "효과 견본", "ja": "エフェクト見本", "en": "Effect samples"}, None),
+    ("develop", {"ko": "직접 고치기", "ja": "自分で手を入れる", "en": "Changing it yourself"}, "bundle/guide/parts/develop.md"),
+    ("license", {"ko": "주의와 라이선스", "ja": "注意とライセンス", "en": "Notes and licenses"}, "bundle/guide/parts/license.md"),
 ]
+
+## 화면 글 (페이지 틀, 효과 견본 장)
+T = {
+    "ko": dict(
+        title="pygaki 안내서", brand="안내서", ph="찾기 (예: 루비, 셰이더, 단축키)", search="안내서에서 찾기",
+        theme="테마", fold="모두 펼치기", unfold="장만 보기", menu="☰ 목차", top="맨 위로",
+        hero="렌파이로 게임을 만드는 사람을 위한 pygaki(대본 편집기와 pygaki 플러그인)의 모든 안내를 한 파일에 모았습니다. 인터넷 없이 열리고, 왼쪽 찾기 칸으로 낱말을 찾습니다.",
+        repo="저장소", nohit="찾는 낱말이 들어 있는 곳이 없어요.", src="원본", ver="pygaki 플러그인",
+        fx_intro="대사 줄의 글자 효과 카드에서 고르는 <b>글자 등장 효과</b>, 배경·보이기 줄에서 고르는 <b>그림 전환</b>, 상자의 ◐ 셰이더에서 고르는 "
+                 "<b>화면 셰이더</b>입니다. 영상은 렌파이에서 찍은 견본이고(마우스를 올리면 처음부터), 영상이 없는 효과는 pygaki 앱 [효과] 화면의 "
+                 "갤러리에서 움직이는 모습을 봅니다. 원고에는 이름(영어)을 씁니다: <code>e \"안녕\" (effect=\"wave\")</code>, "
+                 "<code>scene bg hall with img_fx.use(\"irisin\")</code>, <code>$ screen_fx.shaders(\"glitch\", \"none\")</code>.",
+        fx_none="영상 없음 · 앱 [효과]에서 보기", w_renpy="렌파이 기본", w_engine="pygaki 기본", w_folder="효과 폴더",
+        h_text="글자 등장 효과",
+        p_text='<code>effect="이름"</code>. 두 효과를 겹치려면 <code>effect="slidein|shake"</code>, 세부 값은 <code>effect="wave:u__amplitude=8"</code>. '
+               '글의 일부에만 걸려면 태그 <code>{shader=이름}글{/shader}</code>.',
+        h_tr="그림 전환",
+        p_tr="배경·보이기·숨기기 줄의 \"나타나는 방식\"에서 고르고 [세부 값]으로 시간과 값을 정합니다. 원고에는 "
+             "<code>with img_fx.use(\"이름\", 초, 값=…)</code>. 파일은 <code>ui_kit/effects/</code>에 하나씩 있습니다.",
+        th_name="이름", th_look="모양", h_sh="화면 셰이더",
+        p_sh="상자나 label의 ◐ 셰이더에서 1번, 2번 자리에 고릅니다. 원고에는 <code>$ screen_fx.shaders(\"1번\", \"2번\", transition=…)</code>. "
+             "세부 값은 셰이더마다 <code>screen_fx/&lt;이름&gt;_config.rpy</code>에서 고치고, 목록에서 감추려면 앱 [셰이더]의 [숨김]이나 "
+             "<code>screen_fx/shaders_off.txt</code>를 씁니다.",
+        th_shown="화면 이름", th_ov="덮개(2번) 전용", yes="예"),
+    "ja": dict(
+        title="pygaki 案内書", brand="案内書", ph="検索 (例:ルビ、シェーダー、ショートカット)", search="案内書を検索",
+        theme="テーマ", fold="すべて開く", unfold="章だけ表示", menu="☰ 目次", top="いちばん上へ",
+        hero="Ren'Py でゲームを作る人のための pygaki(スクリプトエディターと pygaki プラグイン)の案内を、すべて 1 つのファイルにまとめました。インターネットなしで開け、左の検索欄で言葉を探せます。",
+        repo="リポジトリ", nohit="探している言葉が入っているところがありません。", src="元の文書(韓国語)", ver="pygaki プラグイン",
+        fx_intro="セリフ行の文字エフェクトカードで選ぶ <b>文字の登場エフェクト</b>、背景・表示の行で選ぶ <b>画像トランジション</b>、ボックスの ◐ シェーダーで選ぶ "
+                 "<b>画面シェーダー</b>です。動画は Ren'Py で撮った見本で(マウスをのせると最初から)、動画のないエフェクトは pygaki アプリの [エフェクト] 画面の "
+                 "ギャラリーで動く様子を見ます。スクリプトには名前(英語)を書きます:<code>e \"こんにちは\" (effect=\"wave\")</code>、"
+                 "<code>scene bg hall with img_fx.use(\"irisin\")</code>、<code>$ screen_fx.shaders(\"glitch\", \"none\")</code>。",
+        fx_none="動画なし · アプリの [エフェクト] で見る", w_renpy="Ren'Py 標準", w_engine="pygaki 基本", w_folder="エフェクトフォルダー",
+        h_text="文字の登場エフェクト",
+        p_text='<code>effect="名前"</code>。2 つのエフェクトを重ねるなら <code>effect="slidein|shake"</code>、詳細値は <code>effect="wave:u__amplitude=8"</code>。'
+               '文の一部だけにかけるならタグ <code>{shader=名前}文字{/shader}</code>。',
+        h_tr="画像トランジション",
+        p_tr="背景・表示・隠すの行の「現れ方」で選び、[詳細値] で時間と値を決めます。スクリプトには "
+             "<code>with img_fx.use(\"名前\", 秒, 値=…)</code>。ファイルは <code>ui_kit/effects/</code> に 1 つずつあります。",
+        th_name="名前", th_look="見た目", h_sh="画面シェーダー",
+        p_sh="ボックスや label の ◐ シェーダーで 1 番、2 番の枠に選びます。スクリプトには <code>$ screen_fx.shaders(\"1番\", \"2番\", transition=…)</code>。"
+             "詳細値はシェーダーごとに <code>screen_fx/&lt;名前&gt;_config.rpy</code> で直し、一覧から隠すにはアプリ [シェーダー] の [非表示] か "
+             "<code>screen_fx/shaders_off.txt</code> を使います。",
+        th_shown="表示名", th_ov="オーバーレイ(2 番)専用", yes="はい"),
+    "en": dict(
+        title="pygaki guide", brand="guide", ph="Search (e.g. ruby, shader, shortcut)", search="Search this guide",
+        theme="Theme", fold="Expand all", unfold="Chapters only", menu="☰ Contents", top="Back to top",
+        hero="Everything about pygaki (the script editor and the pygaki plugins) for people making games with Ren'Py, in one file. It opens without the internet; search for words in the field on the left.",
+        repo="Repository", nohit="No section contains that word.", src="Original (Korean)", ver="pygaki plugins",
+        fx_intro="<b>Text effects</b> chosen in the text effect card of dialogue lines, <b>image transitions</b> chosen in background and show lines, and "
+                 "<b>screen shaders</b> chosen in a box's ◐ Shader. The videos are samples recorded in Ren'Py (hover to restart); for effects without a video, "
+                 "see them move in the gallery of the pygaki app's [Effects] screen. In scripts, use the (English) names: <code>e \"Hello\" (effect=\"wave\")</code>, "
+                 "<code>scene bg hall with img_fx.use(\"irisin\")</code>, <code>$ screen_fx.shaders(\"glitch\", \"none\")</code>.",
+        fx_none="No video · see it in the app's [Effects]", w_renpy="Ren'Py built-in", w_engine="pygaki default", w_folder="Effects folder",
+        h_text="Text effects",
+        p_text='<code>effect="name"</code>. To stack two effects, <code>effect="slidein|shake"</code>; for details, <code>effect="wave:u__amplitude=8"</code>. '
+               'To apply to only part of the text, use the tag <code>{shader=name}text{/shader}</code>.',
+        h_tr="Image transitions",
+        p_tr="Choose them in \"how it appears\" of background, show and hide lines, and set the duration and values with [Details]. In scripts: "
+             "<code>with img_fx.use(\"name\", seconds, value=…)</code>. Each is one file in <code>ui_kit/effects/</code>.",
+        th_name="Name", th_look="Look", h_sh="Screen shaders",
+        p_sh="Choose them for slots 1 and 2 in the ◐ Shader of a box or label. In scripts: <code>$ screen_fx.shaders(\"slot1\", \"slot2\", transition=…)</code>. "
+             "Adjust each shader's details in <code>screen_fx/&lt;name&gt;_config.rpy</code>; to hide one from lists, use [Hide] in the app's [Shaders] or "
+             "<code>screen_fx/shaders_off.txt</code>.",
+        th_shown="Display name", th_ov="Overlay (slot 2) only", yes="Yes"),
+}
+
+_DICT = None
+
+
+def tr(text, lang):
+    """효과·셰이더 한글 이름 → 대본 편집기 사전의 번역 (없으면 그대로)."""
+    global _DICT
+    if lang == "ko" or not text:
+        return text
+    if _DICT is None:
+        try:
+            _DICT = json.loads(read("pykaki/src/i18n/dict.json"))["exact"]
+        except Exception:
+            _DICT = {}
+    v = _DICT.get(text.strip())
+    return v[0 if lang == "ja" else 1] if v else text
 
 
 def read(rel):
@@ -256,14 +348,15 @@ def effect_lines(text, kind):
     return [(m.group(1), m.group(2).strip()) for m in re.finditer(r"^@%s\s+(\S+)\s*(.*)$" % kind, text, re.M)]
 
 
-def effects_chapter(heads, used, clips_dir):
+def effects_chapter(heads, used, clips_dir, lang="ko"):
+    t = T[lang]
     renpy = effect_lines(read("pykaki/src/fx/renpy_textshaders.glsl"), "effect")
     engine = effect_lines(read("showpy/game/ui_kit/engine/text_effects.glsl"), "effect")
     folder_fx, folder_tr = [], []
     for fn in sorted(glob.glob(os.path.join(ROOT, "showpy", "game", "ui_kit", "effects", "*.glsl"))):
-        t = open(fn, encoding="utf-8").read()
-        folder_fx += effect_lines(t, "effect")
-        folder_tr += effect_lines(t, "transition")
+        src = open(fn, encoding="utf-8").read()
+        folder_fx += effect_lines(src, "effect")
+        folder_tr += effect_lines(src, "transition")
     clips = {}
     for fn in glob.glob(os.path.join(clips_dir, "*.webm")):
         with open(fn, "rb") as f:
@@ -275,47 +368,40 @@ def effects_chapter(heads, used, clips_dir):
         heads.append((2, hid, title))
         out.append('<h2 id="%s">%s</h2>' % (hid, html.escape(title)))
 
-    out.append("<p>대사 줄의 글자 효과 카드에서 고르는 <b>글자 등장 효과</b>, 배경·보이기 줄에서 고르는 <b>그림 전환</b>, 상자의 ◐ 셰이더에서 고르는 "
-               "<b>화면 셰이더</b>입니다. 영상은 렌파이에서 찍은 견본이고(마우스를 올리면 처음부터), 영상이 없는 효과는 pygaki 앱 [효과] 화면의 "
-               "갤러리에서 움직이는 모습을 봅니다. 원고에는 이름(영어)을 씁니다: <code>e \"안녕\" (effect=\"wave\")</code>, "
-               "<code>scene bg hall with img_fx.use(\"irisin\")</code>, <code>$ screen_fx.shaders(\"glitch\", \"none\")</code>.</p>")
+    out.append("<p>%s</p>" % t["fx_intro"])
 
     def cards(items, where):
         out.append('<div class="fx-grid">')
         for name, label in items:
             v = clips.get(name)
             media = ('<video src="data:video/webm;base64,%s" autoplay loop muted playsinline preload="auto"></video>' % v) if v else \
-                '<div class="fx-none">영상 없음 · 앱 [효과]에서 보기</div>'
+                '<div class="fx-none">%s</div>' % html.escape(t["fx_none"])
             out.append('<figure class="fx-card">%s<figcaption><b>%s</b><code>%s</code><span>%s</span></figcaption></figure>'
-                       % (media, html.escape(label or name), html.escape(name), where))
+                       % (media, html.escape(tr(label, lang) or name), html.escape(name), html.escape(where)))
         out.append("</div>")
 
-    h2("글자 등장 효과")
-    out.append('<p><code>effect="이름"</code>. 두 효과를 겹치려면 <code>effect="slidein|shake"</code>, 세부 값은 <code>effect="wave:u__amplitude=8"</code>. '
-               '글의 일부에만 걸려면 태그 <code>{shader=이름}글{/shader}</code>.</p>')
-    cards(renpy, "렌파이 기본")
-    cards(engine, "pygaki 기본")
-    cards(folder_fx, "효과 폴더")
-    h2("그림 전환")
-    out.append("<p>배경·보이기·숨기기 줄의 \"나타나는 방식\"에서 고르고 [세부 값]으로 시간과 값을 정합니다. 원고에는 "
-               "<code>with img_fx.use(\"이름\", 초, 값=…)</code>. 파일은 <code>ui_kit/effects/</code>에 하나씩 있습니다.</p>")
-    out.append('<div class="tbl"><table><thead><tr><th>이름</th><th>모양</th></tr></thead><tbody>')
+    h2(t["h_text"])
+    out.append("<p>%s</p>" % t["p_text"])
+    cards(renpy, t["w_renpy"])
+    cards(engine, t["w_engine"])
+    cards(folder_fx, t["w_folder"])
+    h2(t["h_tr"])
+    out.append("<p>%s</p>" % t["p_tr"])
+    out.append('<div class="tbl"><table><thead><tr><th>%s</th><th>%s</th></tr></thead><tbody>' % (t["th_name"], t["th_look"]))
     for name, label in folder_tr:
-        out.append("<tr><td><code>%s</code></td><td>%s</td></tr>" % (html.escape(name), html.escape(label)))
+        out.append("<tr><td><code>%s</code></td><td>%s</td></tr>" % (html.escape(name), html.escape(tr(label, lang))))
     out.append("</tbody></table></div>")
     try:
         sh = json.loads(read("showpy/game/screen_fx/shader_list.json"))["shaders"]
     except Exception:
         sh = []
     if sh:
-        h2("화면 셰이더")
-        out.append("<p>상자나 label의 ◐ 셰이더에서 1번, 2번 자리에 고릅니다. 원고에는 <code>$ screen_fx.shaders(\"1번\", \"2번\", transition=…)</code>. "
-                   "세부 값은 셰이더마다 <code>screen_fx/&lt;이름&gt;_config.rpy</code>에서 고치고, 목록에서 감추려면 앱 [셰이더]의 [숨김]이나 "
-                   "<code>screen_fx/shaders_off.txt</code>를 씁니다.</p>")
-        out.append('<div class="tbl"><table><thead><tr><th>이름</th><th>화면 이름</th><th>덮개(2번) 전용</th></tr></thead><tbody>')
+        h2(t["h_sh"])
+        out.append("<p>%s</p>" % t["p_sh"])
+        out.append('<div class="tbl"><table><thead><tr><th>%s</th><th>%s</th><th>%s</th></tr></thead><tbody>' % (t["th_name"], t["th_shown"], t["th_ov"]))
         for x in sorted(sh, key=lambda x: x.get("order", 0)):
             out.append("<tr><td><code>%s</code></td><td>%s</td><td>%s</td></tr>" % (
-                html.escape(str(x.get("id", ""))), html.escape(str(x.get("name", ""))), "예" if x.get("overlay_only") else ""))
+                html.escape(str(x.get("id", ""))), html.escape(tr(str(x.get("name", "")), lang)), t["yes"] if x.get("overlay_only") else ""))
         out.append("</tbody></table></div>")
     return "\n".join(out)
 
@@ -323,11 +409,11 @@ def effects_chapter(heads, used, clips_dir):
 # ── 페이지 ──
 
 PAGE = """<!doctype html>
-<html lang="ko">
+<html lang="__LANG__">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>pygaki 안내서</title>
+<title>__TITLE__</title>
 <style>
 :root{--bg:#fbfaf7;--panel:#ffffff;--text:#1f2328;--muted:#5d6670;--line:#e3e0d8;--soft:#f3f1ec;--accent:#e2563f;--accent-soft:#fde9e4;--code:#f2efe8;--link:#1c6fd1;--mark:#ffe58a}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#16181c;--panel:#1d2025;--text:#e6e6e6;--muted:#9aa3ad;--line:#30343b;--soft:#23272d;--accent:#ff7a63;--accent-soft:#3a2420;--code:#262a31;--link:#6cb0ff;--mark:#6b5a12}}
@@ -335,6 +421,11 @@ PAGE = """<!doctype html>
 *{box-sizing:border-box}
 html{scroll-padding-top:16px}
 body{margin:0;background:var(--bg);color:var(--text);font:16px/1.7 "Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;word-break:keep-all;overflow-wrap:anywhere}
+html[lang=ja] body{font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP",sans-serif;word-break:normal;line-break:strict}
+html[lang=en] body{font-family:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;word-break:normal}
+nav .langs{display:flex;gap:4px;margin:0 2px 10px;flex-wrap:wrap}
+nav .langs a{padding:2px 9px;border:1px solid var(--line);border-radius:999px;font-size:13px;color:var(--text);text-decoration:none}
+nav .langs a.on{background:var(--accent-soft);border-color:var(--accent);font-weight:700}
 a{color:var(--link)}
 .wrap{display:grid;grid-template-columns:290px minmax(0,1fr);min-height:100vh}
 nav{position:sticky;top:0;height:100vh;overflow:auto;background:var(--panel);border-right:1px solid var(--line);padding:18px 14px 40px}
@@ -403,25 +494,26 @@ mark{background:var(--mark);color:inherit;border-radius:2px}
 <body>
 <div class="wrap">
 <nav id="nav">
-  <div class="brand">py<span>gaki</span> 안내서</div>
+  <div class="brand">py<span>gaki</span> __BRAND__</div>
   <div class="ver">__VER__</div>
-  <input id="q" type="search" placeholder="찾기 (예: 루비, 셰이더, 단축키)" aria-label="안내서에서 찾기">
-  <div class="tools"><button id="theme" type="button">테마</button><button id="fold" type="button">모두 펼치기</button></div>
+  <div class="langs">__LANGS__</div>
+  <input id="q" type="search" placeholder="__PH__" aria-label="__SEARCH__">
+  <div class="tools"><button id="theme" type="button">__THEME__</button><button id="fold" type="button">__FOLD__</button></div>
   <ol id="toc">__TOC__</ol>
 </nav>
 <main>
-<button class="menu-btn" id="menu" type="button">☰ 목차</button>
+<button class="menu-btn" id="menu" type="button">__MENU__</button>
 <header class="hero">
-  <h1>pygaki 안내서</h1>
-  <p>렌파이로 게임을 만드는 사람을 위한 pygaki(대본 편집기와 pygaki 플러그인)의 모든 안내를 한 파일에 모았습니다. 인터넷 없이 열리고, 왼쪽 찾기 칸으로 낱말을 찾습니다.</p>
-  <p>__VER__ · 저장소 <a href="__REPO__" target="_blank" rel="noopener">__REPO__</a></p>
+  <h1>__TITLE__</h1>
+  <p>__HERO__</p>
+  <p>__VER__ · __REPO_L__ <a href="__REPO__" target="_blank" rel="noopener">__REPO__</a></p>
   <div class="chips">__CHIPS__</div>
 </header>
 __BODY__
-<p class="nohit hide" id="nohit">찾는 낱말이 들어 있는 곳이 없어요.</p>
+<p class="nohit hide" id="nohit">__NOHIT__</p>
 </main>
 </div>
-<button class="top" id="top" type="button" title="맨 위로">↑</button>
+<button class="top" id="top" type="button" title="__TOP__">↑</button>
 <script>
 (function(){
   var root=document.documentElement;
@@ -440,7 +532,7 @@ __BODY__
   var byId={}; links.forEach(function(a){byId[a.getAttribute('href').slice(1)]=a});
   var heads=[].slice.call(document.querySelectorAll('main h1[id],main h2[id]')).filter(function(h){return byId[h.id]});
   var allOpen=false;
-  document.getElementById('fold').onclick=function(){allOpen=!allOpen;this.textContent=allOpen?'장만 보기':'모두 펼치기';mark()};
+  document.getElementById('fold').onclick=function(){allOpen=!allOpen;this.textContent=allOpen?'__UNFOLD__':'__FOLD__';mark()};
   function mark(){
     var cur=null,y=innerHeight*0.25;
     for(var i=0;i<heads.length;i++){if(heads[i].offsetParent===null)continue;if(heads[i].getBoundingClientRect().top<y)cur=heads[i];else break}
@@ -487,51 +579,121 @@ def blocks(body_html):
     return "\n".join('<div class="blk">%s</div>' % p for p in parts if p.strip())
 
 
-def version():
+def version(lang="ko"):
     def v(rel, pat):
         try:
             m = re.search(pat, read(rel))
             return m.group(1) if m else "?"
         except OSError:
             return "?"
-    return "pygaki 플러그인 ui_kit %s · screen_fx %s · splash %s" % (
+    return "%s ui_kit %s · screen_fx %s · splash %s" % (T[lang]["ver"],
         v("showpy/game/ui_kit/engine/ui_kit.rpy", r'VERSION = "([\d.]+)"'),
         v("showpy/game/screen_fx/engine/screen_fx.rpy", r'VERSION = "([\d.]+)"'),
         v("showpy/game/splash/engine/splash.rpy", r'VERSION = "([\d.]+)"'))
 
 
-def build(out_path=OUT, clips_dir=None):
+def head_src(text):
+    """번역 파일 첫 줄 <!-- 원본: 경로 @ 커밋 --> → (경로, 커밋, 나머지 글)"""
+    m = re.match(r"\A\s*<!--\s*원본:\s*(\S+)(?:\s*@\s*([0-9a-f]+))?\s*-->\s*\n", text)
+    if not m:
+        return None, None, text
+    return m.group(1), m.group(2), text[m.end():]
+
+
+def src_hash(rel):
+    """원본 글의 지문 (줄 끝 차이는 무시). 번역 파일 첫 줄에 적어 두고, 원본이 바뀌었는지 본다."""
+    return hashlib.sha1(read(rel).replace("\r\n", "\n").encode("utf-8")).hexdigest()[:10]
+
+
+def stale_check(lang, cid, src, at):
+    """번역을 맞춘 뒤(at) 원본(src)이 바뀌었으면 알린다."""
+    if not at:
+        print("  알림: %s/%s.md 첫 줄에 원본 지문이 없어요 (--stamp)" % (lang, cid))
+    elif at != src_hash(src):
+        print("  알림: %s 원본이 번역(%s/%s.md) 뒤에 바뀌었어요. 번역도 맞춘 뒤 --stamp" % (src, lang, cid))
+
+
+def stamp():
+    """번역 파일 첫 줄의 원본 지문을 지금 원본 것으로 (번역을 원본에 맞춘 뒤에만)."""
+    for lang in LANGS[1:]:
+        for cid, _t, src in CHAPTERS:
+            p = os.path.join(HERE, lang, cid + ".md")
+            if not src or not os.path.exists(p):
+                continue
+            _s, _at, rest = head_src(open(p, encoding="utf-8").read())
+            h = src_hash(src)
+            with open(p, "w", encoding="utf-8", newline="\n") as f:
+                f.write("<!-- 원본: %s @ %s -->\n%s" % (src, h, rest))
+            print("표시: %s/%s.md @ %s" % (lang, cid, h))
+
+
+def build(out_path=OUT, clips_dir=None, lang="ko", files=None):
+    files = files or FILES
+    t = T[lang]
     clips_dir = clips_dir or os.path.join(ROOT, "pykaki", "public", "effects")
     used = set()
     toc, chips, body = [], [], []
-    for n, (cid, title, src) in enumerate(CHAPTERS, 1):
+    for n, (cid, titles, src) in enumerate(CHAPTERS, 1):
+        title = titles[lang]
         used.add(cid)
         heads = []
         if src:
-            text = read(src)
+            if lang == "ko":
+                text = read(src)
+            else:
+                tp = os.path.join(HERE, lang, cid + ".md")
+                if not os.path.exists(tp):
+                    raise SystemExit("번역이 없어요: %s" % os.path.relpath(tp, ROOT))
+                _s, at, text = head_src(open(tp, encoding="utf-8").read())
+                stale_check(lang, cid, src, at)
             ## 원본 맨 위 제목(# …)은 장 제목으로 바꾼다
             text = re.sub(r"\A\s*#\s+[^\n]*\n", "", text)
             inner = md(text, src, heads, used)
-            note = '<p class="src">원본: <a href="%s/blob/main/%s" target="_blank" rel="noopener"><code>%s</code></a></p>' % (REPO_URL, src, src) \
+            note = '<p class="src">%s: <a href="%s/blob/main/%s" target="_blank" rel="noopener"><code>%s</code></a></p>' % (t["src"], REPO_URL, src, src) \
                 if not src.startswith("bundle/guide/") else ""
         else:
-            inner = effects_chapter(heads, used, clips_dir)
+            inner = effects_chapter(heads, used, clips_dir, lang)
             note = ""
         body.append('<section class="chapter" id="%s"><h1 id="%s-h"><span class="n">%d</span>%s</h1>%s\n%s</section>'
                     % (cid, cid, n, html.escape(title), note, blocks(inner)))
-        sub = "".join('<li class="s2"><a href="#%s">%s</a></li>' % (h, html.escape(t)) for lv, h, t in heads if lv == 2)
+        sub = "".join('<li class="s2"><a href="#%s">%s</a></li>' % (h, html.escape(x)) for lv, h, x in heads if lv == 2)
         toc.append('<li class="ch"><a href="#%s-h"><span class="n">%d</span>%s</a><ol class="sub">%s</ol></li>' % (cid, n, html.escape(title), sub))
         chips.append('<a href="#%s-h"><b>%d</b>%s</a>' % (cid, n, html.escape(title)))
-    page = (PAGE.replace("__TOC__", "".join(toc)).replace("__CHIPS__", "".join(chips))
-            .replace("__VER__", html.escape(version())).replace("__REPO__", REPO_URL).replace("__BODY__", "\n".join(body)))
+    langs = "".join('<a href="%s"%s lang="%s">%s</a>' % (html.escape(files[l]), ' class="on" aria-current="page"' if l == lang else "", l, LANG_NAME[l])
+                    for l in LANGS)
+    page = PAGE
+    for k, v in (("__TOC__", "".join(toc)), ("__CHIPS__", "".join(chips)), ("__LANGS__", langs), ("__LANG__", lang),
+                 ("__TITLE__", html.escape(t["title"])), ("__BRAND__", html.escape(t["brand"])), ("__PH__", html.escape(t["ph"])),
+                 ("__SEARCH__", html.escape(t["search"])), ("__THEME__", html.escape(t["theme"])), ("__UNFOLD__", t["unfold"]),
+                 ("__FOLD__", t["fold"]), ("__MENU__", html.escape(t["menu"])), ("__HERO__", html.escape(t["hero"])),
+                 ("__REPO_L__", html.escape(t["repo"])), ("__NOHIT__", html.escape(t["nohit"])), ("__TOP__", html.escape(t["top"])),
+                 ("__VER__", html.escape(version(lang))), ("__REPO__", REPO_URL)):
+        page = page.replace(k, v)
+    page = page.replace("__BODY__", "\n".join(body))
     with open(out_path, "w", encoding="utf-8", newline="\n") as f:
         f.write(page)
     return out_path
 
 
+def build_all(out_dir=HERE, files=None, clips_dir=None):
+    """세 언어를 out_dir에. files: 언어마다 파일 이름 (웹판은 한국어를 index.html로)."""
+    files = files or FILES
+    os.makedirs(out_dir, exist_ok=True)
+    return [build(os.path.join(out_dir, files[l]), clips_dir, l, files) for l in LANGS]
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--out", default=OUT)
+    ap.add_argument("--out-dir", default=HERE)
+    ap.add_argument("--web", help="웹판 폴더 (한국어는 index.html)")
+    ap.add_argument("--stamp", action="store_true", help="번역 파일의 원본 지문을 지금 것으로")
     a = ap.parse_args()
-    p = build(a.out)
-    print("만듦: %s (%d KB)" % (os.path.relpath(p, ROOT), os.path.getsize(p) // 1024))
+    if a.stamp:
+        stamp()
+    else:
+        if a.web:
+            ps = build_all(a.web, dict(FILES, ko="index.html"))
+        else:
+            ps = build_all(a.out_dir)
+        for p in ps:
+            print("만듦: %s (%d KB)" % (p, os.path.getsize(p) // 1024))

@@ -18,6 +18,7 @@
                                        새 프로젝트는 런처가 고른 해상도로 새로 만들고 여기서 플러그인만 가져감)
     pygaki/app/pygaki.exe              pygaki 데스크톱 앱 (GitHub Actions "pygaki 앱" 결과물을 풀어 둔 폴더)
     pygaki/pygaki_안내서.html          모든 안내를 모은 HTML 한 파일 (bundle/guide/build_guide.py가 저장소 문서로 만듦)
+    pygaki/pygaki_guide_ja.html, pygaki_guide_en.html   그 일본어판, 영어판
     pygaki/읽어주세요.txt
 
 필요한 것: 파이썬 3, 렌파이 SDK 폴더, pygaki 앱 폴더(win-unpacked).
@@ -304,7 +305,7 @@ def main():
     ## 안내서: 저장소 문서로 지금 다시 만들어 넣는다 (bundle/guide/build_guide.py)
     sys.path.insert(0, os.path.join(HERE, "guide"))
     import build_guide
-    build_guide.build(os.path.join(out, "pygaki", "pygaki_안내서.html"))
+    build_guide.build_all(os.path.join(out, "pygaki"))
     for lic in ("LICENSE",):
         shutil.copy(os.path.join(ROOT, lic), os.path.join(out, "pygaki", "LICENSE-pygaki.txt"))
 
