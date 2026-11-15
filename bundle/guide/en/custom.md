@@ -1,4 +1,4 @@
-<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ 6c70ccb4d1 -->
+<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ 643f9d9d8d -->
 # pygaki plugin customization guide (5.1)
 
 2026-11-13 · version 5.1 (changed in 5.1: the effects folder and image transitions, files to turn off effects and shaders, photo collage (instead of shifting shards), the shimmer shader `ripple`, detail values on shader lines and per-scene dialogue sound and cursor, pixel sort and datamosh as shader transitions, the tree diagram, pygaki as a desktop app only. Changed in 5.0: seven new screen effects (glitch, jitter, halftone, hologram, night vision, shifting shards, flying shards), effects on a single image, eleven text effects, text boxes (speech bubble, rounded frame), editing the splash on screen, the in-game editor's "UI text" tab. Changed in 4.22: lines where shaders change and per-line transitions, "from here" for cursor and shaders, a tidier dialogue tab, cursor and CTC image folders. Changed in 4.21: shader section details moved under slots 1 and 2, clicking a line moves the game there too. Changed in 4.20: two shader slots and "Apply from here", title and in-game menu shaders, title background and title, subtitle, text effects, rotation handle)
@@ -925,7 +925,7 @@ define hotkeys.keyboard_help = [
 | Key names | `K_v` (V), `shift_K_s` (Shift+S), `ctrl_K_l` (Ctrl+L), `alt_K_v` (Alt+V), `K_F5`, `K_SPACE` |
 | Default hotkey names often removed | `screenshot` (S), `toggle_fullscreen` (F), `hide_windows` (H), `self_voicing` (V), `accessibility` (Shift+A), `skip` (Ctrl), `toggle_skip` (Tab), `rollback` (Page Up) |
 | When they overlap | if a new key overlaps a default hotkey, both run, so remove it from the default side with `unbind` |
-| The help screen | if `keyboard_help` is `None`, Ren'Py's default descriptions. If you changed hotkeys, update the descriptions too |
+| The help screen | if `keyboard_help` is `None`, Ren'Py's default descriptions. Keys removed with `unbind` are updated in that default list automatically (1.3: removing V turns the "V" line into "Alt+V", and a line with no keys left is dropped). If you wrote the list yourself, update the descriptions too |
 | Overlap with the editor key | the UI Kit editor uses Shift+M. To change it, `define ui_kit.editor_key = "shift_K_e"` |
 | Preset actions (1.1) | instead of `"action"`, a name like `"do": "quick_save"`. Writing `"help": _("Quick save")` puts it in the controls screen list (if a line with the same key exists, its description is replaced). The list of names is in `hotkeys/README.md` |
 

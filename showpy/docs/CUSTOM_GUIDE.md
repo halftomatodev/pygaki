@@ -922,7 +922,7 @@ define hotkeys.keyboard_help = [
 | 키 이름 | `K_v`(V), `shift_K_s`(Shift+S), `ctrl_K_l`(Ctrl+L), `alt_K_v`(Alt+V), `K_F5`, `K_SPACE` |
 | 자주 빼는 기본 단축키 이름 | `screenshot`(S), `toggle_fullscreen`(F), `hide_windows`(H), `self_voicing`(V), `accessibility`(Shift+A), `skip`(Ctrl), `toggle_skip`(Tab), `rollback`(Page Up) |
 | 겹칠 때 | 새 키가 기본 단축키와 겹치면 둘 다 실행되므로 `unbind`로 기본 쪽에서 뺍니다 |
-| 설명 화면 | `keyboard_help`가 `None`이면 렌파이 기본 설명. 단축키를 바꿨다면 설명도 같이 고칩니다 |
+| 설명 화면 | `keyboard_help`가 `None`이면 렌파이 기본 설명. `unbind`로 뺀 키는 기본 설명의 그 줄에 저절로 맞춰짐(1.3. V를 빼면 "V" 줄이 "Alt+V"로, 키가 안 남으면 줄을 뺌). 목록을 직접 적었다면 설명도 같이 고칩니다 |
 | 편집기 키와 겹침 | UI Kit 편집기는 Shift+M을 씁니다. 바꾸려면 `define ui_kit.editor_key = "shift_K_e"` |
 | 정해 둔 동작 (1.1) | `"action"` 대신 `"do": "quick_save"`처럼 이름으로. `"help": _("퀵세이브")`를 적으면 조작방법 화면 목록에 들어감(같은 키 줄이 있으면 그 설명을 바꿈). 이름 목록은 `hotkeys/README.md` |
 

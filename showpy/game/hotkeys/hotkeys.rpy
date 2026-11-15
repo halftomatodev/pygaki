@@ -21,7 +21,7 @@ init -10 python in hotkeys:
     import store
     from store import python_object
 
-    VERSION = "1.2"
+    VERSION = "1.3"
 
     DEFAULTS = dict(
         bindings=[ ],
@@ -382,13 +382,24 @@ init -10 python in hotkeys:
                     rv.append((t, func_desc(f[0])))
         return rv
 
+    def help_is_default():
+        """조작방법 목록이 렌파이 기본 목록인지 (설정 파일 keyboard_help, 편집 화면 목록을 안 씀)."""
+        return current_layout()["help"] is None and cfg("keyboard_help") is None
+
     def _remap_help(rows):
-        """기본 기능의 키를 바꿨으면 목록의 그 키 칸도 바꿈 (키를 다 빼면 그 줄을 뺌)."""
+        """기본 기능의 키를 바꿨으면 목록의 그 키 칸도 바꿈 (키를 다 빼면 그 줄을 뺌).
+        unbind로 키를 뺀 것도 바꿈 (1.3). 단 목록을 직접 적었으면 그 목록은 만든 사람 것이라 unbind로는 안 바꿈."""
         lay = current_layout()["keys"]
+        by_unbind = help_is_default()
         for fid, old in HELP_KEY.items():
-            if fid not in lay:
+            if fid in lay:
+                new = keys_text(lay[fid])
+            elif by_unbind and all_unbind().get(fid):
+                new = keys_text(func_keys(fid))
+                if new == keys_text(_orig_keymap().get(fid, [ ])):
+                    continue  # 뺀 것이 마우스·게임패드 키뿐
+            else:
                 continue
-            new = keys_text(lay[fid])
             for i, (a, d) in enumerate(rows):
                 if isinstance(a, str) and a == old:
                     if new:
