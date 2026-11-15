@@ -26,6 +26,8 @@ interface S {
   animating: boolean;
   focusMode: boolean; // 집중 모드: 캔버스만 남기고 나머지 화면을 숨긴다
   showPrefs: boolean; // 환경 설정 창
+  showFind: boolean; // 찾기·바꾸기 칸 (Ctrl+F)
+  showTrace: string | null; // 플래그 따라가 보기 창. 시작 상자 id ('' = 대본 시작)
   flowMenu: boolean; // 다음 흐름 창을 키보드로 고르는 중
   shaderOf: { kind: 'box' | 'label'; id: string } | null; // 오른쪽 칸에서 셰이더를 고르는 중인 상자나 label
   hideLeft: boolean; // 왼쪽 칸 접음
@@ -70,6 +72,8 @@ export const useStore = create<S>((set, get) => ({
   animating: false,
   focusMode: false,
   showPrefs: false,
+  showFind: false,
+  showTrace: null,
   flowMenu: false,
   shaderOf: null,
   hideLeft: readFlag('pygaki-hide-left'),

@@ -3,7 +3,7 @@ import { create } from 'zustand';
 // Pretendard (SIL OFL 1.1, licenses/OFL-Pretendard.txt). 굵기를 고를 수 있는 가변 글꼴 하나를 파일 안에 넣는다
 import pretendardUrl from 'pretendard/dist/web/variable/woff2/PretendardVariable.woff2?url';
 
-export type ActionId = 'focus' | 'nextBox' | 'flowMenu' | 'save' | 'saveAs' | 'export' | 'undo' | 'redo' | 'newBox' | 'duplicate' | 'newLine' | 'tagBold' | 'tagItalic' | 'tagUnderline' | 'gamePanel';
+export type ActionId = 'focus' | 'nextBox' | 'flowMenu' | 'save' | 'saveAs' | 'export' | 'undo' | 'redo' | 'newBox' | 'duplicate' | 'newLine' | 'tagBold' | 'tagItalic' | 'tagUnderline' | 'gamePanel' | 'find';
 
 // 키는 e.code(자판 위치)로 적는다. 한글 입력 상태에서도 같은 키로 동작한다
 export const ACTIONS: { id: ActionId; label: string; def: string }[] = [
@@ -21,6 +21,7 @@ export const ACTIONS: { id: ActionId; label: string; def: string }[] = [
   { id: 'tagBold', label: '대사 굵게 {b} (글 칸에서)', def: 'Ctrl+KeyB' },
   { id: 'tagItalic', label: '대사 기울임 {i} (글 칸에서)', def: 'Ctrl+KeyI' },
   { id: 'tagUnderline', label: '대사 밑줄 {u} (글 칸에서)', def: 'Ctrl+KeyU' },
+  { id: 'find', label: '찾기·바꾸기 (대사, 선택지, 상자 제목)', def: 'Ctrl+KeyF' },
   { id: 'gamePanel', label: '게임 창의 편집 화면 보이기/숨기기 (앱, 게임과 연결됐을 때)', def: 'F9' },
 ];
 

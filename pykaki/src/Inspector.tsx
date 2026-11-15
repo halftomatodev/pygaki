@@ -134,6 +134,7 @@ function BoxInspector({ b }: { b: BoxNode }) {
         {g?.entry !== b.id && <button onClick={() => update((p) => void (p.labels.find((l) => l.id === b.group)!.entry = b.id))}>label의 첫 상자로</button>}
         {project.project.startNode !== b.id && <button onClick={() => update((p) => void (p.project.startNode = b.id))}>시작 상자로</button>}
         <GoHere where={{ box: b.id }} />
+        <button onClick={() => useStore.setState({ showTrace: b.id })} title="이 상자부터 플래그 값과 갈래를 따라가 봐요 (플래그는 처음 값부터)">▶ 따라가 보기</button>
         <button className="danger" onClick={() => (update((p) => ops.deleteBoxes(p, [b.id])), useStore.getState().select([]))}>삭제</button>
       </div>
       </Card>

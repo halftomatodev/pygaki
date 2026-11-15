@@ -342,6 +342,9 @@
 | `src/gameFolder.ts` | 렌파이 game 폴더 연결, 목록, 받아 적기 파일 읽기와 쓰기 |
 | `src/inbox.ts` | pygaki 플러그인이 남긴 줄을 대본에 넣기 |
 | `src/imageCheck.ts` | 그림 이름 검사 (게임에 없는 그림 경고) |
+| `src/voice.ts`, `src/VoiceCard.tsx` | 음성 번호, 이름 규칙, [음성] 카드 |
+| `src/FindPanel.tsx` | 찾기·바꾸기 (Ctrl+F, `showFind`). 대사·내레이션 글, 선택지, 선택지 질문, 상자 제목. 모두 바꾸기는 `update` 한 번 |
+| `src/trace.ts`, `src/TracePanel.tsx` | 플래그 따라가 보기 (`showTrace`: '' 대본 시작, 상자 id). 파이썬 일부 식 계산(`evalExpr`, 모르면 `UNKNOWN`), 상자의 flag 줄과 직접 명령 `$ a op b`를 적용, 선택지 조건·고르면, 조건 분기, call 스택. 대본은 안 고친다 |
 | `src/stage.ts` | 연출 줄 → 렌파이 명령 |
 | `src/LineFields.tsx` | 줄 종류 선택, 연출 줄 입력칸, 줄 끌어 옮기기 |
 | `src/layout.ts` | 자동 정렬 |

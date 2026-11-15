@@ -5,6 +5,8 @@ import { Sidebar } from './Sidebar';
 import { Canvas } from './Canvas';
 import { RightPanel } from './Panels';
 import { SettingsModal } from './SettingsModal';
+import { FindPanel } from './FindPanel';
+import { TracePanel } from './TracePanel';
 import { HelpModal, HintTip, openHelp } from './Help';
 import { EditCaret } from './Caret';
 import { useStore } from './store';
@@ -55,6 +57,12 @@ function Keys() {
       else if (s.inlineEdit && hit(e, 'flowMenu')) run(() => useStore.setState({ flowMenu: !s.flowMenu }));
       else if (hit(e, 'save')) run(() => saveProject());
       else if (hit(e, 'saveAs')) run(() => saveProject(true));
+      // 이미 열려 있으면 찾을 글 칸을 고른다
+      else if (hit(e, 'find'))
+        run(() => {
+          if (!s.showFind) useStore.setState({ showFind: true });
+          else document.querySelector<HTMLInputElement>('.float-panel.find input')?.select();
+        });
       else if (hit(e, 'export')) run(() => exportRpyFile(true));
       else if (hit(e, 'newBox')) run(() => addBoxCenter(rf));
       else if (!isTyping(e.target) && hit(e, 'duplicate')) run(() => duplicateBoxes());
@@ -129,6 +137,8 @@ function SideResizer({ side }: { side: 'left' | 'right' }) {
 export function App() {
   const focus = useStore((s) => s.focusMode);
   const showPrefs = useStore((s) => s.showPrefs);
+  const showFind = useStore((s) => s.showFind);
+  const showTrace = useStore((s) => s.showTrace);
   const flash = useStore((s) => s.flash);
   const hideLeft = useStore((s) => s.hideLeft);
   const hideRight = useStore((s) => s.hideRight);
@@ -165,6 +175,8 @@ export function App() {
         </filter>
       </svg>
       {showPrefs && <SettingsModal />}
+      {showFind && view === 'script' && <FindPanel />}
+      {showTrace !== null && view === 'script' && <TracePanel />}
       <HelpModal />
       <HintTip />
       <EditCaret />

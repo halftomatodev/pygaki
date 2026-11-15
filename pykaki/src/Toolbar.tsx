@@ -100,6 +100,7 @@ export function Toolbar() {
       <button className="focus-btn" onClick={toggleFocus} title={'집중 모드: 캔버스만 남기기 ' + keyOf('focus')}>집중</button>
       <button onClick={() => useStore.setState({ showPrefs: true })} title="화면 색, 단축키">설정</button>
       <button onClick={() => openHelp()} title="쓰는 법과 설명 모음 (F1)">도움말</button>
+      <button onClick={() => useStore.setState({ showFind: !s.showFind })} title={'대사, 선택지, 상자 제목에서 찾기·바꾸기 ' + keyOf('find')}>찾기</button>
       <span className="sep" />
       <button onClick={newProject}>새로</button>
       <button onClick={openProject}>열기</button>

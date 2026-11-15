@@ -1257,3 +1257,29 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .vc-missing summary { cursor: pointer; font-size: 12px; }
 .vc-missing .sc-go { display: block; width: 100%; text-align: left; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .vc-chip { font-size: 10.5px; color: var(--muted); margin-left: auto; white-space: nowrap; }
+
+/* 찾기·바꾸기, 플래그 따라가 보기: 캔버스 위에 뜨는 칸 (3단계) */
+.float-panel { position: fixed; z-index: 40; width: 380px; max-width: calc(100vw - 32px); max-height: 70vh; display: flex; flex-direction: column; background: var(--panel); color: var(--text); border: 1px solid color-mix(in srgb, var(--text) 18%, transparent); border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,.25); }
+.float-panel.find { top: 96px; left: 50%; transform: translateX(-50%); }
+.float-panel.trace { bottom: 16px; left: 50%; transform: translateX(-50%); width: 440px; }
+.fp-head { display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-bottom: 1px solid color-mix(in srgb, var(--text) 10%, transparent); }
+.fp-head .sp { flex: 1; }
+.fp-body { padding: 8px 10px; overflow: auto; display: flex; flex-direction: column; gap: 6px; }
+.fp-body .row { display: flex; gap: 4px; align-items: center; }
+.fp-opts { flex-wrap: wrap; font-size: 12px; gap: 10px !important; }
+.fp-list { display: flex; flex-direction: column; gap: 2px; }
+.fp-hit { text-align: left; display: flex; flex-direction: column; padding: 3px 6px; }
+.fp-hit.on { outline: 2px solid var(--accent); }
+.fp-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fp-text mark { background: color-mix(in srgb, var(--accent) 35%, transparent); color: inherit; border-radius: 2px; }
+.tr-path { font-size: 11.5px; color: var(--muted); }
+.tr-path .cur { color: var(--text); font-weight: 700; }
+.tr-changes { margin: 4px 0 0 16px; padding: 0; font-size: 12px; }
+.tr-opts { display: flex; flex-direction: column; gap: 3px; }
+.tr-opt { text-align: left; }
+.tr-opt.pick { outline: 2px solid #34c759; }
+.tr-opt.unk { border-style: dashed; }
+.tr-opt.off { opacity: .45; }
+.tr-vars { border-collapse: collapse; font-size: 12px; width: 100%; }
+.tr-vars td { padding: 2px 6px; border-top: 1px solid color-mix(in srgb, var(--text) 8%, transparent); }
+.tr-vars tr.changed td { background: color-mix(in srgb, #34c759 16%, transparent); }

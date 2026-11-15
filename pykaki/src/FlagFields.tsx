@@ -19,7 +19,12 @@ export function FlagsCard() {
       title={<>플래그 {flags.length > 0 && <span className="count">{flags.length}</span>}</>}
       hint="이야기가 기억하는 값 (만났는지, 호감도 등). 선택지의 조건·고르면, 조건 분기, 플래그 바꾸기 줄에서 써요. 원고 맨 위에 default로 처음 값을 적어요"
       topic="플래그"
-      extra={<button onClick={add}>+ 추가</button>}
+      extra={
+        <>
+          <button onClick={() => useStore.setState({ showTrace: '' })} title="대본 시작부터 선택지를 골라 가며 플래그 값과 조건 분기 갈래를 봐요">▶ 따라가 보기</button>
+          <button onClick={add}>+ 추가</button>
+        </>
+      }
     >
       {!flags.length && <p className="tip">플래그가 없어요. [+ 추가]로 만들어요 (예: met_alice 켜짐/꺼짐, love 숫자).</p>}
       {flags.map((f) => (
