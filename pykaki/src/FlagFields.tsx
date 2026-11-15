@@ -2,17 +2,28 @@
 import { useEffect, useRef, useState } from 'react';
 import { useStore } from './store';
 import { Card } from './Card';
+import { FlagMenu } from './FlagMenu';
+import { addRecipeFlags, type FlagRecipe } from './flagRecipes';
 import type { Flag, FlagKind } from './types';
-import { uid } from './util';
-import { actionText, CMP_LABEL, condSnippet, condText, exprNames, firstClause, fitInit, flagNameProblem, flagUses, KIND_LABEL, newFlagName, parseAction, parseCond, renameFlag, type Clause, type CmpOp, type Cond, type Op } from './flags';
+import { actionText, CMP_LABEL, condSnippet, condText, exprNames, firstClause, fitInit, flagNameProblem, flagUses, KIND_LABEL, parseAction, parseCond, renameFlag, type Clause, type CmpOp, type Cond, type Op } from './flags';
 
 export function FlagsCard() {
   const flags = useStore((s) => s.project.variables);
   const update = useStore((s) => s.update);
-  const add = () =>
-    update((p) => {
-      p.variables.push({ id: uid('v'), name: newFlagName(p), kind: 'bool', init: false });
+  const addBtn = useRef<HTMLButtonElement>(null);
+  const [menu, setMenu] = useState(false);
+  // 용례대로 만들고(실행 취소 한 번), 첫 플래그의 이름 칸으로
+  const pick = (r: FlagRecipe) => {
+    setMenu(false);
+    let ids: string[] = [];
+    update((p) => void (ids = addRecipeFlags(p, r)));
+    requestAnimationFrame(() => {
+      const el = document.querySelector<HTMLInputElement>(`.flag[data-flag="${ids[0]}"] .fname`);
+      el?.scrollIntoView({ block: 'nearest' });
+      el?.focus();
+      el?.select();
     });
+  };
   return (
     <Card
       id="i-flags"
@@ -22,11 +33,12 @@ export function FlagsCard() {
       extra={
         <>
           <button onClick={() => useStore.setState({ showTrace: '' })} title="대본 시작부터 선택지를 골라 가며 플래그 값과 조건 분기 갈래를 봐요">▶ 따라가 보기</button>
-          <button onClick={add}>+ 추가</button>
+          <button ref={addBtn} className={menu ? 'on' : ''} onClick={() => setMenu((v) => !v)} title="용례(호감도, 한 번 본 장면 등)를 골라 만들어요">+ 추가</button>
+          {menu && addBtn.current && <FlagMenu anchor={addBtn.current} onPick={pick} onClose={() => setMenu(false)} />}
         </>
       }
     >
-      {!flags.length && <p className="tip">플래그가 없어요. [+ 추가]로 만들어요 (예: met_alice 켜짐/꺼짐, love 숫자).</p>}
+      {!flags.length && <p className="tip">플래그가 없어요. [+ 추가]에서 용례(호감도, 한 번 본 장면 등)를 골라 만들어요.</p>}
       {flags.map((f) => (
         <FlagRow key={f.id} f={f} />
       ))}
@@ -69,7 +81,7 @@ function FlagRow({ f }: { f: Flag }) {
   };
 
   return (
-    <div className="flag">
+    <div className="flag" data-flag={f.id}>
       <div className="item">
         <input data-native-undo className={'fname' + (why ? ' invalid' : '')} value={name} spellCheck={false} onChange={(e) => setName(e.target.value.replace(/\s/g, '_'))} onBlur={commit} onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()} title={why || '렌파이 변수 이름 (영문·숫자·_)'} />
         <select value={f.kind} onChange={(e) => set((x) => void ((x.kind = e.target.value as FlagKind), (x.init = fitInit(x.kind, x.init))))} title="종류">
