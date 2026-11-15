@@ -1029,7 +1029,9 @@ init -9 python in ui_editor:
             self.child = None
 
         def render(self, width, height, st, at):
-            if self.child is None:
+            ## 편집기 언어를 바꾸면 제목 글도 새로 (editor_lang.rpy)
+            if self.child is None or getattr(self, "lang", None) != editor_lang():
+                self.lang = editor_lang()
                 self.child = store.Text("= pygaki 편집", style="ui_editor_title")
             cr = store.renpy.render(self.child, width, height, st, at)
             self.size = cr.get_size()
@@ -1438,6 +1440,8 @@ screen ui_editor_panel():
                     textbutton "복사 (Ctrl+C)" style "ui_editor_button" action Function(ui_editor.copy_current)
                     textbutton "닫기 (Esc)" style "ui_editor_button" action ui_editor.ToggleEditor()
                     textbutton "X 접기" style "ui_editor_button" action ToggleField(ui_editor.state, "mini")
+                    ## 편집 화면 언어 (editor_lang.rpy). 누를 때마다 한국어 → 日本語 → English
+                    textbutton ui_editor.lang_button() style "ui_editor_button" action Function(ui_editor.next_lang)
 
                 if _ok and not getattr(_tab, "shows_line", False) and ui_editor.line_header():
                     text ui_editor.line_header() style "ui_editor_small"

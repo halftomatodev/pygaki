@@ -1,4 +1,4 @@
-<!-- 원본: bundle/guide/parts/overview.md @ 2bbf8e60ee -->
+<!-- 원본: bundle/guide/parts/overview.md @ 10bea5c7ab -->
 # At a glance: where docs and files are
 
 What is where in the bundle you downloaded, in a game project you made, and in the repository. Look here when you wonder "can I delete this file?" or "where is my work saved?".
@@ -58,6 +58,7 @@ To remove the add-on, delete `launcher/game/pygaki_launcher.rpy` (and its `.rpyc
 | `pykaki/docs/SPEC.md` | how pygaki is built (for people changing it) |
 | `pykaki/public/effects/` | sample videos of text effects (used in this guide's "Effect samples" chapter) |
 | `pykaki/i18n/` | the dictionary for the screen language button (`strings.tsv`) |
+| `showpy/i18n/` | finds text missing from the in-game editor dictionary (`extract_editor.py`). The dictionary is `showpy/game/ui_kit/editor/editor_lang.tsv` |
 | `pykaki/licenses/` | licenses of fonts and libraries bundled in the app |
 | `showpy/game/` | the four pygaki plugin folders (exactly as they go into a game's `game/`) |
 | `showpy/docs/CUSTOM_GUIDE.md` | settings reference. Source of this guide's "Plugin customization guide" chapter |

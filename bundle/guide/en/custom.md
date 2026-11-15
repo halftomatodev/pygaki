@@ -1,4 +1,4 @@
-<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ 643f9d9d8d -->
+<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ 7ccb153023 -->
 # pygaki plugin customization guide (5.1)
 
 2026-11-13 · version 5.1 (changed in 5.1: the effects folder and image transitions, files to turn off effects and shaders, photo collage (instead of shifting shards), the shimmer shader `ripple`, detail values on shader lines and per-scene dialogue sound and cursor, pixel sort and datamosh as shader transitions, the tree diagram, pygaki as a desktop app only. Changed in 5.0: seven new screen effects (glitch, jitter, halftone, hologram, night vision, shifting shards, flying shards), effects on a single image, eleven text effects, text boxes (speech bubble, rounded frame), editing the splash on screen, the in-game editor's "UI text" tab. Changed in 4.22: lines where shaders change and per-line transitions, "from here" for cursor and shaders, a tidier dialogue tab, cursor and CTC image folders. Changed in 4.21: shader section details moved under slots 1 and 2, clicking a line moves the game there too. Changed in 4.20: two shader slots and "Apply from here", title and in-game menu shaders, title background and title, subtitle, text effects, rotation handle)
@@ -7,7 +7,7 @@
 
 This document is for people who installed the pygaki plugins 5.1 to look up **which value in which file changes what**. Full descriptions of setting names are in each folder's `README.md` (Korean); this document starts from "what you want to do". If you write your text in pygaki, start with "Using it with pygaki".
 
-The in-game editor (Shift+M) screens and tab names are in Korean only. This document gives translated names for tabs and buttons (e.g. "dialogue tab" = 대사 탭). Comments in the settings files are in Korean too.
+The in-game editor (Shift+M) can be switched to Japanese or English with the [Language] button on its panel (it starts out following the game's language). This document sometimes gives the Korean screen names next to tab and button names (e.g. "dialogue tab" = 대사 탭). Comments in the settings files are in Korean.
 
 | Folder | What it does | Files you edit |
 | --- | --- | --- |
@@ -818,6 +818,8 @@ e "속까지." (box="pill", pill_fill="#ffd23b", pill_line=None, color="#000000"
 ## Editing with the editor (Shift+M)
 
 With the game running from the launcher (developer mode), press **Shift+M** to open the editor. It doesn't open in releases. While the editor is open, clicks and keys don't go to the game.
+
+Each click on the panel's **[Language]** button switches the editor's text 한국어 → 日本語 → English (4.12). The choice is remembered per game (`persistent`) and starts out following the game's language. The game screen's text (dialogue, menus, the text you're editing) and saved values don't change. Translations live in `ui_kit/editor/editor_lang.tsv` (Korean, Japanese, English per line); text missing from it shows in Korean.
 
 | Tab | Where it opens | What you can change | Ctrl+S saves to |
 | --- | --- | --- | --- |

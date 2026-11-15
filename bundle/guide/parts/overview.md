@@ -57,6 +57,7 @@
 | `pykaki/docs/SPEC.md` | pygaki 구조 설명 (고치는 사람용) |
 | `pykaki/public/effects/` | 글자 효과 견본 영상 (이 안내서의 "효과 견본" 장에 들어감) |
 | `pykaki/i18n/` | 화면 언어 버튼의 사전(`strings.tsv`) |
+| `showpy/i18n/` | 게임 안 편집 화면 사전에 없는 글 찾기(`extract_editor.py`). 사전은 `showpy/game/ui_kit/editor/editor_lang.tsv` |
 | `pykaki/licenses/` | 앱에 함께 넣은 글꼴·라이브러리의 라이선스 |
 | `showpy/game/` | pygaki 플러그인 네 폴더 (게임의 `game/`에 넣는 그대로) |
 | `showpy/docs/CUSTOM_GUIDE.md` | 설정 값 찾아보기. 이 안내서의 "플러그인 커스텀 가이드" 장 |

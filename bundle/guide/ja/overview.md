@@ -1,4 +1,4 @@
-<!-- 원본: bundle/guide/parts/overview.md @ 2bbf8e60ee -->
+<!-- 원본: bundle/guide/parts/overview.md @ 10bea5c7ab -->
 # ひと目で:文書とファイルの場所
 
 ダウンロードしたパック、作ったゲームのプロジェクト、リポジトリのどこに何があるかをまとめました。「このファイルは消していいか」「自分の作業はどこに保存されるか」が気になったときに見ます。
@@ -58,6 +58,7 @@
 | `pykaki/docs/SPEC.md` | pygaki の構造の説明(手を入れる人向け) |
 | `pykaki/public/effects/` | 文字エフェクトの見本動画(この案内書の「エフェクト見本」の章に入る) |
 | `pykaki/i18n/` | 画面の言語ボタンの辞書(`strings.tsv`) |
+| `showpy/i18n/` | ゲーム内編集画面の辞書にない文字を探す(`extract_editor.py`)。辞書は `showpy/game/ui_kit/editor/editor_lang.tsv` |
 | `pykaki/licenses/` | アプリに同梱したフォント・ライブラリのライセンス |
 | `showpy/game/` | pygaki プラグインの 4 フォルダー(ゲームの `game/` に入れるそのままの形) |
 | `showpy/docs/CUSTOM_GUIDE.md` | 設定値の早見表。この案内書の「プラグイン カスタムガイド」の章の元 |

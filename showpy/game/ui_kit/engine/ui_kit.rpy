@@ -22,7 +22,7 @@ init -20 python in ui_kit:
     import store
     from store import DictEquality, TransformMatrix, Matrix, Movie, python_object
 
-    VERSION = "4.11"
+    VERSION = "4.12"
 
     ## ── 플러그인 폴더 위치 ──
     ## 이 파일은 <플러그인 폴더>/engine/ui_kit.rpy 에 있습니다.
@@ -246,5 +246,6 @@ init -20 python in ui_kit:
 
 
 init 990 python in ui_kit:
-    ## 배포판을 만들 때 플러그인 폴더의 설명서(.md)는 빼고 묶습니다.
+    ## 배포판을 만들 때 플러그인 폴더의 설명서(.md)와 편집기 언어 사전(.tsv, 개발 모드에서만 씀)은 빼고 묶습니다.
     store.build.classify(ROOT + "/**.md", None)
+    store.build.classify(ROOT + "/**.tsv", None)

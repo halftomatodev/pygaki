@@ -1,0 +1,1276 @@
+# 게임 안 편집 화면(Shift+M) 사전. 한 줄에 한국어<탭>일본어<탭>영어. editor_lang.rpy가 읽음
+# 줄바꿈은 \n, 글자 그대로의 \n은 \\n. 한국어의 {} 자리(format)는 번역에 {0} {1}로 (차례를 바꿔도 됨)
+# 사전에 없는 글 찾기: 저장소의 showpy/i18n/extract_editor.py → showpy/i18n/missing.txt
+화면 기준	画面基準	screen
+저장 (Ctrl+S)	保存 (Ctrl+S)	Save (Ctrl+S)
+복사 (Ctrl+C)	コピー (Ctrl+C)	Copy (Ctrl+C)
+닫기 (Esc)	閉じる (Esc)	Close (Esc)
+접기	折りたたむ	Fold
+다음 탭	次のタブ	Next tab
+지금 줄: {}	現在の行:{0}	Current line: {0}
+켬	オン	on
+끔	オフ	off
+자동 비키기	自動でよける	Auto dodge
+대사 넘기기	セリフを進める	Advance dialogue
+이전 대사로	前のセリフへ	Previous line
+다음 대사로	次のセリフへ	Next line
+누르는 동안 스킵	押している間スキップ	Skip while held
+스킵 멈춤	スキップ停止	Stop skipping
+스킵 켜기/끄기	スキップのオン/オフ	Toggle skip
+빨리 스킵	高速スキップ	Fast skip
+UI 숨기기	UIを隠す	Hide UI
+스크린샷	スクリーンショット	Screenshot
+전체 화면	フルスクリーン	Fullscreen
+게임 메뉴	ゲームメニュー	Game menu
+접근성 메뉴	アクセシビリティメニュー	Accessibility menu
+대사 읽어주기	セリフ読み上げ	Self-voicing
+대사 복사 읽기	クリップボード読み上げ	Clipboard voicing
+읽어주기 확인	読み上げ確認	Voicing debug
+끝내기	終了	Quit
+창 내리기	最小化	Minimize
+도움말	ヘルプ	Help
+그리기 방식 고르기	描画方式の選択	Choose renderer
+진행 화면	進行画面	Progress screen
+연출 도구(개발)	演出ツール(開発)	Director (dev)
+개발 메뉴(개발)	開発メニュー(開発)	Developer menu (dev)
+다시 불러오기(개발)	再読み込み(開発)	Reload (dev)
+스타일 보기(개발)	スタイル表示(開発)	Style inspector (dev)
+콘솔(개발)	コンソール(開発)	Console (dev)
+성능 기록(개발)	パフォーマンス記録(開発)	Profile once (dev)
+메모리 기록(개발)	メモリ記録(開発)	Memory profile (dev)
+성능 보기(개발)	パフォーマンス表示(開発)	Performance (dev)
+그림 기록(개발)	画像記録(開発)	Image load log (dev)
+말풍선 편집(개발)	吹き出し編集(開発)	Bubble editor (dev)
+저장 지우기	セーブ削除	Delete save
+번역 보기(개발)	翻訳表示(開発)	Translation info (dev)
+끌기	ドラッグ	Drag
+메뉴 이동	メニュー移動	Menu navigation
+막대 조절	バー調整	Bar adjust
+스크롤	スクロール	Scroll
+입력 칸	入力欄	Input field
+버튼 누르기	ボタンを押す	Press button
+설정 파일 단축키	設定ファイルのショートカット	Shortcuts from the settings file
+키 바꾸기를 그만뒀습니다. (Esc를 쓰려면 [[키 단추로]에서 고르세요)	キーの変更をやめました。(Esc を使うには [キーボタンで] から選んでください)	Key change cancelled. (To use Esc, pick it under [Key buttons])
+이 키는 이름을 몰라서 쓸 수 없습니다.	このキーは名前が分からないため使えません。	This key can't be used because its name is unknown.
+단축키 수정	ショートカット編集	Edit shortcuts
+키 바꾸기를 그만뒀습니다.	キーの変更をやめました。	Key change cancelled.
+게임 창에서 '{}'에 {} 키를 누르세요 (Shift, Ctrl, Alt와 같이 눌러도 됨). Esc는 그만두기.	ゲームウィンドウで「{0}」に{1}キーを押してください(Shift、Ctrl、Alt と一緒でも可)。Esc でやめます。	In the game window, press the key to {1} for '{0}' (Shift, Ctrl, Alt combos OK). Esc cancels.
+더할	追加する	add
+쓸	使う	use
+{}는 편집 화면을 여는 키라서 쓸 수 없습니다.	{0} は編集画面を開くキーなので使えません。	{0} opens the editor, so it can't be used.
+'{}'에는 이미 {} 키가 있습니다.	「{0}」にはすでに {1} キーがあります。	'{0}' already has the {1} key.
+{}는 hotkeys_config.rpy의 단축키({})가 씁니다. 그 파일에서 고치거나 다른 키를 고르세요.	{0} は hotkeys_config.rpy のショートカット({1})が使っています。そのファイルで直すか、別のキーを選んでください。	{0} is used by a shortcut in hotkeys_config.rpy ({1}). Change it there or pick another key.
+{}는 '{}'에서 쓰고 있습니다. 아래 안내를 보고 고르세요.	{0} は「{1}」で使われています。下の案内を見て選んでください。	{0} is used by '{1}'. See below and choose.
+바꾸지 않았습니다.	変更しませんでした。	Nothing changed.
+'{}' 키: {}{}	「{0}」のキー:{1}{2}	'{0}' keys: {1}{2}
+없음	なし	none
+('{}'에서는 뺐습니다)	(「{0}」からは外しました)	(removed from '{0}')
+'{}'의 키를 모두 뺐습니다.	「{0}」のキーをすべて外しました。	Removed all keys from '{0}'.
+'{}'를 처음 키로 돌렸습니다: {}	「{0}」を初期キーに戻しました:{1}	Reset '{0}' to its default keys: {1}
+(다른 기능이 쓰는 키는 뺌: {})	(ほかの機能が使うキーは除外:{0})	(keys used by other actions left out: {0})
+스플래시 플러그인(splash 2.5 이상)이 있어야 조작 안내 화면으로 내보낼 수 있습니다.	操作案内画面に書き出すにはスプラッシュプラグイン(splash 2.5 以上)が必要です。	Exporting to the controls screen needs the splash plugin (splash 2.5 or later).
+지금 목록을 복사해 넣었습니다. 이제 칸마다 고칠 수 있습니다.	今のリストをコピーしました。各欄を編集できます。	Copied the current list. You can now edit each field.
+키	キー	Key
+설명	説明	Description
+키 없음	キーなし	No key
+바꾼 기능 {}개	変更した機能 {0} 個	{0} actions changed
+저장 안 한 변경 있음 (게임에는 벌써 적용됨)	未保存の変更あり(ゲームにはもう適用済み)	Unsaved changes (already applied in the game)
+저장 안 한 변경 없음	未保存の変更なし	No unsaved changes
+오류:	エラー:	Error:
+키 단추를 누르고 게임 창에서 바꿀 키를 누름 (Esc 그만). 겹치면 안내를 보고 고름	キーボタンを押し、ゲームウィンドウで新しいキーを押す(Esc でやめる)。重なったら案内を見て選ぶ	Click a key button, then press the new key in the game window (Esc cancels). On a clash, follow the prompt
+고치면 바로 적용됨: 편집 화면을 닫고 눌러 봄. 저장하면 hotkeys/hotkeys_layout.rpy	変更はすぐ適用:編集画面を閉じて押してみる。保存先は hotkeys/hotkeys_layout.rpy	Changes apply at once: close the editor and try them. Saving writes hotkeys/hotkeys_layout.rpy
+안내 화면으로 내보내기	案内画面に書き出す	Export to the controls screen
+조작 안내 화면이 이 표를 따라감	操作案内画面はこの表に従う	The controls screen follows this table
+조작 안내 화면과 잇기	操作案内画面とつなぐ	Link to the controls screen
+키 단추를 누르고 게임 창에서 바꿀 키를 누릅니다 (Esc 그만두기). 고치면 바로 게임에 적용됩니다.	キーボタンを押し、ゲームウィンドウで新しいキーを押します(Esc でやめる)。変更はすぐゲームに適用されます。	Click a key button, then press the new key in the game window (Esc cancels). Changes apply to the game at once.
+누르세요...	押してください...	Press a key...
+바꿈	変更	Changed
+설정 파일	設定ファイル	Settings file
+{}는 이미 쓰고 있습니다:	{0} はすでに使われています:	{0} is already in use:
+[[그쪽에서 빼고 바꾸기]를 누르면 위 기능에서는 이 키가 빠지고 '{}'에만 걸립니다.	[そちらから外して変更] を押すと、上の機能からこのキーが外れ「{0}」だけに割り当てられます。	Click [Remove there and change] to take this key off the action above and give it only to '{0}'.
+메뉴 이동, 입력 칸 같은 렌파이 화면 조작에서 빼면 그 조작은 이 키로 안 됩니다.	メニュー移動や入力欄など Ren'Py の画面操作から外すと、その操作はこのキーではできなくなります。	If you remove it from Ren'Py screen controls such as menu navigation or input fields, those controls won't work with this key.
+다른 키를 쓰려면 [[취소] 뒤 키 단추를 다시 누르세요.	別のキーにするには [キャンセル] の後でキーボタンを押し直してください。	To use another key, click [Cancel] and then the key button again.
+그쪽에서 빼고 바꾸기	そちらから外して変更	Remove there and change
+취소	キャンセル	Cancel
+키 단추 닫기	キーボタンを閉じる	Close key buttons
+키 단추로	キーボタンで	Key buttons
+키 빼기	キーを外す	Remove key
+처음 키로	初期キーに戻す	Reset to default
+같이 누를 키:	同時に押すキー:	Modifier keys:
+조작 안내 화면과 조작방법 화면에 보일 글 (비우면 기능 이름)	操作案内画面と操作方法画面に表示する文(空なら機能名)	Text shown on the controls and help screens (empty = action name)
+예전에 만든 단축키 줄	以前作ったショートカットの行	Shortcut lines made earlier
+지우기	削除	Delete
+렌파이 기본 조작에서 뺀 키	Ren'Py の標準操作から外したキー	Keys removed from Ren'Py's default controls
+다시 넣기	戻す	Put back
+ESC 조작방법 화면 목록	ESC 操作方法画面のリスト	ESC help screen list
+펼치기	広げる	Unfold
+바꾼 키가 저절로 들어감	変更したキーが自動で入る	Changed keys are filled in automatically
+직접 적기로 바꾸기	手入力に切り替え	Switch to manual list
+줄 더하기	行を追加	Add row
+줄 지우기	行を削除	Delete row
+위로	上へ	Up
+아래로	下へ	Down
+저절로 만들기로	自動作成に戻す	Back to automatic
+줄기표를 폈습니다. 마디를 끌어서 구간을 고르세요. (G 접기)	フロー表を開きました。節をドラッグして区間を選んでください。(G で閉じる)	Opened the flow chart. Drag across nodes to pick a range. (G to fold)
+(맞으면)	(当てはまれば)	(if true)
+이 마디 아래에는 고를 수 있는 줄이 없습니다.	この節の下には選べる行がありません。	There are no selectable lines under this node.
+{}~{}번째 줄을 골랐습니다. 1번, 2번 셰이더를 고르고 [[이 구간에 적용]을 누르세요.	{0}~{1} 行目を選びました。シェーダー 1、2 を選んで [この区間に適用] を押してください。	Selected lines {0}-{1}. Pick shaders 1 and 2, then click [Apply to this range].
+구간 안에 셰이더 줄을 넣을 수 있는 문장이 없습니다.	区間内にシェーダー行を入れられる文がありません。	No statement in the range can take a shader line.
+끝 줄이 jump/return이라 끝 다음 줄이 없습니다. 되돌리기는 넣지 않습니다.	最後の行が jump/return なので次の行がありません。戻しは入れません。	The last line is jump/return, so there is no next line. No reset is added.
+pygaki 원고라 끝 다음 {}번째 줄(menu 같은 줄) 앞에는 줄을 넣을 수 없어서 되돌리기는 넣지 않습니다. 구간 끝을 한 줄 앞으로 잡아 보세요.	pygaki のスクリプトなので、次の {0} 行目(menu などの行)の前には行を入れられず、戻しは入れません。区間の終わりを 1 行前にしてみてください。	In a pygaki script no line can go before line {0} (a line such as menu), so no reset is added. Try ending the range one line earlier.
+끝 다음에 이 파일에서 이어지는 줄이 없어서 되돌리기는 넣지 않습니다.	終わりの後にこのファイルで続く行がないので、戻しは入れません。	No line follows the end in this file, so no reset is added.
+끝 줄이 선택지/if 가지 안이라, 다른 가지로 가면 끝 다음 줄을 지나지 않습니다.	最後の行が選択肢/if の分岐内なので、別の分岐に進むと次の行を通りません。	The last line is inside a choice/if branch, so other branches won't pass the next line.
+줄기표에서 마디를 끌어 구간을 먼저 고르세요.	先にフロー表で節をドラッグして区間を選んでください。	First drag across nodes in the flow chart to pick a range.
+원고 쓰기 도구(UI Kit 3.0 이상)가 없습니다.	スクリプト書き込みツール(UI Kit 3.0 以上)がありません。	The script writer (UI Kit 3.0 or later) is missing.
+{}번째 줄부터 원래대로({}).	{0} 行目から元に戻す({1})。	Back to normal from line {0} ({1}).
+끝 다음 {}번째 줄에는 이미 셰이더 줄이 있어서 되돌리기는 넣지 않았습니다.	次の {0} 行目にはすでにシェーダー行があるので、戻しは入れませんでした。	Line {0} after the end already has a shader line, so no reset was added.
+{}번째 줄부터 {}.{} 전환 점 {}곳을 골라 두었습니다. 저장(Ctrl+S)하면 원고에 들어갑니다.	{0} 行目から {1}。{2} トランジション点 {3} か所を選びました。保存(Ctrl+S)するとスクリプトに入ります。	From line {0}: {1}.{2} Picked {3} transition points. Save (Ctrl+S) to write them to the script.
+구간 안에 지울 셰이더 줄이 없습니다.	区間内に削除するシェーダー行がありません。	There are no shader lines to delete in the range.
+구간 안의 셰이더 줄 {}곳을 지우기로 했습니다. (대사 괄호의 fx=는 그대로)	区間内のシェーダー行 {0} か所を削除します。(セリフの括弧の fx= はそのまま)	Marked {0} shader lines in the range for deletion. (fx= in dialogue brackets stays)
+줄을 먼저 고르세요.	先に行を選んでください。	Pick a line first.
+고른 줄이 줄기표에 없습니다.	選んだ行がフロー表にありません。	The selected line isn't in the flow chart.
+전환 점 {}곳을 골랐습니다. 패널의 '고른 전환 점'에서 전환을 고르세요.	トランジション点 {0} か所を選びました。パネルの「選んだトランジション点」でトランジションを選んでください。	Picked {0} transition points. Choose a transition under 'Selected transition points' in the panel.
+고른 전환 점이 없습니다.	選んだトランジション点がありません。	No transition points selected.
+줄기표에서 구간을 먼저 고르세요.	先にフロー表で区間を選んでください。	Pick a range in the flow chart first.
+구간이 닿는 전환 점 {}곳을 골랐습니다.	区間にかかるトランジション点 {0} か所を選びました。	Picked {0} transition points touching the range.
+줄기표 오른쪽 동그라미를 눌러 전환 점을 먼저 고르세요.	先にフロー表の右の丸を押してトランジション点を選んでください。	Click the circles at the right of the flow chart to pick transition points first.
+전환 점 {}곳의 전환: {}.{} 저장(Ctrl+S)하면 원고에 들어갑니다.	トランジション点 {0} か所のトランジション:{1}。{2} 保存(Ctrl+S)するとスクリプトに入ります。	Transition for {0} points: {1}.{2} Save (Ctrl+S) to write it to the script.
+대사 괄호 줄 {}곳은 '셰이더가 바뀌는 줄'에서 [[두 자리로 바꾸기] 먼저.	セリフの括弧の行 {0} か所は、先に「シェーダーが変わる行」で [2 枠に変える] を。	For {0} dialogue-bracket lines, first use [Switch to two slots] under 'Lines where the shader changes'.
+셰이더: {} ({})	シェーダー:{0}({1})	Shader: {0} ({1})
+(바꿀 예정)	(変更予定)	(to change)
+* (셰이더 줄 지움)	* (シェーダー行を削除)	* (shader line deleted)
+지울 셰이더 줄이 없습니다. 줄기표에서 구간을 끌어 고르거나 오른쪽 네모 점을 고르세요.	削除するシェーダー行がありません。フロー表で区間をドラッグするか、右の四角の点を選んでください。	No shader lines to delete. Drag a range in the flow chart or pick the square points on the right.
+이 구간에는 앞에서 이어진 셰이더({})가 보입니다. 둘 다 기본으로 하려면 앞의 셰이더 줄도 지우세요.	この区間には前から続くシェーダー({0})が見えます。両方をデフォルトにするには前のシェーダー行も削除してください。	This range shows a shader carried over from earlier ({0}). To make both default, delete the earlier shader line too.
+셰이더 줄 {}곳을 지우기로 했습니다.{} 저장(Ctrl+S)하면 원고에서 빠집니다.	シェーダー行 {0} か所を削除します。{1} 保存(Ctrl+S)するとスクリプトから消えます。	Marked {0} shader lines for deletion.{1} Save (Ctrl+S) to remove them from the script.
+줄기표 -	フロー表 -	Flow chart -
+원고 없음	スクリプトなし	No script
+지금 줄	現在の行	Current line
+G 접기	G で閉じる	G to fold
+이 원고 파일에서 label 안의 줄을 찾지 못했습니다. 게임을 진행한 뒤 다시 펴세요.	このスクリプトファイルで label 内の行が見つかりませんでした。ゲームを進めてから開き直してください。	No lines inside a label were found in this script file. Play on a bit and open it again.
+누르기: 그 줄로 | 끌기: 구간 | 네모 점: 전환 점 | Delete: 셰이더 지우기 | 휠: 스크롤	クリック:その行へ | ドラッグ:区間 | 四角の点:トランジション点 | Delete:シェーダー削除 | ホイール:スクロール	Click: go to line | Drag: range | Square points: transition points | Delete: remove shader | Wheel: scroll
+G 줄기표 접기	G フロー表を閉じる	G Fold flow chart
+G 줄기표 펴기	G フロー表を開く	G Open flow chart
+고른 줄을 구간 시작으로	選んだ行を区間の始まりに	Selected line as range start
+구간 끝으로	区間の終わりに	As range end
+줄기표에서 마디를 끌어 구간을 고르세요. (앱에서는 원고 칸에서 줄을 고르고 위 두 버튼)	フロー表で節をドラッグして区間を選んでください。(アプリではスクリプト欄で行を選び、上の 2 つのボタン)	Drag across nodes in the flow chart to pick a range. (In the app, pick lines in the script panel and use the two buttons above)
+구간 풀기	区間を解除	Clear range
+구간: {}~{}번째 줄 → {}	区間:{0}~{1} 行目 → {2}	Range: lines {0}-{1} → {2}
+끝난 뒤 {}번째 줄부터 원래대로: {}{}	終了後 {0} 行目から元に戻す:{1}{2}	After the end, back to normal from line {0}: {1}{2}
+(그 줄에 이미 셰이더 줄이 있어서 안 넣음)	(その行にすでにシェーダー行があるので入れない)	(not added: that line already has a shader line)
+끝난 뒤 되돌리기: 넣지 않음	終了後の戻し:入れない	Reset after the end: none
+되돌리는 곳	戻す場所	Reset at
+끝 다음 줄	終わりの次の行	Line after the end
+가지가 합쳐지는 곳	分岐が合流する所	Where branches merge
+안 넣음	入れない	None
+구간 안에 셰이더가 바뀌는 줄이 {}곳 있습니다. 그 줄부터는 그 줄의 셰이더가 보입니다.	区間内にシェーダーが変わる行が {0} か所あります。その行からはその行のシェーダーが見えます。	The range has {0} lines where the shader changes. From those lines on, their shader shows.
+이 구간에 적용	この区間に適用	Apply to this range
+구간 안 셰이더 줄 지우기	区間内のシェーダー行を削除	Delete shader lines in range
+구간이 닿는 전환 점 고르기	区間にかかるトランジション点を選ぶ	Pick transition points in range
+구간의 셰이더 지우기 (Delete)	区間のシェーダーを削除 (Delete)	Remove range shader (Delete)
+고른 전환 점 {}곳 ({}번째 줄)	選んだトランジション点 {0} か所({1} 行目)	{0} selected transition points (line {1})
+고르기 풀기	選択を解除	Clear selection
+고른 점 지우기 (Delete)	選んだ点を削除 (Delete)	Delete selected points (Delete)
+그림 고르기 - game 폴더의 그림	画像を選ぶ - game フォルダーの画像	Pick image - images in the game folder
+타이틀 일렁임	タイトルのゆらめき	Title ripple
+watermorph_config.rpy에 붙여넣으세요.	watermorph_config.rpy に貼り付けてください。	Paste into watermorph_config.rpy.
+일렁임 세기 (픽셀)	ゆらめきの強さ(ピクセル)	Ripple strength (px)
+물결 크기 (픽셀)	波の大きさ(ピクセル)	Wave size (px)
+흐르는 속도	流れる速さ	Flow speed
+소용돌이	渦	Swirl
+반사광	反射光	Highlights
+타이틀 일렁임 기능이 없습니다.	タイトルのゆらめき機能がありません。	The title ripple feature is missing.
+타이틀 화면에서 쓸 수 있습니다. (효과가 타이틀에서만 보여서)	タイトル画面で使えます。(効果がタイトルでしか見えないため)	Available on the title screen (the effect only shows there).
+저장 안 한 변경을 되돌렸습니다.	未保存の変更を元に戻しました。	Reverted unsaved changes.
+꺼져 있습니다. 켜야 화면에 보입니다.	オフです。オンにすると画面に見えます。	It's off. Turn it on to see it.
+저장 안 한 변경: {}개	未保存の変更:{0} 個	Unsaved changes: {0}
+막대를 끌면 타이틀 화면에 바로 보입니다. 적용 대상 바꾸기는 저장하면 다시 불러온 뒤 적용됩니다.	バーをドラッグするとタイトル画面にすぐ見えます。適用対象の変更は保存して再読み込みした後に適用されます。	Dragging a bar shows it on the title screen at once. Changing the target applies after saving and reloading.
+Backspace 저장 안 한 변경 되돌리기	Backspace 未保存の変更を元に戻す	Backspace Revert unsaved changes
+화면 효과	画面エフェクト	Screen FX
+항상	常に	Always
+게임 중에만	ゲーム中のみ	In game only
+타이틀에서만	タイトルのみ	Title only
+TV 껐다 켜기	テレビのオフ/オン	TV off/on
+서서히	徐々に	Gradual
+바로	すぐ	Instant
+꺼지는 시간 (초)	消える時間(秒)	Off time (s)
+검은 화면 (초)	黒い画面(秒)	Black screen (s)
+켜지는 시간 (초)	つく時間(秒)	On time (s)
+가로선 두께 (픽셀)	横線の太さ(ピクセル)	Line thickness (px)
+꺼질 때 섬광	消えるときの閃光	Flash when turning off
+켜질 때 지직거림	つくときのノイズ	Static when turning on
+소리 음량	音量	Sound volume
+서서히 바꾸는 시간 (초)	徐々に変える時間(秒)	Fade time (s)
+설정 파일에 붙여넣으세요.	設定ファイルに貼り付けてください。	Paste into the settings file.
+등록된 화면 효과가 없습니다.	登録された画面エフェクトがありません。	No screen effects are registered.
+값	値	Value
+"keys": 기능마다 바꾼 키 (렌파이 기본 기능은 키보드 키만 바뀌고 마우스는 그대로).	"keys": 機能ごとに変えたキー(Ren'Py の標準機能はキーボードのキーだけ変わり、マウスはそのまま)。	"keys": changed keys per action (for Ren'Py's built-in actions only keyboard keys change; the mouse stays).
+"desc": 조작 안내 화면과 조작방법 화면에 보일 설명 (없으면 기능 이름).	"desc": 操作案内画面と操作方法画面に表示する説明(なければ機能名)。	"desc": text shown on the controls and help screens (action name if absent).
+여기 적힌 단축키와 뺀 키는 hotkeys_config.rpy의 것에 더해집니다.	ここに書かれたショートカットと外したキーは hotkeys_config.rpy のものに加わります。	The shortcuts and removed keys here are added to those in hotkeys_config.rpy.
+이 파일을 지우면 설정 파일 값으로 돌아갑니다.	このファイルを消すと設定ファイルの値に戻ります。	Delete this file to go back to the settings file values.
+게임 안 편집 화면이 저장한 단축키입니다.	ゲーム内編集画面が保存したショートカットです。	Shortcuts saved by the in-game editor.
+UI Kit 편집기가 저장한 타이틀 일렁임 설정입니다.	UI Kit エディターが保存したタイトルのゆらめき設定です。	Title ripple settings saved by the UI Kit editor.
+여기 적힌 값은 watermorph_config.rpy의 같은 값보다 우선합니다.	ここに書かれた値は watermorph_config.rpy の同じ値より優先されます。	Values here override the same values in watermorph_config.rpy.
+두 자리 모두 '기본'으로 골랐습니다. [[여기에서부터 적용]을 눌러야 원고에 들어갑니다.	2 枠とも「デフォルト」にしました。[ここから適用] を押すとスクリプトに入ります。	Set both slots to 'Default'. Click [Apply from here] to write it to the script.
+줄을 넣을 수 있는 곳을 찾지 못했습니다. 게임을 진행한 뒤 다시 누르세요.	行を入れられる場所が見つかりませんでした。ゲームを進めてから押し直してください。	Couldn't find a place to insert a line. Play on a bit and click again.
+{}번째 줄부터 1번 {} + 2번 {} (전환 {}). 저장(Ctrl+S)하면 원고에 들어갑니다.	{0} 行目から 1 番 {1} + 2 番 {2}(トランジション {3})。保存(Ctrl+S)するとスクリプトに入ります。	From line {0}: slot 1 {1} + slot 2 {2} (transition {3}). Save (Ctrl+S) to write it to the script.
+지금 줄로 옮겼습니다. 게임을 진행하면 고른 줄이 따라갑니다.	現在の行に移しました。ゲームを進めると選んだ行が付いていきます。	Moved to the current line. The selection follows as the game goes on.
+세모는 게임의 지금 줄입니다. 두 번 누르면 그 줄로 갑니다.	三角はゲームの現在の行です。2 回押すとその行へ行きます。	The triangle marks the game's current line. Double-click to go to that line.
+설정대로	設定どおり	As configured
+0 평평	0 平ら	0 Flat
+1 기본	1 デフォルト	1 Default
+5 크게	5 大きく	5 Large
+지금 줄을 알 수 없습니다. 게임을 진행한 뒤 다시 누르세요.	現在の行が分かりません。ゲームを進めてから押し直してください。	The current line is unknown. Play on a bit and click again.
+이 원고 파일에서 줄을 넣을 수 있는 곳(label 안의 줄)을 찾지 못했습니다.	このスクリプトファイルで行を入れられる場所(label 内の行)が見つかりませんでした。	No place to insert a line (a line inside a label) was found in this script file.
+{}번째 줄에는 넣을 수 없어서 가장 가까운 {}번째 줄을 골랐습니다.	{0} 行目には入れられないので、一番近い {1} 行目を選びました。	Line {0} can't take it, so the nearest line {1} was picked.
+이 줄 위에는 지울 화면 효과 줄이 없습니다.	この行の上には削除する画面エフェクト行がありません。	There is no screen FX line above this line to delete.
+이 줄 위에는 지울 셰이더 줄이 없습니다. (커서 줄은 커서 칸에서)	この行の上には削除するシェーダー行がありません。(カーソル行はカーソル欄で)	There is no shader line above this line to delete. (Cursor lines: in the cursor section)
+그림 전환과 같이	画像のトランジションと同じ	Same as image transition
+{}번째 줄 전환: {}. 저장(Ctrl+S)하면 원고에 들어갑니다.	{0} 行目のトランジション:{1}。保存(Ctrl+S)するとスクリプトに入ります。	Line {0} transition: {1}. Save (Ctrl+S) to write it to the script.
+대사 탭이 없어서 대사 괄호를 고칠 수 없습니다.	セリフタブがないので、セリフの括弧を直せません。	The dialogue tab is missing, so dialogue brackets can't be edited.
+{}번째 줄을 두 자리로: 1번 {} + 2번 {}. 저장(Ctrl+S)하면 원고에 들어갑니다.	{0} 行目を 2 枠に:1 番 {1} + 2 番 {2}。保存(Ctrl+S)するとスクリプトに入ります。	Line {0} to two slots: slot 1 {1} + slot 2 {2}. Save (Ctrl+S) to write it to the script.
+1번 {} + 2번 {}	1 番 {0} + 2 番 {1}	slot 1 {0} + slot 2 {1}
+{}번째 줄부터 커서: {}. 저장(Ctrl+S)하면 원고에 들어갑니다.	{0} 行目からカーソル:{1}。保存(Ctrl+S)するとスクリプトに入ります。	Cursor from line {0}: {1}. Save (Ctrl+S) to write it to the script.
+이 줄 위에는 지울 커서 줄이 없습니다.	この行の上には削除するカーソル行がありません。	There is no cursor line above this line to delete.
+대사 탭이 없습니다. (UI Kit 2.9 이상)	セリフタブがありません。(UI Kit 2.9 以上)	The dialogue tab is missing. (UI Kit 2.9 or later)
+대사가 화면에 떠 있을 때만 됩니다. 대사까지 진행한 뒤 다시 누르세요.	セリフが画面に出ているときだけ使えます。セリフまで進めてから押し直してください。	Only works while dialogue is on screen. Play to a line of dialogue and click again.
+덮개 켬	オーバーレイ オン	Overlay on
+대사 탭: 이 대사부터 {}. Ctrl+S를 누르면 원고의 이 줄에 적힙니다.	セリフタブ:このセリフから {0}。Ctrl+S でスクリプトのこの行に書き込みます。	Dialogue tab: {0} from this line. Press Ctrl+S to write it to this line of the script.
+이 줄의 저장 안 한 변경을 되돌렸습니다.	この行の未保存の変更を元に戻しました。	Reverted unsaved changes on this line.
+전환 설정의 저장 안 한 변경을 되돌렸습니다.	トランジション設定の未保存の変更を元に戻しました。	Reverted unsaved transition settings.
+{} 기본 설정의 저장 안 한 변경을 되돌렸습니다.	{0} の基本設定の未保存の変更を元に戻しました。	Reverted unsaved changes to {0} base settings.
+{} 프리셋 '{}'의 저장 안 한 변경을 되돌렸습니다.	{0} のプリセット「{1}」の未保存の変更を元に戻しました。	Reverted unsaved changes to {0} preset '{1}'.
+UI Kit 편집기가 저장한 {} 효과 설정입니다.	UI Kit エディターが保存した {0} エフェクトの設定です。	{0} effect settings saved by the UI Kit editor.
+여기 적힌 값은 {}_config.rpy의 같은 값보다 우선합니다.	ここに書かれた値は {0}_config.rpy の同じ値より優先されます。	Values here override the same values in {0}_config.rpy.
+settings는 바꾼 값만, presets는 바꾼 프리셋 전체가 들어 있습니다.	settings には変えた値だけ、presets には変えたプリセット全体が入っています。	settings holds only changed values; presets holds whole changed presets.
+게임 중에 {}.set()으로 바꾼 값과는 상관없습니다.	ゲーム中に {0}.set() で変えた値とは関係ありません。	This is unrelated to values changed with {0}.set() during play.
+UI Kit 편집기가 저장한 화면 효과 전환 설정입니다.	UI Kit エディターが保存した画面エフェクトのトランジション設定です。	Screen FX transition settings saved by the UI Kit editor.
+여기 적힌 값은 screen_fx_config.rpy의 같은 값보다 우선합니다.	ここに書かれた値は screen_fx_config.rpy の同じ値より優先されます。	Values here override the same values in screen_fx_config.rpy.
+고른 셰이더: 1번 {} + 2번 {}{}	選んだシェーダー:1 番 {0} + 2 番 {1}{2}	Selected shaders: slot 1 {0} + slot 2 {1}{2}
+(게임의 지금 값)	(ゲームの現在の値)	(the game's current value)
+고른 줄이 없습니다. [ ] 키, 목록, 줄 번호로 고르세요.	選んだ行がありません。[ ] キー、リスト、行番号で選んでください。	No line selected. Pick one with the [ ] keys, the list or a line number.
+고른 줄: {} {}번째 줄{} (이 줄부터 적용)	選んだ行:{0} {1} 行目{2}(この行から適用)	Selected line: {0} line {1}{2} (applies from this line)
+지금 줄을 따라감	現在の行に付いていく	following the current line
+지금 들어 있음:	今入っているもの:	Currently:
+저장하면:	保存すると:	After saving:
+(지움)	(削除)	(deleted)
+원고에 저장 안 한 줄 {}곳 (Ctrl+S)	スクリプトに未保存の行 {0} か所 (Ctrl+S)	{0} lines not yet saved to the script (Ctrl+S)
+저장 안 한 세부 속성, 전환 변경: {}개 (Ctrl+S)	未保存の詳細設定、トランジションの変更:{0} 個 (Ctrl+S)	Unsaved detail and transition changes: {0} (Ctrl+S)
+게임을 시작할 때: 1번 {}   2번 {}	ゲーム開始時:1 番 {0}   2 番 {1}	At game start: slot 1 {0}   slot 2 {1}
+꺼짐	オフ	Off
+켜짐	オン	On
+소리:	音:	Sound:
+(경로는 screen_fx_config.rpy의 screen_fx.tv에서)	(パスは screen_fx_config.rpy の screen_fx.tv で)	(set the path in screen_fx.tv in screen_fx_config.rpy)
+플레이어 설정({}.Toggle)에서 꺼져 있지만, 편집 중에는 보여줍니다.	プレイヤー設定({0}.Toggle)でオフですが、編集中は表示します。	Turned off in player settings ({0}.Toggle), but shown while editing.
+게임 중에 {}.set()으로 바꾼 값은 편집 중에 잠시 빼고 보여줍니다.	ゲーム中に {0}.set() で変えた値は、編集中は一時的に外して表示します。	Values changed with {0}.set() during play are left out while editing.
+글자 빼기: {}{}	文字を除外:{0}{1}	Exclude text: {0}{1}
+(split_text_layers = False라서 글자는 한꺼번에만 뺄 수 있음)	(split_text_layers = False なので、文字はまとめてしか除外できません)	(split_text_layers = False, so text can only be excluded all at once)
+이 페이지는 {}의 세부 속성을 고칩니다. 편집하는 동안 이 효과만 보여줍니다.	このページは {0} の詳細設定を編集します。編集中はこのエフェクトだけを表示します。	This page edits the details of {0}. Only this effect is shown while editing.
+인게임, 타이틀, 게임 내 메뉴에서 같이 씁니다.	ゲーム中、タイトル、ゲーム内メニューで共通です。	Shared by in-game, title and game menu.
+지금 장면에 쓰려면 '셰이더 고르기'에서 고르고 [[여기에서부터 적용].	今の場面に使うには「シェーダーを選ぶ」で選んで [ここから適用]。	To use it in the current scene, pick it under 'Choose shader' and click [Apply from here].
+게임의 지금 장면: 1번 {} + 2번 {}	ゲームの今の場面:1 番 {0} + 2 番 {1}	Current scene in the game: slot 1 {0} + slot 2 {1}
+1번, 2번을 고르면 화면에 바로 보이고, 그 아래에서 효과의 세부 속성을 고칩니다.	1 番、2 番を選ぶと画面にすぐ見え、その下でエフェクトの詳細設定を編集します。	Picking slots 1 and 2 shows them at once; edit each effect's details below.
+목록에서 줄 누르기: 그 줄을 고르고 게임도 그 줄로 | [[ ] 앞뒤 줄 | 세모 두 번: 지금 줄로 | Ctrl+S 저장	リストの行をクリック:その行を選び、ゲームもその行へ | [ ] 前後の行 | 三角を 2 回:現在の行へ | Ctrl+S 保存	Click a line in the list: select it and jump the game there | [ ] previous/next line | Double-click triangle: current line | Ctrl+S Save
+G 줄기표: 마디를 끌어 구간 고르기 → [[이 구간에 적용] | 오른쪽 네모 점으로 전환 점 고르기 | Delete 구간/고른 점의 셰이더 지우기	G フロー表:節をドラッグして区間を選ぶ → [この区間に適用] | 右の四角の点でトランジション点を選ぶ | Delete 区間/選んだ点のシェーダーを削除	G Flow chart: drag nodes to pick a range → [Apply to this range] | pick transition points with the squares on the right | Delete removes the shader of the range/points
+막대를 끌고 '미리 보기'를 누르면 전환을 다시 보여줍니다.	バーをドラッグして「プレビュー」を押すとトランジションをもう一度見せます。	Drag the bars and click 'Preview' to replay the transition.
+Backspace 전환 설정 되돌리기	Backspace トランジション設定を元に戻す	Backspace Revert transition settings
+막대를 끌면 바로 보입니다. 세부 속성에서 프리셋을 고르면 그 프리셋을 미리 보며 고칩니다.	バーをドラッグするとすぐ見えます。詳細設定でプリセットを選ぶと、そのプリセットをプレビューしながら編集します。	Dragging a bar shows it at once. Pick a preset under details to edit it with a preview.
+프리셋에서 '빼기'를 누르면 그 값은 기본 설정을 따릅니다.	プリセットで「外す」を押すと、その値は基本設定に従います。	Click 'Remove' in a preset to make that value follow the base settings.
+screen_fx_config.rpy에 붙여넣으세요.	screen_fx_config.rpy に貼り付けてください。	Paste into screen_fx_config.rpy.
+타이틀 화면에서 쓸 수 있습니다. (이 셰이더는 타이틀에만 걸려서)	タイトル画面で使えます。(このシェーダーはタイトルにだけかかるため)	Available on the title screen (this shader applies only there).
+게임 중 ESC 메뉴를 연 채로 쓸 수 있습니다. (이 셰이더는 그 메뉴에만 걸려서)	ゲーム中に ESC メニューを開いた状態で使えます。(このシェーダーはそのメニューにだけかかるため)	Available with the ESC menu open during play (this shader applies only there).
+두 자리 모두 '기본'(아무것도 안 함)으로 돌렸습니다.	2 枠とも「デフォルト」(何もしない)に戻しました。	Reset both slots to 'Default' (no effect).
+타이틀과 타이틀에서 연 화면(환경설정, 불러오기)에만 걸립니다. 인게임 셰이더와 따로입니다.	タイトルとタイトルから開いた画面(環境設定、ロード)にだけかかります。ゲーム中のシェーダーとは別です。	Applies only to the title and screens opened from it (preferences, load). Separate from the in-game shader.
+게임 중 ESC 메뉴와 거기서 연 화면(저장, 환경설정 …)에만 걸립니다. 뒤에 비치는 게임 화면도 이 셰이더로 보입니다.	ゲーム中の ESC メニューとそこから開いた画面(セーブ、環境設定…)にだけかかります。後ろに見えるゲーム画面もこのシェーダーで見えます。	Applies only to the ESC menu during play and screens opened from it (save, preferences ...). The game screen showing behind uses this shader too.
+1번, 2번 아래 세부 속성은 효과마다 하나라 인게임과 같이 씁니다.	1 番、2 番の下の詳細設定はエフェクトごとに 1 つなので、ゲーム中と共通です。	The details under slots 1 and 2 are one per effect, so they're shared with in-game.
+1번, 2번을 고르면 화면에 바로 보입니다. 같은 효과는 한 번만 씌웁니다.	1 番、2 番を選ぶと画面にすぐ見えます。同じエフェクトは 1 回だけかけます。	Picking slots 1 and 2 shows them at once. The same effect is applied only once.
+타이틀 셰이더	タイトルのシェーダー	Title shader
+게임 내 메뉴 셰이더	ゲーム内メニューのシェーダー	Game menu shader
+자동	自動	Auto
+직접	手動	Manual
+{:.0f}줄	{0} 行	{0} lines
+빼기	外す	Remove
+켜기	オンにする	Turn on
+적용 대상	適用対象	Applies to
+화면 전체	画面全体	Whole screen
+배경만	背景のみ	Background only
+저장하면 다시 불러온 뒤 적용	保存して再読み込み後に適用	Applies after saving and reloading
+품질	品質	Quality
+타이틀의 다른 화면	タイトルのほかの画面	Other title screens
+적용	適用	Apply
+적용 안 함	適用しない	Don't apply
+모두 버리기	すべて破棄	Discard all
+전부 셰이더 적용 취소	すべてのシェーダー適用を取り消す	Cancel all shader changes
+세부 속성 접기	詳細設定を閉じる	Fold details
+세부 속성 펴기	詳細設定を開く	Show details
+글자 빼기	文字を除外	Exclude text
+안 뺌	除外しない	None
+전부 뺌	すべて除外	All
+세부 속성	詳細設定	Details
+기본 설정	基本設定	Base settings
+프리셋:	プリセット:	Preset:
+1번 셰이더	シェーダー 1	Shader 1
+2번 셰이더	シェーダー 2	Shader 2
+원고 쓰기 도구(UI Kit 3.0 이상)가 없어서 줄 고르기와 [[여기에서부터 적용]은 못 씁니다.	スクリプト書き込みツール(UI Kit 3.0 以上)がないので、行の選択と [ここから適用] は使えません。	The script writer (UI Kit 3.0 or later) is missing, so line picking and [Apply from here] are unavailable.
+처음 상태 접기	初期状態を閉じる	Fold start state
+처음 상태 펴기	初期状態を開く	Show start state
+처음 1번	初期 1 番	Start slot 1
+처음 2번	初期 2 番	Start slot 2
+'설정대로' 전환	「設定どおり」のトランジション	'As configured' transition
+줄 번호	行番号	Line no.
+L 목록 접기	L リストを閉じる	L Fold list
+L 목록 펴기	L リストを開く	L Show list
+지금 줄: {} {}번째 (세모를 두 번 누르면 그 줄로)	現在の行:{0} {1} 行目(三角を 2 回押すとその行へ)	Current line: {0} line {1} (double-click the triangle to go there)
+적용할 때 전환	適用時のトランジション	Transition when applying
+여기에서부터 적용	ここから適用	Apply from here
+이 줄 위의 셰이더 줄 지우기	この行の上のシェーダー行を削除	Delete shader line above
+셰이더가 바뀌는 줄 (이 파일 {}곳)	シェーダーが変わる行(このファイル {0} か所)	Lines where the shader changes ({0} in this file)
+이 파일에는 셰이더가 바뀌는 줄이 없습니다.	このファイルにはシェーダーが変わる行がありません。	No lines in this file change the shader.
+(대사 괄호, 한 자리만)	(セリフの括弧、1 枠のみ)	(dialogue bracket, one slot only)
+(한 자리만)	(1 枠のみ)	(one slot only)
+두 자리로 바꾸기	2 枠に変える	Switch to two slots
+커서와 셰이더 (여기에서부터)	カーソルとシェーダー(ここから)	Cursor and shader (from here)
+이 줄 위의 커서 줄 지우기	この行の上のカーソル行を削除	Delete cursor line above
+커서가 바뀌는 줄 (이 파일 {}곳)	カーソルが変わる行(このファイル {0} か所)	Lines where the cursor changes ({0} in this file)
+이 파일에는 커서가 바뀌는 줄이 없습니다. (처음 값은 설정 screen_fx.cursor)	このファイルにはカーソルが変わる行がありません。(初期値は設定の screen_fx.cursor)	No lines in this file change the cursor. (The start value is the screen_fx.cursor setting)
+(대사 괄호)	(セリフの括弧)	(dialogue bracket)
+로고	ロゴ	Logo
+경고	警告	Warning
+조작 안내 화면	操作案内画面	Controls screen
+묶음	グループ	Group
+제목	タイトル	Title
+본문	本文	Body
+표	表	Table
+안내	案内	Prompt
+보지 않기	表示しない	Don't show
+스플래시	スプラッシュ	Splash
+splash_config.rpy의 그 페이지 { } 안에 붙여넣으세요.	splash_config.rpy のそのページの { } の中に貼り付けてください。	Paste inside that page's { } in splash_config.rpy.
+크기	サイズ	Size
+회전	回転	Rotation
+줄 간격	行間	Line spacing
+가로 (왼쪽 0 ~ 오른쪽 1)	横(左 0 ~ 右 1)	Horizontal (left 0 to right 1)
+세로 (위 0 ~ 아래 1)	縦(上 0 ~ 下 1)	Vertical (top 0 to bottom 1)
+글 폭 (픽셀)	文字幅(ピクセル)	Text width (px)
+그림, 제목, 본문 사이	画像、タイトル、本文の間隔	Space between image, title and body
+나타나는 시간 (초)	現れる時間(秒)	Fade-in time (s)
+사라지는 시간 (초)	消える時間(秒)	Fade-out time (s)
+클릭으로 넘기기 전 기다림 (초)	クリックで進める前の待ち(秒)	Wait before click-to-skip (s)
+클릭할 때까지	クリックするまで	Until click
+시간이 지나면	時間が経ったら	After a time
+영상이 끝날 때	動画が終わったら	When the video ends
+바탕색	背景色	Background color
+제목 색	タイトルの色	Title color
+제목 글꼴	タイトルのフォント	Title font
+본문 색	本文の色	Body color
+본문 글꼴	本文のフォント	Body font
+안내 글 색	案内文の色	Prompt color
+안내 글꼴	案内文のフォント	Prompt font
+보지 않기 색	「表示しない」の色	'Don't show' color
+splash.pages에 페이지가 없습니다. (splash_config.rpy)	splash.pages にページがありません。(splash_config.rpy)	splash.pages has no pages. (splash_config.rpy)
+새 페이지	新しいページ	New page
+새 페이지 '{}'를 만들었습니다. 제목을 더블클릭해서 고치세요.	新しいページ「{0}」を作りました。タイトルをダブルクリックして直してください。	Created new page '{0}'. Double-click the title to edit it.
+'{}'를 복제해서 '{}'를 만들었습니다.	「{0}」を複製して「{1}」を作りました。	Duplicated '{0}' as '{1}'.
+페이지가 하나뿐이라 지울 수 없습니다. 스플래시를 끄려면 splash.enabled = False	ページが 1 つだけなので削除できません。スプラッシュをオフにするには splash.enabled = False	It's the only page, so it can't be deleted. To turn the splash off: splash.enabled = False
+'{}' 페이지를 지웠습니다.	「{0}」ページを削除しました。	Deleted page '{0}'.
+'{}' 페이지를 순서에서 뺐습니다. splash_config.rpy의 글은 남고, [되살리기]로 돌아옵니다.	「{0}」ページを順番から外しました。splash_config.rpy の記述は残り、[復元] で戻せます。	Removed page '{0}' from the order. Its text stays in splash_config.rpy; [Restore] brings it back.
+splash_config.rpy에 있는 페이지 이름은 그 파일에서 바꿉니다.	splash_config.rpy にあるページ名はそのファイルで変えます。	Rename pages from splash_config.rpy in that file.
+저장한 페이지 이름은 바꿀 수 없습니다. 복제해서 새 이름으로 만드세요.	保存したページ名は変えられません。複製して新しい名前で作ってください。	A saved page can't be renamed. Duplicate it under a new name.
+페이지 이름은 영문, 숫자, _만 씁니다. (숫자로 시작하지 않게)	ページ名は英字、数字、_ だけを使います。(数字で始めない)	Page names use only letters, digits and _ (not starting with a digit).
+'{}'는 이미 있는 이름입니다.	「{0}」はすでにある名前です。	'{0}' already exists.
+이 페이지의 '다음부터 보지 않기'와 본 기록을 지웠습니다. 다음에 켤 때 다시 나옵니다.	このページの「次から表示しない」と表示履歴を消しました。次回起動時にまた出ます。	Cleared this page's 'Don't show again' and seen record. It shows again next launch.
+계속 보임	常に表示	Always shown
+클릭 시 안 보임	クリックで非表示	Hidden after click
+한 번만 보임	1 回だけ表示	Shown once
+'클릭할 때까지' 넘어가는 페이지는 클릭으로 넘기기를 끌 수 없습니다. 넘어가는 때를 먼저 바꾸세요.	「クリックするまで」進むページは、クリックで進めるをオフにできません。先に進むタイミングを変えてください。	A page that waits 'Until click' can't turn off click-to-skip. Change when it advances first.
+조작 안내 화면이 벌써 단축키 수정 표를 따라갑니다. 보여 줄 기능은 아래에서 고르세요.	操作案内画面はすでにショートカット編集の表に従っています。表示する機能は下で選んでください。	The controls screen already follows the shortcut table. Pick the actions to show below.
+조작 안내 화면이 단축키 수정 표를 따라갑니다. 아래 목록에서 보여 줄 기능을 고르세요.	操作案内画面がショートカット編集の表に従います。下のリストで表示する機能を選んでください。	The controls screen now follows the shortcut table. Pick the actions to show in the list below.
+단축키 수정 표를 따라갑니다. 아래 목록에서 보여 줄 기능을 고르세요.	ショートカット編集の表に従います。下のリストで表示する機能を選んでください。	Follows the shortcut table. Pick the actions to show in the list below.
+조작방법 화면 목록을 그대로 씁니다. 단축키 탭에서 고치면 여기도 바뀝니다.	操作方法画面のリストをそのまま使います。ショートカットタブで直すとここも変わります。	Uses the help screen list as is. Changes in the shortcuts tab show here too.
+지금 보이는 표를 복사해 넣었습니다. 이제 칸마다 고칠 수 있습니다.	今見えている表をコピーしました。各欄を編集できます。	Copied the visible table. You can now edit each field.
+바탕이나 로고가 영상(.webm 등)일 때만 '영상이 끝날 때'를 고를 수 있습니다.	背景かロゴが動画(.webm など)のときだけ「動画が終わったら」を選べます。	'When the video ends' is only available when the background or logo is a video (.webm etc.).
+클릭으로 넘기기가 '안 됨'이면 '클릭할 때까지'는 고를 수 없습니다.	クリックで進めるが「不可」だと「クリックするまで」は選べません。	'Until click' can't be chosen when click-to-skip is 'No'.
+(없음)	(なし)	(none)
+이 페이지의 저장 안 한 변경을 되돌렸습니다.	このページの未保存の変更を元に戻しました。	Reverted unsaved changes on this page.
+{}의 자리를 되돌렸습니다. (저장하면 splash_layout.rpy에서도 빠짐)	{0} の位置を元に戻しました。(保存すると splash_layout.rpy からも消えます)	Reset the position of {0}. (Saving removes it from splash_layout.rpy too)
+이 표는 조작방법 화면의 목록을 그대로 씁니다("auto"). 패널의 [[직접 적기로 바꾸기]를 누르면 고칠 수 있습니다.	この表は操作方法画面のリストをそのまま使います("auto")。パネルの [手入力に切り替え] で編集できます。	This table uses the help screen list as is ("auto"). Click [Switch to manual list] in the panel to edit it.
+이 표는 단축키 수정 표를 따라갑니다. 키는 [[단축키 수정]에서, 보여 줄 기능은 패널에서 고릅니다.	この表はショートカット編集の表に従います。キーは [ショートカット編集] で、表示する機能はパネルで選びます。	This table follows the shortcut table. Keys are set in [Edit shortcuts]; pick the actions to show in the panel.
+돌린 표는 패널의 글 칸에서 고칩니다. (또는 회전을 0으로)	回転した表はパネルの文字欄で直します。(または回転を 0 に)	Edit a rotated table in the panel's text fields (or set rotation to 0).
+여기 적힌 값은 splash_config.rpy의 같은 페이지 값보다 우선합니다.	ここに書かれた値は splash_config.rpy の同じページの値より優先されます。	Values here override the same page's values in splash_config.rpy.
+글은 _("…")로 적어서 번역 목록에 잡힙니다.	文字は _("…") で書くので翻訳リストに入ります。	Text is written as _("…") so it appears in translation lists.
+이 파일을 지우면 설정 파일 값과 순서로 돌아갑니다.	このファイルを消すと設定ファイルの値と順番に戻ります。	Delete this file to go back to the settings file values and order.
+게임 안 편집 화면이 저장한 스플래시 페이지 값입니다.	ゲーム内編集画面が保存したスプラッシュページの値です。	Splash page values saved by the in-game editor.
+페이지 {}/{}: {}{}	ページ {0}/{1}:{2}{3}	Page {0}/{1}: {2}{3}
+(새 페이지)	(新しいページ)	(new page)
+고른 것:	選んだもの:	Selected:
+저장 안 한 변경: 이 페이지 {}개, 전체 {}개	未保存の変更:このページ {0} 個、全体 {1} 個	Unsaved changes: {0} on this page, {1} in all
+누르면 고르고 끌면 옮김. 빈 곳을 끌면 묶음. 모서리 손잡이 크기, 분홍 손잡이 회전(Shift 15도씩)	クリックで選択、ドラッグで移動。空いた所をドラッグでグループ化。角のハンドルでサイズ、ピンクのハンドルで回転(Shift で 15 度ずつ)	Click to select, drag to move. Drag empty space to group. Corner handles resize, pink handle rotates (Shift: 15° steps)
+글은 더블클릭이나 Enter로 그 자리에서 고침 (Shift+Enter 줄바꿈). 저장하면 splash/splash_layout.rpy	文字はダブルクリックか Enter でその場で編集(Shift+Enter で改行)。保存先は splash/splash_layout.rpy	Edit text in place with double-click or Enter (Shift+Enter for a new line). Saving writes splash/splash_layout.rpy
+페이지:	ページ:	Page:
++ 새 페이지	+ 新しいページ	+ New page
+복제	複製	Duplicate
+◀ 앞으로	◀ 前へ	◀ Earlier
+뒤로 ▶	後ろへ ▶	Later ▶
+페이지 이름	ページ名	Page name
+숨긴 페이지:	隠したページ:	Hidden pages:
+되살리기	復元	Restore
+게임 켤 때	ゲーム起動時	On launch
+보이기	表示	Show
+안 보이기	非表示	Hide
+보이는 방식	表示のしかた	Show mode
+게임을 켤 때마다 나옴	ゲームを起動するたびに出る	Shows every launch
+플레이어가 '다음부터 보지 않기'를 누르면 다음부터 안 나옴	プレイヤーが「次から表示しない」を押すと次から出ない	Stops showing once the player clicks 'Don't show again'
+처음 켤 때 한 번만 나옴	初回起動時に 1 回だけ出る	Shows only on the first launch
+지금은 안 나옴:	今は出ない:	Not showing now:
+다음부터	次から	don't show again
+이미 봄	表示済み	already seen
+다시 보이게	また表示する	Show again
+지금은 게임을 켤 때 나옴	今はゲーム起動時に出る	Shows on launch now
+이 페이지 보기	このページを見る	View this page
+처음부터 보기	最初から見る	View from start
+없음 (화면을 누르세요)	なし(画面をクリックしてください)	None (click the screen)
+자리 되돌리기	位置を元に戻す	Reset position
+바탕 그림/영상	背景の画像/動画	Background image/video
+로고 그림/영상	ロゴの画像/動画	Logo image/video
+고르기 닫기	選択を閉じる	Close picker
+고르기	選ぶ	Choose
+로고 확대	ロゴの拡大	Logo zoom
+설정 파일 글로	設定ファイルの文字に戻す	Use settings file text
+편집기 글	エディターの文字	Editor text
+(기본)	(デフォルト)	(default)
+글꼴 (기본)	フォント(デフォルト)	Font (default)
+넣기	追加	add
+조작 안내 표 넣기	操作案内の表を追加	Add controls table
+조작 안내 표	操作案内の表	Controls table
+단축키 수정 표를 따라감 ("hotkeys")	ショートカット編集の表に従う("hotkeys")	Follows the shortcut table ("hotkeys")
+단축키 수정에서 키 고치기	ショートカット編集でキーを直す	Change keys in Edit shortcuts
+hotkeys 플러그인(1.2 이상)이 없어서 조작방법 화면 목록을 대신 보여 줍니다.	hotkeys プラグイン(1.2 以上)がないので、代わりに操作方法画面のリストを表示します。	The hotkeys plugin (1.2 or later) is missing, so the help screen list is shown instead.
+보여 줄 기능 (누르면 보임/안 보임, 키가 없는 기능은 목록에 없음)	表示する機能(クリックで表示/非表示、キーのない機能はリストにない)	Actions to show (click to show/hide; actions without keys aren't listed)
+모두 보이기	すべて表示	Show all
+모두 숨기기	すべて隠す	Hide all
+조작방법 화면 목록을 그대로 씀 ("auto")	操作方法画面のリストをそのまま使う("auto")	Uses the help screen list as is ("auto")
+단축키 수정 표 따라가기	ショートカット編集の表に従う	Follow the shortcut table
+조작방법 화면 목록 쓰기	操作方法画面のリストを使う	Use the help screen list
+위치 (그림, 제목, 본문 묶음)	位置(画像、タイトル、本文のまとまり)	Position (image, title and body together)
+넘어가는 때	進むタイミング	Advance
+보여 주는 시간 (초)	表示時間(秒)	Display time (s)
+클릭으로 넘기기	クリックで進める	Click to skip
+됨	可	Yes
+안 됨	不可	No
+영상	動画	Video
+이것만	これだけ	This only
+전체	全体	All
+평소	通常	Idle
+선택됐을 때	選択時	Selected
+오류: {}	エラー:{0}	Error: {0}
+지금은 이 탭을 쓸 수 없습니다.	今はこのタブを使えません。	This tab can't be used right now.
+pygaki 편집: 지금 화면에서 편집할 수 있는 것이 없습니다.	pygaki 編集:今の画面には編集できるものがありません。	pygaki editor: nothing on this screen can be edited.
+저장 안 한 변경이 있습니다. Shift+M으로 다시 열어 Ctrl+S로 저장하세요.	未保存の変更があります。Shift+M で開き直して Ctrl+S で保存してください。	There are unsaved changes. Reopen with Shift+M and save with Ctrl+S.
+저장 실패 ({} 탭): {}	保存失敗({0} タブ):{1}	Save failed ({0} tab): {1}
+저장할 변경이 없습니다. 줄별 값은 Ctrl+C로 복사해서 스크립트에 붙여넣으세요.	保存する変更がありません。行ごとの値は Ctrl+C でコピーしてスクリプトに貼り付けてください。	Nothing to save. Copy per-line values with Ctrl+C and paste them into the script.
+저장할 변경이 없습니다.	保存する変更がありません。	Nothing to save.
+저장했습니다.	保存しました。	Saved.
+저장 실패 ({}): {}	保存失敗({0}):{1}	Save failed ({0}): {1}
+저장했습니다:	保存しました:	Saved:
+원고를 다시 불러옵니다. 고친 줄은 그 앞 대사(저장 지점)부터 다시 나옵니다.	スクリプトを再読み込みします。直した行はその前のセリフ(セーブ地点)から出直します。	Reloading the script. Changed lines replay from the dialogue before them (the save point).
+원고에 바로 저장하지 못한 줄별 값이 있습니다. Ctrl+C로 복사하세요.	スクリプトに直接保存できなかった行ごとの値があります。Ctrl+C でコピーしてください。	Some per-line values couldn't be saved to the script directly. Copy them with Ctrl+C.
+복사를 마친 뒤 Shift+R로 다시 불러오면 원고에 쓴 값이 반영됩니다.	コピーした後 Shift+R で再読み込みすると、スクリプトに書いた値が反映されます。	After copying, reload with Shift+R to pick up the values written to the script.
+복사할 내용이 없습니다.	コピーする内容がありません。	Nothing to copy.
+클립보드에 복사했습니다.	クリップボードにコピーしました。	Copied to the clipboard.
+클립보드를 쓸 수 없습니다.	クリップボードを使えません。	The clipboard can't be used.
+T 다음 탭 | Ctrl+S 저장(대사, 선택지, 이미지 줄은 원고에 바로) | Ctrl+C 복사 | Esc 닫기 | F1 안내 접기	T 次のタブ | Ctrl+S 保存(セリフ、選択肢、画像の行はスクリプトに直接) | Ctrl+C コピー | Esc 閉じる | F1 案内を閉じる	T Next tab | Ctrl+S Save (dialogue, choice and image lines go straight to the script) | Ctrl+C Copy | Esc Close | F1 Fold help
+패널: 제목(=)을 끌어 옮기기 | P 구석 바꾸기 | X 접기 | Space 누르는 동안 숨기기 | B 자동 비키기 {}	パネル:タイトル(=)をドラッグして移動 | P 隅を変える | X 折りたたむ | Space 押している間隠す | B 自動でよける {0}	Panel: drag the title (=) to move | P Change corner | X Fold | Space Hide while held | B Auto dodge {0}
+V 화면 효과 보기 {} (휘는 효과는 가장자리에서 누르는 자리가 조금 어긋남)	V 画面エフェクト表示 {0}(曲げるエフェクトは端でクリック位置が少しずれる)	V Show screen FX {0} (with warping effects, clicks near the edges are slightly off)
+화면 효과 플러그인(Screen FX 3.4 이상)이 없습니다.	画面エフェクトプラグイン(Screen FX 3.4 以上)がありません。	The screen FX plugin (Screen FX 3.4 or later) is missing.
+편집 중 화면 효과 보기 {} (V)	編集中の画面エフェクト表示 {0} (V)	Show screen FX while editing: {0} (V)
+= pygaki 편집	= pygaki 編集	= pygaki editor
+새 파일 {}개를 찾았습니다.	新しいファイルを {0} 個見つけました。	Found {0} new files.
+폴더를 열었습니다: game/	フォルダーを開きました:game/	Opened folder: game/
+폴더를 열지 못했습니다: {}	フォルダーを開けませんでした:{0}	Couldn't open the folder: {0}
+{} {}번째 줄	{0} {1} 行目	{0} line {1}
+배경 고르기 - 그림이나 영상(webm)	背景を選ぶ - 画像か動画(webm)	Pick background - image or video (webm)
+지금:	今:	Now:
+없음 (타이틀은 검은 화면, ESC 메뉴는 투명)	なし(タイトルは黒い画面、ESC メニューは透明)	None (black for the title, transparent for the ESC menu)
+game 폴더에 그림(.png, .jpg, .webp)이나 영상(.webm)이 없습니다.	game フォルダーに画像(.png, .jpg, .webp)や動画(.webm)がありません。	No images (.png, .jpg, .webp) or videos (.webm) in the game folder.
+취소 (Esc)	キャンセル (Esc)	Cancel (Esc)
+새로 읽기 (폴더에 넣은 파일)	再読み込み(フォルダーに入れたファイル)	Rescan (files added to the folder)
+X 펼치기	X 広げる	X Unfold
+저장	保存	Save
+X 접기	X 折りたたむ	X Fold
+편집할 탭이 없습니다.	編集するタブがありません。	No tab to edit.
+글꼴 고르기 -	フォントを選ぶ -	Pick font -
+game 폴더에 글꼴 파일(.ttf, .otf)이 없습니다.	game フォルダーにフォントファイル(.ttf, .otf)がありません。	No font files (.ttf, .otf) in the game folder.
+색 고르기 -	色を選ぶ -	Pick color -
+코드	コード	Code
+원래	元の色	Original
+색상	色相	Hue
+채도	彩度	Saturation
+밝기	明るさ	Brightness
+불투명	不透明度	Opacity
+확인	OK	OK
+선택지	選択肢	Choices
+마우스 올렸을 때	マウスオーバー時	On hover
+원고에 바로 저장되지 않는 줄에 쓰세요. 그 선택지 줄을 바꿔 붙여넣습니다.	スクリプトに直接保存されない行に使ってください。その選択肢の行を置き換えて貼り付けます。	Use this for lines that can't be saved to the script directly. Paste it over that choice line.
+선택지 기능이 없습니다.	選択肢の機能がありません。	The choice feature is missing.
+선택지 기능이 꺼져 있습니다. (cmenu.enabled)	選択肢の機能がオフです。(cmenu.enabled)	The choice feature is off. (cmenu.enabled)
+선택지가 화면에 있을 때 쓸 수 있습니다.	選択肢が画面にあるときに使えます。	Available while choices are on screen.
+스크립트의 menu 문에서 나온 선택지만 편집할 수 있습니다.	スクリプトの menu 文から出た選択肢だけを編集できます。	Only choices from a menu statement in the script can be edited.
+선택지를 읽는 중입니다.	選択肢を読み込み中です。	Reading the choices.
+세로 목록 선택지가 없습니다. 자유 배치 선택지는 '이 선택지만'에서 옮기세요.	縦リストの選択肢がありません。自由配置の選択肢は「この選択肢だけ」で動かしてください。	No vertical-list choices. Move freely placed choices under 'This choice only'.
+이 선택지의 저장 안 한 변경을 되돌렸습니다.	この選択肢の未保存の変更を元に戻しました。	Reverted unsaved changes to this choice.
+모든 선택지의 저장 안 한 변경을 버렸습니다.	すべての選択肢の未保存の変更を破棄しました。	Discarded unsaved changes to all choices.
+글꼴	フォント	Font
+색	色	Color
+올렸을 때 글꼴	マウスオーバー時のフォント	Hover font
+올렸을 때 색	マウスオーバー時の色	Hover color
+메뉴의 선택지 줄을 모두 복사했습니다. 스크립트의 선택지 줄을 바꿔 붙여넣으세요.	メニューの選択肢の行をすべてコピーしました。スクリプトの選択肢の行を置き換えて貼り付けてください。	Copied all choice lines of the menu. Paste them over the choice lines in the script.
+선택지 {}/{}  "{}"   {}	選択肢 {0}/{1}  "{2}"   {3}	Choice {0}/{1}  "{2}"   {3}
+이동 ({}, {})   회전 {:.1f}   기울기 {:.1f}   확대 {:.2f}   크기 {}	移動 ({0}, {1})   回転 {2}   傾き {3}   拡大 {4}   サイズ {5}	Offset ({0}, {1})   Rotate {2}   Skew {3}   Zoom {4}   Size {5}
+세로 목록 (끌면 자유 배치)	縦リスト(ドラッグで自由配置)	Vertical list (drag for free placement)
+{}   회전 {:.1f}   기울기 {:.1f}   확대 {:.2f}   크기 {}	{0}   回転 {1}   傾き {2}   拡大 {3}   サイズ {4}	{0}   Rotate {1}   Skew {2}   Zoom {3}   Size {4}
+괄호:	括弧:	Brackets:
+원고에 저장 안 한 선택지 {}개 (Ctrl+S)	スクリプトに未保存の選択肢 {0} 個 (Ctrl+S)	{0} choices not yet saved to the script (Ctrl+S)
+이 선택지는 원고에 저장했습니다.	この選択肢はスクリプトに保存しました。	This choice was saved to the script.
+변경 없음	変更なし	No changes
+마우스: 드래그 이동 (Shift: 한 방향) | 휠 회전 | Shift+휠 글자 크기	マウス:ドラッグで移動(Shift:一方向) | ホイールで回転 | Shift+ホイールで文字サイズ	Mouse: drag to move (Shift: one axis) | Wheel rotate | Shift+wheel text size
+방향키 이동 (Shift: 10배) | Q/E 회전 | Z/C 기울기 | A/D 확대 | S/W 글자 크기	矢印キーで移動(Shift:10 倍) | Q/E 回転 | Z/C 傾き | A/D 拡大 | S/W 文字サイズ	Arrow keys move (Shift: x10) | Q/E Rotate | Z/C Skew | A/D Zoom | S/W Text size
+Tab 다음 선택지 | 1/2 평소/올렸을 때 | H 미리보기 | Backspace 이 선택지 되돌리기	Tab 次の選択肢 | 1/2 通常/マウスオーバー時 | H プレビュー | Backspace この選択肢を元に戻す	Tab Next choice | 1/2 Idle/Hover | H Preview | Backspace Revert this choice
+H 미리보기 켬	H プレビュー オン	H Preview on
+H 미리보기 끔	H プレビュー オフ	H Preview off
+메뉴 전체 복사	メニュー全体をコピー	Copy whole menu
+이 선택지 되돌리기	この選択肢を元に戻す	Revert this choice
+커서/대사 소리	カーソル/セリフ音	Cursor/voice beeps
+커스텀 UI 기능이 없습니다.	カスタム UI の機能がありません。	The custom UI feature is missing.
+커스텀 UI 기능이 꺼져 있습니다. (custom_ui.enabled)	カスタム UI の機能がオフです。(custom_ui.enabled)	The custom UI feature is off. (custom_ui.enabled)
+options.rpy 값 ({})	options.rpy の値({0})	options.rpy value ({0})
+한 번에	一度に	Instant
+{}글자/초	{0} 文字/秒	{0} chars/s
+텍스트 속도와 클릭 대기 표시를 미리 봅니다. 가나다라마바사.	テキスト速度とクリック待ち表示をプレビューします。あいうえおかきくけこ。	Previews text speed and the click-to-continue indicator. The quick brown fox.
+대사 소리가 없습니다. < >로 파일을 고르세요.	セリフ音がありません。< > でファイルを選んでください。	No dialogue sound. Pick a file with < >.
+그림 없음	画像なし	No image
+초당 {:g}장, 한 바퀴 {:.2f}초	毎秒 {0} 枚、1 周 {1} 秒	{0} frames/s, {1} s per loop
+그림이 {}장이라 앞의 {}장만 넣었습니다.	画像が {0} 枚なので、最初の {1} 枚だけ入れました。	There are {0} images, so only the first {1} were used.
+{} {}번 칸	{0} {1} 番の枠	{0} slot {1}
+클릭 대기 표시	クリック待ち表示	Click-to-continue indicator
+커서	カーソル	Cursor
+UI Kit 편집기가 저장한 커서/대사 소리 설정입니다.	UI Kit エディターが保存したカーソル/セリフ音の設定です。	Cursor/voice beep settings saved by the UI Kit editor.
+여기 적힌 값은 custom_ui_config.rpy의 같은 값보다 우선합니다.	ここに書かれた値は custom_ui_config.rpy の同じ値より優先されます。	Values here override the same values in custom_ui_config.rpy.
+그림 폴더: 커서는 game/gui/cursor/, 클릭 대기 표시(CTC)는 game/gui/ctc/ (1번부터 순서대로, 12장까지, 64x64 권장)	画像フォルダー:カーソルは game/gui/cursor/、クリック待ち表示(CTC)は game/gui/ctc/(1 番から順に、12 枚まで、64x64 推奨)	Image folders: cursor in game/gui/cursor/, click-to-continue (CTC) in game/gui/ctc/ (numbered from 1, up to 12, 64x64 recommended)
+칸을 누르면 그림을 고릅니다 (빈 칸은 건너뜀). 24fps 고정: 1프레임마다 = 초당 24장, 2프레임마다 = 초당 12장.	枠をクリックすると画像を選びます(空き枠は飛ばす)。24fps 固定:1 フレームごと = 毎秒 24 枚、2 フレームごと = 毎秒 12 枚。	Click a slot to pick an image (empty slots are skipped). Fixed 24 fps: every frame = 24 images/s, every 2 frames = 12 images/s.
+V 화면 효과 보기	V 画面エフェクト表示	V Show screen FX
+편집 중 화면 효과 보기	編集中の画面エフェクト表示	Show screen FX while editing
+클릭하면 계속합니다	クリックで続けます	Click to continue
+다음부터 보지 않기	次から表示しない	Don't show again
+지금 줄:	現在の行:	Current line:
+커서 켜기/끄기, 커서 방식, 커서 그림, 클릭 대기 표시 켜기/끄기는 저장하면 다시 불러온 뒤 적용됩니다.	カーソルのオン/オフ、カーソル方式、カーソル画像、クリック待ち表示のオン/オフは保存して再読み込みした後に適用されます。	Cursor on/off, cursor mode, cursor images and click-to-continue on/off apply after saving and reloading.
+텍스트 속도	テキスト速度	Text speed
+기본값	デフォルト値	Default
+대사 소리	セリフ音	Voice beeps
+음량	音量	Volume
+들어보기	試聴	Listen
+1프레임마다	1 フレームごと	Every frame
+2프레임마다	2 フレームごと	Every 2 frames
+방식	方式	Mode
+소프트웨어 (24fps)	ソフトウェア(24fps)	Software (24 fps)
+기본 커서 (최대 20fps)	標準カーソル(最大 20fps)	System cursor (max 20 fps)
+퀵메뉴	クイックメニュー	Quick menu
+새 게임에서 보임	新しいゲームで表示	Shown in new games
+새 게임에서 숨김	新しいゲームで非表示	Hidden in new games
+글자 다시 보기	文字をもう一度見る	Replay text
+(끔)	(オフ)	(off)
+그림 고르기 -	画像を選ぶ -	Pick image -
+폴더를 고르고 그림을 누르면 이 칸에 들어가고 다음 칸으로 넘어갑니다.	フォルダーを選び画像をクリックすると、この枠に入り次の枠へ進みます。	Pick a folder and click an image: it goes into this slot and moves to the next.
+이 폴더 통째로 넣기 (최대 12장)	このフォルダーを丸ごと入れる(最大 12 枚)	Use this whole folder (up to 12)
+이 칸 비우기	この枠を空にする	Clear this slot
+게임 안 편집 화면	ゲーム内編集画面	In-game editor
+숨김 (pygaki 앱에서 고침)	非表示(pygaki アプリで編集)	Hidden (editing in the pygaki app)
+보임	表示	Shown
+pygaki 앱에 고르기 창이 열려 있어요 | Esc 닫기	pygaki アプリで選択ウィンドウが開いています | Esc 閉じる	A picker is open in the pygaki app | Esc Close
+GUI 편집 중: {} | Esc 닫기	GUI 編集中:{0} | Esc 閉じる	Editing GUI: {0} | Esc Close
+화면이 바뀌어서 누른 것을 찾지 못했습니다. 다시 눌러 주세요.	画面が変わったので、押したものが見つかりませんでした。もう一度押してください。	The screen changed, so what you clicked wasn't found. Please click again.
+모르는 값 이름: {}	不明な値の名前:{0}	Unknown value name: {0}
+줄로 옮기기는 개발 모드에서만 됩니다.	行への移動は開発モードでのみ使えます。	Jumping to a line only works in developer mode.
+{} {}번째 줄 앞에 옮겨 갈 문장이 없습니다.	{0} {1} 行目の前に移れる文がありません。	There's no statement to jump to before {0} line {1}.
+이미 {} {}번째 줄에 있습니다.	すでに {0} {1} 行目にいます。	Already at {0} line {1}.
+{} {}번째 줄로 되감았습니다.	{0} {1} 行目まで巻き戻しました。	Rolled back to {0} line {1}.
+{} {}번째 줄로 갔습니다 (게임을 다시 시작해서 그 줄까지 건너뜀).	{0} {1} 行目へ移動しました(ゲームを再スタートしてその行までスキップ)。	Went to {0} line {1} (restarted the game and skipped to that line).
+ESC 메뉴는 게임 진행 중에 열 수 있습니다.	ESC メニューはゲーム進行中に開けます。	The ESC menu can be opened during play.
+게임 시작은 타이틀 화면에서 할 수 있습니다.	ゲーム開始はタイトル画面からできます。	Start the game from the title screen.
+저장 안 한 변경을 버렸습니다.	未保存の変更を破棄しました。	Discarded unsaved changes.
+셰이더 상태를 맞추지 못했습니다: {}	シェーダーの状態を合わせられませんでした:{0}	Couldn't sync the shader state: {0}
+파일 목록을 만들지 못했습니다: {}	ファイル一覧を作れませんでした:{0}	Couldn't build the file list: {0}
+상태를 만들지 못했습니다: {}	状態を作れませんでした:{0}	Couldn't build the state: {0}
+대본 편집기에서 원고를 내보냈어요. 게임 안 편집 화면에 저장 안 한 값이 있어서 다시 불러오지 않았어요. 저장하거나 버린 뒤 Shift+R	スクリプトエディターがスクリプトを書き出しました。ゲーム内編集画面に未保存の値があるので再読み込みしませんでした。保存か破棄をしてから Shift+R	The script editor exported the script. It wasn't reloaded because the in-game editor has unsaved values. Save or discard them, then Shift+R
+대사	セリフ	Dialogue
+원고에 바로 저장되지 않는 줄에 쓰세요. 그 대사 줄 괄호에 붙여넣습니다.	スクリプトに直接保存されない行に使ってください。そのセリフ行の括弧に貼り付けます。	Use this for lines that can't be saved to the script directly. Paste it into that dialogue line's brackets.
+뒤집히며	反転しながら	Flipping
+커지며	大きくなりながら	Growing
+떨림	震え	Shake
+물결	波	Wave
+대사 스타일 기능이 없습니다.	セリフスタイルの機能がありません。	The dialogue style feature is missing.
+대사 스타일 기능이 꺼져 있습니다. (say_style.enabled)	セリフスタイルの機能がオフです。(say_style.enabled)	The dialogue style feature is off. (say_style.enabled)
+대사가 화면에 있을 때 쓸 수 있습니다.	セリフが画面にあるときに使えます。	Available while dialogue is on screen.
+스크립트의 대사 줄에서 쓸 수 있습니다.	スクリプトのセリフ行で使えます。	Available on dialogue lines in the script.
+screens.rpy에 config.character_id_prefixes.append('namebox') 줄이 없어서 이름 위치를 바꿀 수 없습니다.	screens.rpy に config.character_id_prefixes.append('namebox') の行がないので、名前の位置を変えられません。	screens.rpy has no config.character_id_prefixes.append('namebox') line, so the name position can't be changed.
+이 대사에는 이름이 없습니다.	このセリフには名前がありません。	This line has no name.
+1초에 {}글자	1 秒に {0} 文字	{0} characters per second
+게임 설정의 {:g}배 (예전 speed=)	ゲーム設定の {0} 倍(以前の speed=)	{0}x the game setting (old speed=)
+게임 설정	ゲーム設定	Game setting
+pygaki 원고입니다. 글자 크기는 대본 편집기에서 고치세요.	pygaki のスクリプトです。文字サイズはスクリプトエディターで直してください。	This is a pygaki script. Change the text size in the script editor.
+말풍선	吹き出し	Speech bubble
+둥근 테두리	丸い枠	Rounded frame
+아래	下	Bottom
+위	上	Top
+왼쪽	左	Left
+오른쪽	右	Right
+그대로	そのまま	Unchanged
+설정값	設定値	Setting
+이 줄의 전환은 '바로'라서 보여줄 전환이 없습니다.	この行のトランジションは「すぐ」なので、見せるトランジションがありません。	This line's transition is 'Instant', so there's nothing to replay.
++ 덮개 VHS	+ オーバーレイ VHS	+ VHS overlay
+(휘어짐 {})	(歪み {0})	(warp {0})
+덮개 끔	オーバーレイ オフ	overlay off
+화면 효과: 선택취소 → {}{} ({})	画面エフェクト:選択解除 → {0}{1}({2})	Screen FX: deselect → {0}{1} ({2})
+화면 효과: 이 줄부터 {}{} ({})	画面エフェクト:この行から {0}{1}({2})	Screen FX: from this line {0}{1} ({2})
+화면 효과: {}{} (앞에서 이어짐)	画面エフェクト:{0}{1}(前から続く)	Screen FX: {0}{1} (carried over)
+화면 효과: {} (앞에서 이어짐)	画面エフェクト:{0}(前から続く)	Screen FX: {0} (carried over)
+모든 줄의 저장 안 한 변경을 버렸습니다.	すべての行の未保存の変更を破棄しました。	Discarded unsaved changes on all lines.
+이름 글꼴	名前のフォント	Name font
+이름 색	名前の色	Name color
+(괄호 없음)	(括弧なし)	(no brackets)
+(이름 없는 캐릭터)	(名前のないキャラクター)	(unnamed character)
+{}   캐릭터: {}	{0}   キャラクター:{1}	{0}   Character: {1}
+화면 기준 {:.0f}, {:.0f}	画面基準 {0}, {1}	screen {0}, {1}
+이름 상자	名前ボックス	Name box
+{} x {:.0f}   y {:.0f}   (대사 창 기준{})   크기 {}	{0} x {1}   y {2}(セリフウィンドウ基準{3})   サイズ {4}	{0} x {1}   y {2}   (relative to the dialogue window{3})   Size {4}
+pygaki 원고입니다. 여기서는 위치를 고치고, 글자 모양, 속도, 등장 효과, 상자는 대본 편집기에서 고칩니다.	pygaki のスクリプトです。ここでは位置を直し、文字の見た目、速度、登場エフェクト、ボックスはスクリプトエディターで直します。	This is a pygaki script. Edit positions here; text look, speed, appear effects and boxes are edited in the script editor.
+속도 {}   효과 {}   상자 {}	速度 {0}   エフェクト {1}   ボックス {2}	Speed {0}   Effect {1}   Box {2}
+- 편집 중에는 꺼 둠 (V로 켜기)	- 編集中はオフ(V でオン)	- off while editing (V to turn on)
+텍스트 속도가 '즉시'라서 속도와 서서히/타자기 같은 효과는 안 보입니다. (물결, 떨림은 보임)	テキスト速度が「即時」なので、速度や徐々に/タイプライターなどのエフェクトは見えません。(波、震えは見える)	Text speed is 'Instant', so speed and effects such as fade/typewriter don't show. (Wave and shake do)
+보려면 게임의 환경설정에서 텍스트 속도를 낮추세요.	見るにはゲームの環境設定でテキスト速度を下げてください。	To see them, lower the text speed in the game's preferences.
+원고에 저장 안 한 대사 {}줄 (Ctrl+S)	スクリプトに未保存のセリフ {0} 行 (Ctrl+S)	{0} dialogue lines not yet saved to the script (Ctrl+S)
+이 줄은 원고에 저장했습니다.	この行はスクリプトに保存しました。	This line was saved to the script.
+마우스: 드래그하면 고르는 것(대사/이름)이 움직임 (Shift: 한 방향)	マウス:ドラッグで選択中のもの(セリフ/名前)が動く(Shift:一方向)	Mouse: drag moves the selected part (dialogue/name) (Shift: one axis)
+Tab 대사/이름 바꾸기 | 방향키 이동 (Shift: 10배) | R 다시 보기 | Backspace 이 줄 되돌리기	Tab セリフ/名前の切り替え | 矢印キーで移動(Shift:10 倍) | R もう一度見る | Backspace この行を元に戻す	Tab Switch dialogue/name | Arrow keys move (Shift: x10) | R Replay | Backspace Revert this line
+마우스: 드래그하면 고르는 것(대사/이름)이 움직임 (Shift: 한 방향) | 휠 글자 크기	マウス:ドラッグで選択中のもの(セリフ/名前)が動く(Shift:一方向) | ホイールで文字サイズ	Mouse: drag moves the selected part (dialogue/name) (Shift: one axis) | Wheel text size
+Tab 대사/이름 바꾸기 | 방향키 이동 (Shift: 10배) | S/W 글자 크기 | R 다시 보기 | Backspace 이 줄 되돌리기	Tab セリフ/名前の切り替え | 矢印キーで移動(Shift:10 倍) | S/W 文字サイズ | R もう一度見る | Backspace この行を元に戻す	Tab Switch dialogue/name | Arrow keys move (Shift: x10) | S/W Text size | R Replay | Backspace Revert this line
+고칠 것:	編集対象:	Edit:
+이름	名前	Name
+속도:	速度:	Speed:
+{}자	{0} 字	{0} chars
+(1초에 몇 글자)	(1 秒に何文字)	(characters per second)
+상자:	ボックス:	Box:
+꼬리:	しっぽ:	Tail:
+기울기:	傾き:	Tilt:
+대사 효과(글자 등장 효과)는 pygaki 앱 [[대본 편집]에서 고칩니다. 셰이더와 커서는 '화면 효과' 탭, '커서/대사 소리' 탭에서 [[여기에서부터 적용]으로.	セリフのエフェクト(文字の登場エフェクト)は pygaki アプリの [スクリプト編集] で直します。シェーダーとカーソルは「画面エフェクト」タブ、「カーソル/セリフ音」タブの [ここから適用] で。	Dialogue effects (text appear effects) are edited in the pygaki app's [Script]. For shaders and cursors use [Apply from here] in the 'Screen FX' and 'Cursor/voice beeps' tabs.
+R 다시 보기	R もう一度見る	R Replay
+이 줄 되돌리기	この行を元に戻す	Revert this line
+이미지/영상	画像/動画	Images/video
+원고에 바로 저장되지 않는 줄에 쓰세요. 그 줄을 이 줄로 바꿔 붙여넣습니다.	スクリプトに直接保存されない行に使ってください。その行をこの行に置き換えて貼り付けます。	Use this for lines that can't be saved to the script directly. Paste it over that line.
+게임 안 편집 화면이 저장한 그림 자리입니다.	ゲーム内編集画面が保存した画像の位置です。	Image positions saved by the in-game editor.
+대본 편집기에서 다시 내보내도 지워지지 않습니다.	スクリプトエディターで書き出し直しても消えません。	Re-exporting from the script editor doesn't erase them.
+"ghost"는 어디서나, ("n4", "ghost")는 상자 n4에서만 쓰는 자리입니다.	"ghost" はどこでも、("n4", "ghost") はボックス n4 だけで使う位置です。	"ghost" applies everywhere; ("n4", "ghost") applies only in box n4.
+이 파일을 지우면 그림이 렌파이 기본 자리로 돌아갑니다.	このファイルを消すと画像は Ren'Py の標準の位置に戻ります。	Delete this file to put images back in Ren'Py's default positions.
+이미지/영상 기능이 없습니다.	画像/動画の機能がありません。	The image/video feature is missing.
+이미지/영상 기능이 꺼져 있습니다. (stage.enabled)	画像/動画の機能がオフです。(stage.enabled)	The image/video feature is off. (stage.enabled)
+게임을 진행하는 중에 쓸 수 있습니다.	ゲーム進行中に使えます。	Available during play.
+게임 메뉴(저장, 불러오기 등)를 닫으면 쓸 수 있습니다.	ゲームメニュー(セーブ、ロードなど)を閉じると使えます。	Available once the game menu (save, load, etc.) is closed.
+스크립트를 진행하는 중에 쓸 수 있습니다.	スクリプト進行中に使えます。	Available while the script is running.
+원고에서 이 줄을 읽을 수 없습니다.	スクリプトからこの行を読めません。	This line can't be read from the script.
+이 원고 파일에는 show/hide/scene 줄이 없습니다.	このスクリプトファイルには show/hide/scene の行がありません。	This script file has no show/hide/scene lines.
+{}번째 줄은 show/hide/scene 줄이 아니라서 가장 가까운 {}번째 줄을 골랐습니다.	{0} 行目は show/hide/scene の行ではないので、一番近い {1} 行目を選びました。	Line {0} isn't a show/hide/scene line, so the nearest line {1} was picked.
+{}번째 줄로 갑니다. (그 앞의 변수 값은 비어 있을 수 있음)	{0} 行目へ移動します。(それ以前の変数の値は空かもしれません)	Going to line {0}. (Variables set before it may be empty)
+줄로 가지 못했습니다: {}	行へ移動できませんでした:{0}	Couldn't go to the line: {0}
+배경(bg)은 위치를 옮기지 않습니다. (전환은 고칠 수 있음)	背景(bg)は位置を動かしません。(トランジションは直せます)	Backgrounds (bg) don't move. (Their transition can be changed)
+고를 줄이 없습니다.	選べる行がありません。	No lines to pick.
+이 줄은 고칠 수 없습니다:	この行は直せません:	This line can't be edited:
+hide 줄에는 위치가 없습니다.	hide の行には位置がありません。	hide lines have no position.
+hide 줄에는 효과를 걸 수 없습니다.	hide の行にはエフェクトをかけられません。	hide lines can't take effects.
+위치 미리 보기 실패: {}	位置のプレビュー失敗:{0}	Position preview failed: {0}
+화면에 없는 그림이라 방향키로 옮길 수 없습니다. 위치 버튼을 쓰세요.	画面にない画像なので矢印キーで動かせません。位置ボタンを使ってください。	This image isn't on screen, so arrow keys can't move it. Use the position buttons.
+원고의 줄로 띄운 그림이 화면에 없습니다.	スクリプトの行で表示した画像が画面にありません。	The image shown by the script line isn't on screen.
+이 줄 아래에 넣으려던 새 줄을 버렸습니다.	この行の下に入れようとした新しい行を破棄しました。	Discarded the new line meant to go below this line.
+'{}'는 원고에 쓸 수 없는 이름입니다. 파일 이름을 영어, 숫자, 한글과 _로 바꾸세요.	「{0}」はスクリプトに書けない名前です。ファイル名を英字、数字、ハングル、_ にしてください。	'{0}' can't be used in the script. Rename the file using letters, digits, Hangul and _.
+{}번째 줄 앞에 '{}'를 넣습니다. Ctrl+S로 저장	{0} 行目の前に「{1}」を入れます。Ctrl+S で保存	Inserting '{1}' before line {0}. Save with Ctrl+S
+이 줄의 그림을 '{}'로 바꿉니다. Ctrl+S로 원고에 저장	この行の画像を「{0}」に変えます。Ctrl+S でスクリプトに保存	Changing this line's image to '{0}'. Save to the script with Ctrl+S
+{}번째 줄 아래에 '{} {}'를 넣습니다. Ctrl+S로 원고에 저장	{0} 行目の下に「{1} {2}」を入れます。Ctrl+S でスクリプトに保存	Inserting '{1} {2}' below line {0}. Save to the script with Ctrl+S
+미리 보기를 못 했습니다: {}	プレビューできませんでした:{0}	Couldn't preview: {0}
+고른 줄이 없습니다. [그림/영상/소리 고르기]로 지금 대사 앞에 넣을 수 있습니다.	選んだ行がありません。[画像/動画/音を選ぶ] で今のセリフの前に入れられます。	No line selected. Use [Pick image/video/sound] to insert before the current dialogue.
+원고에 저장 안 한 줄 {}개 (Ctrl+S)	スクリプトに未保存の行 {0} 個 (Ctrl+S)	{0} lines not yet saved to the script (Ctrl+S)
+지금 장면 (R로 다시 보기)	今の場面(R でもう一度見る)	Current scene (R to replay)
+지금 장면 밖 ('그 줄로 가기'로 확인)	今の場面の外(「その行へ移動」で確認)	Outside the current scene (check with 'Go to that line')
+영상: {}{}	動画:{0}{1}	Video: {0}{1}
+(투명)	(透過)	(transparent)
+위치: {}{}   전환: {}	位置:{0}{1}   トランジション:{2}	Position: {0}{1}   Transition: {2}
+(배경이라 고정)	(背景なので固定)	(fixed: background)
+전환: {}	トランジション:{0}	Transition: {0}
+새 줄:	新しい行:	New line:
+(만들 수 없음)	(作れません)	(can't be made)
+이 줄 아래에 넣을 줄:	この行の下に入れる行:	Line to insert below:
+pygaki 원고: 위치는 stage_layout.rpy에, 그림 줄은 대본 편집기가 받아 적습니다.	pygaki スクリプト:位置は stage_layout.rpy に、画像の行はスクリプトエディターが書き取ります。	pygaki script: positions go to stage_layout.rpy; the script editor picks up image lines.
+대본 편집기가 아직 안 받아 적은 줄 {}개	スクリプトエディターがまだ書き取っていない行 {0} 個	{0} lines not yet picked up by the script editor
+외 {}개	ほか {0} 個	and {0} more
+등록 못 한 영상: {} ({}){}	登録できなかった動画:{0}({1}){2}	Videos not registered: {0} ({1}){2}
+마우스: 그림을 누르면 그 줄 고르기, 끌면 위치 (Shift: 한 방향) | 방향키 이동 (Shift: 10배)	マウス:画像をクリックでその行を選択、ドラッグで位置(Shift:一方向) | 矢印キーで移動(Shift:10 倍)	Mouse: click an image to select its line, drag to move (Shift: one axis) | Arrow keys move (Shift: x10)
+Tab 화면의 그림 차례로 | [[ ] 앞뒤 줄 | PageUp/Down 7줄씩 | L 목록 접기 | R 다시 보기 | Backspace 이 줄 되돌리기	Tab 画面の画像を順に | [ ] 前後の行 | PageUp/Down 7 行ずつ | L リストを閉じる | R もう一度見る | Backspace この行を元に戻す	Tab Cycle on-screen images | [ ] Previous/next line | PageUp/Down 7 lines | L Fold list | R Replay | Backspace Revert this line
+{}번째 줄 {}	{0} 行目 {1}	Line {0} {1}
+지금 장면으로	今の場面へ	To current scene
+그림/영상/소리 고르기	画像/動画/音を選ぶ	Pick image/video/sound
+images 폴더 열기	images フォルダーを開く	Open images folder
+그 줄로 가기	その行へ移動	Go to that line
+위치 저장:	位置の保存:	Save position:
+이 상자에서만	このボックスだけ	This box only
+어디서나	どこでも	Everywhere
+위치:	位置:	Position:
+배경(bg)이라 고정	背景(bg)なので固定	Fixed: background (bg)
+기본 위치로 되돌리기	デフォルトの位置に戻す	Reset to default position
+기본	デフォルト	Default
+효과:	エフェクト:	Effect:
+전환:	トランジション:	Transition:
+나가는 쪽:	出ていく方向:	Exit side:
+방향:	方向:	Direction:
+시간:	時間:	Time:
+{:g}초	{0} 秒	{0} s
+game/images, movies, audio 폴더의 파일입니다.	game/images、movies、audio フォルダーのファイルです。	Files in the game/images, movies and audio folders.
+전부	すべて	All
+그림	画像	Images
+소리	音	Sound
+폴더 열기	フォルダーを開く	Open folder
+새로 읽기	再読み込み	Rescan
+고른 파일 폴더	選んだファイルのフォルダー	Selected file's folder
+투명 영상	透過動画	Transparent video
+images, movies 폴더에 파일이 없습니다.	images、movies フォルダーにファイルがありません。	No files in the images and movies folders.
+/    고른 줄: {}번째 줄 {}	/    選んだ行:{0} 行目 {1}	/    Selected line: line {0} {1}
+지금 대사 앞에:	今のセリフの前に:	Before current dialogue:
+음악	BGM	Music
+효과음	効果音	Sound effect
+고른 줄에:	選んだ行に:	On selected line:
+그림 바꾸기	画像を変える	Change image
+아래에 show	下に show	show below
+아래에 scene	下に scene	scene below
+타이틀 메뉴	タイトルメニュー	Title menu
+이 항목만	この項目だけ	This item only
+모든 항목 공통	全項目共通	All items
+title_menu_config.rpy의 항목에 붙여넣으세요.	title_menu_config.rpy の項目に貼り付けてください。	Paste into the item in title_menu_config.rpy.
+타이틀 메뉴 기능이 없습니다.	タイトルメニューの機能がありません。	The title menu feature is missing.
+타이틀 메뉴 기능이 꺼져 있습니다. (tmenu.enabled)	タイトルメニューの機能がオフです。(tmenu.enabled)	The title menu feature is off. (tmenu.enabled)
+타이틀 화면이나 ESC 메뉴에서 쓸 수 있습니다.	タイトル画面か ESC メニューで使えます。	Available on the title screen or in the ESC menu.
+메뉴 항목이 없습니다.	メニュー項目がありません。	No menu items.
+위치는 항목마다 정합니다. 3을 눌러 '이 항목만'으로 바꾸세요.	位置は項目ごとに決めます。3 を押して「この項目だけ」にしてください。	Positions are per item. Press 3 to switch to 'This item only'.
+'{}' 글자의 저장 안 한 변경을 되돌렸습니다.	「{0}」の文字の未保存の変更を元に戻しました。	Reverted unsaved changes to the text '{0}'.
+공통 값의 저장 안 한 변경을 되돌렸습니다.	共通値の未保存の変更を元に戻しました。	Reverted unsaved changes to the shared values.
+'{}' 항목의 저장 안 한 변경을 되돌렸습니다.	「{0}」項目の未保存の変更を元に戻しました。	Reverted unsaved changes to item '{0}'.
+없음 (검은 화면)	なし(黒い画面)	None (black screen)
+없음 (투명)	なし(透明)	None (transparent)
+배경	背景	Background
+선택됐을 때 글꼴	選択時のフォント	Selected font
+선택됐을 때 색	選択時の色	Selected color
+UI Kit 편집기가 저장한 타이틀 메뉴 배치입니다.	UI Kit エディターが保存したタイトルメニューの配置です。	Title menu layout saved by the UI Kit editor.
+여기 적힌 값은 title_menu_config.rpy의 같은 값보다 우선합니다.	ここに書かれた値は title_menu_config.rpy の同じ値より優先されます。	Values here override the same values in title_menu_config.rpy.
+직접 고쳐도 되지만, 편집기에서 다시 저장하면 덮어써집니다.	直接直してもかまいませんが、エディターで保存し直すと上書きされます。	You can edit this by hand, but saving again from the editor overwrites it.
+타이틀	タイトル	Title
+게임 중 ESC 메뉴	ゲーム中の ESC メニュー	In-game ESC menu
+ESC 메뉴	ESC メニュー	ESC menu
+{}  {} 글자 ({}/{})	{0}  {1} の文字({2}/{3})	{0}  text {1} ({2}/{3})
+x {:.0f}   y {:.0f}   회전 {:.1f}   확대 {:.2f}   크기 {}   효과 {}	x {0}   y {1}   回転 {2}   拡大 {3}   サイズ {4}   エフェクト {5}	x {0}   y {1}   Rotate {2}   Zoom {3}   Size {4}   Effect {5}
+글자가 비어 있어서 화면에 안 보입니다. 내용은 pygaki 앱의 타이틀 메뉴 칸에서 적습니다.	文字が空なので画面に見えません。内容は pygaki アプリのタイトルメニュー欄で書きます。	The text is empty, so nothing shows. Write it in the title menu panel of the pygaki app.
+모든 항목 공통 값을 바꿉니다. (보기: 항목 {}/{} {})	全項目共通の値を変えます。(表示:項目 {0}/{1} {2})	Changes the values shared by all items. (Showing: item {0}/{1} {2})
+회전 {}   기울기 {}   확대 {}   크기 {}	回転 {0}   傾き {1}   拡大 {2}   サイズ {3}	Rotate {0}   Skew {1}   Zoom {2}   Size {3}
+이 항목에 따로 정한 값이 있어 공통 값보다 우선:	この項目には個別の値があり、共通値より優先:	This item has its own values, which override the shared ones:
+{}  항목 {}/{}   id: {}	{0}  項目 {1}/{2}   id: {3}	{0}  Item {1}/{2}   id: {3}
+x {:.0f}   y {:.0f}   회전 {:.1f}   기울기 {:.1f}   확대 {:.2f}   크기 {}	x {0}   y {1}   回転 {2}   傾き {3}   拡大 {4}   サイズ {5}	x {0}   y {1}   Rotate {2}   Skew {3}   Zoom {4}   Size {5}
+이동 ({:.0f}, {:.0f})   회전 {:.1f}   기울기 {:.1f}   확대 {:.2f}   크기 {}	移動 ({0}, {1})   回転 {2}   傾き {3}   拡大 {4}   サイズ {5}	Offset ({0}, {1})   Rotate {2}   Skew {3}   Zoom {4}   Size {5}
+배경:	背景:	Background:
+마우스: 드래그 이동 (Shift: 한 방향) | 분홍 네모 끌기: 회전 (Shift: 15도씩) | 휠 회전 | Shift+휠 글자 크기	マウス:ドラッグで移動(Shift:一方向) | ピンクの四角をドラッグ:回転(Shift:15 度ずつ) | ホイールで回転 | Shift+ホイールで文字サイズ	Mouse: drag to move (Shift: one axis) | Drag the pink square: rotate (Shift: 15° steps) | Wheel rotate | Shift+wheel text size
+Tab 다음 항목 (제목, 부제 포함) | 1/2 평소/선택됐을 때 | 3 이 항목만/공통 | H 미리보기 | Backspace 되돌리기	Tab 次の項目(タイトル、サブタイトルを含む) | 1/2 通常/選択時 | 3 この項目だけ/共通 | H プレビュー | Backspace 元に戻す	Tab Next item (incl. title and subtitle) | 1/2 Idle/Selected | 3 This item/Shared | H Preview | Backspace Revert
+(비어 있음)	(空)	(empty)
+글자 효과:	文字エフェクト:	Text effect:
+없애기	なくす	Remove
+이 항목 되돌리기	この項目を元に戻す	Revert this item
+UI 글	UI の文字	UI text
+UI 글 기능이 없습니다.	UI の文字の機能がありません。	The UI text feature is missing.
+게임 안 편집 화면이 저장한 UI 글(확인 창, 버튼 글자)입니다.	ゲーム内編集画面が保存した UI の文字(確認ウィンドウ、ボタンの文字)です。	UI text (confirm dialogs, button labels) saved by the in-game editor.
+여기 적힌 값은 ui_text_config.rpy의 같은 이름보다 우선합니다.	ここに書かれた値は ui_text_config.rpy の同じ名前より優先されます。	Values here override the same names in ui_text_config.rpy.
+칸을 눌러 고치고 Enter (Esc 취소). 줄바꿈은 \\n. 확인 창 글은 [[이 창 보기]로 바로 보고, 버튼 글자는 저장하면 다시 불러온 뒤 바뀝니다.	欄をクリックして直し Enter(Esc でキャンセル)。改行は \\n。確認ウィンドウの文字は [このウィンドウを見る] ですぐ見られ、ボタンの文字は保存して再読み込みした後に変わります。	Click a field, edit, then Enter (Esc cancels). Use \\n for a new line. See confirm dialog text at once with [Show this dialog]; button labels change after saving and reloading.
+screens.rpy를 고치지 않고 렌파이 번역표로 바꿉니다. 같은 글을 여러 곳에서 쓰면 같이 바뀝니다.	screens.rpy は直さず、Ren'Py の翻訳表で変えます。同じ文字を複数の場所で使っていれば一緒に変わります。	Changes go through Ren'Py's translation table without editing screens.rpy. Text used in several places changes everywhere.
+(바꿈)	(変更)	(changed)
+이 창 보기	このウィンドウを見る	Show this dialog
+원래대로	元に戻す	Restore
+대사나 선택지 글이 다음 줄로 이어집니다.	セリフや選択肢の文字が次の行に続いています。	The dialogue or choice text continues onto the next line.
+괄호 짝이 맞지 않습니다.	括弧の対応が合いません。	Brackets don't match.
+괄호가 다음 줄로 이어집니다.	括弧が次の行に続いています。	A bracket continues onto the next line.
+줄이 다음 줄로 이어집니다.	行が次の行に続いています。	The line continues onto the next line.
+빈 줄입니다.	空行です。	It's an empty line.
+대사 줄이 아닙니다.	セリフの行ではありません。	Not a dialogue line.
+대사 줄이 아닙니다. (끝이 ':')	セリフの行ではありません。(末尾が ':')	Not a dialogue line. (It ends with ':')
+선택지 줄이 아닙니다. (끝에 ':'가 없음)	選択肢の行ではありません。(末尾に ':' がない)	Not a choice line. (No ':' at the end)
+선택지 줄이 아닙니다.	選択肢の行ではありません。	Not a choice line.
+menu 줄이 아닙니다. (끝에 ':'가 없음)	menu の行ではありません。(末尾に ':' がない)	Not a menu line. (No ':' at the end)
+menu 줄이 아닙니다.	menu の行ではありません。	Not a menu line.
+모르는 편집 종류: {}	不明な編集の種類:{0}	Unknown edit kind: {0}
+원고의 이 줄이 게임이 읽은 내용과 다릅니다. (줄 번호가 밀렸을 수 있음)	スクリプトのこの行がゲームの読んだ内容と違います。(行番号がずれたかもしれません)	This script line differs from what the game read. (Line numbers may have shifted)
+{} 줄이 아닙니다.	{0} の行ではありません。	Not a {0} line.
+이미지 이름을 읽을 수 없습니다.	画像名を読めません。	Can't read the image name.
+그림 없는 scene 줄입니다.	画像のない scene の行です。	It's a scene line without an image.
+이미지 이름이 없습니다.	画像名がありません。	No image name.
+{} {} 줄은 고칠 수 없습니다.	{0} {1} の行は直せません。	{0} {1} lines can't be edited.
+읽을 수 없는 부분이 있습니다:	読めない部分があります:	Unreadable part:
+{} 절이 두 번 있습니다.	{0} 節が 2 回あります。	The {0} clause appears twice.
+{} 뒤가 비어 있습니다.	{0} の後が空です。	Nothing follows {0}.
+hide 줄에는 위치를 적을 수 없습니다.	hide の行には位置を書けません。	hide lines can't have a position.
+이미지 이름 {!r}를 쓸 수 없습니다.	画像名 {0} は使えません。	The image name {0} can't be used.
+pygaki 대본 편집기가 만든 원고라 저장하지 않았습니다. 대사 글자와 모양, 선택지는 대본 편집기에서 고치세요. 셰이더와 커서는 화면 효과, 커서 칸의 [[여기에서부터 적용]으로.	pygaki スクリプトエディターが作ったスクリプトなので保存しませんでした。セリフの文字と見た目、選択肢はスクリプトエディターで直してください。シェーダーとカーソルは画面エフェクト、カーソル欄の [ここから適用] で。	Not saved: this script was made by the pygaki script editor. Edit dialogue text, its look and choices there. For shaders and cursors use [Apply from here] in Screen FX and the cursor section.
+이 줄의 표시가 없습니다. 대본 편집기에서 pygaki 플러그인 연결을 켜고 다시 내보내세요.	この行の目印がありません。スクリプトエディターで pygaki プラグイン連携をオンにして書き出し直してください。	This line has no marker. Turn on the pygaki plugin link in the script editor and export again.
+개발 모드에서만 원고를 고칠 수 있습니다.	開発モードでのみスクリプトを直せます。	The script can only be edited in developer mode.
+원고에서 그 줄을 찾지 못했습니다.	スクリプトでその行が見つかりませんでした。	That line wasn't found in the script.
+원고 파일(.rpy)을 찾을 수 없습니다.	スクリプトファイル(.rpy)が見つかりません。	The script file (.rpy) can't be found.
+원고를 읽지 못했습니다: {}	スクリプトを読めませんでした:{0}	Couldn't read the script: {0}
+원고에 그 줄이 없습니다. (줄 번호가 밀렸을 수 있음)	スクリプトにその行がありません。(行番号がずれたかもしれません)	The script doesn't have that line. (Line numbers may have shifted)
+편집하는 동안 다른 프로그램에서 이 줄이 바뀌었습니다.	編集中にほかのプログラムでこの行が変わりました。	Another program changed this line while you were editing.
+원고를 저장하지 못했습니다: {}	スクリプトを保存できませんでした:{0}	Couldn't save the script: {0}
+대본 편집기에 넘길 파일을 쓰지 못했습니다: {}	スクリプトエディターに渡すファイルを書けませんでした:{0}	Couldn't write the file for the script editor: {0}
+원고 {}곳을 고쳤습니다. (그중 줄 넣기 {}곳)	スクリプトを {0} か所直しました。(そのうち行の追加 {1} か所)	Edited {0} places in the script ({1} of them inserted lines).
+원고 {}줄을 고쳤습니다.	スクリプトの {0} 行を直しました。	Edited {0} script lines.
+{}: {} → Ctrl+C로 복사해 붙여넣으세요.	{0}:{1} → Ctrl+C でコピーして貼り付けてください。	{0}: {1} → copy with Ctrl+C and paste.
+바뀐 줄이 없습니다.	変わった行はありません。	No lines changed.
+1 가장 어두운 색	1 一番暗い色	1 darkest color
+1초에 몇 번	1秒に何回	Times per second
+1초에 바뀌는 수	1秒に変わる数	Changes per second
+2 어두운 색	2 暗い色	2 dark color
+3 밝은 색	3 明るい色	3 light color
+4 가장 밝은 색	4 一番明るい色	4 lightest color
+LCD 얼룩	LCDのむら	LCD mura
+REC 글자	REC文字	REC text
+RGB 격자	RGB格子	RGB grille
+RGB 어긋남 (픽셀)	RGBずれ (px)	RGB offset (px)
+VHS 켜기	VHSオン	VHS on
+가는 띠 비율	細い帯の割合	Thin band ratio
+가늘기	細さ	Thinness
+가로	横	Horizontal
+가로 색 번짐	横の色にじみ	Horizontal color bleed
+가로로 뭉개짐	横につぶれる	Horizontal smear
+가로줄	横線	Horizontal lines
+가운데	中央	Center
+가운데 가로 (0~1)	中心 横 (0~1)	Center X (0–1)
+가운데 범위	中心の範囲	Center range
+가운데 세로 (0~1)	中心 縦 (0~1)	Center Y (0–1)
+가장자리	端	Edge
+가장자리 굵기 (픽셀)	端の太さ (px)	Edge width (px)
+가장자리 그림자	端の影	Edge shadow
+가장자리 색 번짐	端の色にじみ	Edge color bleed
+가장자리 어둡게	端を暗く	Vignette
+가장자리 어둡기	端の暗さ	Vignette darkness
+가장자리 휘어짐	端の湾曲	Edge warp
+각도	角度	Angle
+감마	ガンマ	Gamma
+감마 (어두운 곳)	ガンマ (暗い所)	Gamma (shadows)
+감마 (클수록 중간 밝기가 어두움)	ガンマ (大きいほど中間が暗い)	Gamma (higher darkens midtones)
+검게 되는 밝기	黒になる明るさ	Black threshold
+검게 페이드	黒フェード	Fade to black
+검은 먼지 비율	黒いほこりの割合	Black dust ratio
+검은색 들뜸	黒浮き	Raised blacks
+게임보이	ゲームボーイ風	Game Boy
+결 간격 (픽셀)	きめの間隔 (px)	Grain spacing (px)
+결 진하기	きめの濃さ	Grain strength
+경계선 색	境界線の色	Border color
+고리	リング	Rings
+고리 경계선	リングの境界線	Ring edges
+고리 굵기 (픽셀)	リングの太さ (px)	Ring width (px)
+고리마다 확대	リングごとの拡大	Zoom per ring
+곡면 CRT	曲面CRT	Curved CRT
+곡면 CRT 켜기	曲面CRTオン	Curved CRT on
+굴절 (픽셀)	屈折 (px)	Refraction (px)
+그라데이션 맵	グラデーションマップ	Gradient map
+그림자	影	Shadow
+그림자 거리 (점 = 1)	影の距離 (点 = 1)	Shadow distance (dot = 1)
+글꼴 파일	フォントファイル	Font file
+글리치	グリッチ	Glitch
+글자 목록	文字リスト	Character set
+글자 색 (한 가지 색)	文字色 (単色)	Text color (single)
+글자 칸 높이 (픽셀)	文字セルの高さ (px)	Character cell height (px)
+글자도 점으로	文字も点に	Dots for text too
+깜빡임	点滅	Flicker
+깨지는 칸의 양	壊れる枠の量	Broken cell amount
+끌린 줄	引きずった線	Drag streaks
+나이트비전	暗視	Night vision
+낡은 테이프 (5.8)	古いテープ (5.8)	Worn tape (5.8)
+노이즈	ノイズ	Noise
+노이즈 크기	ノイズの大きさ	Noise size
+노이즈가 초당 바뀌는 번	ノイズが毎秒変わる回数	Noise changes per second
+눌려 들어가게 (음각)	へこませる (陰刻)	Engraved (inset)
+늘 깨짐	常に破損	Always broken
+늘 망가짐	常に壊れる	Always glitching
+단계 사이 점 섞기	段階の間に点を混ぜる	Dither between levels
+단계 수 (0 = 부드럽게)	段階数 (0 = なめらか)	Steps (0 = smooth)
+단말기	端末	Terminal
+대비	コントラスト	Contrast
+대사록	ログ	History
+덜컹거림 (픽셀)	がたつき (px)	Gate weave (px)
+도트 느낌	ドット感	Pixelated
+돌기	回転	Spin
+돌아가는 정도 (도)	回る程度 (度)	Rotation (°)
+동그란 테두리	丸い枠	Round border
+동심원 어긋남	同心円ずれ	Ring offset
+둥근 화면 (0 = 없음)	丸い画面 (0 = なし)	Round screen (0 = none)
+둥근 화면 가장자리	丸い画面の端	Rounded screen edge
+들뜬 검은색의 색	黒浮きの色	Raised black color
+디더링 무늬	ディザ模様	Dither pattern
+디더링 세기	ディザの強さ	Dither strength
+떨림 (픽셀)	震え (px)	Jitter (px)
+떨림 무늬 크기	震え模様の大きさ	Jitter pattern size
+뚝뚝 끊기 (초당 번, 0 = 부드럽게)	カクカク (毎秒回数、0 = なめらか)	Choppy (per second, 0 = smooth)
+띠 두께 (픽셀)	帯の厚さ (px)	Band thickness (px)
+띠 모양 변화	帯の形の変化	Band variation
+띠 밀림 (픽셀)	帯のずれ (px)	Band shift (px)
+띠 속도	帯の速度	Band speed
+띠 지직거림	帯のノイズ	Band static
+띠 크기	帯の大きさ	Band size
+띠 튐 (픽셀)	帯の跳ね (px)	Band jump (px)
+레트로 터미널	レトロターミナル	Retro terminal
+렌즈	レンズ	Lens
+망가지는 세기	壊れる強さ	Glitch strength
+망점	網点	Halftone
+머리카락	髪の毛	Hairs
+먼 조각 흐림	遠い破片のぼかし	Far piece blur
+먼지 점	ほこりの点	Dust specks
+먼지와 긁힘	ほこりと傷	Dust and scratches
+멀수록 잦아듦	遠いほど弱まる	Fades with distance
+몇 초마다 (0 = 계속)	何秒ごと (0 = ずっと)	Every N sec (0 = always)
+모양	形	Shape
+무늬 가로 크기 (픽셀)	模様の横の大きさ (px)	Pattern width (px)
+무늬 세로 크기 (픽셀)	模様の縦の大きさ (px)	Pattern height (px)
+물결 간격 (픽셀)	波の間隔 (px)	Wave spacing (px)
+물드는 색	染まる色	Tint color
+물드는 정도	染まる程度	Tint amount
+물드는 조각 비율	染まる破片の割合	Tinted piece ratio
+물들이는 색	染める色	Tint color
+밀리는 거리 (픽셀)	ずれる距離 (px)	Shift distance (px)
+밀림	ずれ	Shift
+밀림 (픽셀)	ずれ (px)	Shift (px)
+바깥 테두리 투명	外枠を透明に	Transparent outer border
+바꾸기 (초)	切り替え (秒)	Switch (sec)
+바랜 색감	あせた色味	Faded colors
+바랜 정도	あせ具合	Fade amount
+바탕색 (어두운 곳)	背景色 (暗い所)	Background (shadows)
+바탕에 원래 그림 비치기	背景に元の画像を透かす	Show original underneath
+반으로 가르기	半分に割る	Split in half
+반짝임	きらめき	Sparkle
+반짝임 날카로움	きらめきの鋭さ	Sparkle sharpness
+밝게 끌어올림	明るく持ち上げる	Lift
+밝기 깜빡임	明るさの点滅	Brightness flicker
+밝기 단계 (1 = 흑백)	明るさの段階 (1 = 白黒)	Brightness levels (1 = mono)
+밝기 뒤집기	明るさ反転	Invert brightness
+밝기 보정	明るさ補正	Brightness boost
+밝기 차이	明るさの差	Brightness difference
+밝은 곳 번짐	明るい所のにじみ	Highlight bloom
+밝은 곳 색	明るい所の色	Highlight color
+밝은 줄 속도	明るい線の速度	Bright line speed
+방향 (도)	方向 (度)	Direction (°)
+버전정보	バージョン情報	About
+번짐	にじみ	Bleed
+번짐 크기 (픽셀)	にじみの大きさ (px)	Blur size (px)
+복사기	コピー機	Photocopy
+복사본 1 거리	複製1の距離	Copy 1 distance
+복사본 2 거리	複製2の距離	Copy 2 distance
+복사본 진하기	複製の濃さ	Copy opacity
+불러오기	ロード	Load
+불투명도	不透明度	Opacity
+블록 깨짐	ブロック破損	Macroblock
+블록 양	ブロック量	Block amount
+블록 크기 (픽셀)	ブロックの大きさ (px)	Block size (px)
+비친 빛	映った光	Reflection
+빗방울	雨粒	Raindrops
+빗방울 크기	雨粒の大きさ	Raindrop size
+빛	光	Glow
+빛 방향 (도)	光の方向 (度)	Light direction (°)
+빛 번짐	光のにじみ	Glow
+빛 번짐 크기	光のにじみの大きさ	Glow size
+빛이 도는 빠르기	光が回る速さ	Glow rotation speed
+살짝 번짐	少しにじむ	Slight blur
+색 1	色 1	Color 1
+색 2	色 2	Color 2
+색 3	色 3	Color 3
+색 갈라짐 (픽셀)	色分離 (px)	RGB split (px)
+색 밀림 (픽셀)	色ずれ (px)	Color shift (px)
+색 바램	色あせ	Fading
+색 번짐	色にじみ	Color bleed
+색 번짐 (픽셀)	色にじみ (px)	Color bleed (px)
+색 수	色数	Colors
+색 입히기	色付け	Colorize
+색 틀어짐	色ずれ	Color shift
+색감	色味	Tone
+색감 세기	色味の強さ	Tone strength
+색이 흐르는 빠르기	色が流れる速さ	Color flow speed
+선 두께 (픽셀)	線の太さ (px)	Line width (px)
+선 색	線の色	Line color
+선 진하기	線の濃さ	Line strength
+선명하게 (8의 배수로)	くっきり (8の倍数に)	Crisp (multiples of 8)
+설정	設定	Settings
+세기 출렁임	強さの揺らぎ	Strength wobble
+세로	縦	Vertical
+세로 긁힘	縦の傷	Vertical scratches
+세로 해상도 (줄)	縦の解像度 (線)	Vertical resolution (lines)
+셰이더	シェーダー	Shaders
+속도 (픽셀/초)	速度 (px/秒)	Speed (px/s)
+수평 흔들림	水平の揺れ	Horizontal jitter
+숨쉬듯 출렁	呼吸のように揺れる	Breathing
+숫자 시간	数字の時刻	Timestamp
+아래 글	下の文字	Bottom text
+아래 글 내용	下の文字の内容	Bottom text content
+아래쪽 찢긴 띠	下の裂けた帯	Head-switch band
+아스키	アスキー	ASCII
+알갱이	粒	Grain
+알갱이 세기	粒の強さ	Grain strength
+알갱이 크기	粒の大きさ	Grain size
+양각	レリーフ	Relief
+양과 색	量と色	Amount and color
+어긋남	ずれ	Offset
+어두운 곳 색	暗い所の色	Shadow color
+어둡게 하는 범위	暗くする範囲	Vignette range
+어안렌즈	魚眼レンズ	Fisheye
+언제	いつ	When
+옛 캠코더	昔のビデオカメラ	Old camcorder
+옛날 필름	古いフィルム	Old film
+왼쪽 위 글	左上の文字	Top-left text
+왼쪽 위 글 내용	左上の文字の内容	Top-left text content
+움직임	動き	Motion
+움직임과 선	動きと線	Motion and lines
+원래 색 남기기	元の色を残す	Keep original color
+원래 색 밝기	元の色の明るさ	Original brightness
+위로 피어오름	上に立ちのぼる	Rise up
+유리에 비친 빛	ガラスに映った光	Glass reflection
+이미지 가로 자리	画像の横位置	Image X
+이미지 세로 자리	画像の縦位置	Image Y
+이미지 자리	画像の位置	Image position
+이미지 진하기	画像の濃さ	Image opacity
+이미지 크기 (배)	画像の大きさ (倍)	Image scale (x)
+이미지 회전 (도)	画像の回転 (度)	Image rotation (°)
+인쇄 어긋남 (픽셀)	印刷ずれ (px)	Print misregistration (px)
+일렁거림	ゆらゆら	Wobble
+일렁임	ゆらめき	Ripple
+일렁임 (픽셀)	揺らめき (px)	Ripple (px)
+입자	粒子	Particles
+입자 크기	粒子の大きさ	Particle size
+잉크 색	インクの色	Ink color
+자글자글 노이즈	細かいノイズ	Fine noise
+작은 조각	小さい破片	Small pieces
+작은 조각 (픽셀)	小さい破片 (px)	Small pieces (px)
+잔무늬	細かい模様	Fine pattern
+전체 세기	全体の強さ	Overall strength
+점 간격 (픽셀)	点の間隔 (px)	Dot spacing (px)
+점 그림자	点の影	Dot shadow
+점 사이 틈	点の間のすき間	Gap between dots
+점 크기 (픽셀)	点の大きさ (px)	Dot size (px)
+정적 노이즈	静的ノイズ	Static noise
+조각	破片	Pieces
+조각 수	破片の数	Piece count
+조각 진하기	破片の濃さ	Piece opacity
+조작 방법	操作方法	Controls
+조작방법	操作方法	Controls
+종이	紙	Paper
+종이 색	紙の色	Paper color
+주사선	走査線	Scanlines
+주사선 개수	走査線の数	Scanline count
+주사선 진하기	走査線の濃さ	Scanline strength
+주사선 틈	走査線のすき間	Scanline gap
+줄	行	Line
+줄 간격 (픽셀)	線の間隔 (px)	Line spacing (px)
+줄 진하기	線の濃さ	Line strength
+줄무늬	縞模様	Stripes
+중간 색	中間色	Mid color
+중간 색 자리	中間色の位置	Mid color position
+지글거림	ボイリング	Boil
+지나가는 밝은 줄	通り過ぎる明るい線	Passing bright line
+지지직 줄	ノイズ線	Static lines
+지직 속도	ノイズ速度	Static speed
+지직거림	ノイズ	Static
+질감	質感	Texture
+초당 바뀌는 번	毎秒変わる回数	Changes per second
+출렁임 빠르기	揺らぎの速さ	Wobble speed
+칸 가로 ÷ 세로	セルの横 ÷ 縦	Cell width ÷ height
+칸 크기 (픽셀)	セルの大きさ (px)	Cell size (px)
+큰 조각	大きい破片	Large pieces
+큰 조각 (픽셀)	大きい破片 (px)	Large pieces (px)
+테두리	枠	Border
+테두리 두께	枠の太さ	Border thickness
+테두리 색	枠の色	Border color
+테두리 폭	枠の幅	Border width
+테두리에 비친 빛	枠に映った光	Rim light
+토너	トナー	Toner
+토너 색	トナーの色	Toner color
+토너 얼룩	トナーのしみ	Toner blotches
+튀어나온 정도	飛び出し具合	Pop amount
+트래킹 어긋남	トラッキングずれ	Tracking error
+틈 두께	すき間の厚さ	Gap width
+파편 흩날림	破片が舞う	Shards
+판	版	Plate
+판 색	版の色	Plate color
+퍼지는 곳	広がる場所	Origin
+퍼지는 속도 (픽셀/초)	広がる速度 (px/秒)	Spread speed (px/s)
+포토 콜라주	フォトコラージュ	Photo collage
+표현 방식	表現方式	Style
+필름	フィルム	Film
+하얀 테두리 (샤픈)	白い縁 (シャープ)	White halo (sharpen)
+한 번 길이 (초)	1回の長さ (秒)	Duration each (sec)
+한 번에 물결 수	一度の波の数	Waves at once
+한 색 뭉개짐	単色につぶれる	Flat blocks
+형광체 색 (글자, 밝은 곳)	蛍光体の色 (文字、明るい所)	Phosphor color (text, highlights)
+홀로그램	ホログラム	Hologram
+홀로그램 색	ホログラムの色	Hologram color
+화면	画面	Screen
+화면 결	画面のきめ	Screen grain
+화면 글	画面の文字	Screen text
+화면 글 전부	画面の文字すべて	All screen text
+화면 떨림 (픽셀)	画面の震え (px)	Screen jitter (px)
+화면 모서리 둥글기	画面の角の丸み	Screen corner radius
+화면 밀림	画面のずれ	Screen shift
+화면 색	画面の色	Screen color
+화면 어둡게	画面を暗く	Darken screen
+화면 이미지	画面の画像	Screen image
+화면 테두리	画面の枠	Screen border
+화질	画質	Quality
+확대	拡大	Zoom
+확인 창	確認ダイアログ	Confirm dialog
+환경설정	環境設定	Preferences
+효과 없음	エフェクトなし	No effect
+휘는 정도	曲がり具合	Bend amount
+휘어짐	湾曲	Warp
+흐르는 띠	流れる帯	Rolling band
+흔들리는 빠르기	揺れる速さ	Shake speed
+흔들림	揺れ	Shake
+흔들림 폭	揺れ幅	Shake range
+흰 빈 곳	白い余白	White space
+Enter(숫자판)	Enter(テンキー)	Enter (keypad)
+UI 이동.	UI を移動。	Navigate the UI.
+UI를 숨김.	UI を隠す。	Hides the UI.
+대사 읽어주기 기능 토글.	セリフ読み上げ機能の切り替え。	Toggles self-voicing.
+게임 끝내기 (물어봄)	ゲーム終了(確認あり)	Quit game (asks)
+게임 메뉴 불러옴.	ゲームメニューを開く。	Opens the game menu.
+누르고 있는 동안 대사를 스킵.	押している間セリフをスキップ。	Skips dialogue while held.
+대사 스킵 토글.	セリフのスキップを切り替え。	Toggles dialogue skipping.
+대사 진행 및 UI (선택지 포함) 선택.	セリフを進め、UI(選択肢を含む)を選ぶ。	Advances dialogue and activates the UI (including choices).
+대사록 열기	履歴を開く	Open history
+대사를 진행하되 선택지는 선택하지 않음.	セリフを進めるが、選択肢は選ばない。	Advances dialogue without selecting choices.
+불러오기 화면 열기	ロード画面を開く	Open load screen
+소리 끄기/켜기	音のオン/オフ	Mute/unmute
+숫자판	テンキー	Keypad
+스크린샷 저장	スクリーンショットを保存	Save screenshot
+스크린샷 저장.	スクリーンショットを保存。	Saves a screenshot.
+스페이스(Space)	スペース(Space)	Space
+아래 화살표	下矢印	Down arrow
+엔터(Enter)	エンター(Enter)	Enter
+오른쪽 화살표	右矢印	Right arrow
+왼쪽 화살표	左矢印	Left arrow
+위 화살표	上矢印	Up arrow
+이스케이프(Esc)	エスケープ(Esc)	Escape (Esc)
+이전 대사로 롤백.	前のセリフへロールバック。	Rolls back to earlier dialogue.
+이후 대사로 롤포워드.	後のセリフへロールフォワード。	Rolls forward to later dialogue.
+자동 진행 켜기/끄기	オートモードのオン/オフ	Toggle auto-forward
+저장 화면 열기	セーブ画面を開く	Open save screen
+전체 화면 켜기/끄기	フルスクリーンのオン/オフ	Toggle fullscreen
+접근성 메뉴를 엽니다.	アクセシビリティメニューを開きます。	Opens the accessibility menu.
+조작 안내 화면 보기	操作案内画面を見る	Show controls screen
+조작방법 화면 열기	操作方法画面を開く	Open help screen
+컨트롤(Ctrl)	コントロール(Ctrl)	Control (Ctrl)
+퀵로드	クイックロード	Quick load
+퀵세이브	クイックセーブ	Quick save
+타이틀로 (물어봄)	タイトルへ(確認あり)	To title (asks)
+탭(Tab)	タブ(Tab)	Tab
+페이지 다운(Page Down)	ページダウン(Page Down)	Page Down
+페이지 업(Page Up)	ページアップ(Page Up)	Page Up
+화살표 키	矢印キー	Arrow keys
+환경설정 열기	環境設定を開く	Open preferences
+1번, 2번 다 받음	1 番、2 番とも受ける	Gets slots 1 and 2
+2번만 받음	2 番だけ受ける	Gets slot 2 only
+shaders()의 2번	shaders() の 2 番	slot 2 of shaders()
+{} {!r}가 이 게임에 없어서 기본값(없음)으로 바꿨어요	{0} {1} がこのゲームにないので、デフォルト(なし)にしました	{0} {1} isn't in this game, so it was set to the default (none)
+글자 전부 빼고 장면만	文字をすべて除いて場面だけ	Scene only, no text
+글자까지 전부	文字まですべて	Everything incl. text
+기본({})	デフォルト({0})	Default ({0})
+대사와 이름	セリフと名前	Dialogue and name
+메뉴와 화면	メニューと画面	Menus and screens
+빼고	除外	except
+설정대로({})	設定どおり({0})	As configured ({0})
+셰이더 안 받음	シェーダーを受けない	No shader
+{}초	{0} 秒	{0} s
+같은 이름의 그림이 이미 있음	同じ名前の画像がすでにある	An image with the same name exists
+같은 이름의 영상이 이미 있음:	同じ名前の動画がすでにある:	A video with the same name exists:
+기본 (적지 않음)	デフォルト(書かない)	Default (not written)
+닦아내기	ワイプ	Wipe
+미끄러지기	スライド	Slide
+밀어내기	プッシュ	Push
+부드럽게 이동	なめらかに移動	Ease
+이동	移動	Move
+이름이 비어 있음	名前が空	Name is empty
+전환 미리 보기 실패: {}	トランジションのプレビュー失敗:{0}	Transition preview failed: {0}
+정중앙	中央	Center
+제자리	その場	In place
+직접 x {:.0f}, y {:.0f}	手動 x {0}, y {1}	Custom x {0}, y {1}
+직접 쓴 전환:	手書きのトランジション:	Hand-written transition:
+픽셀	ピクセル	Pixellate
+화면 밖 오른쪽	画面外の右	Off-screen right
+화면 밖 왼쪽	画面外の左	Off-screen left
+확대/축소	拡大/縮小	Zoom
+흔들기	揺らす	Shake
+글자 효과 {!r}가 효과 폴더에 없어서 한 글자씩 나오기로 했어요	文字エフェクト {0} がエフェクトフォルダーにないので、1 文字ずつ出すことにしました	Text effect {0} isn't in the effects folder, so it falls back to one character at a time
+셰이더 코드가 없습니다:	シェーダーのコードがありません:	No shader code:
+이름은 영어 소문자, 숫자, _만 씁니다:	名前は英小文字、数字、_ だけを使います:	Names use only lowercase letters, digits and _:
+이미 있는 이름입니다:	すでにある名前です:	Name already exists:
+읽지 못했습니다:	読めませんでした:	Couldn't read:
+효과 폴더:	エフェクトフォルダー:	Effects folder:
+돌아가기	戻る	Return
+리플레이 끝내기	リプレイ終了	End replay
+메인 메뉴	メインメニュー	Main menu
+부제	サブタイトル	Subtitle
+시작하기	はじめる	Start
+저장하기	セーブ	Save
+종료하기	終了	Quit
+0과 1	0 と 1	0 and 1
+16색	16 色	16 colors
+가는 선	細い線	Thin lines
+던전풍	ダンジョン風	Dungeon
+동그라미	丸	Circles
+블록	ブロック	Blocks
+원래 색	元の色	Original color
+한 가지 색	単色	Single color
+2색	2 色	2 colors
+4색	4 色	4 colors
+디더링	ディザリング	Dithering
+픽셀화	ピクセル化	Pixelate
+그림 전환 {!r}이 효과 폴더에 없어서 서서히 바뀌기로 했어요	画像トランジション {0} がエフェクトフォルダーにないので、ディゾルブにしました	Image transition {0} isn't in the effects folder, so it falls back to a dissolve
+@fragment가 없습니다:	@fragment がありません:	No @fragment:
+'처음 한 번만'인데 이미 봄	「初回のみ」で表示済み	'First time only' and already seen
+show_if 조건이 거짓	show_if の条件が偽	show_if condition is false
+splash.developer_skip = True (개발 모드에서 전체 건너뜀)	splash.developer_skip = True(開発モードではすべてスキップ)	splash.developer_skip = True (all skipped in developer mode)
+splash.enabled = False (스플래시 전체가 꺼짐)	splash.enabled = False(スプラッシュ全体がオフ)	splash.enabled = False (the whole splash is off)
+{}번째	{0} 番目	#{0}
+안 보이기로 둠	非表示に設定	set to hidden
+파일	ファイル	file
+플레이어가 '다음부터 보지 않기'를 체크함	プレイヤーが「次から表示しない」をチェックした	the player checked 'Don't show again'
+Q.불러오기	Q.ロード	Q.Load
+Q.저장하기	Q.セーブ	Q.Save
+게임 끄기	ゲーム終了	Quit game
+그 밖의 확인	そのほかの確認	Other confirms
+넘기기	スキップ	Skip
+넘기기 시작	スキップ開始	Start skipping
+네	はい	Yes
+다음 선택지까지 넘기기	次の選択肢までスキップ	Skip to next choice
+대사록 (게임 메뉴에도)	履歴(ゲームメニューにも)	History (also in game menu)
+되감기	巻き戻し	Back
+메뉴	メニュー	Menu
+메뉴 (휴대폰 화면)	メニュー(スマホ画面)	Menu (phone screen)
+메인 메뉴, 게임 메뉴	メインメニュー、ゲームメニュー	Main menu, game menu
+메인 메뉴로 가기	メインメニューへ	Go to main menu
+아니오	いいえ	No
+안 읽은 글도 넘기기	未読もスキップ	Skip unseen text too
+예	はい	Yes
+자동진행	オート	Auto
+저장 덮어쓰기	セーブの上書き	Overwrite save
+저장하기 (게임 메뉴에도)	セーブ(ゲームメニューにも)	Save (also in game menu)
+확인 창 버튼	確認ウィンドウのボタン	Confirm dialog buttons
+네 색 (CMYK)	4 色(CMYK)	Four colors (CMYK)
+점	点	Dots
+한 색	1 色	One color
+가운데 원래 크기	中央に元のサイズ	Centered, original size
+화면 가득	画面いっぱい	Fill screen
+1색	1 色	1 color
+3색	3 色	3 colors
+RGB 서브픽셀	RGB サブピクセル	RGB subpixels
+픽셀 격자	ピクセルの格子	Pixel grid

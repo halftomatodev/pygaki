@@ -3,7 +3,8 @@
 ##
 ## 런처에 두 가지를 더합니다.
 ##   [pygaki로 편집]        첫 화면 아래쪽 버튼. 지금 고른 프로젝트를 pygaki 앱으로 엽니다 (대본 편집, GUI 편집)
-##   [pygaki 안내서]        그 옆 버튼. pygaki/pygaki_안내서.html을 기본 브라우저로 엽니다 (인터넷 없이 열리는 한 파일)
+##   [pygaki 안내서]        그 옆 버튼. 런처 언어의 안내서(pygaki/pygaki_안내서.html, _ja, _en)를 기본 브라우저로 엽니다 (인터넷 없이 열리는 한 파일)
+##   단추와 알림 글은 런처 언어(한국어, 일본어, 그 밖은 영어)를 따릅니다
 ##   [플러그인 올리기]      그 옆 버튼. 고른 프로젝트의 pygaki 플러그인을 이 묶음의 판으로 바꿉니다 (설정·저장 값은 그대로)
 ##   [+ Create New Project]  누르면 "기본 (Vanilla)"과 "Pygaki" 가운데 고릅니다.
 ##                           기본 = 렌파이 원래 새 프로젝트
@@ -23,7 +24,7 @@ init python:
     ## SDK 폴더 기준 자리
     PYGAKI_APP = os.path.join(config.renpy_base, "pygaki", "app", "pygaki.exe")
     PYGAKI_TEMPLATE = os.path.join(config.renpy_base, "pygaki", "template")
-    PYGAKI_GUIDE = os.path.join(config.renpy_base, "pygaki", "pygaki_안내서.html")
+    PYGAKI_GUIDES = { "ko": "pygaki_안내서.html", "ja": "pygaki_guide_ja.html", "en": "pygaki_guide_en.html" }
 
     ## 예전 묶음은 템플릿이 SDK 폴더 바로 아래 showpy에 있었다. 새 자리에 없으면 그것을 쓴다
     if not os.path.isdir(os.path.join(PYGAKI_TEMPLATE, "game")):
@@ -37,19 +38,23 @@ init python:
     def pygaki_open():
         p = project.current
         if p is None:
-            interface.error(KO("먼저 왼쪽 목록에서 프로젝트를 고르세요."), label=None)
+            interface.error(L("먼저 왼쪽 목록에서 프로젝트를 고르세요.", "先に左のリストからプロジェクトを選んでください。", "Choose a project in the list on the left first."), label=None)
             return
         if not os.path.exists(PYGAKI_APP):
-            interface.error(KO("pygaki 앱을 찾지 못했어요:") + "\n[pygaki_app!q]", label=None, pygaki_app=PYGAKI_APP)
+            interface.error(L("pygaki 앱을 찾지 못했어요:", "pygaki アプリが見つかりません:", "Couldn't find the pygaki app:") + "\n[pygaki_app!q]", label=None, pygaki_app=PYGAKI_APP)
             return
         subprocess.Popen([ PYGAKI_APP, "--project", p.path ], cwd=os.path.dirname(PYGAKI_APP))
 
     def pygaki_guide():
-        if not os.path.exists(PYGAKI_GUIDE):
-            interface.error(KO("안내서를 찾지 못했어요:") + "\n[pygaki_guide!q]", label=None, pygaki_guide=PYGAKI_GUIDE)
+        ## 런처 언어의 안내서. 없으면(예전 묶음) 한국어
+        guide = os.path.join(config.renpy_base, "pygaki", PYGAKI_GUIDES[pygaki_lang()])
+        if not os.path.exists(guide):
+            guide = os.path.join(config.renpy_base, "pygaki", PYGAKI_GUIDES["ko"])
+        if not os.path.exists(guide):
+            interface.error(L("안내서를 찾지 못했어요:", "案内書が見つかりません:", "Couldn't find the guide:") + "\n[pygaki_guide!q]", label=None, pygaki_guide=guide)
             return
-        if not pygaki_open_in_browser(PYGAKI_GUIDE):
-            os.startfile(PYGAKI_GUIDE)
+        if not pygaki_open_in_browser(guide):
+            os.startfile(guide)
 
     ## .html을 VS Code 같은 편집기가 맡고 있어도 브라우저로 열리게, 윈도우에 정해 둔 기본 브라우저
     ## (https 주소를 여는 프로그램)를 찾아 file 주소를 넘긴다. 못 찾으면 False (그때는 파일에 붙은 프로그램으로)
@@ -72,9 +77,25 @@ init python:
         except Exception:
             return False
 
-    ## 런처 언어가 영어여도 한글이 네모로 나오지 않게 SDK의 한글 글꼴로 적는다
+    ## 런처 언어(환경 설정의 Language)에 맞춘 글. 한국어 런처면 한국어, 일본어면 일본어, 그 밖은 영어.
+    ## 영어 런처 글꼴에는 한글·일본어 글자가 없어서 SDK의 글꼴(한·일·영이 모두 있음)로 적는다
+    def pygaki_lang():
+        l = _preferences.language
+        if l == "korean":
+            return "ko"
+        if l == "japanese":
+            return "ja"
+        return "en"
+
     def KO(s):
         return "{font=SourceHanSansLite.ttf}" + s + "{/font}"
+
+    ## 고른 언어의 글 (글꼴 없이). 글에 {0} 같은 자리를 채울 때는 이것으로 채운 뒤 KO()로 감싼다
+    def T(ko, ja, en):
+        return { "ko": ko, "ja": ja, "en": en }[pygaki_lang()]
+
+    def L(ko, ja, en):
+        return KO(T(ko, ja, en))
 
     def pygaki_can_new():
         return os.path.isdir(os.path.join(PYGAKI_TEMPLATE, "game"))
@@ -217,19 +238,19 @@ screen pygaki_buttons():
             ypos 506
             spacing 24
 
-            textbutton "pygaki로 편집":
+            textbutton L("pygaki로 편집", "pygaki で編集", "Edit with pygaki"):
                 style "l_link"
                 text_font "SourceHanSansLite.ttf"
                 text_size 16
                 action Jump("pygaki_open")
 
-            textbutton "pygaki 안내서":
+            textbutton L("pygaki 안내서", "pygaki 案内書", "pygaki guide"):
                 style "l_link"
                 text_font "SourceHanSansLite.ttf"
                 text_size 16
                 action Jump("pygaki_guide")
 
-            textbutton "플러그인 올리기":
+            textbutton L("플러그인 올리기", "プラグインを更新", "Update plugins"):
                 style "l_link"
                 text_font "SourceHanSansLite.ttf"
                 text_size 16
@@ -250,34 +271,45 @@ label pygaki_update:
     python:
         p = project.current
         if p is None:
-            interface.error(KO("먼저 왼쪽 목록에서 프로젝트를 고르세요."), label=None)
+            interface.error(L("먼저 왼쪽 목록에서 프로젝트를 고르세요.", "先に左のリストからプロジェクトを選んでください。", "Choose a project in the list on the left first."), label=None)
             renpy.jump("front_page")
         if not os.path.isdir(os.path.join(PYGAKI_TEMPLATE, "game", "ui_kit")):
-            interface.error(KO("이 묶음에 플러그인 템플릿(pygaki/template)이 없어요."), label=None)
+            interface.error(L("이 묶음에 플러그인 템플릿(pygaki/template)이 없어요.", "このパックにはプラグインのテンプレート(pygaki/template)がありません。", "This bundle has no plugin template (pygaki/template)."), label=None)
             renpy.jump("front_page")
         if not os.path.isdir(os.path.join(p.gamedir, "ui_kit")):
-            interface.error(KO("이 프로젝트에는 pygaki 플러그인이 없어요. 새 프로젝트 만들기에서 \"Pygaki\"로 만든 프로젝트만 올릴 수 있어요."), label=None)
+            interface.error(L("이 프로젝트에는 pygaki 플러그인이 없어요. 새 프로젝트 만들기에서 \"Pygaki\"로 만든 프로젝트만 올릴 수 있어요.", "このプロジェクトには pygaki プラグインがありません。更新できるのは、新規プロジェクト作成で「Pygaki」を選んで作ったプロジェクトだけです。", "This project has no pygaki plugins. Only projects made with \"Pygaki\" in Create New Project can be updated."), label=None)
             renpy.jump("front_page")
 
         pygaki_old = pygaki_versions(p.gamedir)
         pygaki_new = pygaki_versions(os.path.join(PYGAKI_TEMPLATE, "game"))
+        pygaki_none = T("없음", "なし", "none")
         pygaki_lines = "\n".join(
-            "{}  {} → {}".format(n, pygaki_old[n] or "없음", pygaki_new[n] or "없음")
+            "{}  {} → {}".format(n, pygaki_old[n] or pygaki_none, pygaki_new[n] or pygaki_none)
             for n in PYGAKI_PLUGINS
         )
         pygaki_same = all(pygaki_old[n] == pygaki_new[n] for n in PYGAKI_PLUGINS)
-        pygaki_head = "판이 같아요. 그래도 다시 넣을까요?" if pygaki_same else "이 프로젝트의 pygaki 플러그인을 새 판으로 바꿀까요?"
+        if pygaki_same:
+            pygaki_head = T("판이 같아요. 그래도 다시 넣을까요?", "バージョンは同じです。それでも入れ直しますか?", "The versions are the same. Put them in again anyway?")
+        else:
+            pygaki_head = T("이 프로젝트의 pygaki 플러그인을 새 판으로 바꿀까요?", "このプロジェクトの pygaki プラグインを新しいバージョンにしますか?", "Update this project's pygaki plugins to the new version?")
+        pygaki_note = L(
+            "엔진·편집기 파일만 바꾸고, 설정(*_config.rpy)과 게임 안 편집 화면에서 저장한 값(*_layout.rpy)은 그대로 둬요. 바꾸기 전 것은 프로젝트 폴더의 ui_kit_backup/plugins에 남아요. 게임을 끄고 해 주세요.",
+            "エンジン・編集画面のファイルだけを替え、設定(*_config.rpy)とゲーム内編集画面で保存した値(*_layout.rpy)はそのままです。替える前のものはプロジェクトフォルダーの ui_kit_backup/plugins に残ります。ゲームを閉じてから行ってください。",
+            "Only the engine and editor files are replaced. Settings (*_config.rpy) and values saved in the in-game editor (*_layout.rpy) stay as they are. The old files are kept in ui_kit_backup/plugins in the project folder. Close the game first.",
+        )
 
         pygaki_ok = interface.yesno(
-            KO(pygaki_head + "\n\n" + pygaki_lines + "\n\n엔진·편집기 파일만 바꾸고, 설정(*_config.rpy)과 게임 안 편집 화면에서 저장한 값(*_layout.rpy)은 그대로 둬요. 바꾸기 전 것은 프로젝트 폴더의 ui_kit_backup/plugins에 남아요. 게임을 끄고 해 주세요."),
+            KO(pygaki_head + "\n\n" + pygaki_lines + "\n\n") + pygaki_note,
         )
 
         if pygaki_ok:
-            with interface.error_handling(KO("플러그인을 바꾸는 중")):
+            with interface.error_handling(L("플러그인을 바꾸는 중", "プラグインの更新", "updating the plugins")):
                 pygaki_n, pygaki_gone, pygaki_backup = pygaki_update_plugins(p.gamedir)
             interface.info(
-                KO("바꿨어요. 파일 {}개를 새 판으로, 예전 판에만 있던 파일 {}개를 치웠어요. 게임을 켜면 새 판으로 돌아요.".format(pygaki_n, pygaki_gone)),
-                KO("바꾸기 전 것:") + "\n[pygaki_backup!q]",
+                KO(T("바꿨어요. 파일 {0}개를 새 판으로, 예전 판에만 있던 파일 {1}개를 치웠어요. 게임을 켜면 새 판으로 돌아요.",
+                  "更新しました。ファイル {0} 個を新しいバージョンにし、古いバージョンにだけあったファイル {1} 個を片付けました。ゲームを起動すると新しいバージョンで動きます。",
+                  "Done. {0} files were updated and {1} files that only the old version had were removed. The game runs the new version next time you start it.").format(pygaki_n, pygaki_gone)),
+                L("바꾸기 전 것:", "替える前のもの:", "Old files:") + "\n[pygaki_backup!q]",
                 pygaki_backup=pygaki_backup,
             )
     jump front_page
@@ -305,10 +337,10 @@ label pygaki_new_project:
         ]
 
         gui_kind, gui_template_path = interface.choice(
-            KO("어떤 프로젝트를 만들까요?"),
+            L("어떤 프로젝트를 만들까요?", "どのプロジェクトを作りますか?", "Which kind of project?"),
             [
-                ( ("new_gui_project", None), KO("기본 (Vanilla): 렌파이 원래 새 프로젝트") ),
-                ( ("pygaki_gui_project", None), KO("Pygaki: pygaki 편집 도구가 들어 있는 한국어 프로젝트") ),
+                ( ("new_gui_project", None), L("기본 (Vanilla): 렌파이 원래 새 프로젝트", "基本 (Vanilla):Ren'Py の通常の新規プロジェクト", "Basic (Vanilla): Ren'Py's usual new project") ),
+                ( ("pygaki_gui_project", None), L("Pygaki: pygaki 편집 도구가 들어 있는 한국어 프로젝트", "Pygaki:pygaki の編集ツールが入った韓国語プロジェクト", "Pygaki: a Korean-language project with the pygaki editing tools") ),
             ] + pygaki_others,
             ("pygaki_gui_project", None),
             cancel=Jump("front_page"),

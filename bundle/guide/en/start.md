@@ -10,7 +10,7 @@ A set of tools that lets you make Ren'Py games without learning Ren'Py code.
 * **pygaki app**: [Script] (write the script) + [GUI] (connects to the running game and drives the in-game editor from the app) + [Effects], [Shaders] (browse effects and hide them).
 * **pygaki bundle**: the Ren'Py SDK + the plugin template + launcher buttons + the pygaki app, packed into one folder for Windows.
 
-Language: the language button at the top right of the pygaki app switches the script editor to Japanese or English. The pygaki buttons added to the launcher, the in-game editor and the app's [Help] are in Korean only. This guide gives a translation next to button names that stay in Korean.
+Language: the language button at the top right of the pygaki app switches the script editor and the app's [Help] to Japanese or English. The in-game editor switches with the [Language] button on its panel, and the pygaki buttons added to the launcher follow the launcher's language setting. This guide gives a translation next to button names as they appear on Korean screens.
 
 | I want to | Where |
 | --- | --- |

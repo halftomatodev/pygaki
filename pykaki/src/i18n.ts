@@ -3,7 +3,7 @@
 //   exact: 한국어 글 그대로 → [일본어, 영어]
 //   pats:  ${…}가 든 글 → 정규식, 번역의 {0} {1}에 잡힌 조각을 넣는다 (조각도 사전에 있으면 바꿈)
 // 사전은 pykaki/i18n/strings.tsv에서 만든다 (pykaki/i18n/build_dict.py). 사전에 없는 글은 한국어 그대로 보인다.
-// 바꾸지 않는 것: 글 칸(textarea, input의 값), 원고 미리보기(pre), 도움말 문서(GUIDE.md는 한국어만)
+// 바꾸지 않는 것: 글 칸(textarea, input의 값), 원고 미리보기(pre), 도움말 창(Help.tsx가 언어에 맞는 번역 문서를 따로 읽음)
 import dict from './i18n/dict.json';
 
 export type Lang = 'ko' | 'ja' | 'en';

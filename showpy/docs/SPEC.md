@@ -24,7 +24,7 @@
 
 | 폴더 | 버전 | 하는 일 |
 |---|---|---|
-| `game/ui_kit` | 4.9 | 타이틀 메뉴(배경, 제목, 부제, 글자 효과), ESC 메뉴, 선택지, 커서, 클릭 대기 표시, 대사 소리, 대사 스타일, 글 상자(`text_box`), 그림과 영상 배치(`stage`), 확인 창 글과 버튼 글자(`ui_text`), 게임 안 편집 화면(개발 모드 Shift+M, 화면 이름 "게임 안 편집 화면"), 원고 쓰기 도구(`script_edit`) |
+| `game/ui_kit` | 4.12 | 타이틀 메뉴(배경, 제목, 부제, 글자 효과), ESC 메뉴, 선택지, 커서, 클릭 대기 표시, 대사 소리, 대사 스타일, 글 상자(`text_box`), 그림과 영상 배치(`stage`), 확인 창 글과 버튼 글자(`ui_text`), 게임 안 편집 화면(개발 모드 Shift+M, 화면 이름 "게임 안 편집 화면", [언어] 단추로 한·일·영), 원고 쓰기 도구(`script_edit`) |
 | `game/screen_fx` | 5.6 | 셰이더 두 자리(기본, 아스키, VHS, 단말기, 게임보이, 글리치, 지글거림, 망점, 홀로그램, 나이트비전, 일렁임, 포토 콜라주, 파편 흩날림 중 둘. 자리마다 세부 값 `values=`), 타이틀과 게임 내 메뉴 셰이더(따로 두 자리), TV 전환, 그림 전환으로 셰이더 바꾸기(`pending_with`), 글자 빼기, 커서 자리, 타이틀 일렁임, 이미지 하나에 거는 효과, 셰이더 전환 틀 |
 | `game/hotkeys` | 1.3 | 단축키, 조작방법 화면, 편집기 "단축키 수정" 탭(ui_kit이 있을 때, 기능마다 키를 바꾸고 겹치면 경고, `hotkeys_layout.rpy`의 `"keys"` `"desc"`, 스플래시 조작 안내 화면으로 내보내기) |
 | `game/splash` | 2.2 | 타이틀 전 로고, 경고, 조작 방법 페이지, 편집기 "스플래시" 탭(ui_kit이 있을 때, 화면에서 끌고 돌리고 글 고치기, 페이지 더하기) |
@@ -40,10 +40,10 @@
 | 스크린 교체 | `choice`, `main_menu`, `navigation`, `game_menu`, `keyboard_help` |
 | 새 스크린 | `tmenu_pause`, `title_menu`, `cmenu_choice`, `splash_page`, `ui_editor_*` (`ui_editor_pk_watch`: pygaki 원고가 바뀌는지 지켜봄) |
 | 층 | `sfx_say`, `sfx_choice` (screens 아래), `ui_editor` (top_layers) |
-| config | `say_arguments_callback`(`screen_fx` → `say_style` 순서로 이어짐), `layer_transforms`, `say_layer`, `choice_layer`, `nvl_layer`, `nvl_choice_layer`, `context_clear_layers`, `mouse`, `mouse_displayable`, `always_shown_screens`, `top_layers`, `label_overrides["splashscreen"]`, `end_splash_transition`, `all_character_callbacks`, `start_callbacks`, `after_load_callbacks`, `after_default_callbacks`, `default_text_cps`, `keymap`, `underlay`, `language_callbacks`, `lint_hooks`, `show`, `hide`, `scene`, `with_callback`, `start_interact_callbacks`, `label_callbacks` |
+| config | `say_arguments_callback`(`screen_fx` → `say_style` 순서로 이어짐), `layer_transforms`, `say_layer`, `choice_layer`, `nvl_layer`, `nvl_choice_layer`, `context_clear_layers`, `mouse`, `mouse_displayable`, `always_shown_screens`, `top_layers`, `label_overrides["splashscreen"]`, `end_splash_transition`, `all_character_callbacks`, `start_callbacks`, `after_load_callbacks`, `after_default_callbacks`, `default_text_cps`, `keymap`, `underlay`, `language_callbacks`, `lint_hooks`, `show`, `hide`, `scene`, `with_callback`, `start_interact_callbacks`, `label_callbacks`, `replace_text`(개발 모드에서만, 편집기 언어. 게임이 둔 것이 있으면 그 앞에서 바꾸고 이어 부름. `Text.update`도 감싸서 편집기 스타일 글만 바꿈, `ui_kit/editor/editor_lang.rpy`) |
 | 그 밖 | `_game_menu_screen`, `gui.main_menu_background` |
 | 세이브 값 | `screen_fx.current`, `cur_overlay`, `cur_target`, `cur_cursor`, `overrides`, `changes`, `stage.cur_box` |
-| persistent | `splash_seen`, `splash_hidden`, `screen_fx_off`, `vhs_crt_off`, `ascii_off`, `retro_term_off`, `gameboy_off`, `_ui_kit_text_cps` |
+| persistent | `splash_seen`, `splash_hidden`, `screen_fx_off`, `vhs_crt_off`, `ascii_off`, `retro_term_off`, `gameboy_off`, `_ui_kit_text_cps`, `_pygaki_editor_lang`(편집기 언어 ko/ja/en, 4.12) |
 | 프로젝트 폴더 | `ui_kit_backup/` (원고 백업), `game/showpy_inbox.json` (대본 편집기 전달, 배포판 제외), `game/pykaki_goto.json` (대본 편집기가 적는 옮겨 갈 줄, 배포판 제외), `game/pykaki_preview.json` (없앤 실시간 미리보기의 파일. 예전 프로젝트에 남아 있으면 배포판에서만 뺌) |
 
 ## 4. 스크립트 문법

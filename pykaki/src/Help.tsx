@@ -1,9 +1,14 @@
 // 도움말: 화면의 긴 설명은 모두 여기로 모은다. 내용은 docs/GUIDE.md 그대로 (빌드할 때 가져옴, 문서와 늘 같음)
 // - 화면에는 ⓘ(Hint)만 두고, 마우스를 올리면 짧은 설명, 누르면 도움말의 그 항목이 열린다
 // - 메뉴 [도움말]이나 F1로 연다
+// - 언어 버튼이 일본어·영어면 pygaki 안내서의 번역(bundle/guide/ja|en/pykaki.md)을 보인다. 번역은 제목 줄이 원본과 같은 차례라서
+//   ⓘ의 topic(한국어 제목 글자)은 원본에서 찾은 항목의 차례로 번역의 항목을 연다
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { create } from 'zustand';
 import guide from '../docs/GUIDE.md?raw';
+import guideJa from '../../bundle/guide/ja/pykaki.md?raw';
+import guideEn from '../../bundle/guide/en/pykaki.md?raw';
+import { getLang, type Lang } from './i18n';
 
 // 열린 도움말과 볼 항목 (항목은 제목의 일부 글자. 예: "셰이더")
 export const useHelp = create<{ open: boolean; topic: string; n: number }>(() => ({ open: false, topic: '', n: 0 }));
@@ -63,10 +68,11 @@ type Sec = { id: string; level: number; title: string; lines: string[] };
 
 const plain = (s: string) => s.replace(/\*\*|`/g, '').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1');
 
-function sections(md: string): Sec[] {
-  const rv: Sec[] = [{ id: 's0', level: 1, title: '처음에', lines: [] }];
+function sections(md: string, first: string): Sec[] {
+  const rv: Sec[] = [{ id: 's0', level: 1, title: first, lines: [] }];
   let fence = false;
   for (const line of md.split(/\r?\n/)) {
+    if (line.startsWith('<!--')) continue; // 번역 첫 줄의 원본 지문
     if (line.startsWith('```')) fence = !fence;
     const h = !fence && /^(#{1,3}) (.+)$/.exec(line);
     if (h) {
@@ -149,22 +155,38 @@ function Body({ lines }: { lines: string[] }) {
   return <>{out}</>;
 }
 
-const SECS = sections(guide);
+const SECS = sections(guide, '처음에');
+const SECS_BY: Record<Lang, Sec[]> = { ko: SECS, ja: sections(guideJa, 'はじめに'), en: sections(guideEn, 'Introduction') };
+// 번역이 원본과 항목 수가 다르면(번역을 덜 고친 때) 차례로 잇지 못하니 한국어를 보인다
+const secsFor = (l: Lang) => (SECS_BY[l].length === SECS.length ? SECS_BY[l] : SECS);
+const HEAD: Record<Lang, [string, string, string, string]> = {
+  ko: ['도움말', '찾기', '닫기', '찾는 글이 없어요.'],
+  ja: ['ヘルプ', '検索', '閉じる', '見つかりません。'],
+  en: ['Help', 'Find', 'Close', 'Nothing found.'],
+};
 
 export function HelpModal() {
   const { open, topic, n } = useHelp();
   const [q, setQ] = useState('');
   const [cur, setCur] = useState('s0');
   const bodyRef = useRef<HTMLDivElement>(null);
+  const [lang, setLangState] = useState<Lang>(getLang());
+  useEffect(() => {
+    const f = () => setLangState(getLang());
+    window.addEventListener('pygaki-lang', f);
+    return () => window.removeEventListener('pygaki-lang', f);
+  }, []);
+  const secs = secsFor(lang);
+  const head = HEAD[lang];
 
   // ⓘ로 열면 그 항목으로 (제목에 topic이 든 첫 항목)
   useEffect(() => {
     if (!open) return;
     setQ('');
     const t = topic.trim();
-    const hit = t ? SECS.find((s) => s.title.includes(t)) : undefined;
-    setCur(hit?.id ?? 's0');
-  }, [open, topic, n]);
+    const k = t ? SECS.findIndex((s) => s.title.includes(t)) : -1;
+    setCur(k >= 0 ? secs[k].id : 's0');
+  }, [open, topic, n, secs]);
   useEffect(() => {
     if (open && !q) bodyRef.current?.querySelector('#help-' + cur)?.scrollIntoView({ block: 'start' });
   }, [cur, open, q]);
@@ -177,18 +199,18 @@ export function HelpModal() {
 
   const shown = useMemo(() => {
     const t = q.trim().toLowerCase();
-    if (!t) return SECS;
-    return SECS.filter((s) => (s.title + '\n' + s.lines.join('\n')).toLowerCase().includes(t));
-  }, [q]);
+    if (!t) return secs;
+    return secs.filter((s) => (s.title + '\n' + s.lines.join('\n')).toLowerCase().includes(t));
+  }, [q, secs]);
 
   if (!open) return null;
   return (
     <div className="modal-bg" onMouseDown={(e) => e.target === e.currentTarget && useHelp.setState({ open: false })}>
-      <div className="modal help-modal">
+      <div className="modal help-modal" data-no-tr>
         <div className="help-head">
-          <h3>도움말</h3>
-          <input placeholder="찾기" value={q} onChange={(e) => setQ(e.target.value)} autoFocus />
-          <button onClick={() => useHelp.setState({ open: false })}>닫기</button>
+          <h3>{head[0]}</h3>
+          <input placeholder={head[1]} value={q} onChange={(e) => setQ(e.target.value)} autoFocus />
+          <button onClick={() => useHelp.setState({ open: false })}>{head[2]}</button>
         </div>
         <div className="help-main">
           <nav className="help-toc">
@@ -197,7 +219,7 @@ export function HelpModal() {
                 {s.title}
               </button>
             ))}
-            {!shown.length && <span className="tip">찾는 글이 없어요.</span>}
+            {!shown.length && <span className="tip">{head[3]}</span>}
           </nav>
           <div className="help-body" ref={bodyRef}>
             {shown.map((s) => (

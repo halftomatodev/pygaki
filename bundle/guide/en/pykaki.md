@@ -1,4 +1,4 @@
-<!-- 원본: pykaki/docs/GUIDE.md @ 04e57b5528 -->
+<!-- 원본: pykaki/docs/GUIDE.md @ 1029277f24 -->
 # pygaki user guide
 
 A tool for writing Ren'Py scripts with boxes and lines and exporting them as Ren'Py script files (`.rpy`).
@@ -413,7 +413,11 @@ Press **Ctrl+\\** (**Ctrl+₩** on a Korean keyboard, or **[Focus]** in the tool
 - Shortcuts (save, new line, etc.) still work in focus mode.
 
 ### Language
-**한국어 / 日本語 / English** in the top row changes the language of the script editor's screen text. The choice is remembered on this computer. The script (dialogue, box titles), the exported script and the app's [Help] don't change (the help is Korean only; the same content in Japanese and English is in the pygaki guide: `pygaki/pygaki_guide_ja.html` and `pygaki_guide_en.html` in the bundle, and the web version). Text without a translation yet shows in Korean.
+**한국어 / 日本語 / English** in the top row changes the language of the script editor's screen text. The choice is remembered on this computer. This help (F1) switches to that language too (the same text as the Japanese and English pygaki guide). The script (dialogue, box titles) and the exported script don't change. Text without a translation yet shows in Korean.
+
+Languages elsewhere:
+- **In-game editor** (Shift+M): each click on the panel's **[Language]** button goes 한국어 → 日本語 → English. The choice is remembered per game and starts out following the game's language. Only the editor's text changes; the game screen (dialogue, menus, the text you're editing) stays as it is
+- **The pygaki buttons in the Ren'Py launcher** ([Edit with pygaki], [pygaki guide], [Update plugins]) and their messages follow the launcher's language setting (Preferences → Language): Korean for Korean, Japanese for Japanese, English otherwise. [pygaki guide] opens the guide in that language too
 
 ### Preferences
 Change them in **[Settings]** at the right of the toolbar. These settings are saved only in that browser and don't go into the script file.
