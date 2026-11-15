@@ -3,6 +3,10 @@ import type { Project } from './types';
 
 export type Tab = 'edit' | 'warn' | 'rpy';
 
+// 고칠 때마다 대본을 맞추는 일 (음성 번호 매기기 등, voice.ts가 등록). store가 다른 파일을 불러오지 않게 밖에서 넣는다
+const fixups: ((p: Project) => void)[] = [];
+export const addFixup = (f: (p: Project) => void) => void fixups.push(f);
+
 interface S {
   project: Project;
   past: Project[];
@@ -95,6 +99,7 @@ export const useStore = create<S>((set, get) => ({
     set((s) => {
       const next = structuredClone(s.project);
       fn(next);
+      for (const f of fixups) f(next);
       const now = Date.now();
       const merge = !!key && key === s.lastKey && now - s.lastTime < 1200;
       return {
@@ -109,6 +114,7 @@ export const useStore = create<S>((set, get) => ({
 
   load: (p, o = {}) =>
     set({
+      ...(fixups.forEach((f) => f(p)), {}),
       project: p,
       past: [],
       future: [],

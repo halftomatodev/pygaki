@@ -358,7 +358,7 @@ export function setFollowLine(on: boolean) {
 }
 
 // 연결한 게임의 플러그인이 읽을 수 있을 때만 줄 끝 표시로 내보낸다 (LINK.md 2장)
-const makeRpy = (p: Parameters<typeof generateRpyWith>[0]) => generateRpyWith(p, { endMarks: useGameFolder.getState().endMarks, newMark: useGameFolder.getState().newMark });
+const makeRpy = (p: Parameters<typeof generateRpyWith>[0]) => generateRpyWith(p, { endMarks: useGameFolder.getState().endMarks, newMark: useGameFolder.getState().newMark, audio: useGameFolder.getState().media.audio });
 
 // 지금 쓰는 줄(없으면 고른 상자의 첫 줄)이 내보낸 원고의 몇째 줄인지 (1부터)
 // 표시는 그 줄 끝에 붙어 있거나(문장이면 그 줄, 메모면 다음 문장), 윗줄에 따로 있다

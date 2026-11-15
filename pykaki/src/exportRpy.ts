@@ -5,6 +5,7 @@ import { IDENT, PLUGIN_NAMES, RESERVED } from './util';
 import { badImageName, renpyOnlyEffect, fxArgs, isStage, sayArgs, stageCode, tagEffectNames, REMOVED_EFFECTS, RENPY_EFFECTS } from './stage';
 import { shaderEffect } from './fx/textShaders';
 import { imageProblem, type ImageBook } from './imageCheck';
+import { voiceCode, voiceFile, voiceIndex } from './voice';
 import { checkTags, shaderTags, splitClear } from './tagEdit';
 import { sceneCode, sceneSupported, uiOfBox, usesSceneUi } from './boxUi';
 import { exprNames, flagNameProblem, parseAction, pyValue } from './flags';
@@ -24,7 +25,7 @@ const pyStr = (s: string) => '"' + s.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
 const oneLine = (s: string) => s.replace(/\s+/g, ' ').trim();
 
 // label 안의 상자 순서: 첫 상자부터, "다음으로" 이어지는 상자는 바로 뒤에 붙인다
-function orderGroup(p: Project, g: LabelGroup, byId: Map<string, BoxNode>): BoxNode[] {
+export function orderGroup(p: Project, g: LabelGroup, byId: Map<string, BoxNode>): BoxNode[] {
   const members = p.nodes.filter((n) => n.group === g.id);
   if (!members.length) return [];
   const inG = new Set(members.map((n) => n.id));
@@ -80,7 +81,7 @@ function tailSafe(row: string) {
 // 연결한 게임의 pygaki 플러그인이 ui_kit 4.5 이상일 때만 켠다 (그 전 판은 윗줄 표시만 읽는다)
 // newMark: 머리말을 새 문구(pygaki)로. 게임의 플러그인이 새 문구를 알아볼 때만 (ui_kit 4.10, script_edit.rpy의 PK_NEW_MARK). 아니면 예전 문구
 // images: 연결한 게임의 그림 목록. 있으면 배경·보이기 줄의 없는 그림을 경고한다 (내보내기는 막지 않음)
-export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: boolean; images?: ImageBook | null } = {}): { code: string; warnings: Warn[] } {
+export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: boolean; images?: ImageBook | null; audio?: string[] } = {}): { code: string; warnings: Warn[] } {
   const endMarks = !!opts.endMarks && p.settings.renpyLink;
   const W: Warn[] = [];
   const out: string[] = [];
@@ -208,6 +209,7 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
     W.push({ level: 'warn', msg: '상자의 커서, 클릭 대기는 pygaki 플러그인 ui_kit 4.7부터 돼요. 이 게임은 예전 판이라 내보내지 않아요' });
   const sceneUi = sceneWanted && S.renpyLink && sceneSupported();
 
+  const vIndex = voiceIndex(opts.audio ?? []);
   const I = '    ';
   const q =(t: string) => '"' + escapeText(t, S) + '"';
 
@@ -309,6 +311,11 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
         // {clear}(지우고 이어서): 그 자리에서 같은 화자의 대사 여러 줄로 나눈다. 클릭하면 앞 글이 지워지고 이어진다
         const parts = S.allowTextTags ? splitClear(l.text) : [l.text];
         if (l.type === 'narration') return parts.forEach((t) => body.push(q(t) + tail));
+        // 음성 (FEATURE 16): 대사 바로 앞에 voice 줄. 직접 고른 파일, 아니면 audio/voice에서 이름 규칙으로 찾은 파일
+        if (S.voice) {
+          const v = voiceFile(l, g.name, vIndex);
+          if (v.file) body.push(voiceCode(v.file));
+        }
         const c = l.who ? charById.get(l.who) : undefined;
         if (!c) {
           W.push({ level: 'error', msg: `등록되지 않은 화자 "${l.who ?? ''}" (${b.title || b.id})`, nodeId: b.id });

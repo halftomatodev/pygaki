@@ -61,6 +61,9 @@ export interface Line {
   shake?: ShakeKind; // shake: 세로 vpunch | 가로 hpunch | 번쩍 flash (없으면 vpunch)
   zorder?: number; // show: 앞뒤 (숫자가 클수록 앞)
   behind?: string; // show: 이 태그의 그림 뒤에
+  // 음성 (FEATURE 16, say 줄). vno: label 안 음성 번호 (한 번 매기면 그대로). voice: 직접 고른 파일 (audio 기준), ''이면 이 줄은 음성 없음, 없으면 이름 규칙으로
+  vno?: number;
+  voice?: string;
   fx?: LineFx; // say, narration, fx 줄 (showpy 연결을 켰을 때만 내보낸다)
   say?: SayStyle; // say, narration 줄 (showpy 연결을 켰을 때만 내보낸다)
 }
@@ -160,6 +163,7 @@ export interface Settings {
   allowTextTags: boolean; // false면 { → {{
   escapePercent: boolean; // % → %%
   renpyLink: boolean; // showpy 연결: 상자마다 label, 줄 표시, 플러그인 문법을 내보낸다
+  voice?: boolean; // 음성 쓰기 (FEATURE 16): 대사마다 음성 번호를 매기고 voice 줄을 내보낸다
 }
 
 export interface Project {

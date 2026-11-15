@@ -10,6 +10,7 @@ import { isStage } from './stage';
 import { hit } from './prefs';
 import { ShaderPanel } from './ShaderPanel';
 import { StageCards } from './StageCards';
+import { VoiceCard } from './VoiceCard';
 import { CursorCard, SayUiCard } from './UiPanel';
 import { ActionInput, CondInput, firstAction } from './FlagFields';
 import { GameOffTip, GoHere, MoveBtn, PickBand, useSidePop } from './PickPos';
@@ -160,6 +161,8 @@ function BoxInspector({ b }: { b: BoxNode }) {
       <GameOffTip what="대사" />
       </Card>
 
+      <VoiceCard b={b} upd={upd} />
+
       <StageCards b={b} upd={upd} use={use} />
 
       <CursorCard b={b} />
@@ -186,6 +189,7 @@ function LineRow({ l, i, upd, drag }: { l: Line; i: number; upd: Upd; drag: Retu
   const isSay = l.type === 'say' || l.type === 'narration';
   const movable = l.type === 'show' || l.type === 'scene'; // 숨기기 줄은 자리가 없어서 뺌
   const pop = useSidePop();
+  const voiceOn = useStore((s) => !!s.project.settings.voice);
 
   const onKey = (e: React.KeyboardEvent) => {
     if (!hit(e, 'newLine')) return;
@@ -209,6 +213,7 @@ function LineRow({ l, i, upd, drag }: { l: Line; i: number; upd: Upd; drag: Retu
         <SpeakerSelect l={l} set={set} />
         <button title="줄 삭제" onClick={() => upd((x) => void x.lines.splice(i, 1))}>✕</button>
         {l.type === 'say' && l.attr && <OldAttr attr={l.attr} clear={() => upd((x) => void delete x.lines[i].attr)} />}
+        {voiceOn && l.type === 'say' && l.vno && <span className="vc-chip" title="음성 번호 (아래 [음성] 카드)">🎙{String(l.vno).padStart(3, '0')}</span>}
       </div>
       {/* 연출·플래그 줄은 고르는 칸이라 칸을 감싼 곳에서 Ctrl+Enter를 받음 (글 칸은 자기 onKeyDown) */}
       <div className="line-body" onKeyDown={isStage(l.type) || l.type === 'flag' ? onKey : undefined}>
