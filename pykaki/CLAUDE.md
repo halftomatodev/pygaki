@@ -1,4 +1,4 @@
-# PyKaki
+# pygaki 대본 편집기 (`pykaki/` 폴더)
 
 렌파이 대본을 상자와 선으로 쓰고 `.rpy`로 내보내는 에디터. 데스크톱 앱(`app/`, Electron)으로만 낸다. 화면은 웹 빌드(`dist/index.html`)를 앱이 그대로 쓴다. 사용자는 한국어로 대화한다.
 
@@ -25,4 +25,4 @@ npm run build      # dist/index.html 한 파일로 빌드
 - 저장 파일 형식(`src/types.ts`)을 바꿀 때는 `normalizeProject()`에서 예전 파일도 열리게 한다.
 - 등장 효과 셰이더의 기본 효과는 `../showpy/game/ui_kit/engine/text_effects.glsl` 하나에, 더하는 효과는 `../showpy/game/ui_kit/effects/`에 파일 하나씩 있다. PyKaki는 빌드할 때 그대로 가져가고, 연결한 게임 폴더의 효과 파일도 읽는다(`src/fx/textShaders.ts` `setFolderEffects`). 형식은 저장소 맨 위 docs/LINK.md 8장.
 - 원본은 툴의 JSON이고 `.rpy`는 결과물이다(단방향). showpy에서 넣은 그림, 소리 줄만 `showpy_inbox.json`으로 받아 적는다. 형식은 [../docs/LINK.md](../docs/LINK.md). 바꾸면 `../showpy/`의 맞는 코드도 같은 커밋에서 고친다.
-- 이름은 PyKaki지만, 저장 형식 `"format": "renpy-flow"`·`.flow.json`과 IndexedDB 이름 `renpy-flow-editor`는 일부러 예전 이름 그대로다(바꾸면 기존 대본 파일과 자동 저장을 못 읽음). 바꾸지 말 것.
+- 화면·문서의 이름은 pygaki(갈라 말할 때 "대본 편집기", 예전 이름 PyKaki)지만, 저장 형식 `"format": "renpy-flow"`·`.flow.json`과 IndexedDB 이름 `renpy-flow-editor`는 일부러 예전 이름 그대로다(바꾸면 기존 대본 파일과 자동 저장을 못 읽음). 바꾸지 말 것.

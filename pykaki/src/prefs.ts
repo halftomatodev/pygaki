@@ -21,7 +21,7 @@ export const ACTIONS: { id: ActionId; label: string; def: string }[] = [
   { id: 'tagBold', label: '대사 굵게 {b} (글 칸에서)', def: 'Ctrl+KeyB' },
   { id: 'tagItalic', label: '대사 기울임 {i} (글 칸에서)', def: 'Ctrl+KeyI' },
   { id: 'tagUnderline', label: '대사 밑줄 {u} (글 칸에서)', def: 'Ctrl+KeyU' },
-  { id: 'gamePanel', label: '게임 창의 GUI 편집기 보이기/숨기기 (앱, 게임과 연결됐을 때)', def: 'F9' },
+  { id: 'gamePanel', label: '게임 창의 편집 화면 보이기/숨기기 (앱, 게임과 연결됐을 때)', def: 'F9' },
 ];
 
 // box·label은 어둡게(그라데이션) 테마와 직접 고르기에서만: 상자와 label 배경을 이 색으로 칠한다

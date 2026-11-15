@@ -65,7 +65,7 @@ export function MoveBtn({ where, tab, what }: { where: Where; tab: PickTab; what
   const linked = useStore((s) => !!s.project.settings.renpyLink); // 받아 적기는 플러그인 연결을 켠 원고만
   if (!ready || !linked) return null;
   return (
-    <button className="move-pos" onClick={() => pickInGame(where, tab)} title={`게임을 이 줄로 옮기고 GUI 편집기의 ${what} 탭을 열어요. 게임 창에서 끌어서 정해요`}>
+    <button className="move-pos" onClick={() => pickInGame(where, tab)} title={`게임을 이 줄로 옮기고 게임 안 편집 화면의 ${what} 탭을 열어요. 게임 창에서 끌어서 정해요`}>
       위치 옮기기
     </button>
   );
@@ -82,7 +82,7 @@ export function PickBand({ where, tab, what }: { where: Where; tab: PickTab; wha
       <button className="primary" disabled={!n} onClick={() => liveSend({ cmd: 'save' })} title={`게임 창에서 ${what}를 끌어 옮기고 저장해요`}>
         저장{n ? ` (${n})` : ''}
       </button>
-      <button onClick={() => liveSend({ cmd: 'editor', open: false })} title="게임 창의 GUI 편집기를 닫아요">끝내기</button>
+      <button onClick={() => liveSend({ cmd: 'editor', open: false })} title="게임 창의 편집 화면을 닫아요">끝내기</button>
     </div>
   );
 }

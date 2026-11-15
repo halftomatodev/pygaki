@@ -1,4 +1,4 @@
-# PyKaki — 개발 명세서
+# pygaki — 개발 명세서
 
 지금 구현된 상태를 기준으로 정리한 명세예요. 처음 설계 문서(`../RENPY_FLOW_EDITOR_SPEC.md`)와 다른 곳은 이 문서가 맞아요.
 
@@ -93,9 +93,9 @@
   - `hide` `{ kind, who, image, trans }`
   - `music` `{ file, stop }`, `sound` `{ file }`
   - `fx` `{ fx: { fx, transition, overlay, warp, cursor } }`: pygaki 플러그인 화면 효과 명령. 값은 `src/stage.ts`의 `FX_*`. 화면 효과는 렌파이 편집기에서 고치므로 줄 종류 목록에서 뺐고, 예전 파일의 이 줄만 그대로 보여 주고 내보낸다.
-  - `trans`는 `dissolve` | `fade` | 비움, 또는 showpy에서 받아 적은 식(`stage.move("inleft", 0.8)` 등). 모두 선택 칸이라 예전 파일은 그대로 열린다.
-- **대사 줄의 `fx`**: `say`, `narration` 줄도 같은 `fx` 값(`exclude` 포함)을 가질 수 있다. pygaki 플러그인 대사 탭에서 받아 적고, PyKaki에서는 고치지 않는다. 연결을 켜면 대사 괄호로 내보낸다.
-- **대사 줄의 `say`** (`SayStyle`): `size` `font` `color` `cps` `effect` `box` `tail` `box_rotate` `name_size` `name_font` `name_color`는 PyKaki에서 고친다. `effect`는 두 효과를 `|`로 겹칠 수 있다(`slidein|shake`). `box`는 글 상자(`bubble` 말풍선, `pill` 둥근 테두리, pygaki 플러그인 `ui_kit` 4.0)이고 연결을 켰을 때만 내보낸다. 미리보기는 CSS로 비슷하게 그린다(`.sbox`, 셰이더 효과일 때는 기울기를 안 보여 줌). `x` `y` `name_x` `name_y`는 showpy에서 받아 적은 값을 보여 주고 지우기만 한다. 연결을 켜면 짧은 이름으로(`sayArgs`), 끄면 플러그인 없이 동작하는 렌파이 원래 이름(`what_size`, `what_slow_cps`, `what_textshader` 등)으로 내보낸다. 모두 선택 칸이라 예전 파일은 그대로 열린다.
+  - `trans`는 `dissolve` | `fade` | 비움, 또는 게임 안 편집 화면에서 받아 적은 식(`stage.move("inleft", 0.8)` 등). 모두 선택 칸이라 예전 파일은 그대로 열린다.
+- **대사 줄의 `fx`**: `say`, `narration` 줄도 같은 `fx` 값(`exclude` 포함)을 가질 수 있다. pygaki 플러그인 대사 탭에서 받아 적고, pygaki에서는 고치지 않는다. 연결을 켜면 대사 괄호로 내보낸다.
+- **대사 줄의 `say`** (`SayStyle`): `size` `font` `color` `cps` `effect` `box` `tail` `box_rotate` `name_size` `name_font` `name_color`는 pygaki에서 고친다. `effect`는 두 효과를 `|`로 겹칠 수 있다(`slidein|shake`). `box`는 글 상자(`bubble` 말풍선, `pill` 둥근 테두리, pygaki 플러그인 `ui_kit` 4.0)이고 연결을 켰을 때만 내보낸다. 미리보기는 CSS로 비슷하게 그린다(`.sbox`, 셰이더 효과일 때는 기울기를 안 보여 줌). `x` `y` `name_x` `name_y`는 showpy에서 받아 적은 값을 보여 주고 지우기만 한다. 연결을 켜면 짧은 이름으로(`sayArgs`), 끄면 플러그인 없이 동작하는 렌파이 원래 이름(`what_size`, `what_slow_cps`, `what_textshader` 등)으로 내보낸다. 모두 선택 칸이라 예전 파일은 그대로 열린다.
 - **나가는 방식(exit)**:
   - `next` `{ target }`: 다음 상자로
   - `menu` `{ choices: [{ id, text, target, mode:"jump", condition, actions }] }`: 선택지. condition은 보이는 조건(렌파이 조건식, 없으면 null), actions는 고르면 바꾸는 식 목록(`love += 1`, `met_alice = True`) (`FEATURE` 14)
@@ -180,8 +180,8 @@
 
 ## 7. 대사 미리보기와 등장 효과 (`src/SayPreview.tsx`, `src/fx/`)
 
-- **PyKaki 안 플레이는 없앴다** (세션 34, 사용자 말): 위쪽 [▶ 플레이] [⛶ 전체화면], 오른쪽 플레이 카드, 단축키 Alt+P·F8, `playEngine.ts` `Player.tsx`, store의 `playing` `play` `fullPlay` 등. 대본은 [▶ 렌파이에서 실행]과 [렌파이에서 여기로 이동](6장)으로 게임에서 본다. 남긴 것은 `SayPreview.tsx`(예전 `PlayStage.tsx`의 `useReveal` `Glyphs` `LinePreview`): 글자 효과 카드 미리보기와 [효과] 화면 샘플이 쓴다.
-- 텍스트 태그를 흉내 낸다: `{b} {i} {u} {s} {color=} {size=} {font=} {alpha=} {k=} {cps=} {p} {w} {nw} {fast} {a=}`, `{{`, 그리고 PyKaki의 `{clear}`(클릭 대기 + 다음 글자가 나오면 앞 글자 감춤, `Tagged.clears`, `Glyphs`). 글자를 하나씩 내보내고(`parseTagged`, `useReveal`), 클릭하면 다음 멈춤까지 다 보여 준다.
+- **pygaki 안 플레이는 없앴다** (세션 34, 사용자 말): 위쪽 [▶ 플레이] [⛶ 전체화면], 오른쪽 플레이 카드, 단축키 Alt+P·F8, `playEngine.ts` `Player.tsx`, store의 `playing` `play` `fullPlay` 등. 대본은 [▶ 렌파이에서 실행]과 [렌파이에서 여기로 이동](6장)으로 게임에서 본다. 남긴 것은 `SayPreview.tsx`(예전 `PlayStage.tsx`의 `useReveal` `Glyphs` `LinePreview`): 글자 효과 카드 미리보기와 [효과] 화면 샘플이 쓴다.
+- 텍스트 태그를 흉내 낸다: `{b} {i} {u} {s} {color=} {size=} {font=} {alpha=} {k=} {cps=} {p} {w} {nw} {fast} {a=}`, `{{`, 그리고 pygaki의 `{clear}`(클릭 대기 + 다음 글자가 나오면 앞 글자 감춤, `Tagged.clears`, `Glyphs`). 글자를 하나씩 내보내고(`parseTagged`, `useReveal`), 클릭하면 다음 멈춤까지 다 보여 준다.
 - **등장 효과**: 렌파이 텍스트 셰이더 7개와 pygaki 플러그인이 등록한 20개를 **WebGL로, pygaki 플러그인과 같은 셰이더 코드로** 그린다(`src/fx/`). 효과 폴더(pygaki 플러그인 `ui_kit/effects/*.glsl`, LINK.md 8-1)의 효과도 같다: 플러그인이 있는 폴더를 연결했으면 그 폴더의 파일만 `scanFolder`가 읽고(연결하지 않았으면 빌드할 때 가져온 저장소의 샘플) `setFolderEffects` → `refreshEffects`(`EFFECTS`, `TRANSITIONS` 배열을 그 자리에서 다시 채움, `useGameFolder.fxSeq`로 다시 그림). 바뀌면 `effectEpoch`가 올라 미리보기 셰이더를 다시 만든다. 그림 전환(`img_fx.use`)은 [효과] 화면 샘플에서 같은 셰이더 코드로 그린다(`fx/TransitionCanvas.tsx`).
   - **효과 관리** (`src/effectsLib.ts`, 화면은 3장의 [효과] 화면. `window.pykakiEffects`로도 부를 수 있음): `effectCatalog`가 렌파이 / 기본 / 프로젝트 / 모음(샘플과 `showpy/effects_library`, 아직 넣지 않은 것)을 한 목록으로 만든다(켬·끔, 쓰인 줄 수). `setEffectOn`은 `effects_off.txt`(LINK.md 8-2)를 고치고, 끈 효과는 `stage.ts`의 `refreshEffects`가 고르는 목록에서 뺀다. `addEffectFile`·`addFromLibrary`는 `checkPack`으로 검사한 뒤에만 효과 폴더에 쓰고, `removeEffectFile`은 백업(`ui_kit_backup/effects/`)을 남기고 지우며 `replace`를 주면 대본의 그 효과를 다른 값으로 바꾼다(`replaceInProject`: 칸으로 고른 값, 명령 줄의 `effect="…"`·`img_fx.use(…)`, 대사 글의 `{shader=…}`). 쓰인 곳은 `effectUses`.
   - **숨김만 (2026-11-14)**: [효과]·[셰이더] 화면과 나타나는 방식 고르기 창은 효과 폴더에 있는 것만 보이고, 카드의 [숨김]/[숨김 해제](`setEffectOn`, `setShaderOn` → `effects_off.txt`, `shaders_off.txt`)만 한다. [넣기], [빼기], [파일 넣기], 효과 모음 칸은 없앰(`effectsLib`의 `addFromLibrary`, `addEffectFile`, `removeEffectFile`은 남아 smoke만 씀). `showpy/effects_library`는 비워서 지움(셋은 효과 폴더 샘플로)
@@ -292,12 +292,12 @@
 - [열기]는 두 대본의 요약을 보여 주고 확인을 받은 뒤 고른 파일의 내용을 이 프로젝트 대본으로 가져오고, [새로]는 이 프로젝트 대본을 비운다. 저장 파일은 바뀌지 않는다.
 - 메인 프로세스는 프로젝트 폴더 맨 위도 지켜보고 `*.flow.json`이 바뀌면 `pygaki:changed`로 이름을 알린다. 연 대본 파일이면 0.3초 뒤 `checkExternal`(9-3).
 - 위쪽 줄 오른쪽(`Toolbar.tsx` `FolderButtons`): [다시 읽기] [폴더 열기] [다른 프로젝트]. 연결과 끊기는 없다. 왼쪽 "렌파이 프로젝트 정보" 칸에는 정보만 둔다.
-- [▶ 렌파이에서 실행] (`files.ts` `runInRenpy`, `main.cjs` `pygaki:runGame`): 대본을 내보낸 뒤 렌파이로 이 프로젝트를 켠다. 렌파이는 앱 실행 파일의 두 칸 위 폴더(묶음의 `<렌파이 SDK>/pygaki/app`)에서, 없으면 환경 변수 `RENPY_SDK`에서 찾는다. 답은 `started` / `running` / `no-sdk` / `failed`. 설정 `prefs.runSkip`(처음 값 켬)이 켜져 있으면, 게임과 붙어 있거나(실시간 연결) 이 창이 켠 게임이 살아 있을 때 켜지 않고 `running`만 돌려준다. 켠 게임은 앱을 꺼도 그대로 둔다. PyKaki 안 플레이는 세션 34에 없앴다(7장).
+- [▶ 렌파이에서 실행] (`files.ts` `runInRenpy`, `main.cjs` `pygaki:runGame`): 대본을 내보낸 뒤 렌파이로 이 프로젝트를 켠다. 렌파이는 앱 실행 파일의 두 칸 위 폴더(묶음의 `<렌파이 SDK>/pygaki/app`)에서, 없으면 환경 변수 `RENPY_SDK`에서 찾는다. 답은 `started` / `running` / `no-sdk` / `failed`. 설정 `prefs.runSkip`(처음 값 켬)이 켜져 있으면, 게임과 붙어 있거나(실시간 연결) 이 창이 켠 게임이 살아 있을 때 켜지 않고 `running`만 돌려준다. 켠 게임은 앱을 꺼도 그대로 둔다. pygaki 안 플레이는 세션 34에 없앴다(7장).
 - `showpy_inbox.json`이 바뀌면 0.3초 뒤 받아 적는다(창으로 돌아올 때도).
 - [GUI 편집] 화면 (`src/ShowpyView.tsx`, `src/showpyLive.ts`): 툴바 [대본 편집 | GUI 편집]로 바꾼다(앱에서만). 대본 화면은 숨기기만 해서 캔버스 상태가 남는다. 메인 프로세스가 `game/showpy_live.json`을 보고 그 포트로 붙어(지켜보기 + 3초마다 다시 시도) 한 줄 JSON을 `pygaki:live`로 넘기고, 화면은 `liveSend`로 명령을 보낸다(`pygaki:liveSend`). 형식은 저장소 맨 위 docs/LINK.md 9장.
   - 줄기표 (`src/ShowpyFlow.tsx`, pygaki 플러그인 screen_fx 5.2): (앱에서는 꺼 둠, `ShowpyView.tsx` `FLOW_IN_APP = false`. 셰이더를 거는 자리를 상자·label로 옮겨서) "셰이더" 칸에서 `state.flow`가 있으면 가운데 위 [줄기표 펴기/접기](`flow` `toggle`). 펴지면 가운데가 원고 | 줄기표. 행을 끌면 `flow` `range`, 누르면 `flow` `pick`과 원고 칸 스크롤(`peek`), 네모 점은 `flow` `point`, 줄기표에서 Delete나 [셰이더 지우기]는 `flow` `delete`(Delete는 상자 캔버스로 안 가게 막음). 게임 서랍과 같은 어두운 바탕.
   - 왼쪽: 고칠 것 목록. 타이틀 메뉴, 게임 내 메뉴(ESC)는 앱 칸이 있고, 나머지는 게임 안 편집기 탭을 패널과 함께 연다. 메뉴 바로 아래 "└ 타이틀 셰이더"(`title_fx`), "└ 게임 내 메뉴 셰이더"(`pause_fx`) (pygaki 플러그인 4.20).
-  - 가운데: 지금 화면, 원고 위치, 그 앞뒤 9줄(파일이 바뀌면 다시 읽음). 줄 위의 `# @node:` 표시로 PyKaki 상자를 찾아 [상자로] 버튼. [표시 숨기기](`localStorage['pygaki-hide-marks']`)는 `# @l:` `# @node:` `# @end:` 줄을 그리지 않는다(지금 줄은 그림, 줄 번호는 그대로).
+  - 가운데: 지금 화면, 원고 위치, 그 앞뒤 9줄(파일이 바뀌면 다시 읽음). 줄 위의 `# @node:` 표시로 pygaki 상자를 찾아 [상자로] 버튼. [표시 숨기기](`localStorage['pygaki-hide-marks']`)는 `# @l:` `# @node:` `# @end:` 줄을 그리지 않는다(지금 줄은 그림, 줄 번호는 그대로).
   - 오른쪽: 저장(게임의 Ctrl+S), 버리기, 편집기 닫기, 게임 안 패널 보이기. 타이틀 칸은 배경(그림/영상 고르기, `title.background`), 평소/선택됐을 때, 이 항목만/공통, 항목 목록(메뉴 항목 + 제목, 부제), 글 칸, 숫자 칸, 글자 효과. 입력하는 동안은 게임에서 오는 값으로 덮지 않는다.
   - [GUI 편집] 화면에서는 저장 단축키가 게임 저장이다.
 - 확인: GitHub Actions "pygaki 앱"(`.github/workflows/app.yml`)이 리눅스에서 진짜 Electron으로 켜서 `app/smoke.cjs`(자동 저장, 내보내기, 받아 적기, 쓴 판 표시, 밖에서 바뀐 대본 다시 읽기, 더 새 판 경고, 대본 파일 고르기, 밖에 쓰기 막기, 가짜 게임으로 pygaki 플러그인 연결)를 돌리고, 윈도우 `pygaki.exe` 폴더(`pygaki-win`)를 만든다. 배포 묶음은 저장소 맨 위 `bundle/`.
@@ -309,7 +309,7 @@
 - **파일 이름**: 9-2대로.
 - **저장**: 바뀌고 0.7초 뒤 자동으로. [다른 이름]은 프로젝트 대본 파일을 바꾸지 않고 사본만 쓴다.
 - **밖에서 바뀜**: 이 창이 마지막으로 읽거나 쓴 글의 지문(`seen`)과 파일이 다르면 다른 곳이 고친 것. 이 창이 최근에 쓴 지문 20개와 쓰는 중에 읽은 것은 빼고 본다. 쓰기 전과, 창으로 돌아올 때, 앱은 파일 바뀜 알림 때 본다. 묻기: [확인] 파일을 다시 읽기(지금 대본은 백업), [취소] 지금 대본을 쓰고 덮어쓰기. 빈 파일, 읽을 수 없는 글(쓰는 중)은 다음에 다시 본다.
-- **쓴 판** (`app`): 파일에 쓸 때 `{ by: "pygaki 앱"(개발 서버는 "PyKaki 웹"), build: "2026-11-05 dc3ac85", needs }`를 붙인다. `build`는 `vite.config.ts`가 빌드 날짜와 커밋으로 넣는다. `needs`는 `max(파일의 needs, FEATURE)`라서 내려가지 않는다. `FEATURE`(지금 5: 2 글자 효과 11개, 3 글 상자·효과 겹치기·새 화면 효과 이름, 4 효과 폴더, 5 상자와 label의 셰이더)는 예전 판이 모르는 줄 종류나 값을 대본에 더할 때만 올린다. 예전 파일은 `app`이 없다(needs 0).
+- **쓴 판** (`app`): 파일에 쓸 때 `{ by: "pygaki 앱"(개발 서버는 "pygaki 웹"), build: "2026-11-05 dc3ac85", needs }`를 붙인다. `build`는 `vite.config.ts`가 빌드 날짜와 커밋으로 넣는다. `needs`는 `max(파일의 needs, FEATURE)`라서 내려가지 않는다. `FEATURE`(지금 5: 2 글자 효과 11개, 3 글 상자·효과 겹치기·새 화면 효과 이름, 4 효과 폴더, 5 상자와 label의 셰이더)는 예전 판이 모르는 줄 종류나 값을 대본에 더할 때만 올린다. 예전 파일은 `app`이 없다(needs 0).
 - `needs`가 이 판의 `FEATURE`보다 크면 열 때 알리고, 왼쪽 "렌파이 프로젝트 정보" 칸에 경고를 둔다. 모르는 값은 지우지 않고 그대로 저장한다.
 - `format`, `version`, `.flow.json`, IndexedDB 이름은 바꾸지 않는다.
 
@@ -358,5 +358,5 @@
 
 ## 11. 남은 단계
 
-- **2단계 (플래그)**: 세션 50에 함(위 "플래그"). 남은 것: 플래그 값을 PyKaki 안에서 따라가 보기(어느 갈래로 가는지 미리 보기)
+- **2단계 (플래그)**: 세션 50에 함(위 "플래그"). 남은 것: 플래그 값을 pygaki 안에서 따라가 보기(어느 갈래로 가는지 미리 보기)
 - **확인됨**: 내보낸 `.rpy`가 렌파이 8.5.3에서 실행된다(로컬 label 포함). 연결 쪽 확인 상태는 [LINK.md](../../docs/LINK.md) 9장.

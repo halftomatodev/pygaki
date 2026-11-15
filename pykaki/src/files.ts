@@ -19,7 +19,7 @@ export const hasRpyTarget = () => !!rpyHandle;
 
 // 쓴 판을 붙여서 파일 글로. needs는 내려가지 않는다(더 새 판이 쓴 대본을 옛 판이 저장해도 경고가 남게)
 export function serialize(p: Project) {
-  const app = { by: isDesktop ? 'pygaki 앱' : 'PyKaki 웹', build: BUILD, needs: Math.max(p.app?.needs ?? 0, FEATURE) };
+  const app = { by: isDesktop ? 'pygaki 앱' : 'pygaki 웹', build: BUILD, needs: Math.max(p.app?.needs ?? 0, FEATURE) };
   return JSON.stringify({ ...p, app }, null, 2);
 }
 
@@ -232,7 +232,7 @@ export async function openProject() {
       if (
         !confirm(
           `${file.name}의 내용으로 이 프로젝트 대본(${boundName})을 바꿀까요?\n\n가져올 대본: ${summary(p, file.lastModified)}\n지금 대본: ${summary(s.project)}\n\n` +
-            `지금 대본은 버전 목록에 백업돼요. GUI 편집기에서 받아 적은 줄도 가져올 대본의 것으로 바뀌어요.`,
+            `지금 대본은 버전 목록에 백업돼요. 게임 안 편집 화면에서 받아 적은 줄도 가져올 대본의 것으로 바뀌어요.`,
         )
       )
         return;
@@ -276,7 +276,7 @@ export async function exportRpyFile(again = false) {
       await pullInbox(true);
       await scanFolder();
     } catch (e: any) {
-      alert('GUI 편집기가 넣은 줄을 받아 적지 못해서 내보내기를 멈췄어요: ' + e.message);
+      alert('게임 안 편집 화면이 넣은 줄을 받아 적지 못해서 내보내기를 멈췄어요: ' + e.message);
       return;
     }
     s = useStore.getState();
@@ -358,7 +358,7 @@ export function setFollowLine(on: boolean) {
 }
 
 // 연결한 게임의 플러그인이 읽을 수 있을 때만 줄 끝 표시로 내보낸다 (LINK.md 2장)
-const makeRpy = (p: Parameters<typeof generateRpyWith>[0]) => generateRpyWith(p, { endMarks: useGameFolder.getState().endMarks });
+const makeRpy = (p: Parameters<typeof generateRpyWith>[0]) => generateRpyWith(p, { endMarks: useGameFolder.getState().endMarks, newMark: useGameFolder.getState().newMark });
 
 // 지금 쓰는 줄(없으면 고른 상자의 첫 줄)이 내보낸 원고의 몇째 줄인지 (1부터)
 // 표시는 그 줄 끝에 붙어 있거나(문장이면 그 줄, 메모면 다음 문장), 윗줄에 따로 있다

@@ -1,6 +1,6 @@
 # 배포 파일 만들기
 
-렌파이 SDK + pygaki 템플릿 + 런처 버튼 + PyKaki 데스크톱 앱을 윈도우용으로 묶어요. 두 가지가 한 번에 생겨요.
+렌파이 SDK + pygaki 템플릿 + 런처 버튼 + pygaki 데스크톱 앱을 윈도우용으로 묶어요. 두 가지가 한 번에 생겨요.
 
 | 파일 | 누구에게 | 쓰는 법 |
 |---|---|---|
@@ -16,7 +16,7 @@ git tag v1.0
 git push origin v1.0
 ```
 
-Actions "배포 파일"(`.github/workflows/release.yml`)이 PyKaki 앱을 빌드하고(`app.yml`을 불러 씀), renpy.org에서 SDK `RENPY_VERSION`을 받아 묶고, 템플릿 프로젝트와 런처를 Lint한 뒤 Releases에 **초안**으로 두 zip을 올려요. Releases에서 보고 [Publish release]를 눌러야 공개돼요.
+Actions "배포 파일"(`.github/workflows/release.yml`)이 pygaki 앱을 빌드하고(`app.yml`을 불러 씀), renpy.org에서 SDK `RENPY_VERSION`을 받아 묶고, 템플릿 프로젝트와 런처를 Lint한 뒤 Releases에 **초안**으로 두 zip을 올려요. Releases에서 보고 [Publish release]를 눌러야 공개돼요.
 
 Actions 화면에서 손으로 돌리면(Run workflow) Releases에는 안 올리고 Artifacts `pygaki-dev`에만 남아요(시험용).
 
@@ -24,7 +24,7 @@ Actions 화면에서 손으로 돌리면(Run workflow) Releases에는 안 올리
 
 ## 내 컴퓨터에서 만들기
 
-1. **PyKaki 앱 받기**: GitHub의 Actions → "pygaki 앱" → 가장 최근 성공한 실행 → 맨 아래 Artifacts의 `pygaki-win`을 받아 풀어요. (안에 `pygaki.exe`가 있는 폴더)
+1. **pygaki 앱 받기**: GitHub의 Actions → "pygaki 앱" → 가장 최근 성공한 실행 → 맨 아래 Artifacts의 `pygaki-win`을 받아 풀어요. (안에 `pygaki.exe`가 있는 폴더)
    직접 만들려면:
    ```bash
    cd pykaki && npm ci && npm run build
@@ -44,7 +44,7 @@ Actions 화면에서 손으로 돌리면(Run workflow) Releases에는 안 올리
 | `renpy.exe`, `launcher/`, `renpy/` ... | 렌파이 SDK 그대로 (덧붙임에는 없음) |
 | `launcher/game/pygaki_launcher.rpy` | 런처 첫 화면 아래쪽 버튼 [pygaki로 편집], [pygaki 안내서], [플러그인 올리기], [+ Create New Project](새 프로젝트 만들기)의 "기본 (Vanilla)" / "Pygaki" 고르기 ([launcher/pygaki_launcher.rpy](launcher/pygaki_launcher.rpy)) |
 | `pygaki/template/` | Pygaki 새 프로젝트에 얹을 플러그인을 담은 템플릿. 런처의 [새 프로젝트 만들기]와 같은 방법으로 만든 1280x720 한국어 기본 프로젝트(그림까지 다 만듦) + 플러그인(`ui_kit`, `screen_fx`, `hotkeys`, `splash`), `project.json`의 `"type": "template"`. 새 프로젝트는 고른 해상도로 새로 만들고 여기서는 플러그인, 커서·CTC 샘플, 한국어 공통 문구만 가져가요 |
-| `pygaki/app/pygaki.exe` | PyKaki 데스크톱 앱 |
+| `pygaki/app/pygaki.exe` | pygaki 데스크톱 앱 |
 | `pygaki/pygaki_안내서.html` | 모든 안내를 모은 HTML 한 파일(목차, 찾기, 효과 견본 영상). 묶을 때 `bundle/guide/build_guide.py`가 저장소 문서로 다시 만들어 넣음 |
 | `pygaki/읽어주세요.txt` | 쓰는 법 |
 | `pygaki_넣는법.txt` | (덧붙임에만) SDK 폴더에 넣는 법, 빼는 법 |

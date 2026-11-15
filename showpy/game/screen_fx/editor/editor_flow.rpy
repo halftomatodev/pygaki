@@ -536,7 +536,7 @@ init -7 python in screen_fx:
             else:
                 nxt = target_of(getattr(end["node"], "next", None))
                 if nxt is None and pk_skip:
-                    warn.append("PyKaki 원고라 끝 다음 {}번째 줄(menu 같은 줄) 앞에는 줄을 넣을 수 없어서 되돌리기는 넣지 않습니다. 구간 끝을 한 줄 앞으로 잡아 보세요.".format(pk_skip[-1]))
+                    warn.append("pygaki 원고라 끝 다음 {}번째 줄(menu 같은 줄) 앞에는 줄을 넣을 수 없어서 되돌리기는 넣지 않습니다. 구간 끝을 한 줄 앞으로 잡아 보세요.".format(pk_skip[-1]))
                 elif nxt is None:
                     warn.append("끝 다음에 이 파일에서 이어지는 줄이 없어서 되돌리기는 넣지 않습니다.")
             ## 시작과 끝이 다른 가지에 있으면: 가지가 합쳐지는 곳

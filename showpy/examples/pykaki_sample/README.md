@@ -1,4 +1,4 @@
-# PyKaki 연결 샘플
+# pygaki 연결 샘플
 
 선택지 3개와 call 갈래가 있는 짧은 대본 "빈 병동"입니다. 그림과 소리는 시험용입니다.
 
@@ -8,9 +8,9 @@
 2. 이 폴더 `game` 안의 파일과, 저장소 `game` 안의 `ui_kit`, `screen_fx`, `hotkeys`, `splash`를 프로젝트의 `game`에 넣습니다.
 3. 실행합니다.
 
-## PyKaki에서 열기
+## pygaki에서 열기
 
-pygaki 묶음의 런처에서 위 프로젝트를 고르고 [pygaki로 편집]으로 PyKaki를 연 뒤, [열기]로 `pykaki/sample.flow.json`을 가져옵니다. 이 대본은 pygaki 플러그인 연결이 켜져 있습니다.
+pygaki 묶음의 런처에서 위 프로젝트를 고르고 [pygaki로 편집]으로 pygaki를 연 뒤, [열기]로 `pykaki/sample.flow.json`을 가져옵니다. 이 대본은 pygaki 플러그인 연결이 켜져 있습니다.
 
 | 상자 | 들어 있는 것 |
 |---|---|

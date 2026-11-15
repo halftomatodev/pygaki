@@ -680,11 +680,11 @@ init -19 python in script_edit:
     ##     PyKaki가 그 파일을 받아 적으므로 다시 내보내도 사라지지 않습니다.
     ## 형식은 pygaki 저장소의 문서 docs/LINK.md에 있습니다.
 
-    PYKAKI_MARK = "# PyKaki가 만든 파일이에요."
+    PYKAKI_MARK = ("# pygaki가 만든 파일이에요.", "# PyKaki가 만든 파일이에요.")    # 새 문구, 예전 문구
     INBOX_FILE = "showpy_inbox.json"
     MEDIA_HEADS = ("show", "scene", "hide", "play", "stop")
-    _PK_BLOCK = "PyKaki가 만든 원고라 저장하지 않았습니다. 대사 글자와 모양, 선택지는 PyKaki에서 고치세요. 셰이더와 커서는 화면 효과, 커서 칸의 [[여기에서부터 적용]으로."
-    _PK_OLD = "이 줄의 표시가 없습니다. PyKaki에서 pygaki 플러그인 연결을 켜고 다시 내보내세요."
+    _PK_BLOCK = "pygaki 대본 편집기가 만든 원고라 저장하지 않았습니다. 대사 글자와 모양, 선택지는 대본 편집기에서 고치세요. 셰이더와 커서는 화면 효과, 커서 칸의 [[여기에서부터 적용]으로."
+    _PK_OLD = "이 줄의 표시가 없습니다. 대본 편집기에서 pygaki 플러그인 연결을 켜고 다시 내보내세요."
 
     _pk_cache = { }     # 실제 경로 -> (수정 시각, PyKaki 원고인지)
     _pk_seq = [ 0 ]
@@ -711,6 +711,7 @@ init -19 python in script_edit:
     ##   줄 끝:   e "대사"  # @l:l1        (PyKaki가 새 플러그인에 맞춰 내보낸 원고)
     ##   윗줄:    # @l:l1  /  e "대사"     (예전 원고, 줄 끝에 붙일 수 없는 줄)
     PK_END_MARKS = True     # PyKaki가 이 이름을 보고 줄 끝 표시로 내보냅니다
+    PK_NEW_MARK = True      # 대본 편집기가 이 이름을 보고 머리말을 새 문구(pygaki)로 씁니다 (4.10). 두 문구 모두 알아봄
 
     def _pk_end(text, head):
         """그 줄 끝에 붙은 표시의 값. 줄 전체가 표시이거나 없으면 None."""
@@ -1065,7 +1066,7 @@ init -19 python in script_edit:
                     _inbox_add(path, ops)
                 except Exception as ex:
                     for e in touched:
-                        e.note = "PyKaki에 넘길 파일을 쓰지 못했습니다: {}".format(ex)
+                        e.note = "대본 편집기에 넘길 파일을 쓰지 못했습니다: {}".format(ex)
 
             for e in touched:
                 if e.kind not in INSERT_KINDS:

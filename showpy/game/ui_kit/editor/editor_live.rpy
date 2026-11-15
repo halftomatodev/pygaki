@@ -136,7 +136,7 @@ init -8 python in ui_editor:
             srv.listen(2)
         except Exception as e:
             live.failed = True
-            print("showpy live: 포트를 열지 못했습니다:", e)
+            print("pygaki live: 포트를 열지 못했습니다:", e)
             return
 
         live.server = srv
@@ -153,7 +153,7 @@ init -8 python in ui_editor:
         try:
             store.ui_kit.write_text(_live_path(), json.dumps(info, ensure_ascii=False))
         except Exception as e:
-            print("showpy live: {}을 쓰지 못했습니다: {}".format(LIVE_FILE, e))
+            print("pygaki live: {}을 쓰지 못했습니다: {}".format(LIVE_FILE, e))
 
     def live_cleanup():
         """게임을 끌 때 연결 파일을 지웁니다 (내가 쓴 파일일 때만)."""
@@ -178,7 +178,7 @@ init -8 python in ui_editor:
         """게임 안 패널 보이기/숨기기를 바꾸고 앱에 알립니다(앱이 기억해 둠). (3.23)"""
         live.hide_panel = not live.hide_panel
         _live_send(dict(type="panel", hide=live.hide_panel))
-        msg("게임 안 GUI 편집기 " + ("숨김 (pygaki 앱에서 고침)" if live.hide_panel else "보임"))
+        msg("게임 안 편집 화면 " + ("숨김 (pygaki 앱에서 고침)" if live.hide_panel else "보임"))
         store.renpy.restart_interaction()
 
     def live_panel_hidden():

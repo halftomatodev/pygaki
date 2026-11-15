@@ -183,7 +183,7 @@ export function toggleGamePanel() {
   const s = useLive.getState();
   if (!s.on) return '게임이 연결되지 않았어요. 런처에서 게임을 켜 두면 저절로 붙어요.';
   setGamePanel(!s.gamePanel);
-  return !s.gamePanel ? '게임 창의 GUI 편집기를 보여요 (앱의 칸은 게임 창으로 가요)' : '게임 창의 GUI 편집기를 숨겨요 (앱에서 고쳐요)';
+  return !s.gamePanel ? '게임 창의 편집 화면을 보여요 (앱의 칸은 게임 창으로 가요)' : '게임 창의 편집 화면을 숨겨요 (앱에서 고쳐요)';
 }
 
 let started = false;

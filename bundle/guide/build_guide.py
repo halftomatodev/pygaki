@@ -5,7 +5,7 @@
 
 저장소 문서를 읽어서 그대로 붙인다(사본을 따로 두지 않아 문서를 고치면 다시 돌리기만 하면 됨).
     시작하기, 한눈에, 직접 고치기, 주의와 라이선스   bundle/guide/parts/*.md
-    PyKaki로 대본 쓰기                              pykaki/docs/GUIDE.md (앱의 [도움말])
+    pygaki로 대본 쓰기                              pykaki/docs/GUIDE.md (앱의 [도움말])
     플러그인 커스텀 가이드                           showpy/docs/CUSTOM_GUIDE.md
     효과 견본                                       효과 파일(@effect, @transition)과 화면 셰이더 목록, 견본 영상 pykaki/public/effects/*.webm
 견본 영상은 파일 안에 넣는다(data: 주소). 밖으로 나가는 요청이 없는 한 파일이라 묶음 어디에 두어도 열린다.
@@ -28,7 +28,7 @@ OUT = os.path.join(HERE, "pygaki_안내서.html")
 CHAPTERS = [
     ("start", "시작하기", "bundle/guide/parts/start.md"),
     ("overview", "한눈에: 문서와 파일 자리", "bundle/guide/parts/overview.md"),
-    ("pykaki", "PyKaki로 대본 쓰기", "pykaki/docs/GUIDE.md"),
+    ("pykaki", "pygaki로 대본 쓰기", "pykaki/docs/GUIDE.md"),
     ("custom", "플러그인 커스텀 가이드", "showpy/docs/CUSTOM_GUIDE.md"),
     ("effects", "효과 견본", None),
     ("develop", "직접 고치기", "bundle/guide/parts/develop.md"),
@@ -413,7 +413,7 @@ mark{background:var(--mark);color:inherit;border-radius:2px}
 <button class="menu-btn" id="menu" type="button">☰ 목차</button>
 <header class="hero">
   <h1>pygaki 안내서</h1>
-  <p>렌파이로 게임을 만드는 사람을 위한 대본 편집기 PyKaki와 pygaki 플러그인의 모든 안내를 한 파일에 모았습니다. 인터넷 없이 열리고, 왼쪽 찾기 칸으로 낱말을 찾습니다.</p>
+  <p>렌파이로 게임을 만드는 사람을 위한 pygaki(대본 편집기와 pygaki 플러그인)의 모든 안내를 한 파일에 모았습니다. 인터넷 없이 열리고, 왼쪽 찾기 칸으로 낱말을 찾습니다.</p>
   <p>__VER__ · 저장소 <a href="__REPO__" target="_blank" rel="noopener">__REPO__</a></p>
   <div class="chips">__CHIPS__</div>
 </header>

@@ -1243,9 +1243,9 @@ init -6 python in splash:
                     "이 파일을 지우면 설정 파일 값과 순서로 돌아갑니다.",
                     ]
                 if header is not None:
-                    lines = header("GUI 편집기가 저장한 스플래시 페이지 값입니다.", notes)
+                    lines = header("게임 안 편집 화면이 저장한 스플래시 페이지 값입니다.", notes)
                 else:
-                    lines = [ "## GUI 편집기가 저장한 스플래시 페이지 값입니다. (자동 생성)", "" ]
+                    lines = [ "## 게임 안 편집 화면이 저장한 스플래시 페이지 값입니다. (자동 생성)", "" ]
                 if order is not None:
                     lines.append("## 페이지 순서. 여기 없는 splash_config.rpy의 페이지는 보여 주지 않습니다.")
                     lines.append("define splash.page_order = [ " + ", ".join(json.dumps(pid) for pid in order) + " ]")

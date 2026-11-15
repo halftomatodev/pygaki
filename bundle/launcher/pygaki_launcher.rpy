@@ -272,7 +272,7 @@ label pygaki_update:
         pygaki_head = "판이 같아요. 그래도 다시 넣을까요?" if pygaki_same else "이 프로젝트의 pygaki 플러그인을 새 판으로 바꿀까요?"
 
         pygaki_ok = interface.yesno(
-            KO(pygaki_head + "\n\n" + pygaki_lines + "\n\n엔진·편집기 파일만 바꾸고, 설정(*_config.rpy)과 GUI 편집기에서 저장한 값(*_layout.rpy)은 그대로 둬요. 바꾸기 전 것은 프로젝트 폴더의 ui_kit_backup/plugins에 남아요. 게임을 끄고 해 주세요."),
+            KO(pygaki_head + "\n\n" + pygaki_lines + "\n\n엔진·편집기 파일만 바꾸고, 설정(*_config.rpy)과 게임 안 편집 화면에서 저장한 값(*_layout.rpy)은 그대로 둬요. 바꾸기 전 것은 프로젝트 폴더의 ui_kit_backup/plugins에 남아요. 게임을 끄고 해 주세요."),
         )
 
         if pygaki_ok:

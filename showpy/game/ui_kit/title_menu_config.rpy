@@ -137,7 +137,7 @@ define tmenu.intro_offset = (-30, 0) # 어디서부터 미끄러져 들어올지
 ## 그림은 화면에 꽉 차게 늘어납니다. 영상은 계속 반복합니다.
 ##   define tmenu.background = "images/title_bg.png"
 ##   define tmenu.background = "movies/title_bg.webm"
-## 편집기(Shift+M) "타이틀 메뉴" 탭의 "배경" 버튼이나 PyKaki 앱에서 고를 수도 있습니다.
+## 편집기(Shift+M) "타이틀 메뉴" 탭의 "배경" 버튼이나 pygaki 앱에서 고를 수도 있습니다.
 ## (예전 이름 tmenu.background_movie도 그대로 됩니다)
 
 define tmenu.background = None
@@ -148,7 +148,7 @@ define tmenu.background = None
 ##   "text": None    제목은 게임 이름(config.name). 부제는 "" (안 보임)
 ##   "effect": "glitch"   글자 효과 (대사 등장 효과와 같은 이름: scatter, drop, glitch, stamp, vhs, liquid …)
 ## 편집기에서 끌어서 옮기고, 분홍 네모를 끌어서 돌리고, 저장하면 title_menu_layout.rpy에 들어갑니다.
-## 글 내용은 PyKaki 앱의 "타이틀 메뉴" 칸에서 고칠 수 있습니다.
+## 글 내용은 pygaki 앱의 "타이틀 메뉴" 칸에서 고칠 수 있습니다.
 
 define tmenu.labels = {
     "title": { "text": None, "xalign": 0.5, "yalign": 0.2, "size": 72 },
@@ -189,7 +189,7 @@ define tmenu.main_menu_frame = False
 define tmenu.pause = True
 
 ## 배경: 그림이나 영상(webm). None이면 투명 (뒤 게임 화면이 그대로 보임) (3.19)
-## 편집기 "타이틀 메뉴" 탭(ESC 메뉴를 연 채로)의 "배경" 버튼이나 PyKaki 앱에서 고를 수도 있습니다.
+## 편집기 "타이틀 메뉴" 탭(ESC 메뉴를 연 채로)의 "배경" 버튼이나 pygaki 앱에서 고를 수도 있습니다.
 ##   define tmenu.pause_background = "images/pause_bg.png"
 ##   define tmenu.pause_background = "movies/pause_bg.webm"
 define tmenu.pause_background = None

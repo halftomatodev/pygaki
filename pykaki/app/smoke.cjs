@@ -413,7 +413,7 @@ async function until(what, fn, ms = 10000) {
   // 게임 창의 GUI 편집기 보이기/숨기기 (ui_kit 3.23): 버튼과 F9가 panel 명령을 보내고, 게임 쪽 알림을 기억하는지
   const nPanel = () => got.filter((m) => m.cmd === 'panel' && m.hide === false).length;
   const p0 = nPanel();
-  await page.locator('.sp-bar button', { hasText: '게임 창의 GUI 편집기' }).click();
+  await page.locator('.sp-bar button', { hasText: '게임 창의 편집 화면' }).click();
   await until('보이기 버튼이 panel 명령을 보내지 않음', () => nPanel() > p0);
   if ((await page.evaluate(() => localStorage.getItem('pygaki-game-panel'))) !== 'show') fail('보이기를 기억하지 않음');
   await page.keyboard.press('F9');

@@ -125,7 +125,7 @@ function FolderButtons() {
     return (
       <>
         <span className="sep" />
-        <button onClick={reread} title="프로젝트 폴더의 그림·소리와 GUI 편집기가 넣은 줄을 다시 읽어요">다시 읽기</button>
+        <button onClick={reread} title="프로젝트 폴더의 그림·소리와 게임 안 편집 화면이 넣은 줄을 다시 읽어요">다시 읽기</button>
         <button onClick={() => void desktop!.openFolder('')} title="프로젝트 폴더를 탐색기로 열어요">폴더 열기</button>
         <button onClick={() => void desktop!.choose()} title="다른 렌파이 프로젝트를 새 창으로 열어요">다른 프로젝트</button>
       </>

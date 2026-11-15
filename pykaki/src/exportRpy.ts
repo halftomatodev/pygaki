@@ -77,7 +77,8 @@ function tailSafe(row: string) {
 
 // endMarks: 줄 표시(# @l:, # @node:, # @end:)를 윗줄이 아니라 줄 끝에 붙인다 (docs/LINK.md 2장).
 // 연결한 게임의 pygaki 플러그인이 ui_kit 4.5 이상일 때만 켠다 (그 전 판은 윗줄 표시만 읽는다)
-export function generateRpy(p: Project, opts: { endMarks?: boolean } = {}): { code: string; warnings: Warn[] } {
+// newMark: 머리말을 새 문구(pygaki)로. 게임의 플러그인이 새 문구를 알아볼 때만 (ui_kit 4.10, script_edit.rpy의 PK_NEW_MARK). 아니면 예전 문구
+export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: boolean } = {}): { code: string; warnings: Warn[] } {
   const endMarks = !!opts.endMarks && p.settings.renpyLink;
   const W: Warn[] = [];
   const out: string[] = [];
@@ -143,7 +144,7 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean } = {}): { co
 
   // 머리말과 캐릭터
   out.push(`# ${p.project.title}`);
-  out.push("# PyKaki가 만든 파일이에요. 직접 고치면 다음 내보내기 때 덮어써져요.");
+  out.push(`# ${opts.newMark ? 'pygaki' : 'PyKaki'}가 만든 파일이에요. 직접 고치면 다음 내보내기 때 덮어써져요.`);
   out.push('');
   for (const c of p.characters) out.push(`define ${c.id} = Character(${pyStr(c.name)}${c.color ? `, color=${pyStr(c.color)}` : ''}, image=${pyStr(c.id)})`);
   if (p.characters.length) out.push('');
@@ -291,7 +292,7 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean } = {}): { co
         const tagText = S.allowTextTags ? l.text : undefined;
         for (const n of new Set(tagEffectNames(tagText))) {
           const known = shaderEffect(n)?.kind === 'effect' || REMOVED_EFFECTS.includes(n);
-          if (!known) W.push({ level: 'warn', msg: `대사: {shader=${n}}는 PyKaki가 모르는 효과예요. 게임에 없는 이름이면 그 줄에서 렌파이가 멈춰요 (${b.title || b.id})`, nodeId: b.id });
+          if (!known) W.push({ level: 'warn', msg: `대사: {shader=${n}}는 pygaki가 모르는 효과예요. 게임에 없는 이름이면 그 줄에서 렌파이가 멈춰요 (${b.title || b.id})`, nodeId: b.id });
           else if (!S.renpyLink && !RENPY_EFFECTS.includes(n)) W.push({ level: 'warn', msg: `대사: {shader=${n}}는 pygaki 플러그인이 있어야 해요. 없는 게임에서는 그 줄에서 렌파이가 멈춰요 (${b.title || b.id})`, nodeId: b.id });
         }
         // 대사 소리(say.sound)는 플러그인이 있어야 해서 연결을 끄면 내보내지 않는다 (cb_typing_sound=, stage.ts sayArgs)

@@ -26,7 +26,7 @@ init -8 python in ui_editor:
     ## 편집기에 저장 안 한 값이 있으면 그 값이 사라지지 않게 다시 불러오지 않고 알리기만 합니다.
 
     PK_SCRIPT = "script_flow.rpy"
-    PK_MARK = "PyKaki가 만든 파일이에요"
+    PK_MARK = ("pygaki가 만든 파일이에요", "PyKaki가 만든 파일이에요")    # 새 문구, 예전 문구
 
     class _ScriptWatch(store.NoRollback):
         def __init__(self):
@@ -53,7 +53,7 @@ init -8 python in ui_editor:
                 head = f.read(400).decode("utf-8", "ignore")
         except Exception:
             return False
-        return PK_MARK in head
+        return any(m in head for m in PK_MARK)
 
     def _editor_pending():
         try:
@@ -85,14 +85,14 @@ init -8 python in ui_editor:
             w.last = cur
             return
         text = _pk_script_text()
-        if text is None or PK_MARK not in text[:400]:
+        if text is None or not any(m in text[:400] for m in PK_MARK):
             w.seen = cur
             w.text = text
             return
         if _editor_pending():
             if w.told != cur:
                 w.told = cur
-                store.renpy.notify("PyKaki에서 원고를 내보냈어요. GUI 편집기에 저장 안 한 값이 있어서 다시 불러오지 않았어요. 저장하거나 버린 뒤 Shift+R")
+                store.renpy.notify("대본 편집기에서 원고를 내보냈어요. 게임 안 편집 화면에 저장 안 한 값이 있어서 다시 불러오지 않았어요. 저장하거나 버린 뒤 Shift+R")
             return
         old = getattr(w, "text", None)
         w.seen = cur

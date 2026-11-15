@@ -61,6 +61,7 @@ interface F {
   hasShowpy: boolean; // game 폴더에 ui_kit이 있는지
   fxErrors: [string, string][]; // 효과 폴더(ui_kit/effects)에서 못 읽은 파일과 이유
   endMarks: boolean; // 이 게임의 플러그인이 줄 끝 표시를 읽는지 (ui_kit 4.5, script_edit.rpy의 PK_END_MARKS)
+  newMark: boolean; // 이 게임의 플러그인이 새 머리말 문구(pygaki가 만든 파일)를 알아보는지 (ui_kit 4.10, PK_NEW_MARK)
   sceneUi: boolean | null; // custom_ui.scene이 있는지 (ui_kit 4.7). 플러그인이 없거나 폴더를 안 열었으면 null
   fxSeq: number; // 효과 목록이 바뀔 때마다 오른다 (목록을 쓰는 화면이 다시 그리게)
   fxFiles: string[]; // 효과 폴더에 있는 효과 파일 이름
@@ -79,6 +80,7 @@ export const useGameFolder = create<F>((set) => ({
   hasShowpy: false,
   fxErrors: [],
   endMarks: false,
+  newMark: false,
   sceneUi: null,
   fxSeq: 0,
   fxFiles: [],
@@ -291,13 +293,15 @@ export async function scanFolder() {
   const shOff = parseEffectsOff((sfx && (await readText(sfx, SHADERS_OFF_FILE))) || '');
   setShadersOff(shOff);
   const engine = uiKit ? await sub(uiKit, 'engine') : null;
-  const endMarks = /^\s*PK_END_MARKS\s*=\s*True/m.test((engine && (await readText(engine, 'script_edit.rpy'))) || '');
+  const seText = (engine && (await readText(engine, 'script_edit.rpy'))) || '';
+  const endMarks = /^\s*PK_END_MARKS\s*=\s*True/m.test(seText);
+  const newMark = /^\s*PK_NEW_MARK\s*=\s*True/m.test(seText);
   const cuText = engine ? await readText(engine, 'custom_ui.rpy') : null;
   const sceneUi = cuText === null ? null : /^\s*def scene\(/m.test(cuText);
   const g = useGameFolder.getState();
   if (fxErrors.length && JSON.stringify(fxErrors) !== JSON.stringify(g.fxErrors))
     useStore.getState().say('효과 폴더에서 못 읽은 파일: ' + fxErrors.map(([f, why]) => `${f} (${why})`).join(' / '));
-  g.set({ name: g.name ?? dir.name, media, look, startClash, hasShowpy, endMarks, sceneUi, fxErrors, fxSeq: g.fxSeq + 1, fxFiles: packs.map((f) => f.name).sort(), fxOff, shOff });
+  g.set({ name: g.name ?? dir.name, media, look, startClash, hasShowpy, endMarks, newMark, sceneUi, fxErrors, fxSeq: g.fxSeq + 1, fxFiles: packs.map((f) => f.name).sort(), fxOff, shOff });
   setTimeout(() => oldUrls.forEach((u) => URL.revokeObjectURL(u)), 5000);
 }
 
@@ -353,7 +357,7 @@ export async function pullInbox(ask = false) {
   await writeText(dir, INBOX_FILE, JSON.stringify({ format: 'showpy-inbox', version: 1, ops: rest }, null, 2));
 
   const extra = [res.moved.length ? `기준 줄이 없어 상자 끝에 넣음 ${res.moved.length}개` : '', res.dropped.length ? `넣을 곳이 없어 뺌: ${res.dropped.join(', ')}` : ''].filter(Boolean).join(' / ');
-  s.say(`GUI 편집기에서 고친 ${res.applied}곳을 받아 적었어요${extra ? ' (' + extra + ')' : ''}`);
+  s.say(`게임 안 편집 화면에서 고친 ${res.applied}곳을 받아 적었어요${extra ? ' (' + extra + ')' : ''}`);
   return res.applied;
 }
 

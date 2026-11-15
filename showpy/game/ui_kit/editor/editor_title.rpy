@@ -612,7 +612,7 @@ init -8 python in ui_editor:
                 rv.append("x {:.0f}   y {:.0f}   회전 {:.1f}   확대 {:.2f}   크기 {}   효과 {}".format(
                     x, y, it.rotate, it.zoom, size, self.effect_label()))
                 if it.empty:
-                    rv.append("글자가 비어 있어서 화면에 안 보입니다. 내용은 PyKaki 앱의 타이틀 메뉴 칸에서 적습니다.")
+                    rv.append("글자가 비어 있어서 화면에 안 보입니다. 내용은 pygaki 앱의 타이틀 메뉴 칸에서 적습니다.")
             elif self._all():
                 d = tm.common_values()
                 h = "hover_" if self._hover() else ""

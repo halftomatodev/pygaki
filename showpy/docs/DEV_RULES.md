@@ -22,10 +22,10 @@ pygaki 플러그인을 고치는 사람과 AI가 지킬 규칙입니다.
 - 라이선스: cool-retro-term, HarlequinVG gameboy_shader는 GPL이라 코드를 가져오지 않습니다. 인터넷에서 받은 셰이더나 코드는 참고만 하고 실행하지 않습니다.
 - 프로젝트가 Dropbox 안이면 동기화 중에 파일 쓰기가 실패할 수 있습니다. 그러면 동기화를 잠시 멈추고 다시 합니다.
 
-## PyKaki와 맞출 때
+## 대본 편집기와 맞출 때
 
 - 형식이 바뀌면 저장소 맨 위의 [docs/LINK.md](../../docs/LINK.md)를 고치고, `pykaki/`의 맞는 코드도 같은 커밋에서 고칩니다.
-- PyKaki의 저장 형식 이름(`renpy-flow`, `.flow.json`, IndexedDB `renpy-flow-editor`)은 바꾸지 않습니다.
+- 대본 편집기의 저장 형식 이름(`renpy-flow`, `.flow.json`, IndexedDB `renpy-flow-editor`)은 바꾸지 않습니다.
 
 ## 버전 올리기
 

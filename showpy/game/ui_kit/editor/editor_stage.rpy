@@ -102,8 +102,8 @@ init -8 python in ui_editor:
 
         def layout_file(self):
             uk = store.ui_kit
-            lines = uk.file_header("GUI 편집기가 저장한 그림 자리입니다.", [
-                "PyKaki에서 다시 내보내도 지워지지 않습니다.",
+            lines = uk.file_header("게임 안 편집 화면이 저장한 그림 자리입니다.", [
+                "대본 편집기에서 다시 내보내도 지워지지 않습니다.",
                 '"ghost"는 어디서나, ("n4", "ghost")는 상자 n4에서만 쓰는 자리입니다.',
                 "이 파일을 지우면 그림이 렌파이 기본 자리로 돌아갑니다.",
                 ])
@@ -1035,10 +1035,10 @@ init -8 python in ui_editor:
                 rv.append("원고에 저장 안 한 줄 {}개 (Ctrl+S)".format(n))
 
             if self.pk():
-                rv.append("PyKaki 원고: 위치는 stage_layout.rpy에, 그림 줄은 PyKaki가 받아 적습니다.")
+                rv.append("pygaki 원고: 위치는 stage_layout.rpy에, 그림 줄은 대본 편집기가 받아 적습니다.")
                 wait = self.se().inbox_count(self.sel[0])
                 if wait:
-                    rv.append("PyKaki가 아직 안 받아 적은 줄 {}개".format(wait))
+                    rv.append("대본 편집기가 아직 안 받아 적은 줄 {}개".format(wait))
 
             if rt.skipped:
                 f, r = rt.skipped[0]

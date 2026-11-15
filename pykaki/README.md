@@ -1,4 +1,4 @@
-# PyKaki
+# pygaki
 
 **파이썬을 몰라도 렌파이(Ren'Py) 대본을 쓸 수 있는 에디터예요.**
 상자와 선으로 이야기 흐름을 그리고, 대사를 쓰고, 렌파이 스크립트(`.rpy`)로 내보내요.
@@ -13,7 +13,7 @@ pygaki 묶음(렌파이 SDK + pygaki 플러그인 + 이 앱) 안의 데스크톱
 - 렌파이로 게임을 켜고, 고른 상자나 줄로 바로 가기 ([렌파이에서 여기로 이동])
 - 문제(연결 안 된 선, 빈 대사, 잘못된 이름) 검사
 - `.rpy`로 내보내기
-- [pygaki 플러그인](https://github.com/halftomatodev/pygaki/tree/main/showpy)와 연결: 렌파이 편집기에서 넣은 그림, 영상, 소리가 대본에도 나타나요
+- [pygaki 플러그인](https://github.com/halftomatodev/pygaki/tree/main/showpy)과 연결: 렌파이 편집기에서 넣은 그림, 영상, 소리가 대본에도 나타나요
 - 집중 모드(화면을 비우고 쓰는 줄만 또렷하게), 화면 색(사과 스타일, 어둡게, 직접 고르기)·단축키 바꾸기
 
 자세한 사용법은 [사용 가이드](docs/GUIDE.md)를 보세요.
@@ -41,6 +41,6 @@ cd app && npm ci && npm start   # 데스크톱 앱
 [MIT](LICENSE) © halftomato
 누구나 자유롭게 쓰고, 고치고, 다시 배포할 수 있어요. 저작권 표시와 라이선스 문구만 남겨 주세요.
 
-PyKaki는 Ren'Py의 공식 도구가 아니에요.
+pygaki는 Ren'Py의 공식 도구가 아니에요.
 
 함께 들어 있는 글꼴 **Pretendard**(길형진)는 SIL Open Font License 1.1을 따라요 ([라이선스](licenses/OFL-Pretendard.txt)).

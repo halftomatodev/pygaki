@@ -23,7 +23,7 @@ interface Section {
 }
 
 const SECTIONS: Section[] = [
-  { id: 'splash', label: '스플래시 페이지', tab: 'splash', app: false, mirror: true, note: '게임을 켰을 때 타이틀 전에 나오는 페이지예요. showpy 4.18(splash 1.2)부터 여기서 고쳐요. 예전 판이면 splash/splash_config.rpy에서 고쳐요.' },
+  { id: 'splash', label: '스플래시 페이지', tab: 'splash', app: false, mirror: true, note: '게임을 켰을 때 타이틀 전에 나오는 페이지예요. pygaki 플러그인 4.18(splash 1.2)부터 여기서 고쳐요. 예전 판이면 splash/splash_config.rpy에서 고쳐요.' },
   { id: 'title', label: '타이틀 메뉴', tab: 'title', app: true, note: '' },
   { id: 'title_fx', label: '타이틀 셰이더', tab: 'title_fx', app: false, mirror: true, note: '타이틀에만 걸리는 셰이더 두 자리예요. 1번과 2번에 고른 것이 겹쳐요. 일렁임(예전 "타이틀 일렁임")도 여기서 골라요.' },
   { id: 'pause', label: 'ESC 메뉴', tab: 'title', app: true, note: '' },
@@ -33,7 +33,7 @@ const SECTIONS: Section[] = [
   { id: 'say', label: '대사 상자', tab: 'say', app: false, mirror: true, note: '대사 상자의 처음 위치와 모양이에요. 줄마다 다른 위치는 [대본 편집] 대사 카드의 줄마다 있는 [위치 옮기기]로 정해요.' },
   { id: 'choice', label: '선택지', tab: 'choice', app: false, mirror: true, note: '선택지의 처음 위치와 모양이에요. 상자마다 다른 위치는 [대본 편집] 다음 흐름 카드의 [위치 옮기기]로 정해요.' },
   { id: 'stage', label: '그림, 영상 배치', tab: 'stage', app: false, mirror: true, note: '그림을 넣는 것은 [대본 편집] 상자의 배경, 그림·영상 카드에서 해요. 여기서는 게임 화면에서 자리를 끌어 정해요.' },
-  { id: 'ui_text', label: '종료 메시지, 버튼 글', tab: 'ui_text', app: false, mirror: true, note: '종료 확인 창, 퀵메뉴 버튼 같은 글을 바꿔요. showpy ui_kit 3.23부터 있어요.' },
+  { id: 'ui_text', label: '종료 메시지, 버튼 글', tab: 'ui_text', app: false, mirror: true, note: '종료 확인 창, 퀵메뉴 버튼 같은 글을 바꿔요. pygaki 플러그인 ui_kit 3.23부터 있어요.' },
 ];
 
 // 왼쪽 목록의 카드 묶음
@@ -113,7 +113,7 @@ export function ShowpyView() {
       <Resizer size="guiRightW" grow={-1} className="right" />
       {/* 오른쪽 칸도 대본 편집처럼 카드: 저장·편집기 카드 + 고치는 칸 카드 (커서·대사 소리는 칸마다 카드) */}
       <div className="sp-panel">
-        <Card id="g-bar" title="저장과 GUI 편집기">
+        <Card id="g-bar" title="저장과 게임 안 편집 화면">
           {on && st && <EditorBar st={st} />}
           {err && <p className="sp-err">{err}</p>}
           {!on && <p className="tip">게임과 연결되면 여기서 고쳐요.</p>}
@@ -181,7 +181,7 @@ function Where({ st, sec }: { st: GameState; sec: string }) {
             <>
               <span className="grow" />
               {flow === undefined || flow === null ? (
-                <span className="tip">줄기표는 showpy screen_fx 5.2부터 있어요</span>
+                <span className="tip">줄기표는 pygaki 플러그인 screen_fx 5.2부터 있어요</span>
               ) : (
                 <button className={flowOpen ? 'on' : ''} onClick={() => liveSend({ cmd: 'flow', do: 'toggle' })} title="원고를 마디와 가지로 그린 줄기표를 원고 옆에 펴고 접어요">
                   {flowOpen ? '줄기표 접기' : '줄기표 펴기'}
@@ -299,7 +299,7 @@ function Script({ file, line, peek }: { file: string | null; line: number; peek?
         {lines.some((l) => MARK.test(l)) && (
           <button
             className={hideMarks ? 'on' : ''}
-            title="PyKaki가 줄을 찾으려고 넣은 표시 줄(# @l: 등)을 숨겨요. 파일은 그대로예요"
+            title="pygaki가 줄을 찾으려고 넣은 표시 줄(# @l: 등)을 숨겨요. 파일은 그대로예요"
             onClick={() => {
               try {
                 localStorage.setItem('pygaki-hide-marks', hideMarks ? 'off' : 'on');
@@ -360,7 +360,7 @@ function EditorBar({ st }: { st: GameState }) {
   return (
     <div className="sp-bar">
       <div className="sp-row">
-        <button className="primary" disabled={!e.pending} onClick={() => liveSend({ cmd: 'save' })} title="게임 창의 GUI 편집기의 Ctrl+S와 같아요">
+        <button className="primary" disabled={!e.pending} onClick={() => liveSend({ cmd: 'save' })} title="게임 창 편집 화면의 Ctrl+S와 같아요">
           저장 {e.pending ? `(${e.pending})` : ''}
         </button>
         <button
@@ -376,9 +376,9 @@ function EditorBar({ st }: { st: GameState }) {
         <button
           className={e.hide_panel ? '' : 'on'}
           onClick={() => setGamePanel(e.hide_panel)}
-          title={`게임 창에도 GUI 편집기 패널을 보일지 바꿔요. 보이게 하면 고치는 칸이 게임 창으로 가요. 단축키 ${keyOf('gamePanel')} (게임 창에서도 됨)`}
+          title={`게임 창에도 편집 화면 패널을 보일지 바꿔요. 보이게 하면 고치는 칸이 게임 창으로 가요. 단축키 ${keyOf('gamePanel')} (게임 창에서도 됨)`}
         >
-          게임 창의 GUI 편집기: {e.hide_panel ? '숨김' : '보임'} ({keyOf('gamePanel')})
+          게임 창의 편집 화면: {e.hide_panel ? '숨김' : '보임'} ({keyOf('gamePanel')})
         </button>
       </div>
       {e.open && e.hide_panel && (
@@ -443,7 +443,7 @@ function InGamePanel({ st, sec }: { st: GameState; sec: Section }) {
   const here = st.editor.open && st.editor.tab === sec.tab;
   return (
     <div>
-      <p className="tip">이 칸은 아직 앱으로 옮기지 않았어요. 지금은 게임 창의 GUI 편집기 패널에서 고쳐요.</p>
+      <p className="tip">이 칸은 아직 앱으로 옮기지 않았어요. 지금은 게임 창의 편집 화면 패널에서 고쳐요.</p>
       {sec.tab &&
         (!t ? (
           <p className="tip">이 게임에는 이 편집기 탭이 없어요. (플러그인이 빠져 있을 수 있어요)</p>
@@ -452,7 +452,7 @@ function InGamePanel({ st, sec }: { st: GameState; sec: Section }) {
         ) : here ? (
           <p className="tip">게임 창에 이 탭 패널이 열려 있어요.</p>
         ) : (
-          <button onClick={() => (liveSend({ cmd: 'panel', hide: false }), liveSend({ cmd: 'editor', open: true, tab: sec.tab }))}>게임 창의 GUI 편집기에서 열기</button>
+          <button onClick={() => (liveSend({ cmd: 'panel', hide: false }), liveSend({ cmd: 'editor', open: true, tab: sec.tab }))}>게임 창의 편집 화면에서 열기</button>
         ))}
       {here && st.editor.info.length > 0 && (
         <pre className="sp-info">{st.editor.info.join('\n')}</pre>

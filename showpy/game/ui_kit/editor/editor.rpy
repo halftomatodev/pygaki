@@ -295,7 +295,7 @@ init -9 python in ui_editor:
                 t = best
 
         if t is None:
-            store.renpy.notify("GUI 편집기: 지금 화면에서 편집할 수 있는 것이 없습니다.")
+            store.renpy.notify("pygaki 편집: 지금 화면에서 편집할 수 있는 것이 없습니다.")
             return
 
         state.open = True
@@ -1030,7 +1030,7 @@ init -9 python in ui_editor:
 
         def render(self, width, height, st, at):
             if self.child is None:
-                self.child = store.Text("= GUI 편집기", style="ui_editor_title")
+                self.child = store.Text("= pygaki 편집", style="ui_editor_title")
             cr = store.renpy.render(self.child, width, height, st, at)
             self.size = cr.get_size()
             rv = store.renpy.Render(self.size[0], self.size[1])
@@ -1098,7 +1098,7 @@ init -9 python in ui_editor:
             _ld.scandirfiles()
             after = set(fn for _d, fn in _ld.listdirfiles(False))
         except Exception as e:
-            print("GUI 편집기: 파일 목록을 다시 읽지 못했습니다:", e)
+            print("pygaki 편집: 파일 목록을 다시 읽지 못했습니다:", e)
             return False
         new = sorted(after - before)
         if not new:
@@ -1114,7 +1114,7 @@ init -9 python in ui_editor:
                     import renpy as _r
                     _r.display.image.register_image(name, _r.easy.displayable(fn))
                 except Exception as e:
-                    print("GUI 편집기: 그림 이름을 만들지 못했습니다:", fn, e)
+                    print("pygaki 편집: 그림 이름을 만들지 못했습니다:", fn, e)
         ## pygaki 앱에도 새 파일 목록을 보냄
         lv = globals().get("live")
         if lv is not None:

@@ -472,7 +472,7 @@ init -8 python in ui_editor:
             if what != "size" or not self._check_target():
                 return
             if self.pk():
-                msg("PyKaki 원고입니다. 글자 크기는 PyKaki에서 고치세요.")
+                msg("pygaki 원고입니다. 글자 크기는 대본 편집기에서 고치세요.")
                 return
             cur =self.cur(self.k("size")) or store.gui.text_size
             self._set(**{ self.k("size") : int(max(4, int(cur) + amount)) })
@@ -910,7 +910,7 @@ init -8 python in ui_editor:
                 what, x, y, where, self.cur(self.k("size")) or "-"))
 
             if self.pk():
-                rv.append("PyKaki 원고입니다. 여기서는 위치를 고치고, 글자 모양, 속도, 등장 효과, 상자는 PyKaki에서 고칩니다.")
+                rv.append("pygaki 원고입니다. 여기서는 위치를 고치고, 글자 모양, 속도, 등장 효과, 상자는 대본 편집기에서 고칩니다.")
             else:
                 rv.append("속도 {}   효과 {}   상자 {}".format(self.speed_label(), self.effect_label(),
                     dict(self.BOXES).get(self.box_kind(), "없음")))
@@ -1011,7 +1011,7 @@ screen ui_editor_say_panel(tab):
 
     ## 3.21: 글자 등장 효과, 줄마다 화면 효과·덮개·휘어짐·커서는 이 탭에서 뺌.
     ## 원고에 이미 적힌 괄호(fx=, fx_overlay=, fx_warp=, fx_cursor=, 등장 효과)는 그대로 돌아감
-    text "대사 효과(글자 등장 효과)는 PyKaki(pygaki 앱 [[대본 편집])에서 고칩니다. 셰이더와 커서는 '화면 효과' 탭, '커서/대사 소리' 탭에서 [[여기에서부터 적용]으로." style "ui_editor_small" color "#ffd23b" xmaximum 632
+    text "대사 효과(글자 등장 효과)는 pygaki 앱 [[대본 편집]에서 고칩니다. 셰이더와 커서는 '화면 효과' 탭, '커서/대사 소리' 탭에서 [[여기에서부터 적용]으로." style "ui_editor_small" color "#ffd23b" xmaximum 632
 
     hbox:
         spacing 6

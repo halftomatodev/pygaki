@@ -92,7 +92,7 @@ init -8 python in ui_editor:
         def layout_file(self):
             uk = store.ui_kit
             d = self._live()
-            lines = uk.file_header("GUI 편집기가 저장한 UI 글(확인 창, 버튼 글자)입니다.", [
+            lines = uk.file_header("게임 안 편집 화면이 저장한 UI 글(확인 창, 버튼 글자)입니다.", [
                 "여기 적힌 값은 ui_text_config.rpy의 같은 이름보다 우선합니다.",
                 "이 파일을 지우면 설정 파일 값으로 돌아갑니다.",
                 ])
