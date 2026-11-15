@@ -4,7 +4,7 @@ import { useStore } from './store';
 import * as ops from './ops';
 import type { ImageKind, Line, LineFx, SayStyle } from './types';
 import { shaderEffect } from './fx/textShaders';
-import { BOXES, EFFECTS, effectKnobs, formatEffect, formatImageFx, parseEffect, parseImageFx, type EffectKnob, type EffectPart, FX_BASE, TAILS, FX_CURSOR, FX_OVERLAY, FX_TRANS, FX_WARP, POSITIONS, STAGE_LABEL, STAGE_TYPES, fxArgs, stageCode } from './stage';
+import { BOXES, EFFECTS, effectKnobs, formatEffect, formatImageFx, parseEffect, parseImageFx, type EffectKnob, type EffectPart, FX_BASE, TAILS, FX_CURSOR, FX_OVERLAY, FX_TRANS, FX_WARP, POSITIONS, SHAKES, STAGE_LABEL, STAGE_TYPES, DEFAULT_FADEOUT, fxArgs, imageName, stageCode } from './stage';
 import { useGameFolder } from './gameFolder';
 import { LinePreview } from './SayPreview';
 import { TransPicker } from './TransPicker';
@@ -353,6 +353,27 @@ export function StageFields({ l, set, firstId, nd = '' }: { l: Line; set: SetLin
       {v && !items.some(([k]) => k === v) && <option value={v}>{v}</option>}
     </select>
   );
+  // 초·숫자 칸: 비우면 값을 지운다 (처음 값으로)
+  const numIn = (k: 'fadein' | 'fadeout' | 'secs' | 'zorder', placeholder: string, title: string, o: { min?: number; max?: number; step?: number } = {}) => (
+    <input
+      type="number"
+      className={nd + ' sf-num sf-sec'}
+      min={o.min ?? 0}
+      max={o.max ?? 60}
+      step={o.step ?? 0.1}
+      title={title}
+      placeholder={placeholder}
+      value={l[k] ?? ''}
+      onChange={(e) =>
+        set((x) => {
+          const t = e.target.value.trim();
+          const n = Number(t);
+          if (t === '' || !Number.isFinite(n)) delete x[k];
+          else x[k] = Math.max(o.min ?? 0, Math.min(o.max ?? 60, k === 'zorder' ? Math.round(n) : Math.round(n * 100) / 100));
+        }, k + l.id)
+      }
+    />
+  );
   const kindSel = pick([['char', '캐릭터'], ['bg', '배경'], ['etc', '기타']], kind, (x, v) => void (x.kind = v as ImageKind), '이미지 종류');
   const charSel = (
     <select id={firstId} className={nd + (l.who ? '' : ' invalid')} value={l.who ?? ''} onChange={(e) => set((x) => void (x.who = e.target.value || undefined))}>
@@ -425,6 +446,7 @@ export function StageFields({ l, set, firstId, nd = '' }: { l: Line; set: SetLin
         {/* showpy 연결을 켜면 위치는 렌파이 편집기에서만 정한다. 예전에 적은 값만 지울 수 있게 보여 준다 */}
         {(!linked || l.at) && pick(POSITIONS, l.at, (x, v) => void (x.at = v || undefined), '위치')}
         {trans}
+        <LayerPick l={l} set={set} nd={nd} numIn={numIn} />
       </>
     );
   else if (l.type === 'hide')
@@ -439,11 +461,30 @@ export function StageFields({ l, set, firstId, nd = '' }: { l: Line; set: SetLin
   else if (l.type === 'music')
     body = (
       <>
-        {pick([['', '틀기'], ['stop', '멈추기']], l.stop ? 'stop' : '', (x, v) => void (v ? (x.stop = true) : delete x.stop), '틀기/멈추기')}
+        {pick([['', '틀기'], ['queue', '이어 틀기'], ['stop', '멈추기']], l.stop ? 'stop' : l.queue ? 'queue' : '', (x, v) => {
+          if (v === 'stop') x.stop = true;
+          else delete x.stop;
+          if (v === 'queue') x.queue = true;
+          else delete x.queue;
+        }, '틀기: 지금 곡을 끊고 바로 / 이어 틀기: 지금 곡이 끝나면 (queue) / 멈추기')}
         {!l.stop && field('file', '파일 이름 (예: rain.ogg)', firstId, 'wide')}
+        {!l.stop && numIn('fadein', '페이드인 0초', '시작할 때 소리가 커지는 초. 비우면 바로 (0초)', { max: 30 })}
+        {!l.stop && pick([['', '반복 게임 기본'], ['loop', '반복 켬'], ['noloop', '반복 끔']], l.loop === true ? 'loop' : l.loop === false ? 'noloop' : '', (x, v) => void (v ? (x.loop = v === 'loop') : delete x.loop), '곡이 끝나면 다시 틀지. 게임 기본은 음악은 반복해요')}
+        {l.stop && numIn('fadeout', `페이드아웃 ${DEFAULT_FADEOUT}초`, `멈출 때 소리가 줄어드는 초. 비우면 ${DEFAULT_FADEOUT}초, 0이면 바로`, { max: 30 })}
       </>
     );
-  else body = field('file', '파일 이름 (예: door.ogg)', firstId, 'wide');
+  else if (l.type === 'sound')
+    body = (
+      <>
+        {pick([['', '틀기'], ['stop', '멈추기']], l.stop ? 'stop' : '', (x, v) => void (v ? (x.stop = true) : delete x.stop), '틀기/멈추기 (멈추기는 그 채널에서 나는 소리를 멈춰요)')}
+        {pick([['', '하나씩 (sound)'], ['audio', '겹쳐 나옴 (audio)']], l.channel, (x, v) => void (v ? (x.channel = 'audio') : delete x.channel), '하나씩: 새 효과음이 앞 효과음을 끊어요 / 겹쳐 나옴: 여러 소리가 같이 나요')}
+        {!l.stop && field('file', '파일 이름 (예: door.ogg)', firstId, 'wide')}
+        {l.stop && numIn('fadeout', `페이드아웃 ${DEFAULT_FADEOUT}초`, `멈출 때 소리가 줄어드는 초. 비우면 ${DEFAULT_FADEOUT}초, 0이면 바로`, { max: 30 })}
+      </>
+    );
+  else if (l.type === 'pause') body = <>{numIn('secs', '클릭할 때까지', '멈출 초. 비우면 플레이어가 클릭할 때까지 멈춰요', { max: 600 })}<span className="tip">초</span></>;
+  else if (l.type === 'shake') body = pick(SHAKES, l.shake ?? 'vpunch', (x, v) => void (v === 'vpunch' ? delete x.shake : (x.shake = v as Line['shake'])), '화면 흔들기');
+  else body = null;
 
   return (
     <div className="sf">
@@ -451,6 +492,52 @@ export function StageFields({ l, set, firstId, nd = '' }: { l: Line; set: SetLin
       {(l.type === 'scene' || l.type === 'show' || l.type === 'hide') && picPanel}
       <code className={'sf-code' + (code ? '' : ' todo')} title="내보낼 렌파이 명령">{code ?? problem}</code>
     </div>
+  );
+}
+
+// 보이기 줄의 앞뒤: 기본 / 맨 앞(zorder 숫자) / 이 그림 뒤에(behind 태그). 뒤에 둘 태그는 대본의 보이기 줄과 캐릭터에서 고른다
+function LayerPick({ l, set, nd, numIn }: { l: Line; set: SetLine; nd: string; numIn: (k: 'zorder', placeholder: string, title: string, o?: { min?: number; max?: number; step?: number }) => JSX.Element }) {
+  const tags = useStore((s) => {
+    const own = imageName(l).split(' ')[0];
+    const out = new Set<string>(s.project.characters.map((c) => c.id));
+    for (const n of s.project.nodes) for (const y of n.lines) if (y.type === 'show') out.add(imageName(y).split(' ')[0]);
+    out.delete(own);
+    out.delete('');
+    return [...out].sort().join(' ');
+  });
+  const mode = l.behind !== undefined ? 'behind' : l.zorder !== undefined ? 'zorder' : '';
+  const listId = `sug-behind-${l.id}`;
+  return (
+    <>
+      <select
+        className={nd}
+        title="앞뒤: 다른 그림과 겹칠 때 어느 쪽이 앞인지. 기본은 나중에 보인 그림이 앞"
+        value={mode}
+        onChange={(e) =>
+          set((x) => {
+            delete x.zorder;
+            delete x.behind;
+            if (e.target.value === 'zorder') x.zorder = 10;
+            if (e.target.value === 'behind') x.behind = tags.split(' ')[0] ?? '';
+          })
+        }
+      >
+        <option value="">앞뒤 기본</option>
+        <option value="zorder">맨 앞 (숫자)</option>
+        <option value="behind">이 그림 뒤에</option>
+      </select>
+      {mode === 'zorder' && numIn('zorder', '10', '숫자가 클수록 앞이에요 (기본 그림은 0)', { min: -100, max: 100, step: 1 })}
+      {mode === 'behind' && (
+        <>
+          <input className={nd + ' sf-in short'} list={listId} placeholder="태그 (예: mina)" value={l.behind ?? ''} onChange={(e) => set((x) => void (x.behind = e.target.value.trim()), 'behind' + l.id)} />
+          <datalist id={listId}>
+            {tags.split(' ').filter(Boolean).map((t) => (
+              <option key={t} value={t} />
+            ))}
+          </datalist>
+        </>
+      )}
+    </>
   );
 }
 

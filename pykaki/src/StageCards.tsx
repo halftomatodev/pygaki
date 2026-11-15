@@ -101,8 +101,9 @@ function lineText(l: Line) {
   if (l.type === 'scene') return '배경 ' + (l.image || '(검은 화면)');
   if (l.type === 'show') return '보이기 ' + (l.kind === 'char' || !l.kind ? [l.who, l.attr].filter(Boolean).join(' ') : l.image ?? '');
   if (l.type === 'hide') return '숨기기 ' + (l.kind === 'bg' ? '배경' : l.kind === 'etc' ? l.image ?? '' : l.who ?? '');
-  if (l.type === 'music') return l.stop ? '음악 멈추기' : '음악 ' + (l.file ?? '');
-  return '효과음 ' + (l.file ?? '');
+  if (l.type === 'music') return l.stop ? '음악 멈추기' : (l.queue ? '음악 이어 틀기 ' : '음악 ') + (l.file ?? '');
+  if (l.type === 'sound') return l.stop ? '효과음 멈추기' : '효과음 ' + (l.file ?? '');
+  return l.type;
 }
 
 const words = (n: string) => n.split(' ');
@@ -201,7 +202,7 @@ function SoundPicker({ add }: { add: (l: Omit<Line, 'id' | 'text'>) => void }) {
       ) : (
         <p className="tip">{useGameFolder.getState().name ? 'audio 폴더에 소리 파일이 없어요.' : '프로젝트 연결 안 됨'}</p>
       )}
-      <TextAdd placeholder="파일 이름 (예: door.ogg)" onAdd={put} extra={music ? <button onClick={() => add({ type: 'music', stop: true })}>음악 멈추기</button> : undefined} />
+      <TextAdd placeholder="파일 이름 (예: door.ogg)" onAdd={put} extra={<button onClick={() => add(music ? { type: 'music', stop: true } : { type: 'sound', stop: true })}>{music ? '음악 멈추기' : '효과음 멈추기'}</button>} />
     </>
   );
 }

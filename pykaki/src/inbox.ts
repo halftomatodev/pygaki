@@ -1,6 +1,7 @@
 // showpy가 남긴 그림/영상/소리 줄을 대본에 받아 적는다. 문서: 저장소 맨 위 docs/LINK.md
 // .rpy를 되읽지 않는다. showpy_inbox.json에 적힌 줄만 받는다. 대사 글자와 선택지는 받지 않고, 대사는 위치만 받는다.
 import type { BoxNode, Line, LineFx, Project, SayStyle } from './types';
+import { DEFAULT_FADEOUT, FLASH_CODE } from './stage';
 
 const POS_KEYS = ['x', 'y', 'name_x', 'name_y'] as const;
 
@@ -36,9 +37,51 @@ export function codeToLine(code: string, id: string, p: Project): Line {
   const command: Line = { id, type: 'command', text: raw };
   const isChar = (w: string) => p.characters.some((c) => c.id === w);
 
-  let m = /^play\s+(music|sound)\s+"([^"]+)"$/.exec(raw);
-  if (m) return { id, type: m[1] as 'music' | 'sound', text: '', file: m[2].replace(/^audio\//, '') };
-  if (/^stop\s+music\b/.test(raw)) return { id, type: 'music', text: '', stop: true };
+  const num = (v: string) => (/^\d+(\.\d+)?$/.test(v) ? Number(v) : NaN);
+  // 소리 (FEATURE 15): play/queue music "파일" [fadein 초] [loop|noloop], play sound|audio "파일", stop 채널 [fadeout 초]
+  let m = /^(play|queue)\s+(music|sound|audio)\s+"([^"]+)"((?:\s+\S+)*)\s*$/.exec(raw);
+  if (m) {
+    const [, verb, ch, file] = m;
+    const opts = m[4].trim().split(/\s+/).filter(Boolean);
+    const l: Line = { id, type: ch === 'music' ? 'music' : 'sound', text: '', file: file.replace(/^audio\//, '') };
+    if (ch === 'audio') l.channel = 'audio';
+    if (verb === 'queue') {
+      if (ch !== 'music') return command;
+      l.queue = true;
+    }
+    for (let i = 0; i < opts.length; i++) {
+      const o = opts[i];
+      if (ch === 'music' && o === 'fadein' && num(opts[i + 1] ?? '') >= 0) l.fadein = num(opts[++i]);
+      else if (ch === 'music' && (o === 'loop' || o === 'noloop') && l.loop === undefined) l.loop = o === 'loop';
+      else return command;
+    }
+    if (!l.fadein) delete l.fadein;
+    return l;
+  }
+  m = /^stop\s+(music|sound|audio)(?:\s+fadeout\s+(\S+))?\s*$/.exec(raw);
+  if (m) {
+    const l: Line = { id, type: m[1] === 'music' ? 'music' : 'sound', text: '', stop: true };
+    if (m[1] === 'audio') l.channel = 'audio';
+    const f = m[2] === undefined ? 0 : num(m[2]);
+    if (Number.isNaN(f)) return command;
+    if (f !== DEFAULT_FADEOUT) l.fadeout = f;
+    return l;
+  }
+  // 멈춤, 흔들기 (FEATURE 15)
+  m = /^pause(?:\s+(\S+))?\s*$/.exec(raw);
+  if (m) {
+    if (m[1] === undefined) return { id, type: 'pause', text: '' };
+    const n = num(m[1]);
+    return Number.isNaN(n) || n <= 0 ? command : { id, type: 'pause', text: '', secs: n };
+  }
+  m = /^with\s+(.+)$/.exec(raw);
+  if (m) {
+    const w = m[1].trim();
+    if (w === 'vpunch') return { id, type: 'shake', text: '' };
+    if (w === 'hpunch') return { id, type: 'shake', text: '', shake: 'hpunch' };
+    if (w.replace(/\s+/g, '') === FLASH_CODE.replace(/\s+/g, '')) return { id, type: 'shake', text: '', shake: 'flash' };
+    return command;
+  }
 
   m = /^(scene|show|hide)(?:\s+(.*))?$/.exec(raw);
   if (!m) return command;
@@ -49,6 +92,21 @@ export function codeToLine(code: string, id: string, p: Project): Line {
   if (w) {
     trans = w[1].trim();
     rest = rest.slice(0, w.index).trim();
+  }
+  // 보이기의 앞뒤 (FEATURE 15): zorder 숫자, behind 태그 하나. at보다 먼저 떼어 낸다 (at은 줄 끝까지 읽음)
+  let zorder: number | undefined;
+  let behind: string | undefined;
+  if (type === 'show') {
+    const z = /\s+zorder\s+(-?\d+)(?=\s|$)/.exec(rest);
+    if (z) {
+      zorder = Number(z[1]);
+      rest = (rest.slice(0, z.index) + rest.slice(z.index + z[0].length)).trim();
+    }
+    const bh = /\s+behind\s+([A-Za-z_]\w*)(?=\s|$)/.exec(rest);
+    if (bh) {
+      behind = bh[1];
+      rest = (rest.slice(0, bh.index) + rest.slice(bh.index + bh[0].length)).trim();
+    }
   }
   let at: string | undefined;
   const a = /\s+at\s+(.+)$/.exec(rest);
@@ -70,6 +128,8 @@ export function codeToLine(code: string, id: string, p: Project): Line {
   }
   if (!words.length) return command;
   if (at) base.at = at;
+  if (zorder !== undefined) base.zorder = zorder;
+  if (behind) base.behind = behind;
   if (words[0] === 'bg') return type === 'hide' ? { ...base, kind: 'bg' } : { ...base, kind: 'bg', image: words.slice(1).join(' ') };
   if (isChar(words[0])) {
     const r: Line = { ...base, kind: 'char', who: words[0] };

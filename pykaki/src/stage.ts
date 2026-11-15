@@ -1,9 +1,9 @@
 // 연출 줄(scene/show/hide/music/sound): 칸에 적은 값 → 렌파이 명령 한 줄
-import type { Line, LineFx, LineType, SayStyle } from './types';
+import type { Line, LineFx, LineType, SayStyle, ShakeKind } from './types';
 import { IMAGE_FX, RENPY_SHADERS, SHOWPY_SHADERS, shaderEffect } from './fx/textShaders';
 import { shaderTags } from './tagEdit';
 
-export const STAGE_TYPES: LineType[] = ['scene', 'show', 'hide', 'music', 'sound', 'fx'];
+export const STAGE_TYPES: LineType[] = ['scene', 'show', 'hide', 'music', 'sound', 'pause', 'shake', 'fx'];
 export const isStage = (t: LineType) => STAGE_TYPES.includes(t);
 
 // 줄 종류 칸이 좁아서 짧게. 실제 명령은 칸 아래에 따로 보여 준다
@@ -13,8 +13,20 @@ export const STAGE_LABEL: Record<string, string> = {
   hide: '🙈 숨기기',
   music: '🎵 음악',
   sound: '🔊 효과음',
+  pause: '⏸ 멈춤',
+  shake: '💥 흔들기',
   fx: '✨ 화면 효과',
 };
+export const STAGE_ICON: Record<string, string> = { scene: '🖼', show: '🧍', hide: '🙈', music: '🎵', sound: '🔊', pause: '⏸', shake: '💥', fx: '✨' };
+
+// 흔들기 줄 (FEATURE 15). 렌파이에 번쩍(flash) 전환은 없어서 흰색 Fade로 쓴다
+export const SHAKES: [ShakeKind, string][] = [['vpunch', '세로로 흔들기'], ['hpunch', '가로로 흔들기'], ['flash', '흰색 번쩍']];
+export const FLASH_CODE = 'Fade(0.1, 0.0, 0.5, color="#fff")';
+const shakeCode = (k?: ShakeKind) => (k === 'flash' ? FLASH_CODE : k ?? 'vpunch');
+// 초: 1 → "1.0", 0.5 → "0.5" (렌파이 원고에서 초인 것이 보이게)
+export const secs = (n: number) => (Number.isInteger(n) ? n.toFixed(1) : String(n));
+// 멈출 때 페이드아웃 초 (없으면 1초, 예전 판과 같게)
+export const DEFAULT_FADEOUT = 1;
 
 // 뒤쪽은 효과 폴더의 그림 전환 (showpy img_fx.use). refreshEffects가 채운다
 const BASE_TRANSITIONS: [string, string][] = [['', '바로'], ['dissolve', '서서히'], ['fade', '검게 페이드']];
@@ -241,6 +253,12 @@ const pyStr = (s: string) => '"' + s.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
 // 파일 이름만 적으면 game/audio 폴더에서 찾는다
 const audioPath = (f: string) => (f.includes('/') ? f : 'audio/' + f);
 
+// 멈추기: 페이드아웃이 0이면 바로
+const stopCode = (ch: string, fo?: number) => {
+  const f = fo ?? DEFAULT_FADEOUT;
+  return f > 0 ? `stop ${ch} fadeout ${secs(f)}` : `stop ${ch}`;
+};
+
 export function imageName(l: Line) {
   const k = l.kind ?? 'char';
   if (k === 'bg') return words(l.image) ? 'bg ' + words(l.image) : '';
@@ -260,7 +278,9 @@ export function stageCode(l: Line): { code: string | null; problem: string | nul
     case 'show': {
       const n = imageName(l);
       if (!n) return need(l.kind === 'char' || !l.kind ? '보일 캐릭터를 골라 주세요' : '보일 이미지 이름을 적어 주세요');
-      return { code: `show ${n}${l.at ? ' at ' + l.at : ''}${w}`, problem: null };
+      const z = l.zorder !== undefined ? ` zorder ${l.zorder}` : '';
+      const bh = l.behind?.trim() ? ` behind ${l.behind.trim()}` : '';
+      return { code: `show ${n}${l.at ? ' at ' + l.at : ''}${z}${bh}${w}`, problem: null };
     }
     case 'hide': {
       const k = l.kind ?? 'char';
@@ -268,13 +288,23 @@ export function stageCode(l: Line): { code: string | null; problem: string | nul
       if (!tag) return need(k === 'char' ? '숨길 캐릭터를 골라 주세요' : '숨길 이미지 이름을 적어 주세요');
       return { code: `hide ${tag}${w}`, problem: null };
     }
-    case 'music':
-      if (l.stop) return { code: 'stop music fadeout 1.0', problem: null };
+    case 'music': {
+      if (l.stop) return { code: stopCode('music', l.fadeout), problem: null };
       if (!l.file?.trim()) return need('음악 파일 이름을 적어 주세요');
-      return { code: `play music ${pyStr(audioPath(l.file.trim()))}`, problem: null };
-    case 'sound':
+      const fi = l.fadein ? ` fadein ${secs(l.fadein)}` : '';
+      const lp = l.loop === true ? ' loop' : l.loop === false ? ' noloop' : '';
+      return { code: `${l.queue ? 'queue' : 'play'} music ${pyStr(audioPath(l.file.trim()))}${fi}${lp}`, problem: null };
+    }
+    case 'sound': {
+      const ch = l.channel ?? 'sound';
+      if (l.stop) return { code: stopCode(ch, l.fadeout), problem: null };
       if (!l.file?.trim()) return need('효과음 파일 이름을 적어 주세요');
-      return { code: `play sound ${pyStr(audioPath(l.file.trim()))}`, problem: null };
+      return { code: `play ${ch} ${pyStr(audioPath(l.file.trim()))}`, problem: null };
+    }
+    case 'pause':
+      return { code: l.secs ? `pause ${secs(l.secs)}` : 'pause', problem: null };
+    case 'shake':
+      return { code: `with ${shakeCode(l.shake)}`, problem: null };
     case 'fx': {
       const c = fxCode(l.fx);
       return c ? { code: c, problem: null } : need('바꿀 값을 골라 주세요');

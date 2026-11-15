@@ -2,7 +2,9 @@
 
 // scene/show/hide/music/sound는 렌파이 명령을 몰라도 칸만 채우면 되는 연출 줄
 // flag: 플래그 바꾸기 줄 (FEATURE 14). text에 바꾸는 식 (예: love += 1, met_alice = True)을 두고 $ 줄로 내보낸다
-export type LineType = 'narration' | 'say' | 'scene' | 'show' | 'hide' | 'music' | 'sound' | 'fx' | 'command' | 'note' | 'flag';
+// pause: 멈춤 줄, shake: 흔들기 줄 (FEATURE 15)
+export type LineType = 'narration' | 'say' | 'scene' | 'show' | 'hide' | 'music' | 'sound' | 'fx' | 'command' | 'note' | 'flag' | 'pause' | 'shake';
+export type ShakeKind = 'vpunch' | 'hpunch' | 'flash';
 
 // showpy 화면 효과 값. 대사 줄은 괄호로, 연출 줄(fx)은 명령으로 내보낸다. 빈 칸은 안 내보낸다
 export interface LineFx {
@@ -48,7 +50,17 @@ export interface Line {
   at?: string; // show: left | right (비우면 가운데)
   trans?: string; // scene/show/hide: dissolve | fade (비우면 바로)
   file?: string; // music/sound: 파일 이름
-  stop?: boolean; // music: 멈추기
+  stop?: boolean; // music, sound: 멈추기
+  // 음악·효과음 세부 (FEATURE 15). 없으면 예전처럼 (시작은 바로, 멈출 때 1초 페이드아웃, 반복은 게임 기본)
+  fadein?: number; // music: 시작할 때 페이드인 초
+  fadeout?: number; // music, sound 멈추기: 페이드아웃 초 (없으면 1초)
+  queue?: boolean; // music: 지금 곡이 끝나면 이어 틀기 (queue music)
+  loop?: boolean; // music: true면 loop, false면 noloop, 없으면 게임 기본
+  channel?: 'audio'; // sound: audio 채널 (여러 소리가 겹쳐 나옴). 없으면 sound 채널
+  secs?: number; // pause: 멈출 초. 없으면 클릭할 때까지
+  shake?: ShakeKind; // shake: 세로 vpunch | 가로 hpunch | 번쩍 flash (없으면 vpunch)
+  zorder?: number; // show: 앞뒤 (숫자가 클수록 앞)
+  behind?: string; // show: 이 태그의 그림 뒤에
   fx?: LineFx; // say, narration, fx 줄 (showpy 연결을 켰을 때만 내보낸다)
   say?: SayStyle; // say, narration 줄 (showpy 연결을 켰을 때만 내보낸다)
 }
@@ -69,10 +81,16 @@ export interface Branch {
   target: string | null;
 }
 
+// 선택지 위에 보이는 질문 대사 (FEATURE 15). who가 null이면 내레이션. 글이 비면 내보내지 않는다
+export interface MenuAsk {
+  who: string | null;
+  text: string;
+}
+
 export type Exit =
   | { type: 'next'; target: string | null }
   | { type: 'if'; branches: Branch[]; else: string | null }
-  | { type: 'menu'; choices: Choice[] }
+  | { type: 'menu'; choices: Choice[]; ask?: MenuAsk }
   | { type: 'call'; target: string | null; then: string | null }
   | { type: 'return' };
 

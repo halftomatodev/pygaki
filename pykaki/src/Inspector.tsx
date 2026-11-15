@@ -98,6 +98,14 @@ function BoxInspector({ b }: { b: BoxNode }) {
     const nl: Line = { id: uid('l'), type: 'flag', text: firstAction(project.variables) };
     upd((x) => void x.lines.push(nl));
   };
+  // 멈춤·흔들기 줄: 지금 쓰는 줄 바로 뒤에 (없으면 상자 끝)
+  const addStageLine = (type: 'pause' | 'shake') => {
+    const nl: Line = { id: uid('l'), type, text: '' };
+    upd((x) => {
+      const i = x.lines.findIndex((y) => y.id === activeLine);
+      x.lines.splice(i >= 0 ? i + 1 : x.lines.length, 0, nl);
+    });
+  };
 
   return (
     <div className="insp">
@@ -145,6 +153,8 @@ function BoxInspector({ b }: { b: BoxNode }) {
       <div className="row">
         <button onClick={addLine}>+ 줄 추가</button>
         <button onClick={addFlagLine} title="이 자리에서 플래그를 바꿔요 (예: met_alice 켜기, love +1)">+ 플래그 바꾸기</button>
+        <button onClick={() => addStageLine('pause')} title="지금 쓰는 줄 뒤에서 잠깐 멈춰요 (초, 또는 클릭할 때까지)">+ 멈춤</button>
+        <button onClick={() => addStageLine('shake')} title="지금 쓰는 줄 뒤에서 화면을 흔들거나 번쩍여요">+ 흔들기</button>
         <span className="tip">Ctrl+Enter: 같은 화자로 아래에 새 줄</span>
       </div>
       <GameOffTip what="대사" />
@@ -276,6 +286,33 @@ function ChoiceRow({ b, c, i, upd }: { b: BoxNode; c: Choice; i: number; upd: Up
   );
 }
 
+// 선택지 위 질문 대사 (FEATURE 15): 화자와 글. 글을 비우면 질문 없이 선택지만 나와요
+function MenuAskRow({ b, upd }: { b: BoxNode; upd: Upd }) {
+  const chars = useStore((s) => s.project.characters);
+  const ask = b.exit.type === 'menu' ? b.exit.ask : undefined;
+  const put = (fn: (a: { who: string | null; text: string }) => void, key?: string) =>
+    upd((x) => {
+      if (x.exit.type !== 'menu') return;
+      const a = { who: x.exit.ask?.who ?? null, text: x.exit.ask?.text ?? '' };
+      fn(a);
+      if (a.text || a.who) x.exit.ask = a;
+      else delete x.exit.ask;
+    }, key);
+  return (
+    <div className="choice-ed menu-ask">
+      <select title="질문하는 사람" value={ask?.who ?? ''} onChange={(ev) => put((a) => void (a.who = ev.target.value || null))}>
+        <option value="">내레이션</option>
+        {chars.map((c) => (
+          <option key={c.id} value={c.id}>{c.name}</option>
+        ))}
+        {ask?.who && !chars.some((c) => c.id === ask.who) && <option value={ask.who}>? {ask.who}</option>}
+      </select>
+      <input id={'ed-ask-' + b.id} className="grow" value={ask?.text ?? ''} placeholder="질문 대사 (비우면 없음, 선택지와 같이 보여요)" onChange={(ev) => put((a) => void (a.text = ev.target.value), 'ask' + b.id)} />
+      <Hint text="선택지가 나오는 동안 대사창에 남는 질문이에요 (예: 우산을 빌려줄까?). 렌파이 menu: 바로 아래 대사 줄로 내보내요" topic="흐름 잇기" />
+    </div>
+  );
+}
+
 export function ExitEditor({ b, upd }: { b: BoxNode; upd: Upd }) {
   const e = b.exit;
   const linkedOn = useStore((s) => !!s.project.settings.renpyLink);
@@ -311,6 +348,7 @@ export function ExitEditor({ b, upd }: { b: BoxNode; upd: Upd }) {
       )}
       {e.type === 'menu' && (
         <>
+          <MenuAskRow b={b} upd={upd} />
           {e.choices.map((c, i) => (
             <ChoiceRow key={c.id} b={b} c={c} i={i} upd={upd} />
           ))}

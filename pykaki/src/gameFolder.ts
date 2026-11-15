@@ -8,6 +8,7 @@ import { gameDir, isDesktop, projectDir, projectInfo } from './desktop';
 import { setFolderEffects, type EffectPack } from './fx/textShaders';
 import { parseEffectsOff, refreshEffects, setEffectsOff } from './stage';
 import { setShaderList, setShadersOff } from './shader';
+import { codeImages, type ImageBook } from './imageCheck';
 
 export const hasDirPicker = isDesktop; // 폴더는 앱에서만 연다 (웹 버전은 2026-11-12에 없앰)
 export const INBOX_FILE = 'showpy_inbox.json';
@@ -63,6 +64,7 @@ interface F {
   endMarks: boolean; // 이 게임의 플러그인이 줄 끝 표시를 읽는지 (ui_kit 4.5, script_edit.rpy의 PK_END_MARKS)
   newMark: boolean; // 이 게임의 플러그인이 새 머리말 문구(pygaki가 만든 파일)를 알아보는지 (ui_kit 4.10, PK_NEW_MARK)
   sceneUi: boolean | null; // custom_ui.scene이 있는지 (ui_kit 4.7). 플러그인이 없거나 폴더를 안 열었으면 null
+  imageBook: ImageBook | null; // 그림 이름 검사에 쓰는 그림 목록 (FEATURE 15). 폴더를 안 열었으면 null
   fxSeq: number; // 효과 목록이 바뀔 때마다 오른다 (목록을 쓰는 화면이 다시 그리게)
   fxFiles: string[]; // 효과 폴더에 있는 효과 파일 이름
   fxOff: string[]; // 끈 효과 이름 (effects_off.txt)
@@ -82,6 +84,7 @@ export const useGameFolder = create<F>((set) => ({
   endMarks: false,
   newMark: false,
   sceneUi: null,
+  imageBook: null,
   fxSeq: 0,
   fxFiles: [],
   fxOff: [],
@@ -109,6 +112,18 @@ async function walk(d: any, prefix = ''): Promise<string[]> {
   for await (const [name, h] of d.entries()) {
     if (h.kind === 'directory') out.push(...(await walk(h, prefix + name + '/')));
     else out.push(prefix + name);
+  }
+  return out;
+}
+
+// game 폴더의 .rpy 파일 (pygaki가 쓰는 원고와 그림·소리·저장 폴더는 뺌)
+const SKIP_DIRS = new Set(['images', 'movies', 'audio', 'cache', 'saves', 'gui', 'fonts', 'tl', 'ui_kit_backup']);
+async function walkRpy(d: any, top = true): Promise<any[]> {
+  const out: any[] = [];
+  for await (const [name, h] of d.entries()) {
+    if (h.kind === 'directory') {
+      if (!(top && SKIP_DIRS.has(name.toLowerCase()))) out.push(...(await walkRpy(h, false)));
+    } else if (/\.rpy$/i.test(name) && !(top && name === RPY_FILE)) out.push(h);
   }
   return out;
 }
@@ -265,6 +280,14 @@ export async function scanFolder() {
   media.frames = { ctc: await sets('ctc'), cursor: await sets('cursor') };
   const look = await readLook();
 
+  // 그림 이름 검사: images·movies 폴더 이름 + 게임 코드의 image 정의 (그림·소리·저장 폴더와 대본 원고는 안 읽음)
+  const imageBook: ImageBook = { names: [...media.images], anyTags: [] };
+  for (const f of await walkRpy(dir)) {
+    const c = codeImages(await (await f.getFile()).text());
+    imageBook.names.push(...c.names);
+    imageBook.anyTags.push(...c.anyTags);
+  }
+
   // 대본에 이름이 start인 label을 만들면 script.rpy의 label start와 겹친다
   let startClash: string | null = null;
   for await (const [name, h] of dir.entries()) {
@@ -301,7 +324,7 @@ export async function scanFolder() {
   const g = useGameFolder.getState();
   if (fxErrors.length && JSON.stringify(fxErrors) !== JSON.stringify(g.fxErrors))
     useStore.getState().say('효과 폴더에서 못 읽은 파일: ' + fxErrors.map(([f, why]) => `${f} (${why})`).join(' / '));
-  g.set({ name: g.name ?? dir.name, media, look, startClash, hasShowpy, endMarks, newMark, sceneUi, fxErrors, fxSeq: g.fxSeq + 1, fxFiles: packs.map((f) => f.name).sort(), fxOff, shOff });
+  g.set({ name: g.name ?? dir.name, media, look, startClash, hasShowpy, endMarks, newMark, sceneUi, imageBook, fxErrors, fxSeq: g.fxSeq + 1, fxFiles: packs.map((f) => f.name).sort(), fxOff, shOff });
   setTimeout(() => oldUrls.forEach((u) => URL.revokeObjectURL(u)), 5000);
 }
 

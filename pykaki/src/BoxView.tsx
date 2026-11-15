@@ -2,13 +2,13 @@ import { memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { useStore } from './store';
 import * as ops from './ops';
-import type { BoxNode, BoxShader, Line } from './types';
+import type { BoxNode, BoxShader, Line, MenuAsk } from './types';
 import { shaderLabel } from './shader';
 import { isLight, uid } from './util';
 import { changeThenFocus } from './actions';
 import { FlowMenu } from './FlowMenu';
 import { OldAttr, SpeakerSelect, StageFields } from './LineFields';
-import { isStage, stageCode } from './stage';
+import { isStage, STAGE_ICON, stageCode } from './stage';
 import { actionWords, condWords } from './flags';
 import { ActionInput, CondInput } from './FlagFields';
 import { hit, keyOf } from './prefs';
@@ -135,6 +135,7 @@ function Exits({ b, editing, tb, active, setActive }: { b: BoxNode; editing: boo
             <Handle type="source" id="next" position={tb ? Position.Bottom : Position.Right} />
           </>
         )}
+        {ex.type === 'menu' && ex.ask?.text.trim() && <MenuAskView ask={ex.ask} />}
         {ex.type === 'menu' &&
           ex.choices.map((c, i) => (
             <div key={c.id} {...rowProps(c.id, i, 'choice')}>
@@ -256,7 +257,6 @@ function ShaderButton({ kind, id, own, inherited }: { kind: 'box' | 'label'; id:
   );
 }
 
-const STAGE_ICON: Record<string, string> = { scene: '🖼', show: '🧍', hide: '🙈', music: '🎵', sound: '🔊', fx: '✨' };
 
 interface ActiveProps {
   active: string | null;
@@ -468,6 +468,17 @@ function LineRow({ l, editing, active, cls, grip, onFocus, onKey, onText }: RowP
       {l.type === 'say' && l.attr && <span className="attr">({l.attr})</span>}
       {l.type === 'note' && <span className="mark">#</span>}
       {body}
+    </div>
+  );
+}
+
+// 상자 안 선택지 위 질문 대사 (오른쪽 다음 흐름 카드에서 고침)
+function MenuAskView({ ask }: { ask: MenuAsk }) {
+  const ch = useStore((s) => s.project.characters.find((c) => c.id === ask.who));
+  return (
+    <div className="menu-ask-view" title="선택지 질문 대사 (오른쪽 [다음 흐름]에서 고쳐요)">
+      {ask.who && <span className={'who' + (ch ? '' : ' unknown')} style={{ '--c': ch?.color ?? '#ef4444' } as React.CSSProperties}>{ch?.name ?? ask.who}</span>}
+      <span className="pl-text">{ask.text}</span>
     </div>
   );
 }

@@ -215,7 +215,7 @@ input[type='color']::-webkit-color-swatch { border: none; border-radius: 50%; }
 /* 줄: 볼 때와 고칠 때 같은 자리, 같은 크기 */
 .pl { display: flex; align-items: flex-start; gap: 4px; line-height: 1.45; margin: 2px 0; border-radius: 4px; transition: opacity 0.25s; }
 .pl-text { flex: 1; min-width: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
-.pl .who { flex: none; border-radius: 4px; padding: 0 4px; font-weight: 700; color: var(--text); background: color-mix(in srgb, var(--c) calc(18% + var(--box-strength) * 42%), transparent); }
+.pl .who, .menu-ask-view .who { flex: none; border-radius: 4px; padding: 0 4px; font-weight: 700; color: var(--text); background: color-mix(in srgb, var(--c) calc(18% + var(--box-strength) * 42%), transparent); }
 .pl .attr, .pl .mark { flex: none; color: var(--muted); }
 .pl.narr { color: color-mix(in srgb, var(--text) 80%, var(--panel)); }
 .pl.cmd .pl-text { font-family: var(--mono); font-size: 11px; color: var(--muted); }
@@ -349,6 +349,11 @@ input.title { width: 100%; font-weight: 700; font-size: 15px; margin-bottom: 8px
 .choice-ed { display: flex; gap: 4px; margin-bottom: 5px; }
 .choice-ed input { flex: 1.2; }
 .choice-ed select { flex: 1; }
+.menu-ask select { flex: 0 0 auto; max-width: 34%; }
+.menu-ask input { flex: 2; }
+/* 상자 안 선택지 위 질문 대사 */
+.menu-ask-view { display: flex; gap: 6px; align-items: baseline; padding: 2px 0 4px; color: var(--text); font-style: italic; }
+.sf-num.sf-sec { width: 7.5em; }
 .warn-item { padding: 7px 9px; border-radius: 6px; margin-bottom: 4px; cursor: pointer; }
 .warn-item.error { background: color-mix(in srgb, var(--danger) 10%, var(--panel)); }
 .warn-item.warn { background: color-mix(in srgb, #eab308 10%, var(--panel)); }

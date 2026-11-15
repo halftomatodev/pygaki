@@ -175,7 +175,11 @@ pygaki 플러그인이 쓰고, 대본 편집기가 읽은 뒤 비웁니다. 대�
 | `show ghost with stage.move("inleft", 0.8)` | 보이기, 기타 `ghost`, 전환은 적힌 그대로 |
 | `hide ghost` | 숨기기, 기타 `ghost` |
 | `play music "audio/hum.wav"` | 음악, `hum.wav` |
-| `stop music fadeout 1.0` | 음악 멈추기 |
+| `play music "audio/hum.wav" fadein 2.0 noloop`, `queue music "audio/b.ogg" loop` | 음악, 페이드인 2초·반복 끔 / 이어 틀기·반복 켬 (대본 편집기 `FEATURE` 15) |
+| `stop music fadeout 1.0` | 음악 멈추기 (`stop music`은 페이드아웃 0초, 다른 초는 그 값) |
+| `play sound "audio/k.wav"`, `play audio "audio/k.wav"`, `stop sound fadeout 0.5` | 효과음 (audio는 겹쳐 나옴), 효과음 멈추기 (`FEATURE` 15) |
+| `show mina smile zorder 10`, `show ghost behind mina` | 보이기, 앞뒤 (`FEATURE` 15, behind는 태그 하나만) |
+| `pause`, `pause 1.5`, `with vpunch`, `with hpunch`, `with Fade(0.1, 0.0, 0.5, color="#fff")` | 멈춤, 흔들기 (`FEATURE` 15. 이 줄들은 pygaki 플러그인이 지금 보내지 않지만 대본 편집기는 칸으로 읽음) |
 | `show ghost at stage.pos(1, 2)`, `show a as b` | 직접 명령 |
 
 ## 4. `ui_kit/stage_layout.rpy`

@@ -4,6 +4,7 @@ import { exitLinks, fallTarget } from './ops';
 import { IDENT, PLUGIN_NAMES, RESERVED } from './util';
 import { badImageName, renpyOnlyEffect, fxArgs, isStage, sayArgs, stageCode, tagEffectNames, REMOVED_EFFECTS, RENPY_EFFECTS } from './stage';
 import { shaderEffect } from './fx/textShaders';
+import { imageProblem, type ImageBook } from './imageCheck';
 import { checkTags, shaderTags, splitClear } from './tagEdit';
 import { sceneCode, sceneSupported, uiOfBox, usesSceneUi } from './boxUi';
 import { exprNames, flagNameProblem, parseAction, pyValue } from './flags';
@@ -78,7 +79,8 @@ function tailSafe(row: string) {
 // endMarks: 줄 표시(# @l:, # @node:, # @end:)를 윗줄이 아니라 줄 끝에 붙인다 (docs/LINK.md 2장).
 // 연결한 게임의 pygaki 플러그인이 ui_kit 4.5 이상일 때만 켠다 (그 전 판은 윗줄 표시만 읽는다)
 // newMark: 머리말을 새 문구(pygaki)로. 게임의 플러그인이 새 문구를 알아볼 때만 (ui_kit 4.10, script_edit.rpy의 PK_NEW_MARK). 아니면 예전 문구
-export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: boolean } = {}): { code: string; warnings: Warn[] } {
+// images: 연결한 게임의 그림 목록. 있으면 배경·보이기 줄의 없는 그림을 경고한다 (내보내기는 막지 않음)
+export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: boolean; images?: ImageBook | null } = {}): { code: string; warnings: Warn[] } {
   const endMarks = !!opts.endMarks && p.settings.renpyLink;
   const W: Warn[] = [];
   const out: string[] = [];
@@ -269,6 +271,10 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
         if (isStage(l.type)) {
           const { code, problem } = stageCode(l);
           if (problem) W.push({ level: 'warn', msg: `${problem} (${b.title || b.id})`, nodeId: b.id });
+          const ip = imageProblem(l, opts.images ?? null);
+          if (ip) W.push({ level: 'warn', msg: `${ip} (${b.title || b.id})`, nodeId: b.id });
+          if (l.type === 'show' && l.behind?.trim() && !/^[A-Za-z_]\w*$/.test(l.behind.trim()))
+            W.push({ level: 'error', msg: `"뒤에" 칸에는 그림 태그 하나만 적어요 (예: mina) (${b.title || b.id})`, nodeId: b.id });
           if (badImageName(l)) W.push({ level: 'warn', msg: `이미지 이름은 영문·숫자·_·-로 쓰는 게 안전해요 (${b.title || b.id})`, nodeId: b.id });
           if (l.who && (l.kind ?? 'char') === 'char' && l.type !== 'scene' && !charById.has(l.who))
             W.push({ level: 'error', msg: `등록되지 않은 캐릭터 "${l.who}" (${b.title || b.id})`, nodeId: b.id });
@@ -338,6 +344,14 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
           body.push('return');
         } else {
           body.push('menu:');
+          // 질문 대사: menu: 바로 아래 say 줄. 선택지가 나오는 동안 대사창에 남는다
+          const ask = e.ask;
+          if (ask && ask.text.trim()) {
+            pct(ask.text, '선택지 질문');
+            const c = ask.who ? charById.get(ask.who) : undefined;
+            if (ask.who && !c) W.push({ level: 'error', msg: `선택지 질문의 화자 "${ask.who}"가 등록되지 않았어요 (${b.title || b.id})`, nodeId: b.id });
+            body.push(I + (c ? c.id + ' ' : '') + q(ask.text));
+          }
           for (const c of e.choices) {
             if (!c.text.trim()) W.push({ level: 'warn', msg: `선택지 문구가 비어 있어요 (${b.title || b.id})`, nodeId: b.id });
             pct(c.text, '선택지');

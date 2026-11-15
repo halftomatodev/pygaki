@@ -86,18 +86,21 @@
 
 - **상자(node)**: 대사 묶음 하나. 반드시 label 그룹 하나(`group`)에 속한다. `color`(선택)는 상자 색으로, 없으면 label 색을 따른다. `.rpy`에는 영향이 없다.
 - **label 그룹**: 렌파이 `label` 하나. 상자 여러 개를 묶는다. `entry`가 그 label의 첫 상자다.
-- **줄(line) 종류**: `narration`(내레이션), `say`(캐릭터 대사, `who`=캐릭터 id, `attr`=표정 등), 연출 줄 5가지, `command`(렌파이 명령 그대로), `note`(주석).
+- **줄(line) 종류**: `narration`(내레이션), `say`(캐릭터 대사, `who`=캐릭터 id, `attr`=표정 등), 연출 줄(`scene` `show` `hide` `music` `sound` `pause` `shake`, 예전 `fx`), `flag`(플래그 바꾸기), `command`(렌파이 명령 그대로), `note`(주석).
 - **연출 줄** (`src/stage.ts`): 명령을 직접 쓰지 않고 칸을 채운다. `text`는 쓰지 않는다.
   - `scene` `{ image, trans }`: 배경 이름(`bg` 뒤), 전환
-  - `show` `{ kind, who, attr, image, at, trans }`: `kind`는 `char`(who+attr) | `bg`(image) | `etc`(image), 위치 `left`/`right`(비우면 가운데)
+  - `show` `{ kind, who, attr, image, at, trans, zorder?, behind? }`: `kind`는 `char`(who+attr) | `bg`(image) | `etc`(image), 위치 `left`/`right`(비우면 가운데). 앞뒤(`FEATURE` 15): `zorder` 숫자 또는 `behind` 태그 하나(화면은 둘 중 하나만, `LayerPick`)
   - `hide` `{ kind, who, image, trans }`
-  - `music` `{ file, stop }`, `sound` `{ file }`
+  - `music` `{ file, stop, fadein?, fadeout?, queue?, loop? }`, `sound` `{ file, stop?, channel?, fadeout? }` (`FEATURE` 15: `fadein` 시작 초(없으면 바로), `fadeout` 멈출 때 초(없으면 1초, 0이면 바로), `queue` 이어 틀기, `loop` true/false(없으면 게임 기본, loop/noloop을 안 적음), `channel: 'audio'` 겹쳐 나옴(없으면 sound))
+  - `pause` `{ secs? }`: 멈춤(`FEATURE` 15). 없으면 클릭할 때까지
+  - `shake` `{ shake? }`: 흔들기(`FEATURE` 15). `vpunch`(없을 때) | `hpunch` | `flash`(렌파이에 없어서 `Fade(0.1, 0.0, 0.5, color="#fff")`, `stage.ts` `FLASH_CODE`)
   - `fx` `{ fx: { fx, transition, overlay, warp, cursor } }`: pygaki 플러그인 화면 효과 명령. 값은 `src/stage.ts`의 `FX_*`. 화면 효과는 렌파이 편집기에서 고치므로 줄 종류 목록에서 뺐고, 예전 파일의 이 줄만 그대로 보여 주고 내보낸다.
   - `trans`는 `dissolve` | `fade` | 비움, 또는 게임 안 편집 화면에서 받아 적은 식(`stage.move("inleft", 0.8)` 등). 모두 선택 칸이라 예전 파일은 그대로 열린다.
 - **대사 줄의 `fx`**: `say`, `narration` 줄도 같은 `fx` 값(`exclude` 포함)을 가질 수 있다. pygaki 플러그인 대사 탭에서 받아 적고, pygaki에서는 고치지 않는다. 연결을 켜면 대사 괄호로 내보낸다.
 - **대사 줄의 `say`** (`SayStyle`): `size` `font` `color` `cps` `effect` `box` `tail` `box_rotate` `name_size` `name_font` `name_color`는 pygaki에서 고친다. `effect`는 두 효과를 `|`로 겹칠 수 있다(`slidein|shake`). `box`는 글 상자(`bubble` 말풍선, `pill` 둥근 테두리, pygaki 플러그인 `ui_kit` 4.0)이고 연결을 켰을 때만 내보낸다. 미리보기는 CSS로 비슷하게 그린다(`.sbox`, 셰이더 효과일 때는 기울기를 안 보여 줌). `x` `y` `name_x` `name_y`는 showpy에서 받아 적은 값을 보여 주고 지우기만 한다. 연결을 켜면 짧은 이름으로(`sayArgs`), 끄면 플러그인 없이 동작하는 렌파이 원래 이름(`what_size`, `what_slow_cps`, `what_textshader` 등)으로 내보낸다. 모두 선택 칸이라 예전 파일은 그대로 열린다.
 - **나가는 방식(exit)**:
   - `next` `{ target }`: 다음 상자로
+  - `menu` `{ choices, ask? }`: `ask` `{ who, text }`는 선택지 질문 대사(`FEATURE` 15, `who` null이면 내레이션, 글이 비면 안 내보냄)
   - `menu` `{ choices: [{ id, text, target, mode:"jump", condition, actions }] }`: 선택지. condition은 보이는 조건(렌파이 조건식, 없으면 null), actions는 고르면 바꾸는 식 목록(`love += 1`, `met_alice = True`) (`FEATURE` 14)
   - `if` `{ branches: [{ id, cond, target }], else }`: 조건 분기(`FEATURE` 13). cond는 렌파이 조건식 그대로, 위에서부터 맞는 갈래로, 모두 아니면 else로
   - `call` `{ target, then }`: target을 call하고, 돌아오면 then으로. then이 없으면 return
@@ -141,12 +144,12 @@
    - 내레이션: `"텍스트"`
    - 대사: `id 속성 "텍스트"`
    - 명령: 여러 줄을 그대로 출력(끝 공백만 제거)
-   - 연출: `scene bg 이름 [with 전환]`(이름이 비면 `scene`), `show 이미지 [at 위치] [with 전환]`, `hide 태그 [with 전환]`, `play music "audio/파일"`, `stop music fadeout 1.0`, `play sound "audio/파일"`. 이미지는 배경 `bg 이름`, 캐릭터 `캐릭터id 표정`, 기타 이름 그대로. 파일 이름에 `/`가 있으면 앞에 `audio/`를 붙이지 않는다. 칸이 덜 채워지면 `# TODO: 이유`를 쓰고 경고한다.
+   - 연출: `scene bg 이름 [with 전환]`(이름이 비면 `scene`), `show 이미지 [at 위치] [with 전환]`, `hide 태그 [with 전환]`, `show 이미지 … [zorder 숫자] [behind 태그]`, `play|queue music "audio/파일" [fadein 초] [loop|noloop]`, `stop music|sound|audio [fadeout 초]`(기본 1.0, 0이면 fadeout 없음), `play sound|audio "audio/파일"`, `pause [초]`, `with vpunch|hpunch|Fade(…)`. 초는 정수면 `2.0`처럼. 이미지는 배경 `bg 이름`, 캐릭터 `캐릭터id 표정`, 기타 이름 그대로. 파일 이름에 `/`가 있으면 앞에 `audio/`를 붙이지 않는다. 칸이 덜 채워지면 `# TODO: 이유`를 쓰고 경고한다.
    - 메모: `# ...`
 7. 텍스트 이스케이프: `\`→`\\`, `"`→`\"`. 설정에 따라 `[`→`[[`, `{`→`{{`(텍스트 태그 끔), `%`→`%%`. 줄바꿈은 `\n`.
 8. 나가는 방식 출력:
    - `next`: 다음 상자가 바로 뒤에 놓였으면 생략, 아니면 `jump`. 연결이 없으면 `return  # TODO: 연결 안 됨`.
-   - `menu`: `menu:` 아래 항목마다 `jump`.
+   - `menu`: `menu:` 아래 질문 대사(`ask`의 글이 있으면 `화자 "글"` 또는 `"글"`), 항목마다 `jump`.
    - `call`: `call 대상` 다음 줄은 then을 next와 같은 규칙으로 처리하고, then이 없으면 `return`.
 9. 본문이 비면 `pass`를 넣는다. 각 상자 위에 `# @node:id 제목` 주석을 붙인다(나중에 역가져오기용).
 10. **검사(경고/오류)**:
@@ -155,6 +158,8 @@
     - 등록되지 않은 화자
     - 빈 대사나 빈 선택지
     - 덜 채운 연출 줄, 등록되지 않은 캐릭터, 영문이 아닌 이미지 이름
+    - 게임에 없는 그림(경고, `FEATURE` 15, `src/imageCheck.ts`): 렌파이 프로젝트를 연결했을 때만. `scanFolder`가 만든 `imageBook`(images·movies 파일 이름 + 게임 `.rpy`의 `image 이름 =|:`, `renpy.image("이름"`; `layeredimage` 태그는 속성 상관없음, 글자로 못 읽는 `renpy.image(변수`가 있으면 검사 끔)과 `scene`/`show` 줄의 "태그 속성"을 맞춘다. 그 태그의 그림이 없거나, 줄의 속성을 모두 가진 그림이 없으면 경고(속성 없이 태그만이면 태그만 있으면 됨). 렌파이 기본 그림 `black` `text` `vtext`는 통과. 검사 카드(`Sidebar.tsx` `useRpy`)만 넘기고 내보내기는 막지 않는다
+    - 보이기의 `behind`에 태그 하나가 아닌 글
     - 연결 안 된 선
     - 시작에서 도달할 수 없는 상자
     - call 대상에서 return에 도달하지 않음
@@ -309,7 +314,7 @@
 - **파일 이름**: 9-2대로.
 - **저장**: 바뀌고 0.7초 뒤 자동으로. [다른 이름]은 프로젝트 대본 파일을 바꾸지 않고 사본만 쓴다.
 - **밖에서 바뀜**: 이 창이 마지막으로 읽거나 쓴 글의 지문(`seen`)과 파일이 다르면 다른 곳이 고친 것. 이 창이 최근에 쓴 지문 20개와 쓰는 중에 읽은 것은 빼고 본다. 쓰기 전과, 창으로 돌아올 때, 앱은 파일 바뀜 알림 때 본다. 묻기: [확인] 파일을 다시 읽기(지금 대본은 백업), [취소] 지금 대본을 쓰고 덮어쓰기. 빈 파일, 읽을 수 없는 글(쓰는 중)은 다음에 다시 본다.
-- **쓴 판** (`app`): 파일에 쓸 때 `{ by: "pygaki 앱"(개발 서버는 "pygaki 웹"), build: "2026-11-05 dc3ac85", needs }`를 붙인다. `build`는 `vite.config.ts`가 빌드 날짜와 커밋으로 넣는다. `needs`는 `max(파일의 needs, FEATURE)`라서 내려가지 않는다. `FEATURE`(지금 5: 2 글자 효과 11개, 3 글 상자·효과 겹치기·새 화면 효과 이름, 4 효과 폴더, 5 상자와 label의 셰이더)는 예전 판이 모르는 줄 종류나 값을 대본에 더할 때만 올린다. 예전 파일은 `app`이 없다(needs 0).
+- **쓴 판** (`app`): 파일에 쓸 때 `{ by: "pygaki 앱"(개발 서버는 "pygaki 웹"), build: "2026-11-05 dc3ac85", needs }`를 붙인다. `build`는 `vite.config.ts`가 빌드 날짜와 커밋으로 넣는다. `needs`는 `max(파일의 needs, FEATURE)`라서 내려가지 않는다. `FEATURE`(지금 15, 판마다 무엇이 더해졌는지는 `src/version.ts`)는 예전 판이 모르는 줄 종류나 값을 대본에 더할 때만 올린다. 예전 파일은 `app`이 없다(needs 0).
 - `needs`가 이 판의 `FEATURE`보다 크면 열 때 알리고, 왼쪽 "렌파이 프로젝트 정보" 칸에 경고를 둔다. 모르는 값은 지우지 않고 그대로 저장한다.
 - `format`, `version`, `.flow.json`, IndexedDB 이름은 바꾸지 않는다.
 
@@ -335,6 +340,7 @@
 | `src/exportRpy.ts` | `.rpy` 변환과 검사 |
 | `src/gameFolder.ts` | 렌파이 game 폴더 연결, 목록, 받아 적기 파일 읽기와 쓰기 |
 | `src/inbox.ts` | pygaki 플러그인이 남긴 줄을 대본에 넣기 |
+| `src/imageCheck.ts` | 그림 이름 검사 (게임에 없는 그림 경고) |
 | `src/stage.ts` | 연출 줄 → 렌파이 명령 |
 | `src/LineFields.tsx` | 줄 종류 선택, 연출 줄 입력칸, 줄 끌어 옮기기 |
 | `src/layout.ts` | 자동 정렬 |
