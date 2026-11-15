@@ -1897,3 +1897,46 @@ label 이름 "${g.name}"은 쓸 수 없어요 (영문·숫자·_만, 숫자로 �
 단축키 수정	ショートカット編集	Edit shortcuts
 조작 안내 화면	操作案内画面	Controls guide
 기능 옆 키 단추를 누르고 게임 창에서 바꿀 키를 눌러요. 다른 기능이 쓰는 키면 경고와 안내가 나와요. [안내 화면으로 내보내기]를 누르면 조작 안내 화면의 표가 이 설정을 따라가고, 보여 줄 기능은 조작 안내 화면에서 골라요. pygaki 플러그인 hotkeys 1.2부터 있어요.	機能の横のキーボタンを押し、ゲームウィンドウで新しいキーを押します。ほかの機能が使っているキーなら警告と案内が出ます。[案内画面へ書き出す]を押すと操作案内画面の表がこの設定に従い、表示する機能は操作案内画面で選びます。pygakiプラグイン hotkeys 1.2から使えます。	Press the key button next to a function, then press the new key in the game window. If another function already uses that key, you get a warning and guidance. Press [Export to guide screen] and the controls guide table follows these settings; pick which functions to show on the controls guide screen. Available from pygaki plugin hotkeys 1.2.
+만들기	作成	Create
+호감도	好感度	Affection
+숫자 둘	数値ふたつ	Two numbers
+여러 끝	複数エンディング	Multiple endings
+빈 플래그	空のフラグ	Blank flag
+갈래 정하기	ルート決定	Choose a route
+잠긴 선택지	ロックされた選択肢	Locked choice
+직접 정하기	自分で決める	Set up yourself
+물건 얻기·쓰기	アイテムの入手・使用	Get and use an item
+열쇠를 가졌는지	鍵を持っているか	Has the key
+용례에서 만들기	用例から作成	Create from an example
+한 번 본 장면	一度見た場面	Scene seen once
+앨리스를 만났는지	アリスに会ったか	Met Alice
+맞는 용례가 없어요	合う用例がありません	No matching example
+어떤 플래그를 만들까요?	どんなフラグを作りますか?	What kind of flag?
+누르거나 Enter: 플래그	クリックか Enter:フラグ	Click or Enter: flag
+선택지 고르면: love +1	選択肢を選ぶと:love +1	Choosing a choice: love +1
+용기 (용감한 선택마다 +1)	勇気(勇敢な選択ごとに +1)	Courage (+1 per brave choice)
+호감 (다정한 선택마다 +1)	好感(優しい選択ごとに +1)	Affection (+1 per kind choice)
+호감도 (친절한 선택마다 +1)	好感度(親切な選択ごとに +1)	Affection (+1 per kind choice)
+${r.flags.length}개	{0} 個	{0} flags
+믿음 (약속을 지킬 때마다 +1)	信頼(約束を守るたびに +1)	Trust (+1 each time a promise is kept)
+용감한 선택지 고르면: courage +1	勇敢な選択肢を選ぶと:courage +1	Choosing a brave choice: courage +1
+열쇠를 줍는 선택지 고르면: has_key 켜기	鍵を拾う選択肢を選ぶと:has_key をオン	Choosing to pick up the key: turn has_key on
+고른 갈래 ("sea" 또는 "mountain")	選んだルート("sea" または "mountain")	Chosen route ("sea" or "mountain")
+문 앞 선택지의 보이는 조건: has_key 켜짐	扉の前の選択肢の表示条件:has_key がオン	Show condition of the choice at the door: has_key on
+용례(호감도, 한 번 본 장면 등)를 골라 만들어요	用例(好感度、一度見た場面など)を選んで作ります	Pick an example (affection, scene seen once, ...) to create one
+끝 상자의 ◇ 조건 분기: love ≥ 2이면 좋은 끝	エンディングのボックスの ◇ 条件分岐:love ≥ 2 ならグッドエンド	◇ Condition in the ending box: love ≥ 2 → good ending
+뒤의 공통 장면 ◇ 조건 분기: route가 "sea"이면	後の共通場面の ◇ 条件分岐:route が "sea" なら	◇ Condition in the shared scene later: if route is "sea"
+선택지 고르면: love +1, 다른 선택지는 trust +1	選択肢を選ぶと:love +1、別の選択肢は trust +1	Choosing a choice: love +1, another choice: trust +1
+처음 만나는 대사 뒤 ⚑ 플래그 바꾸기: met_alice 켜기	初めて会うセリフの後の ⚑ フラグ変更:met_alice をオン	⚑ Change flag after the first-meeting line: turn met_alice on
+마지막 선택지의 보이는 조건: courage ≥ 3이면 "맞선다"	最後の選択肢の表示条件:courage ≥ 3 なら「立ち向かう」	Show condition of the last choice: courage ≥ 3 → "Stand up to it"
+이름, 종류(켜짐/꺼짐, 숫자, 글자), 처음 값을 직접 정해요.	名前、種類(オン/オフ、数値、文字)、初期値を自分で決めます。	Set the name, type (on/off, number, text) and initial value yourself.
+처음 만나면 켜 두고, 같은 곳에 다시 오면 다른 대사가 나와요.	初めて会ったらオンにしておき、同じ場所にまた来ると別のセリフが出ます。	Turn it on at the first meeting; coming back to the same place shows a different line.
+그 장면 앞 ◇ 조건 분기: met_alice 켜짐이면 "또 왔구나"	その場面の前の ◇ 条件分岐:met_alice がオンなら「また来たね」	◇ Condition before that scene: if met_alice is on → "You're back"
+갈림길 선택지 고르면: route = "sea" / "mountain"	分かれ道の選択肢を選ぶと:route = "sea" / "mountain"	Choosing at the fork: route = "sea" / "mountain"
+친절한 선택을 할 때마다 1씩 올리고, 마지막에 값이 넉넉하면 좋은 끝으로 가요.	親切な選択をするたびに 1 ずつ上げ、最後に値が十分ならグッドエンドへ進みます。	Goes up by 1 with each kind choice; if it's high enough at the end, you reach the good ending.
+플래그가 없어요. [+ 추가]에서 용례(호감도, 한 번 본 장면 등)를 골라 만들어요.	フラグがありません。[+ 追加] で用例(好感度、一度見た場面など)を選んで作ります。	No flags yet. Use [+ Add] to pick an example (affection, scene seen once, ...) and create one.
+용기 있는 선택을 쌓아야 나중에 새 선택지가 열려요. 값이 모자라면 그 선택지는 안 보여요.	勇気ある選択を重ねると、後で新しい選択肢が開きます。値が足りないとその選択肢は見えません。	Brave choices add up to unlock a new choice later. If the value is too low, that choice stays hidden.
+갈림길에서 고른 갈래를 글자로 기억해 두고, 나중의 같은 장면에서 대사만 갈래에 맞게 바꿔요.	分かれ道で選んだルートを文字で覚えておき、後の共通場面でセリフだけルートに合わせて変えます。	Remembers the route chosen at the fork as text, and later changes just the lines of a shared scene to match it.
+물건을 주우면 켜고, 그 물건이 있어야 고를 수 있는 선택지를 보여 줘요. 없으면 선택지가 숨어요.	アイテムを拾ったらオンにし、そのアイテムがあるときだけ選べる選択肢を見せます。なければ選択肢は隠れます。	Turns on when the item is picked up and shows a choice that needs it. Without the item, the choice is hidden.
+두 값을 따로 쌓아서 끝을 셋으로 나눠요. 둘 다 넉넉하면 진짜 끝, 하나만 넉넉하면 좋은 끝, 아니면 보통 끝이에요.	2 つの値を別々に重ねて、エンディングを 3 つに分けます。両方十分なら真エンド、片方だけならグッドエンド、それ以外はノーマルエンドです。	Builds up two values separately to split the ending three ways: both high → true ending, one high → good ending, otherwise normal ending.
+마지막 ◇ 조건 분기: love ≥ 2 그리고 trust ≥ 2 → 진짜 끝, 아니고 love ≥ 2 → 좋은 끝, 그 밖 → 보통 끝	最後の ◇ 条件分岐:love ≥ 2 かつ trust ≥ 2 → 真エンド、そうでなく love ≥ 2 → グッドエンド、それ以外 → ノーマルエンド	Final ◇ condition: love ≥ 2 and trust ≥ 2 → true ending, else love ≥ 2 → good ending, otherwise → normal ending
