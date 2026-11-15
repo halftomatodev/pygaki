@@ -11,6 +11,9 @@ import { hit } from './prefs';
 import { ShaderPanel } from './ShaderPanel';
 import { StageCards } from './StageCards';
 import { VoiceCard } from './VoiceCard';
+import { syncOuts } from './screens';
+import { useLive } from './showpyLive';
+import { useScreenSel } from './ScreensView';
 import { CursorCard, SayUiCard } from './UiPanel';
 import { ActionInput, CondInput, firstAction } from './FlagFields';
 import { GameOffTip, GoHere, MoveBtn, PickBand, useSidePop } from './PickPos';
@@ -292,6 +295,42 @@ function ChoiceRow({ b, c, i, upd }: { b: BoxNode; c: Choice; i: number; upd: Up
   );
 }
 
+// 화면 부르기 (FEATURE 17): 부를 화면, 돌려준 값마다 갈 상자, 그 밖
+function ScreenExitEditor({ b, upd }: { b: BoxNode; upd: Upd }) {
+  const screens = useStore((s) => s.project.screens ?? []);
+  if (b.exit.type !== 'screen') return null;
+  const e = b.exit;
+  return (
+    <>
+      <div className="row">
+        <label>화면<Hint text="[화면] 탭에서 만든 화면을 띄우고, 누른 버튼의 값에 따라 갈래가 나뉘어요. 갈래는 화면의 버튼 값을 따라 저절로 생겨요" topic="화면 만들기" /></label>
+        <select value={e.screen ?? ''} onChange={(ev) => upd((x, p) => {
+          if (x.exit.type !== 'screen') return;
+          x.exit.screen = ev.target.value || null;
+          syncOuts(p, x);
+        })}>
+          <option value="">화면 고르기…</option>
+          {screens.map((s) => (
+            <option key={s.id} value={s.id}>{s.title || s.name}</option>
+          ))}
+        </select>
+        <button onClick={() => (useLive.setState({ view: 'screens' }), useScreenSel.setState({ id: e.screen }))} title="[화면] 탭에서 이 화면을 고쳐요">화면 고치기</button>
+      </div>
+      {!screens.length && <p className="tip">아직 화면이 없어요. 위쪽 [화면] 탭에서 만들어요.</p>}
+      {e.outs.map((o) => (
+        <div className="choice-ed" key={o.id}>
+          <span className="br-kw">값 {o.value}</span>
+          <TargetSelect self={b.id} value={o.target} onChange={(v) => upd((x) => ops.setLink(x, 's:' + o.id, v))} />
+        </div>
+      ))}
+      <div className="row">
+        <label>그 밖<Hint text="어느 값에도 안 맞으면 이 상자로" topic="화면 만들기" /></label>
+        <TargetSelect self={b.id} value={e.else} onChange={(v) => upd((x) => ops.setLink(x, 'else', v))} />
+      </div>
+    </>
+  );
+}
+
 // 선택지 위 질문 대사 (FEATURE 15): 화자와 글. 글을 비우면 질문 없이 선택지만 나와요
 function MenuAskRow({ b, upd }: { b: BoxNode; upd: Upd }) {
   const chars = useStore((s) => s.project.characters);
@@ -330,6 +369,7 @@ export function ExitEditor({ b, upd }: { b: BoxNode; upd: Upd }) {
           <option value="next">→ 다음 상자로 (jump)</option>
           <option value="menu">◆ 선택지 (menu)</option>
           <option value="if">◇ 조건 분기 (if)</option>
+          <option value="screen">▣ 화면 부르기 (call screen)</option>
           <option value="call">⤷ call 후 계속</option>
           <option value="return">■ 끝 (return)</option>
         </select>
@@ -388,6 +428,7 @@ export function ExitEditor({ b, upd }: { b: BoxNode; upd: Upd }) {
           </div>
         </>
       )}
+      {e.type === 'screen' && <ScreenExitEditor b={b} upd={upd} />}
       {e.type === 'return' && <p className="tip">여기서 끝 (call로 불렸으면 부른 곳으로)</p>}
     </div>
   );

@@ -103,6 +103,7 @@ export function Canvas() {
     const t = c?.cond.trim() || '(빈 조건)';
     return t.length > 18 ? t.slice(0, 17) + '…' : t;
   };
+  const screenLabel = (b: BoxNode, handle: string) => (b.exit.type === 'screen' ? b.exit.outs.find((o) => 's:' + o.id === handle)?.value : undefined);
   const edges = useMemo<Edge[]>(() => {
     const groupOf = new Map(project.nodes.map((b) => [b.id, b.group]));
     const res: Edge[] = [];
@@ -114,7 +115,7 @@ export function Canvas() {
         res.push({
           id, source: b.id, sourceHandle: l.handle, target: l.target, targetHandle: 'in',
           className: cls.join(' '), selected: id === selEdge,
-          label: l.kind === 'call' ? 'call' : l.kind === 'then' ? '복귀 후' : l.kind === 'else' ? '그 밖' : l.kind === 'if' ? condLabel(b, l.handle) : undefined,
+          label: l.kind === 'screen' ? screenLabel(b, l.handle) : l.kind === 'call' ? 'call' : l.kind === 'then' ? '복귀 후' : l.kind === 'else' ? '그 밖' : l.kind === 'if' ? condLabel(b, l.handle) : undefined,
           markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16 },
         });
       }

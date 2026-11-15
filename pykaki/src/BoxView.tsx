@@ -216,6 +216,7 @@ function Exits({ b, editing, tb, active, setActive }: { b: BoxNode; editing: boo
             <Handle type="source" id="then" position={tb ? Position.Bottom : Position.Right} style={tb ? { left: '70%' } : { top: '90%' }} />
           </>
         )}
+        {ex.type === 'screen' && <ScreenExit b={b} />}
         {ex.type === 'return' && <div className="exit-label end">■ 끝 (return)</div>}
       </div>
       {ai >= 0 && top !== null && (
@@ -469,6 +470,30 @@ function LineRow({ l, editing, active, cls, grip, onFocus, onKey, onText }: RowP
       {l.type === 'note' && <span className="mark">#</span>}
       {body}
     </div>
+  );
+}
+
+// 화면 부르기 (FEATURE 17): 화면 이름과 돌려준 값마다 갈래 점, 그 밖
+function ScreenExit({ b }: { b: BoxNode }) {
+  const sc = useStore((s) => (b.exit.type === 'screen' ? s.project.screens?.find((x) => x.id === (b.exit as { screen: string | null }).screen) : undefined));
+  if (b.exit.type !== 'screen') return null;
+  const ex = b.exit;
+  return (
+    <>
+      <div className="exit-label">▣ 화면 {sc ? <code>{sc.title || sc.name}</code> : <span className="todo">(화면 없음)</span>}</div>
+      {ex.outs.map((o) => (
+        <div key={o.id} className="choice branch" data-part={o.id}>
+          <span className="br-kw">값</span>
+          <span className="br-cond">{o.value}</span>
+          <Handle type="source" id={'s:' + o.id} position={Position.Right} />
+        </div>
+      ))}
+      <div className="choice branch else" data-part="else">
+        <span className="br-kw">그 밖</span>
+        {!ex.else && <span className="todo"> (연결 안 됨)</span>}
+        <Handle type="source" id="else" position={Position.Right} />
+      </div>
+    </>
   );
 }
 

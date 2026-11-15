@@ -3,10 +3,11 @@ import { useFolded } from './Card';
 import { useStore } from './store';
 import { createEmpty, normalizeProject } from './sample';
 import { generateRpy as generateRpyWith } from './exportRpy';
+import { screensCode } from './screens';
 import { snapAdd, snapAuto } from './persist';
 import { desktop, isDesktop } from './desktop';
 import { usePrefs } from './prefs';
-import { backupRpy, folderAllowed, folderReady, hasDirPicker, pullInbox, readRpyFromFolder, RPY_FILE, scanFolder, useGameFolder, writeRpyToFolder } from './gameFolder';
+import { writeScreensToFolder, backupRpy, folderAllowed, folderReady, hasDirPicker, pullInbox, readRpyFromFolder, RPY_FILE, scanFolder, useGameFolder, writeRpyToFolder } from './gameFolder';
 import { BUILD, FEATURE } from './version';
 import type { Project } from './types';
 
@@ -300,7 +301,7 @@ export async function exportRpyFile(again = false) {
         if (old && old !== code) await backupRpy(old);
       }
       await snapAuto('내보내기', s.project).catch(() => {});
-      await writeRpyToFolder(code, { line: followLine() ? codeLineOf(code, editingLineId()) : null });
+      await writeRpyToFolder(code, { line: followLine() ? codeLineOf(code, editingLineId()) : null }, screensOut());
       lastAuto = code;
       // 웹: 대본 파일도 같이 (앱에서 이어 쓰게)
       if (bound && !isDesktop && (await writeBound(serialize(s.project), true)) && useStore.getState().project === s.project)
@@ -357,6 +358,12 @@ export function setFollowLine(on: boolean) {
   }
 }
 
+// 화면 만들기 원고 (pykaki_screens.rpy)
+const screensOut = () => {
+  const p = useStore.getState().project;
+  return { code: screensCode(p), has: !!p.screens?.length };
+};
+
 // 연결한 게임의 플러그인이 읽을 수 있을 때만 줄 끝 표시로 내보낸다 (LINK.md 2장)
 const makeRpy = (p: Parameters<typeof generateRpyWith>[0]) => generateRpyWith(p, { endMarks: useGameFolder.getState().endMarks, newMark: useGameFolder.getState().newMark, audio: useGameFolder.getState().media.audio });
 
@@ -384,6 +391,7 @@ function editingLineId(): string | null {
 }
 
 let lastAuto: string | null = null;
+let lastScreens: string | null = null;
 let autoBusy = false;
 let autoWarned = false;
 let autoHeld = false;
@@ -411,6 +419,12 @@ export async function autoExport() {
       return;
     }
     autoWarned = false;
+    // 화면만 고쳤을 때: 화면 원고만 쓴다
+    const sc = screensOut();
+    if (sc.code !== lastScreens) {
+      await writeScreensToFolder(sc);
+      lastScreens = sc.code;
+    }
     if (code === lastAuto) return;
     if (lastAuto === null) {
       const old = await readRpyFromFolder();
@@ -427,7 +441,7 @@ export async function autoExport() {
       }
       if (old) await backupRpy(old);
     }
-    await writeRpyToFolder(code, { line: followLine() ? codeLineOf(code, editingLineId()) : null });
+    await writeRpyToFolder(code, { line: followLine() ? codeLineOf(code, editingLineId()) : null }, screensOut());
     lastAuto = code;
   } catch (e) {
     console.warn('자동 내보내기 실패', e);

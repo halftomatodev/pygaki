@@ -23,6 +23,9 @@ function ViewSwitch() {
           GUI 편집
         </button>
       )}
+      <button className={view === 'screens' ? 'on' : ''} onClick={() => go('screens')} title="버튼을 끌어 놓아 렌파이 화면(screen)을 만들어요. 흐름의 [화면 부르기]로 띄워요">
+        화면
+      </button>
       <button className={view === 'effects' ? 'on' : ''} onClick={() => go('effects')} title="글자 효과와 그림 효과를 보고, 켜고 끄고, 넣고 빼요">
         효과
       </button>

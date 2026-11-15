@@ -90,11 +90,42 @@ export interface MenuAsk {
   text: string;
 }
 
+// 화면 부르기 (FEATURE 17): call screen 뒤 _return 값마다 갈래. outs는 화면의 버튼 값을 따라 저절로 맞춘다 (screens.ts)
+export interface ScreenOut {
+  id: string;
+  value: string;
+  target: string | null;
+}
+
+// 화면 만들기 탭에서 만든 렌파이 screen (FEATURE 17). game/pykaki_screens.rpy로 내보낸다
+export type ScreenItemKind = 'imagebutton' | 'textbutton' | 'text' | 'image';
+export interface ScreenItem {
+  id: string;
+  kind: ScreenItemKind;
+  x: number; // 게임 화면 기준 왼쪽 위 (px)
+  y: number;
+  image?: string; // imagebutton, image: 렌파이 그림 이름 (예: door, bg room)
+  hover?: string; // imagebutton: 마우스를 올렸을 때 그림 (비우면 idle 그대로)
+  text?: string; // textbutton, text
+  size?: number; // 글자 크기
+  color?: string; // 글자 색 #rrggbb
+  hoverColor?: string; // textbutton: 마우스를 올렸을 때 글자 색
+  value?: string; // 버튼: 누르면 돌려줄 값 (_return)
+}
+export interface ScreenDef {
+  id: string;
+  name: string; // 렌파이 screen 이름
+  title: string; // 화면 표시용
+  bg?: string; // 배경: 그림 이름 또는 #rrggbb 색. 비우면 아래 화면이 그대로 보임
+  items: ScreenItem[];
+}
+
 export type Exit =
   | { type: 'next'; target: string | null }
   | { type: 'if'; branches: Branch[]; else: string | null }
   | { type: 'menu'; choices: Choice[]; ask?: MenuAsk }
   | { type: 'call'; target: string | null; then: string | null }
+  | { type: 'screen'; screen: string | null; outs: ScreenOut[]; else: string | null }
   | { type: 'return' };
 
 export type ExitType = Exit['type'];
@@ -173,6 +204,7 @@ export interface Project {
   app?: { by: string; build: string; needs: number };
   project: { title: string; startNode: string | null };
   characters: Character[];
+  screens?: ScreenDef[]; // 화면 만들기 (FEATURE 17)
   variables: Flag[]; // 플래그 (FEATURE 14. 그 전에는 늘 빈 배열)
   labels: LabelGroup[];
   layout: { direction: 'TB' | 'LR' };

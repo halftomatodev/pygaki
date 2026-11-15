@@ -104,6 +104,20 @@ export function TracePanel() {
           })}
         </div>
       );
+    if (e.type === 'screen') {
+      const sc = project.screens?.find((s) => s.id === e.screen);
+      return (
+        <div className="tr-opts">
+          <div className="tip">화면 "{sc ? sc.title || sc.name : '(없음)'}"에서 누를 버튼</div>
+          {e.outs.map((o) => (
+            <button key={o.id} className="tr-opt" onClick={() => go(o.target, `화면 값 "${o.value}"`)}>
+              ▣ {o.value} <span className="tip">→ {name(o.target)}</span>
+            </button>
+          ))}
+          <button className="tr-opt" onClick={() => go(e.else, '화면의 그 밖')}>그 밖 <span className="tip">→ {name(e.else)}</span></button>
+        </div>
+      );
+    }
     // 조건 분기: 위에서부터 첫 참인 갈래. 앞에 알 수 없는 조건이 있으면 정하지 않고 모두 고를 수 있게
     let pick: string | null | undefined;
     let unsure = false;

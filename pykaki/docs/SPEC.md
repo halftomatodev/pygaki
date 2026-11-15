@@ -343,6 +343,7 @@
 | `src/inbox.ts` | pygaki 플러그인이 남긴 줄을 대본에 넣기 |
 | `src/imageCheck.ts` | 그림 이름 검사 (게임에 없는 그림 경고) |
 | `src/voice.ts`, `src/VoiceCard.tsx` | 음성 번호, 이름 규칙, [음성] 카드 |
+| `src/screens.ts`, `src/ScreensView.tsx` | 화면 만들기 (`FEATURE` 17). `project.screens` `{ id, name, title, bg?, items }`, 항목 `{ id, kind: imagebutton|textbutton|text|image, x, y, image?, hover?, text?, size?, color?, hoverColor?, value? }`. `screensCode` → `game/pykaki_screens.rpy`(`screen 이름():` `modal True`, 배경 `add Solid()`/`add "그림"`, 버튼 `action Return("값")`). 화면이 없으면 예전 파일이 있을 때만 머리말로 비운다(`writeScreensToFolder`, 바뀐 것만). 흐름 `exit` `{ type: 'screen', screen, outs: { id, value, target }[], else }`: `addFixup`의 `syncOuts`가 화면 버튼 값(차례, 겹치면 하나)에 맞춰 outs를 고친다(같은 값은 선 유지). 선 손잡이 `s:id`, `else`. 원고 `call screen 이름` → `if/elif _return == "값": jump`, 그 밖은 next처럼 |
 | `src/FindPanel.tsx` | 찾기·바꾸기 (Ctrl+F, `showFind`). 대사·내레이션 글, 선택지, 선택지 질문, 상자 제목. 모두 바꾸기는 `update` 한 번 |
 | `src/trace.ts`, `src/TracePanel.tsx` | 플래그 따라가 보기 (`showTrace`: '' 대본 시작, 상자 id). 파이썬 일부 식 계산(`evalExpr`, 모르면 `UNKNOWN`), 상자의 flag 줄과 직접 명령 `$ a op b`를 적용, 선택지 조건·고르면, 조건 분기, call 스택. 대본은 안 고친다 |
 | `src/stage.ts` | 연출 줄 → 렌파이 명령 |

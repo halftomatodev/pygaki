@@ -9,6 +9,7 @@ import { setFolderEffects, type EffectPack } from './fx/textShaders';
 import { parseEffectsOff, refreshEffects, setEffectsOff } from './stage';
 import { setShaderList, setShadersOff } from './shader';
 import { codeImages, type ImageBook } from './imageCheck';
+import { SCREENS_FILE } from './screens';
 
 export const hasDirPicker = isDesktop; // 폴더는 앱에서만 연다 (웹 버전은 2026-11-12에 없앰)
 export const INBOX_FILE = 'showpy_inbox.json';
@@ -117,13 +118,15 @@ async function walk(d: any, prefix = ''): Promise<string[]> {
 }
 
 // game 폴더의 .rpy 파일 (pygaki가 쓰는 원고와 그림·소리·저장 폴더는 뺌)
+// 그림 정의를 읽을 때 pygaki가 쓴 화면 원고도 뺀다
+const SKIP_FILES = new Set([RPY_FILE, SCREENS_FILE]);
 const SKIP_DIRS = new Set(['images', 'movies', 'audio', 'cache', 'saves', 'gui', 'fonts', 'tl', 'ui_kit_backup']);
 async function walkRpy(d: any, top = true): Promise<any[]> {
   const out: any[] = [];
   for await (const [name, h] of d.entries()) {
     if (h.kind === 'directory') {
       if (!(top && SKIP_DIRS.has(name.toLowerCase()))) out.push(...(await walkRpy(h, false)));
-    } else if (/\.rpy$/i.test(name) && !(top && name === RPY_FILE)) out.push(h);
+    } else if (/\.rpy$/i.test(name) && !(top && SKIP_FILES.has(name))) out.push(h);
   }
   return out;
 }
@@ -388,7 +391,13 @@ export async function pullInbox(ask = false) {
 export const looksLikeGame = async () => (await readText(dir, 'gui.rpy')) !== null || (await readText(dir, 'options.rpy')) !== null;
 export const readRpyFromFolder = () => readText(dir, RPY_FILE);
 
-export async function writeRpyToFolder(code: string, goto?: { line: number | null }) {
+// screens: 화면 만들기 원고 (pykaki_screens.rpy). 화면이 없는 대본이면 null (예전에 쓴 파일이 있을 때만 비운다). 바뀐 것만 쓴다
+export async function writeScreensToFolder(screens: { code: string; has: boolean }) {
+  const old = await readText(dir, SCREENS_FILE);
+  if ((screens.has || old !== null) && old !== screens.code) await writeText(dir, SCREENS_FILE, screens.code);
+}
+export async function writeRpyToFolder(code: string, goto?: { line: number | null }, screens?: { code: string; has: boolean }) {
+  if (screens) await writeScreensToFolder(screens);
   // 옮겨 갈 줄을 먼저 적는다. 게임은 원고가 바뀐 것을 보고 이 파일을 읽는다
   if (goto) await writeText(dir, GOTO_FILE, JSON.stringify({ format: 'pykaki-goto', version: 1, file: 'game/' + RPY_FILE, line: goto.line, time: Date.now() }));
   await writeText(dir, RPY_FILE, code);

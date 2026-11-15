@@ -2,6 +2,7 @@ import type { Project } from './types';
 import { fixEntries, newChoice } from './ops';
 import { PALETTE, uid } from './util';
 import { normalizeFlags } from './flags';
+import { normalizeScreens } from './screens';
 
 const defaults = (): Project => ({
   format: 'renpy-flow',
@@ -101,6 +102,7 @@ export function normalizeProject(raw: any): Project {
     layout: { ...d.layout, ...raw.layout },
     characters: raw.characters ?? [],
     variables: normalizeFlags(raw.variables),
+    screens: normalizeScreens(raw.screens),
     labels: raw.labels ?? [],
   };
   if (!p.labels.length && p.nodes.length) p.labels.push({ id: uid('g'), name: 'chapter_1', title: '', color: PALETTE[0], entry: null });
@@ -135,6 +137,11 @@ export function normalizeProject(raw: any): Project {
     } else if (e.type === 'call') {
       e.target = live(e.target);
       e.then = live(e.then);
+    } else if (e.type === 'screen') {
+      e.screen = typeof e.screen === 'string' ? e.screen : null;
+      e.outs = Array.isArray(e.outs) ? e.outs.filter((o: any) => o && typeof o.value === 'string') : [];
+      for (const o of e.outs) o.target = live(o.target);
+      e.else = live(e.else);
     } else if (e.type !== 'return') n.exit = { type: 'return' };
   }
   p.project.startNode = live(p.project.startNode);

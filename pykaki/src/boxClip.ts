@@ -55,6 +55,7 @@ export function pasteClip(p: Project, clip: BoxClip, at?: { x: number; y: number
     b.lines = b.lines.map((l) => ({ ...l, id: uid('l') }));
     if (b.exit.type === 'menu') b.exit.choices = b.exit.choices.map((c) => ({ ...c, id: uid('c') }));
     if (b.exit.type === 'if') b.exit.branches = b.exit.branches.map((c) => ({ ...c, id: uid('b') }));
+    if (b.exit.type === 'screen') b.exit.outs = b.exit.outs.map((c) => ({ ...c, id: uid('o') }));
     p.nodes.push(b); // 다음 nextBoxId가 이 번호 다음을 주게 바로 넣음
     made.push(b);
   }

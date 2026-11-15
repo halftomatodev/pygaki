@@ -6,6 +6,7 @@ import { badImageName, renpyOnlyEffect, fxArgs, isStage, sayArgs, stageCode, tag
 import { shaderEffect } from './fx/textShaders';
 import { imageProblem, type ImageBook } from './imageCheck';
 import { voiceCode, voiceFile, voiceIndex } from './voice';
+import { screenNameProblem } from './screens';
 import { checkTags, shaderTags, splitClear } from './tagEdit';
 import { sceneCode, sceneSupported, uiOfBox, usesSceneUi } from './boxUi';
 import { exprNames, flagNameProblem, parseAction, pyValue } from './flags';
@@ -404,6 +405,24 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
           if (sceneUi) body.push(sceneCode(bui));
           body.push(...(e.then ? flow(e.then) : ['return']));
         }
+      } else if (e.type === 'screen') {
+        // 화면 부르기 (FEATURE 17): call screen 뒤 돌려준 값(_return)마다 갈래, 나머지는 그 밖
+        const name = b.title || b.id;
+        const sc = p.screens?.find((s) => s.id === e.screen);
+        if (!sc) {
+          W.push({ level: 'error', msg: `부를 화면을 골라 주세요 (${name})`, nodeId: b.id });
+          body.push('return  # TODO: 화면 없음');
+        } else {
+          body.push(`call screen ${sc.name}`);
+          if (!e.outs.length) W.push({ level: 'warn', msg: `화면 "${sc.title || sc.name}"에 값을 돌려주는 버튼이 없어요 (${name})`, nodeId: b.id });
+          e.outs.forEach((o, i) => {
+            if (!o.target) W.push({ level: 'warn', msg: `화면 값 "${o.value}"의 갈래가 연결되지 않았어요 (${name})`, nodeId: b.id });
+            body.push(`${i === 0 ? 'if' : 'elif'} _return == ${pyStr(o.value)}:`);
+            body.push(I + (o.target ? `jump ${ref(o.target)}` : todo));
+          });
+          const rest = flow(e.else);
+          if (rest.length) body.push(...(e.outs.length ? ['else:', ...rest.map((x) => I + x)] : rest));
+        }
       } else body.push('return');
       if (S.renpyLink) mark(endAt, `# @end:${b.id}`); // 상자 끝 (showpy가 선택지 앞에 줄을 넣을 때)
 
@@ -411,6 +430,27 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
       for (const x of body) out.push(I + x);
     });
     out.push('');
+  }
+
+  // 화면 만들기 (FEATURE 17): 화면 이름, 버튼 값, 그림
+  for (const sc of p.screens ?? []) {
+    const nm = sc.title || sc.name;
+    const prob = screenNameProblem(p, sc);
+    if (prob) W.push({ level: 'error', msg: `화면 "${nm}"의 이름: ${prob}` });
+    for (const it of sc.items) {
+      const btn = it.kind === 'imagebutton' || it.kind === 'textbutton';
+      if (btn && !it.value?.trim()) W.push({ level: 'warn', msg: `화면 "${nm}": 돌려줄 값이 빈 버튼이 있어요 (누르면 빈 값으로 돌아가요)` });
+      if ((it.kind === 'imagebutton' || it.kind === 'image') && !it.image?.trim()) W.push({ level: 'warn', msg: `화면 "${nm}": 그림 이름이 빈 칸이 있어서 내보내지 않았어요` });
+      for (const img of [it.image, it.hover])
+        if (img?.trim() && !img.includes('/')) {
+          const ip = imageProblem({ id: '', type: 'show', text: '', kind: 'etc', image: img }, opts.images ?? null);
+          if (ip) W.push({ level: 'warn', msg: `화면 "${nm}": ${ip}` });
+        }
+    }
+    if (sc.bg?.trim() && !sc.bg.startsWith('#') && !sc.bg.includes('/')) {
+      const ip = imageProblem({ id: '', type: 'show', text: '', kind: 'etc', image: sc.bg }, opts.images ?? null);
+      if (ip) W.push({ level: 'warn', msg: `화면 "${nm}" 배경: ${ip}` });
+    }
   }
 
   // 도달 검사

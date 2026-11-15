@@ -6,6 +6,7 @@ import { Canvas } from './Canvas';
 import { RightPanel } from './Panels';
 import { SettingsModal } from './SettingsModal';
 import { FindPanel } from './FindPanel';
+import { ScreensView } from './ScreensView';
 import { TracePanel } from './TracePanel';
 import { HelpModal, HintTip, openHelp } from './Help';
 import { EditCaret } from './Caret';
@@ -46,7 +47,7 @@ function Keys() {
         return;
       }
       // 효과 화면에서는 저장과 되돌리기만 (효과를 바꾸고 빼면 대본이 바뀜)
-      if (useLive.getState().view === 'effects' || useLive.getState().view === 'shaders') {
+      if (['effects', 'shaders', 'screens'].includes(useLive.getState().view)) {
         if (hit(e, 'save')) run(() => saveProject());
         else if (appUndo(e.target) && hit(e, 'undo')) run(s.undo);
         else if (appUndo(e.target) && hit(e, 'redo')) run(s.redo);
@@ -163,6 +164,7 @@ export function App() {
         {view === 'showpy' && <ShowpyView />}
         {view === 'effects' && <EffectsView />}
         {view === 'shaders' && <ShadersView />}
+        {view === 'screens' && <ScreensView />}
       </div>
       {flash && <div className="toast">{flash}</div>}
       {/* 일렁임(liquid) 효과가 쓰는 물결 필터 */}
