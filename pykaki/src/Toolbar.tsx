@@ -6,6 +6,7 @@ import { pullInbox, scanFolder, useGameFolder } from './gameFolder';
 import { snapAdd, snapDelete, snapList, type Snapshot } from './persist';
 import { toggleFocus } from './actions';
 import { keyOf } from './prefs';
+import { getLang, LANGS, setLang, type Lang } from './i18n';
 import { desktop, isDesktop } from './desktop';
 import { useLive } from './showpyLive';
 
@@ -108,6 +109,7 @@ export function Toolbar() {
       <button className="focus-btn" onClick={toggleFocus} title={'집중 모드: 캔버스만 남기기 ' + keyOf('focus')}>집중</button>
       <button onClick={() => useStore.setState({ showPrefs: true })} title="화면 색, 단축키">설정</button>
       <button onClick={() => openHelp()} title="쓰는 법과 설명 모음 (F1)">도움말</button>
+      <LangSelect />
       <button onClick={() => useStore.setState({ showFind: !s.showFind })} title={'대사, 선택지, 상자 제목에서 찾기·바꾸기 ' + keyOf('find')}>찾기</button>
       <span className="sep" />
       <button onClick={newProject}>새로</button>
@@ -209,4 +211,16 @@ async function snapGame() {
   if (r === 'no-game') say('켜진 게임을 찾지 못했어요. [▶ 렌파이에서 실행]으로 켜거나 게임과 연결된 뒤에 눌러 주세요');
   else if (r === 'no-window') say('게임 창을 찾지 못했어요 (내려 둔 창이면 다시 띄워 주세요)');
   else if (r === 'over') say('게임 창 옆이 좁아서 화면 끝에 겹쳐 두었어요');
+}
+
+// 언어 버튼: 대본 편집기 화면 글 (도움말 문서는 한국어만). 고른 언어는 이 컴퓨터에 기억
+function LangSelect() {
+  const [l, setL] = useState<Lang>(getLang());
+  return (
+    <select className="lang-sel" data-no-tr value={l} title="Language" onChange={(e) => (setLang(e.target.value as Lang), setL(e.target.value as Lang))}>
+      {LANGS.map(([k, t]) => (
+        <option key={k} value={k}>{t}</option>
+      ))}
+    </select>
+  );
 }

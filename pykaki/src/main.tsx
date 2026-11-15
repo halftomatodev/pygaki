@@ -10,6 +10,10 @@ import { desktop, flowFile, isDesktop, projectInfo } from './desktop';
 import { autoExport, checkExternal, saveQuiet, setProjectFile, warnNewer } from './files';
 import { chooseFlow } from './flowPick';
 import './effectsLib'; // 효과 관리 함수 (window.pykakiEffects)
+import { initI18n } from './i18n';
+
+// 언어 버튼 (화면 글을 일본어·영어로). 알림 창도 바꾸려고 맨 먼저
+initI18n();
 
 // 데스크톱 앱: 프로젝트 폴더 맨 위의 .flow.json을 연다(여러 개면 고름). 없으면 프로젝트 이름으로 새 대본을 만들어 바로 저장한다
 async function bootDesktop() {
