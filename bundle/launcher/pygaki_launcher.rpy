@@ -221,21 +221,18 @@ screen pygaki_buttons():
                 style "l_link"
                 text_font "SourceHanSansLite.ttf"
                 text_size 16
-                text_color "#F96854"
                 action Jump("pygaki_open")
 
             textbutton "pygaki 안내서":
                 style "l_link"
                 text_font "SourceHanSansLite.ttf"
                 text_size 16
-                text_color "#F96854"
                 action Jump("pygaki_guide")
 
             textbutton "플러그인 올리기":
                 style "l_link"
                 text_font "SourceHanSansLite.ttf"
                 text_size 16
-                text_color "#F96854"
                 action Jump("pygaki_update")
 
 
