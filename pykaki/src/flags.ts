@@ -38,7 +38,7 @@ export function flagNameProblem(p: Project, name: string, selfId?: string) {
 
 export function newFlagName(p: Project) {
   let i = p.variables.length + 1;
-  while (p.variables.some((v) => v.name === 'flag_' + i)) i++;
+  while (flagNameProblem(p, 'flag_' + i)) i++;
   return 'flag_' + i;
 }
 

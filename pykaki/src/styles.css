@@ -1313,3 +1313,46 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 
 /* 게임 패널 미러의 빈 칸 (ui_kit 4.11) */
 .sp-m-sp { display: inline-block; flex: none; }
+
+/* 플래그 새로 만들기 메뉴 (Command Palette 꼴)와 옆 설명 카드 (Hover Card 꼴) */
+.fmenu {
+  position: fixed; z-index: 1000; width: 270px; padding: 6px; border-radius: 12px; background: var(--panel);
+  border: 1px solid color-mix(in srgb, var(--text) 13%, transparent);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.22), 0 2px 6px rgba(0, 0, 0, 0.08); animation: fmenu-in 0.12s ease;
+}
+@keyframes fmenu-in { from { opacity: 0; transform: translateY(-4px) scale(0.98); } }
+.fmenu-search { display: flex; align-items: center; gap: 6px; padding: 2px 4px 7px; border-bottom: 1px solid var(--line); }
+.fmenu-search input { flex: 1; min-width: 0; border: none !important; background: none !important; box-shadow: none !important; outline: none; font-size: 13px; padding: 3px 2px; color: var(--text); }
+.fmenu kbd { flex: none; font-family: var(--mono); font-size: 10px; color: var(--muted); padding: 1px 5px; border: 1px solid var(--line); border-radius: 5px; background: var(--faint); }
+.fmenu-sec { font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em; color: var(--muted); padding: 8px 8px 4px; }
+.fmenu-list { display: flex; flex-direction: column; gap: 1px; }
+.fmenu-item {
+  display: flex; align-items: center; gap: 10px; width: 100%; padding: 7px 8px; border: none; border-radius: 8px;
+  background: none; color: var(--text); font: inherit; font-size: 13px; text-align: left; cursor: pointer;
+}
+.fmenu-item.cur { background: var(--accent); color: #fff; }
+.fmenu-icon { flex: none; width: 18px; text-align: center; font-size: 13px; opacity: 0.85; }
+.fmenu-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fmenu-hint { flex: none; font-size: 10.5px; padding: 1px 6px; border-radius: 5px; color: var(--muted); background: var(--faint); }
+.fmenu-item.cur .fmenu-hint { color: #fff; background: rgba(255, 255, 255, 0.2); }
+.fmenu-empty { padding: 10px 8px; color: var(--muted); font-size: 12px; }
+.fmenu-card {
+  position: absolute; top: 0; width: 290px; padding: 10px 11px; border-radius: 12px; background: var(--panel);
+  border: 1px solid color-mix(in srgb, var(--text) 13%, transparent); box-shadow: 0 14px 40px rgba(0, 0, 0, 0.2);
+  display: flex; flex-direction: column; gap: 7px; pointer-events: none;
+}
+.fmenu-card.left { right: calc(100% + 8px); }
+.fmenu-card.right { left: calc(100% + 8px); }
+.fmenu-card-head { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.fmenu-card-head b { font-size: 13px; }
+.fmenu-card-head .fmenu-icon { width: auto; color: var(--accent); opacity: 1; }
+.fmenu-chips { display: flex; gap: 4px; margin-left: auto; }
+.fmenu-chips code { font-family: var(--mono); font-size: 10.5px; padding: 1px 6px; border-radius: 99px; color: var(--accent); background: var(--accent-soft); }
+.fmenu-desc { margin: 0; color: var(--muted); font-size: 11.5px; line-height: 1.5; }
+.fmenu-clip { aspect-ratio: 16 / 9; }
+.fmenu-clip video { height: 100%; object-fit: contain; }
+.fmenu-uses { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 3px; font-size: 11px; line-height: 1.4; }
+.fmenu-uses li { padding: 3px 7px; border-radius: 6px; background: var(--faint); }
+.fmenu-uses li.w { background: color-mix(in srgb, var(--accent) 9%, var(--panel)); }
+.fmenu-card .fd-code { max-height: 120px; }
+.fmenu-foot { font-size: 10.5px; color: var(--muted); text-align: right; }
