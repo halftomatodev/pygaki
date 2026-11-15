@@ -33,6 +33,7 @@ const SECTIONS: Section[] = [
   { id: 'say', label: '대사 상자', tab: 'say', app: false, mirror: true, note: '대사 상자의 처음 위치와 모양이에요. 줄마다 다른 위치는 [대본 편집] 대사 카드의 줄마다 있는 [위치 옮기기]로 정해요.' },
   { id: 'choice', label: '선택지', tab: 'choice', app: false, mirror: true, note: '선택지의 처음 위치와 모양이에요. 상자마다 다른 위치는 [대본 편집] 다음 흐름 카드의 [위치 옮기기]로 정해요.' },
   { id: 'stage', label: '그림, 영상 배치', tab: 'stage', app: false, mirror: true, note: '그림을 넣는 것은 [대본 편집] 상자의 배경, 그림·영상 카드에서 해요. 여기서는 게임 화면에서 자리를 끌어 정해요.' },
+  { id: 'hotkeys', label: '단축키, 조작 방법', tab: 'hotkeys', app: false, mirror: true, note: '새 단축키를 만들고 렌파이 기본 단축키에서 키를 빼요. 설명을 적으면 조작방법 화면 목록에 붙고, 스플래시 조작 방법 페이지의 표가 "auto"면 거기도 같이 바뀌어요. 키는 아래 키 단추로 고르거나 게임 창에서 눌러요. pygaki 플러그인 hotkeys 1.1부터 있어요.' },
   { id: 'ui_text', label: '종료 메시지, 버튼 글', tab: 'ui_text', app: false, mirror: true, note: '종료 확인 창, 퀵메뉴 버튼 같은 글을 바꿔요. pygaki 플러그인 ui_kit 3.23부터 있어요.' },
 ];
 
@@ -42,6 +43,7 @@ const GROUPS: { title: string; ids: string[] }[] = [
   { title: '타이틀 메뉴', ids: ['title', 'title_fx', 'screen_fx'] },
   { title: '게임 내 메뉴', ids: ['pause', 'pause_fx'] },
   { title: '확인 창, UI 글', ids: ['ui_text'] },
+  { title: '단축키', ids: ['hotkeys'] },
   // 상자마다 바꾸는 것은 [대본 편집]으로 옮겼다(세션 32). 여기는 상자에서 정하지 않았을 때 쓰는 게임 처음 값만
   { title: '게임 처음 값', ids: ['say', 'choice', 'stage', 'custom_ui'] },
 ];

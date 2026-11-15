@@ -645,6 +645,24 @@ init -6 python in splash:
             def keys_auto(self):
                 return self.val("keys") == "auto"
 
+            def keys_to_auto(self):
+                self.put("keys", "auto")
+                self.keys_sel = None
+                _ed.msg("조작방법 화면 목록을 그대로 씁니다. 단축키 탭에서 고치면 여기도 바뀝니다.")
+
+            def keys_page(self):
+                """표("keys")가 있는 첫 페이지 (단축키 탭의 [[스플래시 조작 방법 페이지로])."""
+                for r in self.raws():
+                    pid = r.get("id")
+                    e = state.edits.get(pid, { })
+                    v = e["keys"] if "keys" in e else merged(r).get("keys")
+                    if v is not None:
+                        return pid
+                return None
+
+            def hotkeys_tab(self):
+                return _ed.get_tab("hotkeys")
+
             def keys_to_manual(self):
                 self.put("keys", [ (a, b) for a, b in _keys_auto() ])
                 _ed.msg("조작방법 화면 목록을 복사해 넣었습니다. 이제 칸마다 고칠 수 있습니다.")
@@ -798,6 +816,9 @@ init -6 python in splash:
                     return Solid("#000000")
                 d = merged(raw)
                 key = (raw.get("id"), repr(sorted((k, repr(v)) for k, v in d.items())))
+                if d.get("keys") == "auto":
+                    ## 단축키 탭에서 고친 조작방법 목록도 바로 보이게 (splash 2.4)
+                    key = key + (repr(_keys_auto()),)
                 if key != self._run_key:
                     p = resolve(raw)
                     p.duration = None           # 편집 중에는 영상을 반복
@@ -1528,6 +1549,11 @@ screen ui_editor_splash_panel(tab):
                     spacing 6
                     text "  조작방법 화면 목록을 그대로 씀 (\"auto\")" style "ui_editor_small" yalign 0.5
                     textbutton "직접 적기로 바꾸기" style "ui_editor_button" text_size 13 action Function(tab.keys_to_manual)
+                if tab.hotkeys_tab() is not None:
+                    hbox:
+                        spacing 6
+                        text "  " style "ui_editor_small" min_width 110
+                        textbutton "단축키 탭에서 고치기" style "ui_editor_button" text_size 13 action Function(ui_editor.switch_tab, "hotkeys")
             else:
                 for _i in range(len(tab.key_rows())):
                     hbox:
@@ -1551,6 +1577,7 @@ screen ui_editor_splash_panel(tab):
                     textbutton "줄 지우기" style "ui_editor_button" text_size 13 action Function(tab.del_row) sensitive (tab.keys_sel is not None)
                     textbutton "위로" style "ui_editor_button" text_size 13 action Function(tab.move_row, -1) sensitive (tab.keys_sel is not None)
                     textbutton "아래로" style "ui_editor_button" text_size 13 action Function(tab.move_row, 1) sensitive (tab.keys_sel is not None)
+                    textbutton "조작방법 화면 목록 쓰기" style "ui_editor_button" text_size 13 action Function(tab.keys_to_auto)
             hbox:
                 spacing 6
                 text "  회전" style "ui_editor_small" yalign 0.5 min_width 110

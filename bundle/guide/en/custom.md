@@ -1,4 +1,4 @@
-<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ 97118d3e61 -->
+<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ 636fde2054 -->
 # pygaki plugin customization guide (5.1)
 
 2026-11-13 · version 5.1 (changed in 5.1: the effects folder and image transitions, files to turn off effects and shaders, photo collage (instead of shifting shards), the shimmer shader `ripple`, detail values on shader lines and per-scene dialogue sound and cursor, pixel sort and datamosh as shader transitions, the tree diagram, pygaki as a desktop app only. Changed in 5.0: seven new screen effects (glitch, jitter, halftone, hologram, night vision, shifting shards, flying shards), effects on a single image, eleven text effects, text boxes (speech bubble, rounded frame), editing the splash on screen, the in-game editor's "UI text" tab. Changed in 4.22: lines where shaders change and per-line transitions, "from here" for cursor and shaders, a tidier dialogue tab, cursor and CTC image folders. Changed in 4.21: shader section details moved under slots 1 and 2, clicking a line moves the game there too. Changed in 4.20: two shader slots and "Apply from here", title and in-game menu shaders, title background and title, subtitle, text effects, rotation handle)
@@ -927,6 +927,9 @@ define hotkeys.keyboard_help = [
 | When they overlap | if a new key overlaps a default hotkey, both run, so remove it from the default side with `unbind` |
 | The help screen | if `keyboard_help` is `None`, Ren'Py's default descriptions. If you changed hotkeys, update the descriptions too |
 | Overlap with the editor key | the UI Kit editor uses Shift+M. To change it, `define ui_kit.editor_key = "shift_K_e"` |
+| Preset actions (1.1) | instead of `"action"`, a name like `"do": "quick_save"`. Writing `"help": _("Quick save")` puts it in the controls screen list (if a line with the same key exists, its description is replaced). The list of names is in `hotkeys/README.md` |
+
+**Changing them in the editor** (`hotkeys` 1.1, with `ui_kit`): in the "Shortcuts" tab (단축키) of the Shift+M editor (in the pygaki app, [GUI edit] → "Shortcuts, controls"), add a line, pick the key with [Press a key (game window)] (키 누르기) or the key buttons, pick the action from the list, and write a description. If it overlaps a Ren'Py default shortcut, [Remove from default] (기본에서 빼기) appears. In "Controls screen list" below, press [Switch to writing it yourself] (직접 적기로 바꾸기) to edit the list cells. If the splash controls page's table is `"keys": "auto"`, it shows the same list (the splash tab's table panel has [Edit in the shortcuts tab] (단축키 탭에서 고치기) and [Use the controls screen list] (조작방법 화면 목록 쓰기)). Changes apply right away while you edit; saving writes `hotkeys/hotkeys_layout.rpy`, which is added to the settings file's values.
 
 ## Changing screen effects — `screen_fx/screen_fx_config.rpy`
 

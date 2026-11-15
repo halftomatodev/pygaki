@@ -1892,3 +1892,5 @@ label 이름 "${g.name}"이 중복돼요	label名「{0}」が重複していま�
 label 이름 "${g.name}"은 쓸 수 없어요 (영문·숫자·_만, 숫자로 시작 불가, 예약어 불가)	label名「{0}」は使えません (英数字・_のみ、数字始まり不可、予約語不可)	Label name "{0}" is invalid (letters, digits, _; no leading digit or reserved word)
 누르면 그 상자로	押すとそのボックスへ	click to go to box
 조건 알 수 없음	条件不明	condition unknown
+단축키, 조작 방법	ショートカット、操作方法	Shortcuts, controls
+새 단축키를 만들고 렌파이 기본 단축키에서 키를 빼요. 설명을 적으면 조작방법 화면 목록에 붙고, 스플래시 조작 방법 페이지의 표가 "auto"면 거기도 같이 바뀌어요. 키는 아래 키 단추로 고르거나 게임 창에서 눌러요. pygaki 플러그인 hotkeys 1.1부터 있어요.	新しいショートカットを作り、Ren'Pyの標準ショートカットからキーを外します。説明を書くと操作方法画面の一覧に加わり、スプラッシュの操作方法ページの表が"auto"ならそこも一緒に変わります。キーは下のキーボタンで選ぶか、ゲームウィンドウで押します。pygakiプラグイン hotkeys 1.1から使えます。	Make new shortcuts and remove keys from Ren'Py's default shortcuts. A description you write is added to the controls screen list, and if the splash controls page's table is "auto" it changes there too. Pick keys with the key buttons below or press them in the game window. Available from pygaki plugin hotkeys 1.1.

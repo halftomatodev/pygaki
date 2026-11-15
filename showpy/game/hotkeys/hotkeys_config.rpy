@@ -9,8 +9,19 @@ init offset = 1
 ## "keys": 키 이름 목록 (렌파이 키 이름: "K_v", "shift_K_s", "ctrl_K_l" ...)
 ## "action": 눌렀을 때 동작
 ##
+## "do": "action" 대신 정해 둔 동작 이름 (1.1). 편집 화면의 [단축키] 탭이 쓰는 것과 같음
+##       "preferences" 환경설정, "save" 저장, "load" 불러오기, "history" 대사록,
+##       "help" 조작방법 화면, "quick_save", "quick_load", "skip", "auto" 자동 진행,
+##       "rollback" 이전 대사, "hide" UI 숨기기, "screenshot", "fullscreen", "mute",
+##       "main_menu" 타이틀로, "quit" 끝내기, "controls_page" 스플래시 조작 방법 페이지
+## "help": 조작방법 화면 목록 아래에 붙는 설명 (1.1, 없으면 안 붙음)
+##
 ## 예: V를 누르면 환경설정 열기
 ##     { "keys": [ "K_v" ], "action": ShowMenu("preferences") },
+##     { "keys": [ "K_F5" ], "do": "quick_save", "help": _("퀵세이브") },
+##
+## 게임 안 편집 화면(Shift+M)의 [단축키] 탭에서 고친 것은 hotkeys_layout.rpy에 저장되고
+## 이 파일의 목록에 더해집니다. 그 파일을 지우면 이 파일 값만 남습니다.
 
 define hotkeys.bindings = [
 ]
@@ -29,6 +40,7 @@ define hotkeys.unbind = {
 
 ## ── 조작방법 화면의 키보드 설명 ──────────────────────────────────────────────
 ## (키, 설명) 목록. None이면 렌파이 기본 설명을 씁니다.
-## 단축키를 바꿨다면 여기도 같이 고치세요. (형식은 README.md 참고)
+## 단축키 줄에 "help"를 적으면 이 목록 아래에 저절로 붙습니다. (형식은 README.md 참고)
+## 스플래시의 조작 방법 페이지에서 "keys": "auto"로 적으면 이 목록을 그대로 씁니다.
 
 define hotkeys.keyboard_help = None
