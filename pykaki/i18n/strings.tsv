@@ -2381,3 +2381,4 @@ UI 그림 (gui)	UI 画像 (gui)	UI images (gui)
 글 뒤 그림/영상: 평소, 마우스를 올렸을 때, 고르고 확정할 때 (pygaki 플러그인 연결을 켜야 내보내요)	文字の後ろの画像/動画: 通常、マウスをのせたとき、選んで決定したとき (pygaki プラグイン連携をオンにすると書き出します)	Image/video behind the text: normal, on hover, on select (exported only with the pygaki plugin link on)
 게임의 pygaki 플러그인이 예전 판이라 선택지 "${c.text}"의 뒤 그림에서 멈춰요. 런처의 [플러그인 올리기]로 올려 주세요	ゲームの pygaki プラグインが古い版なので、選択肢「{0}」の後ろの画像で止まります。ランチャーの [プラグインを更新] で更新してください	The game's pygaki plugins are too old and will stop at the image behind choice "{0}". Update them with [Update plugins] in the launcher
 게임의 pygaki 플러그인이 예전 판이라 그림/영상 상자에서 멈춰요. 런처의 [플러그인 올리기]로 올려 주세요 (${b.title || b.id})	ゲームの pygaki プラグインが古い版なので、画像/動画ボックスで止まります。ランチャーの [プラグインを更新] で更新してください ({0})	The game's pygaki plugins are too old and will stop at the image/video box. Update them with [Update plugins] in the launcher ({0})
+글 상자	テキストボックス	Text box

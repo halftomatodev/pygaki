@@ -281,7 +281,8 @@ const DEMO_BASE = 14; // 견본 글의 보통 속도 (TagDemo DEMO_CPS와 같음
 
 // ── 태그 상자 ──
 // 묶음마다 카드 한 장. 카드 안 줄마다 소제목 버블(색은 카드마다 다름)
-export function TagBar({ targetId, className = '' }: { targetId: string; className?: string }) {
+// extra: 태그 말고 줄 전체에 거는 칸(상자 안 편집의 글 상자 칸). 접어도 늘 보인다
+export function TagBar({ targetId, className = '', extra }: { targetId: string; className?: string; extra?: React.ReactNode }) {
   const tagsOn = useStore((s) => s.project.settings.allowTextTags);
   const update = useStore((s) => s.update);
   const [, redraw] = useReducer((x: number) => x + 1, 0);
@@ -345,6 +346,14 @@ export function TagBar({ targetId, className = '' }: { targetId: string; classNa
   };
 
   const cls = 'tagbar nodrag nowheel ' + className;
+  const extraCard = extra && (
+    <div className="tb-card tb-extra" style={{ '--hue': 45 } as React.CSSProperties}>
+      <div className="tb-row">
+        <span className="tb-chip">글 상자</span>
+        {extra}
+      </div>
+    </div>
+  );
   if (!tagsOn)
     return (
       <div className={cls} onMouseDown={keep}>
@@ -352,6 +361,7 @@ export function TagBar({ targetId, className = '' }: { targetId: string; classNa
           텍스트 태그가 꺼져 있어요. <code>{'{'}</code>가 글자 그대로 나가요.
           <button className="primary" onClick={() => update((p) => void (p.settings.allowTextTags = true))}>켜기</button>
         </div>
+        {extraCard}
       </div>
     );
 
@@ -678,6 +688,7 @@ export function TagBar({ targetId, className = '' }: { targetId: string; classNa
           </div>
         </>
       )}
+      {extraCard}
       {palette && (
         <div className="tb-card" style={{ '--hue': palette === 'color' ? 215 : palette === 'rubycolor' ? 330 : 268 } as React.CSSProperties}>
           <Palette

@@ -7,7 +7,7 @@ import { shaderLabel } from './shader';
 import { isLight, uid } from './util';
 import { changeThenFocus } from './actions';
 import { FlowMenu } from './FlowMenu';
-import { OldAttr, SpeakerSelect, StageFields } from './LineFields';
+import { BoxFields, OldAttr, SpeakerSelect, StageFields } from './LineFields';
 import { isStage, STAGE_ICON, stageCode } from './stage';
 import { actionWords, condWords } from './flags';
 import { ActionInput, CondInput } from './FlagFields';
@@ -37,7 +37,13 @@ export const BoxView = memo(function BoxView({ id, selected }: NodeProps) {
   return (
     <div className={cls + (b.color ? ' own-color' : '')} style={{ '--g': b.color ?? g?.color ?? 'var(--panel)', ...(b.color && { '--own-bt': isLight(b.color) ? '#1c1c1e' : '#ffffff' }) } as React.CSSProperties}>
       {editing && <FlowMenu b={b} />}
-      {tagLine && <TagBar targetId={'in-' + tagLine.id} className="tagbar-box" />}
+      {tagLine && (
+        <TagBar
+          targetId={'in-' + tagLine.id}
+          className="tagbar-box"
+          extra={<BoxFields l={tagLine} set={(fn, key) => update((p) => { const x = ops.findBox(p, b.id)?.lines.find((v) => v.id === tagLine.id); if (x) fn(x); }, key)} />}
+        />
+      )}
       <Handle type="target" id="in" position={tb ? Position.Top : Position.Left} />
       <div className="box-head">
         <span className="badge" title="렌파이 label">

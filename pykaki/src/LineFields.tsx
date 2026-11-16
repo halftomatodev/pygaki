@@ -166,22 +166,6 @@ export function SayFields({ l, set }: { l: Line; set: SetLine }) {
       </div>
     );
   };
-  // 상자를 없애면 꼬리, 기울기도 지운다
-  const putBox = (b: string) =>
-    set((x) => {
-      const say: SayStyle = { ...(x.say ?? {}) };
-      if (b) say.box = b;
-      else {
-        delete say.box;
-        delete say.tail;
-        delete say.box_rotate;
-      }
-      // 그림/영상 상자의 값은 그 상자일 때만, 말풍선 꼬리는 그림 상자에 없음
-      if (b !== 'media') for (const k of ['media', 'media_fit', 'media_zoom', 'media_window'] as const) delete say[k];
-      else delete say.tail;
-      if (Object.keys(say).length) x.say = say;
-      else delete x.say;
-    });
   const num = (key: 'size' | 'cps' | 'name_size', placeholder: string, title: string, max: number) => (
     <input
       type="number"
@@ -237,6 +221,55 @@ export function SayFields({ l, set }: { l: Line; set: SetLine }) {
         {fxSlot(0)}
         {fxSlot(1)}
       </div>
+      <BoxFields l={l} set={set} />
+      {l.type === 'say' && (
+        <div className="sf-row">
+          {num('name_size', '이름 크기', '이름 글자 크기', 200)}
+          {color('name_color', '이름 색')}
+          {font('name_font', '이름 글꼴 파일')}
+        </div>
+      )}
+      {fonts.length > 0 && (
+        <datalist id={`sug-fonts-${l.id}`}>
+          {fonts.map((n) => (
+            <option key={n} value={n} />
+          ))}
+        </datalist>
+      )}
+      {(posWhat || posName) && <div className="sf-row">{posWhat}{posName}</div>}
+    </>
+  );
+}
+
+// 글 상자 칸 (말풍선, 둥근 테두리, 그림/영상): 오른쪽 편집 탭과 상자 안 편집의 태그 상자가 함께 쓴다
+export function BoxFields({ l, set }: { l: Line; set: SetLine }) {
+  const s = l.say ?? {};
+  const put = (key: keyof SayStyle, v: string | number | undefined, mergeKey?: string) =>
+    set((x) => {
+      const say: SayStyle = { ...(x.say ?? {}) };
+      if (v === undefined || v === '') delete say[key];
+      else (say as Record<string, unknown>)[key] = v;
+      if (Object.keys(say).length) x.say = say;
+      else delete x.say;
+    }, mergeKey);
+  // 상자를 없애면 꼬리, 기울기도 지운다
+  const putBox = (b: string) =>
+    set((x) => {
+      const say: SayStyle = { ...(x.say ?? {}) };
+      if (b) say.box = b;
+      else {
+        delete say.box;
+        delete say.tail;
+        delete say.box_rotate;
+      }
+      // 그림/영상 상자의 값은 그 상자일 때만, 말풍선 꼬리는 그림 상자에 없음
+      if (b !== 'media') for (const k of ['media', 'media_fit', 'media_zoom', 'media_window'] as const) delete say[k];
+      else delete say.tail;
+      if (Object.keys(say).length) x.say = say;
+      else delete x.say;
+    });
+  return (
+    <>
       <div className="sf-row">
         <select title="글 상자: 대사 글을 둘러싸는 상자 (pygaki 플러그인이 있어야 내보내요)" value={s.box ?? ''} onChange={(e) => putBox(e.target.value)}>
           {BOXES.map(([k, t]) => (
@@ -293,21 +326,6 @@ export function SayFields({ l, set }: { l: Line; set: SetLine }) {
           </label>
         </div>
       )}
-      {l.type === 'say' && (
-        <div className="sf-row">
-          {num('name_size', '이름 크기', '이름 글자 크기', 200)}
-          {color('name_color', '이름 색')}
-          {font('name_font', '이름 글꼴 파일')}
-        </div>
-      )}
-      {fonts.length > 0 && (
-        <datalist id={`sug-fonts-${l.id}`}>
-          {fonts.map((n) => (
-            <option key={n} value={n} />
-          ))}
-        </datalist>
-      )}
-      {(posWhat || posName) && <div className="sf-row">{posWhat}{posName}</div>}
     </>
   );
 }
