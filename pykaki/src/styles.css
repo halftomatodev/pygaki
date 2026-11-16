@@ -1500,8 +1500,9 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .fw-level .fw-fill { position: absolute; inset: 0 auto 0 0; transition: width .18s ease-out; }
 .fw-level.discrete { display: flex; gap: 2px; padding: 1px; }
 .fw-level.discrete .fw-seg { flex: 1; border-radius: 1px; background: transparent; transition: background .15s; }
-.fw-stars { display: flex; gap: 2px; font-size: 17px; line-height: 1; }
-.fw-stars img { width: 18px; height: 18px; object-fit: contain; }
+.fw-stars { display: flex; width: 100%; font-size: 17px; line-height: 1; }
+.fw-stars > * { flex: 1 1 0; min-width: 0; text-align: center; }
+.fw-stars img { height: 18px; object-fit: contain; }
 .fw-slider { position: relative; height: 16px; margin: 0 8px; }
 .fw-slider .fw-track { position: absolute; left: 0; right: 0; top: 6px; height: 4px; border-radius: 2px; }
 .fw-slider .fw-done { right: auto; transition: width .18s ease-out; }
@@ -1563,3 +1564,43 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .fdemo-dots { display: flex; gap: 4px; justify-content: center; }
 .fdemo-dots button { width: 7px; height: 7px; min-height: 0; padding: 0; border: 0; border-radius: 50%; background: var(--line); }
 .fdemo-dots button.on { background: var(--accent); }
+/* 조건 눈금 (Steps 꼴): 번호 동그라미, 넘은 것은 ✓ */
+.fw-num.marked .fw-area { padding-top: 18px; }
+.fw-mark { top: 0; width: 15px; height: 15px; display: grid; place-items: center; border-radius: 50%; font-size: 9px; font-weight: 700; color: var(--muted); background: var(--panel); border: 1.5px solid var(--line); box-sizing: border-box; z-index: 1; }
+.fw-mark::after { content: ''; position: absolute; top: 14px; left: 50%; width: 1px; height: 6px; background: currentColor; opacity: .5; }
+.fw-mark.ok { color: #fff; background: #22a55b; border-color: #22a55b; }
+.fw-mark.ok::after { background: #22a55b; }
+.fw-mark.grab { cursor: ew-resize; }
+.fw-steps { list-style: none; margin: 2px 0 2px; padding: 0; display: flex; flex-direction: column; gap: 2px; font-size: 11.5px; }
+.fw-steps li { display: flex; align-items: baseline; gap: 6px; }
+.fw-steps .n { flex: none; width: 15px; height: 15px; display: inline-grid; place-items: center; border-radius: 50%; font-size: 9px; font-weight: 700; border: 1.5px solid var(--line); color: var(--muted); box-sizing: border-box; transform: translateY(2px); }
+.fw-steps li.ok .n { background: #22a55b; border-color: #22a55b; color: #fff; }
+.fw-steps li[aria-current] { font-weight: 600; }
+.fw-steps code { font: 11px var(--mono); }
+.fw-steps .st { color: var(--muted); white-space: nowrap; }
+.fw-steps li.open .st { color: #1f8f4e; }
+/* 판단 인스펙터: ◇ 조건 분기마다 묶음(머리 + 꼴 + 갈래 줄 + 더하기) */
+.judge { border-top: 1px solid var(--line); padding-top: 6px; margin-top: 4px; display: flex; flex-direction: column; gap: 6px; }
+.judge-head { display: flex; align-items: baseline; gap: 6px; }
+.judge-box { border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; display: flex; flex-direction: column; gap: 5px; }
+.judge-box header { display: flex; align-items: center; gap: 4px; font-weight: 600; }
+.judge-fold { border: 0; background: transparent; padding: 0 2px; min-height: 0; color: var(--muted); }
+.judge-look { display: flex; align-items: center; gap: 8px; }
+.judge-look > code { flex: 0 0 60px; font: 11.5px var(--mono); color: var(--muted); }
+.judge-rules { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+.judge-rules li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 3px 4px; border-radius: 6px; }
+.judge-rules li.on { background: color-mix(in srgb, #22a55b 12%, transparent); }
+.judge-n { flex: 0 0 30px; font: 600 11px var(--mono); color: var(--muted); }
+.judge-to { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+.judge-say { flex-basis: 100%; padding-left: 34px; font-size: 11.5px; color: #1f8f4e; }
+.judge-add { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding-top: 4px; border-top: 1px dashed var(--line); }
+.judge-flags { display: flex; flex-wrap: wrap; gap: 3px; }
+.judge-flags .chip { display: inline-flex; align-items: center; gap: 3px; padding: 1px 8px; border-radius: 10px; border: 1px solid var(--line); font: 11px var(--mono); cursor: pointer; }
+.judge-flags .chip.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.judge-flags .chip input { position: absolute; opacity: 0; pointer-events: none; }
+.judge-at input { width: 48px; }
+.judge-prev { flex-basis: 100%; font: 11px var(--mono); color: var(--muted); }
+.judge-open { align-self: flex-start; font-size: 11.5px; }
+.judge-rules li > .cond-gui, .judge-rules li > .cond-in { order: 5; flex-basis: 100%; padding-left: 34px; box-sizing: border-box; }
+.judge-rules li > .judge-say { order: 6; }
+.judge-rules li > .judge-to { flex: 1; }

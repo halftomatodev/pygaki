@@ -416,7 +416,7 @@ def flag_recipes(lang="ko"):
     src = read("pykaki/src/flagRecipes.ts")
     strs = lambda t: [x.replace("\\'", "'") for x in re.findall(r"'((?:[^'\\]|\\.)*)'", t)]
     out = ['<div class="g-cases">']
-    for m in re.finditer(r"\{\s*id: '(\w+)',\s*(?:demo: \[.*?\n    \],\s*)?icon: '([^']*)',\s*title: '([^']*)',\s*kindHint: '([^']*)',\s*desc: '([^']*)',\s*flags: \[(.*?)\],"
+    for m in re.finditer(r"\{\s*id: '(\w+)',\s*(?:marks: \{[^\n]*\},\s*)?(?:demo: \[.*?\n    \],\s*)?icon: '([^']*)',\s*title: '([^']*)',\s*kindHint: '([^']*)',\s*desc: '([^']*)',\s*flags: \[(.*?)\],"
                          r"\s*write: \[(.*?)\],\s*read: \[(.*?)\],\s*code: '((?:[^'\\]|\\.)*)'", src, re.S):
         rid, icon, title, kind, desc, flags, write, read_, code = m.groups()
         if rid == "blank":

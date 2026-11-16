@@ -22,7 +22,8 @@ interface Props {
   onChange?: (v: Val) => void; // 없으면 보기만
   options?: string[]; // 풀다운·콤보의 고를 값
   label?: string; // 읽어 주는 이름 (플래그 이름)
-  marks?: { value: number; label: string; ok: boolean }[]; // 숫자 꼴 위의 조건 눈금 (2단계)
+  marks?: { value: number; label: string; ok: boolean; n?: number }[]; // 숫자 꼴 위의 조건 눈금 (2단계, Steps 꼴)
+  onMark?: (i: number, v: number) => void; // 눈금을 끌면 그 조건의 기준 값
 }
 
 export function FlagWidget(props: Props) {
@@ -32,7 +33,7 @@ export function FlagWidget(props: Props) {
   return <NumberLook {...props} />;
 }
 
-function NumberLook({ ui, value, onChange, label, marks }: Props) {
+function NumberLook({ ui, value, onChange, label, marks, onMark }: Props) {
   const { pics, paint, color } = useSkin(ui);
   const ref = useRef<HTMLDivElement>(null);
   const lo = uiMin(ui), hi = uiMax(ui);
@@ -113,12 +114,28 @@ function NumberLook({ ui, value, onChange, label, marks }: Props) {
     );
   }
   return (
-    <div className={'fw-num' + (onChange ? ' live' : '')}>
+    <div className={'fw-num' + (onChange ? ' live' : '') + (marks?.length ? ' marked' : '')}>
       <div ref={ref} className="fw-area" {...aria} onPointerDown={down} onKeyDown={key}>
         {body}
         {marks?.map((m, i) => (
-          <span key={i} className={'fw-mark' + (m.ok ? ' ok' : '')} style={{ left: ((Math.min(hi, Math.max(lo, m.value)) - lo) / (hi - lo)) * 100 + '%' }} title={m.label}>
-            {m.ok ? '✓' : '●'}
+          <span
+            key={i}
+            className={'fw-mark' + (m.ok ? ' ok' : '') + (onMark ? ' grab' : '')}
+            style={{ left: ((Math.min(hi, Math.max(lo, m.value)) - lo) / (hi - lo)) * 100 + '%' }}
+            title={m.label + (onMark ? ' · 끌면 기준 값이 바뀌어요' : '')}
+            onPointerDown={(e) => {
+              if (!onMark || e.button !== 0) return;
+              e.preventDefault();
+              e.stopPropagation();
+              const el = e.currentTarget;
+              el.setPointerCapture(e.pointerId);
+              const mv = (ev: PointerEvent) => onMark(i, Math.round(Math.min(hi, Math.max(lo, lo + ((ev.clientX - ref.current!.getBoundingClientRect().left) / Math.max(1, ref.current!.getBoundingClientRect().width)) * steps))));
+              const up = () => (el.removeEventListener('pointermove', mv), el.removeEventListener('pointerup', up));
+              el.addEventListener('pointermove', mv);
+              el.addEventListener('pointerup', up);
+            }}
+          >
+            {m.ok ? '✓' : (m.n ?? i + 1)}
           </span>
         ))}
       </div>

@@ -2,7 +2,7 @@
 import { create } from 'zustand';
 import type { Flag, FlagLook, FlagUi, LevelStyle, Project } from './types';
 import { evalExpr, applyAction, initVars, UNKNOWN, type Val, type Vars } from './trace';
-import { exprNames, parseAction } from './flags';
+import { condText, exprNames, parseAction, parseCond, type CmpOp } from './flags';
 
 export const LOOK_LABEL: Record<FlagLook, string> = { level: '레벨 인디케이터', slider: '슬라이더', switch: '스위치', pulldown: '풀다운', combo: '콤보박스' };
 export const STYLE_LABEL: Record<LevelStyle, string> = { continuous: '이어진 막대', discrete: '칸 막대', rating: '별' };
@@ -125,3 +125,90 @@ export function flagEffects(p: Project, f: Flag, vars: Vars): Effect[] {
   }
   return out;
 }
+
+// ── 조건 눈금 (2단계): 숫자 꼴 위에 그 플래그를 견주는 조건을 Steps처럼 표시. 끌면 조건식의 기준 값을 고침 ──
+export interface MarkRef { nodeId: string; at: 'choice' | 'branch'; id: string; clause: number }
+export interface Mark { value: number; op: CmpOp; label: string; text: string; ok: boolean; open: boolean | null; ref: MarkRef }
+const SYM: Record<string, string> = { '>=': '≥', '<=': '≤', '>': '>', '<': '<', '==': '=', '!=': '≠' };
+const cmp = (op: CmpOp, a: number, b: number) => (op === '>=' ? a >= b : op === '<=' ? a <= b : op === '>' ? a > b : op === '<' ? a < b : op === '==' ? a === b : op === '!=' ? a !== b : false);
+
+export function flagMarks(p: Project, f: Flag, vars: Vars): Mark[] {
+  if (f.kind !== 'int') return [];
+  const out: Mark[] = [];
+  const v = typeof vars[f.name] === 'number' ? (vars[f.name] as number) : 0;
+  const scan = (cond: string | null, ref: Omit<MarkRef, 'clause'>, text: string) => {
+    if (!cond) return;
+    const c = parseCond(cond);
+    if (!c) return;
+    c.clauses.forEach((k, i) => {
+      if (k.name !== f.name || !(k.op in SYM)) return;
+      const n = parseFloat(k.value);
+      if (!Number.isFinite(n)) return;
+      out.push({ value: n, op: k.op, label: `${SYM[k.op]} ${k.value}`, text, ok: cmp(k.op, v, n), open: truth(evalExpr(cond, vars)), ref: { ...ref, clause: i } });
+    });
+  };
+  for (const n of p.nodes) {
+    const e = n.exit;
+    if (e.type === 'menu') for (const c of e.choices) scan(c.condition, { nodeId: n.id, at: 'choice', id: c.id }, c.text || '(빈 선택지)');
+    if (e.type === 'if') for (const b of e.branches) scan(b.cond, { nodeId: n.id, at: 'branch', id: b.id }, firstSay(p, b.target) || '(이을 상자 없음)');
+  }
+  return out; // 차례는 대본 차례 그대로 (끄는 동안 값이 바뀌어도 눈금 번호가 섞이지 않게)
+}
+
+// 눈금을 끌어 기준 값을 바꿈 (update 안에서)
+export function setMarkValue(p: Project, r: MarkRef, value: number) {
+  const n = p.nodes.find((x) => x.id === r.nodeId);
+  if (!n) return;
+  const e = n.exit;
+  const hold = r.at === 'choice' ? (e.type === 'menu' ? e.choices.find((c) => c.id === r.id) : undefined) : e.type === 'if' ? e.branches.find((b) => b.id === r.id) : undefined;
+  if (!hold) return;
+  const src = 'condition' in hold ? hold.condition : hold.cond;
+  const c = src ? parseCond(src) : null;
+  if (!c || !c.clauses[r.clause]) return;
+  c.clauses[r.clause].value = String(Math.round(value));
+  if ('condition' in hold) hold.condition = condText(c);
+  else hold.cond = condText(c);
+}
+
+// ── 판단 인스펙터 (2단계): ◇ 조건 분기 상자마다 숫자 플래그로 갈래를 나누는 판단. 종류별로 더함 ──
+export type JudgeKind = 'all' | 'any' | 'sum' | 'top';
+export const JUDGE_LABEL: Record<JudgeKind, string> = { all: '모두 넉넉하면', any: '하나라도 넉넉하면', sum: '합이 넉넉하면', top: '가장 큰 값이면' };
+export const JUDGE_HINT: Record<JudgeKind, string> = {
+  all: '고른 플래그가 모두 기준 이상일 때 (love >= 2 and trust >= 2)',
+  any: '고른 플래그 가운데 하나라도 기준 이상일 때 (love >= 2 or trust >= 2)',
+  sum: '고른 플래그를 더한 값이 기준 이상일 때 (love + trust >= 4)',
+  top: '첫 플래그가 나머지보다 크거나 같을 때 (love >= trust)',
+};
+export function judgeCond(kind: JudgeKind, names: string[], at: number): string {
+  if (!names.length) return '';
+  if (kind === 'all' || kind === 'any') return names.map((n) => `${n} >= ${at}`).join(kind === 'all' ? ' and ' : ' or ');
+  if (kind === 'sum') return `${names.join(' + ')} >= ${at}`;
+  const [a, ...rest] = names;
+  return rest.length ? rest.map((n) => `${a} >= ${n}`).join(' and ') : `${a} >= ${at}`;
+}
+
+// 숫자 플래그를 보는 ◇ 조건 분기 상자
+export function judgeBoxes(p: Project): { nodeId: string; flags: Flag[] }[] {
+  const nums = p.variables.filter((f) => f.kind === 'int');
+  const out: { nodeId: string; flags: Flag[] }[] = [];
+  for (const n of p.nodes) {
+    if (n.exit.type !== 'if') continue;
+    const used = new Set(n.exit.branches.flatMap((b) => exprNames(b.cond)));
+    const fl = nums.filter((f) => used.has(f.name));
+    if (fl.length) out.push({ nodeId: n.id, flags: fl });
+  }
+  return out;
+}
+
+// 조건 분기에서 지금 값으로 가는 갈래 (앞 갈래부터 하나, 없으면 그 밖)
+export function takenBranch(p: Project, nodeId: string, vars: Vars): string | 'else' | null {
+  const e = p.nodes.find((n) => n.id === nodeId)?.exit;
+  if (!e || e.type !== 'if') return null;
+  for (const b of e.branches) {
+    const r = truth(evalExpr(b.cond, vars));
+    if (r === null) return null;
+    if (r) return b.id;
+  }
+  return 'else';
+}
+export { firstSay };

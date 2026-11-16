@@ -19,12 +19,12 @@ export interface PickEntry {
   read: string[]; // ? 보는 곳
   code: string;
   clip?: string; // 영상 url
-  demo?: { flags: { name: string; kind: FlagKind; ui?: FlagUi }[]; steps: DemoStep[] }; // 움직이는 견본 (있으면 영상 대신)
+  demo?: { flags: { name: string; kind: FlagKind; ui?: FlagUi }[]; steps: DemoStep[]; marks?: Record<string, number[]> }; // 움직이는 견본 (있으면 영상 대신)
   foot: string; // 카드 바닥 글
 }
 
 export function FlagMenu({ anchor, onPick, onClose }: { anchor: HTMLElement; onPick: (r: (typeof FLAG_RECIPES)[number]) => void; onClose: () => void }) {
-  const items: PickEntry[] = FLAG_RECIPES.map((r) => ({ ...r, clip: r.demo ? undefined : r.clip, demo: r.demo && { flags: r.flags, steps: r.demo }, chips: r.flags.map((f) => f.name), foot: r.flags.length > 1 ? `누르거나 Enter: 플래그 ${r.flags.length}개 만들기` : '누르거나 Enter: 플래그 만들기' }));
+  const items: PickEntry[] = FLAG_RECIPES.map((r) => ({ ...r, clip: r.demo ? undefined : r.clip, demo: r.demo && { flags: r.flags, steps: r.demo, marks: r.marks }, chips: r.flags.map((f) => f.name), foot: r.flags.length > 1 ? `누르거나 Enter: 플래그 ${r.flags.length}개 만들기` : '누르거나 Enter: 플래그 만들기' }));
   return <PickMenu anchor={anchor} items={items} first={1} placeholder="어떤 플래그를 만들까요?" section="용례에서 만들기" empty="맞는 용례가 없어요" onPick={(e) => onPick(FLAG_RECIPES.find((r) => r.id === e.id)!)} onClose={onClose} />;
 }
 
@@ -163,7 +163,7 @@ function RecipeDemo({ demo }: { demo: NonNullable<PickEntry['demo']> }) {
         {demo.flags.map((f) => (
           <div key={f.name} className="fdemo-look">
             <code>{f.name}</code>
-            <FlagWidget ui={flagUi(f)} value={s.vals[f.name] ?? (f.kind === 'bool' ? false : f.kind === 'int' ? 0 : '')} options={flagUi(f).options} label={f.name} />
+            <FlagWidget ui={flagUi(f)} value={s.vals[f.name] ?? (f.kind === 'bool' ? false : f.kind === 'int' ? 0 : '')} options={flagUi(f).options} label={f.name} marks={demo.marks?.[f.name]?.map((m) => ({ value: m, label: `≥ ${m}`, ok: Number(s.vals[f.name] ?? 0) >= m }))} />
           </div>
         ))}
       </div>

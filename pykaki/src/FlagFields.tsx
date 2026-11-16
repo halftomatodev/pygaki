@@ -4,6 +4,7 @@ import { useStore } from './store';
 import { Card } from './Card';
 import { FlagMenu } from './FlagMenu';
 import { FlagLookRow } from './FlagLook';
+import { JudgeInspector } from './FlagJudge';
 import { addRecipeFlags, type FlagRecipe } from './flagRecipes';
 import type { Flag, FlagKind } from './types';
 import { screenFlagUses } from './screens';
@@ -48,6 +49,7 @@ export function FlagsCard() {
       {flags.map((f) => (
         <FlagRow key={f.id} f={f} />
       ))}
+      <JudgeInspector />
     </Card>
   );
 }

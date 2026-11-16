@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { useStore } from './store';
 import type { Flag, FlagLook, FlagUi, LevelStyle } from './types';
 import { FlagWidget } from './FlagWidget';
-import { flagEffects, flagUi, LOOK_LABEL, looksFor, skinParts, STYLE_LABEL, strOptions, testValue, testVars, uiMax, uiMin, useFlagTest } from './flagUi';
+import { flagEffects, flagMarks, setMarkValue, flagUi, LOOK_LABEL, looksFor, skinParts, STYLE_LABEL, strOptions, testValue, testVars, uiMax, uiMin, useFlagTest } from './flagUi';
 import { useGameFolder } from './gameFolder';
 import type { Val } from './trace';
 
@@ -23,14 +23,24 @@ export function FlagLookRow({ f }: { f: Flag }) {
       delete n[f.id];
       return { vals: n };
     });
-  const effects = flagEffects(project, f, testVars(project, vals));
+  const tv = testVars(project, vals);
+  const allFx = flagEffects(project, f, tv);
+  // 조건 눈금: 번호는 기준 값 차례
+  const raw = flagMarks(project, f, tv);
+  const order = raw.map((_, i) => i).sort((a, b) => raw[a].value - raw[b].value);
+  const marks = raw.map((m, i) => ({ ...m, n: order.indexOf(i) + 1 }));
+  const update = useStore((s) => s.update);
+  const moveMark = (i: number, v: number) => raw[i] && raw[i].value !== v && update((p) => setMarkValue(p, raw[i].ref, v), 'fmark' + f.id + i);
+  const cur = order.find((i) => !marks[i].ok);
+  // 눈금으로 보이는 조건은 아래 목록에서 뺌 (같은 상자의 같은 자리)
+  const effects = allFx.filter((x) => x.at === 'act' || !raw.some((m) => m.ref.nodeId === x.nodeId && m.ref.at === x.at));
   const go = (id: string) => (useStore.getState().select([id]), useStore.getState().focusNodes([id]));
   const boxName = (id: string) => project.nodes.find((n) => n.id === id)?.title || id;
 
   return (
     <div className="flag-look">
       <div className="flag-look-row">
-        <FlagWidget ui={ui} value={value} onChange={setTest} options={f.kind === 'str' ? strOptions(project, f) : undefined} label={f.name} />
+        <FlagWidget ui={ui} value={value} onChange={setTest} options={f.kind === 'str' ? strOptions(project, f) : undefined} label={f.name} marks={marks} onMark={moveMark} />
         <span className="sp" />
         {changed && (
           <button className="linklike" onClick={reset} title="시험 값을 처음 값으로 (시험 값은 저장되지 않아요)">처음 값으로</button>
@@ -40,6 +50,21 @@ export function FlagLookRow({ f }: { f: Flag }) {
         </button>
         {pop && btn.current && <LookPop f={f} anchor={btn.current} onClose={() => setPop(false)} />}
       </div>
+      {marks.length > 0 && (
+        <ol className="fw-steps" aria-label="조건 눈금">
+          {order.map((i) => {
+            const m = marks[i];
+            return (
+              <li key={i} className={(m.ok ? 'ok' : '') + (m.open ? ' open' : '')} aria-current={i === cur ? 'step' : undefined}>
+                <span className="n">{m.ok ? '✓' : m.n}</span>
+                <code>{f.name} {m.label}</code>
+                <span className="fe-text0">{m.ref.at === 'choice' ? '◆ ' : '◇ '}{m.text}</span>
+                <span className="st">{m.ref.at === 'choice' ? (m.open ? '열림' : m.open === false ? '잠김' : '?') : m.open ? '이 갈래' : ''}</span>
+              </li>
+            );
+          })}
+        </ol>
+      )}
       {effects.length > 0 && (
         <ul className="flag-effects" aria-label="이 값일 때">
           {effects.map((x, i) => (

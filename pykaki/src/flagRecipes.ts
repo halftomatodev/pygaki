@@ -15,6 +15,7 @@ export interface FlagRecipe {
   read: string[]; // ? 보는 곳
   code: string;
   clip?: string; // 영상 url (없으면 설명만)
+  marks?: Record<string, number[]>; // 견본 꼴 위의 조건 눈금 (≥ 값)
   demo?: DemoStep[]; // 메뉴 카드의 움직이는 견본 (FEATURE 20): 차례로 값을 바꾸며 꼴과 식, 대사, 선택지를 보여 줌
 }
 
@@ -43,6 +44,7 @@ const LIST: Omit<FlagRecipe, 'clip'>[] = [
   },
   {
     id: 'affection',
+    marks: { love: [2] },
     demo: [
       { vals: { love: 0 }, code: 'default love = 0', say: '미나: 처음 보는 얼굴이네.' },
       { vals: { love: 1 }, code: '"좋아, 같이 가자" 고르면 love += 1', say: '미나: 정말? 고마워.' },
@@ -93,6 +95,7 @@ const LIST: Omit<FlagRecipe, 'clip'>[] = [
   },
   {
     id: 'locked_choice',
+    marks: { courage: [3] },
     demo: [
       { vals: { courage: 0 }, code: 'menu: "맞선다" if courage >= 3', choice: { text: '맞선다', open: false } },
       { vals: { courage: 1 }, code: '"앞으로 나선다" 고르면 courage += 1', choice: { text: '맞선다', open: false } },
@@ -126,6 +129,7 @@ const LIST: Omit<FlagRecipe, 'clip'>[] = [
   },
   {
     id: 'ending',
+    marks: { love: [2], trust: [2] },
     demo: [
       { vals: { love: 0, trust: 0 }, code: 'default love = 0, trust = 0', say: '' },
       { vals: { love: 2, trust: 0 }, code: 'love += 1 (두 번)', say: '→ 좋은 끝 (love ≥ 2)' },

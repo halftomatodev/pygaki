@@ -2269,3 +2269,24 @@ ${label} 색 (#rrggbbaa)	{0} の色 (#rrggbbaa)	{0} color (#rrggbbaa)
 "산으로 간다" 고르면 route = "mountain"	「山へ行く」を選ぶと route = "mountain"	When "Go to the mountains" is chosen, route = "mountain"
 → 진짜 끝 (love ≥ 2 그리고 trust ≥ 2)	→ トゥルーエンド (love ≥ 2 かつ trust ≥ 2)	→ True ending (love ≥ 2 and trust ≥ 2)
 그림을 넣으면 그 부품을 그림으로 그려요(늘여 맞춤). 그림은 연결한 게임 폴더에서 찾아요	画像を入れると、その部品を画像で描きます(引き伸ばして合わせる)。画像は接続したゲームフォルダーから探します	Set an image to draw that part with it (stretched to fit). Images are looked up in the connected game folder
+기준	基準	At
+열림	開いた	Open
+판단	判定	Judgments
+조건 눈금	条件の目盛り	Condition marks
+모두 넉넉하면	すべて十分なら	If all are enough
+합이 넉넉하면	合計が十分なら	If the sum is enough
++ 판단 더하기	+ 判定を追加	+ Add judgment
+가장 큰 값이면	いちばん大きければ	If it's the largest
+플래그를 골라요	フラグを選びます	Pick flags
++ ◇ 상자 열기	+ ◇ ボックスを開く	+ Open a ◇ box
+하나라도 넉넉하면	どれか 1 つでも十分なら	If any is enough
+(이을 상자 없음)	(つなぐボックスなし)	(no box linked)
+위로 (위 갈래부터 봐요)	上へ (上の分岐から調べます)	Move up (branches are checked from the top)
+· 끌면 기준 값이 바뀌어요	· ドラッグすると基準値が変わります	· Drag to change the threshold
+숫자 플래그로 갈래를 나누는 ◇ 조건 분기	数値フラグで分岐する ◇ 条件分岐	◇ Branches that split on number flags
+플래그를 아직 안 쓰는 ◇ 조건 분기 상자에 판단을 더해요	まだフラグを使っていない ◇ 条件分岐ボックスに判定を追加します	Add judgments to a ◇ branch box that doesn't use flags yet
+첫 플래그가 나머지보다 크거나 같을 때 (love >= trust)	最初のフラグがほかより大きいか同じとき (love >= trust)	When the first flag is at least each of the others (love >= trust)
+이 판단을 맨 아래 갈래로 더해요. 이을 상자는 캔버스에서 선으로 이어요	この判定をいちばん下の分岐として追加します。つなぐボックスはキャンバスで線をつなぎます	Adds this judgment as the last branch. Link its box with a line on the canvas
+고른 플래그를 더한 값이 기준 이상일 때 (love + trust >= 4)	選んだフラグの合計が基準以上のとき (love + trust >= 4)	When the chosen flags add up to at least the threshold (love + trust >= 4)
+고른 플래그가 모두 기준 이상일 때 (love >= 2 and trust >= 2)	選んだフラグがすべて基準以上のとき (love >= 2 and trust >= 2)	When all chosen flags are at least the threshold (love >= 2 and trust >= 2)
+고른 플래그 가운데 하나라도 기준 이상일 때 (love >= 2 or trust >= 2)	選んだフラグのどれか 1 つでも基準以上のとき (love >= 2 or trust >= 2)	When any chosen flag is at least the threshold (love >= 2 or trust >= 2)
