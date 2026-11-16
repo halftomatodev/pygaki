@@ -44,7 +44,7 @@ export function SpeakerSelect({ l, set, className }: { l: Line; set: SetLine; cl
 // 예전 값은 내보내기에 그대로 남고, 여기서 눌러 뺄 수 있다
 export function OldAttr({ attr, clear }: { attr: string; clear: () => void }) {
   return (
-    <button className="nodrag old-attr" title={'예전에 이 대사 줄에 넣은 표정이에요 (' + attr + '). 표정은 [그림, 영상] 카드에서 그림 줄로 넣어요. 누르면 이 줄에서 빼요'} onClick={clear}>
+    <button className="nodrag old-attr" title={`예전에 이 대사 줄에 넣은 표정이에요 (${attr}). 표정은 [그림, 영상] 카드에서 그림 줄로 넣어요. 누르면 이 줄에서 빼요`} onClick={clear}>
       표정 {attr} ✕
     </button>
   );
@@ -125,7 +125,7 @@ export function SayFields({ l, set }: { l: Line; set: SetLine }) {
     return (
       <div className="fx-slot" key={i}>
         <div className="fx-head">
-          <span className="fx-no">{i + 1}번</span>
+          <span className="fx-no">{`${i + 1}번`}</span>
           <select title={i ? '2번 효과: 1번과 같이 돌아요 (렌파이 effect="앞|뒤")' : '등장 효과'} value={p?.name ?? ''} onChange={(e) => pickFx(i, e.target.value)}>
             <option value="">{i ? '없음 (겹치지 않음)' : '효과 없음'}</option>
             {EFFECTS.filter(([k]) => k && k !== other).map(([k, t]) => (

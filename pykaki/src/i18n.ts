@@ -89,7 +89,7 @@ function trLine(t: string): string | null {
 }
 
 // ── 화면에 그려진 글 바꾸기 ──
-const ATTRS = ['title', 'placeholder', 'aria-label'];
+const ATTRS = ['title', 'placeholder', 'aria-label', 'label']; // label: <optgroup label>
 const textOrig = new WeakMap<Text, { orig: string; shown: string }>();
 const attrOrig = new WeakMap<Element, Record<string, { orig: string; shown: string }>>();
 const SKIP = 'textarea, script, style, pre, [data-no-tr]';
@@ -159,6 +159,7 @@ export function setLang(l: Lang) {
   }
   lang = l;
   document.documentElement.lang = l;
+  cssWords();
   if (l === 'ko') {
     observer?.disconnect();
     observer = null;
@@ -174,8 +175,14 @@ window.alert = wrap(window.alert);
 window.confirm = wrap(window.confirm);
 window.prompt = wrap(window.prompt);
 
+// CSS content로 그리는 글("사용 중" 배지)은 DOM 글이 아니라서 CSS 변수로 넘긴다
+function cssWords() {
+  document.documentElement.style.setProperty('--t-in-use', JSON.stringify(tr('사용 중')));
+}
+
 export function initI18n() {
   document.documentElement.lang = lang;
+  cssWords();
   if (document.body) start();
   else document.addEventListener('DOMContentLoaded', start);
 }

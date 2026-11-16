@@ -412,24 +412,46 @@ FLAG_MARK = "<!-- flag-recipes -->"
 
 
 def flag_recipes(lang="ko"):
-    """pykaki/src/flagRecipes.ts의 용례(빈 플래그 빼고)를 영상 카드 격자로. 영상은 pykaki/src/flagclips/<id>.webm"""
+    """pykaki/src/flagRecipes.ts의 용례(빈 플래그 빼고)를 [영상 | 설명·바꾸는 곳·보는 곳·원고] 줄로. 영상은 pykaki/src/flagclips/<id>.webm"""
     src = read("pykaki/src/flagRecipes.ts")
-    out = ['<div class="fx-grid">']
-    for m in re.finditer(r"\{\s*id: '(\w+)',\s*icon: '([^']*)',\s*title: '([^']*)',\s*kindHint: '([^']*)',\s*desc: '([^']*)',\s*flags: \[(.*?)\],\s*write:", src, re.S):
-        rid, icon, title, kind, desc, flags = m.groups()
+    strs = lambda t: [x.replace("\\'", "'") for x in re.findall(r"'((?:[^'\\]|\\.)*)'", t)]
+    out = ['<div class="g-cases">']
+    for m in re.finditer(r"\{\s*id: '(\w+)',\s*icon: '([^']*)',\s*title: '([^']*)',\s*kindHint: '([^']*)',\s*desc: '([^']*)',\s*flags: \[(.*?)\],"
+                         r"\s*write: \[(.*?)\],\s*read: \[(.*?)\],\s*code: '((?:[^'\\]|\\.)*)'", src, re.S):
+        rid, icon, title, kind, desc, flags, write, read_, code = m.groups()
         if rid == "blank":
             continue
         fn = os.path.join(ROOT, "pykaki", "src", "flagclips", rid + ".webm")
         if os.path.exists(fn):
             with open(fn, "rb") as f:
-                media = '<video class="wide" src="data:video/webm;base64,%s" autoplay loop muted playsinline preload="auto"></video>' % base64.b64encode(f.read()).decode("ascii")
+                media = '<video src="data:video/webm;base64,%s" autoplay loop muted playsinline preload="auto"></video>' % base64.b64encode(f.read()).decode("ascii")
         else:
             media = ""
         names = " ".join("<code>%s</code>" % html.escape(n) for n in re.findall(r"name: '(\w+)'", flags))
-        out.append('<figure class="fx-card">%s<figcaption><b>%s %s</b>%s<span>%s · %s</span></figcaption></figure>'
-                   % (media, html.escape(icon), html.escape(tr(title, lang)), names, html.escape(tr(kind, lang)), html.escape(tr(desc, lang))))
+        uses = "".join('<li class="w">✎ %s</li>' % html.escape(tr(w, lang)) for w in strs(write)) + \
+               "".join("<li>? %s</li>" % html.escape(tr(w, lang)) for w in strs(read_))
+        code = code.replace("\\n", "\n").replace("\\'", "'").replace("\\\\", "\\")
+        ## 원고 속 대사·선택지 글도 사전에 있으면 그 언어로
+        code = re.sub(r'"([^"]*[가-힣][^"]*)"', lambda q: '"%s"' % tr(q.group(1), lang), code)
+        out.append('<div class="g-case"><div class="g-case-v">%s</div><div class="g-case-t"><h4>%s %s <small>%s</small></h4>%s<p>%s</p><ul>%s</ul><pre><code>%s</code></pre></div></div>'
+                   % (media, html.escape(icon), html.escape(tr(title, lang)), html.escape(tr(kind, lang)), names,
+                      html.escape(tr(desc, lang)), uses, html.escape(code)))
     out.append("</div>")
     return "\n".join(out)
+
+
+# ── 안내서 영상 (GUIDE의 <!-- clip 이름 --> 줄 → bundle/guide/clips/이름.webm) ──
+
+CLIP_RE = re.compile(r"<!-- clip ([\w-]+) -->")
+
+
+def guide_clip(name):
+    fn = os.path.join(HERE, "clips", name + ".webm")
+    if not os.path.exists(fn):
+        raise SystemExit("영상이 없어요: %s" % os.path.relpath(fn, ROOT))
+    with open(fn, "rb") as f:
+        v = base64.b64encode(f.read()).decode("ascii")
+    return '<figure class="g-clip"><video src="data:video/webm;base64,%s" autoplay loop muted playsinline preload="auto"></video></figure>' % v
 
 
 # ── 페이지 ──
@@ -505,6 +527,20 @@ mark{background:var(--mark);color:inherit;border-radius:2px}
 .fx-none{color:#9aa3ad;font-size:12px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.4}
 .fx-card figcaption{padding:7px 10px 9px;display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline;font-size:14px}
 .fx-card figcaption span{color:var(--muted);font-size:12px;width:100%}
+.g-cases{margin:12px 0 24px}
+.g-case{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:18px;padding:18px 0;border-top:1px solid var(--line)}
+.g-case:first-child{border-top:0;padding-top:4px}
+.g-case video,.g-clip video{display:block;width:100%;aspect-ratio:16/9;background:#111;border-radius:8px}
+.g-case-t{min-width:0;font-size:14.5px}
+.g-case-t h4{margin:0 0 4px;font-size:16px}
+.g-case-t h4 small{font-size:12px;font-weight:500;color:var(--muted);background:var(--soft);border-radius:5px;padding:1px 6px;margin-left:4px}
+.g-case-t p{margin:6px 0}
+.g-case-t ul{list-style:none;padding:0;margin:6px 0;display:flex;flex-direction:column;gap:3px;font-size:13.5px}
+.g-case-t li{background:var(--soft);border-radius:6px;padding:3px 8px}
+.g-case-t li.w{background:var(--accent-soft)}
+.g-case-t pre{font-size:12.5px;margin:6px 0 0}
+.g-clip{margin:8px 0 10px;max-width:760px}
+@media (max-width:860px){.g-case{grid-template-columns:minmax(0,1fr);gap:10px}}
 .top{position:fixed;right:18px;bottom:18px;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:999px;width:42px;height:42px;font-size:18px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.12)}
 .menu-btn{display:none}
 @media (max-width:860px){
@@ -569,7 +605,7 @@ __BODY__
   }
   addEventListener('scroll',function(){requestAnimationFrame(mark)},{passive:true}); mark();
   // 견본 영상: 마우스를 올리면 처음부터
-  document.querySelectorAll('.fx-card video').forEach(function(v){v.parentNode.addEventListener('mouseenter',function(){v.currentTime=0;v.play()})});
+  document.querySelectorAll('.fx-card video,.g-case video,.g-clip video').forEach(function(v){v.parentNode.addEventListener('mouseenter',function(){v.currentTime=0;v.play()})});
   // 찾기: 낱말이 든 절만 남기고 표시
   var blocks=[].slice.call(document.querySelectorAll('main .blk'));
   var q=document.getElementById('q'),t=null;
@@ -675,8 +711,9 @@ def build(out_path=OUT, clips_dir=None, lang="ko", files=None):
                 stale_check(lang, cid, src, at)
             ## 원본 맨 위 제목(# …)은 장 제목으로 바꾼다
             text = re.sub(r"\A\s*#\s+[^\n]*\n", "", text)
-            inner = md(text.replace(FLAG_MARK, "FLAGRECIPESHERE"), src, heads, used)
+            inner = md(CLIP_RE.sub(r"\n\nCLIPHERE \1\n\n", text.replace(FLAG_MARK, "FLAGRECIPESHERE")), src, heads, used)
             inner = inner.replace("<p>FLAGRECIPESHERE</p>", flag_recipes(lang))
+            inner = re.sub(r"<p>CLIPHERE ([\w-]+)</p>", lambda m: guide_clip(m.group(1)), inner)
             note = '<p class="src">%s: <a href="%s/blob/main/%s" target="_blank" rel="noopener"><code>%s</code></a></p>' % (t["src"], REPO_URL, src, src) \
                 if not src.startswith("bundle/guide/") else ""
         else:

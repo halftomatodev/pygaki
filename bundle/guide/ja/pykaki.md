@@ -1,4 +1,4 @@
-<!-- 원본: pykaki/docs/GUIDE.md @ 0b7f3a6f91 -->
+<!-- 원본: pykaki/docs/GUIDE.md @ 8543204b19 -->
 # pygaki 使い方ガイド
 
 ボックスと線で Ren'Py のシナリオを書き、Ren'Py スクリプト(`.rpy`)に書き出すツールです。
@@ -263,6 +263,107 @@ Ren'Py のコマンドを知らなくても、行の種類で **演出** を選�
 - シナリオのボックスの次の流れで **▣ 画面を呼ぶ** を選んで画面を選ぶと、ボタンの値ごとに枝の点ができます。線でつなぎます。
 - 書き出すと `game/pykaki_screens.rpy` に画面が、スクリプトには `call screen 名前` の次に `if _return == "door":` の枝が入ります。画面だけを直しても、自動書き出しが画面のスクリプトを書き直します。
 - いちばん下のカードで、書き出す文をあらかじめ見ます。画面を消すと、呼んでいたボックスは「画面なし」になり、[チェック] が知らせます。
+
+### 小さな画面(show screen)
+[画面] タブで作る画面は、セリフを覆ってボタンを押すまで止まる **大きな画面**(`call screen`)です。Ren'Py には、セリフが流れているあいだ隅に出ている **小さな画面**(`show screen`)もあります。好感度バー、カバン、ミニマップ、時計などはこれで作ります。pygaki ではまだ小さな画面を作れないので、画面は `.rpy` ファイルに直接書き、シナリオでは **⚙ 直接コマンド** の行に `show screen 名前`、`hide screen 名前` と書きます。下の動画は Ren'Py で実際に撮った見本です(選択肢とボタンは自動で押されるようにして撮影。動画の中の文字は韓国語です)。
+
+| | call screen([画面] タブ) | show screen(小さな画面) |
+|---|---|---|
+| セリフ | 画面が閉じるまで止まる | 画面が出たまま流れ続ける |
+| 大きさ | ふつうは画面全体(`modal True`) | 隅に小さく。位置と大きさを決める |
+| 閉じる | ボタンを押すと値を返して閉じる(`Return`) | `hide screen`、またはボタンで開け閉め(`ToggleScreen`) |
+| 結果 | 返した値 `_return` で分岐 | ボタンがフラグを変えたり(`SetVariable`)別の場所へ行ったり(`Jump`) |
+| 使いどころ | 場所を選ぶ地図、大きなメニュー | ステータス、ミニマップ、カバン、時計 |
+
+#### call screen と show screen をくらべる
+<!-- clip screen-compare -->
+前半は [画面] タブが作る形です。画面がセリフを覆い、どれかを選ぶまで進みません。後半は小さな画面です。一度出すとセリフを何行か進めてもそのまま残り、`hide screen` で閉じます。
+
+```
+call screen big_map          # 選ぶまで止まる
+if _return == "cafe":
+    jump cafe
+
+show screen mini_map         # 出たままセリフは続く
+e "地図は右上にずっと出てるよ。"
+e "セリフを進めても消えないよ。"
+hide screen mini_map
+```
+
+#### 好感度バー(フラグを見せる小さな画面)
+<!-- clip screen-hud -->
+小さな画面はフラグをそのまま読んで描きます。選ぶたびに `love` が上がると、バーと数字も自動でついてきます。シナリオで別に直すところはありません。
+
+```
+screen love_hud():
+    frame:
+        xpos 16 ypos 70
+        vbox:
+            text "ミナの好感度"
+            bar value AnimatedValue(love, 5, 0.6)
+            text "[love] / 5"
+
+label cafe:
+    show screen love_hud
+```
+
+#### カバン(インベントリ)
+<!-- clip screen-bag -->
+いつも出ている [カバン] ボタンがカバンのウィンドウを開け閉めします。カバンの中はオン/オフのフラグで持っている物だけを見せ、物のボタンはフラグを変えます。シナリオはそのフラグを見て続きます。
+
+```
+screen bag_button():
+    textbutton "カバン":
+        action ToggleScreen("bag_panel")
+
+screen bag_panel():
+    frame:
+        vbox:
+            if has_key:
+                textbutton "鍵(使う)":
+                    action SetVariable("door_open", True)
+            text "メモ"
+
+if door_open:
+    "鍵を使うと扉が開いた。"
+```
+
+#### ミニマップ
+<!-- clip screen-map -->
+場所のボタンを押すとその場面へすぐ行きます(`Jump`)。今いる場所は文字のフラグ `place` で覚えておき、地図はその値を見て今の場所を塗ります。
+
+```
+default place = "home"
+
+screen mini_map():
+    frame:
+        xalign 1.0 ypos 70
+        vbox:
+            for key, nm in (("home", "家"), ("cafe", "カフェ")):
+                textbutton nm:
+                    action Jump("map_" + key)
+                    selected place == key
+
+label map_cafe:
+    $ place = "cafe"
+    scene bg cafe
+```
+
+#### 小さな画面で使う言葉
+| Ren'Py | 意味 |
+|---|---|
+| `show screen 名前` / `hide screen 名前` | シナリオで出す・閉じる |
+| `config.overlay_screens` | ゲーム中ずっと出しておく(`define config.overlay_screens += ["love_hud"]`) |
+| `zorder` | ほかの画面と重なったときの上下 |
+| `text "[love]"`、`bar value …` | フラグの値を文字やバーで |
+| `if has_key:` / `showif` | 条件のときだけ見せる |
+| `SetVariable`、`ToggleVariable` | ボタンがフラグを変える |
+| `Jump("label")` | ボタンがその場面へ行く |
+| `ToggleScreen("名前")` | ほかの小さな画面を開け閉めする |
+| `Return("値")` | call screen を閉じて値を返す([画面] タブの「返す値」) |
+
+- フラグは pygaki のフラグカードで作ったものをそのまま使います(`default love = 0` は書き出しのときに入ります)。
+- 小さな画面のスクリプトは `game` フォルダーに新しい `.rpy` ファイル(例:`my_screens.rpy`)として置きます。pygaki が書き直す `pykaki_screens.rpy` には入れません。
 
 ## 5. label(場面)の管理
 

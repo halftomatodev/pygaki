@@ -1,5 +1,6 @@
 // [효과] 화면: 글자 효과와 그림 효과를 한곳에서 보고, 켜고 끄고, 넣고 뺀다 (docs/EFFECTS_TAB_SPEC.md 3장).
 // 목록과 파일 다루기는 effectsLib.ts가 하고, 여기는 화면만 그린다. 샘플에서 맞춘 값은 저장하지 않는다 (값은 대사 줄마다 정함)
+import { tr } from './i18n';
 import { Hint } from './Help';
 import { Card } from './Card';
 import { useMemo, useRef, useState } from 'react';
@@ -28,7 +29,7 @@ const REQUEST_TEXT = /## 클로드에게[\s\S]*?```text\r?\n([\s\S]*?)```/.exec(
 // 글자 효과 샘플: 대사 미리보기와 같은 그리기(FxCanvas). 셰이더 코드가 틀리면 이유를 보여 준다
 export function TextSample({ spec, name, text, onReplay, onFrame }: { spec: string; name: string; text: string; onReplay(): void; onFrame?(canvas: HTMLCanvasElement, slow: number, maxTime: number): void }) {
   const look = useGameFolder((s) => s.look);
-  const parsed = useMemo(() => parseTagged(text.trim() ? text : SAMPLE_TEXT, false, gameFont), [text]);
+  const parsed = useMemo(() => parseTagged(text.trim() ? text : tr(SAMPLE_TEXT), false, gameFont), [text]);
   const { shown, click, fast, limit, holding } = useReveal(parsed, SAMPLE_CPS);
   const [bad, setBad] = useState<string | null>(null);
   const ts = useMemo(() => {
@@ -136,7 +137,7 @@ export function EffectsView() {
   const [query, setQuery] = useState('');
   const [picked, setPicked] = useState<Record<FxKind, string>>({ effect: '', transition: '' });
   const [args, setArgs] = useState<Record<string, Record<string, string>>>({}); // 샘플에서만 쓰는 값: 효과 이름 → { u__값: 값 }
-  const [text, setText] = useState(SAMPLE_TEXT);
+  const [text, setText] = useState(() => tr(SAMPLE_TEXT)) // 견본 글은 화면 언어로;
   const [replay, setReplay] = useState(0);
   const [busy, setBusy] = useState(false);
   const gallery = usePrefs((p) => p.gallery);

@@ -88,7 +88,7 @@ export function Sidebar() {
             </label>
             <label>
               <input type="checkbox" checked={project.settings.allowTextTags} onChange={(e) => update((p) => void (p.settings.allowTextTags = e.target.checked))} />
-              텍스트 태그 사용 ({'{b}'} 등)
+              {'텍스트 태그 사용 ({b} 등)'}
             </label>
             <label>
               <input type="checkbox" checked={project.settings.escapePercent} onChange={(e) => update((p) => void (p.settings.escapePercent = e.target.checked))} />

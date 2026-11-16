@@ -1098,7 +1098,7 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 /* 지금 쓰는 줄과 이어진 카드 (대사를 쓰면 대사·글자 효과, 연출 줄이면 그 종류 카드).
    [게임 줄 따라가기: 켬]의 녹색보다 살짝 밝게 */
 .card.in-use { background: color-mix(in srgb, #34c759 8%, var(--panel)); box-shadow: inset 0 0 0 1px color-mix(in srgb, #34c759 28%, transparent); }
-.card.in-use > h3 .card-title::after { content: '사용 중'; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 8px; color: color-mix(in srgb, #34c759 62%, var(--text)); background: color-mix(in srgb, #34c759 16%, var(--panel)); }
+.card.in-use > h3 .card-title::after { content: var(--t-in-use, '사용 중'); font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 8px; color: color-mix(in srgb, #34c759 62%, var(--text)); background: color-mix(in srgb, #34c759 16%, var(--panel)); }
 .sc-char { margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed var(--line); }
 .sc-char-h { font-size: 12px; color: var(--muted); margin: 2px 0 6px; }
 
@@ -1341,7 +1341,7 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .fmenu-keys span { display: inline-flex; align-items: center; gap: 3px; }
 .fmenu-keys kbd { padding: 0 4px; font-size: 9.5px; }
 .fmenu-card {
-  position: absolute; top: 0; width: 290px; padding: 10px 11px; border-radius: 12px; background: var(--panel);
+  position: absolute; top: 0; width: min(480px, calc(100vw - 300px)); max-height: calc(100vh - 16px); overflow: hidden; padding: 10px 11px; border-radius: 12px; background: var(--panel);
   border: 1px solid color-mix(in srgb, var(--text) 13%, transparent); box-shadow: 0 14px 40px rgba(0, 0, 0, 0.2);
   display: flex; flex-direction: column; gap: 7px; pointer-events: none;
 }
@@ -1358,5 +1358,6 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .fmenu-uses { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 3px; font-size: 11px; line-height: 1.4; }
 .fmenu-uses li { padding: 3px 7px; border-radius: 6px; background: var(--faint); }
 .fmenu-uses li.w { background: color-mix(in srgb, var(--accent) 9%, var(--panel)); }
-.fmenu-card .fd-code { max-height: 120px; }
+.fmenu-card .fd-code { max-height: 140px; }
+.fmenu-clip { border-radius: 8px; overflow: hidden; }
 .fmenu-foot { font-size: 10.5px; color: var(--muted); text-align: right; }

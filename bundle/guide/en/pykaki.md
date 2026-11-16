@@ -1,4 +1,4 @@
-<!-- 원본: pykaki/docs/GUIDE.md @ 0b7f3a6f91 -->
+<!-- 원본: pykaki/docs/GUIDE.md @ 8543204b19 -->
 # pygaki user guide
 
 A tool for writing Ren'Py scripts with boxes and lines and exporting them as Ren'Py script files (`.rpy`).
@@ -263,6 +263,107 @@ In the **[Screen]** tab at the top, drag and drop buttons to make a Ren'Py scree
 - In a script box's next flow, choose **▣ Call screen** and pick the screen; a branch dot appears for each button value. Connect them with lines.
 - On export, the screen goes into `game/pykaki_screens.rpy`, and the script gets `call screen name` followed by `if _return == "door":` branches. Even if you only change a screen, auto export rewrites the screen script.
 - Preview the exported text in the bottom card. If you delete a screen, boxes that called it become "No screen" and [Check] tells you.
+
+### Small screens (show screen)
+The screens you make in the [Screen] tab are **full screens** (`call screen`): they cover the dialogue and wait until a button is pressed. Ren'Py also has **small screens** (`show screen`) that stay in a corner while the dialogue keeps going. Affection bars, bags, minimaps and clocks are made this way. pygaki can't make small screens yet, so write the screen in a `.rpy` file yourself, and in the script put `show screen name` or `hide screen name` in a **⚙ Raw command** line. The videos below are samples recorded in Ren'Py (choices and buttons were clicked automatically; the text in the videos is Korean).
+
+| | call screen ([Screen] tab) | show screen (small screen) |
+|---|---|---|
+| Dialogue | Waits until the screen closes | Keeps going while the screen stays up |
+| Size | Usually the whole screen (`modal True`) | Small, in a corner. You set position and size |
+| Closing | A button returns a value and closes it (`Return`) | `hide screen`, or a button that opens and closes it (`ToggleScreen`) |
+| Result | Branch on the returned value `_return` | Buttons change flags (`SetVariable`) or go somewhere else (`Jump`) |
+| Used for | Location maps, big menus | Status panels, minimaps, bags, clocks |
+
+#### call screen vs. show screen
+<!-- clip screen-compare -->
+The first half is what the [Screen] tab makes: the screen covers the dialogue and you must pick something to move on. The second half is a small screen: once shown, it stays while you advance several lines, and `hide screen` closes it.
+
+```
+call screen big_map          # waits until you pick
+if _return == "cafe":
+    jump cafe
+
+show screen mini_map         # stays up, dialogue goes on
+e "The map stays in the top right."
+e "It doesn't go away when you advance."
+hide screen mini_map
+```
+
+#### Affection bar (a small screen that shows a flag)
+<!-- clip screen-hud -->
+A small screen reads flags directly. When `love` goes up with each choice, the bar and the number follow on their own. Nothing else in the script needs to change.
+
+```
+screen love_hud():
+    frame:
+        xpos 16 ypos 70
+        vbox:
+            text "Mina's affection"
+            bar value AnimatedValue(love, 5, 0.6)
+            text "[love] / 5"
+
+label cafe:
+    show screen love_hud
+```
+
+#### Bag (inventory)
+<!-- clip screen-bag -->
+An always-visible [Bag] button opens and closes the bag window. The bag shows only what you have, using on/off flags, and item buttons change flags. The script reads those flags to continue.
+
+```
+screen bag_button():
+    textbutton "Bag":
+        action ToggleScreen("bag_panel")
+
+screen bag_panel():
+    frame:
+        vbox:
+            if has_key:
+                textbutton "Key (use)":
+                    action SetVariable("door_open", True)
+            text "Note"
+
+if door_open:
+    "You use the key and the door opens."
+```
+
+#### Minimap
+<!-- clip screen-map -->
+A place button jumps straight to that scene (`Jump`). The current place is remembered in the text flag `place`, and the map uses it to highlight where you are.
+
+```
+default place = "home"
+
+screen mini_map():
+    frame:
+        xalign 1.0 ypos 70
+        vbox:
+            for key, nm in (("home", "Home"), ("cafe", "Cafe")):
+                textbutton nm:
+                    action Jump("map_" + key)
+                    selected place == key
+
+label map_cafe:
+    $ place = "cafe"
+    scene bg cafe
+```
+
+#### Words used with small screens
+| Ren'Py | Meaning |
+|---|---|
+| `show screen name` / `hide screen name` | Show or close it from the script |
+| `config.overlay_screens` | Keep it up for the whole game (`define config.overlay_screens += ["love_hud"]`) |
+| `zorder` | Which is on top when screens overlap |
+| `text "[love]"`, `bar value …` | Show a flag's value as text or a bar |
+| `if has_key:` / `showif` | Show only when a condition holds |
+| `SetVariable`, `ToggleVariable` | A button changes a flag |
+| `Jump("label")` | A button goes to that scene |
+| `ToggleScreen("name")` | Open or close another small screen |
+| `Return("value")` | Close a call screen and return a value (the [Screen] tab's "Return value") |
+
+- Use the flags you made in pygaki's flag card as they are (`default love = 0` is added on export).
+- Put small screen scripts in a new `.rpy` file in the `game` folder (e.g. `my_screens.rpy`). Don't put them in `pykaki_screens.rpy`, which pygaki rewrites.
 
 ## 5. Managing labels (scenes)
 

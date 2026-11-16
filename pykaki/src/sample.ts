@@ -16,12 +16,29 @@ const defaults = (): Project => ({
   nodes: [],
 });
 
+// 새 대본의 기본 이름은 화면 언어로 (대본에 저장되는 글이라 화면 사전으로 바꾸지 않고 처음부터 그 언어로 넣음)
+const EMPTY_NAMES = {
+  ko: { script: '새 대본', label: '프롤로그', box: '시작' },
+  ja: { script: '新しい台本', label: 'プロローグ', box: 'はじまり' },
+  en: { script: 'New script', label: 'Prologue', box: 'Opening' },
+};
+function uiLang(): keyof typeof EMPTY_NAMES {
+  try {
+    const v = localStorage.getItem('pygaki-lang'); // i18n.ts의 KEY (i18n.ts는 window를 건드려서 여기서 안 불러옴)
+    return v === 'ja' || v === 'en' ? v : 'ko';
+  } catch {
+    return 'ko';
+  }
+}
+
 export function createEmpty(): Project {
   const p = defaults();
-  p.labels.push({ id: uid('g'), name: 'prologue', title: '프롤로그', color: PALETTE[0], entry: null });
+  const t = EMPTY_NAMES[uiLang()];
+  p.project.title = t.script;
+  p.labels.push({ id: uid('g'), name: 'prologue', title: t.label, color: PALETTE[0], entry: null });
   const id = 'n01';
   p.nodes.push({
-    id, group: p.labels[0].id, title: '시작', pos: { x: 0, y: 0 },
+    id, group: p.labels[0].id, title: t.box, pos: { x: 0, y: 0 },
     lines: [{ id: uid('l'), type: 'narration', text: '' }],
     exit: { type: 'next', target: null },
   });

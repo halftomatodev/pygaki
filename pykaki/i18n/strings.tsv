@@ -1940,3 +1940,23 @@ ${r.flags.length}개	{0} 個	{0} flags
 물건을 주우면 켜고, 그 물건이 있어야 고를 수 있는 선택지를 보여 줘요. 없으면 선택지가 숨어요.	アイテムを拾ったらオンにし、そのアイテムがあるときだけ選べる選択肢を見せます。なければ選択肢は隠れます。	Turns on when the item is picked up and shows a choice that needs it. Without the item, the choice is hidden.
 두 값을 따로 쌓아서 끝을 셋으로 나눠요. 둘 다 넉넉하면 진짜 끝, 하나만 넉넉하면 좋은 끝, 아니면 보통 끝이에요.	2 つの値を別々に重ねて、エンディングを 3 つに分けます。両方十分なら真エンド、片方だけならグッドエンド、それ以外はノーマルエンドです。	Builds up two values separately to split the ending three ways: both high → true ending, one high → good ending, otherwise normal ending.
 마지막 ◇ 조건 분기: love ≥ 2 그리고 trust ≥ 2 → 진짜 끝, 아니고 love ≥ 2 → 좋은 끝, 그 밖 → 보통 끝	最後の ◇ 条件分岐:love ≥ 2 かつ trust ≥ 2 → 真エンド、そうでなく love ≥ 2 → グッドエンド、それ以外 → ノーマルエンド	Final ◇ condition: love ≥ 2 and trust ≥ 2 → true ending, else love ≥ 2 → good ending, otherwise → normal ending
+사용 중	使用中	In use
+# 메모	# メモ	# Note
+${i + 1}번	{0}番	No. {0}
+예전에 이 대사 줄에 넣은 표정이에요 (${attr}). 표정은 [그림, 영상] 카드에서 그림 줄로 넣어요. 누르면 이 줄에서 빼요	以前このセリフ行に入れた表情です ({0})。表情は [画像・動画] カードで画像行として入れます。押すとこの行から外します	Expression set on this line in an older version ({0}). Add expressions as image lines in the [Image, Video] card. Click to remove it from this line
+텍스트 태그 사용 ({b} 등)	テキストタグを使う ({b} など)	Use text tags ({b} etc.)
+좋아, 같이 가자	いいよ、一緒に行こう	Sure, let's go together
+바빠서 다음에	忙しいからまた今度	I'm busy, maybe next time
+처음 보네? 나는 앨리스야.	はじめましてかな? わたしはアリス。	First time we meet? I'm Alice.
+또 왔구나!	また来たね!	You're back!
+열쇠를 줍는다	鍵を拾う	Pick up the key
+열쇠로 연다	鍵で開ける	Open it with the key
+돌아간다	引き返す	Go back
+앞으로 나선다	前に出る	Step forward
+뒤로 숨는다	後ろに隠れる	Hide behind
+맞선다	立ち向かう	Stand up to it
+도망친다	逃げる	Run away
+바다로 간다	海へ行く	Go to the sea
+산으로 간다	山へ行く	Go to the mountains
+바다? 좋겠다.	海? いいなあ。	The sea? Lucky you.
+산? 다리 아프겠다.	山? 足が痛そう。	The mountains? Your legs must hurt.

@@ -1,5 +1,6 @@
 // [효과]·[셰이더] 왼쪽의 갤러리 보기: 카드마다 미리보기 그림. 고르면 오른쪽 칸에서 세부 값을 맞춘다.
 // 카드는 멈춘 그림(fx/thumbs.ts, WebGL 판 하나로 차례대로 그림)을 보여 주고, 마우스를 올린 카드 하나만 움직인다
+import { tr } from './i18n';
 import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useGameFolder, gameFont } from './gameFolder';
 import { usePrefs } from './prefs';
@@ -234,7 +235,7 @@ export function TextStill({ spec, name, text }: { spec: string; name: string; te
   if (shot) return <img src={shot} alt="" draggable={false} />;
   return (
     <div className="gal-text" style={{ color: look.textColor, fontFamily: `${gameFont(look.font) ?? 'var(--font)'}, var(--font)` }}>
-      {text.trim() || '안녕, 반가워!'}
+      {text.trim() || tr('안녕, 반가워!')}
     </div>
   );
 }

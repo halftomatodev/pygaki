@@ -261,6 +261,107 @@
 - 내보내면 `game/pykaki_screens.rpy`에 화면이, 원고에는 `call screen 이름` 다음 `if _return == "door":` 갈래가 들어가요. 화면만 고쳐도 자동 내보내기가 화면 원고를 다시 써요.
 - 맨 아래 카드에서 내보낼 글을 미리 봐요. 화면을 지우면 부르던 상자는 "화면 없음"이 되고 [검사]가 알려 줘요.
 
+### 작은 화면 (show screen)
+[화면] 탭이 만드는 화면은 대사를 덮고 버튼을 누를 때까지 멈추는 **큰 화면**(`call screen`)이에요. 렌파이에는 대사가 흐르는 동안 구석에 떠 있는 **작은 화면**(`show screen`)도 있어요. 호감도 막대, 가방, 미니맵, 시계 같은 것을 이렇게 만들어요. pygaki에서는 아직 작은 화면을 만들지 못해서, 화면은 `.rpy` 파일에 직접 쓰고 대본에서는 **⚙ 직접 명령** 줄에 `show screen 이름`, `hide screen 이름`을 적어요. 아래 영상은 렌파이에서 직접 찍은 견본이에요(선택지와 단추는 저절로 눌리게 해서 찍음).
+
+| | call screen ([화면] 탭) | show screen (작은 화면) |
+|---|---|---|
+| 대사 | 화면이 닫힐 때까지 멈춰요 | 화면이 떠 있는 채로 계속 흘러요 |
+| 크기 | 보통 화면 전체(`modal True`) | 구석에 작게. 자리와 크기를 정해요 |
+| 닫기 | 버튼을 누르면 값을 돌려주며 닫혀요(`Return`) | `hide screen`, 또는 단추로 열고 닫기(`ToggleScreen`) |
+| 결과 | 돌려준 값 `_return`으로 갈래 | 단추가 플래그를 바꾸거나(`SetVariable`) 다른 곳으로 가요(`Jump`) |
+| 쓰는 곳 | 장소 고르기 지도, 큰 메뉴 | 상태 창, 미니맵, 가방, 시계 |
+
+#### call screen과 show screen 견주기
+<!-- clip screen-compare -->
+앞부분은 [화면] 탭이 만드는 모양이에요. 화면이 대사를 덮고, 하나를 골라야 넘어가요. 뒷부분은 작은 화면이에요. 한 번 띄우면 대사를 몇 줄 넘겨도 그대로 있다가 `hide screen`으로 닫혀요.
+
+```
+call screen big_map          # 고를 때까지 멈춤
+if _return == "cafe":
+    jump cafe
+
+show screen mini_map         # 떠 있고 대사는 계속
+e "지도는 오른쪽 위에 계속 떠 있어."
+e "대사를 넘겨도 사라지지 않아."
+hide screen mini_map
+```
+
+#### 호감도 막대 (플래그를 보여 주는 작은 화면)
+<!-- clip screen-hud -->
+작은 화면은 플래그를 그대로 읽어서 그려요. 고를 때마다 `love`가 오르면 막대와 숫자도 저절로 따라 바뀌어요. 대본에서 따로 고칠 것이 없어요.
+
+```
+screen love_hud():
+    frame:
+        xpos 16 ypos 70
+        vbox:
+            text "미나 호감도"
+            bar value AnimatedValue(love, 5, 0.6)
+            text "[love] / 5"
+
+label cafe:
+    show screen love_hud
+```
+
+#### 가방 (인벤토리)
+<!-- clip screen-bag -->
+늘 떠 있는 [가방] 단추가 가방 창을 열고 닫아요. 가방 안은 켜짐/꺼짐 플래그로 가진 것만 보여 주고, 물건 단추는 플래그를 바꿔요. 대본은 그 플래그를 보고 이어 가요.
+
+```
+screen bag_button():
+    textbutton "가방":
+        action ToggleScreen("bag_panel")
+
+screen bag_panel():
+    frame:
+        vbox:
+            if has_key:
+                textbutton "열쇠 (쓰기)":
+                    action SetVariable("door_open", True)
+            text "쪽지"
+
+if door_open:
+    "열쇠를 쓰자 문이 열렸다."
+```
+
+#### 미니맵
+<!-- clip screen-map -->
+장소 단추를 누르면 그 장면으로 바로 가요(`Jump`). 지금 있는 곳은 글자 플래그 `place`로 기억하고, 지도는 그 값을 보고 지금 자리를 칠해요.
+
+```
+default place = "home"
+
+screen mini_map():
+    frame:
+        xalign 1.0 ypos 70
+        vbox:
+            for key, nm in (("home", "집"), ("cafe", "카페")):
+                textbutton nm:
+                    action Jump("map_" + key)
+                    selected place == key
+
+label map_cafe:
+    $ place = "cafe"
+    scene bg cafe
+```
+
+#### 작은 화면에 쓰는 말
+| 렌파이 | 뜻 |
+|---|---|
+| `show screen 이름` / `hide screen 이름` | 대본에서 띄우고 닫기 |
+| `config.overlay_screens` | 게임 내내 늘 띄우기(`define config.overlay_screens += ["love_hud"]`) |
+| `zorder` | 다른 화면과 겹칠 때 위아래 |
+| `text "[love]"`, `bar value …` | 플래그 값을 글이나 막대로 |
+| `if has_key:` / `showif` | 조건일 때만 보이기 |
+| `SetVariable`, `ToggleVariable` | 단추가 플래그를 바꿈 |
+| `Jump("label")` | 단추가 그 장면으로 감 |
+| `ToggleScreen("이름")` | 다른 작은 화면 열고 닫기 |
+| `Return("값")` | call screen을 닫고 값을 돌려줌([화면] 탭의 "돌려줄 값") |
+
+- 플래그는 pygaki 플래그 카드에서 만든 것을 그대로 써요(`default love = 0`은 내보낼 때 들어가요).
+- 작은 화면 원고는 `game` 폴더에 새 `.rpy` 파일(예: `my_screens.rpy`)로 두어요. pygaki가 다시 쓰는 `pykaki_screens.rpy`에는 넣지 않아요.
+
 ## 5. label(장면) 관리
 
 - 왼쪽 **label 목록**에서 이름, 표시 제목, 색을 바꿔요.
