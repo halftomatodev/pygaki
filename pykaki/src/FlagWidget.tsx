@@ -1,6 +1,6 @@
 // 플래그의 꼴 (FEATURE 20): 레벨 인디케이터(이어진 막대, 칸 막대, 별), 슬라이더, 스위치, 풀다운, 콤보박스.
 // 플래그 카드에서는 끌거나 눌러 시험 값을 바꾸고, 용례 메뉴의 견본에서는 저절로 움직인다. 부품마다 색이나 그림(게임 그림)으로 꾸민다
-import { useRef, type CSSProperties, type KeyboardEvent, type PointerEvent as RPE } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent as RPE } from 'react';
 import type { FlagUi } from './types';
 import { partColor, uiMax, uiMin } from './flagUi';
 import { usePic } from './ScreensView';
@@ -140,10 +140,43 @@ function NumberLook({ ui, value, onChange, label, marks, onMark }: Props) {
         ))}
       </div>
       <span className="fw-val">
-        {v}
+        {onChange ? <NumInput value={v} lo={lo} hi={hi} label={label} onChange={set} /> : v}
         <small> / {hi}</small>
       </span>
     </div>
+  );
+}
+
+// 수치 칸: 꼴 옆에서 값을 바로 침. 치는 중에는 빈 칸·"-"도 두고, 숫자가 되면 바로 바꾸고(범위 안으로), 칸을 떠나면 지금 값으로 맞춤
+function NumInput({ value, lo, hi, label, onChange }: { value: number; lo: number; hi: number; label?: string; onChange: (v: number) => void }) {
+  const [draft, setDraft] = useState(String(value));
+  const [typing, setTyping] = useState(false);
+  useEffect(() => {
+    if (!typing) setDraft(String(value));
+  }, [value, typing]);
+  return (
+    <input
+      className="fw-input"
+      type="number"
+      inputMode="numeric"
+      min={lo}
+      max={hi}
+      step={1}
+      value={draft}
+      aria-label={label ? `${label} 값` : '값'}
+      title={`${lo}~${hi}`}
+      onFocus={() => setTyping(true)}
+      onBlur={() => (setTyping(false), setDraft(String(value)))}
+      onChange={(e) => {
+        setDraft(e.target.value);
+        const n = Number(e.target.value);
+        if (e.target.value.trim() !== '' && Number.isFinite(n)) onChange(n);
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+        e.stopPropagation(); // 화살표 키가 꼴이나 캔버스로 가지 않게
+      }}
+    />
   );
 }
 
