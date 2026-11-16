@@ -2198,3 +2198,74 @@ HUD 틀에서 만들기	HUDのひな形から作る	Create from a HUD template
 격자 가로 칸	格子の横マス	Grid columns
 격자 세로 칸	格子の縦マス	Grid rows
 기호 색 칠하기	記号の色付け	Symbol tint
+꼴	見た目	Look
+별	星	Stars
+견본	見本	Sample
+눈금	目盛り	Ticks
+채움	塗り	Fill
+트랙	トラック	Track
+숨음	隠れる	Hidden
+꾸미기	カスタマイズ	Customize
+손잡이	つまみ	Thumb
+스위치	スイッチ	Switch
+안 감	行かない	Not taken
+최댓값	最大値	Max
+최솟값	最小値	Min
+풀다운	プルダウン	Pull-down
+고를 값	選べる値	Options
+빈 기호	空の記号	Empty symbol
+슬라이더	スライダー	Slider
+이 갈래	この分岐	This branch
+찬 기호	満ちた記号	Filled symbol
+채운 쪽	塗った側	Filled side
+칸 막대	区切りバー	Segmented bar
+콤보박스	コンボボックス	Combo box
+(빈 글)	(空の文字)	(empty)
+꺼짐 바탕	オフの背景	Off background
+레벨 모양	レベルの形	Level style
+켜짐 바탕	オンの背景	On background
+→ 보통 끝	→ 普通のエンド	→ Normal ending
+→ 좋은 끝	→ グッドエンド	→ Good ending
+갈림길이다.	分かれ道だ。	A fork in the road.
+이 값일 때	この値のとき	At this value
+이어진 막대	連続バー	Continuous bar
+처음 값으로	初期値に戻す	Back to start value
+${o} 빼기	{0} を外す	Remove {0}
+다시 해 보면…	もう一度やると…	Play again and…
+레벨 인디케이터	レベルインジケーター	Level indicator
+(열쇠를 주웠다)	(鍵を拾った)	(Picked up the key)
+${k + 1}번째	{0} 番目	Step {0}
+${label} 색	{0} の色	{0} color
+그림 (게임 폴더)	画像 (ゲームフォルダー)	Image (game folder)
+${f.name} 꼴	{0} の見た目	{0} look
+${label} 그림	{0} の画像	{0} image
+앨리스: 또 왔구나!	アリス: また来たんだね!	Alice: You came back!
+(만났다고 기억해 둠)	(会ったことを覚えておく)	(Remembers that you met)
+미나: 그래… 다음에.	ミナ: そっか… また今度。	Mina: Oh… next time, then.
+미나: 바다? 좋겠다.	ミナ: 海? いいなあ。	Mina: The sea? Sounds nice.
+미나: 오늘 즐거웠어.	ミナ: 今日は楽しかった。	Mina: I had fun today.
+미나: 정말? 고마워.	ミナ: 本当? ありがとう。	Mina: Really? Thanks.
+값 더하기 (Enter)	値を追加 (Enter)	Add a value (Enter)
+"${c.text}" 고르면	「{0}」を選ぶと	When "{0}" is chosen
+미나: 산? 다리 아프겠다.	ミナ: 山? 足が痛くなりそう。	Mina: The mountains? Your legs will hurt.
+미나: 처음 보는 얼굴이네.	ミナ: 初めて見る顔だね。	Mina: I haven't seen you before.
+love += 1 (두 번)	love += 1 (2 回)	love += 1 (twice)
+trust += 1 (두 번)	trust += 1 (2 回)	trust += 1 (twice)
+→ 좋은 끝 (love ≥ 2)	→ グッドエンド (love ≥ 2)	→ Good ending (love ≥ 2)
+"바빠서 다음에" 고르면 (그대로)	「忙しいからまた今度」を選ぶと (そのまま)	When "Busy, next time" is chosen (no change)
+꼴 고르기, 최솟값·최댓값, 꾸미기	見た目の選択、最小値・最大値、カスタマイズ	Choose look, min/max, customize
+별은 10개까지 (한 별이 여러 값)	星は 10 個まで (1 つの星が複数の値)	Up to 10 stars (one star covers several values)
+앨리스: 처음 보네? 나는 앨리스야.	アリス: 初めましてかな? 私はアリス。	Alice: First time? I'm Alice.
+${label} 색 (#rrggbbaa)	{0} の色 (#rrggbbaa)	{0} color (#rrggbbaa)
+"우산 같이 쓰자" 고르면 love += 1	「傘に一緒に入ろう」を選ぶと love += 1	When "Share my umbrella" is chosen, love += 1
+◆ ${c.text || '(빈 선택지)'}	◆ {0}	◆ {0}
+"좋아, 같이 가자" 고르면 love += 1	「いいよ、一緒に行こう」を選ぶと love += 1	When "Sure, let's go together" is chosen, love += 1
+꼴은 플래그 카드와 견본에서 보이는 모양이에요	見た目は、フラグカードと見本で表示される形です	The look is how the flag appears in the flag card and samples
+대본에서 찾은 글이에요. 누르면 목록에 넣어요	台本で見つけた文字です。押すと一覧に入れます	Text found in the script. Click to add it to the list
+"바다로 간다" 고르면 route = "sea"	「海へ行く」を選ぶと route = "sea"	When "Go to the sea" is chosen, route = "sea"
+"앞으로 나선다" 고르면 courage += 1	「前に出る」を選ぶと courage += 1	When "Step forward" is chosen, courage += 1
+"열쇠를 줍는다" 고르면 has_key = True	「鍵を拾う」を選ぶと has_key = True	When "Pick up the key" is chosen, has_key = True
+시험 값을 처음 값으로 (시험 값은 저장되지 않아요)	試しの値を初期値に戻す (試しの値は保存されません)	Reset the test value to the start value (test values aren't saved)
+"산으로 간다" 고르면 route = "mountain"	「山へ行く」を選ぶと route = "mountain"	When "Go to the mountains" is chosen, route = "mountain"
+→ 진짜 끝 (love ≥ 2 그리고 trust ≥ 2)	→ トゥルーエンド (love ≥ 2 かつ trust ≥ 2)	→ True ending (love ≥ 2 and trust ≥ 2)
+그림을 넣으면 그 부품을 그림으로 그려요(늘여 맞춤). 그림은 연결한 게임 폴더에서 찾아요	画像を入れると、その部品を画像で描きます(引き伸ばして合わせる)。画像は接続したゲームフォルダーから探します	Set an image to draw that part with it (stretched to fit). Images are looked up in the connected game folder

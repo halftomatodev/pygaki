@@ -248,7 +248,7 @@ export function ScreenArt({ sc, scale, vars, sel = null, onMove, onHudDown }: { 
   );
 }
 
-function usePic(name: string) {
+export function usePic(name: string) {
   const [url, setUrl] = useState<string | null>(null);
   const seq = useGameFolder((s) => s.fxSeq);
   useEffect(() => {

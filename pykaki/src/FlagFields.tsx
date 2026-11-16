@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useStore } from './store';
 import { Card } from './Card';
 import { FlagMenu } from './FlagMenu';
+import { FlagLookRow } from './FlagLook';
 import { addRecipeFlags, type FlagRecipe } from './flagRecipes';
 import type { Flag, FlagKind } from './types';
 import { screenFlagUses } from './screens';
@@ -99,6 +100,7 @@ function FlagRow({ f }: { f: Flag }) {
         <button className="x" onClick={remove} title="삭제">✕</button>
       </div>
       <input className="fnote" value={f.note ?? ''} placeholder="메모 (예: 앨리스를 만났는지)" onChange={(e) => set((x) => void (e.target.value ? (x.note = e.target.value) : delete x.note), 'fnote' + f.id)} />
+      <FlagLookRow f={f} />
       <div className="flag-uses">
         {!uses.length && !sUses.length && <span className="tip">아직 안 씀</span>}
         {sUses.map((u, i) => (

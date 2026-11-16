@@ -2,7 +2,10 @@
 // 위아래 화살표로 고르고 Enter로 만들기, Esc나 바깥을 누르면 닫힘. [화면] 탭의 [+ HUD 틀에서]도 같은 메뉴(PickMenu)를 쓴다
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { FLAG_RECIPES } from './flagRecipes';
+import { FLAG_RECIPES, type DemoStep } from './flagRecipes';
+import type { FlagKind, FlagUi } from './types';
+import { FlagWidget } from './FlagWidget';
+import { flagUi } from './flagUi';
 
 // 메뉴 한 줄과 설명 카드에 들어가는 것
 export interface PickEntry {
@@ -16,11 +19,12 @@ export interface PickEntry {
   read: string[]; // ? 보는 곳
   code: string;
   clip?: string; // 영상 url
+  demo?: { flags: { name: string; kind: FlagKind; ui?: FlagUi }[]; steps: DemoStep[] }; // 움직이는 견본 (있으면 영상 대신)
   foot: string; // 카드 바닥 글
 }
 
 export function FlagMenu({ anchor, onPick, onClose }: { anchor: HTMLElement; onPick: (r: (typeof FLAG_RECIPES)[number]) => void; onClose: () => void }) {
-  const items: PickEntry[] = FLAG_RECIPES.map((r) => ({ ...r, chips: r.flags.map((f) => f.name), foot: r.flags.length > 1 ? `누르거나 Enter: 플래그 ${r.flags.length}개 만들기` : '누르거나 Enter: 플래그 만들기' }));
+  const items: PickEntry[] = FLAG_RECIPES.map((r) => ({ ...r, clip: r.demo ? undefined : r.clip, demo: r.demo && { flags: r.flags, steps: r.demo }, chips: r.flags.map((f) => f.name), foot: r.flags.length > 1 ? `누르거나 Enter: 플래그 ${r.flags.length}개 만들기` : '누르거나 Enter: 플래그 만들기' }));
   return <PickMenu anchor={anchor} items={items} first={1} placeholder="어떤 플래그를 만들까요?" section="용례에서 만들기" empty="맞는 용례가 없어요" onPick={(e) => onPick(FLAG_RECIPES.find((r) => r.id === e.id)!)} onClose={onClose} />;
 }
 
@@ -120,6 +124,7 @@ function RecipeCard({ r, menu }: { r: PickEntry; menu: HTMLElement | null }) {
         </span>
       </div>
       <p className="fmenu-desc">{r.desc}</p>
+      {r.demo && <RecipeDemo key={r.id} demo={r.demo} />}
       {r.clip && (
         <div className="clip fmenu-clip">
           <video key={r.id} src={r.clip} autoPlay loop muted playsInline />
@@ -138,6 +143,40 @@ function RecipeCard({ r, menu }: { r: PickEntry; menu: HTMLElement | null }) {
       )}
       <pre className="fd-code">{r.code}</pre>
       <div className="fmenu-foot">{r.foot}</div>
+    </div>
+  );
+}
+
+// 움직이는 견본 (FEATURE 20): 걸음마다 꼴의 값이 바뀌고, 그 아래에 그 값을 만든 식과 보이는 대사·선택지. 끝나면 처음부터
+function RecipeDemo({ demo }: { demo: NonNullable<PickEntry['demo']> }) {
+  const [i, setI] = useState(0);
+  const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  useEffect(() => {
+    if (reduce) return;
+    const t = setInterval(() => setI((x) => (x + 1) % demo.steps.length), 1500);
+    return () => clearInterval(t);
+  }, [demo, reduce]);
+  const s = demo.steps[Math.min(i, demo.steps.length - 1)];
+  return (
+    <div className="fdemo" aria-label="견본">
+      <div className="fdemo-looks">
+        {demo.flags.map((f) => (
+          <div key={f.name} className="fdemo-look">
+            <code>{f.name}</code>
+            <FlagWidget ui={flagUi(f)} value={s.vals[f.name] ?? (f.kind === 'bool' ? false : f.kind === 'int' ? 0 : '')} options={flagUi(f).options} label={f.name} />
+          </div>
+        ))}
+      </div>
+      <div className="fdemo-step">
+        <pre className="fdemo-code">{s.code}</pre>
+        {s.say && <div className="fdemo-say">{s.say}</div>}
+        {s.choice && <div className={'fdemo-choice' + (s.choice.open ? ' open' : '')}>{s.choice.open ? '◆' : '🔒'} {s.choice.text}</div>}
+      </div>
+      <div className="fdemo-dots">
+        {demo.steps.map((_, k) => (
+          <button key={k} className={k === i ? 'on' : ''} aria-label={`${k + 1}번째`} onClick={() => setI(k)} />
+        ))}
+      </div>
     </div>
   );
 }

@@ -1484,3 +1484,82 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .fwiz-foot .fwiz-why { flex: 1; min-width: 0; }
 .fwiz-foot .fwiz-why + .sp { display: none; }
 .fd-addrow { display: flex; gap: 3px; flex-wrap: wrap; }
+
+/* 플래그 꼴 (FEATURE 20): 레벨 인디케이터, 슬라이더, 스위치, 풀다운, 콤보 */
+.flag-look { margin: 2px 0 4px; }
+.flag-look-row { display: flex; align-items: center; gap: 6px; min-height: 26px; }
+.flag-look-row .sp { flex: 1; }
+.flag-look-btn { font-size: 11px; padding: 2px 7px; white-space: nowrap; }
+.fw-num { display: flex; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0; max-width: 240px; }
+.fw-area { position: relative; flex: 1; min-width: 60px; padding: 6px 0; outline: none; touch-action: none; }
+.fw-num.live .fw-area { cursor: pointer; }
+.fw-area:focus-visible { box-shadow: 0 0 0 2px var(--accent-soft); border-radius: 6px; }
+.fw-val { font: 600 12px var(--mono); min-width: 40px; white-space: nowrap; }
+.fw-val small { font-weight: 400; color: var(--muted); }
+.fw-level { position: relative; height: 12px; border: 1px solid; border-radius: 3px; overflow: hidden; box-sizing: border-box; }
+.fw-level .fw-fill { position: absolute; inset: 0 auto 0 0; transition: width .18s ease-out; }
+.fw-level.discrete { display: flex; gap: 2px; padding: 1px; }
+.fw-level.discrete .fw-seg { flex: 1; border-radius: 1px; background: transparent; transition: background .15s; }
+.fw-stars { display: flex; gap: 2px; font-size: 17px; line-height: 1; }
+.fw-stars img { width: 18px; height: 18px; object-fit: contain; }
+.fw-slider { position: relative; height: 16px; margin: 0 8px; }
+.fw-slider .fw-track { position: absolute; left: 0; right: 0; top: 6px; height: 4px; border-radius: 2px; }
+.fw-slider .fw-done { right: auto; transition: width .18s ease-out; }
+.fw-slider .fw-tick { position: absolute; top: 12px; width: 1px; height: 4px; transform: translateX(-.5px); }
+.fw-slider .fw-thumb { position: absolute; top: 0; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,.35), 0 0 0 .5px rgba(0,0,0,.15); transition: left .18s ease-out; }
+.fw-slider .fw-thumb.img { object-fit: contain; box-shadow: none; border-radius: 0; }
+.fw-num.live .fw-area:active .fw-fill, .fw-num.live .fw-area:active .fw-done, .fw-num.live .fw-area:active .fw-thumb { transition: none; }
+.fw-mark { position: absolute; top: -9px; transform: translateX(-50%); font-size: 9px; line-height: 1; color: var(--muted); pointer-events: auto; }
+.fw-mark.ok { color: #22a55b; font-weight: 700; }
+.fw-switch { display: inline-flex; align-items: center; gap: 6px; position: relative; width: 40px; height: 22px; padding: 0; border: 0; border-radius: 11px; cursor: pointer; transition: background .2s; flex: none; }
+.fw-switch:disabled { cursor: default; opacity: 1; }
+.fw-switch .fw-knob { position: absolute; left: 2px; top: 2px; width: 18px; height: 18px; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: left .2s; }
+.fw-switch .fw-knob.img { object-fit: contain; box-shadow: none; border-radius: 0; }
+.fw-switch.on .fw-knob { left: 20px; }
+.fw-switch .fw-sw-text { position: absolute; left: 46px; font-size: 11.5px; color: var(--text); white-space: nowrap; }
+.fw-switch:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.flag-look-row:has(.fw-switch) .fw-switch { margin-right: 40px; }
+.fw-pull, .fw-combo input { border: 1px solid; border-radius: 6px; padding: 2px 6px; font-size: 12px; min-width: 110px; max-width: 180px; }
+.fw-pull:disabled, .fw-combo input[readonly] { opacity: 1; }
+.flag-effects { list-style: none; margin: 3px 0 2px; padding: 4px 6px; display: flex; flex-direction: column; gap: 2px; background: var(--soft, color-mix(in srgb, var(--text) 4%, var(--panel))); border-radius: 6px; font-size: 11.5px; }
+.flag-effects li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 5px; }
+.flag-effects code { font-family: var(--mono); font-size: 11px; }
+.flag-effects .fe-box { font-size: 11px; color: var(--muted); }
+.flag-effects .fe-res { font-weight: 600; padding: 0 5px; border-radius: 8px; background: color-mix(in srgb, var(--text) 8%, transparent); white-space: nowrap; }
+.flag-effects li.ok .fe-res { color: #1f8f4e; background: color-mix(in srgb, #22a55b 15%, transparent); }
+.flag-effects li.no .fe-res { color: var(--muted); }
+.flag-effects li.no .fe-text { color: var(--muted); text-decoration: line-through; }
+.flag-effects .fe-act .fe-res { color: var(--accent); background: var(--accent-soft); }
+.flag-effects .fe-text { flex-basis: 100%; padding-left: 10px; }
+.flag-effects .fe-where { color: var(--muted); }
+.flook-pop { width: 380px; }
+.flook-seg { display: flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+.flook-seg button { flex: 1; border: 0; border-radius: 0; padding: 4px 6px; background: transparent; font-size: 12px; }
+.flook-seg button + button { border-left: 1px solid var(--line); }
+.flook-seg button.on { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.flook-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.flook-row input { width: 64px; }
+.flook-sub { font-size: 11px; font-weight: 600; color: var(--muted); }
+.flook-opts, .flook-skin { display: flex; flex-direction: column; gap: 4px; }
+.flook-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.flook-chips .chip { display: inline-flex; align-items: center; gap: 2px; padding: 1px 2px 1px 8px; border-radius: 10px; background: var(--accent-soft); font-size: 11.5px; }
+.flook-chips .chip .x { min-width: 22px; min-height: 20px; padding: 0; border: 0; background: transparent; }
+.flook-chips .chip.add { padding: 1px 8px; border: 1px dashed var(--line); background: transparent; color: var(--muted); }
+.flook-part { display: flex; align-items: center; gap: 4px; }
+.flook-plabel { flex: 0 0 64px; font-size: 11.5px; }
+.flook-part input[type=color] { width: 26px; height: 22px; padding: 0 1px; flex: none; }
+.flook-hex { width: 82px; font-family: var(--mono); font-size: 11px; flex: none; }
+.flook-img { flex: 1; min-width: 0; font-size: 11.5px; }
+.flook-part .x { flex: none; }
+.fdemo { display: flex; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: color-mix(in srgb, var(--text) 4%, var(--panel)); }
+.fdemo-looks { display: flex; flex-direction: column; gap: 4px; }
+.fdemo-look { display: flex; align-items: center; gap: 8px; }
+.fdemo-look > code { flex: 0 0 64px; font: 11.5px var(--mono); color: var(--muted); }
+.fdemo-step { min-height: 52px; display: flex; flex-direction: column; gap: 4px; }
+.fdemo-code { margin: 0; padding: 3px 6px; font: 11px var(--mono); background: var(--panel); border-radius: 5px; white-space: pre-wrap; }
+.fdemo-say { font-size: 12px; }
+.fdemo-choice { align-self: flex-start; padding: 3px 10px; border-radius: 6px; border: 1px dashed var(--line); color: var(--muted); font-size: 12px; transition: all .2s; }
+.fdemo-choice.open { border-style: solid; border-color: #22a55b; color: var(--text); background: color-mix(in srgb, #22a55b 12%, transparent); }
+.fdemo-dots { display: flex; gap: 4px; justify-content: center; }
+.fdemo-dots button { width: 7px; height: 7px; min-height: 0; padding: 0; border: 0; border-radius: 50%; background: var(--line); }
+.fdemo-dots button.on { background: var(--accent); }

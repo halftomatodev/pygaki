@@ -202,6 +202,23 @@ export interface Flag {
   kind: FlagKind; // 켜짐/꺼짐 | 숫자 | 글자
   init: boolean | number | string; // 처음 값
   note?: string; // 작가 메모 (원고에 주석으로)
+  ui?: FlagUi; // 플래그 카드·견본에서 보이는 꼴 (FEATURE 20). 없으면 종류로 정함 (flagUi.ts)
+}
+
+// 플래그의 꼴 (FEATURE 20): 숫자는 레벨 인디케이터·슬라이더, 켜짐/꺼짐은 스위치, 글자는 풀다운·콤보박스
+export type FlagLook = 'level' | 'slider' | 'switch' | 'pulldown' | 'combo';
+export type LevelStyle = 'continuous' | 'discrete' | 'rating';
+export interface FlagSkinPart {
+  color?: string; // #rrggbb 또는 #rrggbbaa
+  image?: string; // 게임 그림 이름 (예: gui/heart.png)
+}
+export interface FlagUi {
+  look: FlagLook;
+  style?: LevelStyle; // 레벨 인디케이터: 이어진 막대 | 칸 막대 | 별(기호)
+  min?: number; // 숫자: 가장 작은 값 (없으면 0)
+  max?: number; // 숫자: 가장 큰 값 (없으면 10)
+  options?: string[]; // 글자: 고를 값 목록
+  skin?: Record<string, FlagSkinPart>; // 부품마다 색·그림 (부품 이름은 flagUi.ts SKIN_PARTS)
 }
 
 export interface Character {

@@ -1,6 +1,7 @@
 // 플래그(렌파이 변수) 다루기 (FEATURE 14). 처음 값은 원고 맨 위 default, 바꾸기는 $ 줄, 보기는 조건식
 import type { Flag, FlagKind, Project } from './types';
 import { IDENT, PLUGIN_NAMES, RESERVED } from './util';
+import { normalizeUi } from './flagUi';
 
 export const KIND_LABEL: Record<FlagKind, string> = { bool: '켜짐/꺼짐', int: '숫자', str: '글자' };
 
@@ -156,7 +157,7 @@ export function normalizeFlags(raw: unknown): Flag[] {
   for (const v of raw as any[]) {
     if (!v || typeof v !== 'object' || typeof v.name !== 'string') continue;
     const kind: FlagKind = v.kind === 'bool' || v.kind === 'int' || v.kind === 'str' ? v.kind : typeof v.init === 'boolean' ? 'bool' : typeof v.init === 'number' ? 'int' : 'str';
-    out.push({ id: typeof v.id === 'string' && v.id ? v.id : 'v' + Date.now().toString(36) + seq++, name: v.name, kind, init: fitInit(kind, v.init), ...(typeof v.note === 'string' && v.note ? { note: v.note } : {}) });
+    out.push({ id: typeof v.id === 'string' && v.id ? v.id : 'v' + Date.now().toString(36) + seq++, name: v.name, kind, init: fitInit(kind, v.init), ...(typeof v.note === 'string' && v.note ? { note: v.note } : {}), ...(normalizeUi(v.ui) ? { ui: normalizeUi(v.ui) } : {}) });
   }
   return out;
 }
