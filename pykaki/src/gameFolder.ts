@@ -9,7 +9,7 @@ import { setFolderEffects, type EffectPack } from './fx/textShaders';
 import { parseEffectsOff, refreshEffects, setEffectsOff } from './stage';
 import { setShaderList, setShadersOff } from './shader';
 import { codeImages, type ImageBook } from './imageCheck';
-import { SCREENS_FILE } from './screens';
+import { SCREENS_FILE, SCREENS_META_FILE } from './screens';
 
 export const hasDirPicker = isDesktop; // 폴더는 앱에서만 연다 (웹 버전은 2026-11-12에 없앰)
 export const INBOX_FILE = 'showpy_inbox.json';
@@ -392,11 +392,15 @@ export const looksLikeGame = async () => (await readText(dir, 'gui.rpy')) !== nu
 export const readRpyFromFolder = () => readText(dir, RPY_FILE);
 
 // screens: 화면 만들기 원고 (pykaki_screens.rpy). 화면이 없는 대본이면 null (예전에 쓴 파일이 있을 때만 비운다). 바뀐 것만 쓴다
-export async function writeScreensToFolder(screens: { code: string; has: boolean }) {
+// meta: 게임 안 편집 화면의 [화면] 탭이 읽는 화면 자리 (pykaki_screens.json, 개발용). 원고를 쓸 때 같이, 바뀐 것만
+export async function writeScreensToFolder(screens: { code: string; has: boolean; meta?: string }) {
   const old = await readText(dir, SCREENS_FILE);
   if ((screens.has || old !== null) && old !== screens.code) await writeText(dir, SCREENS_FILE, screens.code);
+  if (screens.meta === undefined) return;
+  const oldMeta = await readText(dir, SCREENS_META_FILE);
+  if ((screens.has || oldMeta !== null) && oldMeta !== screens.meta) await writeText(dir, SCREENS_META_FILE, screens.meta);
 }
-export async function writeRpyToFolder(code: string, goto?: { line: number | null }, screens?: { code: string; has: boolean }) {
+export async function writeRpyToFolder(code: string, goto?: { line: number | null }, screens?: { code: string; has: boolean; meta?: string }) {
   if (screens) await writeScreensToFolder(screens);
   // 옮겨 갈 줄을 먼저 적는다. 게임은 원고가 바뀐 것을 보고 이 파일을 읽는다
   if (goto) await writeText(dir, GOTO_FILE, JSON.stringify({ format: 'pykaki-goto', version: 1, file: 'game/' + RPY_FILE, line: goto.line, time: Date.now() }));

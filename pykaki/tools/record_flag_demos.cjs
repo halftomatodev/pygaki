@@ -18,7 +18,6 @@ const OUT = path.join(ROOT, 'src', 'flagclips');
 // 용례 id → 메뉴 줄 이름, 걸음 수 (flagRecipes.ts의 demo 길이. 걸음마다 1.5초)
 const RECIPES = { affection: ['호감도', 5], met_once: ['한 번 본 장면', 3], item: ['물건 얻기·쓰기', 3], locked_choice: ['잠긴 선택지', 4], route: ['갈래 정하기', 3], ending: ['여러 끝', 4] };
 const STEP = 1.5;
-const SCALE = 2; // 또렷하게 두 배로 그림
 const slash = (p) => p.split(path.sep).join('/');
 
 async function launch() {
@@ -37,8 +36,9 @@ async function launch() {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'pk_flagdemo_'));
   const browser = await launch();
   const vw = 1280, vh = 860;
-  // 영상 녹화(recordVideo)는 playwright 전용 ffmpeg가 있어야 해서, 견본 부분을 연달아 찍고 찍은 때로 이어 붙인다
-  const ctx = await browser.newContext({ viewport: { width: vw, height: vh }, deviceScaleFactor: SCALE, reducedMotion: 'no-preference' });
+  // 영상 녹화(recordVideo)는 playwright 전용 ffmpeg가 있어야 해서, 크롬 screencast 프레임을 찍은 때로 이어 붙인다
+  // screencast는 기기 배율(deviceScaleFactor)을 따르지 않고 CSS 픽셀로 옴 → 1배로 그대로 씀
+  const ctx = await browser.newContext({ viewport: { width: vw, height: vh }, deviceScaleFactor: 1, reducedMotion: 'no-preference' });
   for (const id of ids) {
     const [title, steps] = RECIPES[id];
     const page = await ctx.newPage();
@@ -48,13 +48,30 @@ async function launch() {
     const demo = page.locator('.fdemo');
     await demo.waitFor();
     const dir = fs.mkdtempSync(path.join(tmp, id + '_'));
-    const t0 = Date.now();
+    // 크롬 화면 흘려 찍기(screencast): 화면이 바뀔 때마다 한 장(초당 수십 장). 견본 칸 자리로 잘라 씀
+    const box = await demo.boundingBox();
+    const cdp = await ctx.newCDPSession(page);
     const shots = [];
-    while (Date.now() - t0 < steps * STEP * 1000) {
-      const f = path.join(dir, `f${String(shots.length).padStart(4, '0')}.png`);
-      await demo.screenshot({ path: f, animations: 'allow' });
-      shots.push([f, Date.now() - t0]);
-    }
+    let t0 = 0;
+    const pending = [];
+    cdp.on('Page.screencastFrame', (e) => {
+      const t = e.metadata.timestamp * 1000;
+      if (!t0) t0 = t;
+      const f = path.join(dir, `f${String(shots.length).padStart(5, '0')}.jpg`);
+      shots.push([f, t - t0]);
+      pending.push(fs.promises.writeFile(f, Buffer.from(e.data, 'base64')));
+      cdp.send('Page.screencastFrameAck', { sessionId: e.sessionId }).catch(() => {});
+    });
+    await cdp.send('Page.startScreencast', { format: 'jpeg', quality: 95, everyNthFrame: 1 });
+    const end = Date.now() + steps * STEP * 1000 + 300;
+    while (Date.now() < end) await page.waitForTimeout(50);
+    await cdp.send('Page.stopScreencast');
+    await Promise.all(pending);
+    const keep = shots.filter(([, t]) => t <= steps * STEP * 1000);
+    if (keep.length) shots.splice(0, shots.length, ...keep);
+    // 프레임 크기로 배율을 셈 (screencast는 기기 픽셀로 옴)
+    const fw = Number(execFileSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width', '-of', 'csv=p=0', shots[0][0]]).toString().trim());
+    const k = fw / vw;
     await page.close();
     // ffconcat: 프레임마다 다음 프레임까지의 시간
     const lines = ['ffconcat version 1.0'];
@@ -66,7 +83,8 @@ async function launch() {
     const list = path.join(dir, 'list.txt');
     fs.writeFileSync(list, lines.join('\n'));
     const out = path.join(OUT, id + '.webm');
-    execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', list, '-vf', 'scale=trunc(iw/4)*2:-2,fps=15', '-c:v', 'libvpx-vp9', '-b:v', '0', '-crf', '34', '-an', out]);
+    const crop = `crop=${Math.round(box.width * k)}:${Math.round(box.height * k)}:${Math.round(box.x * k)}:${Math.round(box.y * k)}`;
+    execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', list, '-vf', crop + ',scale=trunc(iw/2)*2:-2,fps=30', '-c:v', 'libvpx-vp9', '-b:v', '0', '-crf', '34', '-an', out]);
     console.log(id.padEnd(15), shots.length, '장', (fs.statSync(out).size / 1024).toFixed(1), 'KB');
   }
   await ctx.close();

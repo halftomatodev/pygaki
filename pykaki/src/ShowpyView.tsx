@@ -35,6 +35,7 @@ const SECTIONS: Section[] = [
   { id: 'stage', label: '그림, 영상 배치', tab: 'stage', app: false, mirror: true, note: '그림을 넣는 것은 [대본 편집] 상자의 배경, 그림·영상 카드에서 해요. 여기서는 게임 화면에서 자리를 끌어 정해요.' },
   { id: 'hotkeys', label: '단축키 수정', tab: 'hotkeys', app: false, mirror: true, note: '기능 옆 키 단추를 누르고 게임 창에서 바꿀 키를 눌러요. 다른 기능이 쓰는 키면 경고와 안내가 나와요. [안내 화면으로 내보내기]를 누르면 조작 안내 화면의 표가 이 설정을 따라가고, 보여 줄 기능은 조작 안내 화면에서 골라요. pygaki 플러그인 hotkeys 1.2부터 있어요.' },
   { id: 'ui_text', label: '종료 메시지, 버튼 글', tab: 'ui_text', app: false, mirror: true, note: '종료 확인 창, 퀵메뉴 버튼 같은 글을 바꿔요. pygaki 플러그인 ui_kit 3.23부터 있어요.' },
+  { id: 'screens', label: '화면, HUD 자리', tab: 'screens', app: false, mirror: true, note: '[대본 편집]의 [화면] 탭에서 만든 화면과 HUD를 게임 화면 위에서 고쳐요. 항목을 끌어 옮기고, HUD는 붙일 곳과 크기를 정하고, 글을 고쳐요. 저장하면 대본에도 받아 적어요. 항목을 더하거나 지우는 것과 버튼이 할 일은 [화면] 탭에서 해요. pygaki 플러그인 ui_kit 4.13부터 있어요.' },
 ];
 
 // 왼쪽 목록의 카드 묶음

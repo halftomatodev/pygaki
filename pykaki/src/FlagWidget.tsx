@@ -2,7 +2,7 @@
 // 플래그 카드에서는 끌거나 눌러 시험 값을 바꾸고, 용례 메뉴의 견본에서는 저절로 움직인다. 부품마다 색이나 그림(게임 그림)으로 꾸민다
 import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent as RPE } from 'react';
 import type { FlagUi } from './types';
-import { partColor, uiMax, uiMin } from './flagUi';
+import { cornerOf, partColor, uiMax, uiMin } from './flagUi';
 import { usePic } from './ScreensView';
 import type { Val } from './trace';
 
@@ -114,7 +114,7 @@ function NumberLook({ ui, value, onChange, label, marks, onMark }: Props) {
     );
   }
   return (
-    <div className={'fw-num' + (onChange ? ' live' : '') + (marks?.length ? ' marked' : '')}>
+    <div className={'fw-num c-' + cornerOf(ui) + (onChange ? ' live' : '') + (marks?.length ? ' marked' : '')}>
       <div ref={ref} className="fw-area" {...aria} onPointerDown={down} onKeyDown={key}>
         {body}
         {marks?.map((m, i) => (
@@ -184,7 +184,7 @@ function SwitchLook({ ui, value, onChange, label }: Props) {
   const { pics, paint } = useSkin(ui);
   const on = value === true;
   return (
-    <button type="button" role="switch" aria-checked={on} aria-label={label} className={'fw-switch' + (on ? ' on' : '')} style={paint(on ? 'on' : 'off')} disabled={!onChange} onClick={() => onChange?.(!on)}>
+    <button type="button" role="switch" aria-checked={on} aria-label={label} className={'fw-switch c-' + cornerOf(ui) + (on ? ' on' : '')} style={paint(on ? 'on' : 'off')} disabled={!onChange} onClick={() => onChange?.(!on)}>
       {pics.thumb ? <img className="fw-knob img" src={pics.thumb} alt="" draggable={false} /> : <span className="fw-knob" style={paint('thumb')} />}
       <span className="fw-sw-text">{on ? '켜짐' : '꺼짐'}</span>
     </button>
@@ -198,7 +198,7 @@ function TextLook({ ui, value, onChange, options = [], label }: Props) {
   const list = options.includes(s) ? options : [s, ...options];
   if (ui.look === 'combo')
     return (
-      <span className="fw-combo">
+      <span className={'fw-combo c-' + cornerOf(ui)}>
         <input aria-label={label} style={style} value={s} readOnly={!onChange} placeholder="(빈 글)" onChange={(e) => onChange?.(e.target.value)} list={'fw-opts-' + label} />
         <datalist id={'fw-opts-' + label}>
           {options.map((o) => (
@@ -208,7 +208,7 @@ function TextLook({ ui, value, onChange, options = [], label }: Props) {
       </span>
     );
   return (
-    <select className="fw-pull" aria-label={label} style={style} value={s} disabled={!onChange} onChange={(e) => onChange?.(e.target.value)}>
+    <select className={'fw-pull c-' + cornerOf(ui)} aria-label={label} style={style} value={s} disabled={!onChange} onChange={(e) => onChange?.(e.target.value)}>
       {list.map((o) => (
         <option key={o} value={o}>{o === '' ? '(빈 글)' : o}</option>
       ))}

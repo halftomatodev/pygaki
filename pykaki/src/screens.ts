@@ -3,7 +3,7 @@ import type { BoxNode, Project, ScreenAnchor, ScreenDef, ScreenItem } from './ty
 import { addFixup } from './store';
 import { IDENT, RESERVED, uid } from './util';
 import { parseAction } from './flags';
-import { flagUi, partColor, strOptions, uiMax, uiMin } from './flagUi';
+import { cornerOf, flagUi, partColor, strOptions, uiMax, uiMin } from './flagUi';
 
 // HUD (FEATURE 18): 대사가 흐르는 동안 떠 있는 화면. 없으면 전체 화면 (call screen)
 export const isHud = (s?: ScreenDef | null) => s?.kind === 'hud';
@@ -20,6 +20,13 @@ export const actOf = (s: ScreenDef | undefined, it: ScreenItem) => it.act ?? (is
 export const HUD_W = 420;
 export const HUD_H = 160;
 export const hudSize = (s: ScreenDef) => ({ w: s.w ?? HUD_W, h: s.h ?? HUD_H });
+// 스크롤 (FEATURE 23): HUD 안쪽 크기가 HUD보다 크면 그 크기, 아니면 null
+export function hudInner(s: ScreenDef): { cw: number; ch: number } | null {
+  if (!isHud(s) || (s.cw === undefined && s.ch === undefined)) return null;
+  const { w, h } = hudSize(s);
+  const cw = Math.max(w, Math.round(s.cw ?? w)), ch = Math.max(h, Math.round(s.ch ?? h));
+  return cw > w || ch > h ? { cw, ch } : null;
+}
 export const BAR_W = 300;
 export const BAR_H = 24;
 // 9칸 붙이기: [이름, 가로 0~1, 세로 0~1]
@@ -37,6 +44,66 @@ export function hudPos(s: ScreenDef, W: number, H: number) {
 }
 
 export const SCREENS_FILE = 'pykaki_screens.rpy';
+// 게임 안 편집 화면의 [화면] 탭이 읽는 화면 자리 (개발용, 배포판에서 뺌. LINK.md 12장)
+export const SCREENS_META_FILE = 'pykaki_screens.json';
+// 원고 표시: screen 줄 끝 "# @s:화면 id", 항목 첫 줄 끝 "# @i:항목 id". 게임 안 편집 화면이 저장할 때 이 줄을 찾아 고친다
+let marks = true;
+const mark = (out: string[], tag: string) => {
+  if (marks && out.length) out[0] += `  # @${tag}`;
+  return out;
+};
+
+// [화면] 탭이 쓰는 화면 자리 (LINK.md 12장). 글 크기를 모르는 항목은 w·h 없이 (게임이 그려 보고 잼)
+export function screensMeta(p: Project): string {
+  const screens = (p.screens ?? []).filter((s) => IDENT.test(s.name)).map((s) => {
+    const hud = isHud(s);
+    const { w, h } = hudSize(s);
+    const inner = hudInner(s);
+    return {
+      id: s.id, name: s.name, title: s.title || s.name, kind: hud ? 'hud' : 'full',
+      ...(hud ? { w, h, anchor: s.anchor ?? 'tl', dx: s.dx ?? 0, dy: s.dy ?? 0 } : {}),
+      ...(inner ? { cw: inner.cw, ch: inner.ch } : {}),
+      ...(s.bg ? { bg: s.bg, bgAlpha: s.bgAlpha ?? 100 } : {}),
+      items: s.items.map((it) => {
+        const o: Record<string, unknown> = { id: it.id, kind: it.kind, x: Math.round(it.x), y: Math.round(it.y) };
+        if (it.kind === 'text' || it.kind === 'textbutton' || it.kind === 'drop') o.text = it.text ?? '';
+        if (it.size) o.size = it.size;
+        if (it.color) o.color = it.color;
+        if (it.kind === 'image' || it.kind === 'imagebutton') o.image = it.image ?? '';
+        if (it.kind === 'bar') ((o.w = Math.round(it.w ?? BAR_W)), (o.h = Math.round(it.h ?? BAR_H)), (o.flag = it.flag ?? ''));
+        if (it.kind === 'drop') ((o.w = Math.round(it.w ?? DROP_W)), (o.h = Math.round(it.h ?? DROP_H)));
+        if (it.kind === 'look') {
+          const [lw, lh] = lookSize(p, it);
+          ((o.w = lw), (o.h = lh), (o.flag = it.flag ?? ''));
+        }
+        if (isDragged(it)) o.drag = true;
+        return o;
+      }),
+    };
+  });
+  return JSON.stringify({ format: 'pygaki-screens', version: 1, screens }, null, 1) + '\n';
+}
+
+// 게임 안 편집 화면에서 고친 화면 (LINK.md 3장 screen, screen_item). p를 직접 고친다. 못 찾으면 false
+export function applyScreenOp(p: Project, op: { op: string; screen?: string; item?: string; set?: Record<string, unknown> }): boolean {
+  const s = p.screens?.find((x) => x.id === op.screen);
+  const set = op.set ?? {};
+  const num = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? Math.round(v) : undefined);
+  if (!s) return false;
+  if (op.op === 'screen') {
+    if (!isHud(s)) return false;
+    if (typeof set.anchor === 'string' && ANCHORS.some(([k]) => k === set.anchor)) set.anchor === 'tl' ? delete s.anchor : (s.anchor = set.anchor as ScreenAnchor);
+    for (const k of ['dx', 'dy'] as const) if (num(set[k]) !== undefined) (num(set[k]) ? (s[k] = num(set[k])) : delete s[k]);
+    for (const k of ['w', 'h'] as const) if (num(set[k]) !== undefined) s[k] = Math.max(20, num(set[k])!);
+    return true;
+  }
+  const it = s.items.find((x) => x.id === op.item);
+  if (!it) return false;
+  if (num(set.x) !== undefined) it.x = num(set.x)!;
+  if (num(set.y) !== undefined) it.y = num(set.y)!;
+  if (typeof set.text === 'string' && (it.kind === 'text' || it.kind === 'textbutton' || it.kind === 'drop')) it.text = set.text;
+  return true;
+}
 
 // 버튼이 돌려주는 값들 (차례대로, 겹치는 값은 하나)
 export function screenValues(s: ScreenDef | undefined): string[] {
@@ -166,7 +233,7 @@ function itemCode(p: Project, s: ScreenDef, it: ScreenItem, I0: string): string[
     if (it.hoverColor) out.push(`${I}text_hover_color ${py(it.hoverColor)}`);
     out.push(act);
   }
-  return withCond(it, out, I0);
+  return withCond(it, mark(out, 'i:' + it.id), I0);
 }
 
 // 플래그 꼴 (FEATURE 21): 플래그 카드의 꼴과 꾸미기를 렌파이 화면 언어로. 첫 줄은 맨 바깥 칸(뒤에 pos가 들어감)
@@ -184,13 +251,22 @@ export function lookCode(p: Project, it: ScreenItem): string[] {
   const I = '    ';
   const [w, h] = lookSize(p, it);
   const edit = !!it.edit; // FEATURE 22: 게임에서 꼴로 값 바꾸기
+  // 모서리 (FEATURE 23): 각지게 0, 알약 높이의 반, 둥글게(없을 때) 높이의 1/4(8px까지). 둥근 색 부품은 _pk_round(셰이더)로 깎음
+  const cn = cornerOf(u);
+  const rad = (ph: number) => (cn === 'square' ? 0 : cn === 'pill' ? ph / 2 : Math.min(ph / 4, 8));
+  const pillR = (ph: number) => (cn === 'square' ? 0 : ph / 2); // 슬라이더 트랙·스위치는 둥글게도 알약 (앱 꼴과 같게)
+  const roundOf = (d: string, r: number) => (r > 0.5 ? `_pk_round(${d}, ${+r.toFixed(1)})` : d);
   // 부품: 그림이 있으면 그림(늘여 맞춤), 없으면 색
-  const part = (k: string, pw: number | string, ph: number | string) => {
+  const part = (k: string, pw: number | string, ph: number | string, r = 0) => {
     const img = u.skin?.[k]?.image?.trim();
-    return img ? `Transform(${imgRef(img)}, xysize=(${pw}, ${ph}))` : `Solid(${py(partColor(u, k))}, xysize=(${pw}, ${ph}))`;
+    return img ? `Transform(${imgRef(img)}, xysize=(${pw}, ${ph}))` : roundOf(`Solid(${py(partColor(u, k))}, xysize=(${pw}, ${ph}))`, r);
   };
+  // 올리거나 키보드로 고르면(렌파이는 둘 다 hover) 살짝 밝게. 모서리도 맞춤
+  const LIT = '"#ffffff30"';
+  const litFg = (r: number) => roundOf(`Solid(${LIT})`, r);
+  const lit = (d: string, pw: number | string, ph: number | string, r: number) => roundOf(`Fixed(${d}, Solid(${LIT}), xysize=(${pw}, ${ph}))`, r);
   // 누르는 칸: 배경·여백 없는 button (칸 하나에 그림 하나). 올리면 살짝 밝게
-  const press = (I1: string, action: string) => [`${I1}button:`, `${I1}${I}background None`, `${I1}${I}padding (0, 0)`, `${I1}${I}hover_foreground Solid("#ffffff30")`, `${I1}${I}action ${action}`];
+  const press = (I1: string, action: string, r = 0) => [`${I1}button:`, `${I1}${I}background None`, `${I1}${I}padding (0, 0)`, `${I1}${I}hover_foreground ${litFg(r)}`, `${I1}${I}action ${action}`];
   const lo = uiMin(u), hi = uiMax(u), n = f.name;
   // 칸·별 i를 누르면 그 칸까지 찬 값. 첫 칸이 이미 그 값이면 최솟값으로 (모두 비우기)
   const stepSet = (count: number) => {
@@ -208,48 +284,58 @@ export function lookCode(p: Project, it: ScreenItem): string[] {
   if (f.kind === 'int' && u.look === 'level' && u.style === 'discrete') {
     const count = Math.min(hi - lo, 20);
     const seg = `(${w} - ${count + 1} * 2) // ${count}`;
-    const cell = `add (${part('fill', seg, h - 4)} if (${n} - ${lo}) * ${count} >= (i + 1) * ${hi - lo} else ${part('track', seg, h - 4)})`;
-    return ['frame:', `${I}background ${part('border', w, h)}`, `${I}padding (2, 2)`, `${I}xysize (${w}, ${h})`, `${I}hbox:`, `${I}${I}spacing 2`, `${I}${I}for i in range(${count}):`,
-      ...(edit ? [...press(I + I + I, stepSet(count)), `${I}${I}${I}${I}${cell}`] : [`${I}${I}${I}${cell}`])];
+    const sr = cn === 'square' ? 0 : cn === 'pill' ? (h - 4) / 2 : 1;
+    const cell = `add (${part('fill', seg, h - 4, sr)} if (${n} - ${lo}) * ${count} >= (i + 1) * ${hi - lo} else ${part('track', seg, h - 4, sr)})`;
+    return ['frame:', `${I}background ${part('border', w, h, rad(h))}`, `${I}padding (2, 2)`, `${I}xysize (${w}, ${h})`, `${I}hbox:`, `${I}${I}spacing 2`, `${I}${I}for i in range(${count}):`,
+      ...(edit ? [...press(I + I + I, stepSet(count), sr), `${I}${I}${I}${I}${cell}`] : [`${I}${I}${I}${cell}`])];
   }
   if (f.kind === 'int') {
     // 바꿀 수 있으면 끌어서 정수로 (VariableValue, 최솟값~최댓값). 아니면 따라가기만 (AnimatedValue)
     const v = edit ? `VariableValue(${py(n)}, min=${lo}, max=${hi}, step=1, force_step=True)` : `AnimatedValue(${n} - ${lo}, ${hi - lo}, 0.3)`;
     const value = `${I}value ${v}`;
     if (u.look === 'slider') {
-      // 트랙은 가운데 가는 띠, 손잡이는 그림이 없으면 네모 (렌파이 Solid는 둥글지 않음)
+      // 트랙은 가운데 가는 띠(각지게가 아니면 알약), 손잡이는 그림이 없으면 동그라미(각지게면 세로 네모)
       const th = Math.max(4, Math.round(h / 5));
       const thin = (k: string) => {
         const img = u.skin?.[k]?.image?.trim();
-        const d = img ? `Transform(${imgRef(img)}, xysize=(${w}, ${th}), yalign=0.5)` : `Solid(${py(partColor(u, k))}, xysize=(${w}, ${th}), yalign=0.5)`;
+        const d = img ? `Transform(${imgRef(img)}, xysize=(${w}, ${th}), yalign=0.5)` : cn === 'square' ? `Solid(${py(partColor(u, k))}, xysize=(${w}, ${th}), yalign=0.5)`
+          : `Transform(${roundOf(`Solid(${py(partColor(u, k))}, xysize=(${w}, ${th}))`, th / 2)}, yalign=0.5)`;
         return `Fixed(${d}, xysize=(${w}, ${h}))`;
       };
       const t = u.skin?.thumb?.image?.trim();
-      const tw = t ? h : Math.max(6, Math.round(h * 0.5));
-      return ['bar:', value, `${I}xysize (${w}, ${h})`, `${I}left_bar ${thin('fill')}`, `${I}right_bar ${thin('track')}`,
-        `${I}thumb ${t ? `Transform(${imgRef(t)}, xysize=(${h}, ${h}))` : `Solid(${py(partColor(u, 'thumb'))}, xysize=(${tw}, ${h}))`}`, `${I}thumb_offset ${Math.round(tw / 2)}`];
+      const tw = t || cn !== 'square' ? h : Math.max(6, Math.round(h * 0.5));
+      const tr = cn === 'square' ? 0 : h / 2;
+      const out = ['bar:', value, `${I}xysize (${w}, ${h})`, `${I}left_bar ${thin('fill')}`, `${I}right_bar ${thin('track')}`,
+        `${I}thumb ${t ? `Transform(${imgRef(t)}, xysize=(${h}, ${h}))` : roundOf(`Solid(${py(partColor(u, 'thumb'))}, xysize=(${tw}, ${h}))`, tr)}`, `${I}thumb_offset ${Math.round(tw / 2)}`];
+      // 바꿀 수 있으면 고른 손잡이에 테두리(색은 반투명 흰색, 안은 손잡이 색). 키보드: Enter로 잡고 ←→, 다시 Enter
+      if (edit)
+        out.push(`${I}hover_thumb ${t ? `Transform(${imgRef(t)}, xysize=(${h}, ${h}), matrixcolor=BrightnessMatrix(0.15))`
+          : `Fixed(${roundOf(`Solid("#ffffffa0", xysize=(${tw}, ${h}))`, tr)}, Transform(${roundOf(`Solid(${py(partColor(u, 'thumb'))}, xysize=(${Math.max(2, tw - 6)}, ${h - 6}))`, cn === 'square' ? 0 : (h - 6) / 2)}, align=(0.5, 0.5)), xysize=(${tw}, ${h}))`}`);
+      return out;
     }
-    return ['frame:', `${I}background ${part('border', w, h)}`, `${I}padding (1, 1)`, `${I}xysize (${w}, ${h})`,
-      `${I}bar:`, I + value, `${I}${I}xysize (${w - 2}, ${h - 2})`, `${I}${I}left_bar ${part('fill', w - 2, h - 2)}`, `${I}${I}right_bar ${part('track', w - 2, h - 2)}`, `${I}${I}thumb None`];
+    const ir = Math.max(0, rad(h) - 1);
+    return ['frame:', `${I}background ${part('border', w, h, rad(h))}`, `${I}padding (1, 1)`, `${I}xysize (${w}, ${h})`,
+      `${I}bar:`, I + value, `${I}${I}xysize (${w - 2}, ${h - 2})`, `${I}${I}left_bar ${part('fill', w - 2, h - 2, ir)}`, `${I}${I}right_bar ${part('track', w - 2, h - 2, ir)}`,
+      ...(edit ? [`${I}${I}hover_left_bar ${lit(part('fill', w - 2, h - 2), w - 2, h - 2, ir)}`, `${I}${I}hover_right_bar ${lit(part('track', w - 2, h - 2), w - 2, h - 2, ir)}`] : []), `${I}${I}thumb None`];
   }
   if (f.kind === 'bool') {
     const k = Math.round(h * 0.8), m = Math.round((h - k) / 2);
-    const inner = (I1: string) => [`${I1}add (${part('on', w, h)} if ${n} else ${part('off', w, h)})`, `${I1}add ${part('thumb', k, k)}:`, `${I1}${I}xpos (${w - k - m} if ${n} else ${m})`, `${I1}${I}ypos ${m}`];
+    const inner = (I1: string) => [`${I1}add (${part('on', w, h, pillR(h))} if ${n} else ${part('off', w, h, pillR(h))})`, `${I1}add ${part('thumb', k, k, pillR(k))}:`, `${I1}${I}xpos (${w - k - m} if ${n} else ${m})`, `${I1}${I}ypos ${m}`];
     if (!edit) return ['fixed:', `${I}xysize (${w}, ${h})`, ...inner(I)];
-    return ['button:', `${I}xysize (${w}, ${h})`, `${I}background None`, `${I}padding (0, 0)`, `${I}action ToggleVariable(${py(n)})`, `${I}fixed:`, ...inner(I + I)];
+    return ['button:', `${I}xysize (${w}, ${h})`, `${I}background None`, `${I}padding (0, 0)`, `${I}hover_foreground ${litFg(pillR(h))}`, `${I}action ToggleVariable(${py(n)})`, `${I}fixed:`, ...inner(I + I)];
   }
   // 글자: 값을 글로 보이는 칸. 바꿀 수 있으면 눌러서 고를 값 목록을 펼침 (콤보는 아래에 글 치는 칸도)
   const ts = Math.max(12, Math.round(h * 0.5));
   const tc = py(partColor(u, 'text'));
   const value = (I1: string) => `${I1}text "[${n}]" color ${tc} yalign 0.5 size ${ts}`;
   // 펼침 표시 ▾는 따로 (게임 글꼴에 없을 수 있어 DejaVuSans. 값 글은 게임 글꼴 그대로)
-  const label = (I1: string) => [`${I1}frame:`, `${I1}${I}background ${part('box', w - 2, h - 2)}`, `${I1}${I}xfill True`, `${I1}${I}yfill True`, `${I1}${I}padding (10, 0)`,
+  const label = (I1: string) => [`${I1}frame:`, `${I1}${I}background ${part('box', w - 2, h - 2, Math.max(0, rad(h) - 1))}`, `${I1}${I}xfill True`, `${I1}${I}yfill True`, `${I1}${I}padding (10, 0)`,
     ...(edit ? [`${I1}${I}fixed:`, value(I1 + I + I), `${I1}${I}${I}text "▾" font "DejaVuSans.ttf" color ${tc} size ${ts} xalign 1.0 yalign 0.5`] : [value(I1 + I)])];
-  if (!edit) return ['frame:', `${I}background ${part('border', w, h)}`, `${I}padding (1, 1)`, `${I}xysize (${w}, ${h})`, ...label(I)];
+  if (!edit) return ['frame:', `${I}background ${part('border', w, h, rad(h))}`, `${I}padding (1, 1)`, `${I}xysize (${w}, ${h})`, ...label(I)];
   const open = '_pk_open_' + it.id.replace(/\W/g, '_');
   const opts = strOptions(p, f).filter((o) => o !== '');
   const out = ['vbox:', `${I}default ${open} = False`, `${I}spacing 2`,
-    `${I}button:`, `${I}${I}background ${part('border', w, h)}`, `${I}${I}padding (1, 1)`, `${I}${I}xysize (${w}, ${h})`, `${I}${I}action ToggleScreenVariable(${py(open)})`, ...label(I + I),
+    `${I}button:`, `${I}${I}background ${part('border', w, h, rad(h))}`, `${I}${I}padding (1, 1)`, `${I}${I}xysize (${w}, ${h})`, `${I}${I}hover_foreground ${litFg(rad(h))}`, `${I}${I}action ToggleScreenVariable(${py(open)})`, ...label(I + I),
     `${I}if ${open}:`, `${I}${I}frame:`, `${I}${I}${I}background ${part('border', w, 1)}`, `${I}${I}${I}padding (1, 1)`, `${I}${I}${I}xsize ${w}`, `${I}${I}${I}vbox:`, `${I}${I}${I}${I}spacing 1`];
   const I4 = I + I + I + I;
   // 올린 줄·고른 줄은 글자 색 바탕에 칸 색 글자 (뒤집기)
@@ -261,7 +347,7 @@ export function lookCode(p: Project, it: ScreenItem): string[] {
   {
     // 글 치는 칸: 누르면 치기 시작(Toggle), Enter로 끝(action Disable: Enter가 대사로 가지 않음). 누르기가 대사로 가지 않게 button으로 감쌈
     const iv = `VariableInputValue(${py(n)}, default=False, returnable=False)`;
-    out.push(`${I4}button:`, `${I4}${I}xfill True`, `${I4}${I}padding (10, 4)`, `${I4}${I}background ${part('box', w - 2, h - 2)}`, `${I4}${I}action ${iv}.Toggle()`,
+    out.push(`${I4}button:`, `${I4}${I}xfill True`, `${I4}${I}padding (10, 4)`, `${I4}${I}background ${part('box', w - 2, h - 2)}`, `${I4}${I}hover_foreground ${litFg(0)}`, `${I4}${I}action ${iv}.Toggle()`,
       `${I4}${I}input value ${iv} action [${iv}.Disable(), SetScreenVariable(${py(open)}, False)] size ${ts} color ${tc} pixel_width ${Math.max(20, w - 24)}`);
   }
   return out;
@@ -298,7 +384,7 @@ function dragCode(p: Project, s: ScreenDef, it: ScreenItem, I0: string): string[
     if (it.kind === 'image') out.push(`${I}add ${imgRef(it.image!)}`);
     else out.push(...textLines(I));
   }
-  return withCond(it, out, I0);
+  return withCond(it, mark(out, 'i:' + it.id), I0);
 }
 
 const isDD = (it: ScreenItem) => isDragged(it) || it.kind === 'drop';
@@ -345,6 +431,30 @@ const DRAG_HELPERS = [
   '',
 ];
 
+// 둥근 모서리 (FEATURE 23): 그림 없이 색 칸의 모서리를 셰이더로 깎는다 (플러그인이 없어도 됨)
+const ROUND_HELPER = [
+  '# 둥근 모서리 (플래그 꼴의 "모서리")',
+  'init -1 python:',
+  '    renpy.register_shader("pygaki.round", variables="""',
+  '        uniform float u_pk_radius;',
+  '        uniform vec2 u_model_size;',
+  '        attribute vec4 a_position;',
+  '        varying vec2 v_pk_pos;',
+  '    """, vertex_300="""',
+  '        v_pk_pos = a_position.xy;',
+  '    """, fragment_300="""',
+  '        vec2 pk_h = u_model_size * 0.5;',
+  '        vec2 pk_q = abs(v_pk_pos - pk_h) - (pk_h - vec2(u_pk_radius));',
+  '        float pk_d = length(max(pk_q, 0.0)) + min(max(pk_q.x, pk_q.y), 0.0) - u_pk_radius;',
+  '        gl_FragColor *= clamp(0.5 - pk_d, 0.0, 1.0);',
+  '    """)',
+  '',
+  '    def _pk_round(d, r):',
+  '        # 색 칸 d의 모서리를 반지름 r(px)만큼 둥글게',
+  '        return Transform(d, mesh=True, shader="pygaki.round", u_pk_radius=float(r))',
+  '',
+];
+
 function bgCode(s: ScreenDef, I0: string): string[] {
   const a = s.bgAlpha !== undefined && s.bgAlpha < 100 ? ` alpha ${pct(s.bgAlpha)}` : '';
   if (isColor(s.bg)) return [`${I0}add Solid(${py(s.bg!)})${a}`];
@@ -355,11 +465,12 @@ function bgCode(s: ScreenDef, I0: string): string[] {
 // pykaki_screens.rpy 글. 화면이 없으면 머리말만 (지운 화면이 게임에 남지 않게)
 // only: 그 화면 하나만 (머리말 없이, [화면] 탭의 원고 보기)
 export function screensCode(p: Project, only?: string): string {
+  marks = !only; // 원고 보기(화면 하나)에는 표시를 붙이지 않음
   const out = only ? [] : ['# pygaki가 만든 화면이에요. 직접 고치면 다음 내보내기 때 덮어써져요.', '# 대본 편집기의 [화면] 탭에서 고쳐요.', ''];
   for (const s of p.screens ?? []) {
     if (only && s.id !== only) continue;
     out.push(`# ${(s.title || s.name).replace(/\s+/g, ' ')}${isHud(s) ? ' (HUD)' : ''}`);
-    out.push(`screen ${s.name}():`);
+    out.push(`screen ${s.name}():` + (marks ? `  # @s:${s.id}` : ''));
     const start = out.length;
     if (isHud(s)) {
       // HUD: modal 없이 떠 있고, 붙인 자리에 크기만큼의 칸을 둔다
@@ -370,7 +481,16 @@ export function screensCode(p: Project, only?: string): string {
       out.push('    fixed:', `        xysize (${Math.round(w)}, ${Math.round(h)})`, `        align (${ax.toFixed(1)}, ${ay.toFixed(1)})`);
       if (s.dx || s.dy) out.push(`        offset (${Math.round(s.dx ?? 0)}, ${Math.round(s.dy ?? 0)})`);
       out.push(...bgCode(s, '        '));
-      out.push(...itemsCode(p, s, '        '));
+      const inner = hudInner(s);
+      if (inner) {
+        // 스크롤: HUD 크기의 viewport 안에 안쪽 크기 칸. 끌거나 휠로 넘겨 봄 (항목 자리는 안쪽 칸 왼쪽 위 기준)
+        // 휠: 세로로 넘길 것이 없으면 가로로
+        out.push('        viewport:', `            xysize (${Math.round(w)}, ${Math.round(h)})`, '            draggable True', `            mousewheel ${inner.ch > h ? 'True' : '"horizontal"'}`,
+          '            fixed:', `                xysize (${inner.cw}, ${inner.ch})`,
+          // 빈 곳을 눌러도 대사가 넘어가지 않게 뒤에 아무것도 안 하는 단추 (키보드 초점은 안 감)
+          '                button:', `                    xysize (${inner.cw}, ${inner.ch})`, '                    background None', '                    keyboard_focus False', '                    action NullAction()');
+        out.push(...itemsCode(p, s, '                '));
+      } else out.push(...itemsCode(p, s, '        '));
     } else {
       out.push('    modal True');
       out.push(...bgCode(s, '    '));
@@ -385,6 +505,7 @@ export function screensCode(p: Project, only?: string): string {
     out.push('# 게임 내내 띄우는 HUD ([화면] 탭의 "게임 내내 띄우기")', 'init python:', `    for _pk_hud in [${ov.join(', ')}]:`, '        if _pk_hud not in config.overlay_screens:', '            config.overlay_screens.append(_pk_hud)', '');
   }
   if (!only && (p.screens ?? []).some((s) => s.items.some(isDD))) out.push(...DRAG_HELPERS);
+  if (out.some((x) => x.includes('_pk_round('))) out.push(...ROUND_HELPER);
   return out.join('\n') + '\n';
 }
 

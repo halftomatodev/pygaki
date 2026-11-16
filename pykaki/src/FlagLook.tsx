@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { useStore } from './store';
 import type { Flag, FlagLook, FlagUi, LevelStyle } from './types';
 import { FlagWidget } from './FlagWidget';
-import { flagEffects, flagMarks, setMarkValue, flagUi, LOOK_LABEL, looksFor, skinParts, STYLE_LABEL, strOptions, testValue, testVars, uiMax, uiMin, useFlagTest } from './flagUi';
+import { CORNER_LABEL, cornerOf, flagEffects, flagMarks, setMarkValue, flagUi, LOOK_LABEL, looksFor, skinParts, STYLE_LABEL, strOptions, testValue, testVars, uiMax, uiMin, useFlagTest } from './flagUi';
 import { useGameFolder } from './gameFolder';
 import type { Val } from './trace';
 
@@ -172,6 +172,15 @@ function LookPop({ f, anchor, onClose }: { f: Flag; anchor: HTMLElement; onClose
           {(Object.keys(STYLE_LABEL) as LevelStyle[]).map((s) => (
             <button key={s} role="radio" aria-checked={(ui.style ?? 'continuous') === s} className={(ui.style ?? 'continuous') === s ? 'on' : ''} onClick={() => set((u) => void (u.style = s))}>
               {STYLE_LABEL[s]}
+            </button>
+          ))}
+        </div>
+      )}
+      {!(ui.look === 'level' && ui.style === 'rating') && (
+        <div className="flook-seg" role="radiogroup" aria-label="모서리" title="게임 화면(HUD)의 꼴도 같은 모서리로 그려요. 그림을 넣은 부품은 그림 그대로예요">
+          {(Object.keys(CORNER_LABEL) as (keyof typeof CORNER_LABEL)[]).map((c) => (
+            <button key={c} role="radio" aria-checked={cornerOf(ui) === c} className={cornerOf(ui) === c ? 'on' : ''} onClick={() => set((u) => void (c === 'round' ? delete u.corner : (u.corner = c)))}>
+              {CORNER_LABEL[c]}
             </button>
           ))}
         </div>

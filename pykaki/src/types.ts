@@ -149,6 +149,8 @@ export interface ScreenDef {
   bgAlpha?: number; // 배경 투명도 0~100 (없으면 100)
   zorder?: number; // 겹치는 차례 (클수록 앞)
   overlay?: boolean; // 게임 내내 띄우기 (config.overlay_screens)
+  cw?: number; // 스크롤 (FEATURE 23): HUD 안쪽 크기 (px). 크기보다 크면 끌기·휠로 넘겨 봄 (렌파이 viewport). 없으면 스크롤 없음
+  ch?: number;
 }
 
 export type Exit =
@@ -220,7 +222,9 @@ export interface FlagUi {
   max?: number; // 숫자: 가장 큰 값 (없으면 10)
   options?: string[]; // 글자: 고를 값 목록
   skin?: Record<string, FlagSkinPart>; // 부품마다 색·그림 (부품 이름은 flagUi.ts SKIN_PARTS)
+  corner?: FlagCorner; // 모서리 (FEATURE 23): 없으면 둥글게. 각지게, 알약(높이의 반)
 }
+export type FlagCorner = 'square' | 'pill';
 
 export interface Character {
   id: string; // 렌파이 변수 이름

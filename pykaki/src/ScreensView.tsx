@@ -11,7 +11,7 @@ import { useLive } from './showpyLive';
 import { pictureOf, useGameFolder } from './gameFolder';
 import type { Project, ScreenAct, ScreenDef, ScreenItem, ScreenItemKind } from './types';
 import { uid } from './util';
-import { lookSize, actOf, addHudTemplate, ANCHORS, BAR_H, BAR_W, canDrag, DROP_H, DROP_W, hasAct, HUD_H, HUD_TEMPLATES, HUD_W, hudPos, hudTemplateCode, isDragged, isHud, newScreenName, screenNameProblem, SCREENS_FILE, screensCode, type HudTemplate } from './screens';
+import { lookSize, actOf, addHudTemplate, ANCHORS, BAR_H, BAR_W, canDrag, DROP_H, DROP_W, hasAct, HUD_H, HUD_TEMPLATES, HUD_W, hudInner, hudPos, hudSize, hudTemplateCode, isDragged, isHud, newScreenName, screenNameProblem, SCREENS_FILE, screensCode, type HudTemplate } from './screens';
 import { PickMenu, type PickEntry } from './FlagMenu';
 import { ActionInput, CondInput, firstAction } from './FlagFields';
 import { evalExpr, initVars, UNKNOWN, type Vars } from './trace';
@@ -234,6 +234,12 @@ export function ScreenArt({ sc, scale, vars, sel = null, onMove, onHudDown }: { 
   const hud = isHud(sc);
   const box = hud ? hudPos(sc, look.width, look.height) : { x: 0, y: 0, w: look.width, h: look.height };
   const alpha = (sc.bgAlpha ?? 100) / 100;
+  const inner = hudInner(sc);
+  const items = sc.items.map((it) => {
+    const v = shown(it, vars);
+    if (v === false && !onMove) return null;
+    return <StageItem key={it.id} sc={sc} it={it} scale={scale} on={it.id === sel} onMove={onMove} vars={vars} hidden={v === false} />;
+  });
   return (
     <div
       className={'scv-art' + (hud ? ' hud' : '') + (onMove ? '' : ' still')}
@@ -243,11 +249,16 @@ export function ScreenArt({ sc, scale, vars, sel = null, onMove, onHudDown }: { 
       {bgColor && <div className="scv-bgc" style={{ background: bgColor, opacity: alpha }} />}
       {bgPic && <img className="scv-bg" src={bgPic} alt="" style={{ transform: `scale(${scale})`, opacity: alpha }} draggable={false} />}
       {!sc.bg && !hud && onMove && <span className="scv-see tip">배경 없음: 게임에서는 아래 화면이 그대로 보여요</span>}
-      {sc.items.map((it) => {
-        const v = shown(it, vars);
-        if (v === false && !onMove) return null;
-        return <StageItem key={it.id} sc={sc} it={it} scale={scale} on={it.id === sel} onMove={onMove} vars={vars} hidden={v === false} />;
-      })}
+      {inner ? (
+        // 스크롤 (FEATURE 23): HUD 크기 안에서 안쪽 칸을 넘겨 봄. 빈 곳을 끌면 HUD가 옮겨짐
+        <div className="scv-scroll">
+          <div className="scv-inner" style={{ width: inner.cw * scale, height: inner.ch * scale }} onPointerDown={hud ? onHudDown : undefined}>
+            {items}
+          </div>
+        </div>
+      ) : (
+        items
+      )}
     </div>
   );
 }
@@ -346,7 +357,7 @@ function ScreenCard({ sc, updScreen }: { sc: ScreenDef; updScreen: (fn: (s: Scre
   const uses = usesOf(project, sc.id);
   const color = !!sc.bg?.startsWith('#');
   const hud = isHud(sc);
-  const num = (k: 'w' | 'h' | 'dx' | 'dy' | 'zorder', ph: string, title: string, min?: number) => (
+  const num = (k: 'w' | 'h' | 'dx' | 'dy' | 'zorder' | 'cw' | 'ch', ph: string, title: string, min?: number) => (
     <input
       type="number"
       className="sf-num"
@@ -400,6 +411,28 @@ function ScreenCard({ sc, updScreen }: { sc: ScreenDef; updScreen: (fn: (s: Scre
             {num('h', String(HUD_H), '세로 (px)', 20)}
             <span className="tip">px</span>
           </div>
+          <label className="check" title="안쪽 칸을 HUD보다 크게 잡고, 게임에서 끌거나 마우스 휠로 넘겨 봐요 (렌파이 viewport). 넓은 미니맵 등에 써요">
+            <input
+              type="checkbox"
+              checked={!!hudInner(sc)}
+              onChange={(e) =>
+                updScreen((s) => {
+                  const { w, h } = hudSize(s);
+                  if (e.target.checked) (s.cw = w * 2), (s.ch = h);
+                  else delete s.cw, delete s.ch;
+                })
+              }
+            />
+            스크롤 <span className="tip">(안쪽 칸이 더 크면 끌기·휠로 넘겨 봐요)</span>
+          </label>
+          {hudInner(sc) && (
+            <div className="row">
+              <label>안쪽 크기</label>
+              {num('cw', String(hudSize(sc).w), '안쪽 가로 (px, HUD 가로보다 크면 가로로 넘겨 봄)', 20)}
+              {num('ch', String(hudSize(sc).h), '안쪽 세로 (px, HUD 세로보다 크면 세로로 넘겨 봄)', 20)}
+              <span className="tip">px</span>
+            </div>
+          )}
           <div className="row">
             <label>붙일 곳</label>
             <span className="scv-anchor" role="radiogroup" aria-label="붙일 곳">

@@ -1,11 +1,14 @@
 // 플래그의 꼴 (FEATURE 20): 기본값, 꾸밀 부품, 불러온 값 정리, 시험 값, 그 값일 때 대본이 어떻게 되는지
 import { create } from 'zustand';
-import type { Flag, FlagLook, FlagUi, LevelStyle, Project } from './types';
+import type { Flag, FlagCorner, FlagLook, FlagUi, LevelStyle, Project } from './types';
 import { evalExpr, applyAction, initVars, UNKNOWN, type Val, type Vars } from './trace';
 import { condText, exprNames, parseAction, parseCond, type CmpOp } from './flags';
 
 export const LOOK_LABEL: Record<FlagLook, string> = { level: '레벨 인디케이터', slider: '슬라이더', switch: '스위치', pulldown: '풀다운', combo: '콤보박스' };
 export const STYLE_LABEL: Record<LevelStyle, string> = { continuous: '이어진 막대', discrete: '칸 막대', rating: '별' };
+// 모서리 (FEATURE 23): 없으면 둥글게 (앱 꼴의 처음 모양). 렌파이 원고도 같은 모서리로 (그림 부품은 그림 그대로)
+export const CORNER_LABEL: Record<'round' | FlagCorner, string> = { round: '둥글게', square: '각지게', pill: '알약' };
+export const cornerOf = (u: FlagUi): 'round' | FlagCorner => u.corner ?? 'round';
 export const looksFor = (k: Flag['kind']): FlagLook[] => (k === 'int' ? ['level', 'slider'] : k === 'bool' ? ['switch'] : ['pulldown', 'combo']);
 
 // 꾸밀 부품: [이름, 한국어 이름, 기본 색]. 그림을 넣으면 그 부품을 그림으로 그림
@@ -40,6 +43,7 @@ export function normalizeUi(raw: unknown): FlagUi | undefined {
   if (['continuous', 'discrete', 'rating'].includes(r.style as string)) u.style = r.style as LevelStyle;
   if (typeof r.min === 'number' && Number.isFinite(r.min)) u.min = r.min;
   if (typeof r.max === 'number' && Number.isFinite(r.max)) u.max = r.max;
+  if (r.corner === 'square' || r.corner === 'pill') u.corner = r.corner;
   if (Array.isArray(r.options)) u.options = r.options.filter((x): x is string => typeof x === 'string');
   if (r.skin && typeof r.skin === 'object') {
     const s: FlagUi['skin'] = {};

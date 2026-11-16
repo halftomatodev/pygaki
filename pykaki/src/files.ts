@@ -3,7 +3,7 @@ import { useFolded } from './Card';
 import { useStore } from './store';
 import { createEmpty, normalizeProject } from './sample';
 import { generateRpy as generateRpyWith } from './exportRpy';
-import { screensCode } from './screens';
+import { screensCode, screensMeta } from './screens';
 import { snapAdd, snapAuto } from './persist';
 import { desktop, isDesktop } from './desktop';
 import { usePrefs } from './prefs';
@@ -361,7 +361,7 @@ export function setFollowLine(on: boolean) {
 // 화면 만들기 원고 (pykaki_screens.rpy)
 const screensOut = () => {
   const p = useStore.getState().project;
-  return { code: screensCode(p), has: !!p.screens?.length };
+  return { code: screensCode(p), has: !!p.screens?.length, meta: screensMeta(p) };
 };
 
 // 연결한 게임의 플러그인이 읽을 수 있을 때만 줄 끝 표시로 내보낸다 (LINK.md 2장)

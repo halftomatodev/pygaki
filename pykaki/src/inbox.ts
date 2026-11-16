@@ -2,12 +2,13 @@
 // .rpy를 되읽지 않는다. showpy_inbox.json에 적힌 줄만 받는다. 대사 글자와 선택지는 받지 않고, 대사는 위치만 받는다.
 import type { BoxNode, Line, LineFx, Project, SayStyle } from './types';
 import { DEFAULT_FADEOUT, FLASH_CODE } from './stage';
+import { applyScreenOp } from './screens';
 
 const POS_KEYS = ['x', 'y', 'name_x', 'name_y'] as const;
 
 export interface InboxOp {
   id: string; // 새 줄 id (insert), 또는 이 기록 자체의 id
-  op: 'insert' | 'replace' | 'remove' | 'say_pos' | 'say_fx';
+  op: 'insert' | 'replace' | 'remove' | 'say_pos' | 'say_fx' | 'screen' | 'screen_item';
   code?: string; // 렌파이 명령 한 줄 (insert, replace)
   pos?: Partial<Record<(typeof POS_KEYS)[number], number | null>>; // say_pos: 대사 위치. null이면 지움
   box?: string; // 그 줄이 있던 상자. 기준 줄이 사라졌을 때 쓴다
@@ -16,6 +17,9 @@ export interface InboxOp {
   end?: string; // 이 상자의 끝에 (선택지, jump 바로 앞)
   sayFx?: Partial<Record<keyof LineFx, string | string[] | null>>; // say_fx: 대사의 화면 효과. null이면 지움
   line?: string; // replace, say_pos, say_fx: 바꿀 줄
+  screen?: string; // screen, screen_item: 화면 id (게임 안 편집 화면의 [화면] 탭, LINK.md 3장)
+  item?: string; // screen_item: 항목 id
+  set?: Record<string, unknown>; // screen: anchor dx dy w h / screen_item: x y text
 }
 
 function applySayPos(l: Line, pos: NonNullable<InboxOp['pos']>) {
@@ -163,6 +167,11 @@ export function applyInbox(p: Project, ops: InboxOp[]): { applied: number; moved
   const moved: string[] = [];
   const dropped: string[] = [];
   for (const op of ops) {
+    if (op.op === 'screen' || op.op === 'screen_item') {
+      if (applyScreenOp(p, op)) applied++;
+      else dropped.push(op.op === 'screen' ? '화면 자리' : '화면 항목');
+      continue;
+    }
     if (op.op === 'say_pos' || op.op === 'say_fx') {
       const at = op.line ? findLine(p, op.line) : null;
       const l = at?.box.lines[at.i];

@@ -156,13 +156,15 @@ pygaki 플러그인이 쓰고, 대본 편집기가 읽은 뒤 비웁니다. 대�
 | 값 | 뜻 |
 |---|---|
 | `id` | `insert`면 새 줄의 id (`.rpy`의 `# @l:`과 같음). 이미 있는 id면 다시 넣지 않습니다 |
-| `op` | `insert` 줄 넣기, `replace` 줄 바꾸기, `remove` 줄 지우기(pygaki 플러그인 4.22), `say_pos` 대사 위치, `say_fx` 대사 화면 효과 |
+| `op` | `insert` 줄 넣기, `replace` 줄 바꾸기, `remove` 줄 지우기(pygaki 플러그인 4.22), `say_pos` 대사 위치, `say_fx` 대사 화면 효과, `screen` HUD 자리·크기, `screen_item` 화면 항목 자리·글(ui_kit 4.13, 12장) |
 | `code` | 렌파이 명령 한 줄 |
 | `box` | 줄이 들어갈 상자. 기준 줄이 사라졌을 때 그 상자의 끝에 넣습니다 |
 | `before` `after` `end` | `insert`의 자리. 줄 앞, 줄 뒤, 상자 끝 중 하나 |
 | `line` | `replace`, `remove`, `say_pos`, `say_fx`로 바꾸거나 지울 줄의 id |
 | `pos` | `say_pos`의 값. `x` `y` `name_x` `name_y`, 대사창 왼쪽 위 기준. `null`이면 지움 |
 | `sayFx` | `say_fx`의 값. 대본 편집기 `LineFx`와 같은 이름: `fx` `transition`(`none`은 바로) `overlay`(`on` `off`) `warp` `cursor` `exclude`(목록). `null`이면 지움 |
+| `screen` `item` | `screen`, `screen_item`의 화면 id, 항목 id (대본 편집기 `project.screens`의 id) |
+| `set` | `screen`: 고친 것만 `anchor`(`tl` `t` `tr` `l` `c` `r` `bl` `b` `br`) `dx` `dy` `w` `h`. `screen_item`: `x` `y` `text`(글, 글 버튼, 놓는 곳만) |
 
 `say_pos`, `say_fx`를 받으면 그 대사 줄의 괄호에 같은 값을 내보냅니다. 괄호 순서는 대본 편집기 순서로 정리됩니다. 예전 대본 편집기는 이 기록을 모른 채 지우므로 두 프로그램을 같이 올립니다.
 
@@ -400,6 +402,24 @@ pygaki 데스크톱 앱의 [GUI 편집] 화면이 게임 안 편집기를 바깥
 | `discard` | | 지금 탭의 저장 안 한 변경을 모두 버림 |
 
 저장은 지금처럼 게임이 합니다(`*_layout.rpy`, 원고). 앱은 값을 보내기만 하고 pygaki 플러그인 파일을 직접 쓰지 않습니다.
+
+## 12. 화면 자리 (`game/pykaki_screens.json`, 표시 `# @s:` `# @i:`, ui_kit 4.13, 대본 편집기 `FEATURE` 23)
+
+대본 편집기의 [화면] 탭에서 만든 화면과 HUD를 게임 안 편집 화면의 [화면] 탭에서 고치기 위한 약속입니다. 대본 편집기가 `pykaki_screens.rpy`를 쓸 때 같이 씁니다(바뀐 것만). 개발용 파일이라 배포판과 묶음에서 뺍니다.
+
+```json
+{ "format": "pygaki-screens", "version": 1, "screens": [
+  { "id": "s1", "name": "hud_map", "title": "미니맵", "kind": "hud", "w": 260, "h": 190, "anchor": "br", "dx": -20, "dy": -20,
+    "cw": 700, "bg": "#000000", "bgAlpha": 55,
+    "items": [ { "id": "i1", "kind": "textbutton", "x": 24, "y": 52, "text": "거실", "size": 24 },
+               { "id": "i2", "kind": "look", "x": 14, "y": 140, "w": 240, "h": 24, "flag": "love" } ] } ] }
+```
+
+- 화면: `kind`(`hud`, `full`), HUD면 `w` `h` `anchor` `dx` `dy`, 스크롤이면 `cw` `ch`(안쪽 크기), 배경 `bg` `bgAlpha`
+- 항목: `id` `kind` `x` `y`(화면 칸 왼쪽 위 기준). 글 종류(`text` `textbutton` `drop`)는 `text`, 그림은 `image`, 크기를 아는 것(`bar` `drop` `look`)은 `w` `h`, `size` `color` `flag` `drag`. 글·그림 크기는 게임이 그려 보고 잽니다
+- `pykaki_screens.rpy`의 표시: `screen 이름():  # @s:화면 id`, 항목 첫 줄 끝 `  # @i:항목 id`. 게임은 이 표시로 고칠 줄을 찾습니다. HUD는 화면 다음 `fixed:`의 `xysize` `align` `offset`(없으면 넣고 0이면 지움)과 스크롤 `viewport:`의 `xysize`, 항목은 그 블록의 `pos`(끌기 항목은 `_PkBack(x, y)`도)와 글(`text "…"`, `textbutton "…"`, 놓는 곳 안의 `text "…"`)을 고칩니다. 글은 JSON 글자 그대로(큰따옴표)
+- 저장(Ctrl+S): `pykaki_screens.rpy`를 고치고(앞 것은 `ui_kit_backup/`), `pykaki_screens.json`에도 고친 값을 적고, `showpy_inbox.json`에 `screen`/`screen_item` 기록을 더한 뒤 다시 불러옵니다. 표시를 못 찾으면(예전 대본 편집기로 내보낸 원고) 저장하지 않고 알립니다
+- 대본 편집기는 받아 적은 뒤 같은 값으로 다시 내보내므로 원고가 같아집니다
 
 ## 11. 화면 셰이더 목록 (`screen_fx/shader_list.json`, `shaders_off.txt`, screen_fx 5.4. 세부 값 5.5)
 

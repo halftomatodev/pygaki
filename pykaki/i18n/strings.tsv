@@ -2306,3 +2306,19 @@ ${label} 값	{0} の値	{0} value
 게임에서 꼴로 값을 바꿔요	ゲームで見た目から値を変えます	The value can be changed with the look in the game
 켜면 플레이어가 꼴로 값을 바꿔요. 슬라이더·이어진 막대는 끌기, 칸 막대·별은 칸 누르기, 스위치는 누르기, 풀다운·콤보는 펼쳐서 고르기(콤보는 글도 침)	オンにするとプレイヤーが見た目で値を変えます。スライダー・連続バーはドラッグ、区切りバー・星はマスを押す、スイッチは押す、プルダウン・コンボは開いて選ぶ(コンボは文字も打てます)	When on, the player changes the value with the look: drag a slider or continuous bar, click a cell or star, click a switch, open a pull-down or combo and pick (a combo also takes typed text)
 화면 "${nm}": 게임에서 바꿀 수 있는 풀다운 "${f.name}"에 고를 값이 없어요 (플래그 카드의 [꼴 ▾]에서 더해요)	画面「{0}」:ゲームで変更できるプルダウン「{1}」に選ぶ値がありません(フラグカードの [見た目 ▾] で追加します)	Screen "{0}": the pull-down "{1}" changeable in game has no values to pick (add them with [Look ▾] in the flag card)
+
+둥글게	丸く	Rounded
+각지게	角ばる	Square
+알약	カプセル	Pill
+모서리	角	Corners
+스크롤	スクロール	Scroll
+안쪽 크기	内側の大きさ	Inner size
+화면 자리	画面の配置	screen layout
+화면 항목	画面の項目	screen item
+화면, HUD 자리	画面とHUDの配置	Screens and HUD layout
+(안쪽 칸이 더 크면 끌기·휠로 넘겨 봐요)	(内側が大きければドラッグ・ホイールでスクロール)	(drag or use the wheel when the inside is larger)
+안쪽 가로 (px, HUD 가로보다 크면 가로로 넘겨 봄)	内側の幅 (px、HUDの幅より大きければ横にスクロール)	Inner width (px; scrolls sideways if wider than the HUD)
+안쪽 세로 (px, HUD 세로보다 크면 세로로 넘겨 봄)	内側の高さ (px、HUDの高さより大きければ縦にスクロール)	Inner height (px; scrolls up and down if taller than the HUD)
+게임 화면(HUD)의 꼴도 같은 모서리로 그려요. 그림을 넣은 부품은 그림 그대로예요	ゲーム画面(HUD)の形も同じ角で描きます。画像を入れた部品は画像のままです	The in-game (HUD) widget uses the same corners. Parts with an image keep the image
+안쪽 칸을 HUD보다 크게 잡고, 게임에서 끌거나 마우스 휠로 넘겨 봐요 (렌파이 viewport). 넓은 미니맵 등에 써요	内側をHUDより大きくして、ゲームでドラッグやマウスホイールでスクロールします (Ren'Py viewport)。広いミニマップなどに使います	Make the inside larger than the HUD and scroll it in game by dragging or with the mouse wheel (Ren'Py viewport). Good for a wide minimap
+[대본 편집]의 [화면] 탭에서 만든 화면과 HUD를 게임 화면 위에서 고쳐요. 항목을 끌어 옮기고, HUD는 붙일 곳과 크기를 정하고, 글을 고쳐요. 저장하면 대본에도 받아 적어요. 항목을 더하거나 지우는 것과 버튼이 할 일은 [화면] 탭에서 해요. pygaki 플러그인 ui_kit 4.13부터 있어요.	[台本編集]の[画面]タブで作った画面とHUDをゲーム画面の上で直します。項目をドラッグで移動し、HUDは固定位置と大きさを決め、テキストを直します。保存すると台本にも取り込みます。項目の追加・削除とボタンの動作は[画面]タブで行います。pygakiプラグイン ui_kit 4.13から使えます。	Edit the screens and HUDs made in the [Screens] tab of [Script] right on the game screen: drag items, set the HUD anchor and size, and edit text. Saving also updates the script. Add or remove items and set button actions in the [Screens] tab. Available from pygaki plugin ui_kit 4.13.

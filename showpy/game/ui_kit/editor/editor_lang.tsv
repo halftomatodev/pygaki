@@ -1274,3 +1274,42 @@ Q.저장하기	Q.セーブ	Q.Save
 3색	3 色	3 colors
 RGB 서브픽셀	RGB サブピクセル	RGB subpixels
 픽셀 격자	ピクセルの格子	Pixel grid
+왼쪽 위	左上	Top left
+위 가운데	上中央	Top center
+오른쪽 위	右上	Top right
+왼쪽 가운데	左中央	Middle left
+오른쪽 가운데	右中央	Middle right
+왼쪽 아래	左下	Bottom left
+아래 가운데	下中央	Bottom center
+오른쪽 아래	右下	Bottom right
+글	テキスト	Text
+글 버튼	テキストボタン	Text button
+그림 버튼	画像ボタン	Image button
+막대	バー	Bar
+놓는 곳	ドロップ先	Drop target
+플래그 꼴	フラグの形	Flag widget
+화면 표시(# @s:{})	画面マーク(# @s:{0})	screen mark (# @s:{0})
+HUD 칸	HUD枠	HUD box
+항목 표시(# @i:{})	項目マーク(# @i:{0})	item mark (# @i:{0})
+항목 자리(# @i:{})	項目の位置(# @i:{0})	item position (# @i:{0})
+항목 글(# @i:{}): 글이 비어 있던 놓는 곳은 대본 편집기에서	項目テキスト(# @i:{0}): テキストが空だったドロップ先は台本エディタで	item text (# @i:{0}): set it in the script editor if the drop target had no text
+화면 자리를 다시 읽었습니다.	画面の配置を読み直しました。	Reloaded the screen layout.
+개발 모드에서만 고칠 수 있습니다.	開発モードでのみ編集できます。	Can only be edited in developer mode.
+고칠 화면이 없습니다. 대본 편집기의 [[화면] 탭에서 화면이나 HUD를 만들고 내보내면 생깁니다.	編集できる画面がありません。台本エディタの[[画面]タブで画面やHUDを作って書き出すと表示されます。	No screens to edit. Make a screen or HUD in the script editor's [[Screens] tab and export.
+{}을 읽지 못했습니다. 대본 편집기에서 다시 내보내 주세요.	{0}を読めませんでした。台本エディタでもう一度書き出してください。	Couldn't read {0}. Export again from the script editor.
+원고에서 고칠 줄을 찾지 못해 저장하지 않았습니다 ({}). 대본 편집기를 새 판으로 올리고 다시 내보내 주세요.	スクリプトで直す行が見つからず保存しませんでした ({0})。台本エディタを新しい版にして書き出し直してください。	Not saved: couldn't find the lines to change ({0}). Update the script editor and export again.
+대본 편집기에 보낼 기록을 쓰지 못했습니다: {}	台本エディタに送る記録を書けませんでした: {0}	Couldn't write the record for the script editor: {0}
+항목을 끌어 옮기고, HUD 안 빈 곳을 끌면 HUD가 옮겨집니다. 화살표로 1px(Shift 10px), Tab으로 항목 고르기, Backspace로 원래대로.	項目をドラッグで移動、HUD内の空いた所をドラッグするとHUDが移動します。矢印で1px(Shift 10px)、Tabで項目を選択、Backspaceで元に戻す。	Drag items to move them; drag an empty spot inside the HUD to move the HUD. Arrows move 1px (Shift 10px), Tab picks an item, Backspace resets.
+대본 편집기의 [[화면] 탭에서 만든 화면입니다. Ctrl+S로 저장하면 pykaki_screens.rpy를 고치고 대본 편집기에도 받아 적힙니다.	台本エディタの[[画面]タブで作った画面です。Ctrl+Sで保存するとpykaki_screens.rpyを直し、台本エディタにも取り込まれます。	Screens made in the script editor's [[Screens] tab. Ctrl+S updates pykaki_screens.rpy and the script editor picks up the change.
+항목 더하기, 지우기, 버튼이 할 일, 꼴과 막대의 크기는 대본 편집기에서 고칩니다.	項目の追加と削除、ボタンの動作、フラグの形とバーの大きさは台本エディタで編集します。	Adding or removing items, button actions, and widget or bar sizes are edited in the script editor.
+다시 읽기	読み直す	Reload
+붙일 곳	固定位置	Anchor
+가로 {}	幅 {0}	Width {0}
+세로 {}	高さ {0}	Height {0}
+옮기기	移動	Offset
+가로 {}, 세로 {}	横 {0}, 縦 {1}	x {0}, y {1}
+0으로	0に	To 0
+HUD 고름	HUD選択中	HUD selected
+HUD 고르기	HUDを選択	Select HUD
+항목	項目	Items
+자리	位置	Position
