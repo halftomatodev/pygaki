@@ -10,6 +10,7 @@ import { actOf, boxRef, flagAction, hasAct, isDragged, isHud, screenNameProblem 
 import { checkTags, shaderTags, splitClear } from './tagEdit';
 import { sceneCode, sceneSupported, uiOfBox, usesSceneUi } from './boxUi';
 import { exprNames, flagNameProblem, parseAction, pyValue } from './flags';
+import { flagUi, strOptions } from './flagUi';
 import { enterTransTv, imgTransSupported, isImgTrans, shaderCode, shaderOfBox, usesShaderValues, usesShaders, usesTvValues, valuesSupported } from './shader';
 
 export interface Warn { level: 'error' | 'warn'; msg: string; nodeId?: string }
@@ -454,6 +455,10 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
       }
       if (it.kind === 'drop' && !sc.items.some(isDragged)) W.push({ level: 'warn', msg: `화면 "${nm}": 놓는 곳이 있지만 끌 수 있는 글·그림이 없어요 (항목의 [끌 수 있음])` });
       if (it.kind === 'look' && !p.variables.some((f) => f.name === it.flag)) W.push({ level: 'warn', msg: `화면 "${nm}": 플래그 꼴에 플래그를 골라 주세요 (안 고르면 내보내지 않아요)` });
+      if (it.kind === 'look' && it.edit) {
+        const f = p.variables.find((x) => x.name === it.flag);
+        if (f?.kind === 'str' && flagUi(f).look === 'pulldown' && !strOptions(p, f).some((o) => o !== '')) W.push({ level: 'warn', msg: `화면 "${nm}": 게임에서 바꿀 수 있는 풀다운 "${f.name}"에 고를 값이 없어요 (플래그 카드의 [꼴 ▾]에서 더해요)` });
+      }
       if (it.kind === 'bar' && !p.variables.some((f) => f.name === it.flag && f.kind === 'int')) W.push({ level: 'warn', msg: `화면 "${nm}": 막대에 숫자 플래그를 골라 주세요 (안 고르면 내보내지 않아요)` });
       for (const n of it.cond ? exprNames(it.cond) : []) if (!p.variables.some((f) => f.name === n)) W.push({ level: 'warn', msg: `화면 "${nm}": 보이는 조건의 "${n}"이 플래그 카드에 없어요` });
       if ((it.kind === 'imagebutton' || it.kind === 'image') && !it.image?.trim()) W.push({ level: 'warn', msg: `화면 "${nm}": 그림 이름이 빈 칸이 있어서 내보내지 않았어요` });

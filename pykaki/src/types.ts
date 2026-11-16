@@ -131,6 +131,7 @@ export interface ScreenItem {
   // 끌어 놓기 (FEATURE 19, 렌파이 Drag): text·image는 drag면 끌 수 있고 놓으면 제자리로. drop(놓는 곳)은 w·h 칸, 글 text, 놓으면 act(버튼과 같음)
   drag?: boolean;
   accept?: string | null; // drop: 받는 것 (끌 수 있는 항목 id). 없으면 아무거나
+  edit?: boolean; // look (FEATURE 22): 게임에서 꼴로 플래그 값을 바꿀 수 있음 (슬라이더·막대는 끌기, 칸·별은 누르기, 스위치는 누르기, 풀다운·콤보는 펼쳐서 고르기). 없으면 보이기만
 }
 export interface ScreenDef {
   id: string;

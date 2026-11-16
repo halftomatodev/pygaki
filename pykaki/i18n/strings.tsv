@@ -2298,3 +2298,11 @@ ${label} 색 (#rrggbbaa)	{0} の色 (#rrggbbaa)	{0} color (#rrggbbaa)
 화면 "${nm}": 플래그 꼴에 플래그를 골라 주세요 (안 고르면 내보내지 않아요)	画面「{0}」: フラグの見た目にフラグを選んでください (選ばないと書き出しません)	Screen "{0}": pick a flag for the flag look (it isn't exported without one)
 꼴과 꾸미기(색·그림)는 플래그 카드의 [꼴 ▾]에서 고쳐요. 여기서는 게임 화면에서의 자리와 크기만 정해요. 게임에서는 값을 보여 주기만 해요	見た目とカスタマイズ(色・画像)はフラグカードの [見た目 ▾] で変えます。ここではゲーム画面での位置と大きさだけを決めます。ゲームでは値を表示するだけです	Change the look and its customization (colors, images) in the flag card's [Look ▾]. Here you set only its place and size on the game screen. In the game it only shows the value
 ${label} 값	{0} の値	{0} value
+꼴과 꾸미기(색·그림)는 플래그 카드의 [꼴 ▾]에서 고쳐요. 여기서는 게임 화면에서의 자리와 크기만 정해요.	見た目とカスタマイズ(色・画像)はフラグカードの [見た目 ▾] で変えます。ここではゲーム画面での位置と大きさだけを決めます。	Change the look and customization (colors, images) with [Look ▾] in the flag card. Here you only set the place and size on the game screen.
+게임에서는 값을 보여 주기만 해요	ゲームでは値を表示するだけです	In the game it only shows the value
+게임에서 플레이어가 꼴로 값을 바꿔요(최솟값~최댓값, 롤백하면 되돌아감)	ゲームでプレイヤーが見た目で値を変えます(最小値〜最大値、ロールバックすると戻ります)	In the game the player changes the value with the look (minimum to maximum, undone by rollback)
+게임에서 바꿀 수 있음	ゲームで変更できる	Changeable in game
+· 게임에서 바꿀 수 있음	· ゲームで変更できる	· Changeable in game
+게임에서 꼴로 값을 바꿔요	ゲームで見た目から値を変えます	The value can be changed with the look in the game
+켜면 플레이어가 꼴로 값을 바꿔요. 슬라이더·이어진 막대는 끌기, 칸 막대·별은 칸 누르기, 스위치는 누르기, 풀다운·콤보는 펼쳐서 고르기(콤보는 글도 침)	オンにするとプレイヤーが見た目で値を変えます。スライダー・連続バーはドラッグ、区切りバー・星はマスを押す、スイッチは押す、プルダウン・コンボは開いて選ぶ(コンボは文字も打てます)	When on, the player changes the value with the look: drag a slider or continuous bar, click a cell or star, click a switch, open a pull-down or combo and pick (a combo also takes typed text)
+화면 "${nm}": 게임에서 바꿀 수 있는 풀다운 "${f.name}"에 고를 값이 없어요 (플래그 카드의 [꼴 ▾]에서 더해요)	画面「{0}」:ゲームで変更できるプルダウン「{1}」に選ぶ値がありません(フラグカードの [見た目 ▾] で追加します)	Screen "{0}": the pull-down "{1}" changeable in game has no values to pick (add them with [Look ▾] in the flag card)

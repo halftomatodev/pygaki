@@ -3,7 +3,7 @@ import type { BoxNode, Project, ScreenAnchor, ScreenDef, ScreenItem } from './ty
 import { addFixup } from './store';
 import { IDENT, RESERVED, uid } from './util';
 import { parseAction } from './flags';
-import { flagUi, partColor, uiMax, uiMin } from './flagUi';
+import { flagUi, partColor, strOptions, uiMax, uiMin } from './flagUi';
 
 // HUD (FEATURE 18): 대사가 흐르는 동안 떠 있는 화면. 없으면 전체 화면 (call screen)
 export const isHud = (s?: ScreenDef | null) => s?.kind === 'hud';
@@ -183,27 +183,39 @@ export function lookCode(p: Project, it: ScreenItem): string[] {
   const u = flagUi(f);
   const I = '    ';
   const [w, h] = lookSize(p, it);
+  const edit = !!it.edit; // FEATURE 22: 게임에서 꼴로 값 바꾸기
   // 부품: 그림이 있으면 그림(늘여 맞춤), 없으면 색
   const part = (k: string, pw: number | string, ph: number | string) => {
     const img = u.skin?.[k]?.image?.trim();
     return img ? `Transform(${imgRef(img)}, xysize=(${pw}, ${ph}))` : `Solid(${py(partColor(u, k))}, xysize=(${pw}, ${ph}))`;
   };
+  // 누르는 칸: 배경·여백 없는 button (칸 하나에 그림 하나). 올리면 살짝 밝게
+  const press = (I1: string, action: string) => [`${I1}button:`, `${I1}${I}background None`, `${I1}${I}padding (0, 0)`, `${I1}${I}hover_foreground Solid("#ffffff30")`, `${I1}${I}action ${action}`];
   const lo = uiMin(u), hi = uiMax(u), n = f.name;
+  // 칸·별 i를 누르면 그 칸까지 찬 값. 첫 칸이 이미 그 값이면 최솟값으로 (모두 비우기)
+  const stepSet = (count: number) => {
+    const t = `${lo} + ((i + 1) * ${hi - lo} + ${count - 1}) // ${count}`;
+    return `SetVariable(${py(n)}, (${lo} if i == 0 and ${n} == ${t} else ${t}))`;
+  };
   if (f.kind === 'int' && u.look === 'level' && u.style === 'rating') {
     const count = Math.min(hi - lo, 10), per = (hi - lo) / count;
     const on = u.skin?.on?.image?.trim(), off = u.skin?.off?.image?.trim();
-    const sym = on && off ? [`${I}${I}add (${imgRef(on)} if ${n} - ${lo} >= (i + 1) * ${per} else ${imgRef(off)}):`, `${I}${I}${I}fit "contain"`, `${I}${I}${I}xysize (${h}, ${h})`]
-      : [`${I}${I}text "★" font "DejaVuSans.ttf" size ${h} color (${py(partColor(u, 'on'))} if ${n} - ${lo} >= (i + 1) * ${per} else ${py(partColor(u, 'off'))})`];
-    return ['hbox:', `${I}xysize (${w}, ${h})`, `${I}spacing 2`, `${I}for i in range(${count}):`, ...sym];
+    const I2 = edit ? I + I + I : I + I;
+    const sym = on && off ? [`${I2}add (${imgRef(on)} if ${n} - ${lo} >= (i + 1) * ${per} else ${imgRef(off)}):`, `${I2}${I}fit "contain"`, `${I2}${I}xysize (${h}, ${h})`]
+      : [`${I2}text "★" font "DejaVuSans.ttf" size ${h} color (${py(partColor(u, 'on'))} if ${n} - ${lo} >= (i + 1) * ${per} else ${py(partColor(u, 'off'))})`];
+    return ['hbox:', `${I}xysize (${w}, ${h})`, `${I}spacing 2`, `${I}for i in range(${count}):`, ...(edit ? press(I + I, stepSet(count)) : []), ...sym];
   }
   if (f.kind === 'int' && u.look === 'level' && u.style === 'discrete') {
     const count = Math.min(hi - lo, 20);
     const seg = `(${w} - ${count + 1} * 2) // ${count}`;
+    const cell = `add (${part('fill', seg, h - 4)} if (${n} - ${lo}) * ${count} >= (i + 1) * ${hi - lo} else ${part('track', seg, h - 4)})`;
     return ['frame:', `${I}background ${part('border', w, h)}`, `${I}padding (2, 2)`, `${I}xysize (${w}, ${h})`, `${I}hbox:`, `${I}${I}spacing 2`, `${I}${I}for i in range(${count}):`,
-      `${I}${I}${I}add (${part('fill', seg, h - 4)} if (${n} - ${lo}) * ${count} >= (i + 1) * ${hi - lo} else ${part('track', seg, h - 4)})`];
+      ...(edit ? [...press(I + I + I, stepSet(count)), `${I}${I}${I}${I}${cell}`] : [`${I}${I}${I}${cell}`])];
   }
   if (f.kind === 'int') {
-    const value = `${I}value AnimatedValue(${n} - ${lo}, ${hi - lo}, 0.3)`;
+    // 바꿀 수 있으면 끌어서 정수로 (VariableValue, 최솟값~최댓값). 아니면 따라가기만 (AnimatedValue)
+    const v = edit ? `VariableValue(${py(n)}, min=${lo}, max=${hi}, step=1, force_step=True)` : `AnimatedValue(${n} - ${lo}, ${hi - lo}, 0.3)`;
+    const value = `${I}value ${v}`;
     if (u.look === 'slider') {
       // 트랙은 가운데 가는 띠, 손잡이는 그림이 없으면 네모 (렌파이 Solid는 둥글지 않음)
       const th = Math.max(4, Math.round(h / 5));
@@ -222,10 +234,37 @@ export function lookCode(p: Project, it: ScreenItem): string[] {
   }
   if (f.kind === 'bool') {
     const k = Math.round(h * 0.8), m = Math.round((h - k) / 2);
-    return ['fixed:', `${I}xysize (${w}, ${h})`, `${I}add (${part('on', w, h)} if ${n} else ${part('off', w, h)})`, `${I}add ${part('thumb', k, k)}:`, `${I}${I}xpos (${w - k - m} if ${n} else ${m})`, `${I}${I}ypos ${m}`];
+    const inner = (I1: string) => [`${I1}add (${part('on', w, h)} if ${n} else ${part('off', w, h)})`, `${I1}add ${part('thumb', k, k)}:`, `${I1}${I}xpos (${w - k - m} if ${n} else ${m})`, `${I1}${I}ypos ${m}`];
+    if (!edit) return ['fixed:', `${I}xysize (${w}, ${h})`, ...inner(I)];
+    return ['button:', `${I}xysize (${w}, ${h})`, `${I}background None`, `${I}padding (0, 0)`, `${I}action ToggleVariable(${py(n)})`, `${I}fixed:`, ...inner(I + I)];
   }
-  // 글자: 값을 글로 보이는 칸 (게임 안에서 고르지는 않음)
-  return ['frame:', `${I}background ${part('border', w, h)}`, `${I}padding (1, 1)`, `${I}xysize (${w}, ${h})`, `${I}frame:`, `${I}${I}background ${part('box', w - 2, h - 2)}`, `${I}${I}xfill True`, `${I}${I}yfill True`, `${I}${I}padding (10, 0)`, `${I}${I}text "[${n}]" color ${py(partColor(u, 'text'))} yalign 0.5 size ${Math.max(12, Math.round(h * 0.5))}`];
+  // 글자: 값을 글로 보이는 칸. 바꿀 수 있으면 눌러서 고를 값 목록을 펼침 (콤보는 아래에 글 치는 칸도)
+  const ts = Math.max(12, Math.round(h * 0.5));
+  const tc = py(partColor(u, 'text'));
+  const value = (I1: string) => `${I1}text "[${n}]" color ${tc} yalign 0.5 size ${ts}`;
+  // 펼침 표시 ▾는 따로 (게임 글꼴에 없을 수 있어 DejaVuSans. 값 글은 게임 글꼴 그대로)
+  const label = (I1: string) => [`${I1}frame:`, `${I1}${I}background ${part('box', w - 2, h - 2)}`, `${I1}${I}xfill True`, `${I1}${I}yfill True`, `${I1}${I}padding (10, 0)`,
+    ...(edit ? [`${I1}${I}fixed:`, value(I1 + I + I), `${I1}${I}${I}text "▾" font "DejaVuSans.ttf" color ${tc} size ${ts} xalign 1.0 yalign 0.5`] : [value(I1 + I)])];
+  if (!edit) return ['frame:', `${I}background ${part('border', w, h)}`, `${I}padding (1, 1)`, `${I}xysize (${w}, ${h})`, ...label(I)];
+  const open = '_pk_open_' + it.id.replace(/\W/g, '_');
+  const opts = strOptions(p, f).filter((o) => o !== '');
+  const out = ['vbox:', `${I}default ${open} = False`, `${I}spacing 2`,
+    `${I}button:`, `${I}${I}background ${part('border', w, h)}`, `${I}${I}padding (1, 1)`, `${I}${I}xysize (${w}, ${h})`, `${I}${I}action ToggleScreenVariable(${py(open)})`, ...label(I + I),
+    `${I}if ${open}:`, `${I}${I}frame:`, `${I}${I}${I}background ${part('border', w, 1)}`, `${I}${I}${I}padding (1, 1)`, `${I}${I}${I}xsize ${w}`, `${I}${I}${I}vbox:`, `${I}${I}${I}${I}spacing 1`];
+  const I4 = I + I + I + I;
+  // 올린 줄·고른 줄은 글자 색 바탕에 칸 색 글자 (뒤집기)
+  const hl = `Solid(${tc})`, bc = py(partColor(u, 'box'));
+  for (const o of opts)
+    out.push(`${I4}textbutton ${py(o.replace(/\[/g, '[[').replace(/\{/g, '{{'))}:`, `${I4}${I}xfill True`, `${I4}${I}padding (10, 4)`, `${I4}${I}background ${part('box', w - 2, h - 2)}`, `${I4}${I}hover_background ${hl}`, `${I4}${I}selected_background ${hl}`,
+      `${I4}${I}text_size ${ts}`, `${I4}${I}text_color ${tc}`, `${I4}${I}text_hover_color ${bc}`, `${I4}${I}text_selected_color ${bc}`, `${I4}${I}selected ${n} == ${py(o)}`, `${I4}${I}action [SetVariable(${py(n)}, ${py(o)}), SetScreenVariable(${py(open)}, False)]`);
+  if (u.look === 'combo')
+  {
+    // 글 치는 칸: 누르면 치기 시작(Toggle), Enter로 끝(action Disable: Enter가 대사로 가지 않음). 누르기가 대사로 가지 않게 button으로 감쌈
+    const iv = `VariableInputValue(${py(n)}, default=False, returnable=False)`;
+    out.push(`${I4}button:`, `${I4}${I}xfill True`, `${I4}${I}padding (10, 4)`, `${I4}${I}background ${part('box', w - 2, h - 2)}`, `${I4}${I}action ${iv}.Toggle()`,
+      `${I4}${I}input value ${iv} action [${iv}.Disable(), SetScreenVariable(${py(open)}, False)] size ${ts} color ${tc} pixel_width ${Math.max(20, w - 24)}`);
+  }
+  return out;
 }
 
 // 보이는 조건 (FEATURE 18)

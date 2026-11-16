@@ -327,12 +327,13 @@ function StageItem({ sc, it, scale, on, onMove, vars, hidden }: { sc: ScreenDef;
       className={'scv-el k-' + it.kind + (on ? ' on' : '') + (hidden ? ' off' : '') + (onMove ? '' : ' still')}
       style={{ left: it.x * scale, top: it.y * scale }}
       onPointerDown={down}
-      title={(hasAct(it.kind) ? (act === 'return' ? `${KIND[it.kind]} · 값 ${it.value ?? ''}` : KIND[it.kind]) : KIND[it.kind]) + (isDragged(it) ? ' · 끌 수 있음' : '') + (it.cond ? ` · 보이는 조건 ${it.cond}${hidden ? ' (지금 안 보임)' : ''}` : '')}
+      title={(hasAct(it.kind) ? (act === 'return' ? `${KIND[it.kind]} · 값 ${it.value ?? ''}` : KIND[it.kind]) : KIND[it.kind]) + (isDragged(it) ? ' · 끌 수 있음' : '') + (it.kind === 'look' && it.edit ? ' · 게임에서 바꿀 수 있음' : '') + (it.cond ? ` · 보이는 조건 ${it.cond}${hidden ? ' (지금 안 보임)' : ''}` : '')}
     >
       {body}
       {onMove && tag && <span className={'scv-val' + (act === 'return' ? '' : ' act')}>{tag}</span>}
       {onMove && it.cond && <span className="scv-cond">?</span>}
       {onMove && isDragged(it) && <span className="scv-drag" title="게임에서 끌 수 있어요">✋</span>}
+      {onMove && it.kind === 'look' && it.edit && <span className="scv-drag" title="게임에서 꼴로 값을 바꿔요">✋</span>}
     </div>
   );
 }
@@ -582,7 +583,11 @@ function ItemCard({ sc, it, upd, remove, dup }: { sc: ScreenDef; it: ScreenItem;
             {num('w', String(lookSize(project, { ...it, w: undefined, h: undefined })[0]), '가로 (px). 비우면 꼴의 기본 크기')}
             {num('h', String(lookSize(project, { ...it, w: undefined, h: undefined })[1]), '세로 (px)')}
           </div>
-          <p className="tip">꼴과 꾸미기(색·그림)는 플래그 카드의 [꼴 ▾]에서 고쳐요. 여기서는 게임 화면에서의 자리와 크기만 정해요. 게임에서는 값을 보여 주기만 해요</p>
+          <label className="check" title="켜면 플레이어가 꼴로 값을 바꿔요. 슬라이더·이어진 막대는 끌기, 칸 막대·별은 칸 누르기, 스위치는 누르기, 풀다운·콤보는 펼쳐서 고르기(콤보는 글도 침)">
+            <input type="checkbox" checked={!!it.edit} onChange={(e) => upd((x) => void (e.target.checked ? (x.edit = true) : delete x.edit))} />
+            게임에서 바꿀 수 있음
+          </label>
+          <p className="tip">꼴과 꾸미기(색·그림)는 플래그 카드의 [꼴 ▾]에서 고쳐요. 여기서는 게임 화면에서의 자리와 크기만 정해요. {it.edit ? '게임에서 플레이어가 꼴로 값을 바꿔요(최솟값~최댓값, 롤백하면 되돌아감)' : '게임에서는 값을 보여 주기만 해요'}</p>
         </>
       )}
       {it.kind === 'bar' && (
