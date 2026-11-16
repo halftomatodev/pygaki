@@ -406,6 +406,32 @@ def effects_chapter(heads, used, clips_dir, lang="ko"):
     return "\n".join(out)
 
 
+# ── 플래그 용례 (대본 편집기 플래그 만들기 메뉴와 같은 목록. GUIDE의 <!-- flag-recipes --> 자리에) ──
+
+FLAG_MARK = "<!-- flag-recipes -->"
+
+
+def flag_recipes(lang="ko"):
+    """pykaki/src/flagRecipes.ts의 용례(빈 플래그 빼고)를 영상 카드 격자로. 영상은 pykaki/src/flagclips/<id>.webm"""
+    src = read("pykaki/src/flagRecipes.ts")
+    out = ['<div class="fx-grid">']
+    for m in re.finditer(r"\{\s*id: '(\w+)',\s*icon: '([^']*)',\s*title: '([^']*)',\s*kindHint: '([^']*)',\s*desc: '([^']*)',\s*flags: \[(.*?)\],\s*write:", src, re.S):
+        rid, icon, title, kind, desc, flags = m.groups()
+        if rid == "blank":
+            continue
+        fn = os.path.join(ROOT, "pykaki", "src", "flagclips", rid + ".webm")
+        if os.path.exists(fn):
+            with open(fn, "rb") as f:
+                media = '<video class="wide" src="data:video/webm;base64,%s" autoplay loop muted playsinline preload="auto"></video>' % base64.b64encode(f.read()).decode("ascii")
+        else:
+            media = ""
+        names = " ".join("<code>%s</code>" % html.escape(n) for n in re.findall(r"name: '(\w+)'", flags))
+        out.append('<figure class="fx-card">%s<figcaption><b>%s %s</b>%s<span>%s · %s</span></figcaption></figure>'
+                   % (media, html.escape(icon), html.escape(tr(title, lang)), names, html.escape(tr(kind, lang)), html.escape(tr(desc, lang))))
+    out.append("</div>")
+    return "\n".join(out)
+
+
 # ── 페이지 ──
 
 PAGE = """<!doctype html>
@@ -475,6 +501,7 @@ mark{background:var(--mark);color:inherit;border-radius:2px}
 .fx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin:12px 0 20px}
 .fx-card{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
 .fx-card video,.fx-none{display:block;width:100%;aspect-ratio:48/5;object-fit:contain;background:#111}
+.fx-card video.wide{aspect-ratio:16/9}
 .fx-none{color:#9aa3ad;font-size:12px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.4}
 .fx-card figcaption{padding:7px 10px 9px;display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline;font-size:14px}
 .fx-card figcaption span{color:var(--muted);font-size:12px;width:100%}
@@ -648,7 +675,8 @@ def build(out_path=OUT, clips_dir=None, lang="ko", files=None):
                 stale_check(lang, cid, src, at)
             ## 원본 맨 위 제목(# …)은 장 제목으로 바꾼다
             text = re.sub(r"\A\s*#\s+[^\n]*\n", "", text)
-            inner = md(text, src, heads, used)
+            inner = md(text.replace(FLAG_MARK, "FLAGRECIPESHERE"), src, heads, used)
+            inner = inner.replace("<p>FLAGRECIPESHERE</p>", flag_recipes(lang))
             note = '<p class="src">%s: <a href="%s/blob/main/%s" target="_blank" rel="noopener"><code>%s</code></a></p>' % (t["src"], REPO_URL, src, src) \
                 if not src.startswith("bundle/guide/") else ""
         else:

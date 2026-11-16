@@ -1,4 +1,4 @@
-<!-- 원본: pykaki/docs/GUIDE.md @ 1029277f24 -->
+<!-- 원본: pykaki/docs/GUIDE.md @ 0b7f3a6f91 -->
 # pygaki user guide
 
 A tool for writing Ren'Py scripts with boxes and lines and exporting them as Ren'Py script files (`.rpy`).
@@ -222,10 +222,21 @@ The side panels float over the canvas. Gaps between cards and space left by fold
 
 ### Flags (values the story remembers)
 Values the story remembers and uses later to branch, like "did we meet Alice" or "affection". The same as Ren'Py variables.
-- **Flag card**: always at the top of the right panel. Make one with [+ Add] and write its name (English letters, digits, _), type (**on/off**, **number**, **text**), starting value and a memo. Below it, **Used in** lists where it's used (✎ changes it, ? reads it); click to go to that box. Renaming a flag renames it everywhere it's used.
+- **Flag card**: always at the top of the right panel. Make one with [+ Add] (see "Flag recipes" below) and write its name (English letters, digits, _), type (**on/off**, **number**, **text**), starting value and a memo. Below it, **Used in** lists where it's used (✎ changes it, ? reads it); click to go to that box. Renaming a flag renames it everywhere it's used.
 - **Change**: press **⚑** on a choice row and use [+ Change flag] under **On pick**. Choose a flag and set on, off or toggle (on/off), add, subtract or set (number), or text (text). To change one anywhere in a box, add a **⚑ Flag change** line. Press `{ }` to write an expression directly (e.g. `love += 2`).
 - **Read**: write a condition in a choice's **Show if** and the choice is shown only when it holds (always shown if empty). You can also branch automatically with the next flow **◇ Condition**. Conditions are built by picking flags, the same as for conditions.
 - On export, starting values like `default love = 0` go at the top of the script, `$ love += 1` where it changes, and `"Text" if love >= 5:` on choices. If a condition uses a name not in the flag card, [Check] tells you (a variable made in another file of the game is fine to use as is).
+
+### Flag recipes
+Press **[+ Add]** on the flag card to open the flag menu. Pick a common pattern (a recipe) such as affection or a scene seen once, and it makes the flags for you.
+
+- Type a word in the search box at the top (for example affection, key) to filter the recipes. Choose with **↑ ↓** and make it with **Enter**. **Esc** or a click outside closes the menu.
+- Hover a row or move to it with the arrows and an **explanation card** appears beside it: what the recipe does, a sample video recorded in Ren'Py, where the flag is changed (✎) and read (?), and a few lines of the exported script.
+- Choosing a recipe makes its flags with the starting value and memo filled in and moves to the name field. If the name is taken, a number is added, like `love_2`. One undo removes them.
+- The menu only makes flags. Add the choice's "when chosen", the show condition and the ◇ condition branch yourself, following the explanation card.
+- Use **Blank flag** to set the name, type and starting value yourself.
+
+<!-- flag-recipes -->
 
 ### Tracing flags
 Press **[▶ Trace]** in the flag card (from the start of the script) or **[▶ Trace]** in the box card (from that box, with flags at their starting values) and a window opens below the canvas. The script isn't changed.

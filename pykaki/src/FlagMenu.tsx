@@ -22,20 +22,30 @@ export function FlagMenu({ anchor, onPick, onClose }: { anchor: HTMLElement; onP
     setPos((o) => (o && Math.abs(o.left - left) < 1 && Math.abs(o.top - top) < 1 ? o : { left, top }));
   });
 
+  // 닫으면 초점을 [+ 추가] 단추로 되돌림. 바깥을 눌러 초점이 다른 칸으로 갔으면 그대로 둠
+  const close = () => {
+    onClose();
+    setTimeout(() => {
+      const a = document.activeElement;
+      if (!a || a === document.body || box.current?.contains(a)) anchor.focus();
+    });
+  };
+
   useEffect(() => {
     const down = (e: MouseEvent) => {
       const t = e.target as Node;
-      if (!box.current?.contains(t) && !anchor.contains(t)) onClose();
+      if (!box.current?.contains(t) && !anchor.contains(t)) close();
     };
     window.addEventListener('mousedown', down, true);
     return () => window.removeEventListener('mousedown', down, true);
-  }, [anchor, onClose]);
+  });
 
   const key = (e: React.KeyboardEvent) => {
+    if (e.nativeEvent.isComposing || e.keyCode === 229) return; // 한글을 짜는 중의 Enter·화살표는 입력기 몫
     if (e.key === 'ArrowDown') setCur((i) => (Math.min(i, list.length - 1) + 1) % Math.max(1, list.length));
     else if (e.key === 'ArrowUp') setCur((i) => (Math.min(i, list.length - 1) - 1 + list.length) % Math.max(1, list.length));
     else if (e.key === 'Enter') sel && onPick(sel);
-    else if (e.key === 'Escape') onClose();
+    else if (e.key === 'Escape') close();
     else return;
     e.preventDefault();
     e.stopPropagation();
@@ -57,6 +67,11 @@ export function FlagMenu({ anchor, onPick, onClose }: { anchor: HTMLElement; onP
           </button>
         ))}
         {!list.length && <div className="fmenu-empty">맞는 용례가 없어요</div>}
+      </div>
+      <div className="fmenu-keys">
+        <span><kbd>↑</kbd><kbd>↓</kbd> 고르기</span>
+        <span><kbd>Enter</kbd> 만들기</span>
+        <span><kbd>Esc</kbd> 닫기</span>
       </div>
       {sel && <RecipeCard r={sel} menu={box.current} />}
     </div>,
