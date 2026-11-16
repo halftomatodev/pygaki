@@ -25,9 +25,14 @@ export interface SayStyle {
   cps?: number; // 1초에 나오는 글자 수
   sound?: string; // 대사 소리 (game 기준 경로, 예: audio/type.ogg). ''이면 이 줄은 끔, 없으면 캐릭터 → 게임 처음 값 (FEATURE 10, cb_typing_sound=)
   effect?: string; // 등장 효과 (EFFECTS). 두 개를 겹치면 "slidein|shake"
-  box?: string; // 글 상자 (BOXES): bubble 말풍선 | pill 둥근 테두리 (showpy ui_kit 4.0)
+  box?: string; // 글 상자 (BOXES): bubble 말풍선 | pill 둥근 테두리 (showpy ui_kit 4.0) | media 그림/영상 (ui_kit 4.14)
   tail?: string; // 말풍선 꼬리 (TAILS): bottom | top | left | right | none. 비우면 상자 기본
   box_rotate?: number; // 상자와 글 기울기 (도)
+  // 그림/영상 상자 (box media, FEATURE 24): 글 뒤에 까는 그림이나 영상 (game 기준 경로). 기본 대사창은 투명해짐
+  media?: string;
+  media_fit?: 'image'; // 그림 크기 그대로 (없으면 글 크기에 맞춤)
+  media_zoom?: number; // media_fit image일 때 배율
+  media_window?: boolean; // 기본 대사창·이름 칸 배경을 그대로 둠
   name_size?: number;
   name_font?: string;
   name_color?: string;
@@ -77,6 +82,17 @@ export interface Choice {
   mode: 'jump';
   condition: string | null; // 보이는 조건 (렌파이 조건식, 예: love >= 5). 비우면 늘 보임 (FEATURE 14)
   actions: string[]; // 고르면 바꾸는 식 (예: love += 1, met_alice = True). 선택지 아래 $ 줄로 (FEATURE 14)
+  media?: ChoiceMedia; // 글 뒤 그림/영상 (FEATURE 24, pygaki 플러그인 ui_kit 4.14)
+}
+
+// 선택지 글 뒤 그림/영상 (game 기준 경로). 하나라도 있으면 기본 버튼 배경이 없어짐
+export interface ChoiceMedia {
+  idle?: string; // 평소
+  hover?: string; // 마우스를 올렸을 때 (없으면 평소 것)
+  select?: string; // 고르고 확정할 때 잠깐
+  time?: number; // select를 보여 주는 초 (없으면 0.5)
+  fit?: 'image'; // 그림 크기 그대로 (없으면 글 크기에 맞춤)
+  zoom?: number; // fit image일 때 배율
 }
 
 // 조건 분기의 갈래 하나 (FEATURE 13). cond는 렌파이 조건식 그대로 (예: love >= 5)

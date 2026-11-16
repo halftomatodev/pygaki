@@ -8,7 +8,9 @@ contextBridge.exposeInMainWorld('pygaki', {
   read: (rel) => ipcRenderer.invoke('pygaki:read', rel),
   write: (rel, data) => ipcRenderer.invoke('pygaki:write', rel, data),
   remove: (rel) => ipcRenderer.invoke('pygaki:remove', rel), // 효과 파일(game/ui_kit/effects/*.glsl)만
-  openFolder: (rel) => ipcRenderer.invoke('pygaki:openFolder', rel),
+  openFolder: (rel, make) => ipcRenderer.invoke('pygaki:openFolder', rel, !!make), // make: 없는 game 안 폴더는 만들고 엶
+  placeInfo: (id) => ipcRenderer.invoke('pygaki:placeInfo', id), // 프로젝트 밖 자리('appSettings', 'renpySaves')의 경로
+  openPlace: (id) => ipcRenderer.invoke('pygaki:openPlace', id),
   choose: () => ipcRenderer.invoke('pygaki:choose'),
   runGame: (always) => ipcRenderer.invoke('pygaki:runGame', !!always), // 렌파이에서 실행
   pickFile: (kind) => ipcRenderer.invoke('pygaki:pickFile', kind), // 탐색기로 그림·영상('image') 또는 소리('sound') 고르기

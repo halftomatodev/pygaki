@@ -1,10 +1,10 @@
 // 대사 미리보기: 글자 효과 카드의 미리보기와 [효과] 화면 샘플이 같이 쓴다 (예전 PyKaki 안 플레이 화면에서 남긴 부분)
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { Line, SayStyle } from './types';
-import { boxTail, lineCps } from './stage';
+import { boxTail, isMovieFile, lineCps } from './stage';
 import { shaderTags } from './tagEdit';
 import { parseTagged, type Tagged } from './textTags';
-import { gameFont, useGameFolder, type GameLook } from './gameFolder';
+import { fileUrl, gameFont, useGameFolder, type GameLook } from './gameFolder';
 import { FxCanvas, webglOk } from './fx/FxCanvas';
 import { parseTextShader, type TextShader } from './fx/textShaders';
 
@@ -98,6 +98,24 @@ const fxClass = (effect: string | undefined, fast: boolean) => 'fx-' + (effect |
 // 글 상자 (showpy text_box.rpy 흉내): 말풍선, 둥근 테두리. 셰이더로 그릴 때는 글자 자리가 어긋나서 기울이지 않는다
 const boxClass = (s: SayStyle) => (s.box ? ` sbox sbox-${s.box} tail-${boxTail(s)}` : '');
 const boxTilt = (s: SayStyle, gl: boolean): React.CSSProperties => (s.box && s.box_rotate && !gl ? { transform: `rotate(${s.box_rotate}deg)` } : {});
+// 그림/영상 상자 (FEATURE 24): 게임 폴더의 파일을 글 뒤에 깐다. 글에 맞춤이면 늘리고, 그림 크기 그대로면 가운데에
+export function useGameFileUrl(path?: string) {
+  const [url, setUrl] = useState<string | null>(null);
+  const seq = useGameFolder((s) => s.name);
+  useEffect(() => {
+    let live = true;
+    setUrl(null);
+    if (path) void fileUrl(path).then((u) => live && setUrl(u)).catch(() => {});
+    return () => void (live = false);
+  }, [path, seq]);
+  return url;
+}
+export function MediaBg({ path, fit }: { path?: string; fit?: 'image' }) {
+  const url = useGameFileUrl(path);
+  if (!url) return null;
+  const cls = 'media-bg' + (fit === 'image' ? ' natural' : '');
+  return isMovieFile(path) ? <video className={cls} src={url} autoPlay loop muted playsInline /> : <img className={cls} src={url} alt="" />;
+}
 // 말풍선은 글 색을 따로 안 적으면 어두운 글 (showpy bubble text_color 기본)
 const boxColor = (s: SayStyle, base: string) => s.color ?? (s.box === 'bubble' ? '#222222' : base);
 
@@ -186,6 +204,7 @@ function PreviewBody({ line, tagsOn, cps, look, onReplay }: { line: Line; tagsOn
         className={'preview-text ' + (ts ? 'fx-gl' : fxClass(style.effect, fast)) + boxClass(style)}
         style={{ color: boxColor(style, look.textColor), '--txt': boxColor(style, look.textColor), fontFamily: fontStack(style.font), ...charTime(cps), ...boxTilt(style, !!ts) } as React.CSSProperties}
       >
+        {style.box === 'media' && <MediaBg path={style.media} fit={style.media_fit} />}
         <Glyphs parsed={parsed} shown={shown} />
       </div>
       {ts && <FxCanvas target={inner} ts={ts} tagTs={tagTs} parsed={parsed} shown={shown} limit={limit} holding={holding} fast={fast} cps={cps} onFail={onFail} />}

@@ -2322,3 +2322,62 @@ ${label} 값	{0} の値	{0} value
 게임 화면(HUD)의 꼴도 같은 모서리로 그려요. 그림을 넣은 부품은 그림 그대로예요	ゲーム画面(HUD)の形も同じ角で描きます。画像を入れた部品は画像のままです	The in-game (HUD) widget uses the same corners. Parts with an image keep the image
 안쪽 칸을 HUD보다 크게 잡고, 게임에서 끌거나 마우스 휠로 넘겨 봐요 (렌파이 viewport). 넓은 미니맵 등에 써요	内側をHUDより大きくして、ゲームでドラッグやマウスホイールでスクロールします (Ren'Py viewport)。広いミニマップなどに使います	Make the inside larger than the HUD and scroll it in game by dragging or with the mouse wheel (Ren'Py viewport). Good for a wide minimap
 [대본 편집]의 [화면] 탭에서 만든 화면과 HUD를 게임 화면 위에서 고쳐요. 항목을 끌어 옮기고, HUD는 붙일 곳과 크기를 정하고, 글을 고쳐요. 저장하면 대본에도 받아 적어요. 항목을 더하거나 지우는 것과 버튼이 할 일은 [화면] 탭에서 해요. pygaki 플러그인 ui_kit 4.13부터 있어요.	[台本編集]の[画面]タブで作った画面とHUDをゲーム画面の上で直します。項目をドラッグで移動し、HUDは固定位置と大きさを決め、テキストを直します。保存すると台本にも取り込みます。項目の追加・削除とボタンの動作は[画面]タブで行います。pygakiプラグイン ui_kit 4.13から使えます。	Edit the screens and HUDs made in the [Screens] tab of [Script] right on the game screen: drag items, set the HUD anchor and size, and edit text. Saving also updates the script. Add or remove items and set button actions in the [Screens] tab. Available from pygaki plugin ui_kit 4.13.
+영상	動画	Video
+배율	倍率	Scale
+0.5초	0.5秒	0.5 s
+쓰는 곳	使う機能	Used by
+그림 크기	画像サイズ	Image size
+그림/영상	画像/動画	Image/video
+글에 맞춤	文字に合わせる	Fit to text
+아직 없음	まだない	Not yet
+커서 그림	カーソル画像	Cursor images
+폴더 관리	フォルダ管理	Folders
+폴더 관리 ▾	フォルダ管理 ▾	Folders ▾
+확정할 때	決定時	On select
+그림과 소리	画像とサウンド	Images and sound
+대사창 두기	セリフ欄を残す	Keep dialogue window
+화면 셰이더	画面シェーダー	Screen shaders
+렌파이 세이브	Ren'Py セーブ	Ren'Py saves
+음악, 효과음	BGM、効果音	Music, sound effects
+탐색기로 열기	エクスプローラーで開く	Open in Explorer
+프로젝트 폴더	プロジェクトフォルダ	Project folder
+game 폴더	game フォルダ	game folder
+클릭 대기 그림	クリック待ち画像	Click-to-continue images
+그림 크기 그대로	画像サイズのまま	Keep image size
+맞는 폴더가 없어요	該当するフォルダがありません	No matching folder
+앱 설정, 창 자리	アプリ設定、ウィンドウ位置	App settings, window position
+없음, 만들고 열기	なし、作って開く	Missing, create and open
+비우면 바로 넘어가요	空ならすぐ進みます	Empty: moves on right away
+어느 폴더를 열까요?	どのフォルダを開きますか?	Which folder to open?
+pygaki 앱 설정	pygaki アプリ設定	pygaki app settings
+UI 그림 (gui)	UI 画像 (gui)	UI images (gui)
+글자 효과, 그림 전환	文字エフェクト、画像トランジション	Text effects, image transitions
+대사·이름·선택지 글꼴	セリフ・名前・選択肢のフォント	Fonts for dialogue, names and choices
+비우면 평소 그림 그대로	空なら通常の画像のまま	Empty: same as normal
+[셰이더] 탭의 화면 효과	[シェーダー] タブの画面エフェクト	Screen effects of the [Shaders] tab
+그림 배율 (1이면 그대로)	画像の倍率 (1 でそのまま)	Image scale (1 = as is)
+음악·효과음 줄, 대사 소리	BGM・効果音の行、セリフ音	Music and sound lines, dialogue sound
+[효과] 탭의 효과 파일(.glsl)	[エフェクト] タブのエフェクトファイル(.glsl)	Effect files of the [Effects] tab (.glsl)
+상자의 커서 (폴더 하나가 커서 하나)	ボックスのカーソル (フォルダ 1 つがカーソル 1 つ)	Box cursors (one folder per cursor)
+확정 그림을 보여 주는 초 (기본 0.5)	決定時の画像を見せる秒数 (既定 0.5)	Seconds to show the select image (default 0.5)
+게임의 세이브, 설정 (게임을 한 번 켜면 생김)	ゲームのセーブ、設定 (ゲームを一度起動するとできます)	Game saves and settings (created after the game runs once)
+대사 음성 (이름 규칙: 캐릭터_label_번호)	セリフのボイス (名前の規則: キャラ_label_番号)	Dialogue voice (naming: character_label_number)
+상자의 클릭 대기 표시 (폴더 하나가 표시 하나)	ボックスのクリック待ち表示 (フォルダ 1 つが表示 1 つ)	Box click-to-continue marks (one folder per mark)
+눌러서 고르면 이 그림을 잠깐 보여 준 뒤 넘어가요	押して選ぶと、この画像を少し見せてから進みます	When picked, shows this image briefly, then moves on
+대사창(textbox.png), 이름 칸, 버튼 그림	セリフ欄(textbox.png)、名前欄、ボタン画像	Dialogue window (textbox.png), name box, button images
+배경(bg), 캐릭터, 기타 그림. 대사·선택지 뒤 그림	背景(bg)、キャラ、その他の画像。セリフ・選択肢の後ろの画像	Backgrounds (bg), characters, other images. Images behind dialogue and choices
+그림·영상 파일 (예: images/say/cloud.png)	画像・動画ファイル (例: images/say/cloud.png)	Image or video file (e.g. images/say/cloud.png)
+마우스를 올렸을 때(키보드로 골랐을 때) 글 뒤 그림이나 영상	マウスをのせたとき(キーボードで選んだとき)の文字の後ろの画像・動画	Image or video behind the text on hover (or keyboard focus)
+대사·선택지 뒤 영상(webm). 밖에서 고른 영상을 여기로 복사	セリフ・選択肢の後ろの動画(webm)。外から選んだ動画はここへコピー	Videos behind dialogue and choices (webm). Videos picked from outside are copied here
+그림, 영상, 소리, 효과처럼 기능마다 쓰는 폴더를 탐색기로 열어요	画像、動画、サウンド、エフェクトなど機能ごとのフォルダをエクスプローラーで開きます	Open the folders each feature uses (images, video, sound, effects) in Explorer
+글 뒤 그림·영상 (예: images/choice/paper.png)	文字の後ろの画像・動画 (例: images/choice/paper.png)	Image or video behind the text (e.g. images/choice/paper.png)
+글 뒤에 깔 그림이나 영상 (game 폴더 기준). 기본 대사창은 투명해져요	文字の後ろに敷く画像・動画 (game フォルダ基準)。基本のセリフ欄は透明になります	Image or video behind the text (relative to the game folder). The default dialogue window becomes transparent
+켜면 기본 대사창과 이름 칸 배경을 그대로 둬요 (끄면 투명해서 그림만 보여요)	オンにすると基本のセリフ欄と名前欄の背景を残します (オフなら透明で画像だけ見えます)	On: keeps the default dialogue window and name box (off: transparent, only the image shows)
+평소 선택지 글 뒤에 깔 그림이나 영상. 그림을 쓰면 기본 버튼 배경이 없어져요	通常時に選択肢の文字の後ろに敷く画像・動画。画像を使うと基本のボタン背景はなくなります	Image or video behind the choice text normally. Using one removes the default button background
+선택지 "${c.text}"의 뒤 그림은 pygaki 플러그인 연결을 켜야 내보내요	選択肢「{0}」の後ろの画像は pygaki プラグイン連携をオンにすると書き出します	The image behind choice "{0}" is exported only with the pygaki plugin link on
+대본 파일(.flow.json), 오류 기록(traceback.txt, log.txt)	シナリオファイル(.flow.json)、エラー記録(traceback.txt, log.txt)	Script file (.flow.json), error logs (traceback.txt, log.txt)
+그림/영상 상자에 파일이 없어서 상자를 내보내지 않았어요 (${b.title || b.id})	画像/動画ボックスにファイルがないので、ボックスを書き出しませんでした ({0})	The image/video box has no file, so the box was not exported ({0})
+내보낸 원고(script_flow.rpy), 화면(pykaki_screens.rpy), 게임 설정	書き出した原稿(script_flow.rpy)、画面(pykaki_screens.rpy)、ゲーム設定	Exported script (script_flow.rpy), screens (pykaki_screens.rpy), game settings
+글 뒤 그림/영상: 평소, 마우스를 올렸을 때, 고르고 확정할 때 (pygaki 플러그인 연결을 켜야 내보내요)	文字の後ろの画像/動画: 通常、マウスをのせたとき、選んで決定したとき (pygaki プラグイン連携をオンにすると書き出します)	Image/video behind the text: normal, on hover, on select (exported only with the pygaki plugin link on)
+게임의 pygaki 플러그인이 예전 판이라 선택지 "${c.text}"의 뒤 그림에서 멈춰요. 런처의 [플러그인 올리기]로 올려 주세요	ゲームの pygaki プラグインが古い版なので、選択肢「{0}」の後ろの画像で止まります。ランチャーの [プラグインを更新] で更新してください	The game's pygaki plugins are too old and will stop at the image behind choice "{0}". Update them with [Update plugins] in the launcher
+게임의 pygaki 플러그인이 예전 판이라 그림/영상 상자에서 멈춰요. 런처의 [플러그인 올리기]로 올려 주세요 (${b.title || b.id})	ゲームの pygaki プラグインが古い版なので、画像/動画ボックスで止まります。ランチャーの [プラグインを更新] で更新してください ({0})	The game's pygaki plugins are too old and will stop at the image/video box. Update them with [Update plugins] in the launcher ({0})

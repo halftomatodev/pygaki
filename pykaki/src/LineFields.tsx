@@ -9,6 +9,7 @@ import { useGameFolder } from './gameFolder';
 import { LinePreview } from './SayPreview';
 import { TransPicker } from './TransPicker';
 import { TagBar, useTagTarget } from './TagBar';
+import { MediaField } from './MediaField';
 
 type SetLine = (fn: (x: Line) => void, key?: string) => void;
 
@@ -175,6 +176,9 @@ export function SayFields({ l, set }: { l: Line; set: SetLine }) {
         delete say.tail;
         delete say.box_rotate;
       }
+      // 그림/영상 상자의 값은 그 상자일 때만, 말풍선 꼬리는 그림 상자에 없음
+      if (b !== 'media') for (const k of ['media', 'media_fit', 'media_zoom', 'media_window'] as const) delete say[k];
+      else delete say.tail;
       if (Object.keys(say).length) x.say = say;
       else delete x.say;
     });
@@ -241,11 +245,11 @@ export function SayFields({ l, set }: { l: Line; set: SetLine }) {
         </select>
         {s.box && (
           <>
-            <select title="말풍선 꼬리 방향" value={s.tail ?? ''} onChange={(e) => put('tail', e.target.value)}>
+            {s.box !== 'media' && <select title="말풍선 꼬리 방향" value={s.tail ?? ''} onChange={(e) => put('tail', e.target.value)}>
               {TAILS.map(([k, t]) => (
                 <option key={k} value={k}>{t}</option>
               ))}
-            </select>
+            </select>}
             <input
               type="number"
               className="sf-num"
@@ -262,6 +266,33 @@ export function SayFields({ l, set }: { l: Line; set: SetLine }) {
           </>
         )}
       </div>
+      {s.box === 'media' && (
+        <div className="sf-row media-row">
+          <MediaField value={s.media} placeholder="그림·영상 파일 (예: images/say/cloud.png)" title="글 뒤에 깔 그림이나 영상 (game 폴더 기준). 기본 대사창은 투명해져요" onChange={(v) => put('media', v, 'media' + l.id)} />
+          <select title="그림 크기" value={s.media_fit ?? ''} onChange={(e) => set((x) => {
+            const say: SayStyle = { ...(x.say ?? {}) };
+            if (e.target.value === 'image') say.media_fit = 'image';
+            else (delete say.media_fit, delete say.media_zoom);
+            x.say = say;
+          })}>
+            <option value="">글에 맞춤</option>
+            <option value="image">그림 크기 그대로</option>
+          </select>
+          {s.media_fit === 'image' && (
+            <input type="number" className="sf-num" min={0.1} max={10} step={0.1} title="그림 배율 (1이면 그대로)" placeholder="배율" value={s.media_zoom ?? ''}
+              onChange={(e) => { const n = Math.round(Number(e.target.value) * 100) / 100; put('media_zoom', n > 0 && n !== 1 ? Math.min(n, 10) : undefined, 'media_zoom' + l.id); }} />
+          )}
+          <label className="sf-check" title="켜면 기본 대사창과 이름 칸 배경을 그대로 둬요 (끄면 투명해서 그림만 보여요)">
+            <input type="checkbox" checked={!!s.media_window} onChange={(e) => set((x) => {
+              const say: SayStyle = { ...(x.say ?? {}) };
+              if (e.target.checked) say.media_window = true;
+              else delete say.media_window;
+              x.say = say;
+            })} />
+            대사창 두기
+          </label>
+        </div>
+      )}
       {l.type === 'say' && (
         <div className="sf-row">
           {num('name_size', '이름 크기', '이름 글자 크기', 200)}

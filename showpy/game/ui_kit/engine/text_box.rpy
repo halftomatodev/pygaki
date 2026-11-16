@@ -27,6 +27,20 @@
 ##   pill_rotate     기울기 (도). 짧게 box_rotate=
 ##   ..._text_color  상자를 쓸 때 글 색 (괄호에 color를 적으면 그것)
 ##
+## 그림/영상 상자 (box="media", ui_kit 4.14): 글 뒤에 그림이나 영상을 깝니다. 글 가운데가 기준입니다.
+##     e "꿈이었어." (box="media", media="images/say/cloud.png")                    # 글 크기에 맞춰 늘림
+##     e "쾅!" (box="media", media="movies/boom.webm", media_fit="image", media_zoom=0.6)  # 그림 크기 그대로
+##   media           그림이나 영상 파일 (game 폴더 기준). .webm .ogv .mp4 .mkv는 영상
+##   media_fit       "text": 글 크기 + padding에 맞춰 늘림 (기본), "image": 그림 크기 그대로 (media_zoom으로 키우기)
+##   media_zoom      media_fit="image"일 때 크기 배율 (기본 1.0)
+##   media_offset    (x, y) 옮기기 (픽셀)
+##   media_padding   글과 그림 가장자리 사이 (media_fit="text"일 때). 숫자 하나, (가로, 세로), (왼, 위, 오른, 아래)
+##   media_alpha     투명도 (0.0 ~ 1.0)
+##   media_mask      영상 오른쪽 절반을 투명도로 쓰는 영상이면 True (렌파이 side_mask)
+##   media_loop      영상 되풀이 (기본 True)
+##   media_window    True면 기본 대사창·이름 칸 배경을 그대로 둠 (기본 False: 투명하게 해서 그림만 보임)
+##   media_pop       튀어나오며 나타남 (True / False, 또는 걸리는 초)
+##
 ## 상자는 글 전체 크기에 맞춰서, 글이 다 나오기 전에도 다 큰 크기로 나타납니다.
 ## 대사 위치나 화면 흔들림처럼 줄 전체가 움직이면 상자도 같이 움직입니다.
 ## 글자마다 따로 움직이는 등장 효과(shake 등)는 글자만 움직입니다.
@@ -50,13 +64,32 @@ init -10 python in say_style:
             fill=None, line=(3, "#ffffff"), radius=None, padding=(18, 6),
             tail=None, tail_pos=0.25, tail_size=20, tail_width=20,
             pop=False, rotate=0, text_color=None, text_outlines=None),
+        "media": dict(
+            src=None, fit="text", zoom=1.0, offset=(0, 0), padding=(36, 24), alpha=1.0,
+            mask=False, loop=True, window=False, tail=None,
+            pop=False, rotate=0, text_color=None, text_outlines=None),
         }
 
-    BOX_KINDS = ("bubble", "pill")
+    BOX_KINDS = ("bubble", "pill", "media")
+
+    MOVIE_EXTS = (".webm", ".ogv", ".mp4", ".mkv", ".avi", ".mpg", ".mpeg")
+
+    def is_movie(path):
+        return isinstance(path, str) and path.lower().endswith(MOVIE_EXTS)
+
+    def media_displayable(src, mask=False, loop=True):
+        """그림·영상 파일 → 보이는 것. 영상은 렌파이 Movie (채널은 렌파이가 저절로 하나씩)."""
+        if src is None or src == "":
+            return None
+        if is_movie(src):
+            return store.Movie(play=src, side_mask=bool(mask), loop=bool(loop))
+        if isinstance(src, str):
+            return store.renpy.displayable(src)
+        return src
 
     ## 대사 괄호에서 상자 값으로 쓰는 이름인지
     def is_box_key(k):
-        return k in ("box", "tail") or k.startswith("box_") or k.startswith("bubble_") or k.startswith("pill_")
+        return k in ("box", "tail", "media") or k.startswith("box_") or k.startswith("bubble_") or k.startswith("pill_") or k.startswith("media_")
 
     def box_style(kind):
         rv = dict(BOX_DEFAULTS.get(kind, BOX_DEFAULTS["bubble"]))
@@ -85,13 +118,16 @@ init -10 python in say_style:
         if kind is None or kind is False or kind == "none":
             return None
         if kind not in BOX_KINDS:
-            raise Exception("[say_style] box는 \"bubble\"이나 \"pill\"입니다: {!r}".format(kind))
+            raise Exception("[say_style] box는 \"bubble\", \"pill\", \"media\"입니다: {!r}".format(kind))
         opts = { }
         for k, v in args.items():
             if k == "box":
                 continue
             if k == "tail":
                 opts["tail"] = v
+            elif k == "media":
+                if kind == "media":
+                    opts["src"] = v
             elif k.startswith("box_"):
                 opts[k[4:]] = v
             elif k.startswith(kind + "_"):
@@ -108,6 +144,14 @@ init -10 python in say_style:
                 raise Exception("[say_style] {} 상자에 없는 값: {}_{}  (쓸 수 있는 값: {})".format(
                     kind, kind, k, ", ".join(sorted(st))))
             st[k] = v
+        if kind == "media":
+            if not st.get("src"):
+                raise Exception("[say_style] 그림/영상 상자(box=\"media\")에는 media=\"그림이나 영상 파일\"이 있어야 합니다")
+            if st.get("fit") not in ("text", "image"):
+                raise Exception("[say_style] media_fit은 \"text\"나 \"image\"입니다: {!r}".format(st.get("fit")))
+            src = st["src"]
+            if isinstance(src, str) and not is_movie(src) and "." in src.split("/")[-1] and not store.renpy.loadable(src):
+                raise Exception("[say_style] 그림 파일이 없어요: {}".format(src))
         return TextBox(kind, st)
 
     def _rgba(c):
@@ -246,11 +290,75 @@ init -10 python in say_style:
             aw, ah = math.ceil(max(xs) + m) - ax, math.ceil(max(ys) + m) - ay
             return dict(area=(ax, ay, aw, ah), rect=(bx, by, bw, bh), radius=r, line=(lw, lc), tri=tri)
 
+        def _media(self):
+            d = getattr(self, "_media_d", None)
+            if d is None:
+                o = self.opts
+                d = media_displayable(o.get("src"), o.get("mask"), o.get("loop", True))
+                self._media_d = d
+            return d
+
+        def _wrap_media(self, text, rv, st, at):
+            """그림/영상 상자: 글 뒤에 그림을 깝니다. 글 가운데가 기준, 글 크기와 배치는 그대로."""
+            W, H = rv.get_size()
+            o = self.opts
+            d = self._media()
+            if d is None:
+                return rv
+
+            scale = 1.0
+            alpha = float(o.get("alpha") if o.get("alpha") is not None else 1.0)
+            pop = o.get("pop")
+            if pop:
+                dur = 0.28 if pop is True else max(float(pop), 0.01)
+                t = st / dur
+                if t < 1.0:
+                    scale = 0.35 + 0.65 * _ease_back(max(t, 0.0))
+                    alpha *= min(1.0, t * 4.0)
+                    store.renpy.redraw(text, 0)
+            if is_movie(o.get("src")):
+                store.renpy.redraw(text, 0)
+
+            ox, oy = o.get("offset") or (0, 0)
+            if o.get("fit") == "image":
+                tr = store.Transform(d, zoom=float(o.get("zoom") or 1.0) * scale, alpha=alpha)
+                mr = store.renpy.render(tr, store.config.screen_width, store.config.screen_height, st, at)
+            else:
+                pl, pt, pr, pb = _padding(o.get("padding"))
+                bw, bh = W + float(pl + pr), H + float(pt + pb)
+                tr = store.Transform(d, xysize=(int(bw * scale), int(bh * scale)), alpha=alpha)
+                mr = store.renpy.render(tr, int(bw * scale) + 1, int(bh * scale) + 1, st, at)
+            mw, mh = mr.get_size()
+            ## 그림 가운데 = 글 가운데 (fit="text"면 padding이 한쪽만 다를 때 그만큼 옮김)
+            cx, cy = W / 2.0, H / 2.0
+            if o.get("fit") != "image":
+                pl, pt, pr, pb = _padding(o.get("padding"))
+                cx += (pr - pl) / 2.0
+                cy += (pb - pt) / 2.0
+
+            out = store.renpy.Render(W, H)
+            out.subpixel_blit(mr, (cx - mw / 2.0 + ox, cy - mh / 2.0 + oy))
+            out.blit(rv, (0, 0))
+            return self._rotate(out, W, H, st, at)
+
+        def _rotate(self, out, W, H, st, at):
+            rot = float(self.opts.get("rotate") or 0)
+            if abs(rot) < 0.01:
+                return out
+            tr = store.Transform(_Held(out), rotate=rot, rotate_pad=False, subpixel=True)
+            rr = store.renpy.render(tr, W, H, st, at)
+            rw, rh = rr.get_size()
+            final = store.renpy.Render(W, H)
+            final.subpixel_blit(rr, ((W - rw) / 2.0, (H - rh) / 2.0))
+            return final
+
         def ui_kit_wrap(self, text, rv, st, at):
             """글 그림(rv)에 상자를 깔아서 돌려줍니다. 크기는 글 그대로라 배치가 바뀌지 않습니다."""
             W, H = rv.get_size()
             if W <= 0 or H <= 0:
                 return rv
+            if self.kind == "media":
+                return self._wrap_media(text, rv, st, at)
             g = self.geometry(W, H)
             ax, ay, aw, ah = g["area"]
             bx, by, bw, bh = g["rect"]

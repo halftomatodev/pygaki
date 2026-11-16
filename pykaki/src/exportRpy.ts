@@ -1,5 +1,5 @@
 // 프로젝트 → .rpy 변환과 검사. 설계 문서 6장 참고.
-import type { BoxNode, LabelGroup, Line, Project, Settings } from './types';
+import type { BoxNode, ChoiceMedia, LabelGroup, Line, Project, Settings } from './types';
 import { exitLinks, fallTarget } from './ops';
 import { IDENT, PLUGIN_NAMES, RESERVED } from './util';
 import { badImageName, renpyOnlyEffect, fxArgs, isStage, sayArgs, stageCode, tagEffectNames, REMOVED_EFFECTS, RENPY_EFFECTS } from './stage';
@@ -65,6 +65,23 @@ export function orderGroup(p: Project, g: LabelGroup, byId: Map<string, BoxNode>
 const loosePercent = (t: string) => /%/.test(t.replace(/%%/g, ''));
 
 // 줄 끝에 표시를 붙여도 되는 줄인지: 다음 줄로 이어지는 줄(끝의 \, 닫지 않은 따옴표)에는 붙이지 않는다
+// 선택지 뒤 그림/영상의 괄호 값 (pygaki 플러그인 ui_kit 4.14 choice_menu)
+export function choiceMediaArgs(m?: ChoiceMedia): string[] {
+  if (!m || !(m.idle || m.hover || m.select)) return [];
+  const a: string[] = [];
+  if (m.idle) a.push(`idle_media=${pyStr(m.idle)}`);
+  if (m.hover) a.push(`hover_media=${pyStr(m.hover)}`);
+  if (m.select) {
+    a.push(`select_media=${pyStr(m.select)}`);
+    if (m.time !== undefined && m.time !== 0.5) a.push(`select_time=${m.time}`);
+  }
+  if (m.fit === 'image') {
+    a.push('media_fit="image"');
+    if (m.zoom && m.zoom !== 1) a.push(`media_zoom=${m.zoom}`);
+  }
+  return a;
+}
+
 function tailSafe(row: string) {
   if (/\\\s*$/.test(row)) return false;
   let q = '';
@@ -83,7 +100,8 @@ function tailSafe(row: string) {
 // 연결한 게임의 pygaki 플러그인이 ui_kit 4.5 이상일 때만 켠다 (그 전 판은 윗줄 표시만 읽는다)
 // newMark: 머리말을 새 문구(pygaki)로. 게임의 플러그인이 새 문구를 알아볼 때만 (ui_kit 4.10, script_edit.rpy의 PK_NEW_MARK). 아니면 예전 문구
 // images: 연결한 게임의 그림 목록. 있으면 배경·보이기 줄의 없는 그림을 경고한다 (내보내기는 막지 않음)
-export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: boolean; images?: ImageBook | null; audio?: string[] } = {}): { code: string; warnings: Warn[] } {
+// oldMedia: 게임의 플러그인이 대사·선택지 뒤 그림/영상을 모름 (ui_kit 4.14 전). 쓰면 게임이 그 줄에서 멈춰서 알린다
+export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: boolean; oldMedia?: boolean; images?: ImageBook | null; audio?: string[] } = {}): { code: string; warnings: Warn[] } {
   const endMarks = !!opts.endMarks && p.settings.renpyLink;
   const W: Warn[] = [];
   const out: string[] = [];
@@ -298,6 +316,10 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
         // 짧은 이름과 화면 효과는 플러그인이 받는다. 플러그인이 없으면 오류가 나서 글자 모양만 렌파이 원래 이름으로 쓴다
         if (!S.renpyLink && l.say?.effect && !renpyOnlyEffect(l.say.effect)) W.push({ level: 'warn', msg: `이 등장 효과는 pygaki 플러그인이 있어야 해서 내보내지 않았어요 (${b.title || b.id})`, nodeId: b.id });
         if (!S.renpyLink && l.say?.box) W.push({ level: 'warn', msg: `글 상자는 pygaki 플러그인이 있어야 해서 내보내지 않았어요 (${b.title || b.id})`, nodeId: b.id });
+        if (S.renpyLink && l.say?.box === 'media') {
+          if (!l.say.media) W.push({ level: 'warn', msg: `그림/영상 상자에 파일이 없어서 상자를 내보내지 않았어요 (${b.title || b.id})`, nodeId: b.id });
+          else if (opts.oldMedia) W.push({ level: 'error', msg: `게임의 pygaki 플러그인이 예전 판이라 그림/영상 상자에서 멈춰요. 런처의 [플러그인 올리기]로 올려 주세요 (${b.title || b.id})`, nodeId: b.id });
+        }
         // 글의 일부에만 건 효과 {shader=이름}: 게임에 없는 이름이면 그 줄에서 멈춘다
         const tagText = S.allowTextTags ? l.text : undefined;
         for (const n of new Set(tagEffectNames(tagText))) {
@@ -367,7 +389,12 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
             // 보이는 조건: "문구" if 조건:
             const cond = c.condition ? oneLine(c.condition).replace(/:\s*$/, '') : '';
             if (cond) checkExpr(cond, `선택지 "${c.text}"의 조건`, b);
-            body.push(`${I}${q(c.text)}${cond ? ' if ' + cond : ''}:`);
+            // 글 뒤 그림/영상 (FEATURE 24): "문구" (idle_media=…) if 조건: (플러그인이 있어야 해서 연결을 켰을 때만)
+            const ma = choiceMediaArgs(c.media);
+            if (ma.length && S.renpyLink && opts.oldMedia) W.push({ level: 'error', msg: `게임의 pygaki 플러그인이 예전 판이라 선택지 "${c.text}"의 뒤 그림에서 멈춰요. 런처의 [플러그인 올리기]로 올려 주세요`, nodeId: b.id });
+            if (ma.length && !S.renpyLink) W.push({ level: 'warn', msg: `선택지 "${c.text}"의 뒤 그림은 pygaki 플러그인 연결을 켜야 내보내요`, nodeId: b.id });
+            const margs = ma.length && S.renpyLink ? ` (${ma.join(', ')})` : '';
+            body.push(`${I}${q(c.text)}${margs}${cond ? ' if ' + cond : ''}:`);
             // 고르면 바꾸기: jump 앞에 $ 줄
             for (const a0 of c.actions) {
               const a = oneLine(a0);

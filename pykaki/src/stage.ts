@@ -65,7 +65,8 @@ export const FX_BASE: [string, string][] = [
 ];
 
 // 글 상자 (showpy ui_kit 4.0, engine/text_box.rpy)
-export const BOXES: [string, string][] = [['', '상자 없음'], ['bubble', '말풍선'], ['pill', '둥근 테두리']];
+export const BOXES: [string, string][] = [['', '상자 없음'], ['bubble', '말풍선'], ['pill', '둥근 테두리'], ['media', '그림/영상']];
+export const isMovieFile = (p?: string) => !!p && /\.(webm|ogv|mp4|mkv|avi|mpe?g)$/i.test(p);
 export const TAILS: [string, string][] = [['', '꼬리 기본'], ['bottom', '꼬리 아래'], ['top', '꼬리 위'], ['left', '꼬리 왼쪽'], ['right', '꼬리 오른쪽'], ['none', '꼬리 없음']];
 // 상자마다 꼬리 기본 (showpy say_style.box_styles 기본값과 같게)
 export const boxTail = (s?: SayStyle) => (s?.box ? s.tail || (s.box === 'bubble' ? 'bottom' : 'none') : 'none');
@@ -192,6 +193,7 @@ const NATIVE: Record<keyof SayStyle, string> = {
   size: 'what_size', font: 'what_font', color: 'what_color', cps: 'what_slow_cps', effect: 'what_textshader',
   sound: '', // 대사 소리는 플러그인의 대사 소리 콜백이 받아서 연결을 켰을 때만
   box: '', tail: '', box_rotate: '', // 글 상자는 showpy가 있어야 해서 원래 이름이 없다 (내보내지 않음)
+  media: '', media_fit: '', media_zoom: '', media_window: '',
   name_size: 'who_size', name_font: 'who_font', name_color: 'who_color',
   x: 'what_xpos', y: 'what_ypos', name_x: 'namebox_xpos', name_y: 'namebox_ypos',
 };
@@ -216,7 +218,18 @@ export function sayArgs(s0?: SayStyle, native = false, text?: string): string[] 
   str('effect');
   // 글의 일부에만 효과({shader=})를 쓴 줄: 줄에 등장 효과가 없으면 렌파이가 그 줄에서 멈춰서, 한 글자씩 나오기를 넣는다
   if (tagged && a.length === before) a.push(`${name('effect')}="typewriter"`);
-  if (!native && s.box) {
+  if (!native && s.box === 'media') {
+    // 그림/영상 상자 (FEATURE 24): 파일이 없으면 내보내지 않음 (플러그인이 멈추지 않게)
+    if (s.media) {
+      a.push(`box="media"`, `media=${pyStr(s.media)}`);
+      if (s.media_fit === 'image') {
+        a.push(`media_fit="image"`);
+        if (s.media_zoom && s.media_zoom !== 1) a.push(`media_zoom=${s.media_zoom}`);
+      }
+      if (s.media_window) a.push('media_window=True');
+      if (s.box_rotate) a.push(`box_rotate=${s.box_rotate}`);
+    }
+  } else if (!native && s.box) {
     a.push(`box=${pyStr(s.box)}`);
     if (s.tail) a.push(`tail=${s.tail === 'none' ? 'None' : pyStr(s.tail)}`);
     if (s.box_rotate) a.push(`box_rotate=${s.box_rotate}`);

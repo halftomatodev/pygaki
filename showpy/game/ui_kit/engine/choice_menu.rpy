@@ -48,7 +48,12 @@ init -10 python in cmenu:
         "hover_movie", "hover_movie_size", "hover_movie_side_mask", "hover_movie_zoom",
         "hover_movie_offset", "hover_movie_loop",
         "hover_sound", "activate_sound",
+        "idle_media", "hover_media", "select_media", "select_time",
+        "media_fit", "media_zoom", "media_offset", "media_mask", "media_loop", "media_button", "media_padding",
         }
+
+    ## 선택지 뒤 그림/영상 (ui_kit 4.14). 하나라도 있으면 기본 버튼 배경을 없앱니다 (media_button=True면 그대로)
+    MEDIA_KEYS = ("idle_media", "hover_media", "select_media")
 
     POSITION_KEYS = ("x", "y", "xalign", "yalign")
 
@@ -91,6 +96,9 @@ init -10 python in cmenu:
             self.ed_number = None       # 편집기에서 고른 선택지 번호 (테두리 표시)
             self.last = None            # 마지막으로 그린 선택지들 (편집기용)
 
+            ## 고르고 확정할 때 그림(select_media)을 보여 주는 중: (선택지 번호, 원래 동작, 이 메뉴의 items)
+            self.picked = None
+
     state = _State()
 
     def _cached(key, factory):
@@ -118,6 +126,58 @@ init -10 python in cmenu:
             return Fixed(Transform(m, align=(0.5, 0.5), xoffset=ox, yoffset=oy, zoom=zoom))
 
         return _cached(key, make)
+
+    def _media(d, key):
+        """선택지 뒤 그림/영상 (idle_media, hover_media, select_media). 글 가운데가 기준."""
+        src = d.get(key, None)
+        if not src:
+            return None
+        fit = d.get("media_fit", "text")
+        zoom = float(d.get("media_zoom", 1.0) or 1.0)
+        ox, oy = d.get("media_offset", (0, 0))
+        mask = bool(d.get("media_mask", False))
+        loop = bool(d.get("media_loop", True))
+        k = ("media", key, src, fit, zoom, ox, oy, mask, loop)
+
+        def make():
+            m = store.say_style.media_displayable(src, mask, loop)
+            if fit == "image":
+                return Fixed(Transform(m, align=(0.5, 0.5), xoffset=ox, yoffset=oy, zoom=zoom))
+            if fit != "text":
+                _err(src, "media_fit은 \"text\"나 \"image\"입니다: {!r}".format(fit))
+            return _Fill(m, ox, oy)
+
+        return _cached(k, make)
+
+    class _Fill(store.renpy.Displayable):
+        """받은 자리(버튼 크기)에 맞춰 늘려 그림. 버튼 background로 씀."""
+        def __init__(self, child, ox=0, oy=0, **kw):
+            super(_Fill, self).__init__(**kw)
+            self.child = child
+            self.ox, self.oy = ox, oy
+
+        def render(self, width, height, st, at):
+            w, h = int(width), int(height)
+            cr = store.renpy.render(store.Transform(self.child, xysize=(w, h)), w, h, st, at)
+            rv = store.renpy.Render(w, h)
+            rv.blit(cr, (self.ox, self.oy))
+            return rv
+
+        def visit(self):
+            return [ self.child ]
+
+    def pick(number, action, items):
+        """고르고 확정할 때 그림이 있는 선택지를 누름: 그림을 select_time초 보여 준 뒤 원래 동작."""
+        if state.picked is not None:
+            return
+        state.picked = (number, action, items)
+        store.renpy.restart_interaction()
+
+    def pick_done():
+        p = state.picked
+        state.picked = None
+        if p is not None:
+            return store.renpy.run(p[1])
 
     ## ── 선택지 해석 ──
 
@@ -259,6 +319,30 @@ init -10 python in cmenu:
         if hb is not None:
             button_props["hover_background"] = hb
 
+        ## 뒤 그림/영상
+        c.select_media = None
+        c.select_time = float(d.get("select_time", 0.5) or 0.0)
+        if any(d.get(k) for k in MEDIA_KEYS):
+            idle = _media(d, "idle_media")
+            hover = _media(d, "hover_media")
+            if not d.get("media_button", False):
+                button_props["background"] = None
+                button_props["hover_background"] = None
+                ## 버튼을 글 크기 + 여백으로 (button_xsize를 따로 적었으면 그것)
+                if "button_xsize" not in item_kwargs and "button_xsize" not in menu_kwargs:
+                    button_props["xsize"] = None
+                if "button_padding" not in item_kwargs and "button_padding" not in menu_kwargs:
+                    button_props["padding"] = store.say_style._padding(d.get("media_padding", (36, 14)))
+            if idle is not None:
+                button_props["background"] = idle
+            if hover is not None or idle is not None:
+                button_props["hover_background"] = hover if hover is not None else idle
+            c.select_media = _media(d, "select_media")
+        c.picking = state.picked is not None and state.picked[0] == number
+        if c.picking and c.select_media is not None:
+            button_props["background"] = c.select_media
+            button_props["hover_background"] = c.select_media
+
         ## 편집 중: 버튼에 테두리 (버튼과 같이 회전합니다)
         if state.editing and menu_key is not None:
             sel = (state.ed_number == number)
@@ -287,6 +371,10 @@ init -10 python in cmenu:
         menu_key = current_menu_key() if state.editing else None
         defaults = default_values()
 
+        ## 다른 메뉴로 넘어갔으면(되감기 등) 고르는 중 표시를 지움
+        if state.picked is not None and state.picked[2] is not items and not store.renpy.predicting():
+            state.picked = None
+
         rv = Prepared()
         rv.stacked = [ ]
         rv.free = [ ]
@@ -306,6 +394,15 @@ init -10 python in cmenu:
                 rv.free.append(c)
             else:
                 rv.stacked.append(c)
+
+        rv.picking = state.picked is not None
+        rv.pick_time = 0.5
+        for c in rv.all:
+            if c.picking:
+                rv.pick_time = c.select_time
+            ## 확정 그림이 있으면 눌렀을 때 바로 넘어가지 않고 그림을 먼저 보여 줌 (편집 중에는 바로)
+            if c.select_media is not None and c.select_time > 0 and not state.editing:
+                c.action = store.Function(pick, c.number, c.action, items)
 
         rv.list_pos = state.list_pos if (state.editing and state.list_pos is not None) else cfg("list_pos")
 
@@ -408,6 +505,14 @@ screen choice(items, **kwargs):
         ## 위치를 지정한 선택지: 그 자리에
         for c in _cm.free:
             use cmenu_choice(c)
+
+        ## 고르고 확정할 때 그림(select_media)을 보여 주는 동안: 다른 곳을 못 누르게 막고, 끝나면 원래 동작
+        if _cm.picking:
+            button:
+                style "empty"
+                xysize (config.screen_width, config.screen_height)
+                action NullAction()
+            timer _cm.pick_time action Function(cmenu.pick_done)
 
 
 screen cmenu_choice(c):

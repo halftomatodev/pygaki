@@ -301,7 +301,36 @@ ipcMain.handle('pygaki:liveStatus', (e) => {
   return { on, reloading: !on && !!entry?.reloading, showpy: l?.info?.showpy ?? null, last: l ? Object.values(l.last) : [] };
 });
 
-ipcMain.handle('pygaki:openFolder', (e, rel) => shell.openPath(inside(projectOf(e), rel)));
+// 폴더를 탐색기로 연다. make면 없는 폴더를 만들고 연다 (game 안만). 폴더 관리 메뉴(FolderMenu.tsx)가 씀
+ipcMain.handle('pygaki:openFolder', (e, rel, make) => {
+  const full = inside(projectOf(e), rel);
+  if (make && !fs.existsSync(full) && String(rel).startsWith('game/')) fs.mkdirSync(full, { recursive: true });
+  return shell.openPath(full);
+});
+// 프로젝트 밖의 정해진 자리: 앱 설정 폴더(userData), 렌파이 세이브 폴더(%APPDATA%/RenPy/<config.save_directory>)
+function placeOf(project, id) {
+  if (id === 'appSettings') return app.getPath('userData');
+  if (id === 'renpySaves') {
+    let name = null;
+    try {
+      const m = fs.readFileSync(path.join(project, 'game', 'options.rpy'), 'utf8').match(/^\s*define\s+config\.save_directory\s*=\s*["']([^"']+)["']/m);
+      name = m && m[1];
+    } catch {}
+    if (!name || /[\\/]|\.\./.test(name)) return null;
+    return path.join(app.getPath('appData'), 'RenPy', name);
+  }
+  return null;
+}
+ipcMain.handle('pygaki:placeInfo', (e, id) => {
+  const full = placeOf(projectOf(e), id);
+  return full ? { path: full, exists: fs.existsSync(full) } : null;
+});
+ipcMain.handle('pygaki:openPlace', (e, id) => {
+  const full = placeOf(projectOf(e), id);
+  if (!full) return '자리를 찾지 못했어요';
+  if (!fs.existsSync(full)) return '아직 없어요 (게임을 한 번 켜면 생겨요)';
+  return shell.openPath(full);
+});
 
 // ── 렌파이에서 실행 ──
 // 묶음에서는 앱이 <렌파이 SDK>/pygaki/app 안에 있어서 두 칸 위에서 렌파이를 찾는다.
@@ -397,7 +426,7 @@ ipcMain.handle('pygaki:snapToGame', (e) => {
 // 탐색기 창으로 파일 하나를 고른다. game 폴더 안이면 game 기준 경로를, 밖이면 복사할 때 쓸 표(token)를 돌려준다.
 // 화면은 고른 파일의 경로를 모르고, 복사는 이 창에서 고른 파일만 한다
 const PICK_KINDS = {
-  image: { dir: 'images', name: '그림, 영상', ext: ['png', 'jpg', 'jpeg', 'webp', 'avif', 'webm'] },
+  image: { dir: 'images', name: '그림, 영상', ext: ['png', 'jpg', 'jpeg', 'webp', 'avif', 'webm', 'ogv', 'mp4', 'mkv'] },
   sound: { dir: 'audio', name: '소리', ext: ['ogg', 'opus', 'mp3', 'wav', 'flac'] },
 };
 const picked = new Map(); // token → 고른 파일의 전체 경로

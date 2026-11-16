@@ -9,6 +9,7 @@ import { keyOf } from './prefs';
 import { getLang, LANGS, setLang, type Lang } from './i18n';
 import { desktop, isDesktop } from './desktop';
 import { useLive } from './showpyLive';
+import { FolderMenu } from './FolderMenu';
 
 // 화면 바꾸기: 대본 편집 / GUI 편집(데스크톱 앱에서만) / 효과 / 셰이더
 function ViewSwitch() {
@@ -127,12 +128,14 @@ export function Toolbar() {
 // 렌파이 프로젝트 폴더를 열고 읽는 단추. 앱은 프로젝트 하나를 연 채라 다시 읽기·폴더 열기·다른 프로젝트
 function FolderButtons() {
   const reread = () => void pullInbox(true).then(() => scanFolder());
+  const [menu, setMenu] = useState<HTMLElement | null>(null);
   if (isDesktop)
     return (
       <>
         <span className="sep" />
         <button onClick={reread} title="프로젝트 폴더의 그림·소리와 게임 안 편집 화면이 넣은 줄을 다시 읽어요">다시 읽기</button>
-        <button onClick={() => void desktop!.openFolder('')} title="프로젝트 폴더를 탐색기로 열어요">폴더 열기</button>
+        <button className={menu ? 'on' : ''} onClick={(e) => setMenu(menu ? null : e.currentTarget)} title="그림, 영상, 소리, 효과처럼 기능마다 쓰는 폴더를 탐색기로 열어요">폴더 관리 ▾</button>
+        {menu && <FolderMenu anchor={menu} onClose={() => setMenu(null)} />}
         <button onClick={() => void desktop!.choose()} title="다른 렌파이 프로젝트를 새 창으로 열어요">다른 프로젝트</button>
       </>
     );

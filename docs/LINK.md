@@ -45,6 +45,8 @@ label ward.n1:
             jump ward.n4
 ```
 
+**선택지 뒤 그림/영상** (대본 편집기 `FEATURE` 24, pygaki 플러그인 `ui_kit` 4.14 `choice_menu.rpy`, 연결을 켰을 때만): `"문구" (idle_media="…", hover_media="…", select_media="…", select_time=1.0, media_fit="image", media_zoom=0.6) if 조건:`. 대본 편집기 값은 선택지의 `media`(`idle` `hover` `select` `time` `fit` `zoom`). 하나라도 있으면 플러그인이 기본 버튼 배경을 없애고 버튼을 글 크기 + `media_padding`으로 줄입니다. `select_media`가 있으면 누른 뒤 `select_time`초(기본 0.5) 그 그림을 보여 주고 다른 곳을 못 누르게 막은 뒤 넘어갑니다. 대본 편집기는 게임의 `ui_kit/engine/text_box.rpy`에 `BOX_KINDS`의 `"media"`가 없으면(예전 판) 검사 탭에 오류로 알립니다.
+
 캐릭터 `define` 줄 아래에는 플래그의 처음 값 `default 이름 = 값  # 메모`가 한 줄씩 옵니다(대본 편집기 플래그 카드, `FEATURE` 14). 선택지의 조건은 `"문구" if 조건:`, 고르면 바꾸는 값은 그 아래 `$ 식` 줄입니다. 모두 평범한 렌파이 문법이라 플러그인이 따로 읽지 않습니다.
 
 | 표시 | 뜻 | 누가 쓰는가 |
@@ -84,6 +86,9 @@ label ward.n1:  # @node:n1 도입
 | `box="bubble"`, `box="pill"` | `box` | 글 상자: 말풍선, 둥근 테두리 (pygaki 플러그인 `ui_kit` 4.0 `text_box.rpy`, `FEATURE` 3) |
 | `tail="top"`, `tail=None` | `tail` (`bottom` `top` `left` `right` `none`) | 말풍선 꼬리. 비우면 상자 기본(말풍선은 아래, 둥근 테두리는 없음) |
 | `box_rotate=-4` | `box_rotate` | 상자와 글 기울기 (도) |
+| `box="media", media="images/say/cloud.png"` | `box` `media` | 그림/영상 상자: 글 뒤에 그림이나 영상(game 기준 경로, `.webm` `.ogv` `.mp4` `.mkv`는 영상)을 깔고 기본 대사창·이름 칸 배경을 투명하게 (`ui_kit` 4.14 `text_box.rpy`, `FEATURE` 24). 파일이 비면 상자를 안 내보냄 |
+| `media_fit="image"`, `media_zoom=1.5` | `media_fit` `media_zoom` | 그림 크기 그대로(배율). 없으면 글 크기 + 여백에 맞춰 늘림 |
+| `media_window=True` | `media_window` | 기본 대사창·이름 칸 배경을 그대로 둠 |
 | `x=…`, `y=…`, `name_x=…`, `name_y=…` | 위치 | pygaki 플러그인이 정해서 대본 편집기가 받아 적음 (3장) |
 
 상자의 나머지 값(`bubble_color`, `pill_line` 등)은 pygaki 플러그인 원고나 `say_style.box_styles`에서만 고칩니다. 연결을 끈 파일에는 상자와 pygaki 플러그인 효과를 내보내지 않습니다(검사 탭에 경고).

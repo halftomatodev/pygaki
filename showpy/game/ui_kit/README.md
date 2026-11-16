@@ -13,7 +13,9 @@
 그리고 이 기능들을 **게임을 실행한 채로 마우스로 고치는 편집기**가 들어 있습니다. (개발 모드에서 Shift+M)
 대사, 선택지, show·hide·scene 줄은 편집기에서 고친 값이 **원고(.rpy)의 그 줄에 바로 저장**됩니다.
 
-버전 4.13 · 렌파이 8.5.3 기준으로 만들었습니다.
+버전 4.14 · 렌파이 8.5.3 기준으로 만들었습니다.
+
+4.14에서 바뀐 점: **대사·선택지 뒤 그림/영상**. 대사 괄호에 `box="media", media="images/say/cloud.png"`를 적으면 글 뒤에 그림이나 영상(webm 등)을 깔고, 기본 대사창과 이름 칸 배경은 투명하게 합니다(`media_fit` `"text"` 글에 맞춤 / `"image"` 그림 크기 그대로, `media_zoom`, `media_offset`, `media_padding`, `media_alpha`, `media_window=True`면 대사창을 그대로 둠). 선택지 괄호에는 `idle_media`(평소), `hover_media`(마우스를 올렸을 때), `select_media`(고르고 확정할 때, `select_time`초 보여 준 뒤 넘어감, 기본 0.5)를 적고, 그림을 쓰는 선택지는 기본 버튼 배경을 없애고 글 크기 + `media_padding`으로 줄입니다(`media_button=True`면 그대로). 자세한 값은 아래 "글 상자"와 "선택지" 절. 옮기기: `ui_kit` 폴더를 바꿔 넣고 `.rpyc`를 지웁니다.
 
 4.13에서 바뀐 점: **[화면] 탭**. 대본 편집기의 [화면] 탭에서 만든 화면과 HUD(`game/pykaki_screens.rpy`)를 게임 화면 위에서 고칩니다. 화면을 고르면 항목이 고친 자리에 그려지고, 항목을 끌어 옮기거나(화살표 1px, Shift 10px, Tab으로 고르기, Backspace로 원래대로) HUD 빈 곳을 끌어 HUD를 옮기고, HUD 붙일 곳(아홉 칸)과 크기, 글(글, 글 버튼, 놓는 곳)을 고칩니다. Ctrl+S로 저장하면 원고의 그 줄(`# @s:`, `# @i:` 표시)을 고치고(앞 것은 `ui_kit_backup/`) `showpy_inbox.json`에도 적어 대본 편집기가 받아 적습니다. 화면 자리는 대본 편집기가 같이 쓰는 `game/pykaki_screens.json`(개발용, 배포판에서 빠짐)에서 읽습니다. 표시가 없는 예전 원고는 대본 편집기를 새 판으로 올려 다시 내보내야 고칠 수 있습니다. 옮기기: `ui_kit` 폴더를 바꿔 넣고 `.rpyc`를 지웁니다(런처 [플러그인 올리기]).
 
@@ -945,6 +947,15 @@ menu (font="fonts/KBLJump_c.ttf", size=28, appear="fade"):
 | `hover_movie_zoom`, `hover_movie_offset`, `hover_movie_size` | 그 영상의 확대·위치·크기 | `hover_movie_zoom=2.0` |
 | `hover_movie_side_mask`, `hover_movie_loop` | 투명 영상 방식(기본 `True`), 반복 재생(기본 `True`) | |
 | `hover_sound`, `activate_sound` | 이 선택지만의 효과음 | |
+| `idle_media` | 평소 글 뒤에 깔리는 그림이나 영상 (4.14) | `idle_media="images/choice/paper.png"` |
+| `hover_media` | 마우스를 올렸을 때 글 뒤 그림이나 영상 (없으면 `idle_media` 그대로) | `hover_media="movies/glow.webm"` |
+| `select_media` | 고르고 확정할 때 잠깐 보여 줄 그림이나 영상. 보여 준 뒤 넘어감 | `select_media="movies/pick.webm"` |
+| `select_time` | `select_media`를 보여 주는 초 (기본 `0.5`, `0`이면 바로 넘어감) | `select_time=0.8` |
+| `media_fit` | `"text"` 글 크기 + 여백에 맞춰 늘림 (기본), `"image"` 그림 크기 그대로 글 가운데에 | `media_fit="image"` |
+| `media_zoom`, `media_offset` | `media_fit="image"`일 때 배율, 옮기기 (픽셀) | `media_zoom=0.6` |
+| `media_padding` | 글과 그림 가장자리 사이 (기본 `(36, 14)`) | `media_padding=(50, 20)` |
+| `media_mask`, `media_loop` | 투명 영상 방식(side_mask, 기본 `False`), 반복 재생(기본 `True`) | |
+| `media_button` | `True`면 기본 버튼 배경과 크기를 그대로 둠 (기본은 그림을 쓰면 버튼 배경을 없앰) | `media_button=True` |
 | 렌파이 텍스트 스타일 속성 | `font`, `size`, `color`, `kerning`(자간), `line_spacing`(줄 간격), `outlines`, `bold`, `italic`, `underline`, `strikethrough`, `textalign` … | `kerning=3` |
 | `hover_` + 스타일 속성 | 마우스를 올렸을 때 글자 스타일 | `hover_color="#ff4444"` |
 | `insensitive_` + 스타일 속성 | 고를 수 없는 선택지의 글자 스타일 | `insensitive_color="#555"` |
@@ -1109,6 +1120,26 @@ e "속까지." (box="pill", pill_fill="#ffd23b", pill_line=None, color="#000000"
 - 대사 위치(`x`, `y`)나 화면 흔들림처럼 **줄 전체**가 움직이면 상자도 같이 움직입니다. `shake`, `slidein`처럼 **글자마다** 움직이는 등장 효과는 글자만 움직이고 상자는 제자리입니다.
 - 꼬리는 말하는 사람을 저절로 찾지 않습니다. 방향이나 `(x, y)`로 정해 주세요.
 - 낱말마다 다른 자리의 상자는 대사를 여러 줄로 나눠 각자 위치(`x`, `y`)와 `box`를 적습니다.
+**그림/영상 상자** (`box="media"`, 4.14): 글 뒤에 그림이나 영상을 깝니다. 글 가운데가 기준이고, 기본 대사창과 이름 칸 배경은 투명해져서 그림만 보입니다.
+
+```renpy
+e "꿈이었어." (box="media", media="images/say/cloud.png")                                   # 글 크기 + 여백에 맞춰 늘림
+e "쾅!" (box="media", media="movies/boom.webm", media_fit="image", media_zoom=0.6)            # 그림 크기 그대로 (0.6배)
+e "창은 그대로." (box="media", media="images/say/frame.png", media_window=True, media_alpha=0.7) # 대사창을 그대로 둠
+```
+
+| 이름 | 뜻 | 예 |
+|---|---|---|
+| `media` | 그림이나 영상 파일 (game 폴더 기준). `.webm` `.ogv` `.mp4` `.mkv`는 영상 | `media="images/say/cloud.png"` |
+| `media_fit` | `"text"` 글 크기 + 여백에 맞춰 늘림 (기본), `"image"` 그림 크기 그대로 | `media_fit="image"` |
+| `media_zoom` | `media_fit="image"`일 때 배율 | `media_zoom=1.5` |
+| `media_offset` | 옮기기 (x, y 픽셀) | `media_offset=(0, -10)` |
+| `media_padding` | 글과 그림 가장자리 사이 (`media_fit="text"`일 때, 기본 `(36, 24)`) | `media_padding=40` |
+| `media_alpha` | 투명도 (0.0 ~ 1.0) | `media_alpha=0.7` |
+| `media_window` | `True`면 기본 대사창·이름 칸 배경을 그대로 둠 | `media_window=True` |
+| `media_mask`, `media_loop` | 투명 영상 방식(side_mask, 기본 `False`), 반복 재생(기본 `True`) | `media_loop=False` |
+| `media_pop` | 튀어나오며 나타남 (`True`, `False`, 걸리는 초) | `media_pop=True` |
+
 - 편집기 대사 탭의 "상자" 칸에서 없음/말풍선/둥근 테두리, 꼬리 방향, 기울기를 고르고 Ctrl+S로 원고에 씁니다. pygaki 원고에서는 아직 못 고칩니다.
 
 ---

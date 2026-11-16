@@ -64,6 +64,7 @@ interface F {
   fxErrors: [string, string][]; // 효과 폴더(ui_kit/effects)에서 못 읽은 파일과 이유
   endMarks: boolean; // 이 게임의 플러그인이 줄 끝 표시를 읽는지 (ui_kit 4.5, script_edit.rpy의 PK_END_MARKS)
   newMark: boolean; // 이 게임의 플러그인이 새 머리말 문구(pygaki가 만든 파일)를 알아보는지 (ui_kit 4.10, PK_NEW_MARK)
+  mediaBox: boolean | null; // 대사·선택지 뒤 그림/영상을 아는지 (ui_kit 4.14, text_box.rpy BOX_KINDS의 "media"). 플러그인이 없거나 폴더를 안 열었으면 null
   sceneUi: boolean | null; // custom_ui.scene이 있는지 (ui_kit 4.7). 플러그인이 없거나 폴더를 안 열었으면 null
   imageBook: ImageBook | null; // 그림 이름 검사에 쓰는 그림 목록 (FEATURE 15). 폴더를 안 열었으면 null
   fxSeq: number; // 효과 목록이 바뀔 때마다 오른다 (목록을 쓰는 화면이 다시 그리게)
@@ -84,6 +85,7 @@ export const useGameFolder = create<F>((set) => ({
   fxErrors: [],
   endMarks: false,
   newMark: false,
+  mediaBox: null,
   sceneUi: null,
   imageBook: null,
   fxSeq: 0,
@@ -324,10 +326,12 @@ export async function scanFolder() {
   const newMark = /^\s*PK_NEW_MARK\s*=\s*True/m.test(seText);
   const cuText = engine ? await readText(engine, 'custom_ui.rpy') : null;
   const sceneUi = cuText === null ? null : /^\s*def scene\(/m.test(cuText);
+  const tbText = engine ? await readText(engine, 'text_box.rpy') : null;
+  const mediaBox = tbText === null ? null : /BOX_KINDS\s*=\s*\([^)]*"media"/.test(tbText);
   const g = useGameFolder.getState();
   if (fxErrors.length && JSON.stringify(fxErrors) !== JSON.stringify(g.fxErrors))
     useStore.getState().say('효과 폴더에서 못 읽은 파일: ' + fxErrors.map(([f, why]) => `${f} (${why})`).join(' / '));
-  g.set({ name: g.name ?? dir.name, media, look, startClash, hasShowpy, endMarks, newMark, sceneUi, imageBook, fxErrors, fxSeq: g.fxSeq + 1, fxFiles: packs.map((f) => f.name).sort(), fxOff, shOff });
+  g.set({ name: g.name ?? dir.name, media, look, startClash, hasShowpy, endMarks, newMark, mediaBox, sceneUi, imageBook, fxErrors, fxSeq: g.fxSeq + 1, fxFiles: packs.map((f) => f.name).sort(), fxOff, shOff });
   setTimeout(() => oldUrls.forEach((u) => URL.revokeObjectURL(u)), 5000);
 }
 

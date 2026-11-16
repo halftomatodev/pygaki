@@ -891,6 +891,13 @@ fieldset.plain:disabled { opacity: 0.4; }
 .preview-text.sbox { width: fit-content; max-width: calc(100% - 60px); margin: 0 auto; position: relative; }
 .sbox-bubble { background: #fff; border: 3px solid #000; border-radius: 18px; padding: 14px 22px; }
 .sbox-pill { border: 3px solid #fff; border-radius: 999px; padding: 6px 18px; }
+.sbox-media { position: relative; isolation: isolate; padding: 0.5em 0.9em; }
+.media-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; z-index: -1; pointer-events: none; }
+.media-bg.natural { inset: auto; left: 50%; top: 50%; width: auto; height: auto; max-width: 300%; max-height: 300%; transform: translate(-50%, -50%); }
+.media-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.media-row .sf-in { flex: 1; min-width: 120px; }
+.media-row .cf-kw { min-width: 64px; }
+.choice-media-thumb { width: 44px; height: 22px; object-fit: cover; border-radius: 4px; border: 1px solid var(--line); flex: none; }
 .textbox .say.sbox-bubble { margin: -17px 0 0 -25px; }
 .textbox .say.sbox-pill { margin: -9px 0 0 -21px; }
 .sbox-bubble::before, .sbox-bubble::after { content: ''; position: absolute; width: 0; height: 0; border: solid transparent; }
@@ -1385,6 +1392,13 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .fmenu-uses li.w { background: color-mix(in srgb, var(--accent) 9%, var(--panel)); }
 .fmenu-card .fd-code { max-height: 140px; }
 .fmenu-clip { border-radius: 8px; overflow: hidden; }
+.folder-menu { width: 360px; }
+.folder-menu .fmenu-list { max-height: min(430px, 60vh); overflow: auto; }
+.folder-menu .fmenu-item.missing .fmenu-title { color: var(--muted); }
+.folder-menu .fmenu-item.missing.cur .fmenu-title { color: var(--accent); }
+.folder-use { margin-top: 6px; padding: 7px 8px; border-radius: 8px; background: var(--faint); font-size: 11px; line-height: 1.5; color: var(--muted); }
+.folder-use b { color: var(--text); font-weight: 600; margin-right: 4px; }
+.folder-use code { display: block; margin-top: 3px; font-family: var(--mono); font-size: 10.5px; word-break: break-all; }
 .fmenu-foot { font-size: 10.5px; color: var(--muted); text-align: right; }
 
 /* 플래그 설계 창 (2단계 표): 캔버스 아래쪽에 붙는 시트. 좌우 칸 사이에 맞춤 */

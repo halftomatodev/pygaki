@@ -9,7 +9,9 @@ interface PygakiApi {
   read(rel: string): Promise<Uint8Array | null>;
   write(rel: string, data: string | Uint8Array): Promise<boolean>;
   remove(rel: string): Promise<boolean>; // 효과 파일(game/ui_kit/effects/*.glsl)만 지울 수 있다
-  openFolder(rel: string): Promise<string>;
+  openFolder(rel: string, make?: boolean): Promise<string>; // make: 없는 game 안 폴더는 만들고 엶. 돌려주는 글이 비면 열림
+  placeInfo?(id: 'appSettings' | 'renpySaves'): Promise<{ path: string; exists: boolean } | null>; // 프로젝트 밖 자리
+  openPlace?(id: 'appSettings' | 'renpySaves'): Promise<string>;
   choose(): Promise<boolean>;
   // 렌파이에서 실행. always가 아니면 게임이 이미 켜져 있을 때 'running'만 돌려주고 켜지 않는다
   runGame?(always: boolean): Promise<'started' | 'running' | 'no-sdk' | 'failed'>;

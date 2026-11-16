@@ -111,9 +111,10 @@ function useRpy() {
   const project = useStore((s) => s.project);
   const endMarks = useGameFolder((f) => f.endMarks); // 내보낼 때와 같은 형식으로
   const newMark = useGameFolder((f) => f.newMark);
+  const oldMedia = useGameFolder((f) => f.mediaBox === false);
   const images = useGameFolder((f) => f.imageBook); // 그림 이름 검사 (연결한 게임의 그림)
   const audio = useGameFolder((f) => f.media.audio); // 음성 파일 잇기
-  return useMemo(() => generateRpy(project, { endMarks, newMark, images, audio }), [project, endMarks, newMark, images, audio]);
+  return useMemo(() => generateRpy(project, { endMarks, newMark, oldMedia, images, audio }), [project, endMarks, newMark, oldMedia, images, audio]);
 }
 
 // 검사: 내보낼 때 걸리는 것. 누르면 그 상자로 간다 (예전에는 오른쪽 [검사] 탭)

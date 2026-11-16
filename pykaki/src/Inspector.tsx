@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Hint } from './Help';
 import { useStore } from './store';
 import * as ops from './ops';
-import type { BoxNode, Choice, ExitType, Line, Project } from './types';
+import type { BoxNode, Choice, ChoiceMedia, ExitType, Line, Project } from './types';
+import { MediaField } from './MediaField';
 import { uid } from './util';
 import { Card } from './Card';
 import { LineLook, OldAttr, SpeakerSelect, StageFields, useLineDrag } from './LineFields';
@@ -265,16 +266,61 @@ function ChoiceRow({ b, c, i, upd }: { b: BoxNode; c: Choice; i: number; upd: Up
   const flags = useStore((s) => s.project.variables);
   const has = !!c.condition || c.actions.length > 0;
   const [open, setOpen] = useState(has);
+  const m = c.media ?? {};
+  const hasMedia = !!(m.idle || m.hover || m.select);
+  const [openMedia, setOpenMedia] = useState(hasMedia);
   const setC = (fn: (x: Choice) => void, key?: string) => upd((x) => void (x.exit.type === 'menu' && fn(x.exit.choices[i])), key);
+  // 뒤 그림 값 하나 바꾸기. 다 비면 media를 지움
+  const putM = (k: keyof ChoiceMedia, v: ChoiceMedia[keyof ChoiceMedia] | undefined, key?: string) =>
+    setC((x) => {
+      const nm: ChoiceMedia = { ...(x.media ?? {}) };
+      if (v === undefined || v === '') delete nm[k];
+      else (nm as Record<string, unknown>)[k] = v;
+      if (k === 'fit' && v !== 'image') delete nm.zoom;
+      if (Object.keys(nm).length) x.media = nm;
+      else delete x.media;
+    }, key);
   return (
     <div className={'choice-box' + (open ? ' open' : '')}>
       <div className="choice-ed">
         <input id={'ed-' + c.id} value={c.text} placeholder={`선택지 ${i + 1} 문구`} onChange={(ev) => setC((x) => void (x.text = ev.target.value), 'choice' + c.id)} />
         <TargetSelect self={b.id} value={c.target} onChange={(v) => upd((x) => ops.setLink(x, 'c:' + c.id, v))} />
         <button className={'flag-btn' + (has ? ' on' : '')} onClick={() => setOpen(!open)} title="플래그: 보이는 조건, 고르면 바꾸기">⚑</button>
+        <button className={'flag-btn' + (hasMedia ? ' on' : '')} onClick={() => setOpenMedia(!openMedia)} title="글 뒤 그림/영상: 평소, 마우스를 올렸을 때, 고르고 확정할 때 (pygaki 플러그인 연결을 켜야 내보내요)">🖼</button>
         <button disabled={i === 0} onClick={() => upd((x) => { const cs = (x.exit as any).choices; cs.splice(i - 1, 0, ...cs.splice(i, 1)); })}>↑</button>
         <button onClick={() => upd((x) => void (x.exit as any).choices.splice(i, 1))}>✕</button>
       </div>
+      {openMedia && (
+        <div className="choice-flags">
+          <div className="cf-row media-row">
+            <span className="cf-kw">평소</span>
+            <MediaField value={m.idle} placeholder="글 뒤 그림·영상 (예: images/choice/paper.png)" title="평소 선택지 글 뒤에 깔 그림이나 영상. 그림을 쓰면 기본 버튼 배경이 없어져요" onChange={(v) => putM('idle', v, 'cmi' + c.id)} />
+          </div>
+          <div className="cf-row media-row">
+            <span className="cf-kw">올렸을 때</span>
+            <MediaField value={m.hover} placeholder="비우면 평소 그림 그대로" title="마우스를 올렸을 때(키보드로 골랐을 때) 글 뒤 그림이나 영상" onChange={(v) => putM('hover', v, 'cmh' + c.id)} />
+          </div>
+          <div className="cf-row media-row">
+            <span className="cf-kw">확정할 때</span>
+            <MediaField value={m.select} placeholder="비우면 바로 넘어가요" title="눌러서 고르면 이 그림을 잠깐 보여 준 뒤 넘어가요" onChange={(v) => putM('select', v, 'cms' + c.id)} />
+            {m.select && (
+              <input type="number" className="sf-num" min={0} max={10} step={0.1} title="확정 그림을 보여 주는 초 (기본 0.5)" placeholder="0.5초" value={m.time ?? ''}
+                onChange={(e) => { const n = Math.round(Number(e.target.value) * 10) / 10; putM('time', e.target.value === '' || !(n >= 0) ? undefined : Math.min(n, 10), 'cmt' + c.id); }} />
+            )}
+          </div>
+          <div className="cf-row media-row">
+            <span className="cf-kw">크기</span>
+            <select value={m.fit ?? ''} onChange={(e) => putM('fit', e.target.value === 'image' ? 'image' : undefined)}>
+              <option value="">글에 맞춤</option>
+              <option value="image">그림 크기 그대로</option>
+            </select>
+            {m.fit === 'image' && (
+              <input type="number" className="sf-num" min={0.1} max={10} step={0.1} title="그림 배율 (1이면 그대로)" placeholder="배율" value={m.zoom ?? ''}
+                onChange={(e) => { const n = Math.round(Number(e.target.value) * 100) / 100; putM('zoom', n > 0 && n !== 1 ? Math.min(n, 10) : undefined, 'cmz' + c.id); }} />
+            )}
+          </div>
+        </div>
+      )}
       {open && (
         <div className="choice-flags">
           <div className="cf-row">
