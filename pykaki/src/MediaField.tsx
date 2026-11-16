@@ -22,6 +22,24 @@ export async function pickMediaFile(): Promise<string | null> {
   }
 }
 
+// 게임 안 편집 화면에서 정한 그림의 자리·크기·회전 (ui_kit 4.15). 보여 주고 지우기만 한다
+export function MediaPlace({ m, onClear }: { m: { x?: number; y?: number; zoom?: number; angle?: number }; onClear: () => void }) {
+  // 화면 글 사전이 글 조각마다 바꾸므로 조각을 따로 둔다
+  const parts: string[] = [];
+  if (m.x || m.y) parts.push(`옮김 ${m.x ?? 0}, ${m.y ?? 0}`);
+  if (m.zoom && m.zoom !== 1) parts.push(`${m.zoom}배`);
+  if (m.angle) parts.push(`${m.angle}도`);
+  if (!parts.length)
+    return <span className="sf-pos sf-hint" title="게임 안 편집 화면(Shift+M)에서 그림을 끌어 옮기고, 휠로 키우고, Q/E로 돌려요. 저장하면 여기로 받아 적어요">자리·크기는 게임에서</span>;
+  return (
+    <span className="sf-pos" title="게임 안 편집 화면에서 정한 그림 자리·크기·회전이에요. 글 가운데 기준이에요">
+      <span>그림</span>
+      {parts.map((t) => <span key={t}>{t}</span>)}
+      <button title="그림 자리·크기·회전 지우기" onClick={onClear}>✕</button>
+    </span>
+  );
+}
+
 export function MediaField({ value, onChange, placeholder, title }: { value?: string; onChange: (v: string | undefined) => void; placeholder: string; title: string }) {
   return (
     <>

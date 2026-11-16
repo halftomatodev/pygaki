@@ -1639,3 +1639,4 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .tb-extra .sf-row { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
 .tb-extra .media-row { flex-basis: 100%; }
 .tb-extra select, .tb-extra .sf-num { font-size: 11px; }
+.sf-pos.sf-hint { font-family: var(--font); opacity: 0.8; }

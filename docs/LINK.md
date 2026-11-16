@@ -45,7 +45,7 @@ label ward.n1:
             jump ward.n4
 ```
 
-**선택지 뒤 그림/영상** (대본 편집기 `FEATURE` 24, pygaki 플러그인 `ui_kit` 4.14 `choice_menu.rpy`, 연결을 켰을 때만): `"문구" (idle_media="…", hover_media="…", select_media="…", select_time=1.0, media_fit="image", media_zoom=0.6) if 조건:`. 대본 편집기 값은 선택지의 `media`(`idle` `hover` `select` `time` `fit` `zoom`). 하나라도 있으면 플러그인이 기본 버튼 배경을 없애고 버튼을 글 크기 + `media_padding`으로 줄입니다. `select_media`가 있으면 누른 뒤 `select_time`초(기본 0.5) 그 그림을 보여 주고 다른 곳을 못 누르게 막은 뒤 넘어갑니다. 대본 편집기는 게임의 `ui_kit/engine/text_box.rpy`에 `BOX_KINDS`의 `"media"`가 없으면(예전 판) 검사 탭에 오류로 알립니다.
+**선택지 뒤 그림/영상** (대본 편집기 `FEATURE` 24, pygaki 플러그인 `ui_kit` 4.14 `choice_menu.rpy`, 연결을 켰을 때만): `"문구" (idle_media="…", hover_media="…", select_media="…", select_time=1.0, media_fit="image", media_offset=(-40, 15), media_zoom=1.1, media_angle=-8) if 조건:  # @c:c1`. 대본 편집기 값은 선택지의 `media`(`idle` `hover` `select` `time` `fit`, 게임 안 편집 화면 선택지 탭 [뒤 그림]에서 정해서 받아 적는 `x` `y` `zoom` `angle`, `ui_kit` 4.15 `FEATURE` 25. 세 그림에 같이 씀). 하나라도 있으면 플러그인이 기본 버튼 배경을 없애고 버튼을 글 크기 + `media_padding`으로 줄입니다. `select_media`가 있으면 누른 뒤 `select_time`초(기본 0.5) 그 그림을 보여 주고 다른 곳을 못 누르게 막은 뒤 넘어갑니다. 대본 편집기는 게임의 `ui_kit/engine/text_box.rpy`에 `BOX_KINDS`의 `"media"`가 없으면(예전 판) 검사 탭에 오류로 알립니다.
 
 캐릭터 `define` 줄 아래에는 플래그의 처음 값 `default 이름 = 값  # 메모`가 한 줄씩 옵니다(대본 편집기 플래그 카드, `FEATURE` 14). 선택지의 조건은 `"문구" if 조건:`, 고르면 바꾸는 값은 그 아래 `$ 식` 줄입니다. 모두 평범한 렌파이 문법이라 플러그인이 따로 읽지 않습니다.
 
@@ -56,6 +56,7 @@ label ward.n1:
 | `label 그룹.ID:` | 모든 상자에 붙는 로컬 label | 실행 중 지금 상자를 알 때 (`config.label_callbacks`) |
 | `# @l:ID` | 바로 다음 줄이 그 id의 대본 줄 | 줄 넣기, 줄 바꾸기의 기준 |
 | `# @end:ID` | 여기부터 상자의 나가는 부분(선택지, 조건 분기 `if`, jump, return) | 선택지 앞에 줄을 넣을 때 |
+| `# @c:ID` | 그 선택지 줄(뒤 그림/영상이 있는 선택지에만, 늘 줄 끝, 대본 편집기 `FEATURE` 25) | 게임 안 편집 화면 선택지 탭이 뒤 그림 자리·크기·회전을 돌려보낼 때 (3장 `choice_media`) |
 
 **줄 끝 표시** (pygaki 플러그인 `ui_kit` 4.5, 대본 편집기 `generateRpy`의 `endMarks`): 연결한 게임의 `game/ui_kit/engine/script_edit.rpy`에 `PK_END_MARKS = True`가 있으면, 대본 편집기는 표시를 윗줄에 따로 두지 않고 그 줄 끝에 빈칸 두 개를 두고 붙입니다. 뜻은 위 표와 같습니다.
 
@@ -87,8 +88,8 @@ label ward.n1:  # @node:n1 도입
 | `tail="top"`, `tail=None` | `tail` (`bottom` `top` `left` `right` `none`) | 말풍선 꼬리. 비우면 상자 기본(말풍선은 아래, 둥근 테두리는 없음) |
 | `box_rotate=-4` | `box_rotate` | 상자와 글 기울기 (도) |
 | `box="media", media="images/say/cloud.png"` | `box` `media` | 그림/영상 상자: 글 뒤에 그림이나 영상(game 기준 경로, `.webm` `.ogv` `.mp4` `.mkv`는 영상)을 깔고 기본 대사창·이름 칸 배경을 투명하게 (`ui_kit` 4.14 `text_box.rpy`, `FEATURE` 24). 파일이 비면 상자를 안 내보냄 |
-| `media_fit="image"`, `media_zoom=1.5` | `media_fit` `media_zoom` | 그림 크기 그대로(배율). 없으면 글 크기 + 여백에 맞춰 늘림 |
-| `media_window=True` | `media_window` | 기본 대사창·이름 칸 배경을 그대로 둠 |
+| `media_fit="image"` | `media_fit` | 그림 크기 그대로. 없으면 글 크기 + 여백에 맞춰 늘림 |
+| `media_offset=(60, -25)`, `media_zoom=1.3`, `media_angle=12` | `media_x` `media_y` `media_zoom` `media_angle` | 그림 옮김(글 가운데 기준), 배율(글에 맞춤이면 맞춘 크기에 곱함), 그림만 돌리기(도). 게임 안 편집 화면 대사 탭 [그림]에서 정해서 대본 편집기가 받아 적음 (3장, `ui_kit` 4.15, `FEATURE` 25) |
 | `x=…`, `y=…`, `name_x=…`, `name_y=…` | 위치 | pygaki 플러그인이 정해서 대본 편집기가 받아 적음 (3장) |
 
 상자의 나머지 값(`bubble_color`, `pill_line` 등)은 pygaki 플러그인 원고나 `say_style.box_styles`에서만 고칩니다. 연결을 끈 파일에는 상자와 pygaki 플러그인 효과를 내보내지 않습니다(검사 탭에 경고).
@@ -161,12 +162,13 @@ pygaki 플러그인이 쓰고, 대본 편집기가 읽은 뒤 비웁니다. 대�
 | 값 | 뜻 |
 |---|---|
 | `id` | `insert`면 새 줄의 id (`.rpy`의 `# @l:`과 같음). 이미 있는 id면 다시 넣지 않습니다 |
-| `op` | `insert` 줄 넣기, `replace` 줄 바꾸기, `remove` 줄 지우기(pygaki 플러그인 4.22), `say_pos` 대사 위치, `say_fx` 대사 화면 효과, `screen` HUD 자리·크기, `screen_item` 화면 항목 자리·글(ui_kit 4.13, 12장) |
+| `op` | `insert` 줄 넣기, `replace` 줄 바꾸기, `remove` 줄 지우기(pygaki 플러그인 4.22), `say_pos` 대사 위치, `say_fx` 대사 화면 효과, `choice_media` 선택지 뒤 그림 자리·크기·회전(4.15), `screen` HUD 자리·크기, `screen_item` 화면 항목 자리·글(ui_kit 4.13, 12장) |
 | `code` | 렌파이 명령 한 줄 |
 | `box` | 줄이 들어갈 상자. 기준 줄이 사라졌을 때 그 상자의 끝에 넣습니다 |
 | `before` `after` `end` | `insert`의 자리. 줄 앞, 줄 뒤, 상자 끝 중 하나 |
 | `line` | `replace`, `remove`, `say_pos`, `say_fx`로 바꾸거나 지울 줄의 id |
-| `pos` | `say_pos`의 값. `x` `y` `name_x` `name_y`, 대사창 왼쪽 위 기준. `null`이면 지움 |
+| `pos` | `say_pos`의 값. `x` `y` `name_x` `name_y`, 대사창 왼쪽 위 기준. 그림/영상 상자의 `media_x` `media_y`(옮김, 글 가운데 기준) `media_zoom` `media_angle`(pygaki 플러그인 `ui_kit` 4.15). `null`이면 지움 |
+| `choice` `media` | `choice_media`(`ui_kit` 4.15): 선택지 id(`# @c:`)와 뒤 그림 값 `x` `y`(옮김, 선택지 가운데 기준) `zoom` `angle`. `null`이면 지움. 대본 편집기는 선택지 `media`의 같은 이름에 적고, 뒤 그림이 없는 선택지면 버림 |
 | `sayFx` | `say_fx`의 값. 대본 편집기 `LineFx`와 같은 이름: `fx` `transition`(`none`은 바로) `overlay`(`on` `off`) `warp` `cursor` `exclude`(목록). `null`이면 지움 |
 | `screen` `item` | `screen`, `screen_item`의 화면 id, 항목 id (대본 편집기 `project.screens`의 id) |
 | `set` | `screen`: 고친 것만 `anchor`(`tl` `t` `tr` `l` `c` `r` `bl` `b` `br`) `dx` `dy` `w` `h`. `screen_item`: `x` `y` `text`(글, 글 버튼, 놓는 곳만) |

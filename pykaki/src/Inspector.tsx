@@ -3,7 +3,7 @@ import { Hint } from './Help';
 import { useStore } from './store';
 import * as ops from './ops';
 import type { BoxNode, Choice, ChoiceMedia, ExitType, Line, Project } from './types';
-import { MediaField } from './MediaField';
+import { MediaField, MediaPlace } from './MediaField';
 import { uid } from './util';
 import { Card } from './Card';
 import { LineLook, OldAttr, SpeakerSelect, StageFields, useLineDrag } from './LineFields';
@@ -276,7 +276,7 @@ function ChoiceRow({ b, c, i, upd }: { b: BoxNode; c: Choice; i: number; upd: Up
       const nm: ChoiceMedia = { ...(x.media ?? {}) };
       if (v === undefined || v === '') delete nm[k];
       else (nm as Record<string, unknown>)[k] = v;
-      if (k === 'fit' && v !== 'image') delete nm.zoom;
+      if (k === 'fit') delete nm.zoom; // 글에 맞춤과 그림 크기 그대로는 배율 뜻이 달라서
       if (Object.keys(nm).length) x.media = nm;
       else delete x.media;
     }, key);
@@ -314,10 +314,12 @@ function ChoiceRow({ b, c, i, upd }: { b: BoxNode; c: Choice; i: number; upd: Up
               <option value="">글에 맞춤</option>
               <option value="image">그림 크기 그대로</option>
             </select>
-            {m.fit === 'image' && (
-              <input type="number" className="sf-num" min={0.1} max={10} step={0.1} title="그림 배율 (1이면 그대로)" placeholder="배율" value={m.zoom ?? ''}
-                onChange={(e) => { const n = Math.round(Number(e.target.value) * 100) / 100; putM('zoom', n > 0 && n !== 1 ? Math.min(n, 10) : undefined, 'cmz' + c.id); }} />
-            )}
+            <MediaPlace m={m} onClear={() => setC((x) => {
+              if (!x.media) return;
+              const nm: ChoiceMedia = { ...x.media };
+              for (const k of ['x', 'y', 'zoom', 'angle'] as const) delete nm[k];
+              x.media = nm;
+            })} />
           </div>
         </div>
       )}

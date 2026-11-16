@@ -31,8 +31,11 @@ export interface SayStyle {
   // 그림/영상 상자 (box media, FEATURE 24): 글 뒤에 까는 그림이나 영상 (game 기준 경로). 기본 대사창은 투명해짐
   media?: string;
   media_fit?: 'image'; // 그림 크기 그대로 (없으면 글 크기에 맞춤)
-  media_zoom?: number; // media_fit image일 때 배율
-  media_window?: boolean; // 기본 대사창·이름 칸 배경을 그대로 둠
+  // 그림의 자리·크기·회전은 게임 안 편집 화면에서 정해서 받아 적는다 (ui_kit 4.15). 글 가운데 기준
+  media_x?: number; // 옮김 (픽셀)
+  media_y?: number;
+  media_zoom?: number; // 배율 (글에 맞춤이면 맞춘 크기에 곱함)
+  media_angle?: number; // 그림만 돌리기 (도)
   name_size?: number;
   name_font?: string;
   name_color?: string;
@@ -92,7 +95,11 @@ export interface ChoiceMedia {
   select?: string; // 고르고 확정할 때 잠깐
   time?: number; // select를 보여 주는 초 (없으면 0.5)
   fit?: 'image'; // 그림 크기 그대로 (없으면 글 크기에 맞춤)
-  zoom?: number; // fit image일 때 배율
+  // 자리·크기·회전은 게임 안 편집 화면에서 정해서 받아 적는다 (ui_kit 4.15). 선택지 가운데 기준, 세 그림에 같이
+  x?: number;
+  y?: number;
+  zoom?: number; // 배율
+  angle?: number; // 도
 }
 
 // 조건 분기의 갈래 하나 (FEATURE 13). cond는 렌파이 조건식 그대로 (예: love >= 5)

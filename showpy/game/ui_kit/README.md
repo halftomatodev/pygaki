@@ -13,9 +13,11 @@
 그리고 이 기능들을 **게임을 실행한 채로 마우스로 고치는 편집기**가 들어 있습니다. (개발 모드에서 Shift+M)
 대사, 선택지, show·hide·scene 줄은 편집기에서 고친 값이 **원고(.rpy)의 그 줄에 바로 저장**됩니다.
 
-버전 4.14 · 렌파이 8.5.3 기준으로 만들었습니다.
+버전 4.15 · 렌파이 8.5.3 기준으로 만들었습니다.
 
-4.14에서 바뀐 점: **대사·선택지 뒤 그림/영상**. 대사 괄호에 `box="media", media="images/say/cloud.png"`를 적으면 글 뒤에 그림이나 영상(webm 등)을 깔고, 기본 대사창과 이름 칸 배경은 투명하게 합니다(`media_fit` `"text"` 글에 맞춤 / `"image"` 그림 크기 그대로, `media_zoom`, `media_offset`, `media_padding`, `media_alpha`, `media_window=True`면 대사창을 그대로 둠). 선택지 괄호에는 `idle_media`(평소), `hover_media`(마우스를 올렸을 때), `select_media`(고르고 확정할 때, `select_time`초 보여 준 뒤 넘어감, 기본 0.5)를 적고, 그림을 쓰는 선택지는 기본 버튼 배경을 없애고 글 크기 + `media_padding`으로 줄입니다(`media_button=True`면 그대로). 자세한 값은 아래 "글 상자"와 "선택지" 절. 옮기기: `ui_kit` 폴더를 바꿔 넣고 `.rpyc`를 지웁니다.
+4.15에서 바뀐 점: **그림/영상을 게임 안에서 옮기고 키우고 돌리기**. 게임 안 편집 화면(Shift+M) 대사 탭의 [고칠 것: 그림], 선택지 탭의 [고칠 것: 뒤 그림]에서 끌면 옮기고(`media_offset`), 휠이나 A/D로 크기(`media_zoom`), Q/E로 돌립니다(새 값 `media_angle`, 그림만 돌고 글은 그대로). `media_zoom`은 `media_fit="text"`(글에 맞춤)일 때도 맞춘 크기에 곱합니다. pygaki 원고면 Ctrl+S로 원고에 쓰고 대본 편집기가 받아 적습니다(선택지는 대본 편집기가 줄 끝에 붙인 `# @c:` 표시로 찾음). 기본 대사창·이름 칸 배경은 그림/영상 상자면 늘 투명합니다(4.14의 `media_window`는 없앰).
+
+4.14에서 바뀐 점: **대사·선택지 뒤 그림/영상**. 대사 괄호에 `box="media", media="images/say/cloud.png"`를 적으면 글 뒤에 그림이나 영상(webm 등)을 깔고, 기본 대사창과 이름 칸 배경은 투명하게 합니다(`media_fit` `"text"` 글에 맞춤 / `"image"` 그림 크기 그대로, `media_zoom`, `media_offset`, `media_padding`, `media_alpha`). 선택지 괄호에는 `idle_media`(평소), `hover_media`(마우스를 올렸을 때), `select_media`(고르고 확정할 때, `select_time`초 보여 준 뒤 넘어감, 기본 0.5)를 적고, 그림을 쓰는 선택지는 기본 버튼 배경을 없애고 글 크기 + `media_padding`으로 줄입니다(`media_button=True`면 그대로). 자세한 값은 아래 "글 상자"와 "선택지" 절. 옮기기: `ui_kit` 폴더를 바꿔 넣고 `.rpyc`를 지웁니다.
 
 4.13에서 바뀐 점: **[화면] 탭**. 대본 편집기의 [화면] 탭에서 만든 화면과 HUD(`game/pykaki_screens.rpy`)를 게임 화면 위에서 고칩니다. 화면을 고르면 항목이 고친 자리에 그려지고, 항목을 끌어 옮기거나(화살표 1px, Shift 10px, Tab으로 고르기, Backspace로 원래대로) HUD 빈 곳을 끌어 HUD를 옮기고, HUD 붙일 곳(아홉 칸)과 크기, 글(글, 글 버튼, 놓는 곳)을 고칩니다. Ctrl+S로 저장하면 원고의 그 줄(`# @s:`, `# @i:` 표시)을 고치고(앞 것은 `ui_kit_backup/`) `showpy_inbox.json`에도 적어 대본 편집기가 받아 적습니다. 화면 자리는 대본 편집기가 같이 쓰는 `game/pykaki_screens.json`(개발용, 배포판에서 빠짐)에서 읽습니다. 표시가 없는 예전 원고는 대본 편집기를 새 판으로 올려 다시 내보내야 고칠 수 있습니다. 옮기기: `ui_kit` 폴더를 바꿔 넣고 `.rpyc`를 지웁니다(런처 [플러그인 올리기]).
 
@@ -952,7 +954,8 @@ menu (font="fonts/KBLJump_c.ttf", size=28, appear="fade"):
 | `select_media` | 고르고 확정할 때 잠깐 보여 줄 그림이나 영상. 보여 준 뒤 넘어감 | `select_media="movies/pick.webm"` |
 | `select_time` | `select_media`를 보여 주는 초 (기본 `0.5`, `0`이면 바로 넘어감) | `select_time=0.8` |
 | `media_fit` | `"text"` 글 크기 + 여백에 맞춰 늘림 (기본), `"image"` 그림 크기 그대로 글 가운데에 | `media_fit="image"` |
-| `media_zoom`, `media_offset` | `media_fit="image"`일 때 배율, 옮기기 (픽셀) | `media_zoom=0.6` |
+| `media_zoom`, `media_offset` | 배율(`media_fit="text"`면 글에 맞춘 크기에 곱함, 4.15), 옮기기 (픽셀) | `media_zoom=0.6` |
+| `media_angle` | 그림만 돌리기 (도, 4.15) | `media_angle=-8` |
 | `media_padding` | 글과 그림 가장자리 사이 (기본 `(36, 14)`) | `media_padding=(50, 20)` |
 | `media_mask`, `media_loop` | 투명 영상 방식(side_mask, 기본 `False`), 반복 재생(기본 `True`) | |
 | `media_button` | `True`면 기본 버튼 배경과 크기를 그대로 둠 (기본은 그림을 쓰면 버튼 배경을 없앰) | `media_button=True` |
@@ -1125,18 +1128,19 @@ e "속까지." (box="pill", pill_fill="#ffd23b", pill_line=None, color="#000000"
 ```renpy
 e "꿈이었어." (box="media", media="images/say/cloud.png")                                   # 글 크기 + 여백에 맞춰 늘림
 e "쾅!" (box="media", media="movies/boom.webm", media_fit="image", media_zoom=0.6)            # 그림 크기 그대로 (0.6배)
-e "창은 그대로." (box="media", media="images/say/frame.png", media_window=True, media_alpha=0.7) # 대사창을 그대로 둠
+e "기울여." (box="media", media="images/say/cloud.png", media_offset=(20, -10), media_zoom=1.2, media_angle=8)   # 옮기고 키우고 돌림
+e "흐리게." (box="media", media="images/say/frame.png", media_alpha=0.7)                        # 반투명
 ```
 
 | 이름 | 뜻 | 예 |
 |---|---|---|
 | `media` | 그림이나 영상 파일 (game 폴더 기준). `.webm` `.ogv` `.mp4` `.mkv`는 영상 | `media="images/say/cloud.png"` |
 | `media_fit` | `"text"` 글 크기 + 여백에 맞춰 늘림 (기본), `"image"` 그림 크기 그대로 | `media_fit="image"` |
-| `media_zoom` | `media_fit="image"`일 때 배율 | `media_zoom=1.5` |
+| `media_zoom` | 배율 (`media_fit="text"`면 글에 맞춘 크기에 곱함, 4.15) | `media_zoom=1.5` |
+| `media_angle` | 그림만 돌리기 (도, 글은 그대로. 글과 같이 돌리려면 `box_rotate`, 4.15) | `media_angle=12` |
 | `media_offset` | 옮기기 (x, y 픽셀) | `media_offset=(0, -10)` |
 | `media_padding` | 글과 그림 가장자리 사이 (`media_fit="text"`일 때, 기본 `(36, 24)`) | `media_padding=40` |
 | `media_alpha` | 투명도 (0.0 ~ 1.0) | `media_alpha=0.7` |
-| `media_window` | `True`면 기본 대사창·이름 칸 배경을 그대로 둠 | `media_window=True` |
 | `media_mask`, `media_loop` | 투명 영상 방식(side_mask, 기본 `False`), 반복 재생(기본 `True`) | `media_loop=False` |
 | `media_pop` | 튀어나오며 나타남 (`True`, `False`, 걸리는 초) | `media_pop=True` |
 

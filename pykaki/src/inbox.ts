@@ -1,16 +1,19 @@
 // showpy가 남긴 그림/영상/소리 줄을 대본에 받아 적는다. 문서: 저장소 맨 위 docs/LINK.md
-// .rpy를 되읽지 않는다. showpy_inbox.json에 적힌 줄만 받는다. 대사 글자와 선택지는 받지 않고, 대사는 위치만 받는다.
-import type { BoxNode, Line, LineFx, Project, SayStyle } from './types';
+// .rpy를 되읽지 않는다. showpy_inbox.json에 적힌 줄만 받는다. 대사 글자와 선택지는 받지 않고, 대사는 위치(그림/영상 상자의 자리·크기·회전 포함)만, 선택지는 뒤 그림의 자리·크기·회전만 받는다.
+import type { BoxNode, ChoiceMedia, Line, LineFx, Project, SayStyle } from './types';
 import { DEFAULT_FADEOUT, FLASH_CODE } from './stage';
 import { applyScreenOp } from './screens';
 
-const POS_KEYS = ['x', 'y', 'name_x', 'name_y'] as const;
+const POS_KEYS = ['x', 'y', 'name_x', 'name_y', 'media_x', 'media_y', 'media_zoom', 'media_angle'] as const;
+const CHOICE_MEDIA_KEYS = ['x', 'y', 'zoom', 'angle'] as const;
 
 export interface InboxOp {
   id: string; // 새 줄 id (insert), 또는 이 기록 자체의 id
-  op: 'insert' | 'replace' | 'remove' | 'say_pos' | 'say_fx' | 'screen' | 'screen_item';
+  op: 'insert' | 'replace' | 'remove' | 'say_pos' | 'say_fx' | 'choice_media' | 'screen' | 'screen_item';
   code?: string; // 렌파이 명령 한 줄 (insert, replace)
-  pos?: Partial<Record<(typeof POS_KEYS)[number], number | null>>; // say_pos: 대사 위치. null이면 지움
+  pos?: Partial<Record<(typeof POS_KEYS)[number], number | null>>; // say_pos: 대사 위치, 그림/영상 상자 자리·크기·회전. null이면 지움
+  choice?: string; // choice_media: 선택지 id (# @c:)
+  media?: Partial<Record<(typeof CHOICE_MEDIA_KEYS)[number], number | null>>; // choice_media: 뒤 그림 자리·크기·회전. null이면 지움
   box?: string; // 그 줄이 있던 상자. 기준 줄이 사라졌을 때 쓴다
   before?: string; // 이 줄 앞에
   after?: string; // 이 줄 뒤에
@@ -170,6 +173,23 @@ export function applyInbox(p: Project, ops: InboxOp[]): { applied: number; moved
     if (op.op === 'screen' || op.op === 'screen_item') {
       if (applyScreenOp(p, op)) applied++;
       else dropped.push(op.op === 'screen' ? '화면 자리' : '화면 항목');
+      continue;
+    }
+    if (op.op === 'choice_media') {
+      // 선택지 뒤 그림의 자리·크기·회전 (게임 안 편집 화면 선택지 탭, ui_kit 4.15)
+      const c = op.choice ? p.nodes.flatMap((b) => (b.exit.type === 'menu' ? b.exit.choices : [])).find((x) => x.id === op.choice) : undefined;
+      if (!c || !c.media || !op.media) {
+        dropped.push('선택지 뒤 그림');
+        continue;
+      }
+      const m: ChoiceMedia = { ...c.media };
+      for (const k of CHOICE_MEDIA_KEYS) {
+        const v = op.media[k];
+        if (typeof v === 'number' && !(k === 'zoom' && v === 1) && !(k !== 'zoom' && v === 0)) m[k] = v;
+        else if (v !== undefined) delete m[k];
+      }
+      c.media = m;
+      applied++;
       continue;
     }
     if (op.op === 'say_pos' || op.op === 'say_fx') {

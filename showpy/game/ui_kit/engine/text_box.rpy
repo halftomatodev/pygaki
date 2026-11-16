@@ -27,18 +27,18 @@
 ##   pill_rotate     기울기 (도). 짧게 box_rotate=
 ##   ..._text_color  상자를 쓸 때 글 색 (괄호에 color를 적으면 그것)
 ##
-## 그림/영상 상자 (box="media", ui_kit 4.14): 글 뒤에 그림이나 영상을 깝니다. 글 가운데가 기준입니다.
+## 그림/영상 상자 (box="media", ui_kit 4.14): 글 뒤에 그림이나 영상을 깝니다. 글 가운데가 기준이고, 기본 대사창·이름 칸 배경은 늘 투명합니다.
 ##     e "꿈이었어." (box="media", media="images/say/cloud.png")                    # 글 크기에 맞춰 늘림
 ##     e "쾅!" (box="media", media="movies/boom.webm", media_fit="image", media_zoom=0.6)  # 그림 크기 그대로
 ##   media           그림이나 영상 파일 (game 폴더 기준). .webm .ogv .mp4 .mkv는 영상
 ##   media_fit       "text": 글 크기 + padding에 맞춰 늘림 (기본), "image": 그림 크기 그대로 (media_zoom으로 키우기)
-##   media_zoom      media_fit="image"일 때 크기 배율 (기본 1.0)
+##   media_zoom      크기 배율 (기본 1.0). media_fit="text"면 글에 맞춘 크기에 곱함 (4.15)
+##   media_angle     그림만 돌리기 (도, 글은 그대로. 글과 같이 돌리려면 box_rotate) (4.15)
 ##   media_offset    (x, y) 옮기기 (픽셀)
 ##   media_padding   글과 그림 가장자리 사이 (media_fit="text"일 때). 숫자 하나, (가로, 세로), (왼, 위, 오른, 아래)
 ##   media_alpha     투명도 (0.0 ~ 1.0)
 ##   media_mask      영상 오른쪽 절반을 투명도로 쓰는 영상이면 True (렌파이 side_mask)
 ##   media_loop      영상 되풀이 (기본 True)
-##   media_window    True면 기본 대사창·이름 칸 배경을 그대로 둠 (기본 False: 투명하게 해서 그림만 보임)
 ##   media_pop       튀어나오며 나타남 (True / False, 또는 걸리는 초)
 ##
 ## 상자는 글 전체 크기에 맞춰서, 글이 다 나오기 전에도 다 큰 크기로 나타납니다.
@@ -66,7 +66,7 @@ init -10 python in say_style:
             pop=False, rotate=0, text_color=None, text_outlines=None),
         "media": dict(
             src=None, fit="text", zoom=1.0, offset=(0, 0), padding=(36, 24), alpha=1.0,
-            mask=False, loop=True, window=False, tail=None,
+            mask=False, loop=True, angle=0.0, tail=None,
             pop=False, rotate=0, text_color=None, text_outlines=None),
         }
 
@@ -320,14 +320,17 @@ init -10 python in say_style:
                 store.renpy.redraw(text, 0)
 
             ox, oy = o.get("offset") or (0, 0)
+            zoom = float(o.get("zoom") or 1.0)
+            angle = float(o.get("angle") or 0.0)
             if o.get("fit") == "image":
-                tr = store.Transform(d, zoom=float(o.get("zoom") or 1.0) * scale, alpha=alpha)
-                mr = store.renpy.render(tr, store.config.screen_width, store.config.screen_height, st, at)
+                tr = store.Transform(d, zoom=zoom * scale, alpha=alpha)
             else:
                 pl, pt, pr, pb = _padding(o.get("padding"))
                 bw, bh = W + float(pl + pr), H + float(pt + pb)
-                tr = store.Transform(d, xysize=(int(bw * scale), int(bh * scale)), alpha=alpha)
-                mr = store.renpy.render(tr, int(bw * scale) + 1, int(bh * scale) + 1, st, at)
+                tr = store.Transform(d, xysize=(max(1, int(bw * zoom * scale)), max(1, int(bh * zoom * scale))), alpha=alpha)
+            if abs(angle) >= 0.01:
+                tr = store.Transform(tr, rotate=angle, subpixel=True)
+            mr = store.renpy.render(tr, store.config.screen_width * 4, store.config.screen_height * 4, st, at)
             mw, mh = mr.get_size()
             ## 그림 가운데 = 글 가운데 (fit="text"면 padding이 한쪽만 다를 때 그만큼 옮김)
             cx, cy = W / 2.0, H / 2.0
@@ -351,6 +354,12 @@ init -10 python in say_style:
             final = store.renpy.Render(W, H)
             final.subpixel_blit(rr, ((W - rw) / 2.0, (H - rh) / 2.0))
             return final
+
+        def with_opts(self, **kw):
+            """값 몇 개만 바꾼 새 상자 (게임 안 편집 화면에서 끌 때 바로 보여 주려고, 4.15)."""
+            o = dict(self.opts)
+            o.update(kw)
+            return TextBox(self.kind, o)
 
         def ui_kit_wrap(self, text, rv, st, at):
             """글 그림(rv)에 상자를 깔아서 돌려줍니다. 크기는 글 그대로라 배치가 바뀌지 않습니다."""

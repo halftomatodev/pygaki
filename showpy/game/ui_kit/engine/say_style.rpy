@@ -234,8 +234,8 @@ init -10 python in say_style:
                 kwargs["what_color"] = tb.opts["text_color"]
             if tb.opts.get("text_outlines") is not None and "what_outlines" not in kwargs:
                 kwargs["what_outlines"] = list(tb.opts["text_outlines"])
-            ## 그림/영상 상자: 기본 대사창과 이름 칸 배경을 투명하게 (media_window=True면 그대로)
-            if tb.kind == "media" and not tb.opts.get("window"):
+            ## 그림/영상 상자: 기본 대사창과 이름 칸 배경은 늘 투명하게 (그림이 대사창을 대신함)
+            if tb.kind == "media":
                 kwargs.setdefault("window_background", None)
                 if "namebox" in store.config.character_id_prefixes:
                     kwargs.setdefault("namebox_background", None)

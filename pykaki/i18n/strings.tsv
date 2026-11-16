@@ -2335,7 +2335,6 @@ ${label} 값	{0} の値	{0} value
 폴더 관리 ▾	フォルダ管理 ▾	Folders ▾
 확정할 때	決定時	On select
 그림과 소리	画像とサウンド	Images and sound
-대사창 두기	セリフ欄を残す	Keep dialogue window
 화면 셰이더	画面シェーダー	Screen shaders
 렌파이 세이브	Ren'Py セーブ	Ren'Py saves
 음악, 효과음	BGM、効果音	Music, sound effects
@@ -2371,7 +2370,7 @@ UI 그림 (gui)	UI 画像 (gui)	UI images (gui)
 대사·선택지 뒤 영상(webm). 밖에서 고른 영상을 여기로 복사	セリフ・選択肢の後ろの動画(webm)。外から選んだ動画はここへコピー	Videos behind dialogue and choices (webm). Videos picked from outside are copied here
 그림, 영상, 소리, 효과처럼 기능마다 쓰는 폴더를 탐색기로 열어요	画像、動画、サウンド、エフェクトなど機能ごとのフォルダをエクスプローラーで開きます	Open the folders each feature uses (images, video, sound, effects) in Explorer
 글 뒤 그림·영상 (예: images/choice/paper.png)	文字の後ろの画像・動画 (例: images/choice/paper.png)	Image or video behind the text (e.g. images/choice/paper.png)
-글 뒤에 깔 그림이나 영상 (game 폴더 기준). 기본 대사창은 투명해져요	文字の後ろに敷く画像・動画 (game フォルダ基準)。基本のセリフ欄は透明になります	Image or video behind the text (relative to the game folder). The default dialogue window becomes transparent
+글 뒤에 깔 그림이나 영상 (game 폴더 기준). 기본 대사창과 이름 칸 배경은 없어져요	文字の後ろに敷く画像・動画 (game フォルダ基準)。基本のセリフ欄と名前欄の背景はなくなります	Image or video behind the text (relative to the game folder). The default dialogue window and name box backgrounds go away
 켜면 기본 대사창과 이름 칸 배경을 그대로 둬요 (끄면 투명해서 그림만 보여요)	オンにすると基本のセリフ欄と名前欄の背景を残します (オフなら透明で画像だけ見えます)	On: keeps the default dialogue window and name box (off: transparent, only the image shows)
 평소 선택지 글 뒤에 깔 그림이나 영상. 그림을 쓰면 기본 버튼 배경이 없어져요	通常時に選択肢の文字の後ろに敷く画像・動画。画像を使うと基本のボタン背景はなくなります	Image or video behind the choice text normally. Using one removes the default button background
 선택지 "${c.text}"의 뒤 그림은 pygaki 플러그인 연결을 켜야 내보내요	選択肢「{0}」の後ろの画像は pygaki プラグイン連携をオンにすると書き出します	The image behind choice "{0}" is exported only with the pygaki plugin link on
@@ -2382,3 +2381,11 @@ UI 그림 (gui)	UI 画像 (gui)	UI images (gui)
 게임의 pygaki 플러그인이 예전 판이라 선택지 "${c.text}"의 뒤 그림에서 멈춰요. 런처의 [플러그인 올리기]로 올려 주세요	ゲームの pygaki プラグインが古い版なので、選択肢「{0}」の後ろの画像で止まります。ランチャーの [プラグインを更新] で更新してください	The game's pygaki plugins are too old and will stop at the image behind choice "{0}". Update them with [Update plugins] in the launcher
 게임의 pygaki 플러그인이 예전 판이라 그림/영상 상자에서 멈춰요. 런처의 [플러그인 올리기]로 올려 주세요 (${b.title || b.id})	ゲームの pygaki プラグインが古い版なので、画像/動画ボックスで止まります。ランチャーの [プラグインを更新] で更新してください ({0})	The game's pygaki plugins are too old and will stop at the image/video box. Update them with [Update plugins] in the launcher ({0})
 글 상자	テキストボックス	Text box
+옮김 ${m.x ?? 0}, ${m.y ?? 0}	移動 {0}, {1}	Offset {0}, {1}
+${m.zoom}배	{0} 倍	x{0}
+${m.angle}도	{0} 度	{0}°
+자리·크기는 게임에서	位置・サイズはゲームで	Position and size in the game
+그림 자리·크기·회전 지우기	画像の位置・サイズ・回転を消す	Clear image position, size and rotation
+게임 안 편집 화면에서 정한 그림 자리·크기·회전이에요. 글 가운데 기준이에요	ゲーム内編集画面で決めた画像の位置・サイズ・回転です。文字の中央が基準です	Image position, size and rotation set in the in-game editor, measured from the text center
+게임 안 편집 화면(Shift+M)에서 그림을 끌어 옮기고, 휠로 키우고, Q/E로 돌려요. 저장하면 여기로 받아 적어요	ゲーム内編集画面(Shift+M)で画像をドラッグで動かし、ホイールで大きさ、Q/E で回します。保存するとここに書き写します	In the in-game editor (Shift+M), drag the image to move it, use the wheel to resize and Q/E to rotate. Saving copies the values here
+선택지 뒤 그림	選択肢の後ろの画像	Image behind choice

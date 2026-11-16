@@ -49,7 +49,7 @@ init -10 python in cmenu:
         "hover_movie_offset", "hover_movie_loop",
         "hover_sound", "activate_sound",
         "idle_media", "hover_media", "select_media", "select_time",
-        "media_fit", "media_zoom", "media_offset", "media_mask", "media_loop", "media_button", "media_padding",
+        "media_fit", "media_zoom", "media_angle", "media_offset", "media_mask", "media_loop", "media_button", "media_padding",
         }
 
     ## 선택지 뒤 그림/영상 (ui_kit 4.14). 하나라도 있으면 기본 버튼 배경을 없앱니다 (media_button=True면 그대로)
@@ -135,32 +135,40 @@ init -10 python in cmenu:
         fit = d.get("media_fit", "text")
         zoom = float(d.get("media_zoom", 1.0) or 1.0)
         ox, oy = d.get("media_offset", (0, 0))
+        angle = float(d.get("media_angle", 0.0) or 0.0)
         mask = bool(d.get("media_mask", False))
         loop = bool(d.get("media_loop", True))
-        k = ("media", key, src, fit, zoom, ox, oy, mask, loop)
+        k = ("media", key, src, fit, zoom, angle, ox, oy, mask, loop)
 
         def make():
             m = store.say_style.media_displayable(src, mask, loop)
             if fit == "image":
-                return Fixed(Transform(m, align=(0.5, 0.5), xoffset=ox, yoffset=oy, zoom=zoom))
+                return Fixed(Transform(m, align=(0.5, 0.5), xoffset=ox, yoffset=oy, zoom=zoom, rotate=angle or None, subpixel=True))
             if fit != "text":
                 _err(src, "media_fit은 \"text\"나 \"image\"입니다: {!r}".format(fit))
-            return _Fill(m, ox, oy)
+            return _Fill(m, ox, oy, zoom, angle)
 
         return _cached(k, make)
 
     class _Fill(store.renpy.Displayable):
         """받은 자리(버튼 크기)에 맞춰 늘려 그림. 버튼 background로 씀."""
-        def __init__(self, child, ox=0, oy=0, **kw):
+        def __init__(self, child, ox=0, oy=0, zoom=1.0, angle=0.0, **kw):
             super(_Fill, self).__init__(**kw)
             self.child = child
             self.ox, self.oy = ox, oy
+            self.zoom, self.angle = zoom, angle
 
         def render(self, width, height, st, at):
             w, h = int(width), int(height)
-            cr = store.renpy.render(store.Transform(self.child, xysize=(w, h)), w, h, st, at)
+            zw, zh = max(1, int(w * self.zoom)), max(1, int(h * self.zoom))
+            t = store.Transform(self.child, xysize=(zw, zh))
+            if abs(self.angle) >= 0.01:
+                t = store.Transform(t, rotate=self.angle, subpixel=True)
+            cr = store.renpy.render(t, zw * 3, zh * 3, st, at)
+            cw, ch = cr.get_size()
             rv = store.renpy.Render(w, h)
-            rv.blit(cr, (self.ox, self.oy))
+            ## 버튼 가운데 = 그림 가운데 (배율·회전해도)
+            rv.subpixel_blit(cr, ((w - cw) / 2.0 + self.ox, (h - ch) / 2.0 + self.oy))
             return rv
 
         def visit(self):

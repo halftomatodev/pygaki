@@ -31,6 +31,7 @@ init -8 python in ui_editor:
             self.sel = 0
             self.mode_ = "base"
             self.preview = True
+            self.part = "button"    # "button" 선택지, "media" 뒤 그림/영상 (4.15)
 
             ## (파일, menu 줄, 선택지 번호) -> (선택지 줄, 선택지 글, 괄호 정보)
             self.lines = { }
@@ -69,6 +70,95 @@ init -8 python in ui_editor:
                 return None
             self.sel = max(0, min(self.sel, len(cs) - 1))
             return cs[self.sel]
+
+        ## ── 뒤 그림/영상 (4.15): 끌면 media_offset, 휠·A/D 크기 media_zoom, Q/E 회전 media_angle ──
+        ## 평소·올렸을 때·확정할 때 그림에 똑같이 씁니다.
+        MEDIA_KEYS = ("media_offset", "media_zoom", "media_angle")
+
+        def has_media(self, c=None):
+            c = c or self._choice()
+            if c is None:
+                return False
+            return any(c.values.get(k) for k in ("idle_media", "hover_media", "select_media"))
+
+        def set_part(self, part):
+            if part == "media" and not self.has_media():
+                msg("이 선택지에는 뒤 그림/영상이 없습니다. 대본 편집기의 선택지 [[🖼]에서 넣으세요.")
+                return
+            self.part = part
+            msg("")
+
+        def _media_part(self, c=None):
+            if self.part != "media":
+                return False
+            if not self.has_media(c):
+                self.part = "button"
+                return False
+            return True
+
+        def _media_val(self, c, k, default):
+            key = self.menu_key() + (c.number,)
+            d = self._combined(key)
+            v = d.get(k, c.values.get(k, default))
+            if isinstance(v, str) and v == self.cm().REMOVE:
+                return default
+            return default if v is None else v
+
+        def media_offset(self, c):
+            v = self._media_val(c, "media_offset", (0, 0))
+            try:
+                return (int(v[0]), int(v[1]))
+            except Exception:
+                return (0, 0)
+
+        def media_zoom(self, c):
+            try:
+                return float(self._media_val(c, "media_zoom", 1.0))
+            except Exception:
+                return 1.0
+
+        def media_angle(self, c):
+            try:
+                return float(self._media_val(c, "media_angle", 0.0))
+            except Exception:
+                return 0.0
+
+        def _put_media(self, c, k, v, default):
+            if v == default:
+                key = self.menu_key() + (c.number,)
+                own = k in self.cm().state.saved.get(key, { }) or k in getattr(c, "own_keys", ( ))
+                e = self._edits_for(c)
+                if own:
+                    e[k] = self.cm().REMOVE
+                else:
+                    e.pop(k, None)
+                self._sync_preview()
+            else:
+                self._set(c, **{ k : v })
+
+        def set_media_offset(self, c, x, y):
+            self._put_media(c, "media_offset", (int(round(x)), int(round(y))), (0, 0))
+
+        def set_media_zoom(self, c, z):
+            self._put_media(c, "media_zoom", round(max(0.05, min(20.0, z)), 2), 1.0)
+
+        def set_media_angle(self, c, a):
+            a = round(a, 1)
+            while a > 180:
+                a -= 360
+            while a <= -180:
+                a += 360
+            if a == int(a):
+                a = int(a)      # 원고에 12.0이 아니라 12로 (대본 편집기가 내보내는 것과 같게)
+            self._put_media(c, "media_angle", a, 0)
+
+        def reset_media(self):
+            c = self._choice()
+            if c is None:
+                return
+            for k, d in (("media_offset", (0, 0)), ("media_zoom", 1.0), ("media_angle", 0.0)):
+                self._put_media(c, k, d, d)
+            msg("뒤 그림 자리, 크기, 회전을 처음으로 돌렸습니다.")
 
         def _all(self):
             ## "모든 선택지 기본값"은 이제 choice_menu_config.rpy에서 고칩니다.
@@ -249,6 +339,8 @@ init -8 python in ui_editor:
             c = self._choice()
             if c is None:
                 return None
+            if self._media_part(c):
+                return (c.number, ("media",) + self.media_offset(c))
             st = self._start(c)
             if st is None:
                 return None
@@ -256,6 +348,12 @@ init -8 python in ui_editor:
 
         def drag_move(self, token, dx, dy):
             number, (kind, sx, sy) = token
+            if kind == "media":
+                for c in self.choices():
+                    if c.number == number:
+                        self.set_media_offset(c, sx + dx, sy + dy)
+                        return
+                return
             for c in self.choices():
                 if c.number == number:
                     self._apply(c, kind, sx + dx, sy + dy)
@@ -264,6 +362,10 @@ init -8 python in ui_editor:
         def move(self, dx, dy):
             c = self._choice()
             if c is None:
+                return
+            if self._media_part(c):
+                ox, oy = self.media_offset(c)
+                self.set_media_offset(c, ox + dx, oy + dy)
                 return
             st = self._start(c)
             if st is None:
@@ -291,6 +393,14 @@ init -8 python in ui_editor:
             c = self._choice()
             if c is None:
                 return
+            if self._media_part(c):
+                if what == "rotate":
+                    self.set_media_angle(c, self.media_angle(c) + amount)
+                elif what == "zoom":
+                    self.set_media_zoom(c, self.media_zoom(c) + amount)
+                elif what == "size":
+                    self.set_media_zoom(c, self.media_zoom(c) + amount * 0.01)
+                return
             if what == "rotate":
                 self._set(c, **{ self._key("rotate") : round(float(self._cur(c, "rotate", 0.0)) + amount, 2) })
             elif what == "skew":
@@ -306,7 +416,9 @@ init -8 python in ui_editor:
             if under is not None:
                 self.sel = under
                 self._sync_preview()
-            if shift:
+            if self._media_part():
+                self.nudge("zoom", -sign * (0.1 if shift else 0.02))
+            elif shift:
                 self.nudge("size", -sign)
             else:
                 self.nudge("rotate", sign)
@@ -402,7 +514,26 @@ init -8 python in ui_editor:
                 args = merge_arguments(arginfo, self._combined(key), remove=cm.REMOVE)
                 e = se.Edit(key[0], line, se.CHOICE, args, expect=label)
                 e.key = key
+                if se.is_pykaki(key[0]):
+                    ## pygaki 원고: 뒤 그림의 자리·크기·회전만 저장하고 대본 편집기에 넘김 (4.15)
+                    e.pk_media = self._pk_media(self._combined(key))
                 rv.append(e)
+            return rv
+
+        def _pk_media(self, c):
+            """괄호 값 → 대본 편집기에 넘길 그림 값 (x, y, zoom, angle). 지운 값은 None."""
+            REMOVE = self.cm().REMOVE
+            rv = { }
+            for k in self.MEDIA_KEYS:
+                if k not in c:
+                    continue
+                v = c[k]
+                gone = isinstance(v, str) and v == REMOVE
+                if k == "media_offset":
+                    rv["x"] = None if gone else int(v[0])
+                    rv["y"] = None if gone else int(v[1])
+                else:
+                    rv[k[6:]] = None if gone else round(float(v), 3)
             return rv
 
         def after_script_save(self, edits):
@@ -478,6 +609,9 @@ init -8 python in ui_editor:
                     where = "세로 목록 (끌면 자유 배치)"
                 rv.append("{}   회전 {:.1f}   기울기 {:.1f}   확대 {:.2f}   크기 {}".format(
                     where, c.rotate, c.skew, c.zoom, c.values.get("size", "-")))
+            if self._media_part(c):
+                ox, oy = self.media_offset(c)
+                rv.append("뒤 그림 옮김 x {:+d}   y {:+d}   (선택지 가운데 기준)   크기 {:g}배   회전 {:g}도".format(ox, oy, self.media_zoom(c), self.media_angle(c)))
             rv.append("괄호: " + self.line_text(c))
 
             l = self.pending_lines()
@@ -490,6 +624,11 @@ init -8 python in ui_editor:
             return rv
 
         def help_lines(self):
+            if self.part == "media":
+                return [
+                    "뒤 그림: 드래그 이동 (Shift: 한 방향) | 휠 크기 (Shift: 크게)",
+                    "방향키 이동 (Shift: 10배) | Q/E 회전 | A/D 크기 | Tab 다음 선택지 | Backspace 이 선택지 되돌리기",
+                    ]
             return [
                 "마우스: 드래그 이동 (Shift: 한 방향) | 휠 회전 | Shift+휠 글자 크기",
                 "방향키 이동 (Shift: 10배) | Q/E 회전 | Z/C 기울기 | A/D 확대 | S/W 글자 크기",
@@ -500,7 +639,7 @@ init -8 python in ui_editor:
         def session(self):
             cm = self.cm()
             edits = { k : dict(v) for k, v in cm.state.edits.items() if v } if cm is not None else { }
-            return dict(sel=self.sel, mode=self.mode_, preview=self.preview, edits=edits)
+            return dict(sel=self.sel, mode=self.mode_, preview=self.preview, part=self.part, edits=edits)
 
         def restore(self, d):
             if not d:
@@ -508,6 +647,7 @@ init -8 python in ui_editor:
             self.sel = d.get("sel", 0)
             self.mode_ = d.get("mode", "base")
             self.preview = d.get("preview", True)
+            self.part = d.get("part", "button")
             cm = self.cm()
             if cm is not None:
                 for k, v in (d.get("edits") or { }).items():
@@ -524,6 +664,14 @@ screen ui_editor_choice_overlay():
 
 
 screen ui_editor_choice_panel(tab):
+
+    if tab.has_media():
+        hbox:
+            spacing 6
+            text "고칠 것:" style "ui_editor_text" yalign 0.5
+            textbutton "선택지" style "ui_editor_button" action Function(tab.set_part, "button") selected (tab.part != "media")
+            textbutton "뒤 그림" style "ui_editor_button" action Function(tab.set_part, "media") selected (tab.part == "media")
+            textbutton "그림 처음으로" style "ui_editor_button" text_size 13 action Function(tab.reset_media)
 
     use ui_editor_style_row(tab, tab.style_keys())
 

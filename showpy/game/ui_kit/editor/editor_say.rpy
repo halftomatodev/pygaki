@@ -45,6 +45,8 @@ init -8 python in ui_editor:
         KEYS = {
             "what": dict(x="x", y="y", size="size", font="font", color="color"),
             "name": dict(x="name_x", y="name_y", size="name_size", font="name_font", color="name_color"),
+            ## 그림(4.15)은 대사 글을 기준으로 보여 주므로 값 이름은 대사와 같음 (글자 모양은 안 고침)
+            "media": dict(x="x", y="y", size="size", font="font", color="color"),
             }
 
         ## say 스크린의 부분(id)과 그 기본 스타일
@@ -87,6 +89,24 @@ init -8 python in ui_editor:
 
         ## PyKaki 원고에서 저장하는 값
         PK_POS = ("x", "y", "name_x", "name_y")
+        ## 그림/영상 상자의 자리·크기·회전 (4.15). 대본 편집기에는 media_x, media_y, media_zoom, media_angle로
+        MEDIA_KEYS = ("media_offset", "media_zoom", "media_angle")
+
+        def _pk_media(self, c):
+            """괄호 값 → 대본 편집기에 넘길 그림 값. 지운 값은 None."""
+            REMOVE = self.ss().REMOVE
+            rv = { }
+            for k in self.MEDIA_KEYS:
+                if k not in c:
+                    continue
+                v = c[k]
+                gone = isinstance(v, str) and v == REMOVE
+                if k == "media_offset":
+                    rv["media_x"] = None if gone else int(v[0])
+                    rv["media_y"] = None if gone else int(v[1])
+                else:
+                    rv[k] = None if gone else round(float(v), 3)
+            return rv
         PK_FX = ("fx", "fx_transition", "fx_overlay", "fx_warp", "fx_cursor", "fx_exclude")
 
         def _pk_fx_value(self, k, v):
@@ -157,7 +177,18 @@ init -8 python in ui_editor:
                 return (False, "이 대사에는 이름이 없습니다.")
             return (True, "")
 
+        def media_ok(self):
+            """그림/영상 상자 대사인지. (True, "") 또는 (False, "이유")"""
+            if self.line() is None or self._line_value("box")[1] != "media":
+                return (False, "그림/영상 상자(box=\"media\")를 쓰는 대사가 아닙니다. 대본 편집기의 [[글 상자]에서 [[그림/영상]을 고르세요.")
+            return (True, "")
+
         def set_target(self, target):
+            if target == "media":
+                ok, why = self.media_ok()
+                if not ok:
+                    msg(why)
+                    return
             if target == "name":
                 ok, why = self.name_ok()
                 if not ok:
@@ -167,7 +198,14 @@ init -8 python in ui_editor:
             msg("")
 
         def select(self, step):
-            self.set_target("name" if self.target == "what" else "what")
+            order = [ "what", "name" ] + ([ "media" ] if self.media_ok()[0] else [ ])
+            i = order.index(self.target) if self.target in order else 0
+            for j in range(1, len(order) + 1):
+                t = order[(i + j * (1 if step >= 0 else -1)) % len(order)]
+                if t != "name" or self.name_ok()[0]:
+                    self.target = t
+                    break
+            msg("")
 
         ## ── 바꾼 값 ──
 
@@ -247,12 +285,22 @@ init -8 python in ui_editor:
                         base.pop(s[1], None)
                     else:
                         base[s[1]] = v
+                ## 그림/영상 상자: 끄는 동안 자리·크기·회전을 상자에 바로 넣어 보여 줌 (4.15)
+                bg = base.get("background")
+                if wid == "what" and getattr(bg, "ui_kit_box", False) and bg.kind == "media":
+                    up = { }
+                    for k, o in (("media_offset", "offset"), ("media_zoom", "zoom"), ("media_angle", "angle")):
+                        has, v = self._line_value(k)
+                        up[o] = v if has else self.ss().box_style("media").get(o)
+                    base["background"] = bg.with_opts(**up)
             return base
 
         def refresh(self):
             scr = self._ensure_orig()
             if scr is None:
                 return
+            if self.target == "media" and not self.media_ok()[0]:
+                self.target = "what"
             for wid in ("what", "who", "namebox"):
                 if wid in scr.widget_properties or self._props(wid):
                     scr.widget_properties[wid] = self._props(wid)
@@ -270,6 +318,8 @@ init -8 python in ui_editor:
 
         def on_open(self):
             if self.target == "name" and not self.name_ok()[0]:
+                self.target = "what"
+            if self.target == "media" and not self.media_ok()[0]:
                 self.target = "what"
             if self.available()[0]:
                 self.refresh()
@@ -444,7 +494,63 @@ init -8 python in ui_editor:
             self._edits().update(kw)
             self.refresh()
 
+        ## ── 그림/영상 상자 (4.15): 끌면 media_offset, 휠·A/D 크기 media_zoom, Q/E 회전 media_angle ──
+
+        def media_offset(self):
+            has, v = self._line_value("media_offset")
+            try:
+                return (int(v[0]), int(v[1])) if has and v is not None else (0, 0)
+            except Exception:
+                return (0, 0)
+
+        def media_zoom(self):
+            has, v = self._line_value("media_zoom")
+            try:
+                return float(v) if has and v is not None else 1.0
+            except Exception:
+                return 1.0
+
+        def media_angle(self):
+            has, v = self._line_value("media_angle")
+            try:
+                return float(v) if has and v is not None else 0.0
+            except Exception:
+                return 0.0
+
+        def _set_media(self, k, v, default):
+            self._set_or_default(k, None if v == default else v)
+            self.refresh()
+
+        def set_media_offset(self, x, y):
+            self._set_media("media_offset", (int(round(x)), int(round(y))), (0, 0))
+
+        def set_media_zoom(self, z):
+            self._set_media("media_zoom", round(max(0.05, min(20.0, z)), 2), 1.0)
+
+        def set_media_angle(self, a):
+            a = round(a, 1)
+            while a > 180:
+                a -= 360
+            while a <= -180:
+                a += 360
+            if a == int(a):
+                a = int(a)      # 원고에 12.0이 아니라 12로 (대본 편집기가 내보내는 것과 같게)
+            self._set_media("media_angle", a, 0)
+
+        def reset_media(self):
+            for k in self.MEDIA_KEYS:
+                self._set_or_default(k, None)
+            self.refresh()
+            msg("그림 자리, 크기, 회전을 처음으로 돌렸습니다.")
+
         def _check_target(self):
+            if self.target == "media":
+                ok, why = self.media_ok()
+                if not ok:
+                    self.target = "what"
+                    msg(why)
+                    return False
+                return True
             if self.target == "name":
                 ok, why = self.name_ok()
                 if not ok:
@@ -456,19 +562,38 @@ init -8 python in ui_editor:
         def drag_begin(self, x, y):
             if not self._check_target():
                 return None
+            if self.target == "media":
+                return ("media",) + self.media_offset()
             return self._start()
 
         def drag_move(self, token, dx, dy):
+            if token[0] == "media":
+                self.set_media_offset(token[1] + dx, token[2] + dy)
+                return
             sx, sy = token
             self._set(**{ self.k("x") : int(round(sx + dx)), self.k("y") : int(round(sy + dy)) })
 
         def move(self, dx, dy):
             if not self._check_target():
                 return
+            if self.target == "media":
+                ox, oy = self.media_offset()
+                self.set_media_offset(ox + dx, oy + dy)
+                return
             sx, sy = self._start()
             self._set(**{ self.k("x") : int(round(sx + dx)), self.k("y") : int(round(sy + dy)) })
 
         def nudge(self, what, amount):
+            if self.target == "media":
+                if not self._check_target():
+                    return
+                if what == "rotate":
+                    self.set_media_angle(self.media_angle() + amount)
+                elif what == "zoom":
+                    self.set_media_zoom(self.media_zoom() + amount)
+                elif what == "size":
+                    self.set_media_zoom(self.media_zoom() + amount * 0.01)
+                return
             if what != "size" or not self._check_target():
                 return
             if self.pk():
@@ -478,6 +603,9 @@ init -8 python in ui_editor:
             self._set(**{ self.k("size") : int(max(4, int(cur) + amount)) })
 
         def wheel(self, sign, shift):
+            if self.target == "media":
+                self.nudge("zoom", -sign * (0.1 if shift else 0.02))
+                return
             self.nudge("size", -sign * (5 if shift else 1))
 
         ## ── 속도·효과 (바꾸면 그 줄을 다시 보여줌) ──
@@ -499,7 +627,7 @@ init -8 python in ui_editor:
 
         def box_kind(self):
             has, v = self._line_value("box")
-            return v if has and v in ("bubble", "pill") else None
+            return v if has and v in ("bubble", "pill", "media") else None
 
         def set_box(self, kind):
             self._set_or_default("box", kind)
@@ -810,7 +938,7 @@ init -8 python in ui_editor:
         ## ── 글꼴·색 ──
 
         def style_keys(self):
-            if self.pk():
+            if self.pk() or self.target == "media":
                 return ()
             return (self.k("font"), self.k("color"))
 
@@ -867,6 +995,7 @@ init -8 python in ui_editor:
                     REMOVE = ss.REMOVE
                     c = self._combined(key)
                     e.pk_pos = { k : v for k, v in c.items() if k in self.PK_POS and not (isinstance(v, str) and v == REMOVE) }
+                    e.pk_pos.update(self._pk_media(c))
                     e.pk_fx = { ("fx" if k == "fx" else k[3:]) : self._pk_fx_value(k, v) for k, v in c.items() if k in self.PK_FX }
                 e.key = key
                 rv.append(e)
@@ -905,12 +1034,16 @@ init -8 python in ui_editor:
             x, y = self._start()
             org = self.window_origin()
             where = ", 화면 기준 {:.0f}, {:.0f}".format(org[0] + x, org[1] + y) if org is not None else ""
-            what = "이름 상자" if self.target == "name" else "대사"
-            rv.append("{} x {:.0f}   y {:.0f}   (대사 창 기준{})   크기 {}".format(
-                what, x, y, where, self.cur(self.k("size")) or "-"))
+            if self.target == "media":
+                ox, oy = self.media_offset()
+                rv.append("그림 옮김 x {:+d}   y {:+d}   (글 가운데 기준)   크기 {:g}배   회전 {:g}도".format(ox, oy, self.media_zoom(), self.media_angle()))
+            else:
+                what = "이름 상자" if self.target == "name" else "대사"
+                rv.append("{} x {:.0f}   y {:.0f}   (대사 창 기준{})   크기 {}".format(
+                    what, x, y, where, self.cur(self.k("size")) or "-"))
 
             if self.pk():
-                rv.append("pygaki 원고입니다. 여기서는 위치를 고치고, 글자 모양, 속도, 등장 효과, 상자는 대본 편집기에서 고칩니다.")
+                rv.append("pygaki 원고입니다. 여기서는 위치와 그림/영상 상자의 자리, 크기, 회전을 고치고, 글자 모양, 속도, 등장 효과, 상자는 대본 편집기에서 고칩니다.")
             else:
                 rv.append("속도 {}   효과 {}   상자 {}".format(self.speed_label(), self.effect_label(),
                     dict(self.BOXES).get(self.box_kind(), "없음")))
@@ -940,8 +1073,13 @@ init -8 python in ui_editor:
         def help_lines(self):
             if self.pk():
                 return [
-                    "마우스: 드래그하면 고르는 것(대사/이름)이 움직임 (Shift: 한 방향)",
-                    "Tab 대사/이름 바꾸기 | 방향키 이동 (Shift: 10배) | R 다시 보기 | Backspace 이 줄 되돌리기",
+                    "마우스: 드래그하면 고르는 것(대사/이름/그림)이 움직임 (Shift: 한 방향) | 그림: 휠, A/D 크기, Q/E 회전",
+                    "Tab 대사/이름/그림 바꾸기 | 방향키 이동 (Shift: 10배) | R 다시 보기 | Backspace 이 줄 되돌리기",
+                    ]
+            if self.target == "media":
+                return [
+                    "마우스: 드래그하면 그림이 움직임 (Shift: 한 방향) | 휠 크기 (Shift: 크게)",
+                    "Tab 대사/이름/그림 바꾸기 | 방향키 이동 | A/D 크기 | Q/E 회전 (Shift: 5도) | R 다시 보기",
                     ]
             return [
                 "마우스: 드래그하면 고르는 것(대사/이름)이 움직임 (Shift: 한 방향) | 휠 글자 크기",
@@ -976,6 +1114,15 @@ screen ui_editor_say_panel(tab):
         text "고칠 것:" style "ui_editor_text" yalign 0.5
         textbutton "대사" style "ui_editor_button" action Function(tab.set_target, "what") selected (tab.target == "what")
         textbutton "이름" style "ui_editor_button" action Function(tab.set_target, "name") selected (tab.target == "name") sensitive tab.name_ok()[0]
+        if tab.media_ok()[0]:
+            textbutton "그림" style "ui_editor_button" action Function(tab.set_target, "media") selected (tab.target == "media")
+
+    if tab.box_kind() == "media":
+        hbox:
+            spacing 4
+            text "그림/영상 상자:" style "ui_editor_text" yalign 0.5
+            textbutton "그림 처음으로" style "ui_editor_button" text_size 13 action Function(tab.reset_media)
+            text "[[고칠 것: 그림]에서 끌기 자리, 휠 크기, Q/E 회전" style "ui_editor_text" size 12 yalign 0.5
 
     use ui_editor_style_row(tab, tab.style_keys())
 
@@ -990,13 +1137,14 @@ screen ui_editor_say_panel(tab):
                 textbutton ("설정대로" if _v is None else "{}자".format(_v)) style "ui_editor_button" text_size 13 action Function(tab.set_cps, _v) selected (tab.cps() == _v and (_v is not None or abs(tab.speed() - 1.0) < 1e-9))
             text "(1초에 몇 글자)" style "ui_editor_text" size 12 yalign 0.5
 
-        hbox:
-            spacing 4
-            text "상자:" style "ui_editor_text" yalign 0.5
-            for _v, _l in tab.BOXES:
-                textbutton _l style "ui_editor_button" text_size 13 action Function(tab.set_box, _v) selected (tab.box_kind() == _v)
+        if tab.box_kind() != "media":
+            hbox:
+                spacing 4
+                text "상자:" style "ui_editor_text" yalign 0.5
+                for _v, _l in tab.BOXES:
+                    textbutton _l style "ui_editor_button" text_size 13 action Function(tab.set_box, _v) selected (tab.box_kind() == _v)
 
-        if tab.box_kind() is not None:
+        if tab.box_kind() in ("bubble", "pill"):
             hbox:
                 spacing 4
                 box_wrap True

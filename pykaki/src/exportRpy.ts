@@ -2,7 +2,7 @@
 import type { BoxNode, ChoiceMedia, LabelGroup, Line, Project, Settings } from './types';
 import { exitLinks, fallTarget } from './ops';
 import { IDENT, PLUGIN_NAMES, RESERVED } from './util';
-import { badImageName, renpyOnlyEffect, fxArgs, isStage, sayArgs, stageCode, tagEffectNames, REMOVED_EFFECTS, RENPY_EFFECTS } from './stage';
+import { badImageName, mediaPlace, renpyOnlyEffect, fxArgs, isStage, sayArgs, stageCode, tagEffectNames, REMOVED_EFFECTS, RENPY_EFFECTS } from './stage';
 import { shaderEffect } from './fx/textShaders';
 import { imageProblem, type ImageBook } from './imageCheck';
 import { voiceCode, voiceFile, voiceIndex } from './voice';
@@ -75,10 +75,8 @@ export function choiceMediaArgs(m?: ChoiceMedia): string[] {
     a.push(`select_media=${pyStr(m.select)}`);
     if (m.time !== undefined && m.time !== 0.5) a.push(`select_time=${m.time}`);
   }
-  if (m.fit === 'image') {
-    a.push('media_fit="image"');
-    if (m.zoom && m.zoom !== 1) a.push(`media_zoom=${m.zoom}`);
-  }
+  if (m.fit === 'image') a.push('media_fit="image"');
+  a.push(...mediaPlace(m.x, m.y, m.zoom, m.angle));
   return a;
 }
 
@@ -394,7 +392,8 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
             if (ma.length && S.renpyLink && opts.oldMedia) W.push({ level: 'error', msg: `게임의 pygaki 플러그인이 예전 판이라 선택지 "${c.text}"의 뒤 그림에서 멈춰요. 런처의 [플러그인 올리기]로 올려 주세요`, nodeId: b.id });
             if (ma.length && !S.renpyLink) W.push({ level: 'warn', msg: `선택지 "${c.text}"의 뒤 그림은 pygaki 플러그인 연결을 켜야 내보내요`, nodeId: b.id });
             const margs = ma.length && S.renpyLink ? ` (${ma.join(', ')})` : '';
-            body.push(`${I}${q(c.text)}${margs}${cond ? ' if ' + cond : ''}:`);
+            // 뒤 그림이 있는 선택지는 줄 끝에 # @c:선택지id (게임 안 편집 화면이 그림 자리를 돌려보낼 때 찾음, LINK.md 2장)
+            body.push(`${I}${q(c.text)}${margs}${cond ? ' if ' + cond : ''}:${margs && endMarks ? '  # @c:' + c.id : ''}`);
             // 고르면 바꾸기: jump 앞에 $ 줄
             for (const a0 of c.actions) {
               const a = oneLine(a0);

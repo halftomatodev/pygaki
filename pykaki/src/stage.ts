@@ -77,6 +77,15 @@ export const FX_CURSOR: [string, string][] = [['', '커서 그대로'], ['effect
 
 const warpVal = (v: string) => (v === 'default' ? '"default"' : v);
 
+// 그림/영상의 자리·크기·회전 (게임 안 편집 화면에서 받아 적은 값, ui_kit 4.15). 대사와 선택지가 같이 씀
+export function mediaPlace(x?: number, y?: number, zoom?: number, angle?: number): string[] {
+  const a: string[] = [];
+  if (x || y) a.push(`media_offset=(${x ?? 0}, ${y ?? 0})`);
+  if (zoom && zoom !== 1) a.push(`media_zoom=${zoom}`);
+  if (angle) a.push(`media_angle=${angle}`);
+  return a;
+}
+
 // 대사 줄의 괄호 안 값: fx="ascii", fx_warp=3 ...
 export function fxArgs(f?: LineFx): string[] {
   if (!f) return [];
@@ -193,7 +202,7 @@ const NATIVE: Record<keyof SayStyle, string> = {
   size: 'what_size', font: 'what_font', color: 'what_color', cps: 'what_slow_cps', effect: 'what_textshader',
   sound: '', // 대사 소리는 플러그인의 대사 소리 콜백이 받아서 연결을 켰을 때만
   box: '', tail: '', box_rotate: '', // 글 상자는 showpy가 있어야 해서 원래 이름이 없다 (내보내지 않음)
-  media: '', media_fit: '', media_zoom: '', media_window: '',
+  media: '', media_fit: '', media_x: '', media_y: '', media_zoom: '', media_angle: '',
   name_size: 'who_size', name_font: 'who_font', name_color: 'who_color',
   x: 'what_xpos', y: 'what_ypos', name_x: 'namebox_xpos', name_y: 'namebox_ypos',
 };
@@ -222,11 +231,8 @@ export function sayArgs(s0?: SayStyle, native = false, text?: string): string[] 
     // 그림/영상 상자 (FEATURE 24): 파일이 없으면 내보내지 않음 (플러그인이 멈추지 않게)
     if (s.media) {
       a.push(`box="media"`, `media=${pyStr(s.media)}`);
-      if (s.media_fit === 'image') {
-        a.push(`media_fit="image"`);
-        if (s.media_zoom && s.media_zoom !== 1) a.push(`media_zoom=${s.media_zoom}`);
-      }
-      if (s.media_window) a.push('media_window=True');
+      if (s.media_fit === 'image') a.push(`media_fit="image"`);
+      a.push(...mediaPlace(s.media_x, s.media_y, s.media_zoom, s.media_angle));
       if (s.box_rotate) a.push(`box_rotate=${s.box_rotate}`);
     }
   } else if (!native && s.box) {

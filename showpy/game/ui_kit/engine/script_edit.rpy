@@ -743,7 +743,7 @@ init -19 python in script_edit:
     def _pk_strip(text):
         """줄 끝에 붙은 표시(# @l:, # @end:, # @node:)를 뗀 글자."""
         t = text.rstrip()
-        for head in ("# @l:", "# @end:", "# @node:"):
+        for head in ("# @l:", "# @end:", "# @node:", "# @c:"):
             if _pk_end(t, head) is not None:
                 t = t[:t.rfind(head)].rstrip()
         return t
@@ -801,6 +801,14 @@ init -19 python in script_edit:
             elif e.kind == SAY and (getattr(e, "pk_pos", None) or getattr(e, "pk_fx", None)):
                 ## 대사는 위치와 화면 효과만 저장합니다. (editor_say.rpy가 pk_pos, pk_fx를 붙임)
                 e.pk_line = _pk_mark(lines, n, "# @l:")
+                if e.pk_line is None:
+                    e.reason = _PK_OLD
+                    e.no_copy = True
+                    continue
+            elif e.kind == CHOICE and getattr(e, "pk_media", None):
+                ## 선택지는 뒤 그림의 자리·크기·회전만 저장합니다 (4.15, editor_choice.rpy가 pk_media를 붙임).
+                ## 선택지 줄 끝의 # @c:선택지id 로 찾습니다 (대본 편집기가 뒤 그림이 있는 선택지에만 붙임)
+                e.pk_line = _pk_end(lines[n - 1], "# @c:") if 1 <= n <= len(lines) else None
                 if e.pk_line is None:
                     e.reason = _PK_OLD
                     e.no_copy = True
@@ -1062,6 +1070,8 @@ init -19 python in script_edit:
                             ops.append(dict(id=_pk_id(), op="say_pos", line=e.pk_line, pos=e.pk_pos))
                         if e.pk_fx:
                             ops.append(dict(id=_pk_id(), op="say_fx", line=e.pk_line, sayFx=e.pk_fx))
+                    elif e.kind == CHOICE:
+                        ops.append(dict(id=_pk_id(), op="choice_media", choice=e.pk_line, media=e.pk_media))
                 try:
                     _inbox_add(path, ops)
                 except Exception as ex:

@@ -110,11 +110,14 @@ export function useGameFileUrl(path?: string) {
   }, [path, seq]);
   return url;
 }
-export function MediaBg({ path, fit }: { path?: string; fit?: 'image' }) {
+// 자리·크기·회전(게임 안 편집 화면에서 받아 적은 값, ui_kit 4.15)은 글 가운데 기준으로 옮기고 돌린다
+export function MediaBg({ path, fit, x, y, zoom, angle }: { path?: string; fit?: 'image'; x?: number; y?: number; zoom?: number; angle?: number }) {
   const url = useGameFileUrl(path);
   if (!url) return null;
   const cls = 'media-bg' + (fit === 'image' ? ' natural' : '');
-  return isMovieFile(path) ? <video className={cls} src={url} autoPlay loop muted playsInline /> : <img className={cls} src={url} alt="" />;
+  const move = `translate(${x ?? 0}px, ${y ?? 0}px) rotate(${angle ?? 0}deg) scale(${zoom ?? 1})`;
+  const style = { transform: fit === 'image' ? `translate(-50%, -50%) ${move}` : move };
+  return isMovieFile(path) ? <video className={cls} style={style} src={url} autoPlay loop muted playsInline /> : <img className={cls} style={style} src={url} alt="" />;
 }
 // 말풍선은 글 색을 따로 안 적으면 어두운 글 (showpy bubble text_color 기본)
 const boxColor = (s: SayStyle, base: string) => s.color ?? (s.box === 'bubble' ? '#222222' : base);
@@ -204,7 +207,7 @@ function PreviewBody({ line, tagsOn, cps, look, onReplay }: { line: Line; tagsOn
         className={'preview-text ' + (ts ? 'fx-gl' : fxClass(style.effect, fast)) + boxClass(style)}
         style={{ color: boxColor(style, look.textColor), '--txt': boxColor(style, look.textColor), fontFamily: fontStack(style.font), ...charTime(cps), ...boxTilt(style, !!ts) } as React.CSSProperties}
       >
-        {style.box === 'media' && <MediaBg path={style.media} fit={style.media_fit} />}
+        {style.box === 'media' && <MediaBg path={style.media} fit={style.media_fit} x={style.media_x} y={style.media_y} zoom={style.media_zoom} angle={style.media_angle} />}
         <Glyphs parsed={parsed} shown={shown} />
       </div>
       {ts && <FxCanvas target={inner} ts={ts} tagTs={tagTs} parsed={parsed} shown={shown} limit={limit} holding={holding} fast={fast} cps={cps} onFail={onFail} />}
