@@ -2004,3 +2004,59 @@ ${i + 1}번	{0}番	No. {0}
 플래그가 없어요. 오른쪽 플래그 카드의 [+ 추가]에서 용례를 골라 만들면 여기에 줄이 생겨요.	フラグがありません。右のフラグカードの[+ 追加]で用例を選んで作ると、ここに行ができます。	No flags yet. Pick a recipe from [+ Add] on the Flags card on the right, and a row appears here.
 선택지 "${u.choice}"가 늘 ${r === 'true' ? '보여요' : '안 보여요'}	選択肢「{0}」は常に{1}	Choice "{0}" is always {1}
 더하기	追加	Add
+틀	テンプレート	Template
+이전	戻る	Back
+확인	確認	Review
+기준 값	基準値	Threshold
+좋은 끝	グッドエンド	Good ending
+진짜 끝	トゥルーエンド	True ending
+글자 기억	文字を記憶	Remember text
+갈라질 상자	分岐するボックス	Box that branches
+플래그 이름	フラグ名	Flag name
+다시 왔을 때	また来たとき	When coming back
+틀에서 만들기	テンプレートから作成	Build from template
+(나중에 잇기)	(あとでつなぐ)	(connect later)
+(상자 고르기)	(ボックスを選ぶ)	(pick a box)
+갈라질 상자를 골라요	分岐するボックスを選んでください	Pick the box that branches
+바꾸는 상자를 골라요	変えるボックスを選んでください	Pick the boxes that change it
+마법사 닫기 (Esc)	ウィザードを閉じる (Esc)	Close wizard (Esc)
+바꾸는 선택지를 골라요	変える選択肢を選んでください	Pick the choices that change it
+두 플래그 이름이 같아요	2つのフラグ名が同じです	The two flags have the same name
+둘 다 넉넉 (${t})	両方十分 ({0})	Both high enough ({0})
+이미 있는 플래그를 써요	既存のフラグを使います	Uses the existing flag
+기준 값 이상 (${t})	基準値以上 ({0})	At or above threshold ({0})
+조건을 걸 선택지를 골라요	条件をつける選択肢を選んでください	Pick the choices to put the condition on
+기억할 글자 (예: sea)	記憶する文字 (例: sea)	Text to remember (e.g. sea)
+캔버스에서 고른 상자를 써요	キャンバスで選んだボックスを使います	Use the box selected on the canvas
+플래그 ${i + 1} 이름	フラグ{0}の名前	Flag {0} name
+같은 이름의 플래그가 종류가 달라요	同じ名前のフラグは種類が違います	A flag with this name has a different type
+고른 선택지마다 기억할 글자를 적어요	選んだ選択肢ごとに記憶する文字を書いてください	Write the text to remember for each chosen choice
+지금 조건: ${c.condition}	今の条件: {0}	Current condition: {0}
+${s.names[0]} 켜짐 (${t})	{0} オン ({1})	{0} on ({1})
+${s.names[0]} = "${v}"이면	{0} = "{1}" なら	If {0} = "{1}"
+${s.names[0]}만 넉넉 (${t})	{0}だけ十分 ({1})	Only {0} high enough ({1})
+캔버스의 "${titleOf(selBox)}"	キャンバスの「{0}」	"{0}" on canvas
+선택지마다 어느 플래그를 올릴지 골라요 (+1).	選択肢ごとに、どのフラグを上げるか選んでください (+1)。	For each choice, pick which flag goes up (+1).
+${s.names[i]}을(를) 바꾸는 곳을 골라요	{0}を変える場所を選んでください	Pick where {0} changes
+틀대로 만들었어요. Ctrl+Z 한 번이면 되돌아가요	テンプレートどおりに作りました。Ctrl+Z 一回で元に戻ります	Built from the template. One Ctrl+Z undoes it
+이미 조건 분기인 상자예요. 새 갈래를 맨 앞에 더해요.	すでに条件分岐のボックスです。新しい分岐を先頭に追加します。	This box already branches. New branches go first.
+이렇게 넣어요. 만든 뒤에도 표의 칸을 눌러 고칠 수 있어요.	このように入れます。作ったあとも表のセルを押して直せます。	This is what will be added. You can still edit it in the table cells afterward.
+그 밖 → ${boxTitle(plan.branch.else)}	それ以外 → {0}	Otherwise → {0}
+다음 흐름이 선택지, call, 화면인 상자는 고를 수 없어요.	次の流れが選択肢、call、画面のボックスは選べません。	Boxes whose next flow is a choice, call or screen can't be picked.
+✎ ${boxTitle(l.boxId)} 상자 끝 ⚑ ${l.act}	✎ {0} ボックスの最後 ⚑ {1}	✎ End of box {0} ⚑ {1}
+플래그와 바꾸는 곳, 보는 곳을 한 번에 넣어요 (실행 취소 한 번)	フラグと変える場所、見る場所を一度に入れます (元に戻す一回)	Adds the flag, where it changes and where it's checked at once (one undo)
+대본에 선택지가 없어요. 상자의 다음 흐름을 선택지로 바꾼 뒤 다시 와요.	シナリオに選択肢がありません。ボックスの次の流れを選択肢にしてから戻ってきてください。	The script has no choices. Change a box's next flow to choices, then come back.
+? ${boxTitle(plan.branch.boxId)} 상자 ◇ 조건 분기	? {0} ボックス ◇ 条件分岐	? Box {0} ◇ Condition branch
+플래그 ${f.name} (${KIND_LABEL[f.kind]}) 새로 만들기	フラグ {0} ({1}) を新しく作る	Create flag {0} ({1})
+어떤 플래그를 짤지 골라요. 틀대로 플래그, 바꾸는 곳, 보는 곳을 한 번에 넣어요.	どんなフラグを組むか選んでください。テンプレートどおりにフラグ、変える場所、見る場所を一度に入れます。	Pick what kind of flag to set up. The template adds the flag, where it changes and where it's checked at once.
+용례(호감도, 잠긴 선택지 등)를 틀로 플래그와 바꾸는 곳, 보는 곳을 한 번에 넣어요	用例(好感度、ロックされた選択肢など)をテンプレートに、フラグと変える場所、見る場所を一度に入れます	Uses a recipe (affection, locked choice, etc.) as a template to add the flag, where it changes and where it's checked at once
+끝나는 상자예요. "그 밖"을 비워 두면 지금처럼 끝나요([검사]에는 이을 곳으로 보여요).	終わるボックスです。「それ以外」を空けておくと今のように終わります([チェック]にはつなぐ場所として出ます)。	This box ends the story. Leave "Otherwise" empty to end as now ([Check] lists it as a link to make).
+갈라질 상자를 골라요. 그 상자의 대사가 끝나면 ◇ 조건 분기로 값에 따라 다른 상자로 가요.	分岐するボックスを選んでください。そのボックスのセリフが終わると、◇ 条件分岐で値に応じて別のボックスへ進みます。	Pick the box that branches. After its lines, a ◇ condition branch goes to different boxes by value.
+${s.names.filter(Boolean).join(', ')} ≥ ${s.threshold}이면	{0} ≥ {1} なら	If {0} ≥ {1}
+${s.names[0]}을(를) 켤 상자를 골라요. 상자 끝에 ⚑ 플래그 바꾸기 줄(켜기)이 들어가요.	{0}をオンにするボックスを選んでください。ボックスの最後に ⚑ フラグ変更の行(オン)が入ります。	Pick the boxes that turn {0} on. A ⚑ change-flag line (on) goes at the end of each box.
+${s.names[0]}을(를) 바꿀 선택지를 골라요 (${how}). 캔버스에서 고른 상자가 진하게 보여요.	{0}を変える選択肢を選んでください ({1})。キャンバスで選んだボックスが濃く表示されます。	Pick the choices that change {0} ({1}). The box selected on the canvas is highlighted.
+플래그가 없어요. [틀에서 만들기]나 오른쪽 플래그 카드의 [+ 추가]에서 용례를 골라 만들면 여기에 줄이 생겨요.	フラグがありません。[テンプレートから作成]か右のフラグカードの[+ 追加]で用例を選んで作ると、ここに行ができます。	No flags yet. Pick a recipe in [Build from template] or [+ Add] on the Flags card on the right, and a row appears here.
+✎ ${c ? titleOf(c.box) : ''} ◆ "${c?.choice.text || '(빈 선택지)'}" 고르면 ${a.act}	✎ {0} ◆ 「{1}」を選ぶと {2}	✎ {0} ◆ On "{1}": {2}
+? ${x ? titleOf(x.box) : ''} ◆ "${x?.choice.text || '(빈 선택지)'}" 보이는 조건 ${c.cond}	? {0} ◆ 「{1}」の表示条件 {2}	? {0} ◆ "{1}" shows if {2}
+${s.names[0]}이(가) 기준 값 이상일 때만 보일 선택지를 골라요. 아니면 그 선택지가 숨어요.	{0}が基準値以上のときだけ表示する選択肢を選んでください。そうでなければその選択肢は隠れます。	Pick the choices that show only when {0} is at or above the threshold. Otherwise they're hidden.
+${s.names[0]}이(가) 켜졌을 때만 보일 선택지를 골라요. 아니면 그 선택지가 숨어요.	{0}がオンのときだけ表示する選択肢を選んでください。そうでなければその選択肢は隠れます。	Pick the choices that show only when {0} is on. Otherwise they're hidden.

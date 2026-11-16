@@ -1,4 +1,4 @@
-<!-- 원본: pykaki/docs/GUIDE.md @ db70c55a7b -->
+<!-- 원본: pykaki/docs/GUIDE.md @ 4c252d6188 -->
 # pygaki user guide
 
 A tool for writing Ren'Py scripts with boxes and lines and exporting them as Ren'Py script files (`.rpy`).
@@ -254,6 +254,11 @@ Press **[Design]** in the flag card and a table docks at the bottom of the canva
 - Cells show where the flag changes **✎** (`+1`, `on`) and where it is checked **?** (`≥ 2`, `on`). Click a box name to move the canvas to that box.
 - Click a cell to open a popover. Edit the change line, the choice's "On pick", Show if and condition branches with the pickers, and use **Add** below to put this flag into a change line at the end of the box, a choice's "On pick", Show if, or a condition branch. Empty cells can be clicked to add too. One undo takes it back.
 - **Yellow marks**: flags not used yet, flags changed but never checked, flags checked but never changed (always the starting value), choices always shown or never shown, and conditions always true or always false. Values are counted as if every branch and choice is taken, so it only marks what is certain. When there are too many values (a loop, for example) it shows "many values" and does not mark.
+- **[Build from template]**: a wizard opens to the right of the table. Go through **Template → Flag → Where it changes → Where it's checked → Review**.
+  - The templates are the six flag recipes (affection, scene seen once, get and use an item, locked choice, choose a route, multiple endings). You can rename the flag, and if a flag with the same name and type exists, it is used.
+  - **Where it changes**: pick the choices that raise (or turn on) the flag. For a scene seen once, pick the boxes that turn it on and a change line goes at the end of each box. For choose a route, write the text each choice remembers. For multiple endings, pick which flag each choice raises. The box selected on the canvas is highlighted.
+  - **Where it's checked**: pick the box that branches with a condition branch, the threshold, and the box each branch goes to (a box that goes to the next box or ends, or one that already branches). For get and use an item and locked choice, pick the choices to put the condition on.
+  - **Review** shows everything that will be added and warns ahead if it would get a yellow mark such as always true or always false. **[Create]** adds it all at once, and one undo takes it all back.
 - **Esc** closes the popover, and once more closes the table. The save format is unchanged, so the script file and the exported .rpy are not affected.
 
 ### Start box
@@ -273,10 +278,10 @@ In the **[Screen]** tab at the top, drag and drop buttons to make a Ren'Py scree
 - On export, the screen goes into `game/pykaki_screens.rpy`, and the script gets `call screen name` followed by `if _return == "door":` branches. Even if you only change a screen, auto export rewrites the screen script.
 - Preview the exported text in the bottom card. If you delete a screen, boxes that called it become "No screen" and [Check] tells you.
 
-### Small screens (show screen)
-The screens you make in the [Screen] tab are **full screens** (`call screen`): they cover the dialogue and wait until a button is pressed. Ren'Py also has **small screens** (`show screen`) that stay in a corner while the dialogue keeps going. Affection bars, bags, minimaps and clocks are made this way. pygaki can't make small screens yet, so write the screen in a `.rpy` file yourself, and in the script put `show screen name` or `hide screen name` in a **⚙ Raw command** line. The videos below are samples recorded in Ren'Py (choices and buttons were clicked automatically; the text in the videos is Korean).
+### HUD (show screen)
+The screens you make in the [Screen] tab are **full screens** (`call screen`): they cover the dialogue and wait until a button is pressed. Ren'Py also has **HUD screens** (`show screen`, an info panel that stays on top of the game) that stay in a corner while the dialogue keeps going. Affection bars, bags, minimaps and clocks are made this way. pygaki can't make HUD screens yet, so write the screen in a `.rpy` file yourself, and in the script put `show screen name` or `hide screen name` in a **⚙ Raw command** line. The videos below are samples recorded in Ren'Py (choices and buttons were clicked automatically; the text in the videos is Korean).
 
-| | call screen ([Screen] tab) | show screen (small screen) |
+| | call screen ([Screen] tab) | show screen (HUD) |
 |---|---|---|
 | Dialogue | Waits until the screen closes | Keeps going while the screen stays up |
 | Size | Usually the whole screen (`modal True`) | Small, in a corner. You set position and size |
@@ -286,7 +291,7 @@ The screens you make in the [Screen] tab are **full screens** (`call screen`): t
 
 #### call screen vs. show screen
 <!-- clip screen-compare -->
-The first half is what the [Screen] tab makes: the screen covers the dialogue and you must pick something to move on. The second half is a small screen: once shown, it stays while you advance several lines, and `hide screen` closes it.
+The first half is what the [Screen] tab makes: the screen covers the dialogue and you must pick something to move on. The second half is a HUD: once shown, it stays while you advance several lines, and `hide screen` closes it.
 
 ```
 call screen big_map          # waits until you pick
@@ -299,9 +304,9 @@ e "It doesn't go away when you advance."
 hide screen mini_map
 ```
 
-#### Affection bar (a small screen that shows a flag)
+#### Affection bar (a HUD that shows a flag)
 <!-- clip screen-hud -->
-A small screen reads flags directly. When `love` goes up with each choice, the bar and the number follow on their own. Nothing else in the script needs to change.
+A HUD reads flags directly. When `love` goes up with each choice, the bar and the number follow on their own. Nothing else in the script needs to change.
 
 ```
 screen love_hud():
@@ -358,7 +363,7 @@ label map_cafe:
     scene bg cafe
 ```
 
-#### Words used with small screens
+#### Words used with HUDs
 | Ren'Py | Meaning |
 |---|---|
 | `show screen name` / `hide screen name` | Show or close it from the script |
@@ -368,11 +373,11 @@ label map_cafe:
 | `if has_key:` / `showif` | Show only when a condition holds |
 | `SetVariable`, `ToggleVariable` | A button changes a flag |
 | `Jump("label")` | A button goes to that scene |
-| `ToggleScreen("name")` | Open or close another small screen |
+| `ToggleScreen("name")` | Open or close another HUD |
 | `Return("value")` | Close a call screen and return a value (the [Screen] tab's "Return value") |
 
 - Use the flags you made in pygaki's flag card as they are (`default love = 0` is added on export).
-- Put small screen scripts in a new `.rpy` file in the `game` folder (e.g. `my_screens.rpy`). Don't put them in `pykaki_screens.rpy`, which pygaki rewrites.
+- Put HUD scripts in a new `.rpy` file in the `game` folder (e.g. `my_screens.rpy`). Don't put them in `pykaki_screens.rpy`, which pygaki rewrites.
 
 ## 5. Managing labels (scenes)
 

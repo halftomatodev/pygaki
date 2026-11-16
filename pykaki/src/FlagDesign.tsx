@@ -9,6 +9,7 @@ import { uid } from './util';
 import { actionText, condSnippet, condText, firstClause, KIND_LABEL, parseCond } from './flags';
 import { ActionInput, CondInput } from './FlagFields';
 import { buildDesign, cellKey, isWrite, shortOf, valuesText, type DUse } from './flagTable';
+import { FlagWizard } from './FlagWizard';
 
 const close = () => useStore.setState({ showDesign: false });
 const titleOf = (b: BoxNode) => b.title || b.id;
@@ -29,6 +30,7 @@ export function FlagDesign() {
   const project = useStore((s) => s.project);
   const [all, setAll] = useState(false);
   const [open, setOpen] = useState<{ flag: string; box: string; el: HTMLElement } | null>(null);
+  const [wiz, setWiz] = useState(false); // 오른쪽 칸 [틀에서 만들기]
   const d = useMemo(() => buildDesign(project, all), [project, all]);
   const flags = project.variables;
 
@@ -37,14 +39,15 @@ export function FlagDesign() {
       if (e.key !== 'Escape' || open || document.querySelector('.modal')) return;
       const a = document.activeElement;
       if (a && a !== document.body && !a.closest('.fdesign')) return; // 다른 칸에서 쓰던 Esc는 그쪽 몫
+      if (wiz) return setWiz(false); // 마법사 먼저
       close();
     };
     window.addEventListener('keydown', k);
     return () => window.removeEventListener('keydown', k);
-  }, [open]);
+  }, [open, wiz]);
 
   return (
-    <div className="fdesign" role="region" aria-label="플래그 설계">
+    <div className={'fdesign' + (wiz ? ' with-wiz' : '')} role="region" aria-label="플래그 설계">
       <div className="fp-head">
         <b>플래그 설계</b>
         <span className="tip">✎ 바꾸는 곳, ? 보는 곳. 칸을 눌러 고쳐요</span>
@@ -52,12 +55,14 @@ export function FlagDesign() {
         <label className="fd-all" title="플래그를 안 쓰는 상자도 흐름 순서대로 보여요">
           <input type="checkbox" checked={all} onChange={(e) => setAll(e.target.checked)} /> 모든 상자
         </label>
+        <button className={wiz ? 'on' : ''} aria-pressed={wiz} onClick={() => setWiz((v) => !v)} title="용례(호감도, 잠긴 선택지 등)를 틀로 플래그와 바꾸는 곳, 보는 곳을 한 번에 넣어요">틀에서 만들기</button>
         <button onClick={() => useStore.setState({ showTrace: '' })} title="대본 시작부터 선택지를 골라 가며 플래그 값과 조건 분기 갈래를 봐요">▶ 따라가 보기</button>
         <button onClick={close} title="닫기 (Esc)">✕</button>
       </div>
+      <div className="fd-main">
       {!flags.length ? (
         <div className="fd-empty">
-          <p>플래그가 없어요. 오른쪽 플래그 카드의 [+ 추가]에서 용례를 골라 만들면 여기에 줄이 생겨요.</p>
+          <p>플래그가 없어요. [틀에서 만들기]나 오른쪽 플래그 카드의 [+ 추가]에서 용례를 골라 만들면 여기에 줄이 생겨요.</p>
         </div>
       ) : (
         <div className="fd-scroll">
@@ -116,6 +121,8 @@ export function FlagDesign() {
           </table>
         </div>
       )}
+      {wiz && <FlagWizard onClose={() => setWiz(false)} />}
+      </div>
       {open && (() => {
         const f = flags.find((x) => x.name === open.flag);
         const b = project.nodes.find((x) => x.id === open.box);

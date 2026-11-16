@@ -1404,4 +1404,60 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .fd-add { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; padding-top: 6px; border-top: 1px solid var(--line); }
 .fd-sec { font-size: 10.5px; color: var(--muted); font-weight: 600; }
 .fd-add button { font-size: 11.5px; padding: 2px 8px; text-align: left; }
+/* 플래그 설계 마법사 (틀에서 만들기): 시트 오른쪽 칸 */
+.fdesign.with-wiz { height: min(62%, 560px); }
+.fd-main { flex: 1; min-height: 0; display: flex; }
+.fd-main > .fd-scroll, .fd-main > .fd-empty { flex: 1; min-width: 0; }
+.fwiz { width: 380px; max-width: 55%; flex: none; display: flex; flex-direction: column; min-height: 0; border-left: 1px solid var(--line); font-size: 12px; }
+.fwiz-head { display: flex; align-items: center; gap: 6px; padding: 8px 10px 4px; }
+.fwiz-head .sp, .fwiz-foot .sp { flex: 1; }
+.fwiz-x { padding: 1px 7px; }
+.fwiz-steps { display: flex; list-style: none; margin: 0; padding: 4px 10px 8px; gap: 0; border-bottom: 1px solid var(--line); }
+.fwiz-steps li { flex: 1; position: relative; display: flex; justify-content: center; }
+.fwiz-steps li + li::before { content: ''; position: absolute; top: 10px; right: 50%; width: 100%; height: 2px; background: var(--line); z-index: 0; }
+.fwiz-steps li.done + li::before, .fwiz-steps li.done + li.now::before { background: var(--accent); }
+.fwiz-steps button { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; border: 0; background: none; padding: 0; min-width: 0; }
+.fwiz-steps button:disabled { opacity: 1; cursor: default; }
+.fwiz-steps .dot { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; background: var(--panel); border: 2px solid var(--line); color: var(--muted); }
+.fwiz-steps .done .dot { background: var(--accent); border-color: var(--accent); color: #fff; }
+.fwiz-steps .now .dot { border-color: var(--accent); color: var(--accent); }
+.fwiz-steps .nm { font-size: 10.5px; color: var(--muted); white-space: nowrap; }
+.fwiz-steps .now .nm { color: var(--text); font-weight: 700; }
+.fwiz-body { flex: 1; min-height: 0; overflow: auto; padding: 8px 10px; }
+.fwiz-list { display: flex; flex-direction: column; gap: 6px; }
+.fwiz-list > p.tip { margin: 0 0 2px; }
+.fwiz-recipe { display: flex; align-items: flex-start; gap: 8px; text-align: left; padding: 6px 8px; border-radius: 8px; }
+.fwiz-recipe .ic { width: 20px; flex: none; text-align: center; font-size: 14px; color: var(--accent); }
+.fwiz-recipe .tx { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.fwiz-recipe .tx .tip { font-size: 11px; white-space: normal; }
+.fwiz-recipe.on { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.fwiz-field { display: flex; flex-direction: column; gap: 3px; }
+.fwiz-field > label, .fwiz-field.row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.fwiz-field .lb { font-size: 11px; color: var(--muted); font-weight: 600; }
+.fwiz-field.row .lb { min-width: 96px; }
+.fwiz-field input:not([type=checkbox]) { min-width: 0; }
+.fwiz-field input[type=number] { width: 64px; }
+.fwiz-field select { max-width: 200px; }
+.fwiz-inline { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+.fwiz-inline button { font-size: 11px; padding: 2px 7px; }
+.fwiz-bad, .fwiz-why { color: var(--danger); font-size: 11.5px; }
+.fwiz-group { display: flex; flex-direction: column; gap: 2px; padding: 4px 6px; border-radius: 8px; border: 1px solid var(--line); }
+.fwiz-group.sel, .fwiz-pick.sel { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, transparent); }
+.fwiz-gname { align-self: flex-start; border: 0; background: none; padding: 0 2px; font-weight: 700; font-size: 11.5px; }
+.fwiz-gname:hover { color: var(--accent); }
+.fwiz-pick { display: flex; align-items: center; gap: 6px; padding: 2px 4px; border-radius: 6px; border: 1px solid transparent; flex-wrap: wrap; }
+.fwiz-pick .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fwiz-go { font-size: 10.5px; padding: 0 6px; }
+.fwiz-val { width: 120px; font-size: 11.5px; }
+.fwiz-seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.fwiz-seg button { border: 0; border-radius: 0; padding: 1px 8px; font-size: 11px; background: none; }
+.fwiz-seg button + button { border-left: 1px solid var(--line); }
+.fwiz-seg button.on { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); font-weight: 700; }
+.fwiz-sum { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 3px; }
+.fwiz-sum li.w { color: color-mix(in srgb, var(--accent) 80%, var(--text)); }
+.fwiz-sum li.r { color: color-mix(in srgb, #2a9d48 85%, var(--text)); }
+.fwiz-sum ul { padding-left: 16px; margin: 2px 0 0; color: var(--text); }
+.fwiz-foot { display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-top: 1px solid var(--line); }
+.fwiz-foot .fwiz-why { flex: 1; min-width: 0; }
+.fwiz-foot .fwiz-why + .sp { display: none; }
 .fd-addrow { display: flex; gap: 3px; flex-wrap: wrap; }
