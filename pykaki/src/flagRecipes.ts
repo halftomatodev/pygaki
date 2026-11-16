@@ -1,5 +1,5 @@
-// 플래그 용례 (플래그 카드의 [+ 추가] 메뉴). 용례마다 만들 플래그, 바꾸는 곳과 보는 곳, 원고 몇 줄, 렌파이에서 찍은 영상.
-// 영상은 src/flagclips/<id>.webm (렌파이 8.5.3, 게임 화면 전체를 줄여 찍음). 앱은 dist/index.html 한 파일만 가져가서 영상도 빌드에 넣는다
+// 플래그 용례 (플래그 카드의 [+ 추가] 메뉴). 용례마다 만들 플래그(꼴 포함), 바꾸는 곳과 보는 곳, 원고 몇 줄, 메뉴 카드의 움직이는 견본(demo, marks).
+// 안내서용 영상 src/flagclips/<id>.webm은 그 견본을 찍은 것 (tools/record_flag_demos.cjs, 빌드에는 안 들어감)
 import type { Flag, FlagKind, FlagUi, Project } from './types';
 import { flagNameProblem, newFlagName } from './flags';
 import { uid } from './util';
@@ -27,10 +27,8 @@ export interface DemoStep {
   choice?: { text: string; open: boolean };
 }
 
-const CLIPS = import.meta.glob('./flagclips/*.webm', { query: '?url', import: 'default', eager: true }) as Record<string, string>;
-const clip = (id: string) => CLIPS[`./flagclips/${id}.webm`];
 
-const LIST: Omit<FlagRecipe, 'clip'>[] = [
+const LIST: FlagRecipe[] = [
   {
     id: 'blank',
     icon: '+',
@@ -150,7 +148,7 @@ const LIST: Omit<FlagRecipe, 'clip'>[] = [
   },
 ];
 
-export const FLAG_RECIPES: FlagRecipe[] = LIST.map((r) => ({ ...r, clip: clip(r.id) }));
+export const FLAG_RECIPES: FlagRecipe[] = LIST; // 메뉴 카드는 움직이는 견본(demo). src/flagclips/<id>.webm은 그 견본을 찍은 안내서용 영상 (tools/record_flag_demos.cjs)
 
 // 겹치지 않는 이름: love가 있으면 love_2, love_3 …
 export function freeFlagName(p: Project, base: string) {

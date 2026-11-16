@@ -3,6 +3,7 @@ import type { BoxNode, Project, ScreenAnchor, ScreenDef, ScreenItem } from './ty
 import { addFixup } from './store';
 import { IDENT, RESERVED, uid } from './util';
 import { parseAction } from './flags';
+import { flagUi, partColor, uiMax, uiMin } from './flagUi';
 
 // HUD (FEATURE 18): 대사가 흐르는 동안 떠 있는 화면. 없으면 전체 화면 (call screen)
 export const isHud = (s?: ScreenDef | null) => s?.kind === 'hud';
@@ -149,6 +150,10 @@ function itemCode(p: Project, s: ScreenDef, it: ScreenItem, I0: string): string[
     if (!it.flag || !IDENT.test(it.flag)) return [];
     out = ['bar:', `${I}value AnimatedValue(${it.flag}, ${it.max && it.max > 0 ? it.max : 10}, 0.3)`, pos, `${I}xysize (${Math.round(it.w ?? BAR_W)}, ${Math.round(it.h ?? BAR_H)})`];
     out.push(`${I}left_bar Solid(${py(isColor(it.color) ? it.color! : '#e0607a')})`, `${I}right_bar Solid(${py(isColor(it.bgColor) ? it.bgColor! : '#00000080')})`, `${I}thumb None`);
+  } else if (it.kind === 'look') {
+    out = lookCode(p, it);
+    if (!out.length) return [];
+    out.splice(1, 0, pos);
   } else if (it.kind === 'imagebutton') {
     if (!it.image?.trim()) return [];
     out = ['imagebutton:', `${I}idle ${imgRef(it.image)}`];
@@ -162,6 +167,65 @@ function itemCode(p: Project, s: ScreenDef, it: ScreenItem, I0: string): string[
     out.push(act);
   }
   return withCond(it, out, I0);
+}
+
+// 플래그 꼴 (FEATURE 21): 플래그 카드의 꼴과 꾸미기를 렌파이 화면 언어로. 첫 줄은 맨 바깥 칸(뒤에 pos가 들어감)
+export const LOOK_SIZE: Record<string, [number, number]> = { level: [240, 22], slider: [240, 24], rating: [220, 30], switch: [64, 32], pulldown: [200, 40], combo: [200, 40] };
+export function lookSize(p: Project, it: ScreenItem): [number, number] {
+  const f = p.variables.find((v) => v.name === it.flag);
+  const u = f ? flagUi(f) : null;
+  const d = LOOK_SIZE[u ? (u.look === 'level' && u.style === 'rating' ? 'rating' : u.look) : 'level'];
+  return [Math.round(it.w ?? d[0]), Math.round(it.h ?? d[1])];
+}
+export function lookCode(p: Project, it: ScreenItem): string[] {
+  const f = p.variables.find((v) => v.name === it.flag);
+  if (!f || !IDENT.test(f.name)) return [];
+  const u = flagUi(f);
+  const I = '    ';
+  const [w, h] = lookSize(p, it);
+  // 부품: 그림이 있으면 그림(늘여 맞춤), 없으면 색
+  const part = (k: string, pw: number | string, ph: number | string) => {
+    const img = u.skin?.[k]?.image?.trim();
+    return img ? `Transform(${imgRef(img)}, xysize=(${pw}, ${ph}))` : `Solid(${py(partColor(u, k))}, xysize=(${pw}, ${ph}))`;
+  };
+  const lo = uiMin(u), hi = uiMax(u), n = f.name;
+  if (f.kind === 'int' && u.look === 'level' && u.style === 'rating') {
+    const count = Math.min(hi - lo, 10), per = (hi - lo) / count;
+    const on = u.skin?.on?.image?.trim(), off = u.skin?.off?.image?.trim();
+    const sym = on && off ? [`${I}${I}add (${imgRef(on)} if ${n} - ${lo} >= (i + 1) * ${per} else ${imgRef(off)}):`, `${I}${I}${I}fit "contain"`, `${I}${I}${I}xysize (${h}, ${h})`]
+      : [`${I}${I}text "★" font "DejaVuSans.ttf" size ${h} color (${py(partColor(u, 'on'))} if ${n} - ${lo} >= (i + 1) * ${per} else ${py(partColor(u, 'off'))})`];
+    return ['hbox:', `${I}xysize (${w}, ${h})`, `${I}spacing 2`, `${I}for i in range(${count}):`, ...sym];
+  }
+  if (f.kind === 'int' && u.look === 'level' && u.style === 'discrete') {
+    const count = Math.min(hi - lo, 20);
+    const seg = `(${w} - ${count + 1} * 2) // ${count}`;
+    return ['frame:', `${I}background ${part('border', w, h)}`, `${I}padding (2, 2)`, `${I}xysize (${w}, ${h})`, `${I}hbox:`, `${I}${I}spacing 2`, `${I}${I}for i in range(${count}):`,
+      `${I}${I}${I}add (${part('fill', seg, h - 4)} if (${n} - ${lo}) * ${count} >= (i + 1) * ${hi - lo} else ${part('track', seg, h - 4)})`];
+  }
+  if (f.kind === 'int') {
+    const value = `${I}value AnimatedValue(${n} - ${lo}, ${hi - lo}, 0.3)`;
+    if (u.look === 'slider') {
+      // 트랙은 가운데 가는 띠, 손잡이는 그림이 없으면 네모 (렌파이 Solid는 둥글지 않음)
+      const th = Math.max(4, Math.round(h / 5));
+      const thin = (k: string) => {
+        const img = u.skin?.[k]?.image?.trim();
+        const d = img ? `Transform(${imgRef(img)}, xysize=(${w}, ${th}), yalign=0.5)` : `Solid(${py(partColor(u, k))}, xysize=(${w}, ${th}), yalign=0.5)`;
+        return `Fixed(${d}, xysize=(${w}, ${h}))`;
+      };
+      const t = u.skin?.thumb?.image?.trim();
+      const tw = t ? h : Math.max(6, Math.round(h * 0.5));
+      return ['bar:', value, `${I}xysize (${w}, ${h})`, `${I}left_bar ${thin('fill')}`, `${I}right_bar ${thin('track')}`,
+        `${I}thumb ${t ? `Transform(${imgRef(t)}, xysize=(${h}, ${h}))` : `Solid(${py(partColor(u, 'thumb'))}, xysize=(${tw}, ${h}))`}`, `${I}thumb_offset ${Math.round(tw / 2)}`];
+    }
+    return ['frame:', `${I}background ${part('border', w, h)}`, `${I}padding (1, 1)`, `${I}xysize (${w}, ${h})`,
+      `${I}bar:`, I + value, `${I}${I}xysize (${w - 2}, ${h - 2})`, `${I}${I}left_bar ${part('fill', w - 2, h - 2)}`, `${I}${I}right_bar ${part('track', w - 2, h - 2)}`, `${I}${I}thumb None`];
+  }
+  if (f.kind === 'bool') {
+    const k = Math.round(h * 0.8), m = Math.round((h - k) / 2);
+    return ['fixed:', `${I}xysize (${w}, ${h})`, `${I}add (${part('on', w, h)} if ${n} else ${part('off', w, h)})`, `${I}add ${part('thumb', k, k)}:`, `${I}${I}xpos (${w - k - m} if ${n} else ${m})`, `${I}${I}ypos ${m}`];
+  }
+  // 글자: 값을 글로 보이는 칸 (게임 안에서 고르지는 않음)
+  return ['frame:', `${I}background ${part('border', w, h)}`, `${I}padding (1, 1)`, `${I}xysize (${w}, ${h})`, `${I}frame:`, `${I}${I}background ${part('box', w - 2, h - 2)}`, `${I}${I}xfill True`, `${I}${I}yfill True`, `${I}${I}padding (10, 0)`, `${I}${I}text "[${n}]" color ${py(partColor(u, 'text'))} yalign 0.5 size ${Math.max(12, Math.round(h * 0.5))}`];
 }
 
 // 보이는 조건 (FEATURE 18)

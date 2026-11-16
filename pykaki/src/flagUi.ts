@@ -14,10 +14,10 @@ export function skinParts(ui: FlagUi): PartDef[] {
   if (ui.look === 'level')
     return ui.style === 'rating'
       ? [['on', '찬 기호', '#f5b301'], ['off', '빈 기호', '#c9c4b8']]
-      : [['fill', '채움', '#e0607a'], ['track', '바탕', '#00000022'], ['border', '테두리', '#00000033']];
-  if (ui.look === 'slider') return [['track', '트랙', '#00000022'], ['fill', '채운 쪽', '#3b82f6'], ['thumb', '손잡이', '#ffffff'], ['tick', '눈금', '#00000055']];
-  if (ui.look === 'switch') return [['on', '켜짐 바탕', '#34c759'], ['off', '꺼짐 바탕', '#00000026'], ['thumb', '손잡이', '#ffffff']];
-  return [['box', '바탕', '#ffffff'], ['text', '글자', '#1f2328'], ['border', '테두리', '#00000033']];
+      : [['fill', '채움', '#e0607a'], ['track', '바탕', '#8080804d'], ['border', '테두리', '#80808080']];
+  if (ui.look === 'slider') return [['track', '트랙', '#8080804d'], ['fill', '채운 쪽', '#3b82f6'], ['thumb', '손잡이', '#ffffff'], ['tick', '눈금', '#80808099']];
+  if (ui.look === 'switch') return [['on', '켜짐 바탕', '#34c759'], ['off', '꺼짐 바탕', '#80808066'], ['thumb', '손잡이', '#ffffff']];
+  return [['box', '바탕', '#ffffff'], ['text', '글자', '#1f2328'], ['border', '테두리', '#80808080']];
 }
 
 // 이 플래그의 꼴 (저장된 것이 종류와 맞지 않으면 종류의 기본 꼴)

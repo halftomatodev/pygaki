@@ -2290,3 +2290,10 @@ ${label} 색 (#rrggbbaa)	{0} の色 (#rrggbbaa)	{0} color (#rrggbbaa)
 고른 플래그를 더한 값이 기준 이상일 때 (love + trust >= 4)	選んだフラグの合計が基準以上のとき (love + trust >= 4)	When the chosen flags add up to at least the threshold (love + trust >= 4)
 고른 플래그가 모두 기준 이상일 때 (love >= 2 and trust >= 2)	選んだフラグがすべて基準以上のとき (love >= 2 and trust >= 2)	When all chosen flags are at least the threshold (love >= 2 and trust >= 2)
 고른 플래그 가운데 하나라도 기준 이상일 때 (love >= 2 or trust >= 2)	選んだフラグのどれか 1 つでも基準以上のとき (love >= 2 or trust >= 2)	When any chosen flag is at least the threshold (love >= 2 or trust >= 2)
+플래그 꼴	フラグの見た目	Flag look
++ 플래그 꼴	+ フラグの見た目	+ Flag look
+플래그가 없어요 (플래그 카드)	フラグがありません (フラグカード)	No flags (flag card)
+가로 (px). 비우면 꼴의 기본 크기	横 (px)。空にすると見た目の標準サイズ	Width (px). Empty uses the look's default size
+플래그 카드에서 만든 꼴(레벨·슬라이더·스위치·풀다운)과 꾸미기를 그대로 가져와요	フラグカードで作った見た目(レベル・スライダー・スイッチ・プルダウン)とカスタマイズをそのまま持ってきます	Brings in the look (level, slider, switch, pull-down) and customization made in the flag card as is
+화면 "${nm}": 플래그 꼴에 플래그를 골라 주세요 (안 고르면 내보내지 않아요)	画面「{0}」: フラグの見た目にフラグを選んでください (選ばないと書き出しません)	Screen "{0}": pick a flag for the flag look (it isn't exported without one)
+꼴과 꾸미기(색·그림)는 플래그 카드의 [꼴 ▾]에서 고쳐요. 여기서는 게임 화면에서의 자리와 크기만 정해요. 게임에서는 값을 보여 주기만 해요	見た目とカスタマイズ(色・画像)はフラグカードの [見た目 ▾] で変えます。ここではゲーム画面での位置と大きさだけを決めます。ゲームでは値を表示するだけです	Change the look and its customization (colors, images) in the flag card's [Look ▾]. Here you set only its place and size on the game screen. In the game it only shows the value

@@ -101,7 +101,7 @@ export interface ScreenOut {
 
 // 화면 만들기 탭에서 만든 렌파이 screen (FEATURE 17). game/pykaki_screens.rpy로 내보낸다
 // bar: 플래그 값 막대 (FEATURE 18). HUD의 항목은 x, y가 HUD 왼쪽 위 기준
-export type ScreenItemKind = 'imagebutton' | 'textbutton' | 'text' | 'image' | 'bar' | 'drop'; // drop: 놓는 곳 (FEATURE 19)
+export type ScreenItemKind = 'imagebutton' | 'textbutton' | 'text' | 'image' | 'bar' | 'drop' | 'look'; // drop: 놓는 곳 (FEATURE 19). look: 플래그 꼴 (FEATURE 21, 꼴·꾸미기는 플래그 카드의 것)
 // 버튼을 누르면 (FEATURE 18): return 값 돌려주기 (전체 화면만, 없으면 이것) | flag 플래그 바꾸기 | jump 상자로 가기 | toggle 다른 HUD 열고 닫기
 export type ScreenAct = 'return' | 'flag' | 'jump' | 'toggle';
 export type ScreenAnchor = 'tl' | 't' | 'tr' | 'l' | 'c' | 'r' | 'bl' | 'b' | 'br';
@@ -123,7 +123,7 @@ export interface ScreenItem {
   acts?: string[]; // act flag: 바꾸는 식 (예: love += 1)
   target?: string | null; // act jump: 갈 상자 id
   screen?: string | null; // act toggle: 열고 닫을 화면 id
-  flag?: string; // bar: 플래그 이름
+  flag?: string; // bar, look: 플래그 이름
   max?: number; // bar: 꽉 찬 값 (없으면 10)
   w?: number; // bar: 크기 (px)
   h?: number;

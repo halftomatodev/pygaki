@@ -11,14 +11,16 @@ import { useLive } from './showpyLive';
 import { pictureOf, useGameFolder } from './gameFolder';
 import type { Project, ScreenAct, ScreenDef, ScreenItem, ScreenItemKind } from './types';
 import { uid } from './util';
-import { actOf, addHudTemplate, ANCHORS, BAR_H, BAR_W, canDrag, DROP_H, DROP_W, hasAct, HUD_H, HUD_TEMPLATES, HUD_W, hudPos, hudTemplateCode, isDragged, isHud, newScreenName, screenNameProblem, SCREENS_FILE, screensCode, type HudTemplate } from './screens';
+import { lookSize, actOf, addHudTemplate, ANCHORS, BAR_H, BAR_W, canDrag, DROP_H, DROP_W, hasAct, HUD_H, HUD_TEMPLATES, HUD_W, hudPos, hudTemplateCode, isDragged, isHud, newScreenName, screenNameProblem, SCREENS_FILE, screensCode, type HudTemplate } from './screens';
 import { PickMenu, type PickEntry } from './FlagMenu';
 import { ActionInput, CondInput, firstAction } from './FlagFields';
 import { evalExpr, initVars, UNKNOWN, type Vars } from './trace';
+import { FlagWidget } from './FlagWidget';
+import { flagUi, strOptions, LOOK_LABEL } from './flagUi';
 
 export const useScreenSel = create<{ id: string | null; item: string | null }>(() => ({ id: null, item: null }));
 
-const KIND: Record<ScreenItemKind, string> = { imagebutton: '그림 버튼', textbutton: '글 버튼', text: '글', image: '그림', bar: '막대', drop: '놓는 곳' };
+const KIND: Record<ScreenItemKind, string> = { imagebutton: '그림 버튼', textbutton: '글 버튼', text: '글', image: '그림', bar: '막대', drop: '놓는 곳', look: '플래그 꼴' };
 
 // HUD 틀 영상: src/hudclips/<틀 id>.webm (렌파이 8.5.3에서 찍음, 빌드에 들어감)
 const HUD_CLIPS = import.meta.glob('./hudclips/*.webm', { query: '?url', import: 'default', eager: true }) as Record<string, string>;
@@ -86,6 +88,7 @@ export function ScreensView() {
     if (kind === 'imagebutton') Object.assign(it, { image: '' }, hud ? { act: 'flag', acts: [firstAction(project.variables)].filter(Boolean) } : { value: 'b' + (n + 1) });
     if (kind === 'text') it.text = '글';
     if (kind === 'drop') Object.assign(it, { text: '놓는 곳', w: DROP_W, h: DROP_H, accept: null }, hud ? { act: 'flag', acts: [firstAction(project.variables)].filter(Boolean) } : { value: 'd' + (n + 1) });
+    if (kind === 'look') it.flag = project.variables[0]?.name ?? '';
     if (kind === 'bar') Object.assign(it, { flag: project.variables.find((f) => f.kind === 'int')?.name ?? '', max: 10, w: hud ? Math.min(BAR_W, (sc.w ?? HUD_W) - 24) : BAR_W, h: BAR_H });
     updScreen((s) => void s.items.push(it));
     useScreenSel.setState({ id: sc.id, item: id });
@@ -132,6 +135,7 @@ export function ScreensView() {
               <button onClick={() => addItem('text')}>+ 글</button>
               <button onClick={() => addItem('image')}>+ 그림</button>
               <button onClick={() => addItem('bar')} title="숫자 플래그의 값을 막대로 보여요">+ 막대</button>
+              <button onClick={() => addItem('look')} title="플래그 카드에서 만든 꼴(레벨·슬라이더·스위치·풀다운)과 꾸미기를 그대로 가져와요">+ 플래그 꼴</button>
               <button onClick={() => addItem('drop')} title="끌 수 있는 글·그림을 여기에 놓으면 할 일을 정해요 (끌어 놓기)">+ 놓는 곳</button>
               <span className="tip">끌어서 옮겨요 · 방향키로 1px (Shift: 10px){isHud(sc) ? ' · HUD 빈 곳을 끌면 HUD가 옮겨져요' : ''}</span>
             </div>
@@ -264,6 +268,7 @@ const ACT_TAG: Record<ScreenAct, string> = { return: '값', flag: '⚑', jump: '
 
 function StageItem({ sc, it, scale, on, onMove, vars, hidden }: { sc: ScreenDef; it: ScreenItem; scale: number; on: boolean; onMove?: (id: string, x: number, y: number) => void; vars: Vars; hidden: boolean }) {
   const look = useGameFolder((s) => s.look);
+  const project = useStore((s) => s.project);
   const pic = usePic(it.kind === 'imagebutton' || it.kind === 'image' ? it.image ?? '' : '');
   const down = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!onMove) return;
@@ -296,6 +301,18 @@ function StageItem({ sc, it, scale, on, onMove, vars, hidden }: { sc: ScreenDef;
         <span style={{ width: fill * 100 + '%', background: it.color ?? '#e0607a' }} />
         {!it.flag && <em>플래그 없음</em>}
       </span>
+    );
+  } else if (it.kind === 'look') {
+    const f = project.variables.find((v) => v.name === it.flag);
+    const [w, h] = lookSize(project, it);
+    body = f ? (
+      <span className="scv-look" style={{ width: w * scale, height: h * scale }}>
+        <span style={{ width: w, height: h, transform: `scale(${scale})` }}>
+          <FlagWidget ui={flagUi(f)} value={f.name in vars ? vars[f.name] : (f.init as never)} options={f.kind === 'str' ? strOptions(project, f) : undefined} label={f.name} />
+        </span>
+      </span>
+    ) : (
+      <span className="scv-noimg">플래그 없음</span>
     );
   } else if (it.kind === 'drop')
     body = (
@@ -548,6 +565,25 @@ function ItemCard({ sc, it, upd, remove, dup }: { sc: ScreenDef; it: ScreenItem;
           <label>올렸을 때</label>
           <input className="grow" list="scv-images" value={it.hover ?? ''} placeholder="비우면 그대로 (예: door hover)" onChange={(e) => upd((x) => void (e.target.value ? (x.hover = e.target.value) : delete x.hover), 'scr-hover' + it.id)} />
         </div>
+      )}
+      {it.kind === 'look' && (
+        <>
+          <div className="row">
+            <label>플래그</label>
+            <select className={'grow' + (project.variables.some((f) => f.name === it.flag) ? '' : ' invalid')} value={it.flag ?? ''} onChange={(e) => upd((x) => void (x.flag = e.target.value))}>
+              {!project.variables.some((f) => f.name === it.flag) && <option value={it.flag ?? ''}>{project.variables.length ? '플래그 고르기' : '플래그가 없어요 (플래그 카드)'}</option>}
+              {project.variables.map((f) => (
+                <option key={f.id} value={f.name}>{f.name} · {LOOK_LABEL[flagUi(f).look]}</option>
+              ))}
+            </select>
+          </div>
+          <div className="row">
+            <label>크기</label>
+            {num('w', String(lookSize(project, { ...it, w: undefined, h: undefined })[0]), '가로 (px). 비우면 꼴의 기본 크기')}
+            {num('h', String(lookSize(project, { ...it, w: undefined, h: undefined })[1]), '세로 (px)')}
+          </div>
+          <p className="tip">꼴과 꾸미기(색·그림)는 플래그 카드의 [꼴 ▾]에서 고쳐요. 여기서는 게임 화면에서의 자리와 크기만 정해요. 게임에서는 값을 보여 주기만 해요</p>
+        </>
       )}
       {it.kind === 'bar' && (
         <>

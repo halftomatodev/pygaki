@@ -412,10 +412,10 @@ FLAG_MARK = "<!-- flag-recipes -->"
 
 
 def flag_recipes(lang="ko"):
-    """pykaki/src/flagRecipes.ts의 용례(빈 플래그 빼고)를 [영상 | 설명·바꾸는 곳·보는 곳·원고] 줄로. 영상은 pykaki/src/flagclips/<id>.webm"""
+    """pykaki/src/flagRecipes.ts의 용례(빈 플래그 빼고)를 [영상 | 설명·바꾸는 곳·보는 곳·원고] 줄로. 영상은 pykaki/src/flagclips/<id>.webm (대본 편집기 메뉴의 움직이는 견본을 찍은 것, pykaki/tools/record_flag_demos.cjs)"""
     src = read("pykaki/src/flagRecipes.ts")
     strs = lambda t: [x.replace("\\'", "'") for x in re.findall(r"'((?:[^'\\]|\\.)*)'", t)]
-    out = ['<div class="g-cases">']
+    out = ['<div class="g-cases g-flag-demos">']
     for m in re.finditer(r"\{\s*id: '(\w+)',\s*(?:marks: \{[^\n]*\},\s*)?(?:demo: \[.*?\n    \],\s*)?icon: '([^']*)',\s*title: '([^']*)',\s*kindHint: '([^']*)',\s*desc: '([^']*)',\s*flags: \[(.*?)\],"
                          r"\s*write: \[(.*?)\],\s*read: \[(.*?)\],\s*code: '((?:[^'\\]|\\.)*)'", src, re.S):
         rid, icon, title, kind, desc, flags, write, read_, code = m.groups()
@@ -531,6 +531,7 @@ mark{background:var(--mark);color:inherit;border-radius:2px}
 .g-case{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:18px;padding:18px 0;border-top:1px solid var(--line)}
 .g-case:first-child{border-top:0;padding-top:4px}
 .g-case video,.g-clip video{display:block;width:100%;aspect-ratio:16/9;background:#111;border-radius:8px}
+.g-flag-demos .g-case video{aspect-ratio:auto;background:transparent;border:1px solid var(--line)}
 .g-case-t{min-width:0;font-size:14.5px}
 .g-case-t h4{margin:0 0 4px;font-size:16px}
 .g-case-t h4 small{font-size:12px;font-weight:500;color:var(--muted);background:var(--soft);border-radius:5px;padding:1px 6px;margin-left:4px}

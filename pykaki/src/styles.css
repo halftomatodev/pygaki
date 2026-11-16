@@ -1604,3 +1604,10 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .judge-rules li > .cond-gui, .judge-rules li > .cond-in { order: 5; flex-basis: 100%; padding-left: 34px; box-sizing: border-box; }
 .judge-rules li > .judge-say { order: 6; }
 .judge-rules li > .judge-to { flex: 1; }
+.scv-look { display: block; position: relative; pointer-events: none; }
+.scv-look > span { position: absolute; left: 0; top: 0; display: flex; align-items: center; transform-origin: 0 0; }
+.scv-look .fw-num { max-width: none; width: 100%; }
+.scv-look .fw-val { display: none; }
+.scv-look .fw-switch { width: 100%; height: 100%; border-radius: 999px; }
+.scv-look .fw-switch .fw-sw-text { display: none; }
+.scv-look .fw-pull { width: 100%; height: 100%; max-width: none; }
