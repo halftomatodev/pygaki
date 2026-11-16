@@ -1,4 +1,4 @@
-<!-- 원본: pykaki/docs/GUIDE.md @ 8543204b19 -->
+<!-- 원본: pykaki/docs/GUIDE.md @ db70c55a7b -->
 # pygaki user guide
 
 A tool for writing Ren'Py scripts with boxes and lines and exporting them as Ren'Py script files (`.rpy`).
@@ -246,6 +246,15 @@ Press **[▶ Trace]** in the flag card (from the start of the script) or **[▶ 
 - **Conditions**: the branch that matches the current values gets a green border. You can click other branches to go there too.
 - After a call, when the called scene ends (return), it comes back to the "After return" box. **↶** steps back once, **[From start]** starts over.
 - Expressions it can compute are numbers, text and on/off values, arithmetic like addition and subtraction, comparisons and and/or/not. Expressions with functions or the game's other variables show as "unknown"; then you choose yourself. `$ name += value` in direct command lines is computed too.
+
+### Flag design
+Press **[Design]** in the flag card and a table docks at the bottom of the canvas. It shows at a glance which boxes change and check each flag, and you can fix them right there. The canvas above stays usable.
+
+- Rows are flags (name, type, and the values it can take somewhere in the script); columns are boxes in flow order. At first only boxes that use a flag are shown; turn on **[All boxes]** to see every box. Boxes not reachable from the start of the script are dim italics.
+- Cells show where the flag changes **✎** (`+1`, `on`) and where it is checked **?** (`≥ 2`, `on`). Click a box name to move the canvas to that box.
+- Click a cell to open a popover. Edit the change line, the choice's "On pick", Show if and condition branches with the pickers, and use **Add** below to put this flag into a change line at the end of the box, a choice's "On pick", Show if, or a condition branch. Empty cells can be clicked to add too. One undo takes it back.
+- **Yellow marks**: flags not used yet, flags changed but never checked, flags checked but never changed (always the starting value), choices always shown or never shown, and conditions always true or always false. Values are counted as if every branch and choice is taken, so it only marks what is certain. When there are too many values (a loop, for example) it shows "many values" and does not mark.
+- **Esc** closes the popover, and once more closes the table. The save format is unchanged, so the script file and the exported .rpy are not affected.
 
 ### Start box
 The game starts at the box with the green **Start** mark. To start from another box, click that box and press **[Set as start]**.

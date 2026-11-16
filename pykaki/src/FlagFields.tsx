@@ -10,6 +10,7 @@ import { actionText, CMP_LABEL, condSnippet, condText, exprNames, firstClause, f
 export function FlagsCard() {
   const flags = useStore((s) => s.project.variables);
   const update = useStore((s) => s.update);
+  const design = useStore((s) => s.showDesign);
   const addBtn = useRef<HTMLButtonElement>(null);
   const [menu, setMenu] = useState(false);
   // 용례대로 만들고(실행 취소 한 번), 첫 플래그의 이름 칸으로
@@ -32,6 +33,7 @@ export function FlagsCard() {
       topic="플래그"
       extra={
         <>
+          <button className={design ? 'on' : ''} onClick={() => useStore.setState({ showDesign: !design })} title="플래그마다 어느 상자에서 바꾸고 보는지 표로 보고 고쳐요">설계</button>
           <button onClick={() => useStore.setState({ showTrace: '' })} title="대본 시작부터 선택지를 골라 가며 플래그 값과 조건 분기 갈래를 봐요">▶ 따라가 보기</button>
           <button ref={addBtn} className={menu ? 'on' : ''} onClick={() => setMenu((v) => !v)} title="용례(호감도, 한 번 본 장면 등)를 골라 만들어요">+ 추가</button>
           {menu && addBtn.current && <FlagMenu anchor={addBtn.current} onPick={pick} onClose={() => setMenu(false)} />}

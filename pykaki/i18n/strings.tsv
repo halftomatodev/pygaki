@@ -1960,3 +1960,47 @@ ${i + 1}번	{0}番	No. {0}
 산으로 간다	山へ行く	Go to the mountains
 바다? 좋겠다.	海? いいなあ。	The sea? Lucky you.
 산? 다리 아프겠다.	山? 足が痛そう。	The mountains? Your legs must hurt.
+설계	設計	Design
+보여요	表示されます	shown
+늘 꺼짐	常にオフ	always off
+늘 켜짐	常にオン	always on
+여러 값	いろいろな値	many values
+참이에요	真です	true
+거짓이에요	偽です	false
+상자 보기	ボックスを見る	Show box
+안 보여요	表示されません	hidden
+칸 고치기	セルを編集	Edit cell
+켜짐, 꺼짐	オン、オフ	on, off
+플래그 설계	フラグ設計	Flag design
+눌러서 고쳐요	クリックで編集	Click to edit
+아직 안 써요	まだ使っていません	Not used yet
+이 줄 지우기	この行を削除	Delete this line
+? 보이는 조건	? 表示条件	? Show condition
+이 바꾸기 빼기	この変更を外す	Remove this change
+⚑ 플래그 바꾸기 줄	⚑ フラグ変更行	⚑ Change-flag line
+✎ 상자 끝에 바꾸기 줄	✎ ボックスの最後に変更行	✎ Change line at end of box
+캔버스에서 이 상자 보기	キャンバスでこのボックスを表示	Show this box on the canvas
+누르면 캔버스가 이 상자로	クリックでキャンバスをこのボックスへ	Click to move the canvas to this box
+명령 줄 (상자에서 고쳐요)	コマンド行(ボックスで編集)	Command line (edit in the box)
+바꾸기만 하고 보는 곳이 없어요	変更するだけで、見る場所がありません	Changed but never checked
+대본 시작에서 닿지 않는 상자	スクリプトの開始から届かないボックス	Box not reachable from the script start
+아직 플래그를 쓰는 상자가 없어요	まだフラグを使うボックスがありません	No box uses a flag yet
+이 갈래 조건에 이 플래그를 더해요	この分岐の条件にこのフラグを加えます	Add this flag to this branch's condition
+이 선택지를 고르면 플래그를 바꿔요	この選択肢を選ぶとフラグを変えます	Change the flag when this choice is picked
+상자 끝에 플래그 바꾸기 줄을 넣어요	ボックスの最後にフラグ変更行を入れます	Add a change-flag line at the end of the box
+? 조건 분기 ${i + 1}번 갈래에	? 条件分岐 {0} 番目の分岐に	? To branch {0} of the condition
+눌러서 이 상자에 바꾸기·조건을 더해요	クリックでこのボックスに変更・条件を加えます	Click to add a change or condition in this box
+이 플래그 값에 따라 선택지를 보이게 해요	このフラグの値で選択肢を表示します	Show the choice depending on this flag
+◇ 조건 분기 ${u.idx + 1}번 갈래	◇ 条件分岐 {0} 番目の分岐	◇ Condition branch {0}
+플래그를 안 쓰는 상자도 흐름 순서대로 보여요	フラグを使わないボックスも流れの順に表示します	Also show boxes that use no flag, in flow order
+✎ 바꾸는 곳, ? 보는 곳. 칸을 눌러 고쳐요	✎ 変える場所、? 見る場所。セルをクリックして編集	✎ where it changes, ? where it is checked. Click a cell to edit
+보기만 하고 바꾸는 곳이 없어요 (늘 처음 값)	見るだけで、変える場所がありません(常に初期値)	Checked but never changed (always the initial value)
+✎ "${c.text || '(빈 선택지)'}" 고르면	✎ 「{0}」を選んだら	✎ When "{0}" is picked
+플래그마다 어느 상자에서 바꾸고 보는지 표로 보고 고쳐요	フラグごとに、どのボックスで変えて見るかを表で見て編集します	See and edit in a table where each flag is changed and checked
+◆ "${u.choice || '(빈 선택지)'}" 고르면	◆ 「{0}」を選んだら	◆ When "{0}" is picked
+◆ "${u.choice || '(빈 선택지)'}" 보이는 조건	◆ 「{0}」の表示条件	◆ Show condition of "{0}"
+대본 어디선가 가질 수 있는 값 (갈래를 모두 지난다고 보고 셈)	スクリプトのどこかで取りうる値(すべての分岐を通ると見て計算)	Values it can take somewhere in the script (counted as if every branch is taken)
+"${u.text}" 조건이 늘 ${r === 'true' ? '참이에요' : '거짓이에요'}	条件「{0}」は常に{1}	Condition "{0}" is always {1}
+플래그가 없어요. 오른쪽 플래그 카드의 [+ 추가]에서 용례를 골라 만들면 여기에 줄이 생겨요.	フラグがありません。右のフラグカードの[+ 追加]で用例を選んで作ると、ここに行ができます。	No flags yet. Pick a recipe from [+ Add] on the Flags card on the right, and a row appears here.
+선택지 "${u.choice}"가 늘 ${r === 'true' ? '보여요' : '안 보여요'}	選択肢「{0}」は常に{1}	Choice "{0}" is always {1}
+더하기	追加	Add

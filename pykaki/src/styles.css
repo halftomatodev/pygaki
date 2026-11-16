@@ -1361,3 +1361,47 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .fmenu-card .fd-code { max-height: 140px; }
 .fmenu-clip { border-radius: 8px; overflow: hidden; }
 .fmenu-foot { font-size: 10.5px; color: var(--muted); text-align: right; }
+
+/* 플래그 설계 창 (2단계 표): 캔버스 아래쪽에 붙는 시트. 좌우 칸 사이에 맞춤 */
+.fdesign { position: absolute; z-index: 6; left: calc(var(--lw) + 10px); right: calc(var(--rw) + 10px); bottom: 10px; height: min(44%, 420px); min-height: 200px; display: flex; flex-direction: column; background: var(--panel); color: var(--text); border: 1px solid color-mix(in srgb, var(--text) 14%, transparent); border-radius: 12px; box-shadow: 0 -6px 28px rgba(0,0,0,.18); }
+.fdesign .fp-head .tip { font-size: 11.5px; }
+.fd-all { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.fd-empty { flex: 1; display: flex; align-items: center; justify-content: center; padding: 16px; color: var(--muted); font-size: 13px; text-align: center; }
+.fd-scroll { flex: 1; min-height: 0; overflow: auto; }
+.fd-table { border-collapse: separate; border-spacing: 0; font-size: 12px; }
+.fd-table th, .fd-table td { border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); padding: 0; }
+.fd-table thead th { position: sticky; top: 0; z-index: 2; background: var(--panel); }
+.fd-corner { position: sticky; left: 0; z-index: 3 !important; text-align: left; padding: 6px 10px !important; color: var(--muted); font-weight: 600; min-width: 170px; }
+.fd-box { min-width: 96px; max-width: 160px; }
+.fd-box button { width: 100%; padding: 6px 8px; border: 0; background: none; font-weight: 600; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-radius: 0; }
+.fd-box button:hover { color: var(--accent); }
+.fd-box.unreached button { color: var(--muted); font-style: italic; }
+.fd-flag { position: sticky; left: 0; z-index: 1; background: var(--panel); text-align: left; padding: 6px 10px !important; vertical-align: top; font-weight: 400; }
+.fd-fname { display: flex; align-items: baseline; gap: 6px; }
+.fd-fname code { font-weight: 700; font-size: 12.5px; }
+.fd-kind { font-size: 10.5px; color: var(--muted); }
+.fd-range { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.fd-note { font-size: 11px; color: #b8860b; margin-top: 2px; }
+.fd-cell { vertical-align: top; }
+.fd-cell > button { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; min-height: 44px; height: 100%; padding: 5px 7px; border: 0; border-radius: 0; background: none; text-align: left; position: relative; }
+@media (hover: hover) { .fd-cell > button:hover { background: color-mix(in srgb, var(--accent) 7%, transparent); } }
+.fd-cell:not(.used) > button::after { content: '+'; color: var(--muted); opacity: 0; margin: auto; font-size: 14px; }
+.fd-cell:not(.used) > button:hover::after { opacity: .7; }
+.fd-cell.on > button { background: color-mix(in srgb, var(--accent) 12%, transparent); box-shadow: inset 0 0 0 2px var(--accent); }
+.fd-cell.warn > button { background: color-mix(in srgb, #f5c400 14%, transparent); }
+.fd-use { white-space: nowrap; font-size: 11.5px; padding: 0 5px; border-radius: 4px; line-height: 18px; }
+.fd-use.w { background: color-mix(in srgb, var(--accent) 16%, transparent); color: color-mix(in srgb, var(--accent) 80%, var(--text)); }
+.fd-use.r { background: color-mix(in srgb, #34c759 16%, transparent); color: color-mix(in srgb, #2a9d48 85%, var(--text)); }
+.fd-warn { position: absolute; top: 3px; right: 5px; font-size: 11px; color: #b8860b; }
+.fd-pop { position: fixed; z-index: 70; width: 360px; max-width: calc(100vw - 16px); max-height: 60vh; overflow: auto; display: flex; flex-direction: column; gap: 6px; padding: 10px; background: var(--panel); color: var(--text); border: 1px solid color-mix(in srgb, var(--text) 12%, transparent); border-radius: 12px; box-shadow: 0 18px 40px -12px rgba(0,0,0,.35); font-size: 12px; }
+.fd-pop-head { display: flex; align-items: baseline; gap: 6px; }
+.fd-pop-head .sp { flex: 1; }
+.fd-goto { font-size: 11px; padding: 1px 7px; }
+.fd-pop-warn { padding: 5px 8px; border-left: 3px solid #f5c400; background: color-mix(in srgb, #f5c400 12%, transparent); border-radius: 4px; }
+.fd-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding-top: 6px; border-top: 1px solid var(--line); }
+.fd-where { width: 100%; font-size: 11px; color: var(--muted); }
+.fd-code { font-size: 11.5px; }
+.fd-add { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; padding-top: 6px; border-top: 1px solid var(--line); }
+.fd-sec { font-size: 10.5px; color: var(--muted); font-weight: 600; }
+.fd-add button { font-size: 11.5px; padding: 2px 8px; text-align: left; }
+.fd-addrow { display: flex; gap: 3px; flex-wrap: wrap; }

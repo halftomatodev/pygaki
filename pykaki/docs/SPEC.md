@@ -348,6 +348,7 @@
 | `src/i18n.ts`, `i18n/` | 언어 버튼 (한국어·일본어·영어). 소스 글은 한국어, 화면에 그려진 글 노드와 title·placeholder·aria-label을 `src/i18n/dict.json`(i18n/strings.tsv에서 만듦)으로 바꾼다(MutationObserver, 원문은 WeakMap에 두어 언어를 바꾸면 다시). textarea·pre·`[data-no-tr]`(도움말 창 포함, 도움말은 번역 문서를 따로 읽음)는 안 바꿈. alert/confirm/prompt도. 고른 언어는 localStorage `pygaki-lang` |
 | `src/FindPanel.tsx` | 찾기·바꾸기 (Ctrl+F, `showFind`). 대사·내레이션 글, 선택지, 선택지 질문, 상자 제목. 모두 바꾸기는 `update` 한 번 |
 | `src/trace.ts`, `src/TracePanel.tsx` | 플래그 따라가 보기 (`showTrace`: '' 대본 시작, 상자 id). 파이썬 일부 식 계산(`evalExpr`, 모르면 `UNKNOWN`), 상자의 flag 줄과 직접 명령 `$ a op b`를 적용, 선택지 조건·고르면, 조건 분기, call 스택. 대본은 안 고친다 |
+| `src/flagTable.ts`, `src/FlagDesign.tsx` | 플래그 설계 표 (`showDesign`, 플래그 카드 [설계]). 캔버스 아래쪽 시트(`.fdesign`, 좌우 칸 사이). 가로 = `flowOrder`(시작 상자부터 깊이 먼저, call은 "돌아오면"을 뒤에, 닿지 않는 상자는 label 입구·남은 상자 차례, `unreached`), 세로 = 플래그. 칸 = `boxUses`(flag 줄, 명령 줄 `$`, 선택지 condition·actions, 조건 분기). 닿는 값은 상자 단위 넓게 따라가기(`reach`: 플래그마다 값 모음, 12개 넘으면 'many', return은 그 상자에 닿는 call의 then으로). 검사: 안 씀, 바꾸기만, 보기만, 선택지 조건·갈래가 늘 참/거짓(`condOver`, 값 짝을 모두 넣어 봄, 확실할 때만). 칸 팝오버(`CellPop`)는 `ActionInput`·`CondInput`으로 고치고 더함(update 한 번). 저장 형식은 안 바뀜 |
 | `src/stage.ts` | 연출 줄 → 렌파이 명령 |
 | `src/LineFields.tsx` | 줄 종류 선택, 연출 줄 입력칸, 줄 끌어 옮기기 |
 | `src/layout.ts` | 자동 정렬 |

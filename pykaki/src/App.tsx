@@ -8,6 +8,7 @@ import { SettingsModal } from './SettingsModal';
 import { FindPanel } from './FindPanel';
 import { ScreensView } from './ScreensView';
 import { TracePanel } from './TracePanel';
+import { FlagDesign } from './FlagDesign';
 import { HelpModal, HintTip, openHelp } from './Help';
 import { EditCaret } from './Caret';
 import { useStore } from './store';
@@ -140,6 +141,7 @@ export function App() {
   const showPrefs = useStore((s) => s.showPrefs);
   const showFind = useStore((s) => s.showFind);
   const showTrace = useStore((s) => s.showTrace);
+  const showDesign = useStore((s) => s.showDesign);
   const flash = useStore((s) => s.flash);
   const hideLeft = useStore((s) => s.hideLeft);
   const hideRight = useStore((s) => s.hideRight);
@@ -160,6 +162,7 @@ export function App() {
           <Canvas />
           <SideResizer side="right" />
           <RightPanel />
+          {showDesign && <FlagDesign />}
         </div>
         {view === 'showpy' && <ShowpyView />}
         {view === 'effects' && <EffectsView />}

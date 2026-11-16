@@ -599,6 +599,19 @@ else:
 </li>
 <li>Expressions it can compute are numbers, text and on/off values, arithmetic like addition and subtraction, comparisons and and/or/not. Expressions with functions or the game's other variables show as "unknown"; then you choose yourself. <code>$ name += value</code> in direct command lines is computed too.
 </li></ul>
+<h3 id="flag-design">Flag design</h3>
+<p>Press <b>[Design]</b> in the flag card and a table docks at the bottom of the canvas. It shows at a glance which boxes change and check each flag, and you can fix them right there. The canvas above stays usable.</p>
+<ul>
+<li>Rows are flags (name, type, and the values it can take somewhere in the script); columns are boxes in flow order. At first only boxes that use a flag are shown; turn on <b>[All boxes]</b> to see every box. Boxes not reachable from the start of the script are dim italics.
+</li>
+<li>Cells show where the flag changes <b>✎</b> (<code>+1</code>, <code>on</code>) and where it is checked <b>?</b> (<code>≥ 2</code>, <code>on</code>). Click a box name to move the canvas to that box.
+</li>
+<li>Click a cell to open a popover. Edit the change line, the choice's "On pick", Show if and condition branches with the pickers, and use <b>Add</b> below to put this flag into a change line at the end of the box, a choice's "On pick", Show if, or a condition branch. Empty cells can be clicked to add too. One undo takes it back.
+</li>
+<li><b>Yellow marks</b>: flags not used yet, flags changed but never checked, flags checked but never changed (always the starting value), choices always shown or never shown, and conditions always true or always false. Values are counted as if every branch and choice is taken, so it only marks what is certain. When there are too many values (a loop, for example) it shows "many values" and does not mark.
+</li>
+<li><b>Esc</b> closes the popover, and once more closes the table. The save format is unchanged, so the script file and the exported .rpy are not affected.
+</li></ul>
 <h3 id="start-box">Start box</h3>
 <p>The game starts at the box with the green <b>Start</b> mark. To start from another box, click that box and press <b>[Set as start]</b>.</p>
 <h3 id="find-and-replace">Find and replace</h3>
