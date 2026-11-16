@@ -7,6 +7,13 @@ import { parseAction } from './flags';
 // HUD (FEATURE 18): 대사가 흐르는 동안 떠 있는 화면. 없으면 전체 화면 (call screen)
 export const isHud = (s?: ScreenDef | null) => s?.kind === 'hud';
 export const isBtnKind = (k: ScreenItem['kind']) => k === 'imagebutton' || k === 'textbutton';
+// 누르거나 놓으면 할 일이 있는 항목: 버튼과 놓는 곳 (FEATURE 19)
+export const hasAct = (k: ScreenItem['kind']) => isBtnKind(k) || k === 'drop';
+// 끌어 놓기 (FEATURE 19): 글·그림만 끌 수 있음
+export const canDrag = (k: ScreenItem['kind']) => k === 'text' || k === 'image';
+export const isDragged = (it: ScreenItem) => !!it.drag && canDrag(it.kind);
+export const DROP_W = 160;
+export const DROP_H = 100;
 // 버튼을 누르면: HUD는 값을 돌려줄 수 없어서 처음은 플래그 바꾸기
 export const actOf = (s: ScreenDef | undefined, it: ScreenItem) => it.act ?? (isHud(s) ? 'flag' : 'return');
 export const HUD_W = 420;
@@ -35,7 +42,7 @@ export function screenValues(s: ScreenDef | undefined): string[] {
   const out: string[] = [];
   for (const it of s?.items ?? []) {
     const v = it.value?.trim();
-    if (isBtnKind(it.kind) && actOf(s, it) === 'return' && v && !out.includes(v)) out.push(v);
+    if (hasAct(it.kind) && actOf(s, it) === 'return' && v && !out.includes(v)) out.push(v);
   }
   return out;
 }
@@ -154,11 +161,86 @@ function itemCode(p: Project, s: ScreenDef, it: ScreenItem, I0: string): string[
     if (it.hoverColor) out.push(`${I}text_hover_color ${py(it.hoverColor)}`);
     out.push(act);
   }
+  return withCond(it, out, I0);
+}
+
+// 보이는 조건 (FEATURE 18)
+function withCond(it: ScreenItem, out: string[], I0: string): string[] {
   if (!out.length) return out;
-  // 보이는 조건 (FEATURE 18)
-  if (it.cond?.trim()) return [`${I0}if ${it.cond.trim()}:`, ...out.map((x) => I0 + I + x)];
+  if (it.cond?.trim()) return [`${I0}if ${it.cond.trim()}:`, ...out.map((x) => I0 + '    ' + x)];
   return out.map((x) => I0 + x);
 }
+
+// 끌어 놓기 (FEATURE 19): 끌 수 있는 글·그림과 놓는 곳은 렌파이 drag 하나씩. 한 화면의 것은 draggroup 하나에 모은다
+// 끈 것은 놓으면 제자리로 돌아가고(_PkBack), 놓는 곳은 받는 것이 맞으면 "놓으면" 할 일을 한다(_PkDrop)
+function dragCode(p: Project, s: ScreenDef, it: ScreenItem, I0: string): string[] {
+  const I = '    ';
+  const x = Math.round(it.x), y = Math.round(it.y);
+  const out = ['drag:', `${I}drag_name ${py(it.id)}`, `${I}pos (${x}, ${y})`];
+  const textLines = (I1: string) => {
+    const t = [`${I1}text ${py(it.text ?? '')}:`];
+    if (it.kind === 'drop') t.push(`${I1}${I}align (0.5, 0.5)`, `${I1}${I}text_align 0.5`);
+    if (it.size) t.push(`${I1}${I}size ${it.size}`);
+    if (it.color) t.push(`${I1}${I}color ${py(it.color)}`);
+    return t;
+  };
+  if (it.kind === 'drop') {
+    const acc = s.items.find((o) => o.id === it.accept && isDragged(o));
+    out.push(`${I}draggable False`, `${I}dropped _PkDrop(${acc ? py(acc.id) : 'None'}, ${actionCode(p, s, it)})`);
+    out.push(`${I}fixed:`, `${I}${I}xysize (${Math.round(it.w ?? DROP_W)}, ${Math.round(it.h ?? DROP_H)})`, `${I}${I}add Solid(${py(isColor(it.bgColor) ? it.bgColor! : '#ffffff26')})`);
+    if (it.text?.trim()) out.push(...textLines(I + I));
+  } else {
+    if (it.kind === 'image' && !it.image?.trim()) return [];
+    out.push(`${I}droppable False`, `${I}dragged _PkBack(${x}, ${y})`);
+    if (it.kind === 'image') out.push(`${I}add ${imgRef(it.image!)}`);
+    else out.push(...textLines(I));
+  }
+  return withCond(it, out, I0);
+}
+
+const isDD = (it: ScreenItem) => isDragged(it) || it.kind === 'drop';
+
+// 화면의 항목들. 끌어 놓기 항목은 처음 나온 자리에 draggroup으로 모은다 (놓는 곳은 같은 draggroup 안에서만 받음)
+function itemsCode(p: Project, s: ScreenDef, I0: string): string[] {
+  const out: string[] = [];
+  let grouped = false;
+  for (const it of s.items) {
+    if (!isDD(it)) {
+      out.push(...itemCode(p, s, it, I0));
+      continue;
+    }
+    if (grouped) continue;
+    grouped = true;
+    const inner = s.items.filter(isDD).flatMap((d) => dragCode(p, s, d, I0 + '    '));
+    if (inner.length) out.push(`${I0}draggroup:`, ...inner);
+  }
+  return out;
+}
+
+const DRAG_HELPERS = [
+  '# 끌어 놓기 ([화면] 탭의 "끌 수 있음", "놓는 곳")',
+  'init -1 python:',
+  '    class _PkBack(object):',
+  '        # 끈 것을 놓으면 제자리로',
+  '        def __init__(self, x, y):',
+  '            self.x, self.y = x, y',
+  '        def __call__(self, drags, drop):',
+  '            for d in drags:',
+  '                d.snap(self.x, self.y, 0.2)',
+  '            return None',
+  '',
+  '    class _PkDrop(object):',
+  '        # 받는 것이 맞으면 "놓으면" 할 일을 함. 값을 돌려주면 화면이 닫힘',
+  '        def __init__(self, accept, action):',
+  '            self.accept, self.action = accept, action',
+  '        def __call__(self, target, drags):',
+  '            if self.accept is not None and not any(d.drag_name == self.accept for d in drags):',
+  '                return None',
+  '            rv = renpy.run(self.action)',
+  '            renpy.restart_interaction()',
+  '            return rv',
+  '',
+];
 
 function bgCode(s: ScreenDef, I0: string): string[] {
   const a = s.bgAlpha !== undefined && s.bgAlpha < 100 ? ` alpha ${pct(s.bgAlpha)}` : '';
@@ -185,11 +267,11 @@ export function screensCode(p: Project, only?: string): string {
       out.push('    fixed:', `        xysize (${Math.round(w)}, ${Math.round(h)})`, `        align (${ax.toFixed(1)}, ${ay.toFixed(1)})`);
       if (s.dx || s.dy) out.push(`        offset (${Math.round(s.dx ?? 0)}, ${Math.round(s.dy ?? 0)})`);
       out.push(...bgCode(s, '        '));
-      for (const it of s.items) out.push(...itemCode(p, s, it, '        '));
+      out.push(...itemsCode(p, s, '        '));
     } else {
       out.push('    modal True');
       out.push(...bgCode(s, '    '));
-      for (const it of s.items) out.push(...itemCode(p, s, it, '    '));
+      out.push(...itemsCode(p, s, '    '));
     }
     if (out.length === start) out.push('    null');
     out.push('');
@@ -199,21 +281,25 @@ export function screensCode(p: Project, only?: string): string {
   if (ov.length) {
     out.push('# 게임 내내 띄우는 HUD ([화면] 탭의 "게임 내내 띄우기")', 'init python:', `    for _pk_hud in [${ov.join(', ')}]:`, '        if _pk_hud not in config.overlay_screens:', '            config.overlay_screens.append(_pk_hud)', '');
   }
+  if (!only && (p.screens ?? []).some((s) => s.items.some(isDD))) out.push(...DRAG_HELPERS);
   return out.join('\n') + '\n';
 }
 
 // HUD 틀 세 가지 (FEATURE 18): 필요한 플래그도 만든다 (같은 이름이 있으면 그대로 씀). 만든 화면 id
-export type HudTemplate = 'inventory' | 'love' | 'map';
-export const HUD_TEMPLATES: [HudTemplate, string, string][] = [
-  ['inventory', '인벤토리', '켜짐/꺼짐 플래그(has_key 등)가 켜진 물건만 보여요'],
-  ['love', '호감도 막대', '숫자 플래그 love를 막대와 숫자로 보여요'],
-  ['map', '미니맵', '장소 버튼을 누르면 그 상자로 가요. 지금 장소는 글자 플래그 place'],
+export type HudTemplate = 'inventory' | 'love' | 'map' | 'use';
+// [+ HUD 틀에서] 메뉴 (Command Palette 꼴, 설명 카드에 영상): 메뉴 줄 글, 설명, 만드는 플래그, ✎ 바꾸는 곳, ? 보는 곳
+export interface HudTpl { id: HudTemplate; icon: string; title: string; kindHint: string; desc: string; flags: string[]; write: string[]; read: string[] }
+export const HUD_TEMPLATES: HudTpl[] = [
+  { id: 'inventory', icon: '🎒', title: '인벤토리', kindHint: '켜짐/꺼짐', desc: '오른쪽 위에 가진 물건을 늘어놓아요. 플래그가 켜진 물건만 보여요.', flags: ['has_key', 'has_map', 'has_lamp'], write: ['대본에서 물건을 얻을 때: has_key = True'], read: ['물건마다 보이는 조건: has_key'] },
+  { id: 'love', icon: '♥', title: '호감도 막대', kindHint: '숫자', desc: '왼쪽 위에 호감도를 막대와 숫자로 보여요. 값이 바뀌면 막대가 부드럽게 움직여요.', flags: ['love'], write: ['선택지를 고르면: love += 1'], read: ['막대와 글 속 [love]'] },
+  { id: 'map', icon: '⌖', title: '미니맵', kindHint: '글자', desc: '오른쪽 아래에 장소 버튼을 늘어놓아요. 누르면 그 상자로 가요. 지금 장소는 글자 플래그로 보여요.', flags: ['place'], write: ['장소 상자에 들어갈 때: place = "부엌"'], read: ['글 속 [place]', '버튼마다 갈 상자를 골라요'] },
+  { id: 'use', icon: '✋', title: '물건 쓰기 (끌어 놓기)', kindHint: '끌어 놓기', desc: '가진 물건을 끌어 문에 놓으면 문이 열려요. 다른 곳에 놓으면 물건이 제자리로 돌아가요.', flags: ['has_key', 'door_open'], write: ['문에 열쇠를 놓으면: door_open = True, has_key = False'], read: ['열쇠의 보이는 조건: has_key', '대본의 조건 분기: door_open'] },
 ];
 // 틀의 글은 대본에 저장되는 글이라 화면 사전으로 바꾸지 않고 처음부터 화면 언어로 넣는다 (sample.ts 새 대본 이름과 같게)
 const TPL_WORDS = {
-  ko: { inv: '인벤토리', have: '가진 것', key: '열쇠', map: '지도', lamp: '등불', keyN: '열쇠를 가졌는지', mapN: '지도를 가졌는지', lampN: '등불을 가졌는지', love: '호감도 막대', loveT: '호감도', loveN: '호감도', mini: '미니맵', now: '지금', place: '지금 있는 장소', rooms: ['거실', '부엌', '정원'] },
-  ja: { inv: 'インベントリ', have: '持ち物', key: '鍵', map: '地図', lamp: 'ランプ', keyN: '鍵を持っているか', mapN: '地図を持っているか', lampN: 'ランプを持っているか', love: '好感度バー', loveT: '好感度', loveN: '好感度', mini: 'ミニマップ', now: '現在地', place: '今いる場所', rooms: ['居間', '台所', '庭'] },
-  en: { inv: 'Inventory', have: 'Items', key: 'Key', map: 'Map', lamp: 'Lamp', keyN: 'Has the key', mapN: 'Has the map', lampN: 'Has the lamp', love: 'Affection bar', loveT: 'Affection', loveN: 'Affection', mini: 'Minimap', now: 'Now', place: 'Current place', rooms: ['Living room', 'Kitchen', 'Garden'] },
+  ko: { inv: '인벤토리', have: '가진 것', key: '열쇠', map: '지도', lamp: '등불', keyN: '열쇠를 가졌는지', mapN: '지도를 가졌는지', lampN: '등불을 가졌는지', love: '호감도 막대', loveT: '호감도', loveN: '호감도', mini: '미니맵', now: '지금', place: '지금 있는 장소', rooms: ['거실', '부엌', '정원'], use: '물건 쓰기', door: '문 (여기에 놓기)', doorN: '문이 열렸는지' },
+  ja: { inv: 'インベントリ', have: '持ち物', key: '鍵', map: '地図', lamp: 'ランプ', keyN: '鍵を持っているか', mapN: '地図を持っているか', lampN: 'ランプを持っているか', love: '好感度バー', loveT: '好感度', loveN: '好感度', mini: 'ミニマップ', now: '現在地', place: '今いる場所', rooms: ['居間', '台所', '庭'], use: 'アイテムを使う', door: 'ドア (ここに置く)', doorN: 'ドアが開いたか' },
+  en: { inv: 'Inventory', have: 'Items', key: 'Key', map: 'Map', lamp: 'Lamp', keyN: 'Has the key', mapN: 'Has the map', lampN: 'Has the lamp', love: 'Affection bar', loveT: 'Affection', loveN: 'Affection', mini: 'Minimap', now: 'Now', place: 'Current place', rooms: ['Living room', 'Kitchen', 'Garden'], use: 'Use an item', door: 'Door (drop here)', doorN: 'Door is open' },
 };
 function tplWords() {
   try {
@@ -253,6 +339,15 @@ export function addHudTemplate(p: Project, t: HudTemplate): string {
       it({ kind: 'text', x: 14, y: 6, text: W.loveT + ' [love]', size: 22 }),
       it({ kind: 'bar', x: 14, y: 40, flag: 'love', max: 10, w: 332, h: 20, color: '#e0607a', bgColor: '#ffffff33' }),
     ] });
+  } else if (t === 'use') {
+    ensureFlag(p, 'has_key', 'bool', false, W.keyN);
+    ensureFlag(p, 'door_open', 'bool', false, W.doorN);
+    const key = it({ kind: 'text', x: 24, y: 64, text: W.key, size: 26, cond: 'has_key', drag: true });
+    p.screens.push({ ...base, name: freeName(p, 'hud_use'), title: W.use, anchor: 'b', dx: 0, dy: -250, w: 460, h: 150, items: [
+      it({ kind: 'text', x: 14, y: 10, text: W.have, size: 22, color: '#ffd27a' }),
+      key,
+      it({ kind: 'drop', x: 250, y: 20, w: 196, h: 110, text: W.door, size: 22, bgColor: '#ffffff26', accept: key.id, act: 'flag', acts: ['door_open = True', 'has_key = False'] }),
+    ] });
   } else {
     ensureFlag(p, 'place', 'str', W.rooms[0], W.place);
     p.screens.push({ ...base, name: freeName(p, 'hud_map'), title: W.mini, anchor: 'br', dx: -20, dy: -230, w: 260, h: 190, items: [
@@ -261,6 +356,13 @@ export function addHudTemplate(p: Project, t: HudTemplate): string {
     ] });
   }
   return id;
+}
+
+// 틀 메뉴 설명 카드의 원고 (빈 대본에 그 틀만 넣어 본 것, 끌어 놓기 도움 글은 뺌)
+export function hudTemplateCode(t: HudTemplate): string {
+  const p = { labels: [], nodes: [], variables: [], screens: [] } as unknown as Project;
+  addHudTemplate(p, t);
+  return screensCode(p, p.screens![0].id).trim();
 }
 
 // 플래그를 쓰는 화면 (FEATURE 18): 보는 곳(보이는 조건, 막대, 글 속 [이름])과 바꾸는 곳(버튼)

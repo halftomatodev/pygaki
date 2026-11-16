@@ -1,6 +1,7 @@
 // 위쪽 [화면] 탭 (FEATURE 17): 배경·그림 버튼·글 버튼·글·그림을 끌어 놓아 렌파이 screen을 만든다.
 // 버튼마다 누르면 돌려줄 값(_return)을 정하고, 대본의 흐름 "화면 부르기"가 그 값마다 갈래를 낸다. 원고는 game/pykaki_screens.rpy
 // HUD (FEATURE 18): 대사가 흐르는 동안 떠 있는 화면. 크기·붙일 자리, 플래그 값 글([love])·막대, 보이는 조건, 버튼으로 플래그 바꾸기·상자로 가기·다른 HUD 열고 닫기
+// 끌어 놓기 (FEATURE 19): 글·그림에 "끌 수 있음", 항목 "놓는 곳"(받는 것, 놓으면 할 일). HUD 틀은 [+ HUD 틀에서] 메뉴(설명 카드에 렌파이 영상)
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { create } from 'zustand';
 import { Card } from './Card';
@@ -10,14 +11,19 @@ import { useLive } from './showpyLive';
 import { pictureOf, useGameFolder } from './gameFolder';
 import type { Project, ScreenAct, ScreenDef, ScreenItem, ScreenItemKind } from './types';
 import { uid } from './util';
-import { actOf, addHudTemplate, ANCHORS, BAR_H, BAR_W, HUD_H, HUD_TEMPLATES, HUD_W, hudPos, isHud, newScreenName, screenNameProblem, SCREENS_FILE, screensCode, type HudTemplate } from './screens';
+import { actOf, addHudTemplate, ANCHORS, BAR_H, BAR_W, canDrag, DROP_H, DROP_W, hasAct, HUD_H, HUD_TEMPLATES, HUD_W, hudPos, hudTemplateCode, isDragged, isHud, newScreenName, screenNameProblem, SCREENS_FILE, screensCode, type HudTemplate } from './screens';
+import { PickMenu, type PickEntry } from './FlagMenu';
 import { ActionInput, CondInput, firstAction } from './FlagFields';
 import { evalExpr, initVars, UNKNOWN, type Vars } from './trace';
 
 export const useScreenSel = create<{ id: string | null; item: string | null }>(() => ({ id: null, item: null }));
 
-const KIND: Record<ScreenItemKind, string> = { imagebutton: '그림 버튼', textbutton: '글 버튼', text: '글', image: '그림', bar: '막대' };
-const isBtn = (k: ScreenItemKind) => k === 'imagebutton' || k === 'textbutton';
+const KIND: Record<ScreenItemKind, string> = { imagebutton: '그림 버튼', textbutton: '글 버튼', text: '글', image: '그림', bar: '막대', drop: '놓는 곳' };
+
+// HUD 틀 영상: src/hudclips/<틀 id>.webm (렌파이 8.5.3에서 찍음, 빌드에 들어감)
+const HUD_CLIPS = import.meta.glob('./hudclips/*.webm', { query: '?url', import: 'default', eager: true }) as Record<string, string>;
+const tplEntries = (): PickEntry[] =>
+  HUD_TEMPLATES.map((t) => ({ ...t, chips: t.flags, code: hudTemplateCode(t.id), clip: HUD_CLIPS[`./hudclips/${t.id}.webm`], foot: '누르거나 Enter: 이 HUD와 플래그 만들기' }));
 
 // 화면을 부르는 상자들 (HUD는 HUD 줄이 있는 상자)
 const usesOf = (p: Project, id: string) =>
@@ -59,6 +65,8 @@ export function ScreensView() {
     });
     useScreenSel.setState({ id, item: null });
   };
+  const tplBtn = useRef<HTMLButtonElement>(null);
+  const [tplOpen, setTplOpen] = useState(false);
   const addTemplate = (t: HudTemplate) => {
     let id = '';
     update((p) => void (id = addHudTemplate(p, t)));
@@ -77,6 +85,7 @@ export function ScreensView() {
     if (kind === 'textbutton') Object.assign(it, { text: '버튼 ' + (n + 1) }, hud ? { act: 'flag', acts: [firstAction(project.variables)].filter(Boolean) } : { value: 'b' + (n + 1) });
     if (kind === 'imagebutton') Object.assign(it, { image: '' }, hud ? { act: 'flag', acts: [firstAction(project.variables)].filter(Boolean) } : { value: 'b' + (n + 1) });
     if (kind === 'text') it.text = '글';
+    if (kind === 'drop') Object.assign(it, { text: '놓는 곳', w: DROP_W, h: DROP_H, accept: null }, hud ? { act: 'flag', acts: [firstAction(project.variables)].filter(Boolean) } : { value: 'd' + (n + 1) });
     if (kind === 'bar') Object.assign(it, { flag: project.variables.find((f) => f.kind === 'int')?.name ?? '', max: 10, w: hud ? Math.min(BAR_W, (sc.w ?? HUD_W) - 24) : BAR_W, h: BAR_H });
     updScreen((s) => void s.items.push(it));
     useScreenSel.setState({ id: sc.id, item: id });
@@ -91,12 +100,20 @@ export function ScreensView() {
           <span className="grow" />
           <button onClick={addScreen}>+ 새 화면</button>
         </div>
-        <select className="scv-tpl" value="" onChange={(e) => e.target.value && addTemplate(e.target.value as HudTemplate)} title="HUD 틀: 필요한 플래그도 같이 만들어요 (같은 이름이 있으면 그대로 써요)">
-          <option value="">+ HUD 틀에서</option>
-          {HUD_TEMPLATES.map(([k, n, d]) => (
-            <option key={k} value={k} title={d}>{n}</option>
-          ))}
-        </select>
+        <button ref={tplBtn} className="scv-tpl" aria-haspopup="menu" aria-expanded={tplOpen} onClick={() => setTplOpen((v) => !v)} title="HUD 틀: 필요한 플래그도 같이 만들어요 (같은 이름이 있으면 그대로 써요)">
+          + HUD 틀에서 <span aria-hidden>▾</span>
+        </button>
+        {tplOpen && tplBtn.current && (
+          <PickMenu
+            anchor={tplBtn.current}
+            items={tplEntries()}
+            placeholder="어떤 HUD를 만들까요?"
+            section="HUD 틀에서 만들기"
+            empty="맞는 틀이 없어요"
+            onPick={(e) => (setTplOpen(false), addTemplate(e.id as HudTemplate))}
+            onClose={() => setTplOpen(false)}
+          />
+        )}
         {screens.map((s) => (
           <button key={s.id} className={'scv-item' + (s.id === sc?.id ? ' on' : '')} onClick={() => useScreenSel.setState({ id: s.id, item: null })}>
             <span>{s.title || s.name}</span>
@@ -115,6 +132,7 @@ export function ScreensView() {
               <button onClick={() => addItem('text')}>+ 글</button>
               <button onClick={() => addItem('image')}>+ 그림</button>
               <button onClick={() => addItem('bar')} title="숫자 플래그의 값을 막대로 보여요">+ 막대</button>
+              <button onClick={() => addItem('drop')} title="끌 수 있는 글·그림을 여기에 놓으면 할 일을 정해요 (끌어 놓기)">+ 놓는 곳</button>
               <span className="tip">끌어서 옮겨요 · 방향키로 1px (Shift: 10px){isHud(sc) ? ' · HUD 빈 곳을 끌면 HUD가 옮겨져요' : ''}</span>
             </div>
             <Stage
@@ -279,22 +297,28 @@ function StageItem({ sc, it, scale, on, onMove, vars, hidden }: { sc: ScreenDef;
         {!it.flag && <em>플래그 없음</em>}
       </span>
     );
-  } else body = <span style={{ fontSize: size, color: it.color ?? (it.kind === 'textbutton' ? '#aaaaaa' : look.textColor) }}>{fillFlags(it.text || ' ', vars)}</span>;
-  const tag = isBtnK(it.kind) ? (act === 'return' ? it.value || '값 없음' : ACT_TAG[act]) : null;
+  } else if (it.kind === 'drop')
+    body = (
+      <span className="scv-drop" style={{ width: (it.w ?? DROP_W) * scale, height: (it.h ?? DROP_H) * scale, background: it.bgColor ?? '#ffffff26', fontSize: size, color: it.color ?? look.textColor }}>
+        {fillFlags(it.text || '', vars)}
+      </span>
+    );
+  else body = <span style={{ fontSize: size, color: it.color ?? (it.kind === 'textbutton' ? '#aaaaaa' : look.textColor) }}>{fillFlags(it.text || ' ', vars)}</span>;
+  const tag = hasAct(it.kind) ? (act === 'return' ? it.value || '값 없음' : ACT_TAG[act]) : null;
   return (
     <div
       className={'scv-el k-' + it.kind + (on ? ' on' : '') + (hidden ? ' off' : '') + (onMove ? '' : ' still')}
       style={{ left: it.x * scale, top: it.y * scale }}
       onPointerDown={down}
-      title={(isBtnK(it.kind) ? (act === 'return' ? `${KIND[it.kind]} · 값 ${it.value ?? ''}` : KIND[it.kind]) : KIND[it.kind]) + (it.cond ? ` · 보이는 조건 ${it.cond}${hidden ? ' (지금 안 보임)' : ''}` : '')}
+      title={(hasAct(it.kind) ? (act === 'return' ? `${KIND[it.kind]} · 값 ${it.value ?? ''}` : KIND[it.kind]) : KIND[it.kind]) + (isDragged(it) ? ' · 끌 수 있음' : '') + (it.cond ? ` · 보이는 조건 ${it.cond}${hidden ? ' (지금 안 보임)' : ''}` : '')}
     >
       {body}
       {onMove && tag && <span className={'scv-val' + (act === 'return' ? '' : ' act')}>{tag}</span>}
       {onMove && it.cond && <span className="scv-cond">?</span>}
+      {onMove && isDragged(it) && <span className="scv-drag" title="게임에서 끌 수 있어요">✋</span>}
     </div>
   );
 }
-const isBtnK = isBtn;
 
 function ScreenCard({ sc, updScreen }: { sc: ScreenDef; updScreen: (fn: (s: ScreenDef, p: Project) => void, key?: string) => void }) {
   const project = useStore((s) => s.project);
@@ -341,7 +365,7 @@ function ScreenCard({ sc, updScreen }: { sc: ScreenDef; updScreen: (fn: (s: Scre
                 s.w ??= HUD_W;
                 s.h ??= HUD_H;
                 // 값을 돌려주던 버튼은 HUD에서 할 일이 없어서 플래그 바꾸기로
-                for (const it of s.items) if (isBtn(it.kind) && (it.act ?? 'return') === 'return') it.act = 'flag';
+                for (const it of s.items) if (hasAct(it.kind) && (it.act ?? 'return') === 'return') it.act = 'flag';
               } else delete s.kind;
             })
           }
@@ -487,15 +511,19 @@ function ItemCard({ sc, it, upd, remove, dup }: { sc: ScreenDef; it: ScreenItem;
     </span>
   );
   const ints = project.variables.filter((f) => f.kind === 'int');
-  const hint = !isBtn(it.kind)
+  const drop = it.kind === 'drop';
+  const hint = drop
+    ? '끌 수 있는 글·그림을 여기에 놓으면 할 일을 해요. 놓은 것은 제자리로 돌아가요'
+    : !hasAct(it.kind)
     ? it.kind === 'text' ? '글에 [플래그 이름]을 넣으면 게임에서 그 값이 보여요 (예: 호감도 [love])' : undefined
     : act === 'return' ? '누르면 화면이 닫히고 "돌려줄 값"이 대본으로 가요. 같은 값의 버튼은 같은 갈래로 가요'
     : act === 'flag' ? '누르면 플래그가 바뀌어요. 대사는 그대로 이어져요'
     : act === 'jump' ? '누르면 그 상자로 가요 (지금 대사는 끊겨요)'
     : '누르면 다른 HUD가 떴다가, 다시 누르면 내려가요';
+  const drags = sc.items.filter(isDragged);
   return (
     <Card id="scr-item" title={KIND[it.kind]} hint={hint} topic="화면 만들기">
-      {(it.kind === 'textbutton' || it.kind === 'text') && (
+      {(it.kind === 'textbutton' || it.kind === 'text' || drop) && (
         <div className="row">
           <label>글</label>
           <input className="grow" value={it.text ?? ''} onChange={(e) => upd((x) => void (x.text = e.target.value), 'scr-text' + it.id)} />
@@ -545,9 +573,29 @@ function ItemCard({ sc, it, upd, remove, dup }: { sc: ScreenDef; it: ScreenItem;
           </div>
         </>
       )}
-      {isBtn(it.kind) && (
+      {drop && (
+        <>
+          <div className="row">
+            <label>크기</label>
+            {num('w', String(DROP_W), '가로 (px)')}
+            {num('h', String(DROP_H), '세로 (px)')}
+            {col('bgColor', '칸 색')}
+          </div>
+          <div className="row">
+            <label>받는 것</label>
+            <select className="grow" value={drags.some((d) => d.id === it.accept) ? it.accept! : ''} onChange={(e) => upd((x) => void (x.accept = e.target.value || null))} title="이것을 놓을 때만 할 일을 해요">
+              <option value="">끌 수 있는 것 아무거나</option>
+              {drags.map((d) => (
+                <option key={d.id} value={d.id}>{d.kind === 'image' ? d.image || KIND.image : d.text || KIND.text}</option>
+              ))}
+            </select>
+          </div>
+          {!drags.length && <p className="tip">이 화면에 끌 수 있는 것이 없어요. 글·그림 항목에서 [끌 수 있음]을 켜요</p>}
+        </>
+      )}
+      {hasAct(it.kind) && (
         <div className="row">
-          <label>누르면</label>
+          <label>{drop ? '놓으면' : '누르면'}</label>
           <select className="grow" value={act} onChange={(e) => upd((x) => {
             const v = e.target.value as ScreenAct;
             x.act = v;
@@ -561,13 +609,13 @@ function ItemCard({ sc, it, upd, remove, dup }: { sc: ScreenDef; it: ScreenItem;
           </select>
         </div>
       )}
-      {isBtn(it.kind) && act === 'return' && (
+      {hasAct(it.kind) && act === 'return' && (
         <div className="row">
           <label>돌려줄 값</label>
           <input className={'grow' + (it.value?.trim() ? '' : ' invalid')} value={it.value ?? ''} placeholder="예: door" onChange={(e) => upd((x) => void (x.value = e.target.value), 'scr-val' + it.id)} />
         </div>
       )}
-      {isBtn(it.kind) && act === 'flag' && (
+      {hasAct(it.kind) && act === 'flag' && (
         <>
           {(it.acts ?? []).map((a, k) => (
             <div className="row" key={k}>
@@ -580,7 +628,7 @@ function ItemCard({ sc, it, upd, remove, dup }: { sc: ScreenDef; it: ScreenItem;
           </div>
         </>
       )}
-      {isBtn(it.kind) && act === 'jump' && (
+      {hasAct(it.kind) && act === 'jump' && (
         <div className="row">
           <label>갈 상자</label>
           <select className={'grow' + (project.nodes.some((n) => n.id === it.target) ? '' : ' invalid')} value={it.target ?? ''} onChange={(e) => upd((x) => void (x.target = e.target.value || null))}>
@@ -595,7 +643,7 @@ function ItemCard({ sc, it, upd, remove, dup }: { sc: ScreenDef; it: ScreenItem;
           </select>
         </div>
       )}
-      {isBtn(it.kind) && act === 'toggle' && (
+      {hasAct(it.kind) && act === 'toggle' && (
         <div className="row">
           <label>열 HUD</label>
           <select className={'grow' + (project.screens?.some((s) => s.id === it.screen && isHud(s)) ? '' : ' invalid')} value={it.screen ?? ''} onChange={(e) => upd((x) => void (x.screen = e.target.value || null))}>
@@ -606,13 +654,19 @@ function ItemCard({ sc, it, upd, remove, dup }: { sc: ScreenDef; it: ScreenItem;
           </select>
         </div>
       )}
-      {(it.kind === 'textbutton' || it.kind === 'text') && (
+      {(it.kind === 'textbutton' || it.kind === 'text' || drop) && (
         <div className="row">
           <label>글자</label>
           {num('size', '크기')}
           {col('color', '글자 색')}
           {it.kind === 'textbutton' && col('hoverColor', '올렸을 때 글자 색')}
         </div>
+      )}
+      {canDrag(it.kind) && (
+        <label className="check" title="게임에서 끌어 옮길 수 있어요. 놓는 곳에 놓으면 그 할 일을 하고, 놓은 뒤에는 제자리로 돌아가요">
+          <input type="checkbox" checked={!!it.drag} onChange={(e) => upd((x) => void (e.target.checked ? (x.drag = true) : delete x.drag))} />
+          끌 수 있음 <span className="tip">(놓으면 제자리로)</span>
+        </label>
       )}
       <div className="row">
         <label>보이는 조건</label>

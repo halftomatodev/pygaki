@@ -1,4 +1,4 @@
-<!-- 원본: pykaki/docs/GUIDE.md @ 2b546ced90 -->
+<!-- 원본: pykaki/docs/GUIDE.md @ 6a883c1026 -->
 # pygaki user guide
 
 A tool for writing Ren'Py scripts with boxes and lines and exporting them as Ren'Py script files (`.rpy`).
@@ -282,15 +282,44 @@ In the **[Screen]** tab at the top, drag and drop buttons to make a Ren'Py scree
 The screen card has two **Kinds**. A **full screen** (`call screen`) covers the dialogue and waits until a button is pressed. A **HUD** (`show screen`, an info panel on top of the game screen) stays in a corner while the dialogue keeps going. Affection bars, bags, minimaps and clocks are made this way. The videos below are samples recorded in Ren'Py (choices and buttons were clicked automatically; the text in the videos is Korean).
 
 #### Making a HUD in the [Screen] tab
-- **[+ HUD from template]** on the left: pick **Inventory** (shows only items whose on/off flag such as `has_key` is on), **Affection bar** (number flag `love`) or **Minimap** (place buttons; the current place is the text flag `place`). It also creates the flags it needs, reusing flags with the same name. You can also switch an existing screen's **Kind** to **HUD**.
+- **[+ HUD from template]** on the left: pick **Inventory** (shows only items whose on/off flag such as `has_key` is on), **Affection bar** (number flag `love`), **Minimap** (place buttons; the current place is the text flag `place`) or **Use an item** (drag the key onto the door to turn on `door_open`). Hover a menu row to see a video recorded in Ren'Py and the script in the card next to it (↑↓ to pick, Enter to create, Esc to close). It also creates the flags it needs, reusing flags with the same name. You can also switch an existing screen's **Kind** to **HUD**.
 - Screen card: **Size** (px), **Anchor** (nine cells: top left, top center … bottom right), **Offset** (px from the anchor), **Order** (`zorder`, higher is in front), **Background** and **Opacity**. You can also drag an empty part of the HUD on the stage. Item positions are measured from the HUD's top-left corner.
 - **[+ Bar]**: shows a number flag's value as a bar. Pick the flag, the full value, the size, and the fill and empty colors.
 - Put `[flag name]` in a **Text** to show its value in game (e.g. `Affection [love]`). Insert it with **[Flag ▾]** next to it. The stage draws with the flags' starting values.
 - **Show if** for each item: the same field as a choice condition (e.g. if `has_key` is on). On the stage, items hidden right now are faded, and items with a condition get a green **?**.
 - A button's **On click**: **Change flag** (any number of changes; dialogue keeps going), **Jump to box** (jumps to that box) or **Open/close HUD** (shows or hides another HUD). Full screens can also **Return a value** (branching as before).
+- **Drag and drop**: turn on **Draggable** for a text or image item to let players drag it in game (it snaps back when dropped). Add a box with **[+ Drop zone]** and pick what it **Accepts** (one draggable item, or any) and **On drop** (same as a button's "On click"). On full screens a drop can also return a value to branch. Dragged items move only inside their screen's box. On the stage, draggable items get a **✋** and drop zones are dashed boxes.
 - Turn on **Always show** to keep the HUD up without HUD lines (`config.overlay_screens`).
 - In the script, use **[+ HUD]** in a box's dialogue (or the line type **📟 HUD**) and pick **Show** (`show screen name`) or **Hide** (`hide screen name`). Once shown, it stays up across boxes until you hide it.
 - **▶ Trace** shows the HUDs that are up, small, with the current flag values. The Flags card lists the screens that use a flag as **?** (shows it) and **✎** (a button changes it), and the Flag design table's yellow notes count HUD uses too.
+
+#### HUD template samples
+These videos run screens made with [+ HUD from template] in Ren'Py, unchanged (clicks and drags were automated for recording; the text in the videos is Korean). The template menu's card shows the same videos.
+
+**Inventory**: each item appears when its flag turns on (Show if `has_key`, `has_map`).
+<!-- clip hud-inventory -->
+
+**Affection bar**: when `love` goes up, the bar and the number follow smoothly.
+<!-- clip hud-love -->
+
+**Minimap**: a place button goes to its box (`Jump`), and when the box changes `place` the "Now:" text changes too.
+<!-- clip hud-map -->
+
+**Use an item (drag and drop)**: the key dropped elsewhere snaps back; dropped on the door it turns `door_open` on and `has_key` off. Dialogue doesn't advance while you drag.
+<!-- clip hud-use -->
+
+```
+draggroup:
+    if has_key:
+        drag:
+            drag_name "key"
+            dragged _PkBack(24, 64)      # snaps back when dropped
+            text "Key"
+    drag:
+        draggable False
+        dropped _PkDrop("key", [SetVariable("door_open", True), SetVariable("has_key", False)])
+        text "Door (drop here)"
+```
 
 Below is how HUDs behave in Ren'Py and what the script looks like.
 
@@ -388,9 +417,10 @@ label map_cafe:
 | `Jump("label")` | A button goes to that scene |
 | `ToggleScreen("name")` | Open or close another HUD |
 | `Return("value")` | Close a call screen and return a value (the [Screen] tab's "Return value") |
+| `draggroup`, `drag` | Drag and drop (the [Screen] tab's "Draggable", "Drop zone") |
 
 - Use the flags you made in pygaki's flag card as they are (`default love = 0` is added on export).
-- HUDs made in the [Screen] tab go into `pykaki_screens.rpy` (hand edits are overwritten on the next export). For things the tab can't make (`Drag`, `for` loops, `selected`), write a new `.rpy` file in the `game` folder (e.g. `my_screens.rpy`).
+- HUDs made in the [Screen] tab go into `pykaki_screens.rpy` (hand edits are overwritten on the next export). For things the tab can't make (`for` loops, `selected`, scrolling `viewport`), write a new `.rpy` file in the `game` folder (e.g. `my_screens.rpy`).
 
 ## 5. Managing labels (scenes)
 

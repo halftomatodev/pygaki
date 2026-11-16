@@ -2151,3 +2151,41 @@ zorder: 숫자가 클수록 다른 화면보다 앞에	zorder: 数が大きい�
 화면 "${nm}": 버튼이 여는 화면이 HUD가 아니에요	画面「{0}」: ボタンが開く画面がHUDではありません	Screen "{0}": the screen a button opens isn't a HUD
 화면 "${nm}": 보이는 조건의 "${n}"이 플래그 카드에 없어요	画面「{0}」: 表示条件の「{1}」がフラグカードにありません	Screen "{0}": "{1}" in a show condition isn't on the Flags card
 화면 "${nm}": 열고 닫을 화면을 고르지 않은 버튼이 있어요	画面「{0}」: 開閉する画面を選んでいないボタンがあります	Screen "{0}": a button has no screen to open/close
+누르거나 Enter: 플래그 만들기	クリックか Enter:フラグを作成	Click or Enter: create the flag
+누르거나 Enter: 플래그 ${n}개 만들기	クリックか Enter:フラグを{0}個作成	Click or Enter: create {0} flags
+놓으면	置くと	On drop
+칸 색	枠の色	Box color
+놓는 곳	置き場所	Drop zone
+받는 것	受け取るもの	Accepts
+끌어 놓기	ドラッグ&ドロップ	Drag and drop
+물건 쓰기	アイテムを使う	Use an item
++ 놓는 곳	+ 置き場所	+ Drop zone
+끌 수 있음	ドラッグ可	Draggable
+맞는 틀이 없어요	合うひな形がありません	No matching template
+(놓으면 제자리로)	(離すと元の位置へ)	(snaps back when dropped)
+HUD 틀에서 만들기	HUDのひな形から作る	Create from a HUD template
+게임에서 끌 수 있어요	ゲームでドラッグできます	Can be dragged in game
+끌 수 있는 것 아무거나	ドラッグできるものならどれでも	Any draggable item
+물건 쓰기 (끌어 놓기)	アイテムを使う(ドラッグ&ドロップ)	Use an item (drag and drop)
+어떤 HUD를 만들까요?	どんなHUDを作りますか?	Which HUD do you want to make?
+막대와 글 속 [love]	バーとテキスト中の [love]	The bar and [love] in text
+글 속 [place]	テキスト中の [place]	[place] in text
+버튼마다 갈 상자를 골라요	ボタンごとに行き先のボックスを選びます	Pick a box for each button
+이것을 놓을 때만 할 일을 해요	これを置いたときだけ動作します	Acts only when this is dropped
+선택지를 고르면: love += 1	選択肢を選ぶと: love += 1	When a choice is picked: love += 1
+열쇠의 보이는 조건: has_key	鍵の表示条件: has_key	The key's Show if: has_key
+대본의 조건 분기: door_open	シナリオの条件分岐: door_open	Script condition branch: door_open
+물건마다 보이는 조건: has_key	物ごとの表示条件: has_key	Show if on each item: has_key
+누르거나 Enter: 이 HUD와 플래그 만들기	クリックか Enter:このHUDとフラグを作成	Click or Enter: create this HUD and its flags
+장소 상자에 들어갈 때: place = "부엌"	場所のボックスに入るとき: place = "台所"	When entering a place box: place = "Kitchen"
+대본에서 물건을 얻을 때: has_key = True	シナリオで物を手に入れたとき: has_key = True	When the script gives an item: has_key = True
+끌 수 있는 글·그림을 여기에 놓으면 할 일을 정해요 (끌어 놓기)	ドラッグできるテキスト・画像をここに置いたときの動作を決めます(ドラッグ&ドロップ)	Set what happens when a draggable text or image is dropped here (drag and drop)
+오른쪽 위에 가진 물건을 늘어놓아요. 플래그가 켜진 물건만 보여요.	右上に持ち物を並べます。フラグがオンの物だけ見えます。	Lists your items in the top right. Only items whose flag is on are shown.
+이 화면에 끌 수 있는 것이 없어요. 글·그림 항목에서 [끌 수 있음]을 켜요	この画面にドラッグできるものがありません。テキスト・画像の項目で [ドラッグ可] をオンにします	Nothing on this screen can be dragged. Turn on [Draggable] for a text or image item
+끌 수 있는 글·그림을 여기에 놓으면 할 일을 해요. 놓은 것은 제자리로 돌아가요	ドラッグできるテキスト・画像をここに置くと動作します。置いたものは元の位置に戻ります	Acts when a draggable text or image is dropped here. The dropped item snaps back
+문에 열쇠를 놓으면: door_open = True, has_key = False	ドアに鍵を置くと: door_open = True, has_key = False	When the key is dropped on the door: door_open = True, has_key = False
+왼쪽 위에 호감도를 막대와 숫자로 보여요. 값이 바뀌면 막대가 부드럽게 움직여요.	左上に好感度をバーと数字で見せます。値が変わるとバーがなめらかに動きます。	Shows affection as a bar and a number in the top left. The bar moves smoothly when the value changes.
+가진 물건을 끌어 문에 놓으면 문이 열려요. 다른 곳에 놓으면 물건이 제자리로 돌아가요.	持ち物をドラッグしてドアに置くとドアが開きます。ほかの所に置くと元の位置に戻ります。	Drag an item onto the door to open it. Dropped anywhere else, it snaps back.
+화면 "${nm}": 놓는 곳이 있지만 끌 수 있는 글·그림이 없어요 (항목의 [끌 수 있음])	画面「{0}」: 置き場所がありますが、ドラッグできるテキスト・画像がありません(項目の [ドラッグ可])	Screen "{0}": has a drop zone but no draggable text or image (the item's [Draggable])
+게임에서 끌어 옮길 수 있어요. 놓는 곳에 놓으면 그 할 일을 하고, 놓은 뒤에는 제자리로 돌아가요	ゲームでドラッグして動かせます。置き場所に置くとその動作をして、置いたあとは元の位置に戻ります	Can be dragged in game. Dropped on a drop zone it does that zone's action, then snaps back
+오른쪽 아래에 장소 버튼을 늘어놓아요. 누르면 그 상자로 가요. 지금 장소는 글자 플래그로 보여요.	右下に場所ボタンを並べます。押すとそのボックスへ移ります。現在地はテキストフラグで見せます。	Lists place buttons in the bottom right. Clicking one goes to that box. The current place is shown with a text flag.
