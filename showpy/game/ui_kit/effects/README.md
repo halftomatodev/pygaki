@@ -35,6 +35,7 @@ pygaki 앱의 **[효과]** 화면에서는 효과를 샘플로 돌려 보고, **
 | `droplets.glsl` | 글자 | `droplets` 물방울 | 모양이 일정하지 않은 물방울들이 글자 위를 돌아다니며, 그 아래 글자가 렌즈처럼 휘고 커짐 |
 | `spring.glsl` | 글자 | `spring` 튕기며 자리 잡기 | 글자가 아래에서 작게 튀어 올라와 제자리를 조금 지나쳤다가 되돌아오며, 몇 번 작게 흔들린 뒤 멈춤(`u__bounce`, `u__wobble`, `u__lift`, `u__grow`) |
 | `marquee.glsl` | 글자 | `marquee` 옆으로 흐르기 | 줄이 처음부터 다 보이고 오른쪽에서 왼쪽으로 끝없이 흘러감. 양 끝은 흐려짐(`u__speed`, `u__gap`, `u__dir`, `u__fade`) |
+| `scramble.glsl` | 글자 | `scramble` 글자 해독 | 글자 자리에 흐린 무작위 기호(점 격자)가 빠르게 바뀌며 돌다가 왼쪽부터 차례로 제 글자로 자리 잡음. 빈칸은 비워 둠(`u__lead` 먼저 도는 글자 수, `u__churn`, `u__fps`, `u__dim`, `u__tint`·`u__color`) |
 | `bubble.glsl` | 글자 | `bubble` 말풍선 | 대사 글 전체를 만화 말풍선이 감싸고, 퐁 커지며 나온 뒤 글자가 나옴. 모양 넷(`u__shape` 0 둥근, 1 손그림, 2 외침, 3 집중선), 꼬리 길이와 방향(`u__tail`, `u__tail_dir`), 바탕색, 선 색, 글자 색 |
 
 ```renpy
@@ -58,6 +59,8 @@ e "상자 위에서 노래방." (cps=8, effect="backbox:u__grow=0:u__hide=0|kara
 e "물방울이 지나간다." (cps=30, effect="droplets")
 e "튕긴다!" (cps=20, effect="spring")
 e "오늘의 소식: 비가 옵니다." (effect="marquee:u__speed=60")
+e "접속을 확인합니다." (cps=20, effect="scramble")
+e "ACCESS GRANTED" (cps=15, effect="scramble:u__lead=30:u__tint=1")
 e "괜찮아?" (cps=25, effect="bubble")
 e "앗! 뭐야!!" (effect="bubble:u__shape=2")
 e "まさか" (effect="bubble:u__shape=3:u__fill=#000000:u__ink=#ffffff")
@@ -71,6 +74,8 @@ e "まさか" (effect="bubble:u__shape=3:u__fill=#000000:u__ink=#ffffff")
 ```renpy
 e "그림 말풍선." (effect="bubble:u__image=gui/bubble.png:u__image_on=1:u__slice=0.3:u__slice_px=36:u__image_out=14")
 ```
+
+`scramble`의 기호는 셰이더가 그리는 점 격자라 실제 글자가 아닙니다. 기호 크기는 글자 높이로 정해서, 좁은 글자(`i`, `l`, `-`) 자리에서는 기호가 잘려 보입니다. 도는 동안 외곽선은 그리지 않고, 제 글자로 자리 잡을 때 외곽선도 같이 나옵니다.
 
 `meltglitch`는 글자 네모를 아래로 늘려 그 안에서 흘러내리므로, 길게 하면 아랫줄 글자와 겹칩니다(`u__length`로 길이).
 TV 지직 소리는 전환에 들어 있지 않습니다. `play sound "static.ogg"`처럼 같은 자리에 적습니다.

@@ -1,4 +1,4 @@
-<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ 7ccb153023 -->
+<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ 9716e03b8d -->
 # pygaki プラグイン カスタムガイド (5.1)
 
 2026-11-13 · バージョン 5.1(5.1 での変更:エフェクトフォルダーと画像トランジション、エフェクト・シェーダーの非表示ファイル、フォトコラージュ(ずれる破片の代わり)、ゆらぎシェーダー `ripple`、シェーダー行の詳細値と場面ごとのセリフ音・カーソル、シェーダートランジションにピクセルソート・データモッシュ、系統図、pygaki はデスクトップアプリのみ。5.0 での変更:新しい画面エフェクト 7 つ(グリッチ、ジリジリ、網点、ホログラム、暗視スコープ、ずれる破片、破片の飛散)、画像 1 枚にかけるエフェクト、文字の登場エフェクト 11 個、テキストボックス(吹き出し、丸い枠)、スプラッシュを画面で直す、ゲーム内編集画面の「UI テキスト」タブ。4.22 での変更:シェーダーが変わる行と行ごとのトランジション、カーソルとシェーダーの「ここから」、セリフタブの整理、カーソル・CTC 画像のフォルダー。4.21 での変更:シェーダー欄の詳細属性を 1 番、2 番の下へ、行を押すとゲームもその行へ。4.20 での変更:シェーダーの 2 枠と「ここから適用」、タイトル/ゲーム内メニューのシェーダー、タイトルの背景とタイトル、サブタイトル、文字エフェクト、回転ハンドル)
@@ -782,7 +782,7 @@ define n2 = Character(kind=t, what_xpos=400, what_ypos=210)   # 位置のプリ�
 | `width` | `what_xmaximum` | 1 行の最大の幅 |
 | `align` | `what_text_align` | 行のそろえ 0.0 〜 1.0 |
 | `speed` | `what_slow_cps_multiplier` | 出る速さの倍率(プレイヤーのテキスト速度に掛ける。0.5 = 半分) |
-| `effect` | `what_textshader` | 登場エフェクト:`"dissolve"` ふわっと、`"typewriter"` タイプライター、`"slowalpha"` ぼかして待つ、`"flip"` 裏返りながら、`"zoom"` 大きくなりながら、`"jitter"` 震え、`"wave"` 波。pygaki プラグインのエフェクト:`"scatter"` 散らばって集まる、`"drop"` 落ちる、`"shuffle"` ランダムな順番、`"flash"` 色のフラッシュ、`"slam"` 大きく押される、`"typecursor"` カーソルタイプライター、`"echo"` 色の残像、`"glitch"` グリッチ、`"blurin"` ぼやけてからくっきり、`"blockglitch"` ブロックグリッチ、`"liquid"` ゆらぎ、`"vhs"` VHS ノイズ、`"rise"` 浮かび上がる、`"lean"` 傾いて入る、`"stretch"` 伸びて入る、`"slidein"` 滑って止まる、`"shake"` 軽い揺れ、`"glyphbox"` 文字ごとのボックス、`"stamp"` スタンプ、`"squash"` つぶれて弾む、`"extrude"` 立体文字。エフェクトフォルダー(`ui_kit/effects/`):`"maskup"` 下から上がってくる、`"tracking"` 字間が狭まりながら、`"sweep"` 光が通り過ぎる、`"backbox"` 後ろにボックス、`"karaoke"` カラオケ、`"meltglitch"` 溶けるグリッチ、`"droplets"` 水滴、`"spring"` 弾んで落ち着く、`"marquee"` 横に流れる、`"bubble"` 吹き出し。消したエフェクトの名前が残ったスクリプトは、止まらず 1 文字ずつ出ます。2 つのエフェクトを重ねるなら `effect="slidein|shake"` |
+| `effect` | `what_textshader` | 登場エフェクト:`"dissolve"` ふわっと、`"typewriter"` タイプライター、`"slowalpha"` ぼかして待つ、`"flip"` 裏返りながら、`"zoom"` 大きくなりながら、`"jitter"` 震え、`"wave"` 波。pygaki プラグインのエフェクト:`"scatter"` 散らばって集まる、`"drop"` 落ちる、`"shuffle"` ランダムな順番、`"flash"` 色のフラッシュ、`"slam"` 大きく押される、`"typecursor"` カーソルタイプライター、`"echo"` 色の残像、`"glitch"` グリッチ、`"blurin"` ぼやけてからくっきり、`"blockglitch"` ブロックグリッチ、`"liquid"` ゆらぎ、`"vhs"` VHS ノイズ、`"rise"` 浮かび上がる、`"lean"` 傾いて入る、`"stretch"` 伸びて入る、`"slidein"` 滑って止まる、`"shake"` 軽い揺れ、`"glyphbox"` 文字ごとのボックス、`"stamp"` スタンプ、`"squash"` つぶれて弾む、`"extrude"` 立体文字。エフェクトフォルダー(`ui_kit/effects/`):`"maskup"` 下から上がってくる、`"tracking"` 字間が狭まりながら、`"sweep"` 光が通り過ぎる、`"backbox"` 後ろにボックス、`"karaoke"` カラオケ、`"meltglitch"` 溶けるグリッチ、`"droplets"` 水滴、`"spring"` 弾んで落ち着く、`"marquee"` 横に流れる、`"bubble"` 吹き出し、`"scramble"` 文字デコード。消したエフェクトの名前が残ったスクリプトは、止まらず 1 文字ずつ出ます。2 つのエフェクトを重ねるなら `effect="slidein|shake"` |
 | `name_x`、`name_y` | `namebox_xpos`、`namebox_ypos` | 名前のボックスの位置(セリフ窓の左上基準、名前の背景ごと動く) |
 | `name_font`、`name_size`、`name_color` | `who_font`、`who_size`、`who_color` | 名前のフォント、サイズ、色 |
 
@@ -1402,7 +1402,7 @@ e "삐빅." (fx="gameboy", font="screen_fx/fonts/neodgm.ttf", size=32)   # セ�
 | 文字の登場エフェクト(`@effect`) | pygaki 文字エフェクトカードの登場エフェクトの一覧 | `e "아래에서 올라온다." (cps=30, effect="maskup")` |
 | 画像トランジション(`@transition`) | pygaki 背景・表示の行の「現れ方」 | `scene bg hall with img_fx.use("irisin")`、時間と値は `img_fx.use("bands", 1.4, count=10)` |
 
-入っているエフェクト:文字 `maskup` 下から上がってくる、`tracking` 字間が狭まりながら、`sweep` 光が通り過ぎる、`backbox` 後ろにボックス、`karaoke` カラオケ、`meltglitch` 溶けるグリッチ、`droplets` 水滴、`spring` 弾んで落ち着く、`marquee` 横に流れる、`bubble` 吹き出し(形は 4 つ、画像への差し替えはエフェクトフォルダーの README)/ 画像 `irisin` 円で開く、`bands` 帯で覆って開く、`pixelsort` ピクセルソート(クラッシュ)、`datamosh` データモッシュ(クラッシュ)、`slide` 横に押す、`mosaic` モザイクで変わる、`blinds` 横のブラインド、`static` TV ノイズ、`calibrate` 調整画面、`tapestretch` テープの伸び、`blink` 点滅、`pushup` 押し上げる。アプリの [エフェクト] 画面では一覧から [非表示] にすることだけができ、入れたり抜いたりするには、このフォルダーにファイルを入れるか消します。
+入っているエフェクト:文字 `maskup` 下から上がってくる、`tracking` 字間が狭まりながら、`sweep` 光が通り過ぎる、`backbox` 後ろにボックス、`karaoke` カラオケ、`meltglitch` 溶けるグリッチ、`droplets` 水滴、`spring` 弾んで落ち着く、`marquee` 横に流れる、`scramble` 文字デコード、`bubble` 吹き出し(形は 4 つ、画像への差し替えはエフェクトフォルダーの README)/ 画像 `irisin` 円で開く、`bands` 帯で覆って開く、`pixelsort` ピクセルソート(クラッシュ)、`datamosh` データモッシュ(クラッシュ)、`slide` 横に押す、`mosaic` モザイクで変わる、`blinds` 横のブラインド、`static` TV ノイズ、`calibrate` 調整画面、`tapestretch` テープの伸び、`blink` 点滅、`pushup` 押し上げる。アプリの [エフェクト] 画面では一覧から [非表示] にすることだけができ、入れたり抜いたりするには、このフォルダーにファイルを入れるか消します。
 
 **シェーダーが変わるときに画像トランジションで**:`pixelsort`、`datamosh` は、画面シェーダーを変えるときのトランジションとしても使います。前の画面が壊れたまま少し止まってから新しい画面へぷつっと移り、シェーダーもその瞬間に変わります。pygaki では、ボックスの ◐ シェーダー → トランジションの「始まるとき」「終わるとき」で選び、その下の「方向」を決めます。スクリプトに直接書くときはこう書きます。
 

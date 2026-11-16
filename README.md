@@ -15,7 +15,7 @@
 
 렌파이 SDK, pygaki 플러그인, pygaki 데스크톱 앱을 폴더 하나로 묶어요. 만드는 법은 [bundle/README.md](bundle/README.md).
 
-- 렌파이 런처의 [+ Create New Project](새 프로젝트 만들기)에서 "Pygaki"를 고르고 이름, 해상도, 색을 정하면 pygaki 편집 도구가 처음부터 들어 있는 프로젝트가 만들어져요.
+- 렌파이 런처의 [+ Create New Project](새 프로젝트 만들기)에서 "Pygaki"를 고르고 이름과 해상도를 정하면 pygaki 편집 도구가 처음부터 들어 있는 프로젝트가 만들어져요.
 - 런처의 [pygaki로 편집]로 고른 프로젝트의 대본을 열어요. 폴더 연결이나 권한 창이 없어요.
 - 대본은 프로젝트 폴더 맨 위의 `프로젝트이름.flow.json`에 자동 저장돼요.
 

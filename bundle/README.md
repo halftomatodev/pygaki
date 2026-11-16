@@ -57,7 +57,7 @@ Actions 화면에서 손으로 돌리면(Run workflow) Releases에는 안 올리
 
 ## 렌파이를 올릴 때
 
-새 SDK 폴더로 `make_bundle.py`를 다시 돌리면 돼요(Releases는 `RENPY_VERSION`만 바꾸고 태그). 런처의 원래 파일은 고치지 않고 `pygaki_launcher.rpy` 하나만 더하기 때문에, 런처가 바뀌어도 대개 그대로 돼요. 런처 화면이 크게 바뀌면 버튼 자리(`ypos`)를 맞추고, 런처의 `new_project.rpy`가 바뀌었으면 `pygaki_new_project`를, `gui7.rpy`의 `new_gui_project`(해상도 → 색 → 만들기)가 바뀌었으면 `pygaki_gui_project`를 그 순서에 맞춰요.
+새 SDK 폴더로 `make_bundle.py`를 다시 돌리면 돼요(Releases는 `RENPY_VERSION`만 바꾸고 태그). 런처의 원래 파일은 고치지 않고 `pygaki_launcher.rpy` 하나만 더하기 때문에, 런처가 바뀌어도 대개 그대로 돼요. 런처 화면이 크게 바뀌면 버튼 자리(`ypos`)를 맞추고, 런처의 `new_project.rpy`가 바뀌었으면 `pygaki_new_project`를, `gui7.rpy`의 `new_gui_project`(해상도 → 색 → 만들기)가 바뀌었으면 `pygaki_gui_project`를 그 순서에 맞춰요(색 고르기만 뺌).
 
 ## 한국어 공통 문구
 
@@ -70,5 +70,5 @@ Actions 화면에서 손으로 돌리면(Run workflow) Releases에는 안 올리
 - **[플러그인 올리기]**: 고른 프로젝트의 플러그인(`ui_kit`, `screen_fx`, `splash`, `hotkeys`)을 `pygaki/template/`의 판으로 바꿔요. 판(`VERSION`)을 보여 주고 물은 뒤, `*_config.rpy`·`*_layout.rpy`·`*_off.txt`가 이미 있으면 두고 나머지는 덮어쓰고, `PYGAKI_RETIRED`(예전 판에만 있던 파일)를 치우고, 플러그인 폴더의 `.rpyc`를 지워요. 바꾸기 전 폴더는 `ui_kit_backup/plugins/날짜_시각/`. **판을 낼 때 지운 플러그인 파일은 `PYGAKI_RETIRED`에 더해요**(남으면 새 판과 부딪힘).
 - **[+ Create New Project](새 프로젝트 만들기)**: 런처의 원래 버튼을 누르면 먼저 둘 중 하나를 골라요(`config.label_overrides`로 런처의 `new_project`를 `pygaki_new_project`로 돌림. 런처 파일은 그대로).
   - **기본 (Vanilla)**: 렌파이 원래 새 프로젝트(언어 안내 → 이름 → 해상도, 색). pygaki 플러그인은 안 들어가요.
-  - **Pygaki**: 기본과 같은 순서(이름 → 해상도 → 색)로 물어본 뒤 `pygaki_gui_project`가 런처와 같은 방법(`gui7.generate_gui`, `gui_images`)으로 그 해상도의 프로젝트를 만들고, `pygaki/template/`에서 새 프로젝트에 없는 것(플러그인 폴더, `gui/cursor`, `gui/ctc`, `tl`)만 가져와요(`pygaki_add_plugins`). 런처 언어와 상관없이 한국어 프로젝트예요. 처음에 골라져 있어요. 편집기 패널은 크기가 정해져 있어서 해상도가 클수록 화면에서 작게 보여요.
+  - **Pygaki**: 이름 → 해상도를 물어본 뒤(강조·배경 색은 묻지 않고 렌파이 기본 색. pygaki는 상자를 투명하게 두고 그림을 넣어 써요) `pygaki_gui_project`가 런처와 같은 방법(`gui7.generate_gui`, `gui_images`)으로 그 해상도의 프로젝트를 만들고, `pygaki/template/`에서 새 프로젝트에 없는 것(플러그인 폴더, `gui/cursor`, `gui/ctc`, `tl`)만 가져와요(`pygaki_add_plugins`). 런처 언어와 상관없이 한국어 프로젝트예요. 처음에 골라져 있어요. 편집기 패널은 크기가 정해져 있어서 해상도가 클수록 화면에서 작게 보여요.
   - 따로 둔 다른 템플릿 프로젝트가 있으면 그 아래에 이어서 나와요. `pygaki/template/` 폴더가 없으면 런처 원래 흐름 그대로예요(예전 묶음의 `showpy/` 폴더가 있으면 그것을 써요).

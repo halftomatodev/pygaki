@@ -2189,3 +2189,12 @@ HUD 틀에서 만들기	HUDのひな形から作る	Create from a HUD template
 화면 "${nm}": 놓는 곳이 있지만 끌 수 있는 글·그림이 없어요 (항목의 [끌 수 있음])	画面「{0}」: 置き場所がありますが、ドラッグできるテキスト・画像がありません(項目の [ドラッグ可])	Screen "{0}": has a drop zone but no draggable text or image (the item's [Draggable])
 게임에서 끌어 옮길 수 있어요. 놓는 곳에 놓으면 그 할 일을 하고, 놓은 뒤에는 제자리로 돌아가요	ゲームでドラッグして動かせます。置き場所に置くとその動作をして、置いたあとは元の位置に戻ります	Can be dragged in game. Dropped on a drop zone it does that zone's action, then snaps back
 오른쪽 아래에 장소 버튼을 늘어놓아요. 누르면 그 상자로 가요. 지금 장소는 글자 플래그로 보여요.	右下に場所ボタンを並べます。押すとそのボックスへ移ります。現在地はテキストフラグで見せます。	Lists place buttons in the bottom right. Clicking one goes to that box. The current place is shown with a text flag.
+글자 해독	文字デコード	Decode
+먼저 도는 글자 수	先に回る文字数	Chars scrambled ahead
+더 도는 시간	さらに回る時間	Extra scramble time
+바뀌는 빠르기	切り替わる速さ	Change speed
+기호 진하기	記号の濃さ	Symbol opacity
+점 비율	点の割合	Dot ratio
+격자 가로 칸	格子の横マス	Grid columns
+격자 세로 칸	格子の縦マス	Grid rows
+기호 색 칠하기	記号の色付け	Symbol tint

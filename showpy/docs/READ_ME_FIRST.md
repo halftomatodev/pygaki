@@ -95,7 +95,7 @@
 
 ### 이름이 pygaki로
 
-- 런처 버튼은 [pygaki로 편집]. 새 프로젝트는 런처의 [+ Create New Project]에서 "기본 (Vanilla)"과 "Pygaki" 가운데 고릅니다(둘 다 해상도와 색을 고름). 앱 위쪽은 [대본 편집]과 [GUI 편집]입니다.
+- 런처 버튼은 [pygaki로 편집]. 새 프로젝트는 런처의 [+ Create New Project]에서 "기본 (Vanilla)"과 "Pygaki" 가운데 고릅니다(기본은 해상도와 색, Pygaki는 해상도만 고름). 앱 위쪽은 [대본 편집]과 [GUI 편집]입니다.
 
 ### `screen_fx` 4.5, `ui_kit` 3.21: 셰이더는 두 자리를 같이, 줄마다 전환, 커서도 '여기에서부터'
 

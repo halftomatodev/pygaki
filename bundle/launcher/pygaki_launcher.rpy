@@ -8,7 +8,8 @@
 ##   [플러그인 올리기]      그 옆 버튼. 고른 프로젝트의 pygaki 플러그인을 이 묶음의 판으로 바꿉니다 (설정·저장 값은 그대로)
 ##   [+ Create New Project]  누르면 "기본 (Vanilla)"과 "Pygaki" 가운데 고릅니다.
 ##                           기본 = 렌파이 원래 새 프로젝트
-##                           Pygaki = 기본처럼 해상도와 색을 골라 만든 한국어 프로젝트에 pygaki 플러그인을 얹은 것
+##                           Pygaki = 해상도만 골라 만든 한국어 프로젝트에 pygaki 플러그인을 얹은 것
+##                                    (강조·배경 색은 고르지 않음. pygaki는 상자를 투명하게 두고 그림을 넣어 쓰므로 렌파이 기본 색으로 둠)
 ##                           (플러그인은 SDK 폴더의 pygaki/template에서 가져옴)
 ##
 ## 런처의 원래 파일은 고치지 않고 이 파일 하나만 더합니다. 렌파이를 올리면 이 파일을 다시 복사합니다.
@@ -380,7 +381,7 @@ label pygaki_new_project:
     jump expression gui_kind
 
 
-## Pygaki 새 프로젝트: 런처의 new_gui_project(해상도 → 색 → 만들기)와 같은 순서로 한국어 프로젝트를 만들고,
+## Pygaki 새 프로젝트: 런처의 new_gui_project(해상도 → 색 → 만들기)에서 색 고르기만 빼고 한국어 프로젝트를 만들고,
 ## 그 위에 템플릿의 플러그인을 얹는다. 문구는 런처 것을 그대로 써서 런처 언어를 따라간다.
 label pygaki_gui_project:
 
@@ -406,9 +407,8 @@ label pygaki_gui_project:
                 pygaki_number(_("HEIGHT"), _("Please enter the height of your game, in pixels."), _("The height must be a number.")),
             )
 
+    ## 강조·배경 색은 고르지 않는다 (pygaki는 상자를 투명하게 두고 사용자가 그림을 넣어 씀). 렌파이 런처의 기본 색
     $ gui_color = (DARK_COLORS[0], "#000000", False)
-
-    call screen choose_gui_color
 
     python hide:
 
