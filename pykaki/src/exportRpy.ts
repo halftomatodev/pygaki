@@ -6,7 +6,7 @@ import { badImageName, renpyOnlyEffect, fxArgs, isStage, sayArgs, stageCode, tag
 import { shaderEffect } from './fx/textShaders';
 import { imageProblem, type ImageBook } from './imageCheck';
 import { voiceCode, voiceFile, voiceIndex } from './voice';
-import { screenNameProblem } from './screens';
+import { actOf, boxRef, flagAction, isBtnKind, isHud, screenNameProblem } from './screens';
 import { checkTags, shaderTags, splitClear } from './tagEdit';
 import { sceneCode, sceneSupported, uiOfBox, usesSceneUi } from './boxUi';
 import { exprNames, flagNameProblem, parseAction, pyValue } from './flags';
@@ -272,7 +272,7 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
           return body.push('$ ' + a);
         }
         if (isStage(l.type)) {
-          const { code, problem } = stageCode(l);
+          const { code, problem } = stageCode(l, p.screens);
           if (problem) W.push({ level: 'warn', msg: `${problem} (${b.title || b.id})`, nodeId: b.id });
           const ip = imageProblem(l, opts.images ?? null);
           if (ip) W.push({ level: 'warn', msg: `${ip} (${b.title || b.id})`, nodeId: b.id });
@@ -413,6 +413,7 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
           W.push({ level: 'error', msg: `부를 화면을 골라 주세요 (${name})`, nodeId: b.id });
           body.push('return  # TODO: 화면 없음');
         } else {
+          if (isHud(sc)) W.push({ level: 'warn', msg: `"${sc.title || sc.name}"은 HUD라 부르면 버튼을 눌러도 갈래가 없어요. 화면 부르기에는 전체 화면을, HUD는 [📟 HUD] 줄로 띄워요 (${name})`, nodeId: b.id });
           body.push(`call screen ${sc.name}`);
           if (!e.outs.length) W.push({ level: 'warn', msg: `화면 "${sc.title || sc.name}"에 값을 돌려주는 버튼이 없어요 (${name})`, nodeId: b.id });
           e.outs.forEach((o, i) => {
@@ -437,9 +438,22 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
     const nm = sc.title || sc.name;
     const prob = screenNameProblem(p, sc);
     if (prob) W.push({ level: 'error', msg: `화면 "${nm}"의 이름: ${prob}` });
+    const hud = isHud(sc);
     for (const it of sc.items) {
-      const btn = it.kind === 'imagebutton' || it.kind === 'textbutton';
-      if (btn && !it.value?.trim()) W.push({ level: 'warn', msg: `화면 "${nm}": 돌려줄 값이 빈 버튼이 있어요 (누르면 빈 값으로 돌아가요)` });
+      const btn = isBtnKind(it.kind);
+      const act = actOf(sc, it);
+      if (btn && act === 'return' && !hud && !it.value?.trim()) W.push({ level: 'warn', msg: `화면 "${nm}": 돌려줄 값이 빈 버튼이 있어요 (누르면 빈 값으로 돌아가요)` });
+      // HUD (FEATURE 18): 버튼 동작, 막대, 보이는 조건
+      if (btn && act === 'return' && hud) W.push({ level: 'warn', msg: `화면 "${nm}": HUD의 버튼은 값을 돌려줄 수 없어요. 누르면 할 일을 골라 주세요` });
+      if (btn && act === 'jump' && !boxRef(p, it.target)) W.push({ level: 'warn', msg: `화면 "${nm}": 갈 상자를 고르지 않은 버튼이 있어요 (눌러도 아무 일 없어요)` });
+      if (btn && act === 'toggle' && !p.screens?.some((x) => x.id === it.screen)) W.push({ level: 'warn', msg: `화면 "${nm}": 열고 닫을 화면을 고르지 않은 버튼이 있어요` });
+      if (btn && act === 'toggle' && p.screens?.find((x) => x.id === it.screen)?.kind !== 'hud' && p.screens?.some((x) => x.id === it.screen)) W.push({ level: 'warn', msg: `화면 "${nm}": 버튼이 여는 화면이 HUD가 아니에요` });
+      if (btn && act === 'flag') {
+        if (!(it.acts ?? []).some((a) => a.trim())) W.push({ level: 'warn', msg: `화면 "${nm}": 바꿀 플래그가 없는 버튼이 있어요` });
+        for (const a of it.acts ?? []) if (a.trim() && !flagAction(a)) W.push({ level: 'error', msg: `화면 "${nm}": 버튼의 바꾸는 식 "${a}"을 읽을 수 없어요 (예: love += 1)` });
+      }
+      if (it.kind === 'bar' && !p.variables.some((f) => f.name === it.flag && f.kind === 'int')) W.push({ level: 'warn', msg: `화면 "${nm}": 막대에 숫자 플래그를 골라 주세요 (안 고르면 내보내지 않아요)` });
+      for (const n of it.cond ? exprNames(it.cond) : []) if (!p.variables.some((f) => f.name === n)) W.push({ level: 'warn', msg: `화면 "${nm}": 보이는 조건의 "${n}"이 플래그 카드에 없어요` });
       if ((it.kind === 'imagebutton' || it.kind === 'image') && !it.image?.trim()) W.push({ level: 'warn', msg: `화면 "${nm}": 그림 이름이 빈 칸이 있어서 내보내지 않았어요` });
       for (const img of [it.image, it.hover])
         if (img?.trim() && !img.includes('/')) {
@@ -463,6 +477,8 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
   };
   if (start) {
     const r = reach(start.id);
+    // HUD 버튼이 가는 상자 (FEATURE 18)도 닿는 곳으로 친다
+    for (const sc of p.screens ?? []) for (const it of sc.items) if (actOf(sc, it) === 'jump' && it.target && byId.has(it.target)) for (const x of reach(it.target)) r.add(x);
     for (const b of p.nodes) if (!r.has(b.id)) W.push({ level: 'warn', msg: `시작에서 도달할 수 없는 상자예요 (${b.title || b.id})`, nodeId: b.id });
   }
   for (const b of p.nodes)

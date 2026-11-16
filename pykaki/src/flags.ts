@@ -135,6 +135,14 @@ export function renameFlag(p: Project, from: string, to: string) {
       }
     if (e.type === 'if') for (const b of e.branches) b.cond = renameIn(b.cond, from, to);
   }
+  // 화면의 보이는 조건, 버튼의 바꾸기, 막대, 글 속 [이름] (FEATURE 18)
+  for (const s of p.screens ?? [])
+    for (const it of s.items) {
+      if (it.cond) it.cond = renameIn(it.cond, from, to);
+      if (it.acts) it.acts = it.acts.map((a) => renameIn(a, from, to));
+      if (it.flag === from) it.flag = to;
+      if (it.text) it.text = it.text.split(`[${from}]`).join(`[${to}]`);
+    }
 }
 
 // 플래그를 고를 때 조건 칸에 넣을 글 (켜짐/꺼짐은 이름만, 숫자는 비교)

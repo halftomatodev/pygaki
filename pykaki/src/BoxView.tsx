@@ -419,6 +419,7 @@ function LineRow({ l, editing, active, cls, grip, onFocus, onKey, onText }: RowP
   const ch = useStore((s) => (l.type === 'say' ? s.project.characters.find((c) => c.id === l.who) : undefined));
   const tagsOn = useStore((s) => s.project.settings.allowTextTags);
   const project = useStore((s) => (l.type === 'flag' ? s.project : null));
+  const screens = useStore((s) => (l.type === 'hud' ? s.project.screens : undefined));
   // 플래그 바꾸기 줄은 글을 쓰지 않아 연출 줄처럼 그린다 (오른쪽 칸에서 고름)
   const stage = isStage(l.type) || l.type === 'flag';
   const kind = l.type === 'flag' ? 'pl-stage pl-flag' : stage ? 'pl-stage' : l.type === 'command' ? 'cmd' : l.type === 'note' ? 'note' : l.type === 'narration' ? 'narr' : 'say';
@@ -428,7 +429,7 @@ function LineRow({ l, editing, active, cls, grip, onFocus, onKey, onText }: RowP
   if (l.type === 'flag')
     body = <span className="pl-text">⚑ {l.text.trim() ? <code>{actionWords(project!, l.text)}</code> : <i className="todo">(플래그를 고르세요)</i>}</span>;
   else if (stage) {
-    const { code, problem } = stageCode(l);
+    const { code, problem } = stageCode(l, screens);
     body = (
       <span className="pl-text">
         {STAGE_ICON[l.type]} {code ? <code>{code}</code> : <i className="todo">({problem})</i>}

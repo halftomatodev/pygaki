@@ -103,8 +103,10 @@ function BoxInspector({ b }: { b: BoxNode }) {
     upd((x) => void x.lines.push(nl));
   };
   // 멈춤·흔들기 줄: 지금 쓰는 줄 바로 뒤에 (없으면 상자 끝)
-  const addStageLine = (type: 'pause' | 'shake') => {
+  const huds = (project.screens ?? []).filter((s) => s.kind === 'hud');
+  const addStageLine = (type: 'pause' | 'shake' | 'hud') => {
     const nl: Line = { id: uid('l'), type, text: '' };
+    if (type === 'hud' && huds[0]) nl.screen = huds[0].id;
     upd((x) => {
       const i = x.lines.findIndex((y) => y.id === activeLine);
       x.lines.splice(i >= 0 ? i + 1 : x.lines.length, 0, nl);
@@ -160,6 +162,7 @@ function BoxInspector({ b }: { b: BoxNode }) {
         <button onClick={addFlagLine} title="이 자리에서 플래그를 바꿔요 (예: met_alice 켜기, love +1)">+ 플래그 바꾸기</button>
         <button onClick={() => addStageLine('pause')} title="지금 쓰는 줄 뒤에서 잠깐 멈춰요 (초, 또는 클릭할 때까지)">+ 멈춤</button>
         <button onClick={() => addStageLine('shake')} title="지금 쓰는 줄 뒤에서 화면을 흔들거나 번쩍여요">+ 흔들기</button>
+        {huds.length > 0 && <button onClick={() => addStageLine('hud')} title="지금 쓰는 줄 뒤에서 HUD를 띄우거나 내려요 (show screen / hide screen)">+ HUD</button>}
         <span className="tip">Ctrl+Enter: 같은 화자로 아래에 새 줄</span>
       </div>
       <GameOffTip what="대사" />
@@ -310,8 +313,9 @@ function ScreenExitEditor({ b, upd }: { b: BoxNode; upd: Upd }) {
           syncOuts(p, x);
         })}>
           <option value="">화면 고르기…</option>
-          {screens.map((s) => (
-            <option key={s.id} value={s.id}>{s.title || s.name}</option>
+          {/* HUD는 부르는 화면이 아니라 📟 HUD 줄로 띄운다 (FEATURE 18). 예전에 고른 것만 보여 준다 */}
+          {screens.filter((s) => s.kind !== 'hud' || s.id === e.screen).map((s) => (
+            <option key={s.id} value={s.id}>{s.title || s.name}{s.kind === 'hud' ? ' (HUD)' : ''}</option>
           ))}
         </select>
         <button onClick={() => (useLive.setState({ view: 'screens' }), useScreenSel.setState({ id: e.screen }))} title="[화면] 탭에서 이 화면을 고쳐요">화면 고치기</button>

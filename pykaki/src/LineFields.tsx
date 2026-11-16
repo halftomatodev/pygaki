@@ -330,7 +330,8 @@ export function StageFields({ l, set, firstId, nd = '' }: { l: Line; set: SetLin
   const sug = useSuggest(l);
   const [picOpen, setPicOpen] = useState(false);
   const kind = l.kind ?? 'char';
-  const { code, problem } = stageCode(l);
+  const screens = useStore((s) => s.project.screens);
+  const { code, problem } = stageCode(l, screens);
   const listId = (k: string) => (useGameFolder.getState().name ? `sug-${k}-${l.id}` : undefined);
   const field = (k: 'image' | 'attr' | 'file', placeholder: string, id?: string, cls = '') => (
     <>
@@ -484,6 +485,23 @@ export function StageFields({ l, set, firstId, nd = '' }: { l: Line; set: SetLin
     );
   else if (l.type === 'pause') body = <>{numIn('secs', '클릭할 때까지', '멈출 초. 비우면 플레이어가 클릭할 때까지 멈춰요', { max: 600 })}<span className="tip">초</span></>;
   else if (l.type === 'shake') body = pick(SHAKES, l.shake ?? 'vpunch', (x, v) => void (v === 'vpunch' ? delete x.shake : (x.shake = v as Line['shake'])), '화면 흔들기');
+  else if (l.type === 'hud') {
+    // HUD 보이기/숨기기 (FEATURE 18): [화면] 탭에서 HUD로 만든 화면을 고른다
+    const huds = (screens ?? []).filter((s) => s.kind === 'hud');
+    const cur = screens?.find((s) => s.id === l.screen);
+    body = (
+      <>
+        {pick([['', '보이기'], ['stop', '숨기기']], l.stop ? 'stop' : '', (x, v) => void (v ? (x.stop = true) : delete x.stop), '보이기: 이 줄부터 HUD가 떠 있어요 (show screen) / 숨기기: 내려요 (hide screen)')}
+        <select id={firstId} className={cur ? '' : 'invalid'} value={cur?.id ?? ''} onChange={(e) => set((x) => void (e.target.value ? (x.screen = e.target.value) : delete x.screen))} title="[화면] 탭에서 HUD로 만든 화면">
+          <option value="">{huds.length ? 'HUD 고르기' : 'HUD가 없어요 ([화면] 탭)'}</option>
+          {cur && cur.kind !== 'hud' && <option value={cur.id}>{cur.title || cur.name} (전체 화면)</option>}
+          {huds.map((s) => (
+            <option key={s.id} value={s.id}>{s.title || s.name}</option>
+          ))}
+        </select>
+      </>
+    );
+  }
   else body = null;
 
   return (

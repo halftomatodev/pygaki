@@ -2060,3 +2060,94 @@ ${s.names[0]}을(를) 바꿀 선택지를 골라요 (${how}). 캔버스에서 �
 ? ${x ? titleOf(x.box) : ''} ◆ "${x?.choice.text || '(빈 선택지)'}" 보이는 조건 ${c.cond}	? {0} ◆ 「{1}」の表示条件 {2}	? {0} ◆ "{1}" shows if {2}
 ${s.names[0]}이(가) 기준 값 이상일 때만 보일 선택지를 골라요. 아니면 그 선택지가 숨어요.	{0}が基準値以上のときだけ表示する選択肢を選んでください。そうでなければその選択肢は隠れます。	Pick the choices that show only when {0} is at or above the threshold. Otherwise they're hidden.
 ${s.names[0]}이(가) 켜졌을 때만 보일 선택지를 골라요. 아니면 그 선택지가 숨어요.	{0}がオンのときだけ表示する選択肢を選んでください。そうでなければその選択肢は隠れます。	Pick the choices that show only when {0} is on. Otherwise they're hidden.
+"${sc.title || sc.name}"은 HUD라 부르면 버튼을 눌러도 갈래가 없어요. 화면 부르기에는 전체 화면을, HUD는 [📟 HUD] 줄로 띄워요 (${name})	「{0}」はHUDなので、呼んでもボタンで分岐しません。画面を呼ぶには全画面を、HUDは[📟 HUD]行で表示します ({1})	"{0}" is a HUD, so calling it gives no branches. Use a full screen for Call screen, and show a HUD with a [📟 HUD] line ({1})
+"${sc.title || sc.name}"은 전체 화면이에요. [화면] 탭에서 HUD로 바꿔 주세요	「{0}」は全画面です。[画面]タブでHUDに変えてください	"{0}" is a full screen. Change it to a HUD in the [Screens] tab
+${s.items.length}개 · 부르는 상자 ${usesOf(project, s.id).length}	{0}個 · 呼ぶボックス {1}	{0} items · called by {1} boxes
+HUD · ${s.items.length}개 · 쓰는 상자 ${usesOf(project, s.id).length}${s.overlay ? ' · 게임 내내' : ''}	HUD · {0}個 · 使うボックス {1}{2}	HUD · {0} items · used by {1} boxes{2}
+· 게임 내내	· ゲーム中ずっと	· always on
+(HUD 줄 없이 늘 떠 있어요, config.overlay_screens)	(HUD行なしで常に表示, config.overlay_screens)	(always shown without HUD lines, config.overlay_screens)
+([화면] 탭)	([画面]タブ)	([Screens] tab)
+(전체 화면)	(全画面)	(full screen)
+(지금 안 보임)	(今は非表示)	(hidden now)
++ HUD 틀에서	+ HUDのひな形から	+ HUD from template
++ 막대	+ バー	+ Bar
++ 바꾸기 더하기	+ 変更を追加	+ Add change
+HUD 고르기	HUDを選ぶ	Pick a HUD
+HUD 열고 닫기	HUDを開閉	Open/close HUD
+HUD 왼쪽 위에서 (px)	HUDの左上から (px)	From HUD top-left (px)
+HUD 줄이 있는 상자	HUD行があるボックス	Boxes with HUD lines
+HUD 틀: 필요한 플래그도 같이 만들어요 (같은 이름이 있으면 그대로 써요)	HUDのひな形: 必要なフラグも一緒に作ります (同じ名前があればそのまま使います)	HUD templates: also creates the flags they need (reuses flags with the same name)
+HUD가 없어요 ([화면] 탭)	HUDがありません ([画面]タブ)	No HUDs ([Screens] tab)
+HUD는 대사가 흐르는 동안 게임 화면 위에 떠 있어요	HUDはセリフが進む間、ゲーム画面の上に表示されます	A HUD stays on top of the game screen while dialogue plays
+[화면] 탭에서 HUD로 만든 화면	[画面]タブでHUDにした画面	A screen made as a HUD in the [Screens] tab
+zorder: 숫자가 클수록 다른 화면보다 앞에	zorder: 数が大きいほど他の画面より手前	zorder: higher numbers draw in front of other screens
+· HUD 빈 곳을 끌면 HUD가 옮겨져요	· HUDの空いた所をドラッグするとHUDが移動します	· Drag an empty part of the HUD to move it
+· 보이는 조건 ${it.cond}${hidden ? ' (지금 안 보임)' : ''}	· 表示条件 {0}{1}	· Show if {0}{1}
+가로 (px)	幅 (px)	Width (px)
+세로 (px)	高さ (px)	Height (px)
+갈 상자	行き先ボックス	Go to box
+값 돌려주기	値を返す	Return a value
+게임 내내 띄우기	ゲーム中ずっと表示	Always show
+글에 [플래그 이름]을 넣으면 게임에서 그 값이 보여요 (예: 호감도 [love])	テキストに[フラグ名]を入れるとゲームでその値が表示されます (例: 好感度 [love])	Put [flag name] in the text to show its value in game (e.g. Affection [love])
+꽉 찬 값	満タンの値	Full value
+누르면	押すと	On click
+누르면 그 상자로 가요 (지금 대사는 끊겨요)	押すとそのボックスへ移動します (今のセリフは途切れます)	Clicking jumps to that box (the current dialogue stops)
+누르면 다른 HUD가 떴다가, 다시 누르면 내려가요	押すと別のHUDが表示され、もう一度押すと消えます	Clicking shows another HUD; clicking again hides it
+누르면 플래그가 바뀌어요. 대사는 그대로 이어져요	押すとフラグが変わります。セリフはそのまま続きます	Clicking changes flags. Dialogue keeps going
+떠 있는 HUD:	表示中のHUD:	HUDs shown:
+막대	バー	Bar
+보이기: 이 줄부터 HUD가 떠 있어요 (show screen) / 숨기기: 내려요 (hide screen)	表示: この行からHUDを表示 (show screen) / 隠す: 消します (hide screen)	Show: the HUD stays up from this line (show screen) / Hide: takes it down (hide screen)
+보일 HUD를 골라 주세요	表示するHUDを選んでください	Pick a HUD to show
+숨길 HUD를 골라 주세요	隠すHUDを選んでください	Pick a HUD to hide
+부르는 상자	呼ぶボックス	Calling boxes
+붙인 곳에서 가로로 (px, 왼쪽은 −)	基準位置から横に (px, 左は −)	Horizontal offset (px, left is −)
+붙인 곳에서 세로로 (px, 위는 −)	基準位置から縦に (px, 上は −)	Vertical offset (px, up is −)
+붙일 곳	配置	Anchor
+비우면 늘 보여요 (예: has_key)	空なら常に表示 (例: has_key)	Empty means always shown (e.g. has_key)
+빈 쪽 색	空き側の色	Empty color
+찬 쪽 색	満ち側の色	Fill color
+상자 고르기	ボックスを選ぶ	Pick a box
+상자로 가기	ボックスへ移動	Jump to box
+숫자 플래그	数値フラグ	Number flag
+숫자 플래그 love를 막대와 숫자로 보여요	数値フラグloveをバーと数字で表示します	Shows the number flag love as a bar and number
+숫자 플래그 고르기	数値フラグを選ぶ	Pick a number flag
+숫자 플래그가 없어요 (플래그 카드)	数値フラグがありません (フラグカード)	No number flags (Flags card)
+숫자 플래그의 값을 막대로 보여요	数値フラグの値をバーで表示します	Shows a number flag's value as a bar
+아래 가운데	下中央	Bottom center
+위 가운데	上中央	Top center
+오른쪽 가운데	右中央	Middle right
+왼쪽 가운데	左中央	Middle left
+오른쪽 아래	右下	Bottom right
+오른쪽 위	右上	Top right
+왼쪽 아래	左下	Bottom left
+왼쪽 위	左上	Top left
+앞뒤	前後	Order
+없음 (게임 내내 떠 있어요)	なし (ゲーム中ずっと表示)	None (always shown)
+없음 (상자의 대사 칸에서 [+ HUD] 줄을 넣어요)	なし (ボックスのセリフ欄で[+ HUD]行を入れます)	None (add a [+ HUD] line in a box's dialogue)
+없음 (투명)	なし (透明)	None (transparent)
+열 HUD	開くHUD	HUD to open
+옮기기	移動	Offset
+이 값이면 막대가 꽉 차요	この値でバーが満タンになります	The bar is full at this value
+이 화면의 버튼이 바꿔요	この画面のボタンが変更します	Changed by a button on this screen
+이 화면이 보여 줘요	この画面が表示します	Shown by this screen
+이름은 렌파이 screen 이름이에요 (영문). 원고에는 show screen 이름	名前はRen'Pyのscreen名です (英字)。スクリプトでは show screen 名前	The name is the Ren'Py screen name (ASCII). In the script: show screen name
+장소 버튼을 누르면 그 상자로 가요. 지금 장소는 글자 플래그 place	場所ボタンを押すとそのボックスへ移動します。現在地はテキストフラグ place	Place buttons jump to their boxes. The current place is the text flag place
+전체 화면 (call screen)	全画面 (call screen)	Full screen (call screen)
+전체 화면: 화면을 막고 버튼을 누를 때까지 기다려요 (call screen) / HUD: 대사가 흐르는 동안 옆에 떠 있어요 (show screen)	全画面: 画面をふさぎ、ボタンが押されるまで待ちます (call screen) / HUD: セリフが進む間、横に表示されます (show screen)	Full screen: covers the screen and waits for a button (call screen) / HUD: stays up beside the dialogue (show screen)
+지금 쓰는 줄 뒤에서 HUD를 띄우거나 내려요 (show screen / hide screen)	今書いている行の後でHUDを表示・非表示にします (show screen / hide screen)	Shows or hides a HUD after the current line (show screen / hide screen)
+진하기	濃さ	Opacity
+켜짐/꺼짐 플래그(has_key 등)가 켜진 물건만 보여요	オン/オフのフラグ(has_keyなど)がオンの物だけ表示します	Shows only items whose on/off flag (has_key etc.) is on
+클수록 앞 (zorder)	大きいほど手前 (zorder)	Higher is in front (zorder)
+플래그 값을 글에 넣어요 ([이름])	フラグの値をテキストに入れます ([名前])	Insert a flag value into the text ([name])
+플래그 없음	フラグなし	No flag
+인벤토리	インベントリ	Inventory
+미니맵	ミニマップ	Minimap
+호감도 막대	好感度バー	Affection bar
+화면 "${nm}": HUD의 버튼은 값을 돌려줄 수 없어요. 누르면 할 일을 골라 주세요	画面「{0}」: HUDのボタンは値を返せません。押したときの動作を選んでください	Screen "{0}": HUD buttons can't return values. Pick what the button does
+화면 "${nm}": 갈 상자를 고르지 않은 버튼이 있어요 (눌러도 아무 일 없어요)	画面「{0}」: 行き先ボックスを選んでいないボタンがあります (押しても何も起きません)	Screen "{0}": a button has no target box (clicking does nothing)
+화면 "${nm}": 막대에 숫자 플래그를 골라 주세요 (안 고르면 내보내지 않아요)	画面「{0}」: バーに数値フラグを選んでください (選ばないと書き出しません)	Screen "{0}": pick a number flag for the bar (otherwise it isn't exported)
+화면 "${nm}": 바꿀 플래그가 없는 버튼이 있어요	画面「{0}」: 変えるフラグがないボタンがあります	Screen "{0}": a button changes no flags
+화면 "${nm}": 버튼의 바꾸는 식 "${a}"을 읽을 수 없어요 (예: love += 1)	画面「{0}」: ボタンの変更式「{1}」を読めません (例: love += 1)	Screen "{0}": can't read the button's change "{1}" (e.g. love += 1)
+화면 "${nm}": 버튼이 여는 화면이 HUD가 아니에요	画面「{0}」: ボタンが開く画面がHUDではありません	Screen "{0}": the screen a button opens isn't a HUD
+화면 "${nm}": 보이는 조건의 "${n}"이 플래그 카드에 없어요	画面「{0}」: 表示条件の「{1}」がフラグカードにありません	Screen "{0}": "{1}" in a show condition isn't on the Flags card
+화면 "${nm}": 열고 닫을 화면을 고르지 않은 버튼이 있어요	画面「{0}」: 開閉する画面を選んでいないボタンがあります	Screen "{0}": a button has no screen to open/close

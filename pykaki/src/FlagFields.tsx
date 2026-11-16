@@ -5,6 +5,9 @@ import { Card } from './Card';
 import { FlagMenu } from './FlagMenu';
 import { addRecipeFlags, type FlagRecipe } from './flagRecipes';
 import type { Flag, FlagKind } from './types';
+import { screenFlagUses } from './screens';
+import { useScreenSel } from './ScreensView';
+import { useLive } from './showpyLive';
 import { actionText, CMP_LABEL, condSnippet, condText, exprNames, firstClause, fitInit, flagNameProblem, flagUses, KIND_LABEL, parseAction, parseCond, renameFlag, type Clause, type CmpOp, type Cond, type Op } from './flags';
 
 export function FlagsCard() {
@@ -55,6 +58,7 @@ function FlagRow({ f }: { f: Flag }) {
   useEffect(() => setName(f.name), [f.name]);
   const why = flagNameProblem(project, name, f.id);
   const uses = flagUses(project, f.name);
+  const sUses = screenFlagUses(project, f.name);
   const set = (fn: (x: Flag) => void, key?: string) => update((p) => fn(p.variables.find((v) => v.id === f.id)!), key);
 
   // 이름은 입력을 마쳤을 때 확정하고, 쓰인 곳(조건, 고르면, 바꾸기 줄)도 같이 바꾼다
@@ -96,7 +100,12 @@ function FlagRow({ f }: { f: Flag }) {
       </div>
       <input className="fnote" value={f.note ?? ''} placeholder="메모 (예: 앨리스를 만났는지)" onChange={(e) => set((x) => void (e.target.value ? (x.note = e.target.value) : delete x.note), 'fnote' + f.id)} />
       <div className="flag-uses">
-        {!uses.length && <span className="tip">아직 안 씀</span>}
+        {!uses.length && !sUses.length && <span className="tip">아직 안 씀</span>}
+        {sUses.map((u, i) => (
+          <button key={'s' + i} className={'linklike' + (u.write ? ' w' : '')} title={(u.write ? '이 화면의 버튼이 바꿔요' : '이 화면이 보여 줘요') + ' ([화면] 탭)'} onClick={() => (useLive.setState({ view: 'screens' }), useScreenSel.setState({ id: u.screen.id, item: null }))}>
+            {u.write ? '✎' : '?'} {u.screen.title || u.screen.name}
+          </button>
+        ))}
         {uses.map((u, i) => (
           <button key={i} className={'flag-use' + (u.write ? ' w' : '')} onClick={() => go(u.nodeId)} title={(u.write ? '바꾸는 곳' : '보는 곳') + ' · 누르면 그 상자로'}>
             {u.write ? '✎' : '?'} {boxName(u.nodeId)} · {u.where}

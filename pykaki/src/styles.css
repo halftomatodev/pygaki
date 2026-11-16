@@ -1309,6 +1309,26 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .scv-side .row { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
 .scv-side label { min-width: 56px; font-size: 12px; color: var(--muted); }
 .scv-code { font-size: 11px; white-space: pre-wrap; margin: 0; }
+/* HUD (FEATURE 18) */
+.scv-art { position: absolute; left: 0; top: 0; }
+.scv-art.hud { outline: 2px dashed color-mix(in srgb, var(--accent) 70%, transparent); cursor: move; }
+.scv-art.still, .scv-art.still .scv-el { cursor: default; outline: none; }
+.scv-art .scv-bg { position: absolute; left: 0; top: 0; }
+.scv-bgc { position: absolute; inset: 0; pointer-events: none; }
+.scv-stage.hud { background: linear-gradient(color-mix(in srgb, var(--text) 10%, var(--panel)), color-mix(in srgb, var(--text) 4%, var(--panel))); }
+.scv-el.off { opacity: .35; }
+.scv-val.act { left: auto; right: 100%; top: 0; margin-right: 2px; }
+.scv-el.still { pointer-events: none; }
+.scv-bar { position: relative; display: block; overflow: hidden; border-radius: 2px; }
+.scv-bar > span { display: block; height: 100%; }
+.scv-bar em { position: absolute; inset: 0; font-size: 11px; font-style: normal; display: flex; align-items: center; padding-left: 6px; color: #fff; }
+.scv-cond { position: absolute; right: -6px; top: -16px; font-size: 10px; padding: 0 4px; border-radius: 3px; background: #2e9e5b; color: #fff; }
+.scv-anchor { display: inline-grid; grid-template-columns: repeat(3, 18px); gap: 2px; }
+.scv-anchor button { width: 18px; height: 14px; padding: 0; border-radius: 2px; min-width: 0; border: 1px solid var(--line); background: color-mix(in srgb, var(--text) 8%, var(--panel)); }
+.scv-anchor button.on { background: var(--accent); border-color: var(--accent); }
+.scv-tpl { width: 100%; margin-bottom: 4px; }
+.scv-side label.check { display: flex; gap: 6px; align-items: center; min-width: 0; color: var(--text); }
+.tr-hud { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 4px; background: color-mix(in srgb, var(--text) 8%, var(--panel)); margin: 6px 0; }
 .linklike { border: none; background: none; color: var(--accent); padding: 0 4px; cursor: pointer; }
 
 /* 게임 패널 미러의 빈 칸 (ui_kit 4.11) */

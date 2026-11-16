@@ -2,6 +2,7 @@
 // 닿을 수 있는 값은 대본을 렌파이 없이 상자 단위로 넓게 따라가 셈한다(갈래·선택지를 모두 지나간다고 보고, 값이 많으면 "여러 값").
 // 그래서 "늘 참/늘 거짓" 표시는 확실할 때만 나온다(놓치는 것은 있어도 틀리게 짚지는 않음). 대본은 고치지 않는다
 import type { BoxNode, Project } from './types';
+import { screenFlagUses } from './screens';
 import { exprNames, parseAction, parseCond } from './flags';
 import { applyAction, boxActions, evalExpr, UNKNOWN, type Val, type Vars } from './trace';
 
@@ -257,9 +258,11 @@ export function buildDesign(p: Project, showAll = false): Design {
   const cellNotes = new Map<string, string>();
   for (const f of p.variables) {
     const us = order.flatMap((b) => cells.get(cellKey(f.name, b.id)) ?? []);
-    const w = us.some(isWrite), r = us.some((u) => !isWrite(u));
+    // 화면(HUD)에서 보거나 바꾸는 것도 친다 (FEATURE 18)
+    const su = screenFlagUses(p, f.name);
+    const w = us.some(isWrite) || su.some((u) => u.write), r = us.some((u) => !isWrite(u)) || su.some((u) => !u.write);
     const a: string[] = [];
-    if (!us.length) a.push('아직 안 써요');
+    if (!us.length && !su.length) a.push('아직 안 써요');
     else if (w && !r) a.push('바꾸기만 하고 보는 곳이 없어요');
     else if (!w && r) a.push('보기만 하고 바꾸는 곳이 없어요 (늘 처음 값)');
     if (a.length) notes.set(f.name, a);

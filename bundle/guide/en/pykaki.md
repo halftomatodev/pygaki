@@ -1,4 +1,4 @@
-<!-- 원본: pykaki/docs/GUIDE.md @ 4c252d6188 -->
+<!-- 원본: pykaki/docs/GUIDE.md @ 2b546ced90 -->
 # pygaki user guide
 
 A tool for writing Ren'Py scripts with boxes and lines and exporting them as Ren'Py script files (`.rpy`).
@@ -279,7 +279,20 @@ In the **[Screen]** tab at the top, drag and drop buttons to make a Ren'Py scree
 - Preview the exported text in the bottom card. If you delete a screen, boxes that called it become "No screen" and [Check] tells you.
 
 ### HUD (show screen)
-The screens you make in the [Screen] tab are **full screens** (`call screen`): they cover the dialogue and wait until a button is pressed. Ren'Py also has **HUD screens** (`show screen`, an info panel that stays on top of the game) that stay in a corner while the dialogue keeps going. Affection bars, bags, minimaps and clocks are made this way. pygaki can't make HUD screens yet, so write the screen in a `.rpy` file yourself, and in the script put `show screen name` or `hide screen name` in a **⚙ Raw command** line. The videos below are samples recorded in Ren'Py (choices and buttons were clicked automatically; the text in the videos is Korean).
+The screen card has two **Kinds**. A **full screen** (`call screen`) covers the dialogue and waits until a button is pressed. A **HUD** (`show screen`, an info panel on top of the game screen) stays in a corner while the dialogue keeps going. Affection bars, bags, minimaps and clocks are made this way. The videos below are samples recorded in Ren'Py (choices and buttons were clicked automatically; the text in the videos is Korean).
+
+#### Making a HUD in the [Screen] tab
+- **[+ HUD from template]** on the left: pick **Inventory** (shows only items whose on/off flag such as `has_key` is on), **Affection bar** (number flag `love`) or **Minimap** (place buttons; the current place is the text flag `place`). It also creates the flags it needs, reusing flags with the same name. You can also switch an existing screen's **Kind** to **HUD**.
+- Screen card: **Size** (px), **Anchor** (nine cells: top left, top center … bottom right), **Offset** (px from the anchor), **Order** (`zorder`, higher is in front), **Background** and **Opacity**. You can also drag an empty part of the HUD on the stage. Item positions are measured from the HUD's top-left corner.
+- **[+ Bar]**: shows a number flag's value as a bar. Pick the flag, the full value, the size, and the fill and empty colors.
+- Put `[flag name]` in a **Text** to show its value in game (e.g. `Affection [love]`). Insert it with **[Flag ▾]** next to it. The stage draws with the flags' starting values.
+- **Show if** for each item: the same field as a choice condition (e.g. if `has_key` is on). On the stage, items hidden right now are faded, and items with a condition get a green **?**.
+- A button's **On click**: **Change flag** (any number of changes; dialogue keeps going), **Jump to box** (jumps to that box) or **Open/close HUD** (shows or hides another HUD). Full screens can also **Return a value** (branching as before).
+- Turn on **Always show** to keep the HUD up without HUD lines (`config.overlay_screens`).
+- In the script, use **[+ HUD]** in a box's dialogue (or the line type **📟 HUD**) and pick **Show** (`show screen name`) or **Hide** (`hide screen name`). Once shown, it stays up across boxes until you hide it.
+- **▶ Trace** shows the HUDs that are up, small, with the current flag values. The Flags card lists the screens that use a flag as **?** (shows it) and **✎** (a button changes it), and the Flag design table's yellow notes count HUD uses too.
+
+Below is how HUDs behave in Ren'Py and what the script looks like.
 
 | | call screen ([Screen] tab) | show screen (HUD) |
 |---|---|---|
@@ -366,8 +379,8 @@ label map_cafe:
 #### Words used with HUDs
 | Ren'Py | Meaning |
 |---|---|
-| `show screen name` / `hide screen name` | Show or close it from the script |
-| `config.overlay_screens` | Keep it up for the whole game (`define config.overlay_screens += ["love_hud"]`) |
+| `show screen name` / `hide screen name` | Show or close it from the script (**📟 HUD** line) |
+| `config.overlay_screens` | Keep it up for the whole game (screen card "Always show") |
 | `zorder` | Which is on top when screens overlap |
 | `text "[love]"`, `bar value …` | Show a flag's value as text or a bar |
 | `if has_key:` / `showif` | Show only when a condition holds |
@@ -377,7 +390,7 @@ label map_cafe:
 | `Return("value")` | Close a call screen and return a value (the [Screen] tab's "Return value") |
 
 - Use the flags you made in pygaki's flag card as they are (`default love = 0` is added on export).
-- Put HUD scripts in a new `.rpy` file in the `game` folder (e.g. `my_screens.rpy`). Don't put them in `pykaki_screens.rpy`, which pygaki rewrites.
+- HUDs made in the [Screen] tab go into `pykaki_screens.rpy` (hand edits are overwritten on the next export). For things the tab can't make (`Drag`, `for` loops, `selected`), write a new `.rpy` file in the `game` folder (e.g. `my_screens.rpy`).
 
 ## 5. Managing labels (scenes)
 

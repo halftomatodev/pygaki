@@ -1,9 +1,9 @@
 // 연출 줄(scene/show/hide/music/sound): 칸에 적은 값 → 렌파이 명령 한 줄
-import type { Line, LineFx, LineType, SayStyle, ShakeKind } from './types';
+import type { Line, LineFx, LineType, SayStyle, ScreenDef, ShakeKind } from './types';
 import { IMAGE_FX, RENPY_SHADERS, SHOWPY_SHADERS, shaderEffect } from './fx/textShaders';
 import { shaderTags } from './tagEdit';
 
-export const STAGE_TYPES: LineType[] = ['scene', 'show', 'hide', 'music', 'sound', 'pause', 'shake', 'fx'];
+export const STAGE_TYPES: LineType[] = ['scene', 'show', 'hide', 'music', 'sound', 'pause', 'shake', 'hud', 'fx'];
 export const isStage = (t: LineType) => STAGE_TYPES.includes(t);
 
 // 줄 종류 칸이 좁아서 짧게. 실제 명령은 칸 아래에 따로 보여 준다
@@ -15,9 +15,10 @@ export const STAGE_LABEL: Record<string, string> = {
   sound: '🔊 효과음',
   pause: '⏸ 멈춤',
   shake: '💥 흔들기',
+  hud: '📟 HUD',
   fx: '✨ 화면 효과',
 };
-export const STAGE_ICON: Record<string, string> = { scene: '🖼', show: '🧍', hide: '🙈', music: '🎵', sound: '🔊', pause: '⏸', shake: '💥', fx: '✨' };
+export const STAGE_ICON: Record<string, string> = { scene: '🖼', show: '🧍', hide: '🙈', music: '🎵', sound: '🔊', pause: '⏸', shake: '💥', hud: '📟', fx: '✨' };
 
 // 흔들기 줄 (FEATURE 15). 렌파이에 번쩍(flash) 전환은 없어서 흰색 Fade로 쓴다
 export const SHAKES: [ShakeKind, string][] = [['vpunch', '세로로 흔들기'], ['hpunch', '가로로 흔들기'], ['flash', '흰색 번쩍']];
@@ -269,7 +270,8 @@ export function imageName(l: Line) {
 }
 
 // code가 null이면 칸이 덜 채워진 것이고, problem에 이유가 있다
-export function stageCode(l: Line): { code: string | null; problem: string | null } {
+// screens: HUD 줄이 화면 이름을 찾을 목록 (project.screens)
+export function stageCode(l: Line, screens?: ScreenDef[]): { code: string | null; problem: string | null } {
   const w = l.trans ? ` with ${l.trans}` : '';
   const need = (what: string) => ({ code: null, problem: what });
   switch (l.type) {
@@ -307,6 +309,13 @@ export function stageCode(l: Line): { code: string | null; problem: string | nul
       return { code: l.secs ? `pause ${secs(l.secs)}` : 'pause', problem: null };
     case 'shake':
       return { code: `with ${shakeCode(l.shake)}`, problem: null };
+    case 'hud': {
+      // HUD 보이기/숨기기 (FEATURE 18)
+      const sc = screens?.find((s) => s.id === l.screen);
+      if (!sc) return need(l.stop ? '숨길 HUD를 골라 주세요' : '보일 HUD를 골라 주세요');
+      if (sc.kind !== 'hud') return need(`"${sc.title || sc.name}"은 전체 화면이에요. [화면] 탭에서 HUD로 바꿔 주세요`);
+      return { code: `${l.stop ? 'hide' : 'show'} screen ${sc.name}`, problem: null };
+    }
     case 'fx': {
       const c = fxCode(l.fx);
       return c ? { code: c, problem: null } : need('바꿀 값을 골라 주세요');

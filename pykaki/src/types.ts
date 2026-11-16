@@ -3,7 +3,8 @@
 // scene/show/hide/music/sound는 렌파이 명령을 몰라도 칸만 채우면 되는 연출 줄
 // flag: 플래그 바꾸기 줄 (FEATURE 14). text에 바꾸는 식 (예: love += 1, met_alice = True)을 두고 $ 줄로 내보낸다
 // pause: 멈춤 줄, shake: 흔들기 줄 (FEATURE 15)
-export type LineType = 'narration' | 'say' | 'scene' | 'show' | 'hide' | 'music' | 'sound' | 'fx' | 'command' | 'note' | 'flag' | 'pause' | 'shake';
+// hud: HUD 보이기/숨기기 줄 (FEATURE 18). screen에 화면 id, stop이면 숨기기 (show screen / hide screen)
+export type LineType = 'narration' | 'say' | 'scene' | 'show' | 'hide' | 'music' | 'sound' | 'fx' | 'command' | 'note' | 'flag' | 'pause' | 'shake' | 'hud';
 export type ShakeKind = 'vpunch' | 'hpunch' | 'flash';
 
 // showpy 화면 효과 값. 대사 줄은 괄호로, 연출 줄(fx)은 명령으로 내보낸다. 빈 칸은 안 내보낸다
@@ -60,6 +61,7 @@ export interface Line {
   secs?: number; // pause: 멈출 초. 없으면 클릭할 때까지
   shake?: ShakeKind; // shake: 세로 vpunch | 가로 hpunch | 번쩍 flash (없으면 vpunch)
   zorder?: number; // show: 앞뒤 (숫자가 클수록 앞)
+  screen?: string; // hud: 보이거나 숨길 화면 id (project.screens)
   behind?: string; // show: 이 태그의 그림 뒤에
   // 음성 (FEATURE 16, say 줄). vno: label 안 음성 번호 (한 번 매기면 그대로). voice: 직접 고른 파일 (audio 기준), ''이면 이 줄은 음성 없음, 없으면 이름 규칙으로
   vno?: number;
@@ -98,7 +100,11 @@ export interface ScreenOut {
 }
 
 // 화면 만들기 탭에서 만든 렌파이 screen (FEATURE 17). game/pykaki_screens.rpy로 내보낸다
-export type ScreenItemKind = 'imagebutton' | 'textbutton' | 'text' | 'image';
+// bar: 플래그 값 막대 (FEATURE 18). HUD의 항목은 x, y가 HUD 왼쪽 위 기준
+export type ScreenItemKind = 'imagebutton' | 'textbutton' | 'text' | 'image' | 'bar';
+// 버튼을 누르면 (FEATURE 18): return 값 돌려주기 (전체 화면만, 없으면 이것) | flag 플래그 바꾸기 | jump 상자로 가기 | toggle 다른 HUD 열고 닫기
+export type ScreenAct = 'return' | 'flag' | 'jump' | 'toggle';
+export type ScreenAnchor = 'tl' | 't' | 'tr' | 'l' | 'c' | 'r' | 'bl' | 'b' | 'br';
 export interface ScreenItem {
   id: string;
   kind: ScreenItemKind;
@@ -111,6 +117,17 @@ export interface ScreenItem {
   color?: string; // 글자 색 #rrggbb
   hoverColor?: string; // textbutton: 마우스를 올렸을 때 글자 색
   value?: string; // 버튼: 누르면 돌려줄 값 (_return)
+  // FEATURE 18
+  cond?: string; // 보이는 조건 (렌파이 조건식). 비우면 늘 보임 (if 블록으로)
+  act?: ScreenAct; // 버튼을 누르면. 없으면 return
+  acts?: string[]; // act flag: 바꾸는 식 (예: love += 1)
+  target?: string | null; // act jump: 갈 상자 id
+  screen?: string | null; // act toggle: 열고 닫을 화면 id
+  flag?: string; // bar: 플래그 이름
+  max?: number; // bar: 꽉 찬 값 (없으면 10)
+  w?: number; // bar: 크기 (px)
+  h?: number;
+  bgColor?: string; // bar: 빈 쪽 색 (color는 찬 쪽)
 }
 export interface ScreenDef {
   id: string;
@@ -118,6 +135,16 @@ export interface ScreenDef {
   title: string; // 화면 표시용
   bg?: string; // 배경: 그림 이름 또는 #rrggbb 색. 비우면 아래 화면이 그대로 보임
   items: ScreenItem[];
+  // HUD (FEATURE 18): 대사가 흐르는 동안 떠 있는 화면 (modal 없음, show screen). 없으면 전체 화면 (call screen)
+  kind?: 'hud';
+  w?: number; // HUD 크기 (px)
+  h?: number;
+  anchor?: ScreenAnchor; // 게임 화면의 어디에 붙이는지 (없으면 tl)
+  dx?: number; // 붙인 곳에서 옮긴 만큼 (px)
+  dy?: number;
+  bgAlpha?: number; // 배경 투명도 0~100 (없으면 100)
+  zorder?: number; // 겹치는 차례 (클수록 앞)
+  overlay?: boolean; // 게임 내내 띄우기 (config.overlay_screens)
 }
 
 export type Exit =

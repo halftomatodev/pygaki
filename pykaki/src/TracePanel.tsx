@@ -4,9 +4,13 @@ import { useStore } from './store';
 import type { BoxNode, Project } from './types';
 import { parseAction } from './flags';
 import { applyAction, boxActions, evalExpr, initVars, showVal, UNKNOWN, type Vars } from './trace';
+import { useGameFolder } from './gameFolder';
+import { ScreenArt } from './ScreensView';
+import { isHud } from './screens';
 
 interface Change { name: string; from: string; to: string }
-interface Step { box: string; vars: Vars; changes: Change[]; via: string; stack: (string | null)[] }
+// huds: HUD 줄로 띄워 둔 화면 id (FEATURE 18. 게임 내내 띄우는 HUD는 따로)
+interface Step { box: string; vars: Vars; changes: Change[]; via: string; stack: (string | null)[]; huds: string[] }
 
 const close = () => useStore.setState({ showTrace: null });
 const titleOf = (b?: BoxNode) => (b ? b.title || b.id : '(없는 상자)');
@@ -21,13 +25,35 @@ function run(acts: string[], vars: Vars, changes: Change[]) {
   }
 }
 
-function enter(p: Project, box: string, vars0: Vars, via: string, stack: (string | null)[], pre: string[] = []): Step {
+function enter(p: Project, box: string, vars0: Vars, via: string, stack: (string | null)[], pre: string[] = [], huds0: string[] = []): Step {
   const vars = { ...vars0 };
   const changes: Change[] = [];
   run(pre, vars, changes);
   const b = p.nodes.find((n) => n.id === box);
   if (b) run(boxActions(b), vars, changes);
-  return { box, vars, changes, via, stack };
+  let huds = huds0;
+  for (const l of b?.lines ?? [])
+    if (l.type === 'hud' && l.screen) huds = l.stop ? huds.filter((x) => x !== l.screen) : huds.includes(l.screen) ? huds : [...huds, l.screen];
+  return { box, vars, changes, via, stack, huds };
+}
+
+// 지금 떠 있는 HUD를 지금 플래그 값으로 (게임 화면을 줄여서)
+function HudPeek({ p, step }: { p: Project; step: Step }) {
+  const look = useGameFolder((s) => s.look);
+  const list = (p.screens ?? []).filter((s) => isHud(s) && (s.overlay || step.huds.includes(s.id))).sort((a, b) => (a.zorder ?? 0) - (b.zorder ?? 0));
+  if (!list.length) return null;
+  const W = 300;
+  const scale = W / look.width;
+  return (
+    <div title={'떠 있는 HUD: ' + list.map((s) => s.title || s.name).join(', ')}>
+      <div className="tip">떠 있는 HUD: {list.map((s) => s.title || s.name).join(', ')}</div>
+      <div className="tr-hud" style={{ width: W, height: look.height * scale }}>
+        {list.map((s) => (
+          <ScreenArt key={s.id} sc={s} scale={scale} vars={step.vars} />
+        ))}
+      </div>
+    </div>
+  );
 }
 
 export function TracePanel() {
@@ -59,7 +85,7 @@ export function TracePanel() {
       return;
     }
     setEnded(null);
-    setSteps([...steps, enter(project, target, cur.vars, via, stack, opt.pre)]);
+    setSteps([...steps, enter(project, target, cur.vars, via, stack, opt.pre, cur.huds)]);
   };
   const back = () => {
     if (ended) return setEnded(null);
@@ -81,7 +107,7 @@ export function TracePanel() {
           onClick={() => {
             const stack = st.slice(0, -1);
             if (!ret) return setEnded('call한 곳으로 돌아갔지만 "복귀 후"가 없어서 끝');
-            setSteps([...steps, enter(project, ret, cur.vars, 'call에서 돌아옴', stack)]);
+            setSteps([...steps, enter(project, ret, cur.vars, 'call에서 돌아옴', stack, [], cur.huds)]);
           }}
         >
           ⤶ call한 곳으로: {name(ret)}
@@ -183,6 +209,7 @@ export function TracePanel() {
             </ul>
           )}
         </div>
+        <HudPeek p={project} step={cur} />
         {ended ? <p className="tip">끝났어요: {ended}</p> : exits}
         <table className="tr-vars">
           <tbody>
