@@ -1,7 +1,8 @@
 // 대사 미리보기: 글자 효과 카드의 미리보기와 [효과] 화면 샘플이 같이 쓴다 (예전 PyKaki 안 플레이 화면에서 남긴 부분)
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { Line, SayStyle } from './types';
-import { boxTail, isMovieFile, lineCps } from './stage';
+import { boxTail, isMovieFile, lineCps, mediaMasked } from './stage';
+import { MaskMovie } from './maskVideo/MaskMovie';
 import { shaderTags } from './tagEdit';
 import { parseTagged, type Tagged } from './textTags';
 import { fileUrl, gameFont, useGameFolder, type GameLook } from './gameFolder';
@@ -111,12 +112,14 @@ export function useGameFileUrl(path?: string) {
   return url;
 }
 // 자리·크기·회전(게임 안 편집 화면에서 받아 적은 값, ui_kit 4.15)은 글 가운데 기준으로 옮기고 돌린다
-export function MediaBg({ path, fit, x, y, zoom, angle }: { path?: string; fit?: 'image'; x?: number; y?: number; zoom?: number; angle?: number }) {
+export function MediaBg({ path, fit, x, y, zoom, angle, mask, alpha }: { path?: string; fit?: 'image'; x?: number; y?: number; zoom?: number; angle?: number; mask?: boolean; alpha?: number }) {
   const url = useGameFileUrl(path);
   if (!url) return null;
   const cls = 'media-bg' + (fit === 'image' ? ' natural' : '');
   const move = `translate(${x ?? 0}px, ${y ?? 0}px) rotate(${angle ?? 0}deg) scale(${zoom ?? 1})`;
-  const style = { transform: fit === 'image' ? `translate(-50%, -50%) ${move}` : move };
+  const style = { transform: fit === 'image' ? `translate(-50%, -50%) ${move}` : move, opacity: alpha ?? 1 };
+  // 투명 영상(왼쪽 색 + 오른쪽 투명도)은 두 쪽을 합쳐서 보여 준다
+  if (mediaMasked(path, mask)) return <MaskMovie src={url} className={cls} style={style} />;
   return isMovieFile(path) ? <video className={cls} style={style} src={url} autoPlay loop muted playsInline /> : <img className={cls} style={style} src={url} alt="" />;
 }
 // 말풍선은 글 색을 따로 안 적으면 어두운 글 (showpy bubble text_color 기본)
@@ -207,7 +210,7 @@ function PreviewBody({ line, tagsOn, cps, look, onReplay }: { line: Line; tagsOn
         className={'preview-text ' + (ts ? 'fx-gl' : fxClass(style.effect, fast)) + boxClass(style)}
         style={{ color: boxColor(style, look.textColor), '--txt': boxColor(style, look.textColor), fontFamily: fontStack(style.font), ...charTime(cps), ...boxTilt(style, !!ts) } as React.CSSProperties}
       >
-        {style.box === 'media' && <MediaBg path={style.media} fit={style.media_fit} x={style.media_x} y={style.media_y} zoom={style.media_zoom} angle={style.media_angle} />}
+        {style.box === 'media' && <MediaBg path={style.media} fit={style.media_fit} x={style.media_x} y={style.media_y} zoom={style.media_zoom} angle={style.media_angle} mask={style.media_mask} alpha={style.media_alpha} />}
         <Glyphs parsed={parsed} shown={shown} />
       </div>
       {ts && <FxCanvas target={inner} ts={ts} tagTs={tagTs} parsed={parsed} shown={shown} limit={limit} holding={holding} fast={fast} cps={cps} onFail={onFail} />}

@@ -934,6 +934,7 @@ fieldset.plain:disabled { opacity: 0.4; }
 .sbox-media { position: relative; isolation: isolate; padding: 0.5em 0.9em; }
 .media-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; z-index: -1; pointer-events: none; }
 .media-bg.natural { inset: auto; left: 50%; top: 50%; width: auto; height: auto; max-width: 300%; max-height: 300%; transform: translate(-50%, -50%); }
+canvas.media-bg.natural { width: var(--nat-w, auto); }
 .media-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .media-row .sf-in { flex: 1; min-width: 120px; }
 .media-row .cf-kw { min-width: 64px; }
@@ -1680,3 +1681,60 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .tb-extra .media-row { flex-basis: 100%; }
 .tb-extra select, .tb-extra .sf-num { font-size: 11px; }
 .sf-pos.sf-hint { font-family: var(--font); opacity: 0.8; }
+
+/* ── 투명 영상 만들기 창 (MaskVideoDialog, Modal Dialog 꼴) ── */
+.modal.mask-dlg { width: min(860px, 94vw); max-height: 90vh; display: flex; flex-direction: column; gap: 10px; }
+.mask-head { display: flex; align-items: center; }
+.mask-head h3 { margin: 0; }
+.mask-head .sp, .mask-foot .sp { flex: 1; }
+.mask-x { width: 28px; height: 28px; padding: 0; color: var(--muted); }
+.mask-lead { margin: 0; color: var(--muted); line-height: 1.6; font-size: 12px; }
+.mask-lead code, .mask-done code { font-family: var(--mono); font-size: 11.5px; background: var(--faint); padding: 1px 5px; border-radius: 4px; }
+/* 빈 상태: 파일 고르기 + 끌어 놓기 자리 */
+.mask-empty { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 38px 20px; border: 1.5px dashed var(--line); border-radius: 12px; background: var(--faint); color: var(--muted); text-align: center; }
+.mask-empty b { color: var(--accent); font-size: 14px; }
+.mask-empty small { max-width: 440px; line-height: 1.6; }
+.mask-empty-icon { font-size: 28px; }
+.mask-empty.drag, .mask-stage.drag { border-color: var(--accent); background: var(--accent-soft); }
+.mask-body { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(250px, 1fr); gap: 18px; min-height: 0; }
+.mask-view { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+/* 체크 무늬 위에 결과 모습 */
+.mask-stage {
+  display: flex; align-items: center; justify-content: center; min-height: 220px; padding: 8px; border-radius: 10px; border: 1.5px solid var(--line);
+  background-color: #fff; background-image: linear-gradient(45deg, #d9d9d9 25%, transparent 25%, transparent 75%, #d9d9d9 75%), linear-gradient(45deg, #d9d9d9 25%, transparent 25%, transparent 75%, #d9d9d9 75%);
+  background-size: 16px 16px; background-position: 0 0, 8px 8px;
+}
+.mask-stage canvas { max-width: 100%; max-height: 46vh; display: block; }
+.mask-scrub, .mask-row { display: flex; align-items: center; gap: 8px; }
+.mask-num { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 12px; min-width: 28px; text-align: right; white-space: nowrap; }
+.mask-strip { display: flex; align-items: center; gap: 10px; color: var(--muted); }
+.mask-strip canvas { border-radius: 4px; border: 1px solid var(--line); background: #000; max-width: 240px; }
+.mask-side { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.mask-field { display: flex; flex-direction: column; gap: 5px; }
+.mask-field > label { font-size: 11.5px; font-weight: 600; color: var(--muted); }
+.mask-field .seg { margin: 0; }
+.mask-src { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.mask-src span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mask-src button { flex: none; }
+.mask-row input[type='color'] { width: 34px; height: 26px; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: none; }
+.mask-row code { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.mask-dim { color: var(--muted); font-size: 12px; }
+.mask-name { gap: 2px; }
+.mask-name span { color: var(--muted); font-family: var(--mono); font-size: 12px; }
+.mask-name input { flex: 1; min-width: 60px; font-family: var(--mono); font-size: 12px; }
+.mask-check { display: flex; align-items: center; gap: 6px; color: var(--text); }
+/* Inline Alert: 주의는 옅은 노랑, 오류는 옅은 빨강 */
+.mask-alert { padding: 8px 10px; border-radius: 8px; font-size: 12px; line-height: 1.5; background: color-mix(in srgb, #eab308 14%, var(--panel)); border: 1px solid color-mix(in srgb, #eab308 35%, var(--panel)); }
+.mask-alert.err { background: color-mix(in srgb, var(--danger) 10%, var(--panel)); border-color: color-mix(in srgb, var(--danger) 35%, var(--panel)); color: color-mix(in srgb, var(--danger) 70%, var(--text)); }
+.mask-done { display: flex; align-items: center; gap: 14px; padding: 10px 12px; border-radius: 10px; background: var(--accent-soft); }
+.mask-done > div:last-child { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.mask-done small { color: var(--muted); }
+.mask-done-view { flex: none; padding: 4px; border-radius: 6px; background-color: #fff; background-image: linear-gradient(45deg, #d9d9d9 25%, transparent 25%, transparent 75%, #d9d9d9 75%), linear-gradient(45deg, #d9d9d9 25%, transparent 25%, transparent 75%, #d9d9d9 75%); background-size: 12px 12px; background-position: 0 0, 6px 6px; }
+.mask-done-view canvas { display: block; max-width: 200px; max-height: 120px; }
+.mask-foot { display: flex; align-items: center; gap: 8px; padding-top: 4px; }
+.mask-prog { flex: 1; height: 8px; border-radius: 4px; background: var(--hover); overflow: hidden; }
+.mask-prog > div { height: 100%; background: var(--accent); transition: width 0.15s; }
+button.primary.solid { background: var(--accent); color: #fff; font-weight: 600; }
+button.primary.solid:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 85%, #000); color: #fff; }
+.sf-check { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); white-space: nowrap; }
+@media (max-width: 720px) { .mask-body { grid-template-columns: 1fr; } }

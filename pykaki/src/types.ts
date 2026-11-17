@@ -36,6 +36,9 @@ export interface SayStyle {
   media_y?: number;
   media_zoom?: number; // 배율 (글에 맞춤이면 맞춘 크기에 곱함)
   media_angle?: number; // 그림만 돌리기 (도)
+  // 투명 영상 (FEATURE 26, ui_kit 4.16): 왼쪽 색 + 오른쪽 투명도 영상인지. 없으면 파일 이름이 mask_로 시작할 때 투명 영상
+  media_mask?: boolean;
+  media_alpha?: number; // 그림 투명도 0~1 (없으면 1)
   name_size?: number;
   name_font?: string;
   name_color?: string;

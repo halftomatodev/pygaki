@@ -464,6 +464,32 @@ ipcMain.handle('pygaki:importFile', (e, token, dir) => {
   return dir + '/' + name;
 });
 
+// 투명 영상 만들기의 원본: 영상 하나, 움직이는 그림 하나, 또는 그림 여러 장(PNG 연속). 복사하지 않고 읽기만 한다
+const MASK_SOURCE_EXT = ['webm', 'mp4', 'm4v', 'mkv', 'ogv', 'mov', 'gif', 'png', 'apng', 'webp', 'avif', 'jpg', 'jpeg'];
+ipcMain.handle('pygaki:pickMaskSource', async (e) => {
+  const game = path.join(projectOf(e), 'game');
+  const w = windows.get(e.sender.id);
+  const r = await dialog.showOpenDialog(w?.win, {
+    title: '투명 영상으로 바꿀 파일 고르기 (그림 연속은 여러 장을 한꺼번에)',
+    defaultPath: game,
+    properties: ['openFile', 'multiSelections'],
+    filters: [{ name: '영상, 움직이는 그림, 그림 연속', extensions: MASK_SOURCE_EXT }],
+  });
+  if (r.canceled || !r.filePaths.length) return null;
+  return r.filePaths.map((f) => {
+    const full = path.resolve(f);
+    const token = Math.random().toString(36).slice(2) + Date.now().toString(36);
+    picked.set(token, full);
+    return { name: path.basename(full), token, size: fs.statSync(full).size };
+  });
+});
+// 고른 파일 읽기 (pickMaskSource로 고른 것만)
+ipcMain.handle('pygaki:readPicked', (e, token) => {
+  const full = picked.get(token);
+  if (!full) throw new Error('고른 파일을 찾지 못했어요');
+  return new Uint8Array(fs.readFileSync(full));
+});
+
 // 윈도우의 Electron은 alert/confirm을 닫은 뒤 글 칸에 커서가 안 들어가는 일이 있음 → 창 포커스를 한 번 뺐다가 돌려준다
 ipcMain.handle('pygaki:refocus', (e) => {
   const win = BrowserWindow.fromWebContents(e.sender);

@@ -4,7 +4,7 @@ import { useStore } from './store';
 import * as ops from './ops';
 import type { ImageKind, Line, LineFx, SayStyle } from './types';
 import { shaderEffect } from './fx/textShaders';
-import { BOXES, EFFECTS, effectKnobs, formatEffect, formatImageFx, parseEffect, parseImageFx, type EffectKnob, type EffectPart, FX_BASE, TAILS, FX_CURSOR, FX_OVERLAY, FX_TRANS, FX_WARP, POSITIONS, SHAKES, STAGE_LABEL, STAGE_TYPES, DEFAULT_FADEOUT, fxArgs, imageName, stageCode } from './stage';
+import { BOXES, EFFECTS, effectKnobs, formatEffect, formatImageFx, parseEffect, parseImageFx, type EffectKnob, type EffectPart, FX_BASE, TAILS, FX_CURSOR, FX_OVERLAY, FX_TRANS, FX_WARP, isMaskName, isMovieFile, mediaMasked, POSITIONS, SHAKES, STAGE_LABEL, STAGE_TYPES, DEFAULT_FADEOUT, fxArgs, imageName, stageCode } from './stage';
 import { useGameFolder } from './gameFolder';
 import { LinePreview } from './SayPreview';
 import { TransPicker } from './TransPicker';
@@ -263,7 +263,7 @@ export function BoxFields({ l, set }: { l: Line; set: SetLine }) {
         delete say.box_rotate;
       }
       // 그림/영상 상자의 값은 그 상자일 때만, 말풍선 꼬리는 그림 상자에 없음
-      if (b !== 'media') for (const k of ['media', 'media_fit', 'media_x', 'media_y', 'media_zoom', 'media_angle'] as const) delete say[k];
+      if (b !== 'media') for (const k of ['media', 'media_fit', 'media_x', 'media_y', 'media_zoom', 'media_angle', 'media_mask', 'media_alpha'] as const) delete say[k];
       else delete say.tail;
       if (Object.keys(say).length) x.say = say;
       else delete x.say;
@@ -317,6 +317,40 @@ export function BoxFields({ l, set }: { l: Line; set: SetLine }) {
             for (const k of ['media_x', 'media_y', 'media_zoom', 'media_angle'] as const) delete say[k];
             x.say = say;
           })} />
+        </div>
+      )}
+      {s.box === 'media' && s.media && (
+        <div className="sf-row media-row">
+          {isMovieFile(s.media) && (
+            <label className="sf-check" title="왼쪽에 색, 오른쪽에 투명도(흰색이 보이는 곳)를 담은 영상이에요. 이름이 mask_로 시작하면 저절로 켜져요. 투명 webm은 [🎞]로 바꿔요">
+              <input
+                type="checkbox"
+                checked={mediaMasked(s.media, s.media_mask)}
+                onChange={(e) => set((x) => {
+                  const say: SayStyle = { ...(x.say ?? {}) };
+                  // 이름으로 정해지는 값과 같으면 적지 않는다
+                  if (e.target.checked === isMaskName(say.media)) delete say.media_mask;
+                  else say.media_mask = e.target.checked;
+                  x.say = say;
+                })}
+              />
+              투명 영상
+            </label>
+          )}
+          <input
+            type="number"
+            className="sf-num"
+            min={0}
+            max={1}
+            step={0.1}
+            title="그림 투명도 (0 ~ 1). 비우면 1, 0이면 안 보여요"
+            placeholder="투명도"
+            value={s.media_alpha ?? ''}
+            onChange={(e) => {
+              const v = e.target.value === '' ? undefined : Math.max(0, Math.min(1, Number(e.target.value)));
+              put('media_alpha', v === undefined || v >= 1 || isNaN(v) ? undefined : Math.round(v * 100) / 100, 'media_alpha' + l.id);
+            }}
+          />
         </div>
       )}
     </>

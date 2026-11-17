@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Card } from './Card';
 import { imageNameOf, movieNameOf, pictureOf, scanFolder, soundUrl, useGameFolder } from './gameFolder';
 import { desktop } from './desktop';
+import { openMaskDialog } from './MaskVideoDialog';
 import { useStore } from './store';
 import type { BoxNode, Line, LineType } from './types';
 import { uid } from './util';
@@ -173,6 +174,11 @@ function PicPicker({ add }: { add: (l: Omit<Line, 'id' | 'text'>) => void }) {
   return (
     <>
       <PickFile kind="image" onPick={(rel) => show(imageOfPath(rel))} />
+      {desktop?.pickMaskSource && (
+        <button className="sc-pickfile" onClick={() => openMaskDialog((rel) => show(imageOfPath(rel)), '보이기 줄 넣기')} title="투명 webm, GIF, PNG 연속 그림, 초록 화면 영상을 렌파이가 쓰는 투명 영상(movies/mask_이름.webm)으로 바꿔서 보이기 줄로 넣어요">
+          🎞 투명 영상 만들기
+        </button>
+      )}
       <Grid names={names} pic={(n) => n} onPick={show} empty="images, movies 폴더에 배경 말고 다른 그림·영상이 없어요." />
       <TextAdd placeholder="이미지 이름 (예: mina smile)" onAdd={show} />
     </>

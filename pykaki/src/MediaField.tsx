@@ -1,6 +1,7 @@
 // 그림/영상 파일 칸 (FEATURE 24): 대사·선택지 뒤에 까는 파일 (game 기준 경로).
 // 글로 치거나 [📂]로 고름(앱). game 밖 파일은 묻고 game/images 또는 game/movies로 복사한다
 import { desktop } from './desktop';
+import { openMaskDialog } from './MaskVideoDialog';
 import { scanFolder } from './gameFolder';
 import { isMovieFile } from './stage';
 import { useStore } from './store';
@@ -47,6 +48,11 @@ export function MediaField({ value, onChange, placeholder, title }: { value?: st
       {desktop?.pickFile && (
         <button title="탐색기 창에서 그림·영상 파일을 골라요" onClick={() => void pickMediaFile().then((rel) => rel && onChange(rel))}>
           📂
+        </button>
+      )}
+      {desktop?.pickMaskSource && (
+        <button title="투명 영상 만들기: 투명 webm, GIF, PNG 연속 그림, 초록 화면 영상을 렌파이가 쓰는 투명 영상으로 바꿔 이 칸에 넣어요" onClick={() => openMaskDialog((rel) => onChange(rel))}>
+          🎞
         </button>
       )}
       {value && (

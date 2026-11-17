@@ -2469,3 +2469,68 @@ ${r.label} 기본 글꼴을 바꿨어요 (game/gui.rpy). 켜 둔 게임은 Shift
 game/fonts 안의 글꼴만 뺄 수 있어요	game/fonts 内のフォントだけ外せます	Only fonts in game/fonts can be removed
 game/gui.rpy가 없어요	game/gui.rpy がありません	game/gui.rpy is missing
 글꼴:	フォント:	Font:
+원본	元のファイル	Source
+취소	キャンセル	Cancel
+뺄 색	抜く色	Color to remove
+멈췄어요	止めました	Stopped
+만들었어요	作りました	Done
+원본 크기	元のサイズ	Original size
+읽는 중…	読み込み中…	Reading…
+투명 영상	透過動画	Transparent video
+1초 장 수	1 秒の枚数	Frames per second
+가장자리 색	縁の色	Edge color
+높이 360	高さ 360	Height 360
+높이 540	高さ 540	Height 540
+높이 720	高さ 720	Height 720
+높이 1080	高さ 1080	Height 1080
+다른 파일…	別のファイル…	Other file…
+다시 만들기	作り直す	Make again
+원본 투명도	元の透明度	Source transparency
+저장할 이름	保存する名前	Save as
+파일 고르기	ファイルを選ぶ	Choose files
+이 칸에 넣기	この欄に入れる	Put in this field
+{0}초	{0} 秒	{0} s
+미리 볼 프레임	プレビューするフレーム	Frame to preview
+보이기 줄 넣기	表示の行を入れる	Add show line
+투명하게 할 곳	透明にする部分	What to make transparent
+만들지 못했어요:	作れませんでした:	Couldn't make it:
+투명 영상 만들기	透過動画を作る	Make transparent video
+고른 파일이 없어요	選んだファイルがありません	No files chosen
+만든 프레임이 없어요	作ったフレームがありません	No frames were made
+🎞 투명 영상 만들기	🎞 透過動画を作る	🎞 Make transparent video
+또는 여기로 끌어 놓기	またはここにドラッグ	or drag files here
+파일을 읽지 못했어요:	ファイルを読めませんでした:	Couldn't read the file:
+원본 가장자리에 깔린 색으로	元の縁に敷かれた色にする	Use the color along the source's edges
+움직이는 그림을 읽지 못했어요	動く画像を読めませんでした	Couldn't read the animated image
+첫 조각이 키 프레임이 아니에요	最初のチャンクがキーフレームではありません	The first chunk isn't a key frame
+영상 크기나 길이를 읽지 못했어요	動画のサイズや長さを読めませんでした	Couldn't read the video's size or length
+영상을 읽는 데 너무 오래 걸려요	動画の読み込みに時間がかかりすぎています	Reading the video is taking too long
+클수록 가장자리가 부드럽게 비쳐요	大きいほど縁がやわらかく透けます	Higher values make the border fade more softly
+가장자리에 묻은 바탕 색 걷어 내기	縁に残った背景色を取る	Remove background color left on the edges
+그림 {0}장	画像 {0} 枚	{0} images
+game/{0}을(를) 만들었어요	game/{0} を作りました	Made game/{0}
+이 앱에서 VP9 영상을 만들 수 없어요	このアプリでは VP9 動画を作れません	This app can't make VP9 videos
+이 앱에서는 움직이는 그림을 읽지 못해요	このアプリでは動く画像を読めません	This app can't read animated images
+저장되는 꼴 (왼쪽 색, 오른쪽 투명도)	保存される形(左が色、右が透明度)	Saved form (color on the left, transparency on the right)
+클수록 바탕과 비슷한 색까지 더 많이 빼요	大きいほど背景に近い色までもっと抜きます	Higher values remove more colors close to the background
+바탕 색. 가장자리 색을 저절로 찾아 넣어요	背景の色。縁の色を自動で見つけて入れます	Background color. The edge color is filled in automatically
+초록 화면처럼 한 가지 색으로 깔린 바탕을 빼요	グリーンバックのように 1 色で敷かれた背景を抜きます	Removes a one-color background, like a green screen
+game/{0}이(가) 이미 있어요. 덮어쓸까요?	game/{0} はもうあります。上書きしますか?	game/{0} already exists. Overwrite it?
+이 크기로는 영상을 만들 수 없어요. 크기를 줄여 보세요	このサイズでは動画を作れません。サイズを小さくしてみてください	Can't make a video at this size. Try a smaller size
+그림 투명도 (0 ~ 1). 비우면 1, 0이면 안 보여요	画像の透明度(0 ~ 1)。空なら 1、0 なら見えません	Image opacity (0-1). Empty means 1; 0 hides it
+그림을 읽지 못했어요: {0}	画像を読めませんでした: {0}	Couldn't read the image: {0}
+실제로 저장되는 꼴: 왼쪽 색, 오른쪽 투명도(흰색이 보이는 곳)	実際に保存される形: 左が色、右が透明度(白が見える部分)	The form actually saved: color on the left, transparency on the right (white = visible)
+영상은 하나만 골라 주세요. 여러 장은 그림(PNG 연속)만 돼요	動画は 1 つだけ選んでください。複数選べるのは画像(PNG 連番)だけです	Choose only one video. Only images (a PNG sequence) can be chosen several at a time
+움직이지 않는 그림이에요. 그림 한 장은 PNG 그대로 쓰면 돼요	動かない画像です。画像 1 枚なら PNG のまま使えます	This image doesn't move. A single image can be used as a PNG as is
+원본에 들어 있는 투명도를 그대로 써요 (투명 webm, 투명 PNG·GIF)	元のファイルの透明度をそのまま使います(透過 webm、透過 PNG・GIF)	Uses the transparency in the source as is (transparent webm, PNG, GIF)
+이 원본에는 투명한 곳이 없어요. 바탕이 초록 화면이면 [색 빼기]를 골라요.	このファイルには透明な部分がありません。背景がグリーンバックなら [色を抜く] を選びます。	This source has no transparent areas. If the background is a green screen, choose [Remove color].
+{0}×{1}, 파일은 {2}×{3}	{0}×{1}、ファイルは {2}×{3}	{0}×{1}, file is {2}×{3}
+그림 한 장은 투명 영상으로 바꿀 수 없어요. 그림 연속이면 여러 장을 한꺼번에 골라 주세요	画像 1 枚は透過動画にできません。連番なら何枚かをまとめて選んでください	A single image can't become a transparent video. For a sequence, choose several images at once
+{0}. 대사·선택지 그림 칸에 넣거나, 대본에서 show 줄로 보여요.	{0}。セリフ・選択肢の画像欄に入れるか、台本の show の行で表示します。	{0}. Put it in a dialogue or choice image field, or show it with a show line.
+1초에 몇 장씩 넘길지. 영상은 원본 값으로 채워 두고, 줄이면 파일이 작아져요. 움직이는 그림은 원본 그대로예요	1 秒に何枚ずつ進めるか。動画は元の値が入り、減らすとファイルが小さくなります。動く画像は元のままです	How many frames per second. For a video the source value is filled in, and lowering it makes the file smaller. Animated images keep their own timing
+이 영상은 앱이 읽지 못해요. webm(VP8·VP9)이나 mp4(H.264)로 바꾸거나, PNG 연속 그림으로 뽑아 주세요	この動画はアプリで読めません。webm(VP8・VP9)か mp4(H.264)に変えるか、PNG 連番に書き出してください	The app can't read this video. Convert it to webm (VP8/VP9) or mp4 (H.264), or export it as a PNG sequence
+투명 영상 만들기: 투명 webm, GIF, PNG 연속 그림, 초록 화면 영상을 렌파이가 쓰는 투명 영상으로 바꿔 이 칸에 넣어요	透過動画を作る: 透過 webm、GIF、PNG 連番、グリーンバック動画を Ren'Py が使う透過動画に変換してこの欄に入れます	Make transparent video: converts a transparent webm, GIF, PNG sequence or green-screen video into the transparent video Ren'Py uses and puts it in this field
+투명 webm · 움직이는 GIF·WebP·PNG · PNG 연속 그림(여러 장을 한꺼번에) · 초록 화면 영상(mp4, webm)	透過 webm · 動く GIF・WebP・PNG · PNG 連番(何枚かをまとめて) · グリーンバック動画(mp4、webm)	Transparent webm · animated GIF/WebP/PNG · PNG sequence (several at once) · green-screen video (mp4, webm)
+왼쪽에 색, 오른쪽에 투명도(흰색이 보이는 곳)를 담은 영상이에요. 이름이 mask_로 시작하면 저절로 켜져요. 투명 webm은 [🎞]로 바꿔요	左に色、右に透明度(白が見える部分)を入れた動画です。名前が mask_ で始まれば自動でオンになります。透過 webm は [🎞] で変換します	A video with color on the left and transparency on the right (white = visible). Turned on automatically when the name starts with mask_. Convert a transparent webm with [🎞]
+투명 webm, GIF, PNG 연속 그림, 초록 화면 영상을 렌파이가 쓰는 투명 영상(movies/mask_이름.webm)으로 바꿔서 보이기 줄로 넣어요	透過 webm、GIF、PNG 連番、グリーンバック動画を Ren'Py が使う透過動画(movies/mask_名前.webm)に変換して表示の行で入れます	Converts a transparent webm, GIF, PNG sequence or green-screen video into the transparent video Ren'Py uses (movies/mask_name.webm) and adds a show line
+렌파이는 투명한 webm을 그대로 못 틀어요. 왼쪽에 색, 오른쪽에 투명도를 담은 영상으로 바꿔서 game/movies 폴더에 mask_로 시작하는 이름으로 저장해요. 이름이 mask_로 시작하면 pygaki 플러그인이 저절로 투명하게 보여 줘요.	Ren'Py は透過 webm をそのまま再生できません。左に色、右に透明度を入れた動画に変換して、game/movies フォルダに mask_ で始まる名前で保存します。名前が mask_ で始まれば pygaki プラグインが自動で透明に表示します。	Ren'Py can't play a transparent webm as is. This converts it into a video with color on the left and transparency on the right and saves it in game/movies with a name starting with mask_. When the name starts with mask_, the pygaki plugin shows it as transparent automatically.

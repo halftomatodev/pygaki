@@ -15,6 +15,8 @@ contextBridge.exposeInMainWorld('pygaki', {
   runGame: (always) => ipcRenderer.invoke('pygaki:runGame', !!always), // 렌파이에서 실행
   pickFile: (kind) => ipcRenderer.invoke('pygaki:pickFile', kind), // 탐색기로 그림·영상('image'), 소리('sound'), 글꼴('font') 고르기
   importFile: (token, dir) => ipcRenderer.invoke('pygaki:importFile', token, dir), // 밖에서 고른 파일을 game/<dir>로 복사
+  pickMaskSource: () => ipcRenderer.invoke('pygaki:pickMaskSource'), // 투명 영상으로 바꿀 원본 고르기 (여러 장 가능)
+  readPicked: (token) => ipcRenderer.invoke('pygaki:readPicked', token), // 위에서 고른 파일 읽기
   snapToGame: () => ipcRenderer.invoke('pygaki:snapToGame'), // 앱 창을 게임 창 옆으로
   refocus: () => ipcRenderer.invoke('pygaki:refocus'), // 알림 창(alert, confirm)을 닫은 뒤 글 칸에 커서가 다시 들어가게
 

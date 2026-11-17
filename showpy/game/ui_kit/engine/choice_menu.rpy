@@ -136,9 +136,9 @@ init -10 python in cmenu:
         zoom = float(d.get("media_zoom", 1.0) or 1.0)
         ox, oy = d.get("media_offset", (0, 0))
         angle = float(d.get("media_angle", 0.0) or 0.0)
-        mask = bool(d.get("media_mask", False))
+        mask = d.get("media_mask", None)  # 안 적으면 파일마다 이름으로 (mask_, 4.16)
         loop = bool(d.get("media_loop", True))
-        k = ("media", key, src, fit, zoom, angle, ox, oy, mask, loop)
+        k = ("media", key, src, fit, zoom, angle, ox, oy, mask, loop)  # mask: None | True | False
 
         def make():
             m = store.say_style.media_displayable(src, mask, loop)

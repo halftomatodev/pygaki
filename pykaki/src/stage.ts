@@ -67,6 +67,10 @@ export const FX_BASE: [string, string][] = [
 // 글 상자 (showpy ui_kit 4.0, engine/text_box.rpy)
 export const BOXES: [string, string][] = [['', '상자 없음'], ['bubble', '말풍선'], ['pill', '둥근 테두리'], ['media', '그림/영상']];
 export const isMovieFile = (p?: string) => !!p && /\.(webm|ogv|mp4|mkv|avi|mpe?g)$/i.test(p);
+// 투명 영상(왼쪽 색 + 오른쪽 투명도, 렌파이 side_mask): 이름이 mask_로 시작하는 영상 (pygaki 플러그인 stage·글 상자·선택지와 같은 규칙)
+export const isMaskName = (p?: string) => isMovieFile(p) && /(^|\/)mask_[^/]*$/i.test(p!);
+// 그 영상을 투명 영상으로 쓸지: 적은 값이 있으면 그 값, 없으면 이름으로
+export const mediaMasked = (p?: string, mask?: boolean) => isMovieFile(p) && (mask ?? isMaskName(p));
 export const TAILS: [string, string][] = [['', '꼬리 기본'], ['bottom', '꼬리 아래'], ['top', '꼬리 위'], ['left', '꼬리 왼쪽'], ['right', '꼬리 오른쪽'], ['none', '꼬리 없음']];
 // 상자마다 꼬리 기본 (showpy say_style.box_styles 기본값과 같게)
 export const boxTail = (s?: SayStyle) => (s?.box ? s.tail || (s.box === 'bubble' ? 'bottom' : 'none') : 'none');
@@ -202,7 +206,7 @@ const NATIVE: Record<keyof SayStyle, string> = {
   size: 'what_size', font: 'what_font', color: 'what_color', cps: 'what_slow_cps', effect: 'what_textshader',
   sound: '', // 대사 소리는 플러그인의 대사 소리 콜백이 받아서 연결을 켰을 때만
   box: '', tail: '', box_rotate: '', // 글 상자는 showpy가 있어야 해서 원래 이름이 없다 (내보내지 않음)
-  media: '', media_fit: '', media_x: '', media_y: '', media_zoom: '', media_angle: '',
+  media: '', media_fit: '', media_x: '', media_y: '', media_zoom: '', media_angle: '', media_mask: '', media_alpha: '',
   name_size: 'who_size', name_font: 'who_font', name_color: 'who_color',
   x: 'what_xpos', y: 'what_ypos', name_x: 'namebox_xpos', name_y: 'namebox_ypos',
 };
@@ -233,6 +237,12 @@ export function sayArgs(s0?: SayStyle, native = false, text?: string): string[] 
       a.push(`box="media"`, `media=${pyStr(s.media)}`);
       if (s.media_fit === 'image') a.push(`media_fit="image"`);
       a.push(...mediaPlace(s.media_x, s.media_y, s.media_zoom, s.media_angle));
+      // 투명 영상 (FEATURE 26): 예전 플러그인(4.14~4.15)도 알게 늘 적는다. 그림이면 적지 않음
+      if (isMovieFile(s.media)) {
+        if (mediaMasked(s.media, s.media_mask)) a.push('media_mask=True');
+        else if (isMaskName(s.media)) a.push('media_mask=False');
+      }
+      if (s.media_alpha !== undefined && s.media_alpha < 1) a.push(`media_alpha=${s.media_alpha}`);
       if (s.box_rotate) a.push(`box_rotate=${s.box_rotate}`);
     }
   } else if (!native && s.box) {

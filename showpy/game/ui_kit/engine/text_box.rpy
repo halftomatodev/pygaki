@@ -37,7 +37,7 @@
 ##   media_offset    (x, y) 옮기기 (픽셀)
 ##   media_padding   글과 그림 가장자리 사이 (media_fit="text"일 때). 숫자 하나, (가로, 세로), (왼, 위, 오른, 아래)
 ##   media_alpha     투명도 (0.0 ~ 1.0)
-##   media_mask      영상 오른쪽 절반을 투명도로 쓰는 영상이면 True (렌파이 side_mask)
+##   media_mask      영상 오른쪽 절반을 투명도로 쓰는 영상이면 True (렌파이 side_mask). 안 적으면 파일 이름이 mask_로 시작할 때 True (4.16)
 ##   media_loop      영상 되풀이 (기본 True)
 ##   media_pop       튀어나오며 나타남 (True / False, 또는 걸리는 초)
 ##
@@ -66,7 +66,7 @@ init -10 python in say_style:
             pop=False, rotate=0, text_color=None, text_outlines=None),
         "media": dict(
             src=None, fit="text", zoom=1.0, offset=(0, 0), padding=(36, 24), alpha=1.0,
-            mask=False, loop=True, angle=0.0, tail=None,
+            mask=None, loop=True, angle=0.0, tail=None,
             pop=False, rotate=0, text_color=None, text_outlines=None),
         }
 
@@ -77,11 +77,18 @@ init -10 python in say_style:
     def is_movie(path):
         return isinstance(path, str) and path.lower().endswith(MOVIE_EXTS)
 
-    def media_displayable(src, mask=False, loop=True):
-        """그림·영상 파일 → 보이는 것. 영상은 렌파이 Movie (채널은 렌파이가 저절로 하나씩)."""
+    def is_mask_name(path):
+        """mask_로 시작하는 영상 파일 이름이면 투명 영상(왼쪽 색, 오른쪽 투명도). stage.rpy의 영상 자동 등록과 같은 규칙 (4.16)."""
+        return is_movie(path) and path.replace("\\", "/").rsplit("/", 1)[-1].lower().startswith("mask_")
+
+    def media_displayable(src, mask=None, loop=True):
+        """그림·영상 파일 → 보이는 것. 영상은 렌파이 Movie (채널은 렌파이가 저절로 하나씩).
+        mask가 None이면 파일 이름으로 정함 (mask_로 시작하면 투명 영상, 4.16)."""
         if src is None or src == "":
             return None
         if is_movie(src):
+            if mask is None:
+                mask = is_mask_name(src)
             return store.Movie(play=src, side_mask=bool(mask), loop=bool(loop))
         if isinstance(src, str):
             return store.renpy.displayable(src)

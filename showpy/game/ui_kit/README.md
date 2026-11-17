@@ -13,7 +13,9 @@
 그리고 이 기능들을 **게임을 실행한 채로 마우스로 고치는 편집기**가 들어 있습니다. (개발 모드에서 Shift+M)
 대사, 선택지, show·hide·scene 줄은 편집기에서 고친 값이 **원고(.rpy)의 그 줄에 바로 저장**됩니다.
 
-버전 4.15 · 렌파이 8.5.3 기준으로 만들었습니다.
+버전 4.16 · 렌파이 8.5.3 기준으로 만들었습니다.
+
+4.16에서 바뀐 점: **투명 영상을 이름으로**. 대사 글 상자(`box="media"`)와 선택지 뒤 그림/영상(`idle_media` `hover_media` `select_media`)도 영상 파일 이름이 `mask_`로 시작하면 투명 영상(왼쪽 색, 오른쪽 투명도. 렌파이 `side_mask`)으로 틉니다. `movies/` 폴더 자동 등록과 같은 규칙입니다. `media_mask=True`/`False`를 적으면 그 값이 먼저입니다(선택지는 세 그림에 같이). 렌파이 8.5.3은 알파가 든 webm을 그대로 못 틀어서, 투명 webm·GIF·PNG 연속 그림·초록 화면 영상은 pygaki 앱의 [투명 영상 만들기]로 `movies/mask_이름.webm`을 만들어 씁니다. 옮기기: `ui_kit` 폴더를 바꿔 넣고 `.rpyc`를 지웁니다.
 
 4.15에서 바뀐 점: **그림/영상을 게임 안에서 옮기고 키우고 돌리기**. 게임 안 편집 화면(Shift+M) 대사 탭의 [고칠 것: 그림], 선택지 탭의 [고칠 것: 뒤 그림]에서 끌면 옮기고(`media_offset`), 휠이나 A/D로 크기(`media_zoom`), Q/E로 돌립니다(새 값 `media_angle`, 그림만 돌고 글은 그대로). `media_zoom`은 `media_fit="text"`(글에 맞춤)일 때도 맞춘 크기에 곱합니다. pygaki 원고면 Ctrl+S로 원고에 쓰고 대본 편집기가 받아 적습니다(선택지는 대본 편집기가 줄 끝에 붙인 `# @c:` 표시로 찾음). 기본 대사창·이름 칸 배경은 그림/영상 상자면 늘 투명합니다(4.14의 `media_window`는 없앰).
 
@@ -957,7 +959,7 @@ menu (font="fonts/KBLJump_c.ttf", size=28, appear="fade"):
 | `media_zoom`, `media_offset` | 배율(`media_fit="text"`면 글에 맞춘 크기에 곱함, 4.15), 옮기기 (픽셀) | `media_zoom=0.6` |
 | `media_angle` | 그림만 돌리기 (도, 4.15) | `media_angle=-8` |
 | `media_padding` | 글과 그림 가장자리 사이 (기본 `(36, 14)`) | `media_padding=(50, 20)` |
-| `media_mask`, `media_loop` | 투명 영상 방식(side_mask, 기본 `False`), 반복 재생(기본 `True`) | |
+| `media_mask`, `media_loop` | 투명 영상 방식(side_mask. 안 적으면 영상 이름이 `mask_`로 시작할 때 `True`, 4.16), 반복 재생(기본 `True`) | |
 | `media_button` | `True`면 기본 버튼 배경과 크기를 그대로 둠 (기본은 그림을 쓰면 버튼 배경을 없앰) | `media_button=True` |
 | 렌파이 텍스트 스타일 속성 | `font`, `size`, `color`, `kerning`(자간), `line_spacing`(줄 간격), `outlines`, `bold`, `italic`, `underline`, `strikethrough`, `textalign` … | `kerning=3` |
 | `hover_` + 스타일 속성 | 마우스를 올렸을 때 글자 스타일 | `hover_color="#ff4444"` |
@@ -1141,7 +1143,7 @@ e "흐리게." (box="media", media="images/say/frame.png", media_alpha=0.7)     
 | `media_offset` | 옮기기 (x, y 픽셀) | `media_offset=(0, -10)` |
 | `media_padding` | 글과 그림 가장자리 사이 (`media_fit="text"`일 때, 기본 `(36, 24)`) | `media_padding=40` |
 | `media_alpha` | 투명도 (0.0 ~ 1.0) | `media_alpha=0.7` |
-| `media_mask`, `media_loop` | 투명 영상 방식(side_mask, 기본 `False`), 반복 재생(기본 `True`) | `media_loop=False` |
+| `media_mask`, `media_loop` | 투명 영상 방식(side_mask. 안 적으면 영상 이름이 `mask_`로 시작할 때 `True`, 4.16), 반복 재생(기본 `True`) | `media_loop=False` |
 | `media_pop` | 튀어나오며 나타남 (`True`, `False`, 걸리는 초) | `media_pop=True` |
 
 - 편집기 대사 탭의 "상자" 칸에서 없음/말풍선/둥근 테두리, 꼬리 방향, 기울기를 고르고 Ctrl+S로 원고에 씁니다. pygaki 원고에서는 아직 못 고칩니다.

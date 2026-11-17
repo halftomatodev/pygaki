@@ -18,6 +18,9 @@ interface PygakiApi {
   // 탐색기로 파일 하나 고르기. game 안이면 rel(game 기준), 밖이면 token(importFile로 복사할 때 씀). 취소면 null
   pickFile?(kind: 'image' | 'sound' | 'font'): Promise<{ name: string; rel?: string; token?: string } | null>;
   importFile?(token: string, dir: 'images' | 'movies' | 'audio' | 'fonts'): Promise<string>; // 복사한 자리 (game 기준)
+  // 투명 영상 만들기 (maskVideo): 원본을 여러 개 고르고(그림 연속), 읽기만 한다
+  pickMaskSource?(): Promise<{ name: string; token: string; size: number }[] | null>;
+  readPicked?(token: string): Promise<Uint8Array>;
   snapToGame?(): Promise<'right' | 'left' | 'over' | 'no-game' | 'no-window'>; // 앱 창을 게임 창 옆으로
   refocus?(): Promise<void>; // alert/confirm을 닫은 뒤 창 포커스를 돌려준다
   onChange(fn: (rel: string) => void): () => void;

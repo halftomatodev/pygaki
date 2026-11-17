@@ -5,6 +5,7 @@ import { Sidebar } from './Sidebar';
 import { Canvas } from './Canvas';
 import { RightPanel } from './Panels';
 import { SettingsModal } from './SettingsModal';
+import { MaskVideoDialog } from './MaskVideoDialog';
 import { FindPanel } from './FindPanel';
 import { ScreensView } from './ScreensView';
 import { TracePanel } from './TracePanel';
@@ -185,6 +186,7 @@ export function App() {
       {showFind && view === 'script' && <FindPanel />}
       {showTrace !== null && view === 'script' && <TracePanel />}
       <HelpModal />
+      <MaskVideoDialog />
       <HintTip />
       <EditCaret />
     </ReactFlowProvider>
