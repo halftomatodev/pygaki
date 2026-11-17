@@ -296,7 +296,7 @@
 
 - Electron 앱. 화면은 웹 빌드(`dist/index.html`)를 그대로 `app/web/index.html`로 복사해 `?app=1`로 연다. 웹 코드는 `window.pygaki`가 있으면 앱 모드(`isDesktop`)로 돈다.
 - 렌파이 프로젝트 폴더 하나를 연다. `pygaki.exe --project "폴더"`(렌파이 런처 버튼), 없으면 폴더 고르는 창. 같은 프로젝트를 다시 열면 있던 창을 앞으로, 다른 프로젝트는 새 창.
-- 파일은 메인 프로세스(`app/main.cjs`)가 다룬다: `info` `list` `stat` `read` `write`(임시 파일에 쓰고 바꿔 끼움) `remove`(효과 파일 `game/ui_kit/effects/*.glsl`만 지움) `openFolder` `choose`. 경로는 프로젝트 폴더 기준이고 밖은 막는다. `game/` 폴더를 `fs.watch`로 지켜보고 바뀐 파일 이름을 `pygaki:changed`로 알린다.
+- 파일은 메인 프로세스(`app/main.cjs`)가 다룬다: `info` `list` `stat` `read` `write`(임시 파일에 쓰고 바꿔 끼움) `remove`(`game/ui_kit/effects/*.glsl`과 `game/fonts/**.ttf|otf|ttc`만 지움) `openFolder` `pickFile`(그림·소리·글꼴) `importFile`(images·movies·audio·fonts로) `choose`. 경로는 프로젝트 폴더 기준이고 밖은 막는다. `game/` 폴더를 `fs.watch`로 지켜보고 바뀐 파일 이름을 `pygaki:changed`로 알린다.
 - `src/desktop.ts`의 `AppDir`, `AppFile`이 이 기능을 브라우저 폴더 손잡이(`FileSystemDirectoryHandle`)와 같은 모양으로 감싼다. 그래서 `gameFolder.ts`, `files.ts`는 웹과 같은 코드로 돈다. 권한은 늘 `granted`.
 - 대본: 프로젝트 폴더 맨 위의 `*.flow.json`을 연다. 여러 개면 처음 열 때 고르게 하고(`src/flowPick.ts`, 상자 수·줄 수·고친 때, 가장 최근 것을 강조), 고른 이름을 `localStorage['pygaki-flow:<프로젝트 경로>']`에 둔다. 왼쪽 칸 [다른 대본 파일]은 이 기억을 지우고 창을 다시 연다. 없으면 `프로젝트이름.flow.json`으로 빈 대본을 만들고, pygaki 플러그인(`game/ui_kit`)이 있으면 `renpyLink`를 켠다. 바뀌면 0.7초 뒤 그 파일에 자동 저장(`saveQuiet`)하고 이어서 자동 내보내기(`autoExport`): `renpyLink`이고 폴더가 연결돼 있으면 받아 적기 → `generateRpy` → 오류가 없고 지난번과 다르면 `pykaki_goto.json`(지금 쓰는 줄 `activeLine`, 없으면 고른 상자의 첫 줄, [게임 줄 따라가기]를 끄면 `null`) → `script_flow.rpy`. 형식은 LINK.md 7-1. 창을 열고 처음 쓸 때(`lastAuto === null`)는 `foreignBoxes`로 원고의 `# @node:` 표시를 보고, 절반 넘게 지금 대본에 없으면 자동은 멈추고(`autoHeld`) Ctrl+E는 물어본다. 처음 덮어쓰기 전 원고는 `script_flow.rpy.bak`(`backupRpy`). 끄기 버튼 상태는 `localStorage['pykaki-follow-line']`. 브라우저 저장소의 `current`는 읽지 않는다. 버전 목록(IndexedDB)은 앱 전체가 같이 쓴다.
 - [열기]는 두 대본의 요약을 보여 주고 확인을 받은 뒤 고른 파일의 내용을 이 프로젝트 대본으로 가져오고, [새로]는 이 프로젝트 대본을 비운다. 저장 파일은 바뀌지 않는다.
@@ -304,6 +304,11 @@
 - 위쪽 줄 오른쪽(`Toolbar.tsx` `FolderButtons`): [다시 읽기] [폴더 관리 ▾] [다른 프로젝트]. [폴더 관리]는 Command Palette 꼴 메뉴(`FolderMenu.tsx`, `.fmenu` 모양을 같이 씀): 프로젝트, game, 그림, 영상, 음악·효과음, 음성, 글꼴, UI 그림, 커서, 클릭 대기, 글자 효과, 화면 셰이더, 렌파이 세이브, 앱 설정. 찾기 칸, 화살표·Enter·Esc, 고른 줄의 "쓰는 곳". game 안 폴더가 없으면 "없음, 만들고 열기"(`openFolder(rel, make)`가 game 안만 만듦). 렌파이 세이브(`options.rpy`의 `config.save_directory` → `%APPDATA%/RenPy/이름`)와 앱 설정(userData)은 `placeInfo`·`openPlace`. 연결과 끊기는 없다. 왼쪽 "렌파이 프로젝트 정보" 칸에는 정보만 둔다.
 - [▶ 렌파이에서 실행] (`files.ts` `runInRenpy`, `main.cjs` `pygaki:runGame`): 대본을 내보낸 뒤 렌파이로 이 프로젝트를 켠다. 렌파이는 앱 실행 파일의 두 칸 위 폴더(묶음의 `<렌파이 SDK>/pygaki/app`)에서, 없으면 환경 변수 `RENPY_SDK`에서 찾는다. 답은 `started` / `running` / `no-sdk` / `failed`. 설정 `prefs.runSkip`(처음 값 켬)이 켜져 있으면, 게임과 붙어 있거나(실시간 연결) 이 창이 켠 게임이 살아 있을 때 켜지 않고 `running`만 돌려준다. 켠 게임은 앱을 꺼도 그대로 둔다. pygaki 안 플레이는 세션 34에 없앴다(7장).
 - `showpy_inbox.json`이 바뀌면 0.3초 뒤 받아 적는다(창으로 돌아올 때도).
+- [글꼴] 화면 (`src/FontsView.tsx`, `src/fontsLib.ts`, `src/fontInfo.ts`, 앱에서만, 툴바 맨 끝): 왼쪽 목록(게임 폴더 바로 아래와 `game/fonts/**`의 `.ttf` `.otf` `.ttc`, `media.fonts`) 위에 기본 글꼴 네 줄(대사 `gui.text_font`, 이름 `gui.name_text_font`, 메뉴·버튼 `gui.interface_text_font`, 선택지 `gui.choice_button_text_font`. `readRoles`가 `gui.rpy`의 `define` 줄을 글자로 읽고 `gui.text_font` 같은 식은 "같게"로 따라감), 오른쪽 카드(견본, 들어 있는 글자, 기본 글꼴로, 정보, 쓰인 곳). 
+  - 글꼴 파일은 `fontInfo.readFontInfo`가 `name`(이름 16→1, 모양, 라이선스 13·14, 저작권 0. 한국어 → 영어 차례)과 `cmap`(형식 12 → 4)만 읽는다. `.ttc`는 첫 글꼴(렌파이와 같음). `coverage`는 영문·숫자 62자, 한글 11,172자(20% 넘으면 있음, 2,350자 글꼴 때문), 가나, 한자. `missingChars`는 `fontsLib.scriptText`(대사·선택지·물음·캐릭터 이름·화면 글, `{태그}`·`[변수]` 뺌)에서 없는 글자. 견본은 없는 글자를 □로 그린다(`Tofu`. 브라우저는 다른 글꼴로 대신 그려서 있는 것처럼 보이니까). 라이선스 글에 OFL·Apache면 배포 가능, 윈도우 글꼴 문구면 경고(`licenseKind`).
+  - 넣기: [+ 글꼴 넣기] → `pickFile('font')`/`importFile(token, 'fonts')`(같은 이름이면 `_2`), 끌어다 놓기는 바이트를 `readFontInfo`로 확인한 뒤 `game/fonts/`에 바로 씀. 넣은 뒤 `scanFolder`.
+  - 기본 글꼴로: `setRole` → `writeRole`이 그 `define` 줄의 값만 바꿈(뒤 주석·줄바꿈 꼴·BOM 그대로, 없으면 끝에 더함). 앱을 켠 동안 처음 바꿀 때만 `ui_kit_backup/gui/gui.날짜-시각.rpy` 백업. 뒤에 `scanFolder`(대사 미리보기 글꼴도 바뀜).
+  - 쓰인 곳(`fontUses`): 기본 글꼴 자리, 대본 줄(`say.font`, `say.name_font`, 글과 선택지의 `{font=경로}`), 게임 코드(game의 `.rpy`에서 `"경로"`를 찾음. `script_flow.rpy`·`gui.rpy`, `tl` `cache` `saves` 등 폴더, 플러그인 `editor` `engine` 폴더는 뺌). 빼기는 `game/fonts` 안에서 어디에도 안 쓰는 것만: 바이트를 `ui_kit_backup/fonts/`에 쓴 뒤 `remove`(main.cjs가 `game/fonts/**.ttf|otf|ttc`도 허락).
 - [GUI 편집] 화면 (`src/ShowpyView.tsx`, `src/showpyLive.ts`): 툴바 [대본 편집 | GUI 편집]로 바꾼다(앱에서만). 대본 화면은 숨기기만 해서 캔버스 상태가 남는다. 메인 프로세스가 `game/showpy_live.json`을 보고 그 포트로 붙어(지켜보기 + 3초마다 다시 시도) 한 줄 JSON을 `pygaki:live`로 넘기고, 화면은 `liveSend`로 명령을 보낸다(`pygaki:liveSend`). 형식은 저장소 맨 위 docs/LINK.md 9장.
   - 줄기표 (`src/ShowpyFlow.tsx`, pygaki 플러그인 screen_fx 5.2): (앱에서는 꺼 둠, `ShowpyView.tsx` `FLOW_IN_APP = false`. 셰이더를 거는 자리를 상자·label로 옮겨서) "셰이더" 칸에서 `state.flow`가 있으면 가운데 위 [줄기표 펴기/접기](`flow` `toggle`). 펴지면 가운데가 원고 | 줄기표. 행을 끌면 `flow` `range`, 누르면 `flow` `pick`과 원고 칸 스크롤(`peek`), 네모 점은 `flow` `point`, 줄기표에서 Delete나 [셰이더 지우기]는 `flow` `delete`(Delete는 상자 캔버스로 안 가게 막음). 게임 서랍과 같은 어두운 바탕.
   - 왼쪽: 고칠 것 목록. 타이틀 메뉴, 게임 내 메뉴(ESC)는 앱 칸이 있고, 나머지는 게임 안 편집기 탭을 패널과 함께 연다. 메뉴 바로 아래 "└ 타이틀 셰이더"(`title_fx`), "└ 게임 내 메뉴 셰이더"(`pause_fx`) (pygaki 플러그인 4.20).
@@ -336,6 +341,7 @@
 | `src/store.ts` | zustand 상태, 실행 취소, 선택, 상자 안 편집 상태 |
 | `src/showpyLive.ts`, `src/ShowpyView.tsx` | 데스크톱 앱의 [GUI 편집] 화면 (게임과 실시간 연결) |
 | `src/effectsLib.ts`, `src/EffectsView.tsx` | 효과 관리: 목록·켜고 끄기·넣기·빼기(7장), [효과] 화면(3장) |
+| `src/fontsLib.ts`, `src/fontInfo.ts`, `src/FontsView.tsx` | 글꼴 관리(9-2): 글꼴 파일 읽기(name·cmap 표), 기본 글꼴(gui.rpy), 넣기·빼기, [글꼴] 화면 |
 | `src/fx/TransitionCanvas.tsx` | 그림 효과(`@transition`)를 WebGL로 그리기: [효과] 화면의 샘플 |
 | `src/sample.ts` | 예제/빈 프로젝트, 불러오기 정규화 |
 | `src/persist.ts` | IndexedDB |

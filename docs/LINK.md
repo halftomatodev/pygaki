@@ -228,6 +228,9 @@ define stage.placed = {
 | `ui_kit/stage_layout.rpy` | 그림 위치 |
 | `ui_kit/engine/script_edit.rpy` | `PK_END_MARKS = True`가 있는지 (있으면 줄 끝 표시로 내보냄, 2장) |
 | `images/`, `movies/`, `audio/` | 그림, 영상, 소리 |
+| game 폴더 바로 아래와 `fonts/`의 `.ttf` `.otf` `.ttc` | 글꼴 (대사 줄 글꼴 칸, `{font=}`, [글꼴] 화면) |
+
+대본 편집기가 게임 파일을 고치는 곳은 원고(`script_flow.rpy`, `pykaki_screens.rpy`)와 개발용 파일 말고는 하나입니다: **[글꼴] 화면의 [기본 글꼴로]**가 `gui.rpy`의 `define gui.text_font`, `gui.name_text_font`, `gui.interface_text_font`, `gui.choice_button_text_font` 줄에서 값만 바꿉니다(줄이 없으면 파일 끝에 더함, 선택지는 `gui.text_font`로 "대사와 같게"도 됨). 처음 바꾸기 전에 프로젝트 폴더의 `ui_kit_backup/gui/gui.날짜-시각.rpy`에 남깁니다. 글꼴 넣기는 `game/fonts/`에 복사, 빼기는 `game/fonts/` 안의 안 쓰는 글꼴만 `ui_kit_backup/fonts/`로 옮겨 남긴 뒤 지웁니다.
 
 ## 7. `game/pykaki_preview.json` (렌파이 실시간 미리보기, 없앰)
 

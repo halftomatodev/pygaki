@@ -271,12 +271,13 @@ ipcMain.handle('pygaki:write', async (e, rel, data) => {
   return true;
 });
 
-// 지우기: 효과 폴더의 효과 파일(game/ui_kit/effects/*.glsl)만. 다른 파일은 앱이 지우지 않는다
+// 지우기: 효과 폴더의 효과 파일(game/ui_kit/effects/*.glsl)과 글꼴 폴더의 글꼴(game/fonts/**.ttf|otf|ttc)만.
+// 다른 파일은 앱이 지우지 않는다. 글꼴은 화면이 먼저 ui_kit_backup/fonts/에 백업한 뒤 부른다
 ipcMain.handle('pygaki:remove', (e, rel) => {
   const project = projectOf(e);
   const full = inside(project, rel);
   const where = path.relative(project, full).split(path.sep).join('/');
-  if (!/^game\/ui_kit\/effects\/[^/]+\.glsl$/i.test(where)) throw new Error('효과 파일만 지울 수 있어요: ' + rel);
+  if (!/^game\/ui_kit\/effects\/[^/]+\.glsl$/i.test(where) && !/^game\/fonts\/.+\.(ttf|otf|ttc)$/i.test(where)) throw new Error('효과 파일과 글꼴만 지울 수 있어요: ' + rel);
   try {
     fs.unlinkSync(full);
     return true;
@@ -428,6 +429,7 @@ ipcMain.handle('pygaki:snapToGame', (e) => {
 const PICK_KINDS = {
   image: { dir: 'images', name: '그림, 영상', ext: ['png', 'jpg', 'jpeg', 'webp', 'avif', 'webm', 'ogv', 'mp4', 'mkv'] },
   sound: { dir: 'audio', name: '소리', ext: ['ogg', 'opus', 'mp3', 'wav', 'flac'] },
+  font: { dir: 'fonts', name: '글꼴', ext: ['ttf', 'otf', 'ttc'] },
 };
 const picked = new Map(); // token → 고른 파일의 전체 경로
 ipcMain.handle('pygaki:pickFile', async (e, kind) => {
@@ -446,11 +448,11 @@ ipcMain.handle('pygaki:pickFile', async (e, kind) => {
   picked.set(token, full);
   return { name, token };
 });
-// 밖에서 고른 파일을 game/<dir>/ 로 복사한다 (dir은 images, movies, audio만). 같은 이름이 있으면 _2, _3 …을 붙인다
+// 밖에서 고른 파일을 game/<dir>/ 로 복사한다 (dir은 images, movies, audio, fonts만). 같은 이름이 있으면 _2, _3 …을 붙인다
 ipcMain.handle('pygaki:importFile', (e, token, dir) => {
   const full = picked.get(token);
   if (!full) throw new Error('고른 파일을 찾지 못했어요');
-  if (!['images', 'movies', 'audio'].includes(dir)) throw new Error('복사할 수 없는 자리예요: ' + dir);
+  if (!['images', 'movies', 'audio', 'fonts'].includes(dir)) throw new Error('복사할 수 없는 자리예요: ' + dir);
   picked.delete(token);
   const dest = inside(projectOf(e), path.join('game', dir));
   fs.mkdirSync(dest, { recursive: true });

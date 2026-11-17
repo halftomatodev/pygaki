@@ -30,6 +30,7 @@ import { liveSend, startLive, toggleGamePanel, useLive } from './showpyLive';
 import { ShowpyView } from './ShowpyView';
 import { EffectsView } from './EffectsView';
 import { ShadersView } from './ShadersView';
+import { FontsView } from './FontsView';
 
 // 단축키는 환경 설정에서 바꿀 수 있다 (prefs.ts)
 function Keys() {
@@ -48,7 +49,7 @@ function Keys() {
         return;
       }
       // 효과 화면에서는 저장과 되돌리기만 (효과를 바꾸고 빼면 대본이 바뀜)
-      if (['effects', 'shaders', 'screens'].includes(useLive.getState().view)) {
+      if (['effects', 'shaders', 'screens', 'fonts'].includes(useLive.getState().view)) {
         if (hit(e, 'save')) run(() => saveProject());
         else if (appUndo(e.target) && hit(e, 'undo')) run(s.undo);
         else if (appUndo(e.target) && hit(e, 'redo')) run(s.redo);
@@ -167,6 +168,7 @@ export function App() {
         {view === 'showpy' && <ShowpyView />}
         {view === 'effects' && <EffectsView />}
         {view === 'shaders' && <ShadersView />}
+        {view === 'fonts' && <FontsView />}
         {view === 'screens' && <ScreensView />}
       </div>
       {flash && <div className="toast">{flash}</div>}

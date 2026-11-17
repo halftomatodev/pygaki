@@ -664,6 +664,46 @@ fieldset.plain:disabled { opacity: 0.4; }
 .fxv-use-box { font-weight: 600; white-space: nowrap; max-width: 130px; overflow: hidden; text-overflow: ellipsis; }
 .fxv-use-text { flex: 1; min-width: 0; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fxv-use button { padding: 1px 8px; font-size: 12px; }
+
+/* [글꼴] 화면 (FontsView.tsx). 목록은 [효과] 화면(.fxv)과 같은 꼴 */
+.fov-card { padding: 6px 8px; }
+.fov-aa { width: 44px; flex-shrink: 0; font-size: 20px; text-align: center; line-height: 1; }
+.fov-text { display: flex; flex-direction: column; min-width: 0; }
+.fov-text .fxv-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fov-size { font-size: 11.5px; color: var(--muted); white-space: nowrap; min-width: 46px; text-align: right; }
+.fov-role-tag { background: var(--accent-soft); color: var(--accent); }
+.fov-warn { font-size: 11.5px; color: var(--danger); white-space: nowrap; }
+.fov-roles { display: flex; flex-direction: column; gap: 2px; margin-bottom: 4px; }
+.fov-role { display: flex; align-items: center; gap: 10px; padding: 4px 8px; border-radius: 8px; font-size: 12.5px; cursor: pointer; border: 1px solid transparent; }
+.fov-role:hover { background: var(--hover); }
+.fov-role.on { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 35%, transparent); }
+.fov-role-label { width: 72px; flex-shrink: 0; color: var(--muted); font-weight: 600; }
+.fov-role-font { flex: 1; min-width: 0; font-family: var(--mono); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fov-sample { background: #15171f; color: #f2f2f2; border-radius: 6px; padding: 14px 16px; line-height: 1.35; overflow: hidden; word-break: keep-all; overflow-wrap: anywhere; }
+.fov-sample-sub { font-size: 0.55em; opacity: 0.75; margin-top: 6px; }
+.fov-tofu { font-family: var(--mono); opacity: 0.55; }
+.fov-cov { display: flex; flex-wrap: wrap; gap: 6px; }
+.fov-cov-item { font-size: 12.5px; padding: 2px 9px; border-radius: 999px; white-space: nowrap; border: 1px solid var(--line); }
+.fov-cov-item.ok { color: var(--ok-text); }
+.fov-cov-item.no { color: var(--muted); }
+.fov-alert { margin-top: 8px; padding: 7px 10px; border-radius: 6px; font-size: 12.5px; line-height: 1.45; border-left: 3px solid var(--accent); background: var(--accent-soft); }
+.fov-alert.warn, .fov-alert.bad { border-left-color: var(--danger); background: color-mix(in srgb, var(--danger) 9%, var(--panel)); }
+.fov-alert.ok { border-left-color: #16a34a; background: color-mix(in srgb, #16a34a 9%, var(--panel)); }
+.fov-alert .tip { margin: 2px 0 0; }
+.fov-miss { font-size: 15px; letter-spacing: 1px; user-select: text; }
+.fov-role-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+.fov-role-btns button.on { background: var(--accent-soft); color: var(--accent); border-color: color-mix(in srgb, var(--accent) 35%, transparent); opacity: 1; }
+.fov .link { border: none; background: none; padding: 0; color: var(--accent); cursor: pointer; text-decoration: underline; font-size: inherit; }
+.fov-info { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: 12.5px; }
+.fov-info > span:nth-child(odd) { color: var(--muted); }
+.fov-lic { margin-top: 8px; font-size: 12px; }
+.fov-lic summary { cursor: pointer; color: var(--muted); }
+.fov-lic p { margin: 6px 0 0; white-space: pre-wrap; user-select: text; max-height: 160px; overflow: auto; }
+.fov-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 40px 16px; text-align: center; color: var(--muted); margin: auto; }
+.fov-empty-icon { font-size: 34px; opacity: 0.6; }
+.fov-empty p { margin: 0; max-width: 340px; }
+.fov.drag::after { content: ''; position: absolute; inset: 6px; border: 2px dashed var(--accent); border-radius: 10px; pointer-events: none; }
+.fov-drop { position: absolute; left: 50%; top: 45%; transform: translate(-50%, -50%); background: var(--panel); color: var(--accent); padding: 10px 18px; border-radius: 10px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); pointer-events: none; font-weight: 600; }
 .fxv-rm-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-top: 1px solid var(--line); font-size: 12.5px; }
 .fxv-rm-row .grow { flex: 1; }
 .fxv-rm-row select { border-color: var(--line); max-width: 180px; }

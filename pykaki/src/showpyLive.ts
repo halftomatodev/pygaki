@@ -143,7 +143,7 @@ export interface GameState {
 export interface SplashPages { pages: { id: string; title: string; new: boolean; keys?: boolean }[]; cur: string | null }
 
 interface S {
-  view: 'script' | 'showpy' | 'effects' | 'shaders' | 'screens'; // 대본 편집 / GUI 편집 / 효과 / 셰이더 / 화면 만들기
+  view: 'script' | 'showpy' | 'effects' | 'shaders' | 'screens' | 'fonts'; // 대본 편집 / GUI 편집 / 효과 / 셰이더 / 화면 만들기 / 글꼴
   gamePanel: boolean; // 게임 창에도 GUI 편집기 패널을 보일지 (앱이 기억함, F9)
   on: boolean; // 게임과 붙어 있음
   reloading: boolean; // 게임이 원고를 다시 읽는 중이라 잠깐 끊김 (게임 수정 중)

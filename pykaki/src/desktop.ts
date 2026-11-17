@@ -8,7 +8,7 @@ interface PygakiApi {
   stat(rel: string): Promise<{ dir: boolean; size: number; mtime: number } | null>;
   read(rel: string): Promise<Uint8Array | null>;
   write(rel: string, data: string | Uint8Array): Promise<boolean>;
-  remove(rel: string): Promise<boolean>; // 효과 파일(game/ui_kit/effects/*.glsl)만 지울 수 있다
+  remove(rel: string): Promise<boolean>; // 효과 파일(game/ui_kit/effects/*.glsl)과 글꼴(game/fonts/*.ttf|otf|ttc)만 지울 수 있다
   openFolder(rel: string, make?: boolean): Promise<string>; // make: 없는 game 안 폴더는 만들고 엶. 돌려주는 글이 비면 열림
   placeInfo?(id: 'appSettings' | 'renpySaves'): Promise<{ path: string; exists: boolean } | null>; // 프로젝트 밖 자리
   openPlace?(id: 'appSettings' | 'renpySaves'): Promise<string>;
@@ -16,8 +16,8 @@ interface PygakiApi {
   // 렌파이에서 실행. always가 아니면 게임이 이미 켜져 있을 때 'running'만 돌려주고 켜지 않는다
   runGame?(always: boolean): Promise<'started' | 'running' | 'no-sdk' | 'failed'>;
   // 탐색기로 파일 하나 고르기. game 안이면 rel(game 기준), 밖이면 token(importFile로 복사할 때 씀). 취소면 null
-  pickFile?(kind: 'image' | 'sound'): Promise<{ name: string; rel?: string; token?: string } | null>;
-  importFile?(token: string, dir: 'images' | 'movies' | 'audio'): Promise<string>; // 복사한 자리 (game 기준)
+  pickFile?(kind: 'image' | 'sound' | 'font'): Promise<{ name: string; rel?: string; token?: string } | null>;
+  importFile?(token: string, dir: 'images' | 'movies' | 'audio' | 'fonts'): Promise<string>; // 복사한 자리 (game 기준)
   snapToGame?(): Promise<'right' | 'left' | 'over' | 'no-game' | 'no-window'>; // 앱 창을 게임 창 옆으로
   refocus?(): Promise<void>; // alert/confirm을 닫은 뒤 창 포커스를 돌려준다
   onChange(fn: (rel: string) => void): () => void;

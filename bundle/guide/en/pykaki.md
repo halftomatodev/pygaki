@@ -1,4 +1,4 @@
-<!-- 원본: pykaki/docs/GUIDE.md @ a3ad389d35 -->
+<!-- 원본: pykaki/docs/GUIDE.md @ b27cd9213a -->
 # pygaki user guide
 
 A tool for writing Ren'Py scripts with boxes and lines and exporting them as Ren'Py script files (`.rpy`).
@@ -485,6 +485,17 @@ Press **[Effects]** at the left of the toolbar to see text effects (how dialogue
 - **Image effect sample**: the chosen image effect plays as a change from the "old image" to the "new image" (drawn with the same shader code as the game). [Choose] lets you try your own image file as the new image (not saved). The sliders include the duration. The **How to write it in the script** row shows the current values like `with img_fx.use("bands", 1.4, count=10)`; [Copy] it to use in a direct command line. In background, show and hide lines, choose an image effect in "how it appears", then press **[Details]** beside it to set the duration and values with sliders (applies only to that line).
 - **Used in**: lists the lines using that effect; [View] takes you to that box in [Script].
 - Without a connected Ren'Py folder (a game with the pygaki plugins), you can only browse. Hiding works after connecting.
+
+## 7-2. Managing fonts ([Fonts] screen, app)
+
+Press **[Fonts]** in the toolbar to see the fonts in your game, add new ones, and set the default fonts for the whole game.
+
+- **Add fonts**: Use **[+ Add font]** to pick a font file (.ttf, .otf, .ttc), or drop files onto this screen. They're copied into `game/fonts`. Added fonts also appear in a dialogue line's font field, the tag box's `{font=}`, and the font picker in the in-game editor.
+- **Default fonts**: The top left shows which font dialogue, names, menus & buttons, and choices use now (values like `gui.text_font` in `game/gui.rpy`). Pick a font and press a place under **[Use as default]** on the right; only that line changes. The first change keeps the old `gui.rpy` in `ui_kit_backup/gui/` in the project folder. Press Shift+R in a running game to reload. To change just one line, use the line's font field or a `{font=}` tag.
+- **Sample**: Draws your sample text (editable) plus Korean, Japanese and English lines in the chosen font. Characters missing from the font show as **□**, just like in the game.
+- **Characters included**: Shows how many Latin/digit, Hangul, kana and kanji characters the font has, and **which characters used in your script are missing from this font**. Ren'Py draws missing characters as boxes, so use another font or change those characters.
+- **Info and license**: Shows the file size and the license text inside the font. It tells you that SIL Open Font License (OFL) fonts may ship with your game and that fonts that come with Windows may not. Always check the license before you release.
+- **Used in, and removing**: Lists the default-font places, script lines ([Show] takes you to the box) and game code files that use the font. Only fonts in `game/fonts` that aren't used anywhere can be removed with **[Remove font]**; the file is kept in `ui_kit_backup/fonts/`.
 
 ## 8. Checking and exporting
 

@@ -2389,3 +2389,83 @@ ${m.angle}도	{0} 度	{0}°
 게임 안 편집 화면에서 정한 그림 자리·크기·회전이에요. 글 가운데 기준이에요	ゲーム内編集画面で決めた画像の位置・サイズ・回転です。文字の中央が基準です	Image position, size and rotation set in the in-game editor, measured from the text center
 게임 안 편집 화면(Shift+M)에서 그림을 끌어 옮기고, 휠로 키우고, Q/E로 돌려요. 저장하면 여기로 받아 적어요	ゲーム内編集画面(Shift+M)で画像をドラッグで動かし、ホイールで大きさ、Q/E で回します。保存するとここに書き写します	In the in-game editor (Shift+M), drag the image to move it, use the wheel to resize and Q/E to rotate. Saving copies the values here
 선택지 뒤 그림	選択肢の後ろの画像	Image behind choice
+게임에 글꼴을 넣고, 대사·이름·선택지·메뉴의 기본 글꼴을 정해요	ゲームにフォントを入れ、セリフ・名前・選択肢・メニューの標準フォントを決めます	Add fonts to the game and set the default fonts for dialogue, names, choices and menus
++ 글꼴 넣기	+ フォントを追加	+ Add font
+탐색기 창에서 글꼴 파일(.ttf, .otf, .ttc)을 골라 game/fonts에 넣어요. 파일을 이 화면에 끌어다 놓아도 돼요	エクスプローラーでフォントファイル(.ttf, .otf, .ttc)を選んで game/fonts に入れます。この画面にドラッグ&ドロップしても入ります	Pick a font file (.ttf, .otf, .ttc) in the file dialog and copy it into game/fonts. You can also drop files onto this screen
+game/fonts 폴더를 탐색기로 열어요 (없으면 만들어요)	game/fonts フォルダーをエクスプローラーで開きます(なければ作ります)	Open the game/fonts folder in Explorer (creates it if missing)
+기본 글꼴	標準フォント	Default fonts
+game/gui.rpy · 오른쪽 [기본 글꼴로]에서 바꿔요	game/gui.rpy · 右の[標準フォントに]で変えます	game/gui.rpy · change it with [Use as default] on the right
+${folderName ?? '게임'}의 글꼴	{0}のフォント	Fonts in {0}
+아직 넣은 글꼴이 없어요. 글꼴 파일을 넣으면 대사·이름·선택지에 쓸 수 있어요.	まだフォントがありません。フォントファイルを入れるとセリフ・名前・選択肢に使えます。	No fonts yet. Add a font file to use it for dialogue, names and choices.
+.ttf, .otf, .ttc 파일을 이 화면에 끌어다 놓아도 돼요	.ttf, .otf, .ttc ファイルをこの画面にドロップしても入ります	You can also drop .ttf, .otf, .ttc files onto this screen
+찾는 글꼴이 없어요.	該当するフォントがありません。	No matching fonts.
+왼쪽에서 글꼴을 고르거나 새로 넣어 주세요.	左でフォントを選ぶか、新しく追加してください。	Pick a font on the left or add a new one.
+견본 글	見本の文	Sample text
+□는 이 글꼴에 없는 글자예요. 게임에서도 네모로 나와요.	□はこのフォントにない文字です。ゲームでも四角で表示されます。	□ marks characters missing from this font. They show as boxes in the game too.
+이 글꼴에 없는 글자: ${ch}	このフォントにない文字: {0}	Missing from this font: {0}
+⚠ 이 파일을 글꼴로 읽지 못했어요. 렌파이에서도 오류가 날 수 있어요.	⚠ このファイルをフォントとして読めませんでした。Ren'Pyでもエラーになる可能性があります。	⚠ Couldn't read this file as a font. Ren'Py may fail on it too.
+들어 있는 글자	収録文字	Characters included
+렌파이는 글꼴에 없는 글자를 네모(□)로 그려요	Ren'Pyはフォントにない文字を四角(□)で描きます	Ren'Py draws characters missing from the font as boxes (□)
+영문·숫자	英数字	Latin & digits
+한글	ハングル	Hangul
+가나	かな	Kana
+한자	漢字	Kanji
+${c.have.toLocaleString()}자	{0}字	{0} chars
+${c.have.toLocaleString()} / ${c.total.toLocaleString()}자	{0} / {1}字	{0} / {1} chars
+⚠ 대본에 쓴 글자 중 이 글꼴에 없는 글자 ${miss.total}자:	⚠ 台本の文字のうち、このフォントにない文字 {0}字:	⚠ {0} characters used in the script are missing from this font:
+이 글꼴로 그 글자를 쓰면 네모로 나와요. 다른 글꼴을 쓰거나 글자를 바꿔요.	このフォントだとその文字は四角になります。別のフォントを使うか文字を変えてください。	With this font those characters show as boxes. Use another font or change the text.
+대본에 쓴 글자는 모두 들어 있어요.	台本で使った文字はすべて入っています。	All characters used in the script are included.
+기본 글꼴로	標準フォントに	Use as default
+게임 전체의 기본 글꼴이에요. 한 줄만 다르게 하려면 대사 줄의 글꼴 칸이나 {font=} 태그를 써요	ゲーム全体の標準フォントです。1行だけ変えるならセリフ行のフォント欄か {font=} タグを使います	The default font for the whole game. To change just one line, use the line's font field or a {font=} tag
+선택지 글꼴이 따로 정해져 있어요.	選択肢のフォントが別に指定されています。	The choice font is set separately.
+대사와 같게	セリフと同じに	Same as dialogue
+gui.rpy의 그 줄만 바꿔요. 처음 바꿀 때 예전 파일을 ui_kit_backup/gui/에 남겨요.	gui.rpy のその行だけを変えます。初めて変えるとき、元のファイルを ui_kit_backup/gui/ に残します。	Only that line of gui.rpy changes. The first change keeps the old file in ui_kit_backup/gui/.
+대사 글 (gui.text_font)	セリフの文字 (gui.text_font)	Dialogue text (gui.text_font)
+대사창의 말하는 사람 이름 (gui.name_text_font)	セリフ欄の話者名 (gui.name_text_font)	Speaker name in the dialogue window (gui.name_text_font)
+타이틀·저장·설정 화면 같은 메뉴와 버튼 글 (gui.interface_text_font)	タイトル・セーブ・設定画面などのメニューとボタンの文字 (gui.interface_text_font)	Menu and button text such as title, save and preferences (gui.interface_text_font)
+선택지 글 (gui.choice_button_text_font). 처음에는 대사와 같은 글꼴	選択肢の文字 (gui.choice_button_text_font)。最初はセリフと同じフォント	Choice text (gui.choice_button_text_font). Same as dialogue by default
+메뉴·버튼	メニュー・ボタン	Menus & buttons
+· ${sameAs}와 같게	· {0}と同じ	· same as {0}
+(gui.rpy에 없음)	(gui.rpy にない)	(not in gui.rpy)
+(렌파이 기본)	(Ren'Py標準)	(Ren'Py default)
+⚠ 파일 없음	⚠ ファイルなし	⚠ File missing
+⚠ 한글 없음	⚠ ハングルなし	⚠ No Hangul
+한글 없음	ハングルなし	No Hangul
+못 읽음	読めない	Unreadable
+game 폴더에 이 파일이 없어요. 게임이 켜지지 않을 수 있어요	game フォルダーにこのファイルがありません。ゲームが起動しないかもしれません	This file isn't in the game folder. The game may not start
+이 글꼴에는 한글이 거의 없어서 한글이 네모로 나와요	このフォントにはハングルがほとんどないため、ハングルが四角になります	This font has almost no Hangul, so Hangul shows as boxes
+한글이 거의 없는 글꼴이에요	ハングルがほとんどないフォントです	This font has almost no Hangul
+정보	情報	Info
+파일	ファイル	File
+글꼴 수	フォント数	Faces
+${info.faces}개 묶음 (.ttc) · 렌파이는 첫 글꼴을 써요	{0}個のまとまり (.ttc) · Ren'Pyは最初のフォントを使います	{0}-face collection (.ttc) · Ren'Py uses the first one
+글자 수	文字数	Characters
+${info.count.toLocaleString()}자	{0}字	{0} chars
+SIL 오픈 폰트 라이선스(OFL): 게임에 넣어 배포해도 돼요 (글꼴만 따로 팔면 안 돼요)	SIL Open Font License (OFL): ゲームに入れて配布できます(フォント単体の販売は不可)	SIL Open Font License (OFL): you may ship it in your game (but not sell the font by itself)
+아파치 라이선스: 게임에 넣어 배포해도 돼요	Apacheライセンス: ゲームに入れて配布できます	Apache License: you may ship it in your game
+윈도우에 든 글꼴이에요. 게임에 넣어 배포하면 안 될 수 있어요	Windows付属のフォントです。ゲームに入れて配布できない場合があります	This font comes with Windows. You may not be allowed to ship it in your game
+배포하기 전에 글꼴의 라이선스를 확인해 주세요.	配布する前にフォントのライセンスを確認してください。	Check the font's license before you release your game.
+글꼴에 적힌 라이선스	フォントに書かれたライセンス	License text in the font
+큰 글꼴이에요. 게임 배포 파일이 그만큼 커져요.	大きなフォントです。ゲームの配布ファイルがその分大きくなります。	This is a large font. Your game's download grows by that much.
+세는 중…	数えています…	Counting…
+어디에도 안 써요	どこにも使っていません	Not used anywhere
+기본 글꼴:	標準フォント:	Default font:
+게임 코드	ゲームコード	Game code
+game/${f.file} (${f.n}곳)	game/{0} ({1}か所)	game/{0} ({1} places)
+글꼴 빼기	フォントを外す	Remove font
+쓰는 곳이 있어서 뺄 수 없어요	使っている箇所があるので外せません	Can't remove it while it's in use
+이 글꼴을 game/fonts에서 빼요 (ui_kit_backup/fonts/에 남김)	このフォントを game/fonts から外します(ui_kit_backup/fonts/ に残します)	Remove this font from game/fonts (kept in ui_kit_backup/fonts/)
+game 폴더 바로 아래의 글꼴은 여기서 빼지 않아요.	game フォルダー直下のフォントはここでは外しません。	Fonts directly in the game folder aren't removed here.
+${sel} 글꼴을 뺄까요?\n파일은 프로젝트 폴더의 ui_kit_backup/fonts/에 남겨 둬요.	{0} を外しますか?\nファイルはプロジェクトフォルダーの ui_kit_backup/fonts/ に残します。	Remove the font {0}?\nThe file is kept in ui_kit_backup/fonts/ in the project folder.
+글꼴을 뺐어요. 백업: ${at}	フォントを外しました。バックアップ: {0}	Removed the font. Backup: {0}
+글꼴을 넣었어요: game/${rel}	フォントを追加しました: game/{0}	Added the font: game/{0}
+(이 글꼴에는 한글이 거의 없어요)	(このフォントにはハングルがほとんどありません)	(this font has almost no Hangul)
+${r.label} 기본 글꼴을 바꿨어요 (game/gui.rpy). 켜 둔 게임은 Shift+R로 다시 읽어요	{0}の標準フォントを変えました (game/gui.rpy)。起動中のゲームは Shift+R で再読み込みします	Changed the default {0} font (game/gui.rpy). Press Shift+R in a running game to reload
+· 예전 gui.rpy는 ${backup}	· 元の gui.rpy は {0}	· old gui.rpy saved as {0}
+여기에 놓으면 game/fonts에 넣어요	ここに置くと game/fonts に入れます	Drop here to add to game/fonts
+글꼴 관리는 pygaki 앱에서 렌파이 프로젝트를 열었을 때 써요.	フォント管理は pygaki アプリで Ren'Py プロジェクトを開いたときに使えます。	Font management works when a Ren'Py project is open in the pygaki app.
+.ttf, .otf, .ttc 파일만 넣을 수 있어요	.ttf, .otf, .ttc ファイルだけ追加できます	Only .ttf, .otf and .ttc files can be added
+글꼴 파일로 읽지 못했어요	フォントファイルとして読めませんでした	Couldn't read it as a font file
+game/fonts 안의 글꼴만 뺄 수 있어요	game/fonts 内のフォントだけ外せます	Only fonts in game/fonts can be removed
+game/gui.rpy가 없어요	game/gui.rpy がありません	game/gui.rpy is missing
+글꼴:	フォント:	Font:

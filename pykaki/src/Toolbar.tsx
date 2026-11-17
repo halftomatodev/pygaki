@@ -11,7 +11,7 @@ import { desktop, isDesktop } from './desktop';
 import { useLive } from './showpyLive';
 import { FolderMenu } from './FolderMenu';
 
-// 화면 바꾸기: 대본 편집 / GUI 편집(데스크톱 앱에서만) / 효과 / 셰이더
+// 화면 바꾸기: 대본 편집 / GUI 편집(데스크톱 앱에서만) / 화면 / 효과 / 셰이더 / 글꼴(앱에서만)
 function ViewSwitch() {
   const view = useLive((l) => l.view);
   const go = (v: typeof view) => useLive.setState({ view: v });
@@ -34,6 +34,11 @@ function ViewSwitch() {
       <button className={view === 'shaders' ? 'on' : ''} onClick={() => go('shaders')} title="화면 전체에 씌우는 셰이더와 셰이더가 바뀔 때의 전환을 봐요">
         셰이더
       </button>
+      {isDesktop && (
+        <button className={view === 'fonts' ? 'on' : ''} onClick={() => go('fonts')} title="게임에 글꼴을 넣고, 대사·이름·선택지·메뉴의 기본 글꼴을 정해요">
+          글꼴
+        </button>
+      )}
     </span>
   );
 }
