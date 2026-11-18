@@ -11,6 +11,7 @@ import { isStage } from './stage';
 import { hit } from './prefs';
 import { ShaderPanel } from './ShaderPanel';
 import { StageCards } from './StageCards';
+import { branchSummary } from './BranchTree';
 import { VoiceCard } from './VoiceCard';
 import { syncOuts } from './screens';
 import { useLive } from './showpyLive';
@@ -369,9 +370,20 @@ function LineRow({ l, i, upd, drag }: { l: Line; i: number; upd: Upd; drag: Retu
 function TargetSelect({ value, onChange, self }: { value: string | null; onChange: (v: string | null) => void; self: string }) {
   const project = useStore((s) => s.project);
   const name = (gid: string) => project.labels.find((l) => l.id === gid)?.name ?? '?';
+  const forks = project.nodes.filter((n) => n.exit.type === 'if' && n.id !== self);
   return (
     <select className="target" value={value ?? ''} onChange={(e) => onChange(e.target.value || null)}>
       <option value="">(연결 안 됨)</option>
+      {/* 조건 분기가 있는 상자를 맨 위에 모음 (조건 분기 칸과 같은 요약). 아래 장면 목록에도 그대로 있음 */}
+      {forks.length > 0 && (
+        <optgroup label="◇ 조건 분기 상자">
+          {forks.map((n) => (
+            <option key={'f' + n.id} value={n.id}>
+              ◇ {n.title || n.id} · {branchSummary(n)}
+            </option>
+          ))}
+        </optgroup>
+      )}
       {project.labels.map((g) => (
         <optgroup key={g.id} label={g.title ? `${g.title} (${g.name})` : g.name}>
           {project.nodes

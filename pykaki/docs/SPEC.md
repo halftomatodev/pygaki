@@ -380,6 +380,7 @@
 | `src/FlowMenu.tsx` | 편집 중 오른쪽에 붙는 다음 흐름 창 |
 | `src/FlowDemo.tsx` | 다음 흐름 창의 툴팁과 움직이는 견본 |
 | `src/flags.ts`, `src/FlagFields.tsx`, `src/FlagMenu.tsx`, `src/flagRecipes.ts` | 플래그: 이름 검사, 식 읽기, 쓰인 곳, 플래그 카드, 조건 칸, 바꾸기 칸, 플래그 만들기 메뉴와 용례 |
+| `src/BranchTree.tsx` | 조건 분기 칸 (세션 84): 오른쪽 칸 플래그 카드 아래 `BranchCard`. ◇ 조건 분기(켜면 조건 있는 선택지 ◆도)를 보는 플래그 이름 묶음(노랑) → 상자(보라) → 갈래 조건·그 밖(파랑) → 갈 상자(초록) 트리(`role=tree`), 시험 값(`testVars`·`takenBranch`)으로 가는 갈래 ✓·안 가는 갈래 흐리게, 장면 거르기, 상자 이름을 누르면 고르고 캔버스로. 갈 곳 고르는 칸 `TargetSelect`(Inspector)는 맨 위에 "◇ 조건 분기 상자" 묶음(`branchSummary`: 조건 / … / 그 밖) |
 | `src/flagUi.ts`, `src/FlagWidget.tsx`, `src/FlagLook.tsx`, `src/FlagJudge.tsx` | 플래그 꼴 (`FEATURE` 20): 기본 꼴·부품·불러오기, 시험 값, 이 값일 때. 레벨 인디케이터·스위치·체크박스·라디오·풀다운 그리기, 플래그 카드 꼴 줄과 꼴 팝오버, 조건 눈금, 판단 인스펙터 |
 | `licenses/` | 함께 배포하는 글꼴의 라이선스 |
 
