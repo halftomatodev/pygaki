@@ -9,7 +9,7 @@ export function RightPanel() {
     <div className="right-panel">
       <div className="right-scroll">
         <FoldScope name="right">
-          <FoldAll />
+          <FoldAll side="right" />
           <div className="insp flags-top">
             <FlagsCard />
           </div>

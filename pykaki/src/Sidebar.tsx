@@ -33,7 +33,7 @@ export function Sidebar() {
   return (
     <aside className="sidebar">
       <FoldScope name="left">
-      <FoldAll />
+      <FoldAll side="left" />
       <Card id="labels" defFolded title="label (장면)" hint="상자를 묶는 장면. 렌파이 label 하나가 돼요" topic="label(장면) 관리" extra={<button onClick={() => update((p) => void ops.addGroup(p))}>+ 추가</button>}>
         {project.labels.map((g) => (
           <GroupRow key={g.id} g={g} />

@@ -2564,3 +2564,5 @@ label의 HUD를 따라요	label の HUD に従います	Follows the label's HUD
 이 상자가 시작될 때 HUD를 띄우거나 내려요 (show screen / hide screen). 그대로면 label에서 정한 것을, 그것도 없으면 앞 상자의 HUD가 이어져요	このボックスが始まるときに HUD を出したり下げたりします (show screen / hide screen)。そのままなら label で決めたものに、それもなければ前のボックスの HUD が続きます	Shows or hides HUDs when this box starts (show screen / hide screen). Keep follows the label's choice, or else carries over the previous box's HUD
 label "${g.name}"의 HUD: ${problem}	label "{0}" の HUD: {1}	HUD of label "{0}": {1}
 label "${g.name}"의 HUD: 지운 HUD를 골라 두었어요. label의 [♡ HUD]에서 지워 주세요	label "{0}" の HUD: 削除した HUD が選ばれています。label の [♡ HUD] で外してください	HUD of label "{0}": a deleted HUD is still chosen. Remove it with the label's [♡ HUD]
+카드 투명도	カードの透明度	Card transparency
+높일수록 카드 뒤의 캔버스가 비치고 가장자리 빛이 세져요. 글이 읽기 어려우면 낮춰요	上げるほどカードの後ろのキャンバスが透けて、縁の光が強くなります。文字が読みにくければ下げてください	Higher values let the canvas show through the cards and brighten their edges. Lower it if text gets hard to read

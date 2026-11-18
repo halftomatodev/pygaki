@@ -186,6 +186,16 @@ code { font-family: var(--mono); }
 @media (prefers-reduced-motion: reduce) { .paper-fold :is(.pf-paper, .pf-crane, .pf-flap) { transition-duration: 0s; transition-delay: 0s; } }
 /* 왼쪽 칸 [모두 펼치기]는 왼쪽 끝에 (세션 79) */
 .sidebar .fold-all { justify-content: flex-start; }
+/* 세션 82: [모두 접기]와 첫 카드 사이도 카드 사이 간격(칸의 gap 10px) 그대로. 칸 접기 ‹ ›는 그 단추 바로 옆 */
+.fold-all { margin-bottom: 0; align-items: center; gap: 4px; min-height: 24px; }
+.fold-all .side-fold {
+  width: 22px; height: 22px; padding: 0; line-height: 1; font-size: 14px; border-radius: 999px;
+  color: var(--muted); background: var(--faint); border: none;
+}
+.fold-all .side-fold:hover { background: var(--line); color: var(--text); }
+/* 카드 투명도(세션 82): 투명할수록 뒤 흐림을 줄여 뿌옇지 않게 (Card.tsx glassOf). fluidkit이 style로 넣는 값을 덮음 */
+.card [data-fluidkit='liquid-fill'] { -webkit-backdrop-filter: blur(var(--card-blur, 8px)) saturate(1.6) !important; backdrop-filter: blur(var(--card-blur, 8px)) saturate(1.6) !important; }
+.card [data-fluidkit='liquid-shadow'] { opacity: var(--card-shadow, 1); }
 /* 오른쪽 칸 카드는 내용 폭만큼 (세션 79, 왼쪽의 접은 카드처럼). 오른쪽에 붙고 칸 폭보다 넓어지지 않음 */
 .right-scroll :is(.card, .insp > section.sec) { align-self: flex-end; width: fit-content; min-width: min(240px, 100%); max-width: 100%; }
 /* 오른쪽 칸 카드 머리 단추는 바탕(복숭아·분홍)에 맞춰 분홍 톤 (세션 79) */
@@ -1231,6 +1241,7 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .main .side-toggle.l { left: calc(var(--lw) + 6px); }
 .main .side-toggle.r { right: calc(var(--rw) + 6px); }
 .main .canvas-hint { left: calc(var(--lw) + 32px); }
+.main:not(.no-left) .canvas-hint { left: calc(var(--lw) + 10px); }
 /* 왼쪽 위 캔버스 조작 줄 (세션 78): 글 + ⓘ + 가로 캡슐 확대·축소·모두 보기. 그 아래 미니맵 */
 .canvas-hint { display: flex; align-items: center; gap: 8px; opacity: 1; }
 .canvas-hint-t { display: inline-flex; align-items: center; opacity: 0.7; }

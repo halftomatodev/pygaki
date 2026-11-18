@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useStore } from './store';
 import { Hint } from './Help';
 import { isDesktop } from './desktop';
-import { ACTIONS, DIMS, GRAD_DEFAULTS, THEMES, colorsOf, gradColors, gradOf, comboLabel, comboOf, resetKeys, resetPrefs, usePrefs, type ActionId, type Colors } from './prefs';
+import { ACTIONS, DIMS, GLASS, GRAD_DEFAULTS, THEMES, colorsOf, gradColors, gradOf, comboLabel, comboOf, resetKeys, resetPrefs, usePrefs, type ActionId, type Colors } from './prefs';
 
 const close = () => useStore.setState({ showPrefs: false });
 
@@ -13,6 +13,7 @@ export function SettingsModal() {
       <div className="modal prefs" onClick={(e) => e.stopPropagation()}>
         <h3>환경 설정<Hint text="화면 설정은 이 컴퓨터에만, 상자 색만 대본 파일에 저장돼요" topic="환경 설정" /></h3>
         <FramePrefs />
+        <GlassPrefs />
         <LookPrefs />
         <BoxColors />
         {isDesktop && <RunPrefs />}
@@ -104,6 +105,19 @@ function FramePrefs() {
       <label className="pick" htmlFor="frame-w">label 경계선</label>
       <input id="frame-w" type="range" min={0} max={6} step={0.5} value={w} onChange={(e) => usePrefs.setState({ frameWidth: +e.target.value })} />
       <span className="tip">{w ? w + 'px' : '안 보임'}</span>
+    </div>
+  );
+}
+
+// 카드 투명도 (세션 82): 왼쪽·오른쪽 칸과 GUI 편집 칸의 유리 카드가 모두 따른다(Card.tsx glassOf)
+function GlassPrefs() {
+  const g = usePrefs((p) => p.glass);
+  return (
+    <div className="row" data-testid="pref-glass">
+      <label className="pick" htmlFor="card-glass">카드 투명도</label>
+      <input id="card-glass" type="range" min={GLASS.min} max={GLASS.max} step={1} value={g} onChange={(e) => usePrefs.setState({ glass: +e.target.value })} />
+      <span className="tip">{g}%</span>
+      <Hint text="높일수록 카드 뒤의 캔버스가 비치고 가장자리 빛이 세져요. 글이 읽기 어려우면 낮춰요" topic="환경 설정" />
     </div>
   );
 }

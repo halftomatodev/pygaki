@@ -89,6 +89,7 @@ interface Prefs {
   keys: Record<ActionId, string>;
   dim: DimId;
   frameWidth: number; // label 경계선 굵기 (px, 0이면 안 보임)
+  glass: number; // 카드 투명도 (%, 0이면 거의 불투명. 높을수록 뒤가 비치고 테두리 빛이 세짐, Card.tsx glassOf)
   grads: Record<GradId, Grad>; // 어둡게 테마의 두 색
   textColor: string | null; // 텍스트 색. null이면 테마가 정한 색
   runSkip: boolean; // [렌파이에서 실행]: 게임이 이미 켜져 있으면 무시 (앱)
@@ -103,6 +104,9 @@ interface Prefs {
   galleryMove: boolean; // 갤러리에서 보이는 카드를 계속 움직이기 (FxGallery.tsx MAX_LIVE개까지)
   hiddenLast: boolean; // [효과]·[셰이더] 목록에서 숨긴 것을 아래로 모으기
 }
+
+// 카드 투명도의 처음 값과 범위 (세션 82)
+export const GLASS = { def: 28, min: 0, max: 85 } as const;
 
 // 칸 너비의 처음 값과 범위 (대본 편집 양쪽, GUI 편집 양쪽, 효과·셰이더 오른쪽)
 export const SIZES = {
@@ -123,7 +127,7 @@ const defKeys = () => Object.fromEntries(ACTIONS.map((a) => [a.id, a.def])) as R
 // 처음 값
 const defaults = (): Prefs => ({
   theme: 'apple', custom: { ...THEMES.find((t) => t.id === 'apple')!.colors, box: '#ffffff' }, keys: defKeys(),
-  dim: 'mid', frameWidth: 3, grads: structuredClone(GRAD_DEFAULTS), textColor: null, runSkip: true,
+  dim: 'mid', frameWidth: 3, glass: GLASS.def, grads: structuredClone(GRAD_DEFAULTS), textColor: null, runSkip: true,
   ...sizeDefaults(), sizeLock: false, gallery: true, galleryMove: false, hiddenLast: true,
 });
 

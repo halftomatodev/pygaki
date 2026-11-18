@@ -264,13 +264,17 @@ export function Canvas() {
           bgColor="var(--panel)"
         />
       </ReactFlow>
-      {/* 좌우 칸 접기/펴기 */}
-      <button className={'side-toggle l' + (hideLeft ? ' off' : '')} title={hideLeft ? '왼쪽 칸 펴기' : '왼쪽 칸 접기'} onClick={() => useStore.getState().togglePanel('left')}>
-        {hideLeft ? '›' : '‹'}
-      </button>
-      <button className={'side-toggle r' + (hideRight ? ' off' : '')} title={hideRight ? '오른쪽 칸 펴기' : '오른쪽 칸 접기'} onClick={() => useStore.getState().togglePanel('right')}>
-        {hideRight ? '‹' : '›'}
-      </button>
+      {/* 접은 칸 펴기. 칸이 펴져 있을 때 접는 단추는 칸 맨 위 [모두 접기] 옆에 있다(Card.tsx FoldAll, 세션 82) */}
+      {hideLeft && (
+        <button className="side-toggle l off" title="왼쪽 칸 펴기" onClick={() => useStore.getState().togglePanel('left')}>
+          ›
+        </button>
+      )}
+      {hideRight && (
+        <button className="side-toggle r off" title="오른쪽 칸 펴기" onClick={() => useStore.getState().togglePanel('right')}>
+          ‹
+        </button>
+      )}
       {/* 왼쪽 위: [캔버스 조작] ⓘ 옆에 가로 캡슐 확대·축소·모두 보기 (세션 78. React Flow 기본 Controls 대신) */}
       <div className="canvas-hint">
         <span className="canvas-hint-t">
