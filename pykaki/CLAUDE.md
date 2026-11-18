@@ -19,6 +19,7 @@ npm run build      # dist/index.html 한 파일로 빌드
 - 저장소 맨 위 [../CLAUDE.md](../CLAUDE.md)도 같이 따른다.
 - 기능을 고친 뒤에는 **`npm run build`로 로컬 `dist/index.html`도 다시 만든다.** 데스크톱 앱이 그 파일을 복사해 쓴다(`app`에서 `npm run web`).
 - 작업 폴더는 Dropbox 밖의 `<저장소>\pykaki`다(pygaki 저장소 안). 저장소를 Dropbox 안에 두지 않는다. Vite 캐시는 `vite.config.ts`의 `cacheDir`로 임시 폴더에 둔다(Dropbox 안에서 돌릴 때도 EBUSY로 개발 서버가 멈추지 않게).
+- 화면 움직임(전환, 애니메이션)은 [docs/MOTION.md](docs/MOTION.md) 원칙을 따르고, `src/styles.css`의 움직임 토큰(`--ease*`, `--dur-*`, `--pop-*`)만 쓴다.
 - Windows는 파일 이름 대소문자를 구분하지 않는다. 새 파일 이름이 있는 파일과 대소문자만 다르지 않게 한다.
 - PyKaki 안 플레이 화면은 없앴다(2026-11-12). 대본은 앱의 [▶ 렌파이에서 실행]과 [렌파이에서 여기로 이동]으로 게임에서 본다. 대사 미리보기는 `src/SayPreview.tsx`.
 - 커밋 작성자는 `halftomato <wwonwan@naver.com>`, GitHub 계정은 `halftomatodev`. 이 저장소의 git 설정에 `http.sslBackend=schannel`과 gh 자격 증명이 들어 있어 push가 된다.

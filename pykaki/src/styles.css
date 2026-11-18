@@ -24,6 +24,17 @@
   --mono: Consolas, 'D2Coding', monospace;
   --dim-line: 0.4;
   --dim-box: 0.18;
+  /* 움직임 토큰. 원칙은 docs/MOTION.md. 새 transition·animation은 이 값만 쓴다 */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);        /* 자리 바꿈: 툭 나가서 길게 감속 */
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);      /* 나타남 */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);       /* 사라짐 */
+  --ease-spring: linear(0, 0.081 4%, 0.252 8%, 0.441 12%, 0.611 16%, 0.748 20%, 0.869 25%, 0.943 30%, 0.989 36%, 1.007 42%, 1.011 50%, 1.006 60%, 1.002 72%, 1 86%, 1); /* 1% 넘었다 돌아옴 */
+  --dur-hover: 100ms;
+  --dur-press: 150ms;
+  --dur-pop: 250ms;
+  --dur-view: 400ms;
+  --pop-scale: 0.96;   /* 뜨는 창이 이 크기에서 1로 */
+  --pop-blur: 4px;     /* 뜨는 창이 이 흐림에서 0으로 */
   font-family: var(--font);
   font-weight: var(--font-weight, 400);
   font-size: 13px;
@@ -31,6 +42,10 @@
   color-scheme: light;
 }
 :root[data-dark='1'] { color-scheme: dark; --box-mix: calc(var(--label-tint) * 40%); }
+/* 운영체제의 '애니메이션 줄이기'(윈도우: 애니메이션 효과 끄기)를 따른다. 움직임·확대·흐림은 빼고 짧은 페이드만 남긴다 */
+@media (prefers-reduced-motion: reduce) {
+  :root { --ease-spring: var(--ease-out); --dur-view: 150ms; --pop-scale: 1; --pop-blur: 0px; }
+}
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html, body, #root { height: 100%; margin: 0; }
