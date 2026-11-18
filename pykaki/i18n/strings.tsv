@@ -2608,3 +2608,15 @@ label 이름	label 名	label name
 게임의 pygaki 플러그인이 예전 판이라 이 값은 내보내지 않아요. 런처의 [플러그인 올리기]로 올려 주세요	ゲームのpygakiプラグインが古いため、この値は書き出しません。ランチャーの [プラグインを更新] で更新してください	The game's pygaki plugin is old, so these values are not exported. Update it with [Update plugins] in the launcher
 게임의 pygaki 플러그인이 예전 판이라 선택지 "${c.text}"의 묶기, 네 점 변형, 그림 효과를 내보내지 않았어요. 런처의 [플러그인 올리기]로 올려 주세요	ゲームのpygakiプラグインが古いため、選択肢「{0}」のリンク、4点変形、画像効果を書き出しませんでした。ランチャーの [プラグインを更新] で更新してください	The game's pygaki plugin is old, so the link, corner warp and picture effect of choice "{0}" were not exported. Update it with [Update plugins] in the launcher
 게임의 pygaki 플러그인이 예전 판이라 글 상자 묶기, 네 점 변형, 그림 효과를 내보내지 않았어요. 런처의 [플러그인 올리기]로 올려 주세요 (${b.title || b.id})	ゲームのpygakiプラグインが古いため、テキストボックスのリンク、4点変形、画像効果を書き出しませんでした。ランチャーの [プラグインを更新] で更新してください ({0})	The game's pygaki plugin is old, so the text box link, corner warp and picture effect were not exported. Update it with [Update plugins] in the launcher ({0})
+링	リング	Ring
+라디오	ラジオ	Radio
+고른 링	選択したリング	Selected ring
+선택 점	選択ドット	Selection dot
+체크박스	チェックボックス	Checkbox
+체크 마크	チェックマーク	Check mark
+체크된 상자	チェックされたボックス	Checked box
+글자 (게임)	文字 (ゲーム)	Text (game)
+(고를 값 없음)	(選べる値なし)	(no values)
+플래그 꼴과 글 속 [love]	フラグの見た目と文中の [love]	Flag look and [love] in text
+예전 대본의 끌기예요. 새로 켤 수는 없어요 (끌어 놓기는 뺐어요). 끄면 다시 켤 수 없어요	以前の台本のドラッグです。新しくオンにはできません (ドラッグ&ドロップは廃止)。オフにすると戻せません	Dragging from an older script. It can't be turned on anew (drag and drop was removed). Once off, it can't be turned back on
+왼쪽 위에 호감도를 레벨 인디케이터와 숫자로 보여요. 막대는 love 플래그의 꼴이라 플래그 카드에서 꾸민 모양 그대로예요.	左上に好感度をレベルインジケーターと数字で表示します。バーは love フラグの見た目なので、フラグカードで飾った形そのままです。	Shows affection at the top left as a level indicator and a number. The bar is the love flag's look, so it matches how you styled it on the flag card.

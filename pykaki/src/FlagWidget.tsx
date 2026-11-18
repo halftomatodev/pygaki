@@ -1,4 +1,4 @@
-// 플래그의 꼴 (FEATURE 20): 레벨 인디케이터(이어진 막대, 칸 막대, 별), 슬라이더, 스위치, 풀다운, 콤보박스.
+// 플래그의 꼴 (FEATURE 20, 29): 레벨 인디케이터(이어진 막대, 칸 막대, 별), 스위치, 체크박스, 라디오, 풀다운.
 // 플래그 카드에서는 끌거나 눌러 시험 값을 바꾸고, 용례 메뉴의 견본에서는 저절로 움직인다. 부품마다 색이나 그림(게임 그림)으로 꾸민다
 import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent as RPE } from 'react';
 import type { FlagUi } from './types';
@@ -6,7 +6,7 @@ import { cornerOf, partColor, uiMax, uiMin } from './flagUi';
 import { usePic } from './ScreensView';
 import type { Val } from './trace';
 
-const PARTS = ['fill', 'track', 'border', 'on', 'off', 'thumb', 'tick', 'box', 'text'] as const;
+const PARTS = ['fill', 'track', 'border', 'on', 'off', 'thumb', 'box', 'text', 'mark', 'ring', 'dot'] as const;
 
 // 부품마다 그림 주소 (훅 수가 늘 같게 부품 이름을 다 부름)
 function useSkin(ui: FlagUi) {
@@ -20,7 +20,7 @@ interface Props {
   ui: FlagUi;
   value: Val;
   onChange?: (v: Val) => void; // 없으면 보기만
-  options?: string[]; // 풀다운·콤보의 고를 값
+  options?: string[]; // 라디오·풀다운의 고를 값
   label?: string; // 읽어 주는 이름 (플래그 이름)
   marks?: { value: number; label: string; ok: boolean; n?: number }[]; // 숫자 꼴 위의 조건 눈금 (2단계, Steps 꼴)
   onMark?: (i: number, v: number) => void; // 눈금을 끌면 그 조건의 기준 값
@@ -29,7 +29,9 @@ interface Props {
 export function FlagWidget(props: Props) {
   const { ui } = props;
   if (ui.look === 'switch') return <SwitchLook {...props} />;
-  if (ui.look === 'pulldown' || ui.look === 'combo') return <TextLook {...props} />;
+  if (ui.look === 'checkbox') return <CheckLook {...props} />;
+  if (ui.look === 'radio') return <RadioLook {...props} />;
+  if (ui.look === 'pulldown') return <TextLook {...props} />;
   return <NumberLook {...props} />;
 }
 
@@ -86,7 +88,7 @@ function NumberLook({ ui, value, onChange, label, marks, onMark }: Props) {
         })}
       </div>
     );
-  } else if (ui.look === 'level') {
+  } else {
     const discrete = ui.style === 'discrete';
     const count = Math.min(steps, 20);
     body = (
@@ -95,20 +97,6 @@ function NumberLook({ ui, value, onChange, label, marks, onMark }: Props) {
           Array.from({ length: count }, (_, i) => <span key={i} className="fw-seg" style={(i + 1) / count <= frac + 1e-9 ? paint('fill') : undefined} />)
         ) : (
           <span className="fw-fill" style={{ ...paint('fill'), width: frac * 100 + '%' }} />
-        )}
-      </div>
-    );
-  } else {
-    body = (
-      <div className="fw-slider">
-        <span className="fw-track" style={paint('track')} />
-        <span className="fw-track fw-done" style={{ ...paint('fill'), width: frac * 100 + '%' }} />
-        {steps <= 20 &&
-          Array.from({ length: steps + 1 }, (_, i) => <span key={i} className="fw-tick" style={{ left: (i / steps) * 100 + '%', background: color('tick') }} />)}
-        {pics.thumb ? (
-          <img className="fw-thumb img" src={pics.thumb} alt="" draggable={false} style={{ left: frac * 100 + '%' }} />
-        ) : (
-          <span className="fw-thumb" style={{ left: frac * 100 + '%', background: color('thumb') }} />
         )}
       </div>
     );
@@ -196,22 +184,61 @@ function TextLook({ ui, value, onChange, options = [], label }: Props) {
   const s = typeof value === 'string' ? value : '';
   const style: CSSProperties = { ...paint('box'), color: color('text'), borderColor: color('border') };
   const list = options.includes(s) ? options : [s, ...options];
-  if (ui.look === 'combo')
-    return (
-      <span className={'fw-combo c-' + cornerOf(ui)}>
-        <input aria-label={label} style={style} value={s} readOnly={!onChange} placeholder="(빈 글)" onChange={(e) => onChange?.(e.target.value)} list={'fw-opts-' + label} />
-        <datalist id={'fw-opts-' + label}>
-          {options.map((o) => (
-            <option key={o} value={o} />
-          ))}
-        </datalist>
-      </span>
-    );
   return (
     <select className={'fw-pull c-' + cornerOf(ui)} aria-label={label} style={style} value={s} disabled={!onChange} onChange={(e) => onChange?.(e.target.value)}>
       {list.map((o) => (
         <option key={o} value={o}>{o === '' ? '(빈 글)' : o}</option>
       ))}
     </select>
+  );
+}
+
+// 체크박스: 상자(체크되면 "체크된 상자")와 체크 마크. 마크가 그림이 아니면 ✓ 선
+function CheckLook({ ui, value, onChange, label }: Props) {
+  const { pics, paint, color } = useSkin(ui);
+  const on = value === true;
+  return (
+    <button type="button" role="checkbox" aria-checked={on} aria-label={label} className={'fw-check c-' + cornerOf(ui) + (on ? ' on' : '')} disabled={!onChange} onClick={() => onChange?.(!on)}>
+      <span className="fw-cbox" style={{ ...paint(on && (pics.on || ui.skin?.on?.color || !pics.box) ? 'on' : 'box'), borderColor: on ? 'transparent' : color('border') }}>
+        {pics.mark ? (
+          <img className="fw-cmark" src={pics.mark} alt="" draggable={false} />
+        ) : (
+          <svg className="fw-cmark" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke={color('mark')} strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
+        )}
+      </span>
+      <span className="fw-sw-text">{on ? '켜짐' : '꺼짐'}</span>
+    </button>
+  );
+}
+
+// 라디오: 고를 값마다 링 + 선택 점 + 글. 같은 플래그는 하나만 고름 (방향키로 옮김)
+function RadioLook({ ui, value, onChange, options = [], label }: Props) {
+  const { pics, paint, color } = useSkin(ui);
+  const s = typeof value === 'string' ? value : '';
+  const list = options.length ? (options.includes(s) || s === '' ? options : [s, ...options]) : s ? [s] : [];
+  const move = (e: KeyboardEvent, i: number) => {
+    const d = e.key === 'ArrowDown' || e.key === 'ArrowRight' ? 1 : e.key === 'ArrowUp' || e.key === 'ArrowLeft' ? -1 : 0;
+    if (!d || !onChange || !list.length) return;
+    e.preventDefault();
+    const n = (i + d + list.length) % list.length;
+    onChange(list[n]);
+    ((e.currentTarget as HTMLElement).parentElement?.children[n] as HTMLElement | undefined)?.focus();
+  };
+  if (!list.length) return <span className="fw-radio-empty">(고를 값 없음)</span>;
+  return (
+    <span className={'fw-radio' + (onChange ? ' live' : '')} role="radiogroup" aria-label={label}>
+      {list.map((o, i) => {
+        const on = o === s;
+        const ring = on ? 'on' : 'ring';
+        return (
+          <button key={o} type="button" role="radio" aria-checked={on} tabIndex={on || (!list.includes(s) && i === 0) ? 0 : -1} className={on ? 'on' : ''} disabled={!onChange} onClick={() => onChange?.(o)} onKeyDown={(e) => move(e, i)}>
+            <span className="fw-ring" style={pics[ring] ? paint(ring) : { borderColor: color(ring), background: '#fff' }}>
+              {pics.dot ? <img className="fw-dot" src={pics.dot} alt="" draggable={false} /> : <span className="fw-dot" style={{ background: color('dot') }} />}
+            </span>
+            <span style={ui.skin?.text?.color ? { color: color('text') } : undefined}>{o === '' ? '(빈 글)' : o}</span>
+          </button>
+        );
+      })}
+    </span>
   );
 }

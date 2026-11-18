@@ -87,9 +87,7 @@ export function ScreensView() {
     if (kind === 'textbutton') Object.assign(it, { text: '버튼 ' + (n + 1) }, hud ? { act: 'flag', acts: [firstAction(project.variables)].filter(Boolean) } : { value: 'b' + (n + 1) });
     if (kind === 'imagebutton') Object.assign(it, { image: '' }, hud ? { act: 'flag', acts: [firstAction(project.variables)].filter(Boolean) } : { value: 'b' + (n + 1) });
     if (kind === 'text') it.text = '글';
-    if (kind === 'drop') Object.assign(it, { text: '놓는 곳', w: DROP_W, h: DROP_H, accept: null }, hud ? { act: 'flag', acts: [firstAction(project.variables)].filter(Boolean) } : { value: 'd' + (n + 1) });
     if (kind === 'look') it.flag = project.variables[0]?.name ?? '';
-    if (kind === 'bar') Object.assign(it, { flag: project.variables.find((f) => f.kind === 'int')?.name ?? '', max: 10, w: hud ? Math.min(BAR_W, (sc.w ?? HUD_W) - 24) : BAR_W, h: BAR_H });
     updScreen((s) => void s.items.push(it));
     useScreenSel.setState({ id: sc.id, item: id });
   };
@@ -134,9 +132,7 @@ export function ScreensView() {
               <button onClick={() => addItem('imagebutton')}>+ 그림 버튼</button>
               <button onClick={() => addItem('text')}>+ 글</button>
               <button onClick={() => addItem('image')}>+ 그림</button>
-              <button onClick={() => addItem('bar')} title="숫자 플래그의 값을 막대로 보여요">+ 막대</button>
               <button onClick={() => addItem('look')} title="플래그 카드에서 만든 꼴(레벨·슬라이더·스위치·풀다운)과 꾸미기를 그대로 가져와요">+ 플래그 꼴</button>
-              <button onClick={() => addItem('drop')} title="끌 수 있는 글·그림을 여기에 놓으면 할 일을 정해요 (끌어 놓기)">+ 놓는 곳</button>
               <span className="tip">끌어서 옮겨요 · 방향키로 1px (Shift: 10px){isHud(sc) ? ' · HUD 빈 곳을 끌면 HUD가 옮겨져요' : ''}</span>
             </div>
             <Stage
@@ -736,8 +732,8 @@ function ItemCard({ sc, it, upd, remove, dup }: { sc: ScreenDef; it: ScreenItem;
           {it.kind === 'textbutton' && col('hoverColor', '올렸을 때 글자 색')}
         </div>
       )}
-      {canDrag(it.kind) && (
-        <label className="check" title="게임에서 끌어 옮길 수 있어요. 놓는 곳에 놓으면 그 할 일을 하고, 놓은 뒤에는 제자리로 돌아가요">
+      {canDrag(it.kind) && it.drag && (
+        <label className="check" title="예전 대본의 끌기예요. 새로 켤 수는 없어요 (끌어 놓기는 뺐어요). 끄면 다시 켤 수 없어요">
           <input type="checkbox" checked={!!it.drag} onChange={(e) => upd((x) => void (e.target.checked ? (x.drag = true) : delete x.drag))} />
           끌 수 있음 <span className="tip">(놓으면 제자리로)</span>
         </label>

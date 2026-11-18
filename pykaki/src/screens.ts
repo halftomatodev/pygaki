@@ -1,5 +1,5 @@
 // 화면 만들기 (FEATURE 17): 화면 목록(project.screens) → game/pykaki_screens.rpy, 흐름 "화면 부르기"의 갈래 맞추기
-import type { BoxNode, Project, ScreenAnchor, ScreenDef, ScreenItem } from './types';
+import type { BoxNode, Flag, Project, ScreenAnchor, ScreenDef, ScreenItem } from './types';
 import { addFixup } from './store';
 import { IDENT, RESERVED, uid } from './util';
 import { parseAction } from './flags';
@@ -237,12 +237,14 @@ function itemCode(p: Project, s: ScreenDef, it: ScreenItem, I0: string): string[
 }
 
 // 플래그 꼴 (FEATURE 21): 플래그 카드의 꼴과 꾸미기를 렌파이 화면 언어로. 첫 줄은 맨 바깥 칸(뒤에 pos가 들어감)
-export const LOOK_SIZE: Record<string, [number, number]> = { level: [240, 22], slider: [240, 24], rating: [220, 30], switch: [64, 32], pulldown: [200, 40], combo: [200, 40] };
+export const LOOK_SIZE: Record<string, [number, number]> = { level: [240, 22], rating: [220, 30], switch: [64, 32], checkbox: [32, 32], radio: [200, 32], pulldown: [200, 40] };
+const RADIO_ROW = 32; // 라디오 한 줄 높이 (처음 크기는 고를 값 수만큼)
 export function lookSize(p: Project, it: ScreenItem): [number, number] {
   const f = p.variables.find((v) => v.name === it.flag);
   const u = f ? flagUi(f) : null;
   const d = LOOK_SIZE[u ? (u.look === 'level' && u.style === 'rating' ? 'rating' : u.look) : 'level'];
-  return [Math.round(it.w ?? d[0]), Math.round(it.h ?? d[1])];
+  const dh = u?.look === 'radio' && f ? RADIO_ROW * Math.max(1, strOptions(p, f).filter((o) => o !== '').length) : d[1];
+  return [Math.round(it.w ?? d[0]), Math.round(it.h ?? dh)];
 }
 export function lookCode(p: Project, it: ScreenItem): string[] {
   const f = p.variables.find((v) => v.name === it.flag);
@@ -293,30 +295,41 @@ export function lookCode(p: Project, it: ScreenItem): string[] {
     // 바꿀 수 있으면 끌어서 정수로 (VariableValue, 최솟값~최댓값). 아니면 따라가기만 (AnimatedValue)
     const v = edit ? `VariableValue(${py(n)}, min=${lo}, max=${hi}, step=1, force_step=True)` : `AnimatedValue(${n} - ${lo}, ${hi - lo}, 0.3)`;
     const value = `${I}value ${v}`;
-    if (u.look === 'slider') {
-      // 트랙은 가운데 가는 띠(각지게가 아니면 알약), 손잡이는 그림이 없으면 동그라미(각지게면 세로 네모)
-      const th = Math.max(4, Math.round(h / 5));
-      const thin = (k: string) => {
-        const img = u.skin?.[k]?.image?.trim();
-        const d = img ? `Transform(${imgRef(img)}, xysize=(${w}, ${th}), yalign=0.5)` : cn === 'square' ? `Solid(${py(partColor(u, k))}, xysize=(${w}, ${th}), yalign=0.5)`
-          : `Transform(${roundOf(`Solid(${py(partColor(u, k))}, xysize=(${w}, ${th}))`, th / 2)}, yalign=0.5)`;
-        return `Fixed(${d}, xysize=(${w}, ${h}))`;
-      };
-      const t = u.skin?.thumb?.image?.trim();
-      const tw = t || cn !== 'square' ? h : Math.max(6, Math.round(h * 0.5));
-      const tr = cn === 'square' ? 0 : h / 2;
-      const out = ['bar:', value, `${I}xysize (${w}, ${h})`, `${I}left_bar ${thin('fill')}`, `${I}right_bar ${thin('track')}`,
-        `${I}thumb ${t ? `Transform(${imgRef(t)}, xysize=(${h}, ${h}))` : roundOf(`Solid(${py(partColor(u, 'thumb'))}, xysize=(${tw}, ${h}))`, tr)}`, `${I}thumb_offset ${Math.round(tw / 2)}`];
-      // 바꿀 수 있으면 고른 손잡이에 테두리(색은 반투명 흰색, 안은 손잡이 색). 키보드: Enter로 잡고 ←→, 다시 Enter
-      if (edit)
-        out.push(`${I}hover_thumb ${t ? `Transform(${imgRef(t)}, xysize=(${h}, ${h}), matrixcolor=BrightnessMatrix(0.15))`
-          : `Fixed(${roundOf(`Solid("#ffffffa0", xysize=(${tw}, ${h}))`, tr)}, Transform(${roundOf(`Solid(${py(partColor(u, 'thumb'))}, xysize=(${Math.max(2, tw - 6)}, ${h - 6}))`, cn === 'square' ? 0 : (h - 6) / 2)}, align=(0.5, 0.5)), xysize=(${tw}, ${h}))`}`);
-      return out;
-    }
     const ir = Math.max(0, rad(h) - 1);
     return ['frame:', `${I}background ${part('border', w, h, rad(h))}`, `${I}padding (1, 1)`, `${I}xysize (${w}, ${h})`,
       `${I}bar:`, I + value, `${I}${I}xysize (${w - 2}, ${h - 2})`, `${I}${I}left_bar ${part('fill', w - 2, h - 2, ir)}`, `${I}${I}right_bar ${part('track', w - 2, h - 2, ir)}`,
       ...(edit ? [`${I}${I}hover_left_bar ${lit(part('fill', w - 2, h - 2), w - 2, h - 2, ir)}`, `${I}${I}hover_right_bar ${lit(part('track', w - 2, h - 2), w - 2, h - 2, ir)}`] : []), `${I}${I}thumb None`];
+  }
+  if (f.kind === 'bool' && u.look === 'checkbox') {
+    // 체크박스: 테두리 + 상자, 체크되면 "체크된 상자" + 마크(그림이 없으면 ✓ 글자)
+    const r = rad(h), mk = u.skin?.mark?.image?.trim();
+    const off = u.skin?.box?.image?.trim() ? part('box', w, h) : `Fixed(${part('border', w, h, r)}, Transform(${part('box', w - 4, h - 4, Math.max(0, r - 2))}, pos=(2, 2)), xysize=(${w}, ${h}))`;
+    const mark = mk ? `Transform(${imgRef(mk)}, xysize=(${Math.round(w * 0.8)}, ${Math.round(h * 0.8)}), fit="contain", align=(0.5, 0.5))`
+      : `Text("✓", font="DejaVuSans.ttf", size=${Math.round(h * 0.8)}, color=${py(partColor(u, 'mark'))}, align=(0.5, 0.5))`;
+    const onD = u.skin?.box?.image?.trim() && !u.skin?.on ? off : part('on', w, h, r); // 상자 그림만 있으면 체크돼도 그 그림 (앱 꼴과 같게)
+    const inner = (I1: string) => [`${I1}add (${onD} if ${n} else ${off})`, `${I1}if ${n}:`, `${I1}${I}add ${mark}`];
+    if (!edit) return ['fixed:', `${I}xysize (${w}, ${h})`, ...inner(I)];
+    return ['button:', `${I}xysize (${w}, ${h})`, `${I}background None`, `${I}padding (0, 0)`, `${I}hover_foreground ${litFg(r)}`, `${I}action ToggleVariable(${py(n)})`, `${I}fixed:`, ...inner(I + I)];
+  }
+  if (f.kind === 'str' && u.look === 'radio') {
+    // 라디오: 고를 값마다 한 줄 (링 + 고르면 선택 점 + 글). 링은 그림이 없으면 둥근 색 두 겹
+    const opts = strOptions(p, f).filter((o) => o !== '');
+    if (!opts.length) return [];
+    const rh = Math.max(12, Math.floor(h / opts.length)), k = Math.min(Math.round(rh * 0.7), 40), d = Math.round(k * 0.5);
+    const ts = Math.max(12, Math.round(rh * 0.55)), tc = py(partColor(u, 'text'));
+    const ring = (key: string) => (u.skin?.[key]?.image?.trim() ? part(key, k, k)
+      : `Fixed(${roundOf(`Solid(${py(partColor(u, key))}, xysize=(${k}, ${k}))`, k / 2)}, Transform(${roundOf(`Solid("#ffffff", xysize=(${k - 4}, ${k - 4}))`, (k - 4) / 2)}, pos=(2, 2)), xysize=(${k}, ${k}))`);
+    const dot = u.skin?.dot?.image?.trim() ? `Transform(${imgRef(u.skin.dot.image.trim())}, xysize=(${k}, ${k}), fit="contain")` : `Transform(${roundOf(`Solid(${py(partColor(u, 'dot'))}, xysize=(${d}, ${d}))`, d / 2)}, align=(0.5, 0.5))`;
+    const onRing = ring('on');
+    const out = ['vbox:', `${I}xsize ${w}`];
+    for (const o of opts) {
+      const sel = `${n} == ${py(o)}`;
+      const row = (I1: string) => [`${I1}fixed:`, `${I1}${I}xysize (${k}, ${k})`, `${I1}${I}yalign 0.5`, `${I1}${I}add (${onRing} if ${sel} else ${ring('ring')})`, `${I1}${I}if ${sel}:`, `${I1}${I}${I}add ${dot}`,
+        `${I1}text ${py(o.replace(/\[/g, '[[').replace(/\{/g, '{{'))} size ${ts} color ${tc} xpos ${k + 8} yalign 0.5`];
+      if (edit) out.push(`${I}button:`, `${I}${I}xysize (${w}, ${rh})`, `${I}${I}background None`, `${I}${I}padding (0, 0)`, `${I}${I}hover_foreground ${litFg(4)}`, `${I}${I}action SetVariable(${py(n)}, ${py(o)})`, `${I}${I}fixed:`, ...row(I + I + I));
+      else out.push(`${I}fixed:`, `${I}${I}xysize (${w}, ${rh})`, ...row(I + I));
+    }
+    return out;
   }
   if (f.kind === 'bool') {
     const k = Math.round(h * 0.8), m = Math.round((h - k) / 2);
@@ -324,7 +337,7 @@ export function lookCode(p: Project, it: ScreenItem): string[] {
     if (!edit) return ['fixed:', `${I}xysize (${w}, ${h})`, ...inner(I)];
     return ['button:', `${I}xysize (${w}, ${h})`, `${I}background None`, `${I}padding (0, 0)`, `${I}hover_foreground ${litFg(pillR(h))}`, `${I}action ToggleVariable(${py(n)})`, `${I}fixed:`, ...inner(I + I)];
   }
-  // 글자: 값을 글로 보이는 칸. 바꿀 수 있으면 눌러서 고를 값 목록을 펼침 (콤보는 아래에 글 치는 칸도)
+  // 글자 풀다운: 값을 글로 보이는 칸. 바꿀 수 있으면 눌러서 고를 값 목록을 펼침
   const ts = Math.max(12, Math.round(h * 0.5));
   const tc = py(partColor(u, 'text'));
   const value = (I1: string) => `${I1}text "[${n}]" color ${tc} yalign 0.5 size ${ts}`;
@@ -343,13 +356,6 @@ export function lookCode(p: Project, it: ScreenItem): string[] {
   for (const o of opts)
     out.push(`${I4}textbutton ${py(o.replace(/\[/g, '[[').replace(/\{/g, '{{'))}:`, `${I4}${I}xfill True`, `${I4}${I}padding (10, 4)`, `${I4}${I}background ${part('box', w - 2, h - 2)}`, `${I4}${I}hover_background ${hl}`, `${I4}${I}selected_background ${hl}`,
       `${I4}${I}text_size ${ts}`, `${I4}${I}text_color ${tc}`, `${I4}${I}text_hover_color ${bc}`, `${I4}${I}text_selected_color ${bc}`, `${I4}${I}selected ${n} == ${py(o)}`, `${I4}${I}action [SetVariable(${py(n)}, ${py(o)}), SetScreenVariable(${py(open)}, False)]`);
-  if (u.look === 'combo')
-  {
-    // 글 치는 칸: 누르면 치기 시작(Toggle), Enter로 끝(action Disable: Enter가 대사로 가지 않음). 누르기가 대사로 가지 않게 button으로 감쌈
-    const iv = `VariableInputValue(${py(n)}, default=False, returnable=False)`;
-    out.push(`${I4}button:`, `${I4}${I}xfill True`, `${I4}${I}padding (10, 4)`, `${I4}${I}background ${part('box', w - 2, h - 2)}`, `${I4}${I}hover_foreground ${litFg(0)}`, `${I4}${I}action ${iv}.Toggle()`,
-      `${I4}${I}input value ${iv} action [${iv}.Disable(), SetScreenVariable(${py(open)}, False)] size ${ts} color ${tc} pixel_width ${Math.max(20, w - 24)}`);
-  }
   return out;
 }
 
@@ -509,21 +515,20 @@ export function screensCode(p: Project, only?: string): string {
   return out.join('\n') + '\n';
 }
 
-// HUD 틀 세 가지 (FEATURE 18): 필요한 플래그도 만든다 (같은 이름이 있으면 그대로 씀). 만든 화면 id
-export type HudTemplate = 'inventory' | 'love' | 'map' | 'use';
+// HUD 틀 세 가지 (FEATURE 18. 물건 쓰기(끌어 놓기) 틀은 너무 복잡해서 뺌): 필요한 플래그도 만든다 (같은 이름이 있으면 그대로 씀). 만든 화면 id
+export type HudTemplate = 'inventory' | 'love' | 'map';
 // [+ HUD 틀에서] 메뉴 (Command Palette 꼴, 설명 카드에 영상): 메뉴 줄 글, 설명, 만드는 플래그, ✎ 바꾸는 곳, ? 보는 곳
 export interface HudTpl { id: HudTemplate; icon: string; title: string; kindHint: string; desc: string; flags: string[]; write: string[]; read: string[] }
 export const HUD_TEMPLATES: HudTpl[] = [
   { id: 'inventory', icon: '🎒', title: '인벤토리', kindHint: '켜짐/꺼짐', desc: '오른쪽 위에 가진 물건을 늘어놓아요. 플래그가 켜진 물건만 보여요.', flags: ['has_key', 'has_map', 'has_lamp'], write: ['대본에서 물건을 얻을 때: has_key = True'], read: ['물건마다 보이는 조건: has_key'] },
-  { id: 'love', icon: '♥', title: '호감도 막대', kindHint: '숫자', desc: '왼쪽 위에 호감도를 막대와 숫자로 보여요. 값이 바뀌면 막대가 부드럽게 움직여요.', flags: ['love'], write: ['선택지를 고르면: love += 1'], read: ['막대와 글 속 [love]'] },
+  { id: 'love', icon: '♥', title: '호감도 막대', kindHint: '숫자', desc: '왼쪽 위에 호감도를 레벨 인디케이터와 숫자로 보여요. 막대는 love 플래그의 꼴이라 플래그 카드에서 꾸민 모양 그대로예요.', flags: ['love'], write: ['선택지를 고르면: love += 1'], read: ['플래그 꼴과 글 속 [love]'] },
   { id: 'map', icon: '⌖', title: '미니맵', kindHint: '글자', desc: '오른쪽 아래에 장소 버튼을 늘어놓아요. 누르면 그 상자로 가요. 지금 장소는 글자 플래그로 보여요.', flags: ['place'], write: ['장소 상자에 들어갈 때: place = "부엌"'], read: ['글 속 [place]', '버튼마다 갈 상자를 골라요'] },
-  { id: 'use', icon: '✋', title: '물건 쓰기 (끌어 놓기)', kindHint: '끌어 놓기', desc: '가진 물건을 끌어 문에 놓으면 문이 열려요. 다른 곳에 놓으면 물건이 제자리로 돌아가요.', flags: ['has_key', 'door_open'], write: ['문에 열쇠를 놓으면: door_open = True, has_key = False'], read: ['열쇠의 보이는 조건: has_key', '대본의 조건 분기: door_open'] },
 ];
 // 틀의 글은 대본에 저장되는 글이라 화면 사전으로 바꾸지 않고 처음부터 화면 언어로 넣는다 (sample.ts 새 대본 이름과 같게)
 const TPL_WORDS = {
-  ko: { inv: '인벤토리', have: '가진 것', key: '열쇠', map: '지도', lamp: '등불', keyN: '열쇠를 가졌는지', mapN: '지도를 가졌는지', lampN: '등불을 가졌는지', love: '호감도 막대', loveT: '호감도', loveN: '호감도', mini: '미니맵', now: '지금', place: '지금 있는 장소', rooms: ['거실', '부엌', '정원'], use: '물건 쓰기', door: '문 (여기에 놓기)', doorN: '문이 열렸는지' },
-  ja: { inv: 'インベントリ', have: '持ち物', key: '鍵', map: '地図', lamp: 'ランプ', keyN: '鍵を持っているか', mapN: '地図を持っているか', lampN: 'ランプを持っているか', love: '好感度バー', loveT: '好感度', loveN: '好感度', mini: 'ミニマップ', now: '現在地', place: '今いる場所', rooms: ['居間', '台所', '庭'], use: 'アイテムを使う', door: 'ドア (ここに置く)', doorN: 'ドアが開いたか' },
-  en: { inv: 'Inventory', have: 'Items', key: 'Key', map: 'Map', lamp: 'Lamp', keyN: 'Has the key', mapN: 'Has the map', lampN: 'Has the lamp', love: 'Affection bar', loveT: 'Affection', loveN: 'Affection', mini: 'Minimap', now: 'Now', place: 'Current place', rooms: ['Living room', 'Kitchen', 'Garden'], use: 'Use an item', door: 'Door (drop here)', doorN: 'Door is open' },
+  ko: { inv: '인벤토리', have: '가진 것', key: '열쇠', map: '지도', lamp: '등불', keyN: '열쇠를 가졌는지', mapN: '지도를 가졌는지', lampN: '등불을 가졌는지', love: '호감도 막대', loveT: '호감도', loveN: '호감도', mini: '미니맵', now: '지금', place: '지금 있는 장소', rooms: ['거실', '부엌', '정원'] },
+  ja: { inv: 'インベントリ', have: '持ち物', key: '鍵', map: '地図', lamp: 'ランプ', keyN: '鍵を持っているか', mapN: '地図を持っているか', lampN: 'ランプを持っているか', love: '好感度バー', loveT: '好感度', loveN: '好感度', mini: 'ミニマップ', now: '現在地', place: '今いる場所', rooms: ['居間', '台所', '庭'] },
+  en: { inv: 'Inventory', have: 'Items', key: 'Key', map: 'Map', lamp: 'Lamp', keyN: 'Has the key', mapN: 'Has the map', lampN: 'Has the lamp', love: 'Affection bar', loveT: 'Affection', loveN: 'Affection', mini: 'Minimap', now: 'Now', place: 'Current place', rooms: ['Living room', 'Kitchen', 'Garden'] },
 };
 function tplWords() {
   try {
@@ -533,8 +538,8 @@ function tplWords() {
     return TPL_WORDS.ko;
   }
 }
-function ensureFlag(p: Project, name: string, kind: 'bool' | 'int' | 'str', init: boolean | number | string, note: string) {
-  if (!p.variables.some((f) => f.name === name)) p.variables.push({ id: uid('v'), name, kind, init, note });
+function ensureFlag(p: Project, name: string, kind: 'bool' | 'int' | 'str', init: boolean | number | string, note: string, ui?: Flag['ui']) {
+  if (!p.variables.some((f) => f.name === name)) p.variables.push({ id: uid('v'), name, kind, init, note, ...(ui ? { ui } : {}) });
 }
 function freeName(p: Project, base: string) {
   let n = base;
@@ -558,19 +563,10 @@ export function addHudTemplate(p: Project, t: HudTemplate): string {
       it({ kind: 'text', x: 14, y: 120, text: W.lamp, size: 24, cond: 'has_lamp' }),
     ] });
   } else if (t === 'love') {
-    ensureFlag(p, 'love', 'int', 0, W.loveN);
+    ensureFlag(p, 'love', 'int', 0, W.loveN, { look: 'level', style: 'continuous', min: 0, max: 10 });
     p.screens.push({ ...base, name: freeName(p, 'hud_love'), title: W.love, anchor: 'tl', dx: 20, dy: 20, w: 360, h: 74, items: [
       it({ kind: 'text', x: 14, y: 6, text: W.loveT + ' [love]', size: 22 }),
-      it({ kind: 'bar', x: 14, y: 40, flag: 'love', max: 10, w: 332, h: 20, color: '#e0607a', bgColor: '#ffffff33' }),
-    ] });
-  } else if (t === 'use') {
-    ensureFlag(p, 'has_key', 'bool', false, W.keyN);
-    ensureFlag(p, 'door_open', 'bool', false, W.doorN);
-    const key = it({ kind: 'text', x: 24, y: 64, text: W.key, size: 26, cond: 'has_key', drag: true });
-    p.screens.push({ ...base, name: freeName(p, 'hud_use'), title: W.use, anchor: 'b', dx: 0, dy: -250, w: 460, h: 150, items: [
-      it({ kind: 'text', x: 14, y: 10, text: W.have, size: 22, color: '#ffd27a' }),
-      key,
-      it({ kind: 'drop', x: 250, y: 20, w: 196, h: 110, text: W.door, size: 22, bgColor: '#ffffff26', accept: key.id, act: 'flag', acts: ['door_open = True', 'has_key = False'] }),
+      it({ kind: 'look', x: 14, y: 40, flag: 'love', w: 332, h: 20 }),
     ] });
   } else {
     ensureFlag(p, 'place', 'str', W.rooms[0], W.place);

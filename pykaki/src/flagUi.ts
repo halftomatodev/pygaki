@@ -4,12 +4,12 @@ import type { Flag, FlagCorner, FlagLook, FlagUi, LevelStyle, Project } from './
 import { evalExpr, applyAction, initVars, UNKNOWN, type Val, type Vars } from './trace';
 import { condText, exprNames, parseAction, parseCond, type CmpOp } from './flags';
 
-export const LOOK_LABEL: Record<FlagLook, string> = { level: '레벨 인디케이터', slider: '슬라이더', switch: '스위치', pulldown: '풀다운', combo: '콤보박스' };
+export const LOOK_LABEL: Record<FlagLook, string> = { level: '레벨 인디케이터', switch: '스위치', checkbox: '체크박스', radio: '라디오', pulldown: '풀다운' };
 export const STYLE_LABEL: Record<LevelStyle, string> = { continuous: '이어진 막대', discrete: '칸 막대', rating: '별' };
 // 모서리 (FEATURE 23): 없으면 둥글게 (앱 꼴의 처음 모양). 렌파이 원고도 같은 모서리로 (그림 부품은 그림 그대로)
 export const CORNER_LABEL: Record<'round' | FlagCorner, string> = { round: '둥글게', square: '각지게', pill: '알약' };
 export const cornerOf = (u: FlagUi): 'round' | FlagCorner => u.corner ?? 'round';
-export const looksFor = (k: Flag['kind']): FlagLook[] => (k === 'int' ? ['level', 'slider'] : k === 'bool' ? ['switch'] : ['pulldown', 'combo']);
+export const looksFor = (k: Flag['kind']): FlagLook[] => (k === 'int' ? ['level'] : k === 'bool' ? ['switch', 'checkbox'] : ['radio', 'pulldown']);
 
 // 꾸밀 부품: [이름, 한국어 이름, 기본 색]. 그림을 넣으면 그 부품을 그림으로 그림
 export type PartDef = [part: string, label: string, color: string];
@@ -18,8 +18,9 @@ export function skinParts(ui: FlagUi): PartDef[] {
     return ui.style === 'rating'
       ? [['on', '찬 기호', '#f5b301'], ['off', '빈 기호', '#c9c4b8']]
       : [['fill', '채움', '#e0607a'], ['track', '바탕', '#8080804d'], ['border', '테두리', '#80808080']];
-  if (ui.look === 'slider') return [['track', '트랙', '#8080804d'], ['fill', '채운 쪽', '#3b82f6'], ['thumb', '손잡이', '#ffffff'], ['tick', '눈금', '#80808099']];
   if (ui.look === 'switch') return [['on', '켜짐 바탕', '#34c759'], ['off', '꺼짐 바탕', '#80808066'], ['thumb', '손잡이', '#ffffff']];
+  if (ui.look === 'checkbox') return [['box', '상자', '#ffffff'], ['on', '체크된 상자', '#4f46e5'], ['mark', '체크 마크', '#ffffff'], ['border', '테두리', '#94a3b8']];
+  if (ui.look === 'radio') return [['ring', '링', '#94a3b8'], ['on', '고른 링', '#4f46e5'], ['dot', '선택 점', '#4f46e5'], ['text', '글자 (게임)', '#ffffff']];
   return [['box', '바탕', '#ffffff'], ['text', '글자', '#1f2328'], ['border', '테두리', '#80808080']];
 }
 
@@ -28,7 +29,7 @@ export function flagUi(f: Pick<Flag, 'kind' | 'ui'>): FlagUi {
   const u = f.ui;
   const ok = u && looksFor(f.kind).includes(u.look);
   if (ok) return u!;
-  return f.kind === 'int' ? { look: 'slider', min: 0, max: 10 } : f.kind === 'bool' ? { look: 'switch' } : { look: 'pulldown', options: [] };
+  return f.kind === 'int' ? { look: 'level', min: 0, max: 10 } : f.kind === 'bool' ? { look: 'switch' } : { look: 'radio', options: [] };
 }
 export const uiMin = (u: FlagUi) => (Number.isFinite(u.min) ? u.min! : 0);
 export const uiMax = (u: FlagUi) => Math.max(uiMin(u) + 1, Number.isFinite(u.max) ? u.max! : 10);
@@ -38,8 +39,10 @@ export const partColor = (u: FlagUi, part: string) => u.skin?.[part]?.color || s
 export function normalizeUi(raw: unknown): FlagUi | undefined {
   if (!raw || typeof raw !== 'object') return undefined;
   const r = raw as Record<string, unknown>;
-  if (!['level', 'slider', 'switch', 'pulldown', 'combo'].includes(r.look as string)) return undefined;
-  const u: FlagUi = { look: r.look as FlagLook };
+  // 예전 꼴: 슬라이더 → 레벨(이어진 막대), 콤보박스 → 풀다운 (FEATURE 29에서 뺌)
+  const look = r.look === 'slider' ? 'level' : r.look === 'combo' ? 'pulldown' : r.look;
+  if (!['level', 'switch', 'checkbox', 'radio', 'pulldown'].includes(look as string)) return undefined;
+  const u: FlagUi = { look: look as FlagLook };
   if (['continuous', 'discrete', 'rating'].includes(r.style as string)) u.style = r.style as LevelStyle;
   if (typeof r.min === 'number' && Number.isFinite(r.min)) u.min = r.min;
   if (typeof r.max === 'number' && Number.isFinite(r.max)) u.max = r.max;

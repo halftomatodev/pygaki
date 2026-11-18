@@ -1747,13 +1747,7 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .fw-stars { display: flex; width: 100%; font-size: 17px; line-height: 1; }
 .fw-stars > * { flex: 1 1 0; min-width: 0; text-align: center; }
 .fw-stars img { height: 18px; object-fit: contain; }
-.fw-slider { position: relative; height: 16px; margin: 0 8px; }
-.fw-slider .fw-track { position: absolute; left: 0; right: 0; top: 6px; height: 4px; border-radius: 2px; }
-.fw-slider .fw-done { right: auto; transition: width .18s ease-out; }
-.fw-slider .fw-tick { position: absolute; top: 12px; width: 1px; height: 4px; transform: translateX(-.5px); }
-.fw-slider .fw-thumb { position: absolute; top: 0; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,.35), 0 0 0 .5px rgba(0,0,0,.15); transition: left .18s ease-out; }
-.fw-slider .fw-thumb.img { object-fit: contain; box-shadow: none; border-radius: 0; }
-.fw-num.live .fw-area:active .fw-fill, .fw-num.live .fw-area:active .fw-done, .fw-num.live .fw-area:active .fw-thumb { transition: none; }
+.fw-num.live .fw-area:active .fw-fill { transition: none; }
 .fw-mark { position: absolute; top: -9px; transform: translateX(-50%); font-size: 9px; line-height: 1; color: var(--muted); pointer-events: auto; }
 .fw-mark.ok { color: #22a55b; font-weight: 700; }
 .fw-switch { display: inline-flex; align-items: center; gap: 6px; position: relative; width: 40px; height: 22px; padding: 0; border: 0; border-radius: 11px; cursor: pointer; transition: background .2s; flex: none; }
@@ -1764,11 +1758,30 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .fw-switch .fw-sw-text { position: absolute; left: 46px; font-size: 11.5px; color: var(--text); white-space: nowrap; }
 .fw-switch:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .flag-look-row:has(.fw-switch) .fw-switch { margin-right: 40px; }
-.fw-pull, .fw-combo input { border: 1px solid; border-radius: 6px; padding: 2px 6px; font-size: 12px; min-width: 110px; max-width: 180px; }
+/* 체크박스·라디오 (FEATURE 29) */
+.fw-check { display: inline-flex; align-items: center; gap: 6px; padding: 0; border: 0; background: none; cursor: pointer; flex: none; color: var(--text); }
+.fw-check:disabled { cursor: default; opacity: 1; }
+.fw-check .fw-cbox { position: relative; width: 20px; height: 20px; border: 2px solid; border-radius: 5px; box-sizing: border-box; display: grid; place-items: center; transition: background .15s, border-color .15s; }
+.fw-check .fw-cmark { width: 16px; height: 16px; object-fit: contain; opacity: 0; transform: scale(.4); transition: opacity .15s, transform .15s var(--ease-out, ease-out); }
+.fw-check.on .fw-cmark { opacity: 1; transform: none; }
+.fw-check .fw-sw-text { font-size: 11.5px; white-space: nowrap; }
+.fw-check:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.fw-radio { display: inline-flex; flex-wrap: wrap; gap: 4px 12px; }
+.fw-radio > button { display: inline-flex; align-items: center; gap: 5px; padding: 0; border: 0; background: none; cursor: pointer; font-size: 12px; }
+.fw-radio > button:disabled { cursor: default; opacity: 1; }
+.fw-radio > button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.fw-radio .fw-ring { position: relative; width: 16px; height: 16px; border: 2px solid; border-radius: 50%; box-sizing: border-box; background-size: 100% 100%; display: grid; place-items: center; }
+.fw-radio .fw-dot { width: 8px; height: 8px; border-radius: 50%; object-fit: contain; opacity: 0; transform: scale(.4); transition: opacity .15s, transform .15s var(--ease-out, ease-out); }
+.fw-radio img.fw-dot { width: 12px; height: 12px; border-radius: 0; }
+.fw-radio .on .fw-dot { opacity: 1; transform: none; }
+.fw-radio-empty { font-size: 11.5px; color: var(--muted); }
+.c-square .fw-cbox { border-radius: 0; }
+.c-pill .fw-cbox { border-radius: 50%; }
+.fw-pull { border: 1px solid; border-radius: 6px; padding: 2px 6px; font-size: 12px; min-width: 110px; max-width: 180px; }
 /* 모서리 (FEATURE 23): 각지게, 알약. 둥글게는 위 처음 모양 */
-.c-square :is(.fw-level, .fw-seg, .fw-track, .fw-thumb), .fw-switch.c-square, .fw-switch.c-square .fw-knob, .fw-pull.c-square, .fw-combo.c-square input { border-radius: 0; }
-.c-pill :is(.fw-level, .fw-seg), .fw-pull.c-pill, .fw-combo.c-pill input { border-radius: 999px; }
-.fw-pull:disabled, .fw-combo input[readonly] { opacity: 1; }
+.c-square :is(.fw-level, .fw-seg), .fw-switch.c-square, .fw-switch.c-square .fw-knob, .fw-pull.c-square { border-radius: 0; }
+.c-pill :is(.fw-level, .fw-seg), .fw-pull.c-pill { border-radius: 999px; }
+.fw-pull:disabled { opacity: 1; }
 .flag-effects { list-style: none; margin: 3px 0 2px; padding: 4px 6px; display: flex; flex-direction: column; gap: 2px; background: var(--soft, color-mix(in srgb, var(--text) 4%, var(--panel))); border-radius: 6px; font-size: 11.5px; }
 .flag-effects li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 5px; }
 .flag-effects code { font-family: var(--mono); font-size: 11px; }

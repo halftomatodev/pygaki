@@ -245,8 +245,9 @@ export interface Flag {
   ui?: FlagUi; // 플래그 카드·견본에서 보이는 꼴 (FEATURE 20). 없으면 종류로 정함 (flagUi.ts)
 }
 
-// 플래그의 꼴 (FEATURE 20): 숫자는 레벨 인디케이터·슬라이더, 켜짐/꺼짐은 스위치, 글자는 풀다운·콤보박스
-export type FlagLook = 'level' | 'slider' | 'switch' | 'pulldown' | 'combo';
+// 플래그의 꼴 (FEATURE 20, 29): 숫자는 레벨 인디케이터, 켜짐/꺼짐은 스위치·체크박스, 글자는 라디오·풀다운.
+// 예전 슬라이더는 레벨, 콤보박스는 풀다운으로 읽음 (flagUi.ts normalizeUi)
+export type FlagLook = 'level' | 'switch' | 'checkbox' | 'radio' | 'pulldown';
 export type LevelStyle = 'continuous' | 'discrete' | 'rating';
 export interface FlagSkinPart {
   color?: string; // #rrggbb 또는 #rrggbbaa
