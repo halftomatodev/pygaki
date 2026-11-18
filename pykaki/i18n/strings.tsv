@@ -2620,3 +2620,17 @@ label 이름	label 名	label name
 플래그 꼴과 글 속 [love]	フラグの見た目と文中の [love]	Flag look and [love] in text
 예전 대본의 끌기예요. 새로 켤 수는 없어요 (끌어 놓기는 뺐어요). 끄면 다시 켤 수 없어요	以前の台本のドラッグです。新しくオンにはできません (ドラッグ&ドロップは廃止)。オフにすると戻せません	Dragging from an older script. It can't be turned on anew (drag and drop was removed). Once off, it can't be turned back on
 왼쪽 위에 호감도를 레벨 인디케이터와 숫자로 보여요. 막대는 love 플래그의 꼴이라 플래그 카드에서 꾸민 모양 그대로예요.	左上に好感度をレベルインジケーターと数字で表示します。バーは love フラグの見た目なので、フラグカードで飾った形そのままです。	Shows affection at the top left as a level indicator and a number. The bar is the love flag's look, so it matches how you styled it on the flag card.
+메모 없음	メモなし	No note
+· 꾸미기 ▾	· 飾り ▾	· Style ▾
+플래그 가져오기	フラグを取り込む	Import a flag
++ 플래그 가져오기	+ フラグを取り込む	+ Import a flag
+맞는 플래그가 없어요	該当するフラグがありません	No matching flags
+어느 플래그를 가져올까요?	どのフラグを取り込みますか?	Which flag do you want to import?
+누르거나 Enter: 이 플래그의 꼴 넣기	クリックか Enter: このフラグの見た目を入れる	Click or Enter: add this flag's look
+꼴 고르기, 최솟값·최댓값, 고를 값, 부품마다 색·그림	見た目の選択、最小値・最大値、選べる値、部品ごとの色・画像	Pick a look, min and max, values, and a color or image per part
+꼴은 플래그 카드, 견본, HUD에서 같이 쓰는 모양이에요	見た目はフラグカード、見本、HUD で共通の形です	The look is shared by the flag card, the samples, and HUDs
+플래그가 없어요. [대본 편집]의 플래그 카드에서 먼저 만들어요	フラグがありません。[台本編集] のフラグカードで先に作ってください	There are no flags. Create one first on the flag card in [Script editor]
+(이 플래그는 이름이 렌파이 변수로 맞지 않아 원고에 안 들어가요)	(このフラグは名前が Ren'Py の変数名として正しくないため、原稿に入りません)	(This flag's name isn't a valid Ren'Py variable, so it won't be in the script)
+플래그를 고르면 그 플래그의 꼴(레벨 인디케이터·스위치·체크박스·라디오·풀다운)과 꾸미기를 그대로 가져와요	フラグを選ぶと、そのフラグの見た目(レベルインジケーター・スイッチ・チェックボックス・ラジオ・プルダウン)と飾りをそのまま取り込みます	Pick a flag to bring in its look (level indicator, switch, checkbox, radio, pull-down) and styling as is
+꼴과 꾸미기는 그 플래그의 것이라, 여기서 고치면 플래그 카드와 이 플래그를 쓰는 다른 화면도 같이 바뀌어요.	見た目と飾りはそのフラグのものなので、ここで変えるとフラグカードとこのフラグを使うほかの画面も変わります。	The look and styling belong to the flag, so changing them here also changes the flag card and other screens that use this flag.
+켜면 플레이어가 꼴로 값을 바꿔요. 이어진 막대는 끌기, 칸 막대·별은 칸 누르기, 스위치·체크박스는 누르기, 라디오는 줄 누르기, 풀다운은 펼쳐서 고르기	オンにするとプレイヤーが見た目で値を変えます。連続バーはドラッグ、セグメントバー・星はマスをクリック、スイッチ・チェックボックスはクリック、ラジオは行をクリック、プルダウンは開いて選択	When on, the player changes the value with the look: drag a continuous bar, click a cell or star, click a switch or checkbox, click a radio row, or open the pull-down and pick

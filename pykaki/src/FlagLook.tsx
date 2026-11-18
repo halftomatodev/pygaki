@@ -100,7 +100,7 @@ export function FlagLookRow({ f }: { f: Flag }) {
 }
 
 // 꼴 팝오버 (Popover): 꼴, 레벨 모양, 최솟값·최댓값, 고를 값(글자), 부품마다 색·그림
-function LookPop({ f, anchor, onClose }: { f: Flag; anchor: HTMLElement; onClose: () => void }) {
+export function LookPop({ f, anchor, onClose }: { f: Flag; anchor: HTMLElement; onClose: () => void }) {
   const update = useStore((s) => s.update);
   const project = useStore((s) => s.project);
   const images = useGameFolder((s) => s.media.images);
@@ -156,7 +156,7 @@ function LookPop({ f, anchor, onClose }: { f: Flag; anchor: HTMLElement; onClose
       <div className="fd-pop-head">
         <b>{f.name}</b>
         <span className="sp" />
-        <span className="tip">꼴은 플래그 카드와 견본에서 보이는 모양이에요</span>
+        <span className="tip">꼴은 플래그 카드, 견본, HUD에서 같이 쓰는 모양이에요</span>
       </div>
       {looks.length > 1 && (
         <div className="flook-seg" role="radiogroup" aria-label="꼴">

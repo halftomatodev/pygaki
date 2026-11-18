@@ -11,12 +11,14 @@ import { useLive } from './showpyLive';
 import { pictureOf, useGameFolder } from './gameFolder';
 import type { Project, ScreenAct, ScreenDef, ScreenItem, ScreenItemKind } from './types';
 import { uid } from './util';
-import { lookSize, actOf, addHudTemplate, ANCHORS, BAR_H, BAR_W, canDrag, DROP_H, DROP_W, hasAct, HUD_H, HUD_TEMPLATES, HUD_W, hudInner, hudPos, hudSize, hudTemplateCode, isDragged, isHud, newScreenName, screenNameProblem, SCREENS_FILE, screensCode, type HudTemplate } from './screens';
+import { lookCode, lookSize, actOf, addHudTemplate, ANCHORS, BAR_H, BAR_W, canDrag, DROP_H, DROP_W, hasAct, HUD_H, HUD_TEMPLATES, HUD_W, hudInner, hudPos, hudSize, hudTemplateCode, isDragged, isHud, newScreenName, screenNameProblem, SCREENS_FILE, screensCode, type HudTemplate } from './screens';
 import { PickMenu, type PickEntry } from './FlagMenu';
 import { ActionInput, CondInput, firstAction } from './FlagFields';
 import { evalExpr, initVars, UNKNOWN, type Vars } from './trace';
 import { FlagWidget } from './FlagWidget';
-import { flagUi, strOptions, LOOK_LABEL } from './flagUi';
+import { flagUi, strOptions, LOOK_LABEL, uiMax, uiMin } from './flagUi';
+import { LookPop } from './FlagLook';
+import type { Flag } from './types';
 
 export const useScreenSel = create<{ id: string | null; item: string | null }>(() => ({ id: null, item: null }));
 
@@ -26,6 +28,26 @@ const KIND: Record<ScreenItemKind, string> = { imagebutton: '그림 버튼', tex
 const HUD_CLIPS = import.meta.glob('./hudclips/*.webm', { query: '?url', import: 'default', eager: true }) as Record<string, string>;
 const tplEntries = (): PickEntry[] =>
   HUD_TEMPLATES.map((t) => ({ ...t, chips: t.flags, code: hudTemplateCode(t.id), clip: HUD_CLIPS[`./hudclips/${t.id}.webm`], foot: '누르거나 Enter: 이 HUD와 플래그 만들기' }));
+
+// [+ 플래그 가져오기] 메뉴 (FEATURE 29): 플래그 이름부터 고르고, 그 플래그의 꼴(플래그 카드에서 꾸민 것)을 그대로 넣음.
+// 카드에는 꼴이 값을 바꾸며 움직이는 견본과 들어갈 원고
+const KIND_ICON: Record<Flag['kind'], string> = { int: '#', bool: '◉', str: '⑂' };
+const KIND_WORD: Record<Flag['kind'], string> = { int: '숫자', bool: '켜짐/꺼짐', str: '글자' };
+function flagEntries(p: Project): PickEntry[] {
+  return p.variables.map((f) => {
+    const u = flagUi(f);
+    const lo = uiMin(u), hi = uiMax(u);
+    const opts = f.kind === 'str' ? strOptions(p, f).filter((o) => o !== '') : [];
+    const vals: (boolean | number | string)[] = f.kind === 'int' ? [lo, Math.round((lo + hi) / 2), hi] : f.kind === 'bool' ? [false, true] : opts.length ? opts : [''];
+    const code = lookCode(p, { id: 'pick', kind: 'look', flag: f.name, x: 0, y: 0 }).join('\n');
+    return {
+      id: f.id, icon: KIND_ICON[f.kind], title: f.name, kindHint: `${KIND_WORD[f.kind]} · ${LOOK_LABEL[u.look]}`, desc: f.note || '메모 없음',
+      chips: [f.name], write: [], read: [],
+      demo: { flags: [{ name: f.name, kind: f.kind, ui: u }], steps: vals.map((v) => ({ vals: { [f.name]: v }, code: `$ ${f.name} = ${typeof v === 'string' ? JSON.stringify(v) : v === true ? 'True' : v === false ? 'False' : v}` })) },
+      code: code || '(이 플래그는 이름이 렌파이 변수로 맞지 않아 원고에 안 들어가요)', foot: '누르거나 Enter: 이 플래그의 꼴 넣기',
+    };
+  });
+}
 
 // 화면을 부르는 상자들 (HUD는 HUD 줄이 있는 상자)
 const usesOf = (p: Project, id: string) =>
@@ -75,7 +97,9 @@ export function ScreensView() {
     useScreenSel.setState({ id, item: null });
   };
   const look = useGameFolder((s) => s.look);
-  const addItem = (kind: ScreenItemKind) => {
+  const flagBtn = useRef<HTMLButtonElement>(null);
+  const [flagOpen, setFlagOpen] = useState(false);
+  const addItem = (kind: ScreenItemKind, flag?: string) => {
     if (!sc) return;
     const id = uid('i');
     const n = sc.items.length;
@@ -87,7 +111,7 @@ export function ScreensView() {
     if (kind === 'textbutton') Object.assign(it, { text: '버튼 ' + (n + 1) }, hud ? { act: 'flag', acts: [firstAction(project.variables)].filter(Boolean) } : { value: 'b' + (n + 1) });
     if (kind === 'imagebutton') Object.assign(it, { image: '' }, hud ? { act: 'flag', acts: [firstAction(project.variables)].filter(Boolean) } : { value: 'b' + (n + 1) });
     if (kind === 'text') it.text = '글';
-    if (kind === 'look') it.flag = project.variables[0]?.name ?? '';
+    if (kind === 'look') it.flag = flag ?? project.variables[0]?.name ?? '';
     updScreen((s) => void s.items.push(it));
     useScreenSel.setState({ id: sc.id, item: id });
   };
@@ -132,7 +156,20 @@ export function ScreensView() {
               <button onClick={() => addItem('imagebutton')}>+ 그림 버튼</button>
               <button onClick={() => addItem('text')}>+ 글</button>
               <button onClick={() => addItem('image')}>+ 그림</button>
-              <button onClick={() => addItem('look')} title="플래그 카드에서 만든 꼴(레벨·슬라이더·스위치·풀다운)과 꾸미기를 그대로 가져와요">+ 플래그 꼴</button>
+              <button ref={flagBtn} aria-haspopup="menu" aria-expanded={flagOpen} onClick={() => setFlagOpen((v) => !v)} title="플래그를 고르면 그 플래그의 꼴(레벨 인디케이터·스위치·체크박스·라디오·풀다운)과 꾸미기를 그대로 가져와요">
+                + 플래그 가져오기 <span aria-hidden>▾</span>
+              </button>
+              {flagOpen && flagBtn.current && (
+                <PickMenu
+                  anchor={flagBtn.current}
+                  items={flagEntries(project)}
+                  placeholder="어느 플래그를 가져올까요?"
+                  section="플래그 가져오기"
+                  empty={project.variables.length ? '맞는 플래그가 없어요' : '플래그가 없어요. [대본 편집]의 플래그 카드에서 먼저 만들어요'}
+                  onPick={(e) => (setFlagOpen(false), addItem('look', project.variables.find((f) => f.id === e.id)?.name))}
+                  onClose={() => setFlagOpen(false)}
+                />
+              )}
               <span className="tip">끌어서 옮겨요 · 방향키로 1px (Shift: 10px){isHud(sc) ? ' · HUD 빈 곳을 끌면 HUD가 옮겨져요' : ''}</span>
             </div>
             <Stage
@@ -612,11 +649,12 @@ function ItemCard({ sc, it, upd, remove, dup }: { sc: ScreenDef; it: ScreenItem;
             {num('w', String(lookSize(project, { ...it, w: undefined, h: undefined })[0]), '가로 (px). 비우면 꼴의 기본 크기')}
             {num('h', String(lookSize(project, { ...it, w: undefined, h: undefined })[1]), '세로 (px)')}
           </div>
-          <label className="check" title="켜면 플레이어가 꼴로 값을 바꿔요. 슬라이더·이어진 막대는 끌기, 칸 막대·별은 칸 누르기, 스위치는 누르기, 풀다운·콤보는 펼쳐서 고르기(콤보는 글도 침)">
+          <LookSkinBtn flag={project.variables.find((f) => f.name === it.flag)} />
+          <label className="check" title="켜면 플레이어가 꼴로 값을 바꿔요. 이어진 막대는 끌기, 칸 막대·별은 칸 누르기, 스위치·체크박스는 누르기, 라디오는 줄 누르기, 풀다운은 펼쳐서 고르기">
             <input type="checkbox" checked={!!it.edit} onChange={(e) => upd((x) => void (e.target.checked ? (x.edit = true) : delete x.edit))} />
             게임에서 바꿀 수 있음
           </label>
-          <p className="tip">꼴과 꾸미기(색·그림)는 플래그 카드의 [꼴 ▾]에서 고쳐요. 여기서는 게임 화면에서의 자리와 크기만 정해요. {it.edit ? '게임에서 플레이어가 꼴로 값을 바꿔요(최솟값~최댓값, 롤백하면 되돌아감)' : '게임에서는 값을 보여 주기만 해요'}</p>
+          <p className="tip">꼴과 꾸미기는 그 플래그의 것이라, 여기서 고치면 플래그 카드와 이 플래그를 쓰는 다른 화면도 같이 바뀌어요. {it.edit ? '게임에서 플레이어가 꼴로 값을 바꿔요(최솟값~최댓값, 롤백하면 되돌아감)' : '게임에서는 값을 보여 주기만 해요'}</p>
         </>
       )}
       {it.kind === 'bar' && (
@@ -763,5 +801,21 @@ function CodeCard({ sc }: { sc: ScreenDef }) {
     <Card id="scr-code" title={`${SCREENS_FILE}에 들어가는 글`} defFolded>
       <pre className="scv-code">{code}</pre>
     </Card>
+  );
+}
+
+// [꼴 꾸미기 ▾]: 플래그 카드의 꼴 팝오버를 화면 탭에서 바로 엶 (꼴 고르기, 범위, 고를 값, 부품 꾸미기)
+function LookSkinBtn({ flag }: { flag?: Flag }) {
+  const btn = useRef<HTMLButtonElement>(null);
+  const [open, setOpen] = useState(false);
+  if (!flag) return null;
+  return (
+    <div className="row">
+      <label>꼴</label>
+      <button ref={btn} className={'flag-look-btn' + (open ? ' on' : '')} onClick={() => setOpen((v) => !v)} title="꼴 고르기, 최솟값·최댓값, 고를 값, 부품마다 색·그림">
+        {LOOK_LABEL[flagUi(flag).look]} · 꾸미기 ▾
+      </button>
+      {open && btn.current && <LookPop f={flag} anchor={btn.current} onClose={() => setOpen(false)} />}
+    </div>
   );
 }
