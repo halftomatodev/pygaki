@@ -35,6 +35,7 @@
   --dur-view: 400ms;
   --pop-scale: 0.96;   /* 뜨는 창이 이 크기에서 1로 */
   --pop-blur: 4px;     /* 뜨는 창이 이 흐림에서 0으로 */
+  --spring-scale: 0.9; /* 스프링으로 뜨는 창(메뉴)이 이 크기에서 1로 */
   font-family: var(--font);
   font-weight: var(--font-weight, 400);
   font-size: 13px;
@@ -44,7 +45,7 @@
 :root[data-dark='1'] { color-scheme: dark; --box-mix: calc(var(--label-tint) * 40%); }
 /* 운영체제의 '애니메이션 줄이기'(윈도우: 애니메이션 효과 끄기)를 따른다. 움직임·확대·흐림은 빼고 짧은 페이드만 남긴다 */
 @media (prefers-reduced-motion: reduce) {
-  :root { --ease-spring: var(--ease-out); --dur-view: 150ms; --pop-scale: 1; --pop-blur: 0px; }
+  :root { --ease-spring: var(--ease-out); --dur-view: 150ms; --pop-scale: 1; --pop-blur: 0px; --spring-scale: 1; }
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
@@ -1406,9 +1407,13 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .fmenu {
   position: fixed; z-index: 1000; width: 270px; padding: 6px; border-radius: 12px; background: var(--panel);
   border: 1px solid color-mix(in srgb, var(--text) 13%, transparent);
-  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.22), 0 2px 6px rgba(0, 0, 0, 0.08); animation: fmenu-in 0.12s ease;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.22), 0 2px 6px rgba(0, 0, 0, 0.08);
+  /* 단추 쪽 모서리에서 스프링으로 커지고, 투명도는 짧게 따로 (docs/MOTION.md) */
+  transform-origin: top right;
+  animation: fmenu-pop var(--dur-view) var(--ease-spring) backwards, fmenu-fade 150ms var(--ease-out) backwards;
 }
-@keyframes fmenu-in { from { opacity: 0; transform: translateY(-4px) scale(0.98); } }
+@keyframes fmenu-pop { from { scale: var(--spring-scale); filter: blur(var(--pop-blur)); } }
+@keyframes fmenu-fade { from { opacity: 0; } }
 .fmenu-search { display: flex; align-items: center; gap: 6px; padding: 2px 4px 7px; border-bottom: 1px solid var(--line); }
 .fmenu-search input { flex: 1; min-width: 0; border: none !important; background: none !important; box-shadow: none !important; outline: none; font-size: 13px; padding: 3px 2px; color: var(--text); }
 .fmenu kbd { flex: none; font-family: var(--mono); font-size: 10px; color: var(--muted); padding: 1px 5px; border: 1px solid var(--line); border-radius: 5px; background: var(--faint); }

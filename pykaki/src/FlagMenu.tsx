@@ -76,7 +76,7 @@ export function PickMenu({ anchor, items, first = 0, placeholder, section, empty
   };
 
   return createPortal(
-    <div ref={box} className="fmenu" style={pos ? { left: pos.left, top: pos.top } : { opacity: 0 }} onKeyDown={key}>
+    <div ref={box} className="fmenu" style={pos ? { left: pos.left, top: pos.top, transformOrigin: pos.top < anchor.getBoundingClientRect().top ? 'bottom right' : 'top right' } : { opacity: 0 }} onKeyDown={key}>
       <div className="fmenu-search">
         <input autoFocus value={q} placeholder={placeholder} spellCheck={false} onChange={(e) => (setQ(e.target.value), setCur(0))} />
         <kbd>Esc</kbd>
