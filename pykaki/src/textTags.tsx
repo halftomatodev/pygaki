@@ -2,6 +2,8 @@
 // 그리고 PyKaki의 {clear}(지우고 이어서): 클릭을 기다리고, 다음 글자가 나오면 앞 글을 지운다
 import type { CSSProperties, ReactNode } from 'react';
 import { tokenize } from './tagEdit';
+import { FLAG_SUB } from './flags';
+import { useStore } from './store';
 
 // 플레이 화면용: 글자 하나씩으로 나눈다. 언제 멈출지(stops)와 글자별 속도도 함께
 // shader: 이 글자에만 거는 등장 효과 ({shader=이름}글{/shader}. 가장 안쪽 것)
@@ -126,7 +128,23 @@ const VIEW_STYLE: Record<string, (v: string) => CSSProperties> = {
   alpha: (v) => (/^(?:0|1|0?\.\d+)$/.test(v) ? { opacity: Math.max(0.15, Number(v)) } : {}), // 다 안 보이면 고칠 수 없으니 조금은 남긴다
 };
 
-export function TagView({ text }: { text: string }) {
+// 글 안 플래그 값 [이름]을 작은 칩으로 (등록한 플래그만)
+function withFlags(raw: string, flags: Set<string>): ReactNode[] {
+  const out: ReactNode[] = [];
+  let at = 0;
+  for (const m of raw.matchAll(FLAG_SUB)) {
+    if (!flags.has(m[1])) continue;
+    out.push(raw.slice(at, m.index), <span key={m.index} className="tg-var" title={`플래그 값: 게임에서 ${m[1]}의 그때 값이 보여요`}>{m[1]}</span>);
+    at = m.index! + m[0].length;
+  }
+  out.push(raw.slice(at));
+  return out;
+}
+
+export function TagView({ text, tagsOn = true }: { text: string; tagsOn?: boolean }) {
+  const names = useStore((s) => s.project.variables);
+  const flags = new Set(names.map((f) => f.name));
+  if (!tagsOn) return <>{flags.size ? withFlags(text, flags) : text}</>;
   const out: ReactNode[] = [];
   const stack: { name: string; style: CSSProperties }[] = [];
   tokenize(text).forEach((t, k) => {
@@ -134,7 +152,7 @@ export function TagView({ text }: { text: string }) {
     if (t.k === 'text' || t.k === 'esc') {
       const deco = stack.map((x) => x.style.textDecoration).filter(Boolean).join(' ');
       const style = Object.assign({}, ...stack.map((x) => x.style), deco ? { textDecoration: deco } : {});
-      out.push(<span key={k} style={style}>{raw}</span>);
+      out.push(<span key={k} style={style}>{flags.size ? withFlags(raw, flags) : raw}</span>);
       return;
     }
     out.push(<span key={k} className={'tg' + (t.k === 'self' ? ' tg-stop' : '')}>{raw}</span>);

@@ -17,6 +17,15 @@ export function fitInit(k: FlagKind, v: unknown): Flag['init'] {
   return typeof v === 'string' ? v : v === undefined || v === null ? '' : String(v);
 }
 
+// 대사·선택지 글 안의 플래그 값 [이름] (렌파이 글 바꿔 넣기). 앞이 [이면 글자 그대로 쓴 것([[)이라 뺌
+export const FLAG_SUB = /(?<!\[)\[([A-Za-z_][A-Za-z0-9_]*)\]/g;
+// 글에 [이름]으로 쓴 이름들 (플래그인지는 안 봄)
+export const subNames = (t: string) => Array.from(t.matchAll(FLAG_SUB), (m) => m[1]);
+// 렌파이가 보여 주는 모양: True/False, 숫자, 글 그대로
+export const shownValue = (v: unknown) => (v === true ? 'True' : v === false ? 'False' : v === undefined || v === null ? '' : String(v));
+// 미리보기: 플래그 [이름]을 값으로 (없는 이름은 그대로)
+export const fillFlags = (t: string, vars: Record<string, unknown>) => t.replace(FLAG_SUB, (m, n) => (n in vars ? shownValue(vars[n]) : m));
+
 const pyStr = (s: string) => '"' + s.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\r?\n/g, '\\n') + '"';
 
 // 파이썬 값으로

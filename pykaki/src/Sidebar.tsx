@@ -68,7 +68,7 @@ export function Sidebar() {
         <div className="settings">
             <label>
               <input type="checkbox" checked={project.settings.escapeBrackets} onChange={(e) => update((p) => void (p.settings.escapeBrackets = e.target.checked))} />
-              [ 를 글자 그대로 ([[ 로 변환)
+              [ 를 글자 그대로 ([[ 로 변환. 플래그 값 [이름]은 빼고)
             </label>
             <label>
               <input type="checkbox" checked={project.settings.allowTextTags} onChange={(e) => update((p) => void (p.settings.allowTextTags = e.target.checked))} />

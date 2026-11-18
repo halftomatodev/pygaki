@@ -555,7 +555,7 @@ function LineRow({ l, editing, active, cls, grip, onFocus, onKey, onText }: RowP
         onChange={(e) => onText(e.target.value)}
       />
     );
-  else body = <span className="pl-text">{!l.text ? <i className="todo">{empty}</i> : tagsOn && isSayLine(l) && l.text.includes('{') ? <TagView text={l.text} /> : l.text}</span>;
+  else body = <span className="pl-text">{!l.text ? <i className="todo">{empty}</i> : isSayLine(l) && ((tagsOn && l.text.includes('{')) || l.text.includes('[')) ? <TagView text={l.text} tagsOn={tagsOn} /> : l.text}</span>;
 
   return (
     <div

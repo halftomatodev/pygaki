@@ -1050,6 +1050,8 @@ fieldset.plain:disabled { opacity: 0.4; }
 /* 상자 보기 화면의 태그 글자: 흐리게. 고칠 때와 같은 글자라 자리가 안 바뀐다 */
 .pl-text .tg { opacity: 0.4; }
 .pl-text .tg-stop { opacity: 0.55; color: var(--accent); }
+/* 대사 안 플래그 값 [이름]: 플래그 표시처럼 초록 칩 */
+.pl-text .tg-var { padding: 0 4px; border-radius: 4px; background: color-mix(in srgb, #16a34a 16%, transparent); color: color-mix(in srgb, #047857 70%, var(--text)); font-family: var(--mono); font-size: 0.92em; }
 
 /* 글 상자 (showpy ui_kit 4.0 text_box.rpy 흉내). 렌파이처럼 글 자리는 그대로 두고 둘레에 상자를 깐다 */
 .sbox { box-sizing: content-box; }

@@ -5,6 +5,9 @@ import { boxTail, isMovieFile, lineCps, mediaMasked } from './stage';
 import { MaskMovie } from './maskVideo/MaskMovie';
 import { shaderTags } from './tagEdit';
 import { parseTagged, type Tagged } from './textTags';
+import { useStore } from './store';
+import { fillFlags } from './flags';
+import { testVars, useFlagTest } from './flagUi';
 import { fileUrl, gameFont, useGameFolder, type GameLook } from './gameFolder';
 import { FxCanvas, webglOk } from './fx/FxCanvas';
 import { parseTextShader, type TextShader } from './fx/textShaders';
@@ -198,7 +201,10 @@ const PREVIEW_MIN = 11;
 const PREVIEW_MAX = 60;
 
 function PreviewBody({ line, tagsOn, cps, look, onReplay }: { line: Line; tagsOn: boolean; cps: number; look: GameLook; onReplay(): void }) {
-  const text = line.text.trim() ? line.text : '효과 미리보기';
+  const project = useStore((s) => s.project);
+  const vals = useFlagTest((s) => s.vals);
+  // 플래그 값 [이름]은 처음 값(시험 값이 있으면 그 값)으로
+  const text = line.text.trim() ? (project.variables.length ? fillFlags(line.text, testVars(project, vals)) : line.text) : '효과 미리보기';
   const parsed = useMemo(() => parseTagged(text, tagsOn, gameFont), [text, tagsOn]);
   const { shown, click, fast, limit, holding } = useReveal(parsed, cps);
   const { ts, tagTs, onFail } = useShader(line.say?.effect, parsed);

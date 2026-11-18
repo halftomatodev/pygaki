@@ -2721,3 +2721,9 @@ GIF·투명 webm·PNG 연속 그림을 렌파이가 쓰는 투명 영상으로 �
 선택지의 보이는 조건(◆)도 같이 보여요	選択肢の表示条件(◆)も一緒に表示します	Also show choice conditions (◆)
 아직 조건 분기가 없어요. 상자의 [다음 흐름]에서 ◇ 조건 분기를 골라요.	まだ条件分岐がありません。ボックスの [次の流れ] で ◇ 条件分岐を選んでください。	No condition branches yet. Pick ◇ Condition branch in a box's [Next flow].
 대본의 ◇ 조건 분기를 플래그 → 상자 → 갈래 조건 → 갈 상자 차례로 보여요. ✓는 플래그 카드의 시험 값으로 지금 가는 갈래예요. 상자 이름을 누르면 캔버스에서 그 상자로 가요	台本の ◇ 条件分岐をフラグ → ボックス → 分岐の条件 → 行き先のボックスの順に表示します。✓ はフラグカードの試し値で今進む分岐です。ボックス名を押すとキャンバスでそのボックスへ移動します	Shows the script's ◇ condition branches as flag → box → branch condition → target box. ✓ marks the branch taken with the flag card's test values. Click a box name to go to it on the canvas
+플래그 값	フラグの値	Flag value
+플래그 값: 게임에서 ${m[1]}의 그때 값이 보여요	フラグの値: ゲームでは{0}のその時の値が表示されます	Flag value: the game shows the current value of {0}
+[ 를 글자 그대로 ([[ 로 변환. 플래그 값 [이름]은 빼고)	[ を文字のまま ([[ に変換。フラグの値 [名前] は除く)	Keep [ as text (convert to [[, except flag values [name])
+플래그 값 [이름]: 커서 자리에 넣으면 게임에서 그때의 값이 보여요 (예: 호감도 [love])	フラグの値 [名前]: カーソル位置に入れると、ゲームでその時の値が表示されます (例: 好感度 [love])	Flag value [name]: insert at the cursor and the game shows its current value (e.g. Affection [love])
+${where}의 [${n}]: "${n}"는 플래그 카드에 없는 이름이에요. 게임에 없으면 렌파이가 멈춰요 (${b.title || b.id})	{0}の [{1}]: "{2}" はフラグカードにない名前です。ゲームになければ Ren'Py が止まります ({3})	[{1}] in {0}: "{2}" is not on the flag card. If the game doesn't define it, Ren'Py will stop ({3})
+${where}의 [${n}]: "${n}"는 플래그가 아니라 글자 그대로 보여요. 값을 보이려면 플래그 카드에 만들어 주세요 (${b.title || b.id})	{0}の [{1}]: "{2}" はフラグではないので文字のまま表示されます。値を表示するにはフラグカードで作ってください ({3})	[{1}] in {0}: "{2}" is not a flag, so it is shown as text. Create it on the flag card to show its value ({3})

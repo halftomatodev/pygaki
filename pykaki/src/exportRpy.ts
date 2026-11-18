@@ -9,17 +9,21 @@ import { voiceCode, voiceFile, voiceIndex } from './voice';
 import { actOf, boxRef, flagAction, hasAct, isDragged, isHud, screenNameProblem } from './screens';
 import { checkTags, shaderTags, splitClear } from './tagEdit';
 import { sceneCode, sceneSupported, uiOfBox, usesSceneUi } from './boxUi';
-import { exprNames, flagNameProblem, parseAction, pyValue } from './flags';
+import { exprNames, FLAG_SUB, flagNameProblem, parseAction, pyValue, subNames } from './flags';
 import { flagUi, strOptions } from './flagUi';
 import { enterTransTv, imgTransSupported, isImgTrans, shaderCode, shaderOfBox, usesShaderValues, usesShaders, usesTvValues, valuesSupported } from './shader';
 
 export interface Warn { level: 'error' | 'warn'; msg: string; nodeId?: string }
 
-export function escapeText(t: string, s: Settings) {
+// subs: 글 안 [이름]을 렌파이 값으로 둘 플래그 (이름 → 원고에 쓸 식). "[ 를 글자 그대로"를 켜도 이것은 [[로 안 바꿈
+export function escapeText(t: string, s: Settings, subs?: Map<string, string>) {
   let r = t.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  const keep: string[] = [];
+  if (subs?.size) r = r.replace(FLAG_SUB, (m, n: string) => (subs.has(n) ? (keep.push('[' + subs.get(n) + ']'), `\u0000${keep.length - 1}\u0000`) : m));
   if (s.escapeBrackets) r = r.replace(/\[/g, '[[');
   if (!s.allowTextTags) r = r.replace(/\{/g, '{{');
   if (s.escapePercent) r = r.replace(/%/g, '%%');
+  if (keep.length) r = r.replace(/\u0000(\d+)\u0000/g, (_, i) => keep[+i]);
   return r.replace(/\r?\n/g, '\\n');
 }
 
@@ -236,7 +240,9 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
 
   const vIndex = voiceIndex(opts.audio ?? []);
   const I = '    ';
-  const q =(t: string) => '"' + escapeText(t, S) + '"';
+  // 대사·선택지 안 플래그 값 [이름] (3단계에서 게임 밖에도 남는 플래그는 persistent.이름)
+  const subs = new Map(p.variables.map((v) => [v.name, v.name] as [string, string]));
+  const q =(t: string) => '"' + escapeText(t, S, subs) + '"';
 
   for (const g of p.labels) {
     const o = orders.get(g.id)!;
@@ -274,6 +280,11 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
         // 텍스트 태그 짝 (렌파이 check_text_tags와 같은 규칙)
         if (S.allowTextTags) for (const w of checkTags(t)) W.push({ level: w.level, msg: `${where}: ${w.msg} (${b.title || b.id})`, nodeId: b.id });
         // 선택지 글에는 등장 효과가 없어서 {shader=}를 쓰면 렌파이가 멈춘다
+        // [이름]: 플래그면 값이 나오고, 아니면 "[ 를 글자 그대로"일 때 글자 그대로, 끄면 렌파이가 그 이름을 찾음
+        for (const n of new Set(subNames(t))) if (!subs.has(n))
+          W.push(S.escapeBrackets
+            ? { level: 'warn', msg: `${where}의 [${n}]: "${n}"는 플래그가 아니라 글자 그대로 보여요. 값을 보이려면 플래그 카드에 만들어 주세요 (${b.title || b.id})`, nodeId: b.id }
+            : { level: 'warn', msg: `${where}의 [${n}]: "${n}"는 플래그 카드에 없는 이름이에요. 게임에 없으면 렌파이가 멈춰요 (${b.title || b.id})`, nodeId: b.id });
         if (S.allowTextTags && where !== '대사' && shaderTags(t).length) W.push({ level: 'error', msg: `${where}: {shader=}는 대사 글에만 쓸 수 있어요. 여기에 쓰면 렌파이가 멈춰요 (${b.title || b.id})`, nodeId: b.id });
       };
       // 표시 붙이기: at부터 새로 쓴 줄 가운데 첫 문장(없으면 첫 줄) 끝에, 붙일 수 없으면 예전처럼 그 윗줄에

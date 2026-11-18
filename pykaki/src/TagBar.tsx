@@ -3,6 +3,7 @@
 import { useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react';
 import { create } from 'zustand';
 import { useStore } from './store';
+import type { Flag } from './types';
 import { useGameFolder } from './gameFolder';
 import { hit, keyOf } from './prefs';
 import { EFFECTS, effectKnobs, formatEffect, parseEffect } from './stage';
@@ -285,6 +286,7 @@ const DEMO_BASE = 14; // 견본 글의 보통 속도 (TagDemo DEMO_CPS와 같음
 // extra: 태그 말고 줄 전체에 거는 칸(상자 안 편집의 글 상자 칸). 접어도 늘 보인다
 export function TagBar({ targetId, className = '', extra }: { targetId: string; className?: string; extra?: React.ReactNode }) {
   const tagsOn = useStore((s) => s.project.settings.allowTextTags);
+  const flags = useStore((s) => s.project.variables);
   const update = useStore((s) => s.update);
   const [, redraw] = useReducer((x: number) => x + 1, 0);
   const [palette, setPalette] = useState<false | 'color' | 'outlinecolor' | 'rubycolor'>(false);
@@ -362,6 +364,13 @@ export function TagBar({ targetId, className = '', extra }: { targetId: string; 
           텍스트 태그가 꺼져 있어요. <code>{'{'}</code>가 글자 그대로 나가요.
           <button className="primary" onClick={() => update((p) => void (p.settings.allowTextTags = true))}>켜기</button>
         </div>
+        {flags.length > 0 && (
+          <div className="tb-card" style={{ '--hue': 28 } as React.CSSProperties}>
+            <div className="tb-row">
+              <FlagValuePick flags={flags} onPick={(n) => run((x, s, e) => insertTag(x, s, e, `[${n}]`))} />
+            </div>
+          </div>
+        )}
         {extraCard}
       </div>
     );
@@ -511,6 +520,12 @@ export function TagBar({ targetId, className = '', extra }: { targetId: string; 
           {ins('{nw}', 'nw')}
           {ins('{fast}', 'fast')}
           {ins('{clear}', 'clear')}
+          {flags.length > 0 && (
+            <>
+              <span className="tb-sep" />
+              <FlagValuePick flags={flags} onPick={(n) => run((x, s, e) => insertTag(x, s, e, `[${n}]`))} />
+            </>
+          )}
         </div>
       </div>
       <div className="tb-card" style={{ '--hue': 150 } as React.CSSProperties}>
@@ -725,6 +740,21 @@ export function TagBar({ targetId, className = '', extra }: { targetId: string; 
 // 펼칠 때: 자리 높이가 스프링으로 늘고, 카드가 한 장씩 아래에서 옅고 흐리게 올라와 제자리로(50ms씩 늦게).
 // 접을 때: 카드가 위로 조금 뜨며 옅어지고 자리가 줄어든 뒤 빠진다. 움직이는 도중에 다시 눌러도 지금 자리에서 반대로.
 // 애니메이션 줄이기면 짧은 페이드만. 바깥 .tagbar의 gap(5px)도 같이 늘고 줄어서 끝에 튀지 않음
+// 대사에 플래그 값 넣기 [이름]: 게임에서 그때 값이 보임 (글은 처음 값, 켜짐/꺼짐은 True/False)
+function FlagValuePick({ flags, onPick }: { flags: Flag[]; onPick: (name: string) => void }) {
+  return (
+    <select
+      className="tb-sel tb-sel-s"
+      value=""
+      title="플래그 값 [이름]: 커서 자리에 넣으면 게임에서 그때의 값이 보여요 (예: 호감도 [love])"
+      onChange={(e) => e.target.value && onPick(e.target.value)}
+    >
+      <option value="">플래그 값</option>
+      {flags.map((f) => <option key={f.id} value={f.name}>{f.name}{f.note ? ` (${f.note})` : ''}</option>)}
+    </select>
+  );
+}
+
 function MoreReveal({ open, children }: { open: boolean; children: React.ReactNode }) {
   const [shown, setShown] = useState(open);
   const ref = useRef<HTMLDivElement | null>(null);
