@@ -12,8 +12,7 @@ export function SettingsModal() {
     <div className="modal-bg" onClick={close}>
       <div className="modal prefs" onClick={(e) => e.stopPropagation()}>
         <h3>환경 설정<Hint text="화면 설정은 이 컴퓨터에만, 상자 색만 대본 파일에 저장돼요" topic="환경 설정" /></h3>
-        <TextColor />
-        <ColorPrefs />
+        <FramePrefs />
         <LookPrefs />
         <BoxColors />
         {isDesktop && <RunPrefs />}
@@ -35,88 +34,6 @@ export function SettingsModal() {
 }
 
 // 텍스트 색: 어느 테마에서든 고를 수 있다. 자동이면 테마가 밝기에 맞춰 정한다
-function TextColor() {
-  const p = usePrefs();
-  const auto = colorsOf(p).text;
-  return (
-    <>
-      <h4>텍스트 색</h4>
-      <div className="row">
-        <input type="color" className="bc-big" value={p.textColor ?? auto} onChange={(e) => usePrefs.setState({ textColor: e.target.value })} title="눌러서 글자색 고르기" />
-        <button className={'swatch' + (p.textColor ? '' : ' on')} onClick={() => usePrefs.setState({ textColor: null })}>
-          자동 (테마 색)
-        </button>
-        <span className="tip">{p.textColor ? '모든 테마에 씀' : '테마대로'}</span>
-      </div>
-    </>
-  );
-}
-
-function ColorPrefs() {
-  const p = usePrefs();
-  const cur = colorsOf(p);
-  const grad = gradOf(p);
-  const setCustom = (k: keyof Colors, v: string) => usePrefs.setState({ custom: { ...p.custom, [k]: v } });
-  const setGrad = (k: 'a' | 'b', v: string) => grad && usePrefs.setState({ grads: { ...p.grads, [grad]: { ...p.grads[grad], [k]: v } } });
-  const pickers: [keyof Colors, string][] = [['bg', '바탕'], ['panel', '면'], ['box', '상자']];
-  const preview = (c: Colors) => ({ background: c.bg, color: c.text, borderColor: c.box ?? c.accent });
-  return (
-    <>
-      <h4>화면 테마<Hint text="그라데이션 테마는 두 색으로 바탕·label·상자를 칠해요. label 경계선 0이면 선 없음" topic="환경 설정" /></h4>
-      <div className="row">
-        {THEMES.map((t) => {
-          const c = t.grad ? gradColors(p.grads[t.grad]) : t.colors;
-          return (
-            <button key={t.id} className={'swatch' + (p.theme === t.id ? ' on' : '')} onClick={() => usePrefs.setState({ theme: t.id })} style={preview(c)}>
-              {t.label}
-            </button>
-          );
-        })}
-        <button
-          className={'swatch' + (p.theme === 'custom' ? ' on' : '')}
-          onClick={() => usePrefs.setState({ theme: 'custom', custom: p.theme === 'custom' ? p.custom : { ...cur, box: cur.box ?? cur.panel, label: undefined } })}
-        >
-          직접 고르기
-        </button>
-      </div>
-      {grad && (
-        <>
-          <div className="row">
-            <label className="pick">
-              <input type="color" value={p.grads[grad].a} onChange={(e) => setGrad('a', e.target.value)} />
-              바탕 색
-            </label>
-            <span className="grad-bar" style={{ background: `linear-gradient(90deg, ${p.grads[grad].a}, ${p.grads[grad].b})` }}>
-              <i style={{ left: '30%' }} title="label 배경" />
-              <i style={{ left: '55%' }} title="상자" />
-            </span>
-            <label className="pick">
-              <input type="color" value={p.grads[grad].b} onChange={(e) => setGrad('b', e.target.value)} />
-              끝 색
-            </label>
-            <button onClick={() => usePrefs.setState({ grads: { ...p.grads, [grad]: { ...GRAD_DEFAULTS[grad] } } })}>처음 색</button>
-          </div>
-        </>
-      )}
-      {p.theme === 'custom' && (
-        <div className="row">
-          {pickers.map(([k, label]) => (
-            <label key={k} className="pick">
-              <input type="color" value={p.custom[k] ?? p.custom.panel} onChange={(e) => setCustom(k, e.target.value)} />
-              {label}
-            </label>
-          ))}
-        </div>
-      )}
-      <div className="row">
-        <label className="pick" htmlFor="frame-w">label 경계선</label>
-        <input id="frame-w" type="range" min={0} max={6} step={0.5} value={p.frameWidth} onChange={(e) => usePrefs.setState({ frameWidth: +e.target.value })} />
-        <span className="tip">{p.frameWidth ? p.frameWidth + 'px' : '안 보임'}</span>
-      </div>
-    </>
-  );
-}
-
 const HEX = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
 // #abc → #aabbcc
 const fullHex = (h: string) => (h.length === 4 ? '#' + [...h.slice(1)].map((x) => x + x).join('') : h).toLowerCase();
@@ -176,6 +93,18 @@ function BoxColors() {
       </div>
       </fieldset>
     </>
+  );
+}
+
+// label 경계선 굵기 (세션 77에 화면 테마 칸을 없애며 따로 뺌)
+function FramePrefs() {
+  const w = usePrefs((p) => p.frameWidth);
+  return (
+    <div className="row">
+      <label className="pick" htmlFor="frame-w">label 경계선</label>
+      <input id="frame-w" type="range" min={0} max={6} step={0.5} value={w} onChange={(e) => usePrefs.setState({ frameWidth: +e.target.value })} />
+      <span className="tip">{w ? w + 'px' : '안 보임'}</span>
+    </div>
   );
 }
 

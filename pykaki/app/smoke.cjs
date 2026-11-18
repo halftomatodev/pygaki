@@ -339,7 +339,7 @@ async function until(what, fn, ms = 10000) {
 
   // 위쪽 줄: 제목 칸과 [렌파이에서 실행] 단추가 있고, 상자·정렬 단추는 왼쪽 칸에 있는지
   if (!(await page.locator('.toolbar .ptitle').count())) fail('위쪽 줄에 프로젝트 제목 칸이 없음');
-  if (!(await page.locator('.toolbar .run').count())) fail('위쪽 줄에 [렌파이에서 실행] 단추가 없음');
+  if (!(await page.locator('.toolbar .ctx-item', { hasText: '렌파이에서 실행' }).count())) fail('위쪽 줄에 [렌파이에서 실행] 단추가 없음');
   if (!(await page.locator('.sidebar .sec-btns button', { hasText: '+ 상자' }).count())) fail('왼쪽 칸에 [+ 상자] 단추가 없음');
   // 렌파이를 못 찾는 자리(시험)에서는 켜지 않고 그렇다고 알림
   const run1 = await page.evaluate(() => window.pygaki.runGame(false));
@@ -441,7 +441,7 @@ async function until(what, fn, ms = 10000) {
   if (await goBtn.isDisabled()) fail('게임과 이어졌는데 [렌파이에서 여기로 이동]을 못 누름');
   await goBtn.click();
   await until('[렌파이에서 여기로 이동]이 goto를 보내지 않음', () => got.some((m) => m.cmd === 'goto' && m.where === 'line' && m.file === 'game/script_flow.rpy' && m.line > 0));
-  if (await page.locator('.tb-run button', { hasText: /^▶ 플레이/ }).count()) fail('PyKaki 안 [▶ 플레이]가 남아 있음');
+  if (await page.locator('.tb-ctx button', { hasText: /^▶ 플레이/ }).count()) fail('PyKaki 안 [▶ 플레이]가 남아 있음');
   console.log('렌파이에서 여기로 이동: 됨');
   // [📂 파일 고르기]: 창은 시험에서 못 띄우니 함수와 단추가 있는지, 고르지 않은 파일은 복사하지 못하는지만
   if ((await page.evaluate(() => typeof window.pygaki.pickFile)) !== 'function') fail('pickFile이 없음');

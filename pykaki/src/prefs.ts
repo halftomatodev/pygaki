@@ -36,7 +36,6 @@ export type GradId = 'dark';
 export type Look = 'apple';
 export const THEMES: { id: Exclude<ThemeId, 'custom'>; label: string; colors: Colors; look?: Look; grad?: GradId }[] = [
   { id: 'apple', label: '사과 스타일', colors: { bg: '#f2f2f7', panel: '#ffffff', text: '#1c1c1e', accent: '#007aff' }, look: 'apple' },
-  { id: 'dark', label: '어둡게', colors: { bg: '#000000', panel: '#0b0714', text: '#ececf1', accent: '#a684f8' }, grad: 'dark' },
 ];
 const THEME_IDS: string[] = [...THEMES.map((t) => t.id), 'custom'];
 export const GRAD_DEFAULTS: Record<GradId, Grad> = { dark: { a: '#000000', b: '#8b5cf6' } };
@@ -148,14 +147,14 @@ export const usePrefs = create<Prefs>(loadPrefs);
 export const resetKeys = () => usePrefs.setState({ keys: defKeys() });
 export const resetPrefs = () => usePrefs.setState(defaults());
 
-const themeOf = (p: Prefs) => THEMES.find((t) => t.id === p.theme) ?? THEMES[0];
+// 세션 77: 사과 스타일 하나만 쓴다(어둡게, 내 색, 글자색 고르기 없앰). 예전 설정의 theme·custom·textColor는 읽어도 무시
+const themeOf = (_p: Prefs) => THEMES[0];
 export const colorsOf = (p: Prefs): Colors => {
-  if (p.theme === 'custom') return p.custom;
   const t = themeOf(p);
   return t.grad ? gradColors(p.grads[t.grad]) : t.colors;
 };
-export const gradOf = (p: Prefs) => (p.theme === 'custom' ? undefined : themeOf(p).grad);
-export const lookOf = (p: Prefs) => (p.theme === 'custom' ? undefined : themeOf(p).look);
+export const gradOf = (p: Prefs) => themeOf(p).grad;
+export const lookOf = (p: Prefs) => themeOf(p).look;
 
 // 배경이 어두우면 캔버스(React Flow)도 어두운 모드로
 export function isDark(c: Colors) {
@@ -168,9 +167,8 @@ function apply(p: Prefs) {
   const r = document.documentElement;
   r.style.setProperty('--bg', c.bg);
   r.style.setProperty('--panel', c.panel);
-  r.style.setProperty('--text', p.textColor ?? c.text);
-  r.dataset.textfix = p.textColor ? '1' : '';
-  if (p.textColor) r.style.setProperty('--text-fix', p.textColor);
+  r.style.setProperty('--text', c.text);
+  r.dataset.textfix = '';
   r.dataset.grad = gradOf(p) ? '1' : '';
   r.style.setProperty('--accent', c.accent);
   r.dataset.dark = isDark(c) ? '1' : '';

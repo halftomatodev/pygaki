@@ -11,6 +11,7 @@ import { getLang, LANGS, setLang, type Lang } from './i18n';
 import { desktop, isDesktop } from './desktop';
 import { useLive } from './showpyLive';
 import { FolderMenu } from './FolderMenu';
+import { Redo2, Undo2 } from 'lucide-react';
 
 // 화면 바꾸기: 대본 편집 / GUI 편집(데스크톱 앱에서만) / 화면 / 효과 / 셰이더 / 글꼴(앱에서만)
 // fluidkit LiquidTabs: 유리 물방울 막대가 탭 사이를 흘러가고, 꼬리가 늦게 따라와 다시 합쳐진다
@@ -116,31 +117,16 @@ export function Toolbar() {
 
   return (
     <div className="toolbar">
-      {/* 왼쪽: 프로젝트 제목, 큰 탭 셋 */}
+      {/* 가운데 두 줄: 큰 탭 묶음(+ 게임 연결 표시), 그 아래 메뉴 묶음. 둘 다 가운데 정렬 (세션 77) */}
+      <div className="tb-center">
       <div className="tb-left">
-      <input
-        className="ptitle"
-        value={s.project.project.title}
-        onChange={(e) => s.update((p) => void (p.project.title = e.target.value), 'ptitle')}
-        placeholder="프로젝트 제목"
-        title="프로젝트 제목 (눌러서 고쳐요)"
-      />
       <ViewSwitch />
       <LiveBadge />
       </div>
-      {/* 게임 돌려보기: 첫 줄 오른쪽 끝에 초록 톤으로 */}
-      <div className="tb-run">
-      {isDesktop && (
-        <button className="run" onClick={() => void runInRenpy()} title="지금 대본을 내보내고 렌파이로 게임을 켜요. 이미 켜져 있을 때 어떻게 할지는 [설정]에서 골라요">
-          ▶ 렌파이에서 실행
-        </button>
-      )}
-      <FollowLine />
-      </div>
       {/* 메뉴: 둘째 줄 왼쪽부터. 자주 쓰는 되돌리기, 집중, 설정이 맨 앞 */}
       <div className="tb-right">
-      <button disabled={!s.past.length} onClick={s.undo} title={'실행 취소 ' + keyOf('undo')}>↶</button>
-      <button disabled={!s.future.length} onClick={s.redo} title={'다시 실행 ' + keyOf('redo')}>↷</button>
+      <button className="tb-icon" aria-label="실행 취소" disabled={!s.past.length} onClick={s.undo} title={'실행 취소 ' + keyOf('undo')}><Undo2 size={16} strokeWidth={2} aria-hidden /></button>
+      <button className="tb-icon" aria-label="다시 실행" disabled={!s.future.length} onClick={s.redo} title={'다시 실행 ' + keyOf('redo')}><Redo2 size={16} strokeWidth={2} aria-hidden /></button>
       <button className="focus-btn" onClick={toggleFocus} title={'집중 모드: 캔버스만 남기기 ' + keyOf('focus')}>집중</button>
       <button onClick={() => useStore.setState({ showPrefs: true })} title="화면 색, 단축키">설정</button>
       <button onClick={() => openHelp()} title="쓰는 법과 설명 모음 (F1)">도움말</button>
@@ -158,6 +144,18 @@ export function Toolbar() {
       <span className="sep" />
       <button onClick={() => exportRpyFile(false)}>.rpy 내보내기</button>
       {hasRpyTarget() && <button onClick={() => exportRpyFile(true)} title={keyOf('export')}>같은 곳에 다시</button>}
+      </div>
+      </div>
+      {/* 오른쪽 위: 메뉴 패널 하나(Context Menu 꼴). 맨 위 프로젝트 제목, 구분선, 렌파이에서 실행, 스크립트 따라가기 */}
+      <div className="tb-ctx">
+      <input
+        className="ptitle"
+        value={s.project.project.title}
+        onChange={(e) => s.update((p) => void (p.project.title = e.target.value), 'ptitle')}
+        placeholder="프로젝트 제목"
+        title="프로젝트 제목 (눌러서 고쳐요)"
+      />
+      <RunItems />
       </div>
       {showVersions && <Versions onClose={() => setShowVersions(false)} />}
     </div>
@@ -181,26 +179,50 @@ function FolderButtons() {
   return null;
 }
 
-// 렌파이 폴더를 연결했을 때: 고치면 저절로 내보내고, 게임을 지금 쓰는 줄로 옮길지
-function FollowLine() {
+// 오른쪽 위 메뉴 패널의 두 줄 (세션 77). 둘 다 켜짐/꺼짐 꼴: 켜짐은 옅은 바탕, 꺼짐은 바탕 없음
+// - 렌파이에서 실행: 게임이 꺼져 있으면 켜짐(누를 수 있음). 게임이 켜져 있으면(앱과 연결됨, 다시 읽는 중) 꺼짐(누를 수 없음).
+//   플러그인이 없는 게임은 앱이 켜진 줄 몰라서 켜짐으로 보이고, 누르면 runInRenpy가 "이미 켜져 있어요"라고 알린다
+// - 스크립트 따라가기(예전 이름 게임 줄 따라가기): 렌파이 폴더를 연결했을 때만. 고치고 잠깐 멈추면 script_flow.rpy로 저절로 내보내고,
+//   켜 두면 켜 둔 게임을 지금 쓰는 줄로 옮긴다
+function RunItems() {
+  const running = useLive((l) => l.on || l.reloading);
   const link = useStore((s) => s.project.settings.renpyLink);
   const name = useGameFolder((g) => g.name);
   const [on, setOn] = useState(followLine);
-  if (!link || !name) return null;
+  const follow = !!link && !!name;
+  if (!isDesktop && !follow) return null;
   return (
-    <button
-      className={'follow' + (on ? ' on' : '')}
-      onClick={() => {
-        setFollowLine(!on);
-        setOn(!on);
-      }}
-      title={
-        '고치고 잠깐 멈추면 script_flow.rpy로 저절로 내보내고, 켜 둔 게임이 다시 불러와요. ' +
-        (on ? '켬: 게임을 지금 쓰는 줄로 옮겨요. 여러 곳을 고친 뒤 처음부터 훑어보려면 꺼요.' : '끔: 게임은 있던 자리에 그대로 있어요.')
-      }
-    >
-      게임 줄 따라가기: {on ? '켬' : '끔'}
-    </button>
+    <>
+      <span className="ctx-sep" />
+      {isDesktop && (
+        <button
+          className={'ctx-item' + (running ? '' : ' on')}
+          disabled={running}
+          onClick={() => void runInRenpy()}
+          title={running ? '게임이 켜져 있어요. 고친 대본은 게임이 저절로 다시 불러와요' : '지금 대본을 내보내고 렌파이로 게임을 켜요. 이미 켜져 있을 때 어떻게 할지는 [설정]에서 골라요'}
+        >
+          <span>렌파이에서 실행</span>
+          <span className="ctx-state">{running ? '실행 중' : ''}</span>
+        </button>
+      )}
+      {follow && (
+        <button
+          className={'ctx-item' + (on ? ' on' : '')}
+          aria-pressed={on}
+          onClick={() => {
+            setFollowLine(!on);
+            setOn(!on);
+          }}
+          title={
+            '고치고 잠깐 멈추면 script_flow.rpy로 저절로 내보내고, 켜 둔 게임이 다시 불러와요. ' +
+            (on ? '켬: 게임을 지금 쓰는 줄로 옮겨요. 여러 곳을 고친 뒤 처음부터 훑어보려면 꺼요.' : '끔: 게임은 있던 자리에 그대로 있어요.')
+          }
+        >
+          <span>스크립트 따라가기</span>
+          <span className="ctx-state">{on ? '켬' : '끔'}</span>
+        </button>
+      )}
+    </>
   );
 }
 

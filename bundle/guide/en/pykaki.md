@@ -1,4 +1,4 @@
-<!-- 원본: pykaki/docs/GUIDE.md @ a8c3a1377e -->
+<!-- 원본: pykaki/docs/GUIDE.md @ c259050647 -->
 # pygaki user guide
 
 A tool for writing Ren'Py scripts with boxes and lines and exporting them as Ren'Py script files (`.rpy`).
@@ -11,9 +11,9 @@ The in-app [Help] (F1) is the Korean version of this document. Button names here
 
 ## 1. A tour of the screen
 
-- **Top row, left**: the project title (click to edit) and the big tabs **[Script | GUI | Effects | Shaders]**. In the app, next to them is the **game connection button** (light blue "● Connected to game" when attached to the game, yellow "◐ Game reloading" while the game rereads a changed script (it reattaches by itself when done), gray otherwise. Click it to go to GUI).
-- **Top row, far right (green buttons)**: run the game. **[▶ Run in Ren'Py]** and [Follow game line].
-- **Second row menu** (from the left): undo ↶ ↷, **[Focus]** (light purple button), settings, **Help**, then file New/Open/Save, project folder (Reload, Folders, Other project), versions, Export. Dim normally, clear when the mouse is over them.
+- **Top row, left**: the big tabs **[Script | GUI | Screen | Effects | Shaders | Font]**. In the app, next to them is the **game connection button** (light blue "● Connected to game" when attached to the game, yellow "◐ Game reloading" while the game rereads a changed script (it reattaches by itself when done), gray otherwise. Click it to go to GUI).
+- **Menu panel, top right**: the project title at the top (click to edit), and below it **[Run in Ren'Py]** and **[Follow script]**. A row that is on has a light pink background. [Run in Ren'Py] is dimmed and can't be clicked while the game is running ("Running"). [Follow script] switches on/off each time you click it.
+- **Second row menu** (from the left): undo and redo arrows, **[Focus]** (light purple button), settings, **Help**, then file New/Open/Save, project folder (Reload, Folders, Other project), versions, Export. Together with the tabs they float in the center as translucent groups, and a button gets a white background when the mouse is over it.
 - **Left**: label (scenes, with box and layout buttons below), Characters, **Check** (errors and warnings that come up on export; click to go to that box), Ren'Py project info (project, script file, save state, number of images and sounds found), **Script** (the script to be exported; [Expand] to see it, [Copy], [Export .rpy]), Settings. Each group is a rounded card.
 - **Right**: the same kind of cards as the left, without tabs. Click a box and you get the box, text effects, dialogue and next flow cards; click ◐ Shader and you get the shader and transition cards.
 - **Panel size**: hover the border between the left or right panel and the canvas and the cursor becomes ↔. Drag to change that panel's width; double-click the border to reset only that panel. Panel borders in [GUI], [Effects] and [Shaders] drag the same way. **[Start size]** in the left "Settings" resets the panels of every screen at once, and **[Lock]** keeps them from changing when dragged. Sizes and the lock are remembered in this browser (app).
@@ -518,7 +518,7 @@ Ren'Py 8.5.3 can't play a webm with transparent areas as is (they come out black
 - After exporting once, **Ctrl+E** (or [Again to same place]) overwrites it right away.
 - Press **Shift+R** with Ren'Py running to reload the changed script.
 - **Auto export** (with a Ren'Py folder connected, pygaki plugin ui_kit 4.2 or later): edit the script and pause for a moment, and `script_flow.rpy` is written without pressing Ctrl+E; a game running in developer mode reloads by itself. If the [Check] card on the left has errors, it doesn't export until they're fixed.
-- **[Follow game line]** (toolbar): when on, the reloaded game goes to the line you're writing (rolling back if it's a line already passed, otherwise skipping ahead to it). Turn it off if you want to look through from the start after editing many places. When off, the game stays where it was.
+- **[Follow script]** (menu panel at the top right, formerly Follow game line): when on, the reloaded game goes to the line you're writing (rolling back if it's a line already passed, otherwise skipping ahead to it). Turn it off if you want to look through from the start after editing many places. When off, the game stays where it was.
 
 > **Caution**: if you edit the exported `.rpy` directly in VSCode, it will be overwritten on the next export. Always edit the script in this tool.
 
@@ -623,11 +623,7 @@ Languages elsewhere:
 ### Preferences
 Change them in **[Settings]** at the right of the toolbar. These settings are saved only in that browser and don't go into the script file.
 
-- **Text color** (top of settings): choose the text color. In any theme, all text, including text on boxes and labels, becomes that color. **[Auto (theme color)]** goes back to the color the theme picks for the background brightness.
-- **Screen theme**: choose from **Apple style** (default), **Dark** and **Custom**.
-  - **Apple style**: a theme inspired by Apple's design. White tones with blue and gray accents. No borders: rounded white cards (boxes) are told apart only by the background color, and label backgrounds are painted in the colors from the label list on the left.
-  - **Dark**: choose just a **background color** and an **end color**, and it blends between them, painting background → label background (30%) → boxes (55%) automatically. In this theme boxes can't be painted individually; they all follow the gradient (box colors you painted show in other themes). The default is black → purple. [Start colors] resets it.
-  - **Custom**: choose the background, surface and box colors one by one. (Text color is set in Text color at the top)
+- **Screen theme**: just **Apple style** (a translucent toolbar on a pastel background). The old dark theme, custom colors and text color option were removed.
 - **Label border** (0–6px, default 3px): thickness of the line grouping boxes of the same label. At 0 the line is hidden.
 - **Box color (saved in this script)**: paints the selected box. Click a color swatch or type a hex code (#RRGGBB or #RGB). Clear it with [Back to label color]. The color is saved in the script file and can be undone with Ctrl+Z. This is the only screen setting that goes into the script file.
 - **Font**: just Pretendard 500. It's included in the app, so it shows without the internet.

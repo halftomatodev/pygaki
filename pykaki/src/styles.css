@@ -1776,3 +1776,74 @@ button.primary.solid:hover:not(:disabled) { background: color-mix(in srgb, var(-
 
 /* 카드는 fluidkit LiquidCard가 유리 면과 그림자를 그린다 (Card.tsx). 칸마다 준 바탕·그림자는 빼고 */
 .sec.card.card { background: transparent; box-shadow: none; }
+/* ── 사과 스타일: 파스텔 배경 위에 떠 있는 유리 툴바 (2026-11 세션 77, 사용자 손그림) ──
+   배경은 하늘·라벤더·복숭아를 옅게. 툴바 첫 줄 탭과 둘째 줄 메뉴는 반투명 묶음(유리)으로 떠 있고,
+   메뉴 단추는 올렸을 때만 덜 투명한 흰 바탕. 오른쪽 위는 메뉴보다 더 투명한 메뉴 패널(제목, 실행, 스크립트 따라가기).
+   다른 테마(어둡게, 내 색)는 그대로 */
+:root[data-look='apple'] {
+  --pastel: linear-gradient(120deg, #e4efff 0%, #ece7ff 48%, #ffeadf 100%);
+  --glass: rgba(255, 255, 255, 0.42);
+  --glass-line: rgba(255, 255, 255, 0.7);
+  --glass-shadow: 0 6px 24px rgba(70, 80, 140, 0.08), 0 1px 2px rgba(70, 80, 140, 0.06);
+  --glass-blur: blur(18px) saturate(1.5);
+  --glass-hover: rgba(255, 255, 255, 0.82);
+  --tab-on: rgba(0, 122, 255, 0.15);
+  --tab-on-text: #0a63d1;
+}
+:root[data-look='apple'] body { background: #eef0fb var(--pastel) fixed; }
+/* 바탕이 보이게: 툴바, 양쪽 칸 둘레, 캔버스 바탕을 비움 (칸 안의 카드는 그대로 흰색) */
+[data-look='apple'] :is(.app, .toolbar, .sidebar, .right-panel) { background: transparent; }
+[data-look='apple'] .react-flow { --xy-background-color: transparent; }
+[data-look='apple'] .toolbar { padding: 10px 14px 8px; row-gap: 8px; column-gap: 8px; }
+/* 유리 묶음: 탭 묶음, 메뉴 묶음, 연결 표시, 실행 묶음 */
+[data-look='apple'] :is(.view-switch, .tb-right, .live-badge) {
+  background: var(--glass); border: 1px solid var(--glass-line); box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+}
+/* 첫 줄 탭: 둘째 줄보다 크게, 고른 탭은 반투명 연한 파랑 */
+[data-look='apple'] .view-switch { gap: 2px; padding: 4px; margin-right: 8px; border-radius: 999px; }
+[data-look='apple'] .view-switch button { font-size: 14.5px; font-weight: 600; padding: 7px 18px; border-radius: 999px; color: color-mix(in srgb, var(--text) 72%, transparent); }
+[data-look='apple'] .view-switch button:hover:not(:disabled):not(.on) { background: var(--glass-hover); color: var(--text); }
+[data-look='apple'] .view-switch button.on, [data-look='apple'] .view-switch button.on:hover:not(:disabled) { background: var(--tab-on); color: var(--tab-on-text); box-shadow: inset 0 0 0 1px rgba(0, 122, 255, 0.18); }
+[data-look='apple'] .live-badge { border-radius: 999px; padding: 7px 14px; font-weight: 500; color: color-mix(in srgb, var(--text) 62%, transparent); }
+[data-look='apple'] .live-badge.on, [data-look='apple'] .live-badge.on:hover:not(:disabled) { background: rgba(59, 130, 246, 0.14); color: #1d5fd6; }
+[data-look='apple'] .live-badge.reloading, [data-look='apple'] .live-badge.reloading:hover:not(:disabled) { background: rgba(255, 159, 10, 0.16); color: #b26a00; }
+/* 둘째 줄 메뉴: 한 묶음, 단추는 평소 투명 → 올리면 흰 바탕 */
+[data-look='apple'] .tb-right { padding: 3px; gap: 1px; border-radius: 14px; opacity: 1; }
+[data-look='apple'] .tb-right button { font-weight: 500; color: color-mix(in srgb, var(--text) 78%, transparent); padding: 5px 10px; border-radius: 10px; }
+[data-look='apple'] .tb-right button:hover:not(:disabled) { background: var(--glass-hover); color: var(--text); box-shadow: 0 1px 3px rgba(70, 80, 140, 0.12); }
+[data-look='apple'] .tb-right button.on { background: var(--glass-hover); color: var(--accent); }
+[data-look='apple'] .tb-right .tb-icon { display: inline-flex; align-items: center; justify-content: center; min-width: 32px; padding: 5px 8px; }
+[data-look='apple'] .tb-right .sep { background: rgba(60, 60, 90, 0.14); }
+[data-look='apple'] .tb-right .focus-btn, [data-look='apple'] .tb-right .focus-btn:hover:not(:disabled) { background: rgba(139, 92, 246, 0.14); color: #6d3fd6; font-weight: 600; }
+[data-look='apple'] .tb-right .lang-sel { background: transparent; font-weight: 500; color: color-mix(in srgb, var(--text) 78%, transparent); }
+[data-look='apple'] .tb-right .lang-sel:hover { background: var(--glass-hover); }
+
+/* ── 툴바 배치 (세션 77): 가운데 두 줄(탭 묶음, 메뉴 묶음)을 창 가운데에, 오른쪽 위에 메뉴 패널 ──
+   왼쪽 칸은 비워 두고 오른쪽 칸과 같은 폭(1fr)이라 가운데가 정말 가운데. 좁으면 왼쪽부터 줄고 메뉴는 줄바꿈 */
+.toolbar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, max-content) minmax(max-content, 1fr); align-items: start; column-gap: 12px; }
+.tb-center { grid-column: 2; display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; }
+.tb-center .tb-left { margin-right: 0; justify-content: center; }
+.tb-center .tb-right { flex-basis: auto; order: 0; justify-content: center; }
+.tb-ctx { grid-column: 3; justify-self: end; display: flex; flex-direction: column; align-items: stretch; gap: 1px; min-width: 190px; padding: 4px; border-radius: 12px; }
+.tb-ctx .ptitle { margin: 0; font-size: 14px; font-weight: 700; padding: 5px 10px; }
+.ctx-sep { height: 1px; margin: 3px 8px; background: var(--line); }
+.ctx-item { display: flex; justify-content: space-between; align-items: center; gap: 16px; width: 100%; text-align: left; padding: 6px 10px; border-radius: 8px; color: var(--text); font-weight: 500; }
+.ctx-item.on { background: var(--accent-soft); }
+.ctx-state { color: var(--muted); font-size: 11.5px; }
+/* 사과 스타일: 메뉴보다 더 투명한 판, 글자는 메뉴와 같은 색, 켜짐은 옅은 분홍 */
+:root[data-look='apple'] { --ctx-glass: rgba(255, 255, 255, 0.2); --ctx-on: rgba(255, 192, 214, 0.5); --ctx-on-hover: rgba(255, 178, 204, 0.62); --menu-text: color-mix(in srgb, var(--text) 78%, transparent); }
+[data-look='apple'] .toolbar { column-gap: 14px; }
+[data-look='apple'] .tb-ctx {
+  padding: 5px; border-radius: 16px; background: var(--ctx-glass); border: 1px solid rgba(255, 255, 255, 0.55); box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+}
+[data-look='apple'] .tb-ctx .ptitle, [data-look='apple'] .tb-ctx .ptitle:hover { background: transparent; color: var(--menu-text); font-weight: 600; border-radius: 10px; }
+[data-look='apple'] .tb-ctx .ptitle:focus { background: rgba(255, 255, 255, 0.5); box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.25); color: var(--text); }
+[data-look='apple'] .ctx-sep { background: rgba(60, 60, 90, 0.14); }
+[data-look='apple'] .ctx-item { color: var(--menu-text); border-radius: 10px; background: transparent; }
+[data-look='apple'] .ctx-item:hover:not(:disabled) { background: rgba(255, 255, 255, 0.5); color: var(--text); }
+[data-look='apple'] .ctx-item.on { background: var(--ctx-on); color: var(--menu-text); }
+[data-look='apple'] .ctx-item.on:hover:not(:disabled) { background: var(--ctx-on-hover); color: var(--text); }
+[data-look='apple'] .ctx-item:disabled { opacity: 0.55; }
+[data-look='apple'] .ctx-state { color: color-mix(in srgb, var(--text) 50%, transparent); }
