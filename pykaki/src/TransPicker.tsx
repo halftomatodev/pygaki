@@ -19,9 +19,14 @@ interface Props {
   value: string | undefined;
   onPick(v: string): void;
   className?: string;
+  // 글 상자 그림 효과(FEATURE 28)처럼 렌파이 기본 전환을 못 쓰는 곳: 기본은 [없음] 하나만
+  noBasic?: boolean;
 }
 
-export function TransPicker({ value, onPick, className = '' }: Props) {
+const NONE: [string, string, string][] = [['', '없음', '효과 없이 바로 나와요']];
+
+export function TransPicker({ value, onPick, className = '', noBasic = false }: Props) {
+  const basic = noBasic ? NONE : BASIC;
   const [open, setOpen] = useState(false);
   const [hover, setHover] = useState<string | null>(null);
   const box = useRef<HTMLDivElement>(null);
@@ -34,7 +39,7 @@ export function TransPicker({ value, onPick, className = '' }: Props) {
 
   const cur = parseImageFx(value)?.name;
   const curLabel =
-    BASIC.find(([k]) => k === (value ?? ''))?.[1] ??
+    basic.find(([k]) => k === (value ?? ''))?.[1] ??
     (cur ? (effectCatalog().find((c) => c.kind === 'transition' && c.name === cur)?.label ?? cur) : value ?? '바로');
 
   useEffect(() => {
@@ -95,11 +100,11 @@ export function TransPicker({ value, onPick, className = '' }: Props) {
           </div>
           <div className="tp-list">
             <div className="tp-sub">기본</div>
-            {BASIC.map(([k, label, title]) => row('b' + k, label, '렌파이', (value ?? '') === k, () => pick(k), title))}
+            {basic.map(([k, label, title]) => row('b' + k, label, '렌파이', (value ?? '') === k, () => pick(k), title))}
             <div className="tp-sub">그림 효과</div>
             {!ready.length && <p className="tip">게임에 그림 효과가 없어요.</p>}
             {ready.map((c) => row(c.name, c.label, SOURCE_LABEL[c.source], cur === c.name, () => pickCard(c), c.name, c.name))}
-            {value && !BASIC.some(([k]) => k === value) && !cur && <p className="tip">지금 값: {value}</p>}
+            {value && !basic.some(([k]) => k === value) && !cur && <p className="tip">지금 값: {value}</p>}
           </div>
         </div>,
         document.body,

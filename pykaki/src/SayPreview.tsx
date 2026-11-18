@@ -112,15 +112,40 @@ export function useGameFileUrl(path?: string) {
   return url;
 }
 // 자리·크기·회전(게임 안 편집 화면에서 받아 적은 값, ui_kit 4.15)은 글 가운데 기준으로 옮기고 돌린다
-export function MediaBg({ path, fit, x, y, zoom, angle, mask, alpha }: { path?: string; fit?: 'image'; x?: number; y?: number; zoom?: number; angle?: number; mask?: boolean; alpha?: number }) {
+// 네 점 변형 (FEATURE 28): 가운데 기준 w×h 사각형의 네 모서리를 q(크기에 대한 비율)만큼 옮기는 CSS matrix3d. 플러그인 text_box.rpy quad_homography와 같은 식
+export function quadMatrix(q: number[] | undefined, w: number, h: number): string {
+  if (!q || q.length !== 8 || !q.some((n) => Math.abs(n) > 1e-4) || w < 1 || h < 1) return '';
+  const rx = -w / 2, ry = -h / 2;
+  const [x0, y0] = [rx + q[0] * w, ry + q[1] * h];
+  const [x1, y1] = [rx + w + q[2] * w, ry + q[3] * h];
+  const [x2, y2] = [rx + w + q[4] * w, ry + h + q[5] * h];
+  const [x3, y3] = [rx + q[6] * w, ry + h + q[7] * h];
+  const sx = x0 - x1 + x2 - x3, sy = y0 - y1 + y2 - y3;
+  const dx1 = x1 - x2, dx2 = x3 - x2, dy1 = y1 - y2, dy2 = y3 - y2;
+  const den = dx1 * dy2 - dx2 * dy1;
+  const g = Math.abs(den) < 1e-9 ? 0 : (sx * dy2 - dx2 * sy) / den;
+  const hh = Math.abs(den) < 1e-9 ? 0 : (dx1 * sy - sx * dy1) / den;
+  const m = [[x1 - x0 + g * x1, x3 - x0 + hh * x3, x0], [y1 - y0 + g * y1, y3 - y0 + hh * y3, y0], [g, hh, 1]];
+  const n = [[1 / w, 0, -rx / w], [0, 1 / h, -ry / h], [0, 0, 1]];
+  const H = m.map((r) => [0, 1, 2].map((j) => r[0] * n[0][j] + r[1] * n[1][j] + r[2] * n[2][j]));
+  return ` matrix3d(${[H[0][0], H[1][0], 0, H[2][0], H[0][1], H[1][1], 0, H[2][1], 0, 0, 1, 0, H[0][2], H[1][2], 0, H[2][2]].join(',')})`;
+}
+
+export function MediaBg({ path, fit, x, y, zoom, angle, mask, alpha, quad }: { path?: string; fit?: 'image'; x?: number; y?: number; zoom?: number; angle?: number; mask?: boolean; alpha?: number; quad?: number[] }) {
   const url = useGameFileUrl(path);
+  const [size, setSize] = useState<[number, number]>([0, 0]);
+  const measure = (el: HTMLElement | null) => {
+    if (!el || !quad) return;
+    const w = el.offsetWidth, h = el.offsetHeight;
+    if (w !== size[0] || h !== size[1]) requestAnimationFrame(() => setSize([w, h]));
+  };
   if (!url) return null;
   const cls = 'media-bg' + (fit === 'image' ? ' natural' : '');
-  const move = `translate(${x ?? 0}px, ${y ?? 0}px) rotate(${angle ?? 0}deg) scale(${zoom ?? 1})`;
+  const move = `translate(${x ?? 0}px, ${y ?? 0}px) rotate(${angle ?? 0}deg) scale(${zoom ?? 1})` + quadMatrix(quad, size[0], size[1]);
   const style = { transform: fit === 'image' ? `translate(-50%, -50%) ${move}` : move, opacity: alpha ?? 1 };
   // 투명 영상(왼쪽 색 + 오른쪽 투명도)은 두 쪽을 합쳐서 보여 준다
   if (mediaMasked(path, mask)) return <MaskMovie src={url} className={cls} style={style} />;
-  return isMovieFile(path) ? <video className={cls} style={style} src={url} autoPlay loop muted playsInline /> : <img className={cls} style={style} src={url} alt="" />;
+  return isMovieFile(path) ? <video ref={measure} className={cls} style={style} src={url} autoPlay loop muted playsInline /> : <img ref={measure} className={cls} style={style} src={url} alt="" />;
 }
 // 말풍선은 글 색을 따로 안 적으면 어두운 글 (showpy bubble text_color 기본)
 const boxColor = (s: SayStyle, base: string) => s.color ?? (s.box === 'bubble' ? '#222222' : base);
@@ -210,7 +235,7 @@ function PreviewBody({ line, tagsOn, cps, look, onReplay }: { line: Line; tagsOn
         className={'preview-text ' + (ts ? 'fx-gl' : fxClass(style.effect, fast)) + boxClass(style)}
         style={{ color: boxColor(style, look.textColor), '--txt': boxColor(style, look.textColor), fontFamily: fontStack(style.font), ...charTime(cps), ...boxTilt(style, !!ts) } as React.CSSProperties}
       >
-        {style.box === 'media' && <MediaBg path={style.media} fit={style.media_fit} x={style.media_x} y={style.media_y} zoom={style.media_zoom} angle={style.media_angle} mask={style.media_mask} alpha={style.media_alpha} />}
+        {style.box === 'media' && <MediaBg path={style.media} fit={style.media_fit} x={style.media_x} y={style.media_y} zoom={style.media_zoom} angle={style.media_angle} mask={style.media_mask} alpha={style.media_alpha} quad={style.media_quad} />}
         <Glyphs parsed={parsed} shown={shown} />
       </div>
       {ts && <FxCanvas target={inner} ts={ts} tagTs={tagTs} parsed={parsed} shown={shown} limit={limit} holding={holding} fast={fast} cps={cps} onFail={onFail} />}

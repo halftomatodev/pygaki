@@ -35,7 +35,7 @@ init -8 python in ui_editor:
         id = "say"
         label = "대사"
         panel_screen = "ui_editor_say_panel"
-        overlay_screen = None
+        overlay_screen = "ui_editor_say_overlay"
         uses_mode = False
         uses_scope = False
         shows_line = True
@@ -90,7 +90,9 @@ init -8 python in ui_editor:
         ## PyKaki 원고에서 저장하는 값
         PK_POS = ("x", "y", "name_x", "name_y")
         ## 그림/영상 상자의 자리·크기·회전 (4.15). 대본 편집기에는 media_x, media_y, media_zoom, media_angle로
-        MEDIA_KEYS = ("media_offset", "media_zoom", "media_angle")
+        MEDIA_KEYS = ("media_offset", "media_zoom", "media_angle", "media_link", "media_quad", "media_text_quad")
+        ## 대본 편집기에 그대로 넘기는 값 (4.18): 묶기는 [크기, 회전, 가로, 세로], 네 점 변형은 숫자 8개
+        MEDIA_LISTS = ("media_link", "media_quad", "media_text_quad")
 
         def _pk_media(self, c):
             """괄호 값 → 대본 편집기에 넘길 그림 값. 지운 값은 None."""
@@ -104,6 +106,14 @@ init -8 python in ui_editor:
                 if k == "media_offset":
                     rv["media_x"] = None if gone else int(v[0])
                     rv["media_y"] = None if gone else int(v[1])
+                elif k in self.MEDIA_LISTS:
+                    if gone or v is None or v is False:
+                        rv[k] = None
+                    elif k == "media_link":
+                        rv[k] = [ round(float(n), 3) for n in self.ss().link_base(v) ]
+                    else:
+                        q = self.ss().quad_corners(v)
+                        rv[k] = [ round(n, 4) for n in q ] if q else None
                 else:
                     rv[k] = None if gone else round(float(v), 3)
             return rv
@@ -289,7 +299,8 @@ init -8 python in ui_editor:
                 bg = base.get("background")
                 if wid == "what" and getattr(bg, "ui_kit_box", False) and bg.kind == "media":
                     up = { }
-                    for k, o in (("media_offset", "offset"), ("media_zoom", "zoom"), ("media_angle", "angle")):
+                    for k, o in (("media_offset", "offset"), ("media_zoom", "zoom"), ("media_angle", "angle"),
+                            ("media_link", "link"), ("media_quad", "quad"), ("media_text_quad", "text_quad")):
                         has, v = self._line_value(k)
                         up[o] = v if has else self.ss().box_style("media").get(o)
                     base["background"] = bg.with_opts(**up)
@@ -472,9 +483,14 @@ init -8 python in ui_editor:
             return (x, y)
 
         def focus_rect(self):
-            """고르고 있는 대사 글자(또는 이름)의 대략 둘레. 패널이 가리면 비킵니다."""
+            """고르고 있는 대사 글자(또는 이름)의 대략 둘레. 패널이 가리면 비킵니다.
+            그림을 고칠 때는 모서리 점(그림, 글)을 모두 감싸는 사각형 (4.18, 끌어 나간 점도 패널에 안 가리게)."""
             if self.line() is None:
                 return None
+            if self.target == "media":
+                r = dots_rect(self.corner_dots())
+                if r is not None:
+                    return r
             org = self.window_origin()
             if org is None:
                 return None
@@ -541,7 +557,95 @@ init -8 python in ui_editor:
             for k in self.MEDIA_KEYS:
                 self._set_or_default(k, None)
             self.refresh()
-            msg("그림 자리, 크기, 회전을 처음으로 돌렸습니다.")
+            msg("그림 자리, 크기, 회전, 묶기, 네 점 변형을 처음으로 돌렸습니다.")
+
+        ## ── 묶기, 네 점 변형 (4.18) ──
+
+        def media_link(self):
+            has, v = self._line_value("media_link")
+            if not has or isinstance(v, str):
+                return None
+            try:
+                return self.ss().link_base(v)
+            except Exception:
+                return None
+
+        def toggle_link(self):
+            """글을 그림에 묶기/풀기. 묶을 때의 그림 값을 적어 두고, 그 뒤로 달라진 만큼 글이 따라감."""
+            if not self._check_target_media():
+                return
+            if self.media_link() is not None:
+                self._set_or_default("media_link", None)
+                msg("묶음을 풀었습니다. 글은 제자리로 돌아갑니다.")
+            else:
+                ox, oy = self.media_offset()
+                a = self.media_angle()
+                self._set_or_default("media_link", (round(self.media_zoom(), 3), int(a) if a == int(a) else a, ox, oy))
+                msg("글을 그림에 묶었습니다. 이제 그림의 크기, 회전, 옮김, 네 점 변형을 글도 같이 받습니다.")
+            self.refresh()
+
+        def _quad(self, k):
+            has, v = self._line_value(k)
+            if not has or isinstance(v, str):
+                return None
+            try:
+                return self.ss().quad_corners(v)
+            except Exception:
+                return None
+
+        def reset_quads(self):
+            if not self._check_target_media():
+                return
+            self._set_or_default("media_quad", None)
+            self._set_or_default("media_text_quad", None)
+            self.refresh()
+            msg("네 점 변형을 처음으로 돌렸습니다.")
+
+        def _check_target_media(self):
+            ok, why = self.media_ok()
+            if not ok:
+                msg(why)
+            return ok
+
+        def _geom(self):
+            """마지막으로 그린 그림/영상 상자 자리와 글의 화면 왼쪽 위."""
+            try:
+                w = store.renpy.get_displayable("say", "what")
+            except Exception:
+                w = None
+            geom = self.ss().GEOM.get(id(w)) if w is not None else None
+            if geom is None:
+                return None, None
+            ## 렌파이가 그린 실제 자리 (text_box.rpy mark_geom). 다음 화면부터 생기므로 없으면 스타일 값으로 짐작
+            o = self.ss().screen_origin(w)
+            if o is not None:
+                return geom, o
+            org = self.window_origin()
+            if org is None:
+                return None, None
+            x, y = self._start()
+            if x is None or y is None:
+                return None, None
+            return geom, (org[0] + x, org[1] + y)
+
+        def corner_dots(self):
+            """모서리 점 [(화면 x, y, 색)]. 그림은 분홍, 글은 하늘색."""
+            if self.target != "media" or not self.media_ok()[0]:
+                return [ ]
+            geom, o = self._geom()
+            if geom is None:
+                return [ ]
+            ss = self.ss()
+            rv = [ (o[0] + p[0], o[1] + p[1], "#ff3b8d") for p in ss.geom_media_corners(geom) ]
+            rv += [ (o[0] + p[0], o[1] + p[1], "#3bd6ff") for p in ss.geom_text_corners(geom) ]
+            return rv
+
+        def _set_quad_corner(self, k, i, qx, qy):
+            q = list(self._quad(k) or [ 0.0 ] * 8)
+            q[i * 2] = round(max(-2.0, min(2.0, qx)), 4)
+            q[i * 2 + 1] = round(max(-2.0, min(2.0, qy)), 4)
+            self._set_or_default(k, None if all(abs(n) < 1e-4 for n in q) else tuple(q))
+            self.refresh()
 
         def _check_target(self):
             if self.target == "media":
@@ -563,10 +667,28 @@ init -8 python in ui_editor:
             if not self._check_target():
                 return None
             if self.target == "media":
+                ## 모서리 점 위면 그 모서리만 (네 점 변형, 4.18)
+                geom, o = self._geom()
+                if geom is not None:
+                    ss = self.ss()
+                    for k, pts in (("media_text_quad", ss.geom_text_corners(geom)), ("media_quad", ss.geom_media_corners(geom))):
+                        for i, p in enumerate(pts):
+                            if abs(o[0] + p[0] - x) <= 10 and abs(o[1] + p[1] - y) <= 10:
+                                return ("corner", k, i, p)
                 return ("media",) + self.media_offset()
             return self._start()
 
         def drag_move(self, token, dx, dy):
+            if token[0] == "corner":
+                _c, k, i, p = token
+                geom, o = self._geom()
+                if geom is None:
+                    return
+                ss = self.ss()
+                P = (p[0] + dx, p[1] + dy)
+                qx, qy = ss.geom_text_q(geom, P, i) if k == "media_text_quad" else ss.geom_media_q(geom, P, i)
+                self._set_quad_corner(k, i, qx, qy)
+                return
             if token[0] == "media":
                 self.set_media_offset(token[1] + dx, token[2] + dy)
                 return
@@ -1036,7 +1158,8 @@ init -8 python in ui_editor:
             where = ", 화면 기준 {:.0f}, {:.0f}".format(org[0] + x, org[1] + y) if org is not None else ""
             if self.target == "media":
                 ox, oy = self.media_offset()
-                rv.append("그림 옮김 x {:+d}   y {:+d}   (글 가운데 기준)   크기 {:g}배   회전 {:g}도".format(ox, oy, self.media_zoom(), self.media_angle()))
+                rv.append("그림 옮김 x {:+d}   y {:+d}   (글 가운데 기준)   크기 {:g}배   회전 {:g}도   {}".format(ox, oy, self.media_zoom(), self.media_angle(),
+                    "글 묶음" if self.media_link() is not None else "글 따로"))
             else:
                 what = "이름 상자" if self.target == "name" else "대사"
                 rv.append("{} x {:.0f}   y {:.0f}   (대사 창 기준{})   크기 {}".format(
@@ -1078,7 +1201,7 @@ init -8 python in ui_editor:
                     ]
             if self.target == "media":
                 return [
-                    "마우스: 드래그하면 그림이 움직임 (Shift: 한 방향) | 휠 크기 (Shift: 크게)",
+                    "마우스: 드래그하면 그림이 움직임 (Shift: 한 방향) | 모서리 점: 분홍 그림, 하늘색 글을 끌면 네 점 변형 | 휠 크기 (Shift: 크게)",
                     "Tab 대사/이름/그림 바꾸기 | 방향키 이동 | A/D 크기 | Q/E 회전 (Shift: 5도) | R 다시 보기",
                     ]
             return [
@@ -1106,6 +1229,59 @@ init -8 python in ui_editor:
 
     register(SayTab())
 
+    def is_corner_token(token):
+        """끌기 토큰이 모서리 점 끌기인지 (대사 탭 ("corner", …), 선택지 탭 (번호, ("corner", …)))."""
+        try:
+            return token[0] == "corner" or token[1][0] == "corner"
+        except Exception:
+            return False
+
+    class CornerDots(store.renpy.Displayable):
+        """그림/영상 상자의 모서리 점 (4.18). 그릴 때마다 지금 탭의 corner_dots()를 읽어서,
+        값을 바꿔 글 그림이 새로 만들어진 뒤에도 점이 바로 따라옵니다 (화면을 계산할 때 읽으면 그 순간엔 자리가 아직 없음).
+        편집 패널보다 위에 두어 패널 밑의 점도 보이고 먼저 집히며, 점을 끄는 동안은 패널을 숨깁니다."""
+
+        def event(self, ev, x, y, st):
+            import pygame_sdl2 as pygame
+            if ev.type != pygame.MOUSEBUTTONDOWN or ev.button != 1 or state.popup is not None:
+                return None
+            tab = current_tab()
+            dots = getattr(tab, "corner_dots", None)
+            if tab is None or dots is None or not tab_available(tab)[0]:
+                return None
+            if not any(abs(dx - x) <= 10 and abs(dy - y) <= 10 for dx, dy, _c in dots()):
+                return None
+            token = tab.drag_begin(x, y)
+            if token is None or not is_corner_token(token):
+                return None
+            editor_input.drag = (token, x, y)
+            state.corner_peek = True
+            state.peek = True
+            store.renpy.restart_interaction()
+            raise store.renpy.IgnoreEvent()
+
+        def render(self, width, height, st, at):
+            rv = store.renpy.Render(width, height)
+            tab = current_tab()
+            dots = getattr(tab, "corner_dots", None)
+            for x, y, c in (dots() if dots else ( )):
+                for size, col in ((13, "#000000"), (9, c)):
+                    r = store.renpy.render(store.Solid(col), size, size, st, at)
+                    rv.blit(r, (int(x - size / 2), int(y - size / 2)))
+            store.renpy.redraw(self, 0)
+            return rv
+
+    CORNER_DOTS = CornerDots()
+
+    def dots_rect(dots, margin=24):
+        """모서리 점들을 감싸는 사각형 (x, y, w, h). 점이 없으면 None. 패널 자동 비키기에 씀 (4.18)."""
+        if not dots:
+            return None
+        xs = [ d[0] for d in dots ]
+        ys = [ d[1] for d in dots ]
+        x0, y0 = min(xs) - margin, min(ys) - margin
+        return (x0, y0, max(xs) + margin - x0, max(ys) + margin - y0)
+
 
 screen ui_editor_say_panel(tab):
 
@@ -1122,7 +1298,9 @@ screen ui_editor_say_panel(tab):
             spacing 4
             text "그림/영상 상자:" style "ui_editor_text" yalign 0.5
             textbutton "그림 처음으로" style "ui_editor_button" text_size 13 action Function(tab.reset_media)
-            text "[[고칠 것: 그림]에서 끌기 자리, 휠 크기, Q/E 회전" style "ui_editor_text" size 12 yalign 0.5
+            textbutton ("묶음 풀기" if tab.media_link() is not None else "글과 묶기") style "ui_editor_button" text_size 13 action Function(tab.toggle_link) selected (tab.media_link() is not None)
+            textbutton "네 점 처음으로" style "ui_editor_button" text_size 13 action Function(tab.reset_quads)
+        text "[[고칠 것: 그림]에서 끌기 자리, 휠 크기, Q/E 회전, 모서리 점(분홍 그림, 하늘색 글) 끌기 네 점 변형. 묶으면 글도 그림을 따라 움직임" style "ui_editor_text" size 12 xmaximum 632
 
     use ui_editor_style_row(tab, tab.style_keys())
 
@@ -1166,3 +1344,9 @@ screen ui_editor_say_panel(tab):
         textbutton "R 다시 보기" style "ui_editor_button" action Function(tab.replay)
         textbutton "이 줄 되돌리기" style "ui_editor_button" action Function(tab.reset_item)
         textbutton "모두 버리기" style "ui_editor_button" action Function(tab.discard)
+
+
+## 그림/영상 상자의 모서리 점 (4.18): 분홍은 그림, 하늘색은 글. 끌면 그 모서리만 옮김
+screen ui_editor_say_overlay():
+    ## 모서리 점은 편집 패널 위에 그림 (editor.rpy ui_editor_main)
+    pass

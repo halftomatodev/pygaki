@@ -9,7 +9,7 @@ import { useGameFolder } from './gameFolder';
 import { LinePreview } from './SayPreview';
 import { TransPicker } from './TransPicker';
 import { TagBar, useTagTarget } from './TagBar';
-import { MediaField, MediaPlace } from './MediaField';
+import { MediaField, MediaGroupFields, MediaPlace } from './MediaField';
 
 type SetLine = (fn: (x: Line) => void, key?: string) => void;
 
@@ -244,6 +244,7 @@ export function SayFields({ l, set }: { l: Line; set: SetLine }) {
 // 글 상자 칸 (말풍선, 둥근 테두리, 그림/영상): 오른쪽 편집 탭과 상자 안 편집의 태그 상자가 함께 쓴다
 export function BoxFields({ l, set }: { l: Line; set: SetLine }) {
   const s = l.say ?? {};
+  const oldGroup = useGameFolder((f) => f.mediaGroup === false);
   const put = (key: keyof SayStyle, v: string | number | undefined, mergeKey?: string) =>
     set((x) => {
       const say: SayStyle = { ...(x.say ?? {}) };
@@ -263,7 +264,7 @@ export function BoxFields({ l, set }: { l: Line; set: SetLine }) {
         delete say.box_rotate;
       }
       // 그림/영상 상자의 값은 그 상자일 때만, 말풍선 꼬리는 그림 상자에 없음
-      if (b !== 'media') for (const k of ['media', 'media_fit', 'media_x', 'media_y', 'media_zoom', 'media_angle', 'media_mask', 'media_alpha'] as const) delete say[k];
+      if (b !== 'media') for (const k of ['media', 'media_fit', 'media_x', 'media_y', 'media_zoom', 'media_angle', 'media_mask', 'media_alpha', 'media_link', 'media_quad', 'media_text_quad', 'media_fx'] as const) delete say[k];
       else delete say.tail;
       if (Object.keys(say).length) x.say = say;
       else delete x.say;
@@ -318,6 +319,24 @@ export function BoxFields({ l, set }: { l: Line; set: SetLine }) {
             x.say = say;
           })} />
         </div>
+      )}
+      {s.box === 'media' && (
+        <MediaGroupFields
+          g={{ link: s.media_link, quad: s.media_quad, text_quad: s.media_text_quad, fx: s.media_fx }}
+          place={{ x: s.media_x, y: s.media_y, zoom: s.media_zoom, angle: s.media_angle }}
+          old={oldGroup}
+          onChange={(fn, key) => set((x) => {
+            const say: SayStyle = { ...(x.say ?? {}) };
+            const g = { link: say.media_link, quad: say.media_quad, text_quad: say.media_text_quad, fx: say.media_fx };
+            fn(g);
+            const put = <K extends 'media_link' | 'media_quad' | 'media_text_quad' | 'media_fx'>(k: K, v: SayStyle[K]) => (v === undefined ? delete say[k] : (say[k] = v));
+            put('media_link', g.link);
+            put('media_quad', g.quad);
+            put('media_text_quad', g.text_quad);
+            put('media_fx', g.fx);
+            x.say = say;
+          }, key && key + l.id)}
+        />
       )}
       {s.box === 'media' && s.media && (
         <div className="sf-row media-row">

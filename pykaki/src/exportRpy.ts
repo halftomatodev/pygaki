@@ -2,7 +2,7 @@
 import type { BoxNode, ChoiceMedia, LabelGroup, Line, Project, Settings } from './types';
 import { exitLinks, fallTarget } from './ops';
 import { IDENT, PLUGIN_NAMES, RESERVED } from './util';
-import { badImageName, isMaskName, isMovieFile, mediaPlace, renpyOnlyEffect, fxArgs, isStage, sayArgs, stageCode, tagEffectNames, REMOVED_EFFECTS, RENPY_EFFECTS } from './stage';
+import { badImageName, isMaskName, isMovieFile, mediaGroupArgs, mediaPlace, renpyOnlyEffect, fxArgs, isStage, sayArgs, sayHasGroup, stageCode, tagEffectNames, REMOVED_EFFECTS, RENPY_EFFECTS } from './stage';
 import { shaderEffect } from './fx/textShaders';
 import { imageProblem, type ImageBook } from './imageCheck';
 import { voiceCode, voiceFile, voiceIndex } from './voice';
@@ -66,7 +66,7 @@ const loosePercent = (t: string) => /%/.test(t.replace(/%%/g, ''));
 
 // 줄 끝에 표시를 붙여도 되는 줄인지: 다음 줄로 이어지는 줄(끝의 \, 닫지 않은 따옴표)에는 붙이지 않는다
 // 선택지 뒤 그림/영상의 괄호 값 (pygaki 플러그인 ui_kit 4.14 choice_menu)
-export function choiceMediaArgs(m?: ChoiceMedia): string[] {
+export function choiceMediaArgs(m?: ChoiceMedia, oldGroup = false): string[] {
   if (!m || !(m.idle || m.hover || m.select)) return [];
   const a: string[] = [];
   if (m.idle) a.push(`idle_media=${pyStr(m.idle)}`);
@@ -80,8 +80,11 @@ export function choiceMediaArgs(m?: ChoiceMedia): string[] {
   // 투명 영상(mask_ 이름, FEATURE 26): 예전 플러그인(4.14~4.15)도 알게, 영상이 다 투명 영상이면 적는다 (4.16은 파일마다 이름으로 앎)
   const movies = [m.idle, m.hover, m.select].filter(isMovieFile);
   if (movies.length && movies.every(isMaskName)) a.push('media_mask=True');
+  // 묶기·네 점 변형·그림 효과 (FEATURE 28, ui_kit 4.18). 예전 플러그인은 모르는 값이라 적지 않음
+  if (!oldGroup) a.push(...mediaGroupArgs(m.link, m.quad, m.text_quad, m.fx));
   return a;
 }
+export const choiceHasGroup = (m?: ChoiceMedia) => !!m && !!(m.link || m.quad?.some((n) => Math.abs(n) > 1e-4) || m.text_quad?.some((n) => Math.abs(n) > 1e-4) || m.fx);
 
 function tailSafe(row: string) {
   if (/\\\s*$/.test(row)) return false;
@@ -102,7 +105,8 @@ function tailSafe(row: string) {
 // newMark: 머리말을 새 문구(pygaki)로. 게임의 플러그인이 새 문구를 알아볼 때만 (ui_kit 4.10, script_edit.rpy의 PK_NEW_MARK). 아니면 예전 문구
 // images: 연결한 게임의 그림 목록. 있으면 배경·보이기 줄의 없는 그림을 경고한다 (내보내기는 막지 않음)
 // oldMedia: 게임의 플러그인이 대사·선택지 뒤 그림/영상을 모름 (ui_kit 4.14 전). 쓰면 게임이 그 줄에서 멈춰서 알린다
-export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: boolean; oldMedia?: boolean; images?: ImageBook | null; audio?: string[] } = {}): { code: string; warnings: Warn[] } {
+// oldGroup: 글 상자 묶기·네 점 변형·그림 효과를 모름 (ui_kit 4.18 전). 그 값은 적지 않고 알린다
+export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: boolean; oldMedia?: boolean; oldGroup?: boolean; images?: ImageBook | null; audio?: string[] } = {}): { code: string; warnings: Warn[] } {
   const endMarks = !!opts.endMarks && p.settings.renpyLink;
   const W: Warn[] = [];
   const out: string[] = [];
@@ -329,6 +333,7 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
         if (S.renpyLink && l.say?.box === 'media') {
           if (!l.say.media) W.push({ level: 'warn', msg: `그림/영상 상자에 파일이 없어서 상자를 내보내지 않았어요 (${b.title || b.id})`, nodeId: b.id });
           else if (opts.oldMedia) W.push({ level: 'error', msg: `게임의 pygaki 플러그인이 예전 판이라 그림/영상 상자에서 멈춰요. 런처의 [플러그인 올리기]로 올려 주세요 (${b.title || b.id})`, nodeId: b.id });
+          else if (opts.oldGroup && sayHasGroup(l.say)) W.push({ level: 'warn', msg: `게임의 pygaki 플러그인이 예전 판이라 글 상자 묶기, 네 점 변형, 그림 효과를 내보내지 않았어요. 런처의 [플러그인 올리기]로 올려 주세요 (${b.title || b.id})`, nodeId: b.id });
         }
         // 글의 일부에만 건 효과 {shader=이름}: 게임에 없는 이름이면 그 줄에서 멈춘다
         const tagText = S.allowTextTags ? l.text : undefined;
@@ -340,7 +345,7 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
         // 대사 소리(say.sound)는 플러그인이 있어야 해서 연결을 끄면 내보내지 않는다 (cb_typing_sound=, stage.ts sayArgs)
         if (!S.renpyLink && l.say?.sound !== undefined) W.push({ level: 'warn', msg: `대사 소리는 pygaki 플러그인 연결을 켜야 내보내요 (${b.title || b.id})`, nodeId: b.id });
         const ls = l.say;
-        const fa = S.renpyLink ? [...fxArgs(l.fx), ...sayArgs(ls, false, tagText)] : sayArgs(ls, true, tagText);
+        const fa = S.renpyLink ? [...fxArgs(l.fx), ...sayArgs(ls, false, tagText, !!opts.oldGroup)] : sayArgs(ls, true, tagText);
         const tail = fa.length ? ` (${fa.join(', ')})` : '';
         // {clear}(지우고 이어서): 그 자리에서 같은 화자의 대사 여러 줄로 나눈다. 클릭하면 앞 글이 지워지고 이어진다
         const parts = S.allowTextTags ? splitClear(l.text) : [l.text];
@@ -400,7 +405,8 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
             const cond = c.condition ? oneLine(c.condition).replace(/:\s*$/, '') : '';
             if (cond) checkExpr(cond, `선택지 "${c.text}"의 조건`, b);
             // 글 뒤 그림/영상 (FEATURE 24): "문구" (idle_media=…) if 조건: (플러그인이 있어야 해서 연결을 켰을 때만)
-            const ma = choiceMediaArgs(c.media);
+            const ma = choiceMediaArgs(c.media, !!opts.oldGroup);
+            if (ma.length && S.renpyLink && opts.oldGroup && !opts.oldMedia && choiceHasGroup(c.media)) W.push({ level: 'warn', msg: `게임의 pygaki 플러그인이 예전 판이라 선택지 "${c.text}"의 묶기, 네 점 변형, 그림 효과를 내보내지 않았어요. 런처의 [플러그인 올리기]로 올려 주세요`, nodeId: b.id });
             if (ma.length && S.renpyLink && opts.oldMedia) W.push({ level: 'error', msg: `게임의 pygaki 플러그인이 예전 판이라 선택지 "${c.text}"의 뒤 그림에서 멈춰요. 런처의 [플러그인 올리기]로 올려 주세요`, nodeId: b.id });
             if (ma.length && !S.renpyLink) W.push({ level: 'warn', msg: `선택지 "${c.text}"의 뒤 그림은 pygaki 플러그인 연결을 켜야 내보내요`, nodeId: b.id });
             const margs = ma.length && S.renpyLink ? ` (${ma.join(', ')})` : '';

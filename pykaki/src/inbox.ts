@@ -6,14 +6,18 @@ import { applyScreenOp } from './screens';
 
 const POS_KEYS = ['x', 'y', 'name_x', 'name_y', 'media_x', 'media_y', 'media_zoom', 'media_angle'] as const;
 const CHOICE_MEDIA_KEYS = ['x', 'y', 'zoom', 'angle'] as const;
+// 글 상자 묶기·네 점 변형 (FEATURE 28, ui_kit 4.18): 숫자 목록. null이면 지움
+const SAY_LIST_KEYS = ['media_link', 'media_quad', 'media_text_quad'] as const;
+const CHOICE_LIST_KEYS = ['link', 'quad', 'text_quad'] as const;
+const numList = (v: unknown, n: number) => (Array.isArray(v) && v.length === n && v.every((x) => typeof x === 'number' && Number.isFinite(x)) ? (v as number[]) : null);
 
 export interface InboxOp {
   id: string; // 새 줄 id (insert), 또는 이 기록 자체의 id
   op: 'insert' | 'replace' | 'remove' | 'say_pos' | 'say_fx' | 'choice_media' | 'screen' | 'screen_item';
   code?: string; // 렌파이 명령 한 줄 (insert, replace)
-  pos?: Partial<Record<(typeof POS_KEYS)[number], number | null>>; // say_pos: 대사 위치, 그림/영상 상자 자리·크기·회전. null이면 지움
+  pos?: Partial<Record<(typeof POS_KEYS)[number], number | null> & Record<(typeof SAY_LIST_KEYS)[number], number[] | null>>; // say_pos: 대사 위치, 그림/영상 상자 자리·크기·회전·묶기·네 점 변형. null이면 지움
   choice?: string; // choice_media: 선택지 id (# @c:)
-  media?: Partial<Record<(typeof CHOICE_MEDIA_KEYS)[number], number | null>>; // choice_media: 뒤 그림 자리·크기·회전. null이면 지움
+  media?: Partial<Record<(typeof CHOICE_MEDIA_KEYS)[number], number | null> & Record<(typeof CHOICE_LIST_KEYS)[number], number[] | null>>; // choice_media: 뒤 그림 자리·크기·회전·묶기·네 점 변형. null이면 지움
   box?: string; // 그 줄이 있던 상자. 기준 줄이 사라졌을 때 쓴다
   before?: string; // 이 줄 앞에
   after?: string; // 이 줄 뒤에
@@ -31,6 +35,12 @@ function applySayPos(l: Line, pos: NonNullable<InboxOp['pos']>) {
     const v = pos[k];
     if (typeof v === 'number') say[k] = v;
     else if (v === null) delete say[k];
+  }
+  for (const k of SAY_LIST_KEYS) {
+    if (!(k in pos)) continue;
+    const v = numList(pos[k], k === 'media_link' ? 4 : 8);
+    if (v) say[k] = v;
+    else delete say[k];
   }
   if (Object.keys(say).length) l.say = say;
   else delete l.say;
@@ -187,6 +197,12 @@ export function applyInbox(p: Project, ops: InboxOp[]): { applied: number; moved
         const v = op.media[k];
         if (typeof v === 'number' && !(k === 'zoom' && v === 1) && !(k !== 'zoom' && v === 0)) m[k] = v;
         else if (v !== undefined) delete m[k];
+      }
+      for (const k of CHOICE_LIST_KEYS) {
+        if (!(k in op.media)) continue;
+        const v = numList(op.media[k], k === 'link' ? 4 : 8);
+        if (v) m[k] = v;
+        else delete m[k];
       }
       c.media = m;
       applied++;

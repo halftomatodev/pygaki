@@ -40,6 +40,16 @@
 ##   media_mask      영상 오른쪽 절반을 투명도로 쓰는 영상이면 True (렌파이 side_mask). 안 적으면 파일 이름이 mask_로 시작할 때 True (4.16)
 ##   media_loop      영상 되풀이 (기본 True)
 ##   media_pop       튀어나오며 나타남 (True / False, 또는 걸리는 초)
+##   media_link      글을 그림에 묶기 (4.18). 묶은 뒤로 그림의 크기, 회전, 옮김, 네 점 변형, 그림 효과를 글도 같이 받음.
+##                   True, 또는 묶을 때의 그림 값 (media_zoom, media_angle, 가로 옮김, 세로 옮김): 그 값에서 달라진 만큼만 글이 따라감
+##                       e "흔들려!" (box="media", media="images/say/cloud.png", media_angle=20, media_link=(1.0, 0, 0, 0))   # 글도 20도
+##   media_quad      그림 네 모서리 자유변형 (4.18). 왼위, 오른위, 오른아래, 왼아래 모서리를 (가로, 세로)로 옮긴 비율 8개
+##                       media_quad=(0.1, 0, -0.1, 0, 0, 0, 0, 0)   # 위쪽 변을 좁혀 뒤로 누운 판처럼
+##   media_text_quad 글 네 모서리 자유변형 (4.18). 값은 media_quad와 같음 (글 크기에 대한 비율)
+##   media_fx        나타날 때 그림 효과 (4.18): 효과 폴더의 그림 전환 이름. 묶었으면 글도 같이
+##                       e "쾅!" (box="media", media="images/say/boom.png", media_link=True, media_fx="vibrate", media_fx_time=0.6, media_fx_values={"amount": 14})
+##   media_fx_time   그림 효과 시간 (초). 없으면 효과 파일의 @time
+##   media_fx_values 그림 효과 세부 값 {이름: 값}
 ##
 ## 상자는 글 전체 크기에 맞춰서, 글이 다 나오기 전에도 다 큰 크기로 나타납니다.
 ## 대사 위치나 화면 흔들림처럼 줄 전체가 움직이면 상자도 같이 움직입니다.
@@ -67,6 +77,7 @@ init -10 python in say_style:
         "media": dict(
             src=None, fit="text", zoom=1.0, offset=(0, 0), padding=(36, 24), alpha=1.0,
             mask=None, loop=True, angle=0.0, tail=None,
+            link=None, quad=None, text_quad=None, fx=None, fx_time=None, fx_values=None,
             pop=False, rotate=0, text_color=None, text_outlines=None),
         }
 
@@ -306,7 +317,9 @@ init -10 python in say_style:
             return d
 
         def _wrap_media(self, text, rv, st, at):
-            """그림/영상 상자: 글 뒤에 그림을 깝니다. 글 가운데가 기준, 글 크기와 배치는 그대로."""
+            """그림/영상 상자: 글 뒤에 그림을 깝니다. 글 가운데가 기준, 글 크기와 배치는 그대로.
+            묶으면(media_link, 4.18) 글이 그림과 한 장이 되어 그림의 크기, 회전, 옮김, 네 점 변형을 같이 받고,
+            나타나는 그림 효과(media_fx, 4.18)도 둘이 같이 받습니다."""
             W, H = rv.get_size()
             o = self.opts
             d = self._media()
@@ -335,8 +348,6 @@ init -10 python in say_style:
                 pl, pt, pr, pb = _padding(o.get("padding"))
                 bw, bh = W + float(pl + pr), H + float(pt + pb)
                 tr = store.Transform(d, xysize=(max(1, int(bw * zoom * scale)), max(1, int(bh * zoom * scale))), alpha=alpha)
-            if abs(angle) >= 0.01:
-                tr = store.Transform(tr, rotate=angle, subpixel=True)
             mr = store.renpy.render(tr, store.config.screen_width * 4, store.config.screen_height * 4, st, at)
             mw, mh = mr.get_size()
             ## 그림 가운데 = 글 가운데 (fit="text"면 padding이 한쪽만 다를 때 그만큼 옮김)
@@ -346,10 +357,91 @@ init -10 python in say_style:
                 cx += (pr - pl) / 2.0
                 cy += (pb - pt) / 2.0
 
+            ## 글만의 네 점 변형 (media_text_quad)
+            tw_r, (tox, toy) = rv, (0.0, 0.0)
+            tq = quad_corners(o.get("text_quad"))
+            if tq:
+                tw_r, (tox, toy) = warp_render(rv, (0.0, 0.0, float(W), float(H)), tq)
+
+            link = link_base(o.get("link"))
+            geom = dict(W=float(W), H=float(H), rot=float(o.get("rotate") or 0), angle=angle,
+                dest=(cx + ox, cy + oy), tq=tq, link=link, size=(float(mw), float(mh)))
+            if link is None:
+                ## 그림만 한 장 (글은 따로 그 자리에)
+                g, rect = mr, (0.0, 0.0, float(mw), float(mh))
+            else:
+                ## 그림 기준 좌표(돌리기 전)에 글을 놓아 한 장으로. 묶을 때의 값(z0, a0, x0, y0)에서 달라진 만큼만 글이 따라갑니다:
+                ## 글은 그림 쪽에서 보면 -a0만큼 돌아 있고, 크기는 zoom / z0배
+                z0, a0, x0, y0 = link
+                dz = zoom / z0 * scale
+                tt, tp = transform_about(tw_r, (W / 2.0 - tox, H / 2.0 - toy), -a0, dz, st, at)
+                vx, vy = (W / 2.0 - cx - x0) * dz, (H / 2.0 - cy - y0) * dz
+                vx, vy = _rot(vx, vy, -a0)
+                tlx, tly = mw / 2.0 + vx - tp[0], mh / 2.0 + vy - tp[1]
+                ttw, tth = tt.get_size()
+                minx, miny = min(0.0, tlx), min(0.0, tly)
+                maxx, maxy = max(float(mw), tlx + ttw), max(float(mh), tly + tth)
+                g = store.renpy.Render(int(math.ceil(maxx - minx)), int(math.ceil(maxy - miny)))
+                g.subpixel_blit(mr, (-minx, -miny))
+                g.subpixel_blit(tt, (tlx - minx, tly - miny))
+                rect = (-minx, -miny, float(mw), float(mh))
+                geom.update(dz=dz, mc=(mw / 2.0, mh / 2.0), c0=(cx + x0, cy + y0), shift=(-minx, -miny))
+
+            ## 그림(묶었으면 그림+글)의 네 점 변형 (media_quad): 그림 네 모서리를 옮긴 만큼 판 전체를 휨.
+            ## 돌리고 놓는 기준은 휘기 전 그림 가운데라서, 모서리 하나를 끌어도 나머지 모서리는 제자리
+            gx = gy = 0.0
+            mq = quad_corners(o.get("quad"))
+            Hm = None
+            if mq:
+                Hm = quad_homography(rect, mq)
+                g2, (gx, gy) = warp_render(g, rect, mq)
+                if g2 is g:
+                    ## 너무 휘어서 그대로 그림
+                    Hm, mq = None, None
+                g = g2
+            pvx, pvy = rect[0] + rect[2] / 2.0 - gx, rect[1] + rect[3] / 2.0 - gy
+            geom.update(rect=rect, mq=mq, Hm=Hm, g=(gx, gy), pv=(pvx, pvy))
+            if len(GEOM) > 40:
+                GEOM.clear()
+            GEOM[id(text)] = geom
+
+            ## 나타날 때 그림 효과 (media_fx)
+            g = self._fx(text, g, st, at)
+
+            gr, gp = transform_about(g, (pvx, pvy), angle, 1.0, st, at)
             out = store.renpy.Render(W, H)
-            out.subpixel_blit(mr, (cx - mw / 2.0 + ox, cy - mh / 2.0 + oy))
-            out.blit(rv, (0, 0))
-            return self._rotate(out, W, H, st, at)
+            out.subpixel_blit(gr, (cx + ox - gp[0], cy + oy - gp[1]))
+            if link is None:
+                out.subpixel_blit(tw_r, (tox, toy))
+            final = self._rotate(out, W, H, st, at)
+            mark_geom(final, text, W, H)
+            return final
+
+        def _fx(self, text, g, st, at):
+            """나타날 때 그림 효과 (media_fx="이름", media_fx_time=초, media_fx_values={값: …}, 4.18).
+            효과 폴더의 그림 전환을 빈 그림 → 이 판으로 돌립니다. 이름이 없으면 그대로."""
+            name = self.opts.get("fx")
+            if not name:
+                return g
+            sh = fx_shader(name, self.opts.get("fx_time"), self.opts.get("fx_values"))
+            if sh is None:
+                return g
+            shader, time, uniforms = sh
+            if time <= 0 or st >= time:
+                return g
+            store.renpy.redraw(text, 0)
+            w, h = g.get_size()
+            empty = store.renpy.Render(w, h)
+            rv = store.renpy.Render(w, h)
+            rv.mesh = True
+            rv.add_shader(shader)
+            rv.add_uniform("u_imgfx_t", max(0.0, min(1.0, st / time)))
+            rv.add_uniform("u_imgfx_size", (float(w), float(h)))
+            for k, v in uniforms.items():
+                rv.add_uniform(k, v)
+            rv.blit(empty, (0, 0), focus=False, main=False)
+            rv.blit(g, (0, 0), focus=False, main=True)
+            return rv
 
         def _rotate(self, out, W, H, st, at):
             rot = float(self.opts.get("rotate") or 0)
@@ -505,6 +597,308 @@ init -10 python in say_style:
     if hasattr(_renpy_mod.config, "glsl_version"):
         _box_kwargs["glsl"] = 100
     store.renpy.register_shader(BOX_SHADER, **_box_kwargs)
+
+    ## ── 묶기, 네 점 변형, 나타날 때 그림 효과 (ui_kit 4.18) ──
+
+    def link_base(v):
+        """media_link 값 → 묶을 때의 그림 값 (zoom, angle, x, y). True면 (1, 0, 0, 0), None/False면 안 묶음."""
+        if v is None or v is False:
+            return None
+        if v is True:
+            return (1.0, 0.0, 0.0, 0.0)
+        try:
+            z, a, x, y = [ float(n) for n in v ]
+        except Exception:
+            raise Exception("[say_style] media_link는 True, 또는 묶을 때의 (크기, 회전, 가로 옮김, 세로 옮김)입니다: {!r}".format(v))
+        return (max(z, 0.01), a, x, y)
+
+    def quad_corners(q):
+        """media_quad, media_text_quad 값 → 숫자 8개 [왼위 x, y, 오른위 x, y, 오른아래 x, y, 왼아래 x, y].
+        모서리를 옮긴 만큼이고 그 상자 크기에 대한 비율(0.1이면 폭의 10%)입니다. 없거나 모두 0이면 None."""
+        if q is None or q is False:
+            return None
+        flat = [ ]
+        try:
+            for v in q:
+                if isinstance(v, (tuple, list)):
+                    flat.extend(v)
+                else:
+                    flat.append(v)
+            flat = [ float(n) for n in flat ]
+        except Exception:
+            flat = [ ]
+        if len(flat) != 8:
+            raise Exception("[say_style] media_quad, media_text_quad는 숫자 8개(왼위, 오른위, 오른아래, 왼아래 모서리를 가로, 세로로 옮긴 비율)입니다: {!r}".format(q))
+        if all(abs(n) < 1e-6 for n in flat):
+            return None
+        return flat
+
+    def _rot(x, y, deg):
+        r = math.radians(deg)
+        c, s = math.cos(r), math.sin(r)
+        return (x * c - y * s, x * s + y * c)
+
+    def transform_about(r, pivot, angle, zoom, st, at):
+        """그림 r을 가운데 기준으로 zoom배, angle도 돌림. (새 그림, pivot이 옮겨 간 자리)"""
+        if abs(angle) < 0.01 and abs(zoom - 1.0) < 1e-4:
+            return r, pivot
+        w, h = r.get_size()
+        tr = store.Transform(_Held(r), rotate=(angle if abs(angle) >= 0.01 else None), zoom=zoom, rotate_pad=False, subpixel=True)
+        rr = store.renpy.render(tr, w, h, st, at)
+        rw, rh = rr.get_size()
+        vx, vy = _rot((pivot[0] - w / 2.0) * zoom, (pivot[1] - h / 2.0) * zoom, angle)
+        return rr, (rw / 2.0 + vx, rh / 2.0 + vy)
+
+    def quad_homography(rect, q):
+        """사각형 rect (x, y, 폭, 높이)의 네 모서리를 q만큼 옮긴 네 점으로 보내는 3x3 행렬 (원근, 행 순서)."""
+        rx, ry, rw, rh = rect
+        rw, rh = max(rw, 1e-3), max(rh, 1e-3)
+        x0, y0 = rx + q[0] * rw, ry + q[1] * rh
+        x1, y1 = rx + rw + q[2] * rw, ry + q[3] * rh
+        x2, y2 = rx + rw + q[4] * rw, ry + rh + q[5] * rh
+        x3, y3 = rx + q[6] * rw, ry + rh + q[7] * rh
+        ## 단위 사각형 → 네 점 (Heckbert)
+        sx, sy = x0 - x1 + x2 - x3, y0 - y1 + y2 - y3
+        dx1, dx2, dy1, dy2 = x1 - x2, x3 - x2, y1 - y2, y3 - y2
+        den = dx1 * dy2 - dx2 * dy1
+        if abs(den) < 1e-9:
+            g = h = 0.0
+        else:
+            g = (sx * dy2 - dx2 * sy) / den
+            h = (dx1 * sy - sx * dy1) / den
+        a, b, c = x1 - x0 + g * x1, x3 - x0 + h * x3, x0
+        d, e, f = y1 - y0 + g * y1, y3 - y0 + h * y3, y0
+        m = [ [ a, b, c ], [ d, e, f ], [ g, h, 1.0 ] ]
+        ## 픽셀 → 단위 사각형
+        n = [ [ 1.0 / rw, 0.0, -rx / rw ], [ 0.0, 1.0 / rh, -ry / rh ], [ 0.0, 0.0, 1.0 ] ]
+        return [ [ sum(m[i][k] * n[k][j] for k in range(3)) for j in range(3) ] for i in range(3) ]
+
+    def homography_point(H, x, y, w_out=None):
+        X = H[0][0] * x + H[0][1] * y + H[0][2]
+        Y = H[1][0] * x + H[1][1] * y + H[1][2]
+        Z = H[2][0] * x + H[2][1] * y + H[2][2]
+        if w_out is not None:
+            w_out.append(Z)
+        if abs(Z) < 1e-9:
+            Z = 1e-9
+        return (X / Z, Y / Z)
+
+    def _inverse3(m):
+        a, b, c = m[0]
+        d, e, f = m[1]
+        g, h, i = m[2]
+        A, B, C = e * i - f * h, -(d * i - f * g), d * h - e * g
+        det = a * A + b * B + c * C
+        if abs(det) < 1e-12:
+            return None
+        return [ [ A / det, -(b * i - c * h) / det, (b * f - c * e) / det ],
+                 [ B / det, (a * i - c * g) / det, -(a * f - c * d) / det ],
+                 [ C / det, -(a * h - b * g) / det, (a * e - b * d) / det ] ]
+
+    QUAD_SHADER = "ui_kit.quadwarp"
+    QUAD_LIMIT = 4096
+
+    def warp_render(r, rect, q):
+        """그림 r 전체를, 그 안의 사각형 rect 네 모서리가 q만큼 옮겨 가게 휩니다 (원근).
+        (휜 그림, 휜 그림의 왼쪽 위가 r 기준으로 어디인지)"""
+        H = quad_homography(rect, q)
+        Hi = _inverse3(H)
+        if Hi is None:
+            return r, (0.0, 0.0)
+        Rw, Rh = r.get_size()
+        zs = [ ]
+        pts = [ homography_point(H, x, y, zs) for (x, y) in ((0, 0), (Rw, 0), (Rw, Rh), (0, Rh)) ]
+        if min(zs) <= 1e-3:
+            ## 판이 뒤로 넘어갈 만큼 휨: 휘지 않고 그대로
+            return r, (0.0, 0.0)
+        xs = [ p[0] for p in pts ] + [ 0.0, float(Rw) ]
+        ys = [ p[1] for p in pts ] + [ 0.0, float(Rh) ]
+        ux0 = math.floor(max(min(xs), -QUAD_LIMIT))
+        uy0 = math.floor(max(min(ys), -QUAD_LIMIT))
+        ux1 = math.ceil(min(max(xs), Rw + QUAD_LIMIT))
+        uy1 = math.ceil(min(max(ys), Rh + QUAD_LIMIT))
+        uw, uh = int(max(1, ux1 - ux0)), int(max(1, uy1 - uy0))
+
+        src = store.renpy.Render(uw, uh)
+        src.blit(r, (-ux0, -uy0))
+        rv = store.renpy.Render(uw, uh)
+        rv.mesh = True
+        rv.add_shader(QUAD_SHADER)
+        rv.add_uniform("u_qw_org", (float(ux0), float(uy0)))
+        rv.add_uniform("u_qw_size", (float(uw), float(uh)))
+        rv.add_uniform("u_qw_src", (float(Rw), float(Rh)))
+        rv.add_uniform("u_qw_r0", tuple(Hi[0]))
+        rv.add_uniform("u_qw_r1", tuple(Hi[1]))
+        rv.add_uniform("u_qw_r2", tuple(Hi[2]))
+        rv.blit(src, (0, 0))
+        return rv, (float(ux0), float(uy0))
+
+    _qw_kwargs = dict(
+        variables="""
+            uniform sampler2D tex0;
+            uniform vec2 u_qw_org;
+            uniform vec2 u_qw_size;
+            uniform vec2 u_qw_src;
+            uniform vec3 u_qw_r0;
+            uniform vec3 u_qw_r1;
+            uniform vec3 u_qw_r2;
+            attribute vec2 a_tex_coord;
+            varying vec2 v_tex_coord;
+        """,
+        vertex_200="""
+            v_tex_coord = a_tex_coord;
+        """,
+        fragment_300="""
+            vec2 qw_p = u_qw_org + v_tex_coord * u_qw_size;
+            vec3 qw_h = vec3(qw_p, 1.0);
+            vec3 qw_s = vec3(dot(u_qw_r0, qw_h), dot(u_qw_r1, qw_h), dot(u_qw_r2, qw_h));
+            if (qw_s.z <= 0.0) {
+                gl_FragColor = vec4(0.0);
+            } else {
+                vec2 qw_sp = qw_s.xy / qw_s.z;
+                // 원래 그림 바깥은 투명. 가장자리는 반 픽셀 부드럽게
+                vec2 qw_in = min(qw_sp, u_qw_src - qw_sp);
+                float qw_m = clamp(min(qw_in.x, qw_in.y) + 0.5, 0.0, 1.0);
+                gl_FragColor = texture2D(tex0, (qw_sp - u_qw_org) / u_qw_size) * qw_m;
+            }
+        """)
+    if hasattr(_renpy_mod.config, "glsl_version"):
+        _qw_kwargs["glsl"] = 100
+    store.renpy.register_shader(QUAD_SHADER, **_qw_kwargs)
+
+    ## 게임 안 편집 화면이 모서리 점을 그리고 끌 때 쓰는, 마지막으로 그린 그림/영상 상자의 자리 (글 그림 id → 값).
+    ## 숫자만 두고 init 뒤에 다시 넣지 않으므로 세이브에 들어가지 않습니다.
+    GEOM = { }
+
+    class _GeomMark(store.renpy.Displayable):
+        """글 그림의 화면 자리를 렌파이에게서 받으려고 포커스 목록에 끼우는 보이지 않는 표시 (편집 화면이 열렸을 때만).
+        마스크가 비어 있어 마우스가 잡지 않고, keyboard_focus가 꺼져 있어 키보드도 잡지 않습니다."""
+        def __init__(self):
+            super(_GeomMark, self).__init__(keyboard_focus=False)
+
+        def render(self, width, height, st, at):
+            return store.renpy.Render(0, 0)
+
+    GEOM_MARK = _GeomMark()
+
+    def mark_geom(rv, text, W, H):
+        """편집 화면이 열려 있으면 글 그림(rv, 글 왼쪽 위 = rv 왼쪽 위)의 화면 자리를 포커스 목록에 남김."""
+        if not store.config.developer:
+            return
+        ue = getattr(store, "ui_editor", None)
+        if ue is None or not getattr(ue.state, "open", False):
+            return
+        rv.add_focus(GEOM_MARK, id(text), 0, 0, int(W), int(H), 0, 0, store.renpy.Render(1, 1))
+
+    def screen_origin(text):
+        """mark_geom이 남긴 글 그림의 화면 왼쪽 위 (x, y). 없으면 None."""
+        try:
+            import renpy.display.focus as _f
+            for f in _f.focus_list:
+                if f.widget is GEOM_MARK and f.arg == id(text) and f.x is not None:
+                    return (float(f.x), float(f.y))
+        except Exception:
+            pass
+        return None
+
+    def _geom_final(geom, P):
+        """글 상자 판 위 자리 → 글 기준 자리 (상자 기울기 box_rotate까지)."""
+        W, H = geom["W"], geom["H"]
+        vx, vy = _rot(P[0] - W / 2.0, P[1] - H / 2.0, geom["rot"])
+        return (W / 2.0 + vx, H / 2.0 + vy)
+
+    def _geom_from_g(geom, p):
+        """휜 판(그림, 묶었으면 그림+글) 위 자리 → 글 기준 자리."""
+        pv, d = geom["pv"], geom["dest"]
+        vx, vy = _rot(p[0] - pv[0], p[1] - pv[1], geom["angle"])
+        return _geom_final(geom, (d[0] + vx, d[1] + vy))
+
+    def geom_media_corners(geom):
+        """그림 네 모서리 (왼위, 오른위, 오른아래, 왼아래). 글 왼쪽 위 기준 픽셀."""
+        rx, ry, rw, rh = geom["rect"]
+        q = geom["mq"] or [ 0.0 ] * 8
+        gx, gy = geom["g"]
+        base = ((rx, ry), (rx + rw, ry), (rx + rw, ry + rh), (rx, ry + rh))
+        return [ _geom_from_g(geom, (bx + q[i * 2] * rw - gx, by + q[i * 2 + 1] * rh - gy)) for i, (bx, by) in enumerate(base) ]
+
+    def geom_text_point(geom, p):
+        """글 그림(돌리기 전, 글 왼쪽 위 기준) 위 자리 → 화면에 그려진 자리 (글 기준)."""
+        link = geom["link"]
+        if link is None:
+            return _geom_final(geom, p)
+        z0, a0, x0, y0 = link
+        mc, c0, sh, dz = geom["mc"], geom["c0"], geom["shift"], geom["dz"]
+        vx, vy = _rot((p[0] - c0[0]) * dz, (p[1] - c0[1]) * dz, -a0)
+        G = (mc[0] + vx + sh[0], mc[1] + vy + sh[1])
+        if geom["Hm"] is not None:
+            G = homography_point(geom["Hm"], G[0], G[1])
+        gx, gy = geom["g"]
+        return _geom_from_g(geom, (G[0] - gx, G[1] - gy))
+
+    def geom_text_corners(geom):
+        W, H = geom["W"], geom["H"]
+        q = geom["tq"] or [ 0.0 ] * 8
+        base = ((0.0, 0.0), (W, 0.0), (W, H), (0.0, H))
+        return [ geom_text_point(geom, (bx + q[i * 2] * W, by + q[i * 2 + 1] * H)) for i, (bx, by) in enumerate(base) ]
+
+    def geom_media_q(geom, P, i):
+        """그림 모서리 i를 글 기준 자리 P로 끌 때 media_quad의 그 모서리 값 (가로, 세로 비율)."""
+        W, H = geom["W"], geom["H"]
+        vx, vy = _rot(P[0] - W / 2.0, P[1] - H / 2.0, -geom["rot"])
+        d = geom["dest"]
+        vx, vy = _rot(W / 2.0 + vx - d[0], H / 2.0 + vy - d[1], -geom["angle"])
+        rx, ry, rw, rh = geom["rect"]
+        cx, cy = rx + rw / 2.0 + vx, ry + rh / 2.0 + vy
+        bx = rx if i in (0, 3) else rx + rw
+        by = ry if i in (0, 1) else ry + rh
+        return ((cx - bx) / max(rw, 1.0), (cy - by) / max(rh, 1.0))
+
+    def geom_text_q(geom, P, i):
+        """글 모서리 i를 글 기준 자리 P로 끌 때 media_text_quad의 그 모서리 값. 묶었으면 휜 판을 거꾸로 풀어서 (뉴턴법)."""
+        W, H = geom["W"], geom["H"]
+        q = geom["tq"] or [ 0.0 ] * 8
+        bx = 0.0 if i in (0, 3) else W
+        by = 0.0 if i in (0, 1) else H
+        p = [ bx + q[i * 2] * W, by + q[i * 2 + 1] * H ]
+        for _n in range(12):
+            f = geom_text_point(geom, p)
+            ex, ey = P[0] - f[0], P[1] - f[1]
+            if abs(ex) + abs(ey) < 0.05:
+                break
+            fx = geom_text_point(geom, (p[0] + 1.0, p[1]))
+            fy = geom_text_point(geom, (p[0], p[1] + 1.0))
+            a, b = fx[0] - f[0], fy[0] - f[0]
+            c, d = fx[1] - f[1], fy[1] - f[1]
+            det = a * d - b * c
+            if abs(det) < 1e-9:
+                break
+            p[0] += (d * ex - b * ey) / det
+            p[1] += (-c * ex + a * ey) / det
+        return ((p[0] - bx) / max(W, 1.0), (p[1] - by) / max(H, 1.0))
+
+    _fx_cache = { }
+
+    def fx_shader(name, time=None, values=None):
+        """효과 폴더의 그림 전환 이름 → (셰이더 이름, 걸리는 초, 값). 효과가 없으면 None (개발 모드면 한 번 알림)."""
+        key = (name, time, repr(sorted((values or { }).items())))
+        if key in _fx_cache:
+            return _fx_cache[key]
+        fx = getattr(store, "img_fx", None)
+        e = fx.EFFECTS.get(name) if fx is not None else None
+        if e is None:
+            if fx is not None and store.config.developer and name not in fx.MISSING:
+                fx.MISSING.add(name)
+                store.renpy.notify("글 상자 그림 효과 {!r}이 효과 폴더에 없어서 효과 없이 나와요".format(name))
+            rv = None
+        else:
+            known = dict((k[3:], v) for k, v in e["uniforms"])
+            for k, v in (values or { }).items():
+                if k in known:
+                    known[k] = v
+            uniforms = dict(("u_imgfx_%s_%s" % (name, k), fx._value(v)) for k, v in known.items())
+            rv = ("ui_kit.imgfx." + name, float(e["time"] if time is None else time), uniforms)
+        _fx_cache[key] = rv
+        return rv
 
     ## ── 렌파이 글 그리기에 상자 끼우기 ──
     ## 렌파이 Text는 background 스타일을 쓰지 않습니다. 대사 글의 background에 TextBox가

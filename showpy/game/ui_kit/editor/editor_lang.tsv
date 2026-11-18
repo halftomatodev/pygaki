@@ -1315,14 +1315,14 @@ HUD 고르기	HUDを選択	Select HUD
 자리	位置	Position
 이 선택지에는 뒤 그림/영상이 없습니다. 대본 편집기의 선택지 [[🖼]에서 넣으세요.	この選択肢には後ろの画像/動画がありません。台本エディターの選択肢の [🖼] で入れてください。	This choice has no image/video behind it. Add one with [🖼] on the choice in the script editor.
 뒤 그림 자리, 크기, 회전을 처음으로 돌렸습니다.	後ろの画像の位置、サイズ、回転を元に戻しました。	Reset the position, size and rotation of the image behind.
-뒤 그림 옮김 x {:+d}   y {:+d}   (선택지 가운데 기준)   크기 {:g}배   회전 {:g}도	後ろの画像 移動 x {0}   y {1}   (選択肢の中央基準)   サイズ {2} 倍   回転 {3} 度	Image behind  offset x {0}   y {1}   (from the choice center)   size x{2}   rotate {3}°
+뒤 그림 옮김 x {:+d}   y {:+d}   (선택지 가운데 기준)   크기 {:g}배   회전 {:g}도   {}	後ろの画像 移動 x {0}   y {1}   (選択肢の中央基準)   サイズ {2} 倍   回転 {3} 度   {4}	Image behind  offset x {0}   y {1}   (from the choice center)   size x{2}   rotate {3}°   {4}
 뒤 그림: 드래그 이동 (Shift: 한 방향) | 휠 크기 (Shift: 크게)	後ろの画像: ドラッグで移動 (Shift: 一方向) | ホイールでサイズ (Shift: 大きく)	Image behind: drag to move (Shift: one axis) | Wheel to resize (Shift: bigger steps)
 방향키 이동 (Shift: 10배) | Q/E 회전 | A/D 크기 | Tab 다음 선택지 | Backspace 이 선택지 되돌리기	矢印キーで移動 (Shift: 10 倍) | Q/E 回転 | A/D サイズ | Tab 次の選択肢 | Backspace この選択肢を元に戻す	Arrow keys move (Shift: x10) | Q/E rotate | A/D size | Tab next choice | Backspace revert this choice
 뒤 그림	後ろの画像	Image behind
 그림 처음으로	画像を元に戻す	Reset image
 그림/영상 상자(box="media")를 쓰는 대사가 아닙니다. 대본 편집기의 [[글 상자]에서 [[그림/영상]을 고르세요.	画像/動画ボックス(box="media")を使うセリフではありません。台本エディターの [テキストボックス] で [画像/動画] を選んでください。	This line doesn't use an image/video box (box="media"). Pick [Image/video] under [Text box] in the script editor.
 그림 자리, 크기, 회전을 처음으로 돌렸습니다.	画像の位置、サイズ、回転を元に戻しました。	Reset the image position, size and rotation.
-그림 옮김 x {:+d}   y {:+d}   (글 가운데 기준)   크기 {:g}배   회전 {:g}도	画像 移動 x {0}   y {1}   (文字の中央基準)   サイズ {2} 倍   回転 {3} 度	Image  offset x {0}   y {1}   (from the text center)   size x{2}   rotate {3}°
+그림 옮김 x {:+d}   y {:+d}   (글 가운데 기준)   크기 {:g}배   회전 {:g}도   {}	画像 移動 x {0}   y {1}   (文字の中央基準)   サイズ {2} 倍   回転 {3} 度   {4}	Image  offset x {0}   y {1}   (from the text center)   size x{2}   rotate {3}°   {4}
 pygaki 원고입니다. 여기서는 위치와 그림/영상 상자의 자리, 크기, 회전을 고치고, 글자 모양, 속도, 등장 효과, 상자는 대본 편집기에서 고칩니다.	pygaki の原稿です。ここでは位置と画像/動画ボックスの位置、サイズ、回転を直し、文字の見た目、速度、登場効果、ボックスは台本エディターで直します。	This is a pygaki script. Here you change positions and the image/video box's position, size and rotation; text look, speed, appear effects and boxes are edited in the script editor.
 마우스: 드래그하면 고르는 것(대사/이름/그림)이 움직임 (Shift: 한 방향) | 그림: 휠, A/D 크기, Q/E 회전	マウス: ドラッグで選んだもの(セリフ/名前/画像)が動く (Shift: 一方向) | 画像: ホイール、A/D でサイズ、Q/E で回転	Mouse: drag moves the selected part (dialogue/name/image) (Shift: one axis) | Image: wheel or A/D size, Q/E rotate
 Tab 대사/이름/그림 바꾸기 | 방향키 이동 (Shift: 10배) | R 다시 보기 | Backspace 이 줄 되돌리기	Tab セリフ/名前/画像の切り替え | 矢印キーで移動 (Shift: 10 倍) | R もう一度見る | Backspace この行を元に戻す	Tab switch dialogue/name/image | Arrow keys move (Shift: x10) | R replay | Backspace revert this line
@@ -1330,3 +1330,17 @@ Tab 대사/이름/그림 바꾸기 | 방향키 이동 (Shift: 10배) | R 다시 
 Tab 대사/이름/그림 바꾸기 | 방향키 이동 | A/D 크기 | Q/E 회전 (Shift: 5도) | R 다시 보기	Tab セリフ/名前/画像の切り替え | 矢印キーで移動 | A/D サイズ | Q/E 回転 (Shift: 5 度) | R もう一度見る	Tab switch dialogue/name/image | Arrow keys move | A/D size | Q/E rotate (Shift: 5°) | R replay
 그림/영상 상자:	画像/動画ボックス:	Image/video box:
 [[고칠 것: 그림]에서 끌기 자리, 휠 크기, Q/E 회전	[編集対象: 画像] でドラッグ位置、ホイールでサイズ、Q/E で回転	Under [Edit: Image]: drag to move, wheel to resize, Q/E to rotate
+뒤 그림 자리, 크기, 회전, 묶기, 네 점 변형을 처음으로 돌렸습니다.	後ろの画像の位置、サイズ、回転、リンク、4点変形を元に戻しました。	Reset the image position, size, rotation, link and four-corner warp.
+그림 자리, 크기, 회전, 묶기, 네 점 변형을 처음으로 돌렸습니다.	画像の位置、サイズ、回転、リンク、4点変形を元に戻しました。	Reset the image position, size, rotation, link and four-corner warp.
+묶음을 풀었습니다. 글은 제자리로 돌아갑니다.	リンクを解除しました。文字は元の位置に戻ります。	Unlinked. The text goes back to its own place.
+글을 뒤 그림에 묶었습니다. 이제 그림의 크기, 회전, 옮김, 네 점 변형을 글도 같이 받습니다.	文字を後ろの画像にリンクしました。これから画像のサイズ、回転、移動、4点変形が文字にもかかります。	Linked the text to the image behind it. The text now follows the image's size, rotation, offset and four-corner warp.
+글을 그림에 묶었습니다. 이제 그림의 크기, 회전, 옮김, 네 점 변형을 글도 같이 받습니다.	文字を画像にリンクしました。これから画像のサイズ、回転、移動、4点変形が文字にもかかります。	Linked the text to the image. The text now follows the image's size, rotation, offset and four-corner warp.
+네 점 변형을 처음으로 돌렸습니다.	4点変形を元に戻しました。	Reset the four-corner warp.
+글 묶음	文字リンク	text linked
+글 따로	文字は別	text separate
+묶음 풀기	リンク解除	Unlink
+글과 묶기	文字とリンク	Link text
+네 점 처음으로	4点を元に	Reset corners
+모서리 점(분홍 그림, 하늘색 글)을 끌면 네 점 변형	角の点(ピンク 画像、水色 文字)をドラッグで4点変形	Drag the corner dots (pink image, light blue text) to warp
+마우스: 드래그하면 그림이 움직임 (Shift: 한 방향) | 모서리 점: 분홍 그림, 하늘색 글을 끌면 네 점 변형 | 휠 크기 (Shift: 크게)	マウス: ドラッグで画像が動く (Shift: 一方向) | 角の点: ピンク 画像、水色 文字をドラッグで4点変形 | ホイール サイズ (Shift: 大きく)	Mouse: drag moves the image (Shift: one direction) | Corner dots: drag pink (image) or light blue (text) to warp | Wheel size (Shift: bigger)
+[[고칠 것: 그림]에서 끌기 자리, 휠 크기, Q/E 회전, 모서리 점(분홍 그림, 하늘색 글) 끌기 네 점 변형. 묶으면 글도 그림을 따라 움직임	[[編集: 画像]でドラッグ 位置、ホイール サイズ、Q/E 回転、角の点(ピンク 画像、水色 文字)ドラッグ 4点変形。リンクすると文字も画像についていく	In [[Edit: Image]: drag position, wheel size, Q/E rotate, drag corner dots (pink image, light blue text) to warp. Linked text follows the image

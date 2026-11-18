@@ -39,6 +39,11 @@ export interface SayStyle {
   // 투명 영상 (FEATURE 26, ui_kit 4.16): 왼쪽 색 + 오른쪽 투명도 영상인지. 없으면 파일 이름이 mask_로 시작할 때 투명 영상
   media_mask?: boolean;
   media_alpha?: number; // 그림 투명도 0~1 (없으면 1)
+  // 글 상자 묶기·네 점 변형·그림 효과 (FEATURE 28, ui_kit 4.18). 묶기·변형은 게임 안 편집 화면에서 정해서 받아 적는다
+  media_link?: number[]; // 글을 그림에 묶음: 묶을 때의 그림 [크기, 회전, 가로 옮김, 세로 옮김]. 그 뒤로 달라진 만큼 글이 따라감
+  media_quad?: number[]; // 그림 네 모서리 옮김 8개 (왼위, 오른위, 오른아래, 왼아래의 가로, 세로. 그림 크기에 대한 비율)
+  media_text_quad?: number[]; // 글 네 모서리 옮김 8개 (글 크기에 대한 비율)
+  media_fx?: string; // 나타날 때 그림 효과. 나타나는 방식과 같은 꼴 img_fx.use("vibrate", 0.6, amount=14)
   name_size?: number;
   name_font?: string;
   name_color?: string;
@@ -103,6 +108,11 @@ export interface ChoiceMedia {
   y?: number;
   zoom?: number; // 배율
   angle?: number; // 도
+  // 묶기·네 점 변형·그림 효과 (FEATURE 28): SayStyle의 media_link, media_quad, media_text_quad, media_fx와 같음
+  link?: number[];
+  quad?: number[];
+  text_quad?: number[];
+  fx?: string;
 }
 
 // 조건 분기의 갈래 하나 (FEATURE 13). cond는 렌파이 조건식 그대로 (예: love >= 5)

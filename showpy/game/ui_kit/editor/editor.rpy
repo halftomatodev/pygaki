@@ -43,6 +43,7 @@ init -9 python in ui_editor:
             self.mini = False       # X: 패널을 한 줄로 접기
             self.peek = False       # Space를 누르고 있는 동안 패널 숨기기
             self.dodge = True       # B: 고른 것이 패널 아래에 있으면 패널이 다른 구석으로 비킴
+            self.corner_peek = False  # 모서리 점을 끄는 동안 패널을 숨겼는지 (4.18)
             self.panel_xy = None    # 패널 제목을 끌어서 놓은 자리 (None이면 구석)
             self.panel_drag = None  # 패널을 끄는 중 (마우스 x, y, 패널 x, y)
             self.panel_now = (10, 10)
@@ -743,7 +744,22 @@ init -9 python in ui_editor:
             if ev.type == pygame.MOUSEBUTTONUP:
                 if self.drag is not None:
                     if tab is not None:
+                        ## 마우스를 빨리 움직이면 렌파이가 화면을 다시 그리는 동안 움직임 신호를 흘릴 때가 있어서,
+                        ## 손을 뗀 자리로 한 번 더 맞춤 (4.18)
+                        token, mx, my = self.drag
+                        dx, dy = x - mx, y - my
+                        if shift:
+                            if abs(dx) > abs(dy):
+                                dy = 0
+                            else:
+                                dx = 0
+                        if dx or dy:
+                            tab.drag_move(token, dx, dy)
                         tab.drag_end(self.drag[0])
+                    ## 모서리 점을 끄는 동안 숨긴 패널을 다시 보임 (4.18)
+                    if getattr(state, "corner_peek", False):
+                        state.corner_peek = False
+                        state.peek = False
                     self.drag = None
                     store.renpy.restart_interaction()
                 raise store.renpy.IgnoreEvent()
@@ -1309,6 +1325,10 @@ screen ui_editor_main():
 
     ## 마우스 휠 (패널 위면 패널 스크롤, 밖이면 탭의 휠 기능). 패널보다 위에 둬야 먼저 받습니다.
     add ui_editor.wheel_catcher
+
+    ## 그림/영상 상자의 모서리 점 (4.18, editor_say.rpy CornerDots): 패널 위에 그려서 패널 밑의 점도 보이고 먼저 집힘
+    if _ok and hasattr(_tab, "corner_dots"):
+        add ui_editor.CORNER_DOTS
 
     ## 앱이 붙어 있으면 고르기 창도 앱에서 봅니다
     if not ui_editor.live_panel_hidden():

@@ -50,7 +50,11 @@ init -10 python in cmenu:
         "hover_sound", "activate_sound",
         "idle_media", "hover_media", "select_media", "select_time",
         "media_fit", "media_zoom", "media_angle", "media_offset", "media_mask", "media_loop", "media_button", "media_padding",
+        "media_link", "media_quad", "media_text_quad", "media_fx", "media_fx_time", "media_fx_values",
         }
+
+    ## 이 값이 하나라도 있으면 뒤 그림을 글의 상자(say_style 그림/영상 상자)로 그려서 글과 같이 휘고 돌게 함 (4.18)
+    GROUP_KEYS = ("media_link", "media_quad", "media_text_quad", "media_fx")
 
     ## 선택지 뒤 그림/영상 (ui_kit 4.14). 하나라도 있으면 기본 버튼 배경을 없앱니다 (media_button=True면 그대로)
     MEDIA_KEYS = ("idle_media", "hover_media", "select_media")
@@ -147,6 +151,27 @@ init -10 python in cmenu:
             if fit != "text":
                 _err(src, "media_fit은 \"text\"나 \"image\"입니다: {!r}".format(fit))
             return _Fill(m, ox, oy, zoom, angle)
+
+        return _cached(k, make)
+
+    def _media_box(d, key):
+        """묶기, 네 점 변형, 그림 효과가 있는 선택지 뒤 그림 (4.18): 글 배경의 그림/영상 상자로. 크기는 버튼과 같게(글 + media_padding)."""
+        src = d.get(key, None)
+        if not src:
+            return None
+        opts = dict(src=src, fit=d.get("media_fit", "text"), zoom=float(d.get("media_zoom", 1.0) or 1.0),
+            offset=tuple(d.get("media_offset", (0, 0))), angle=float(d.get("media_angle", 0.0) or 0.0),
+            mask=d.get("media_mask", None), loop=bool(d.get("media_loop", True)),
+            padding=d.get("media_padding", (36, 14)),
+            link=d.get("media_link", None), quad=d.get("media_quad", None), text_quad=d.get("media_text_quad", None),
+            fx=d.get("media_fx", None), fx_time=d.get("media_fx_time", None), fx_values=d.get("media_fx_values", None))
+        k = ("mbox", key, repr(sorted(opts.items())))
+
+        def make():
+            try:
+                return store.say_style.box("media", **opts)
+            except Exception as e:
+                _err(src, str(e))
 
         return _cached(k, make)
 
@@ -330,9 +355,11 @@ init -10 python in cmenu:
         ## 뒤 그림/영상
         c.select_media = None
         c.select_time = float(d.get("select_time", 0.5) or 0.0)
+        grouped = any(d.get(k) for k in GROUP_KEYS)
+        c.grouped = grouped
         if any(d.get(k) for k in MEDIA_KEYS):
-            idle = _media(d, "idle_media")
-            hover = _media(d, "hover_media")
+            idle = _media(d, "idle_media") if not grouped else None
+            hover = _media(d, "hover_media") if not grouped else None
             if not d.get("media_button", False):
                 button_props["background"] = None
                 button_props["hover_background"] = None
@@ -345,11 +372,23 @@ init -10 python in cmenu:
                 button_props["background"] = idle
             if hover is not None or idle is not None:
                 button_props["hover_background"] = hover if hover is not None else idle
-            c.select_media = _media(d, "select_media")
+            c.select_media = _media(d, "select_media") if not grouped else _media_box(d, "select_media")
+            if grouped:
+                ## 그림을 글 배경(상자)으로: 글과 한 장이라 묶기, 네 점 변형, 그림 효과가 글에도 걸림
+                ib = _media_box(d, "idle_media")
+                hb2 = _media_box(d, "hover_media")
+                if ib is not None:
+                    text_props["background"] = ib
+                if hb2 is not None or ib is not None:
+                    text_props["hover_background"] = hb2 if hb2 is not None else ib
         c.picking = state.picked is not None and state.picked[0] == number
         if c.picking and c.select_media is not None:
-            button_props["background"] = c.select_media
-            button_props["hover_background"] = c.select_media
+            if grouped:
+                text_props["background"] = c.select_media
+                text_props["hover_background"] = c.select_media
+            else:
+                button_props["background"] = c.select_media
+                button_props["hover_background"] = c.select_media
 
         ## 편집 중: 버튼에 테두리 (버튼과 같이 회전합니다)
         if state.editing and menu_key is not None:
@@ -361,6 +400,8 @@ init -10 python in cmenu:
         if preview:
             if "hover_background" in button_props:
                 button_props["background"] = button_props["hover_background"]
+            if "hover_background" in text_props:
+                text_props["background"] = text_props["hover_background"]
             c.idle_dx, c.idle_dy = c.h_dx, c.h_dy
 
         c.text_props = text_props

@@ -222,6 +222,7 @@ function Exits({ b, editing, tb, active, setActive }: { b: BoxNode; editing: boo
               ) : (
                 c.text || <i className="todo">(빈 선택지)</i>
               )}
+              {c.media?.link && (c.media.idle || c.media.hover || c.media.select) && <LinkMark />}
               {(c.condition || c.actions.length > 0) && <ChoiceFlags cond={c.condition} actions={c.actions} />}
               <Handle type="source" id={'c:' + c.id} position={Position.Right} />
             </div>
@@ -511,6 +512,15 @@ interface RowProps {
   onText: (v: string) => void;
 }
 
+// 글이 글 상자 그림에 묶여 있다는 체인 표시 (FEATURE 28)
+function LinkMark() {
+  return (
+    <span className="link-mark" title="글이 글 상자 그림에 묶여 있어요. 그림의 크기, 회전, 옮김, 네 점 변형, 그림 효과를 글도 같이 받아요">
+      <svg width="12" height="12" viewBox="0 0 16 16" aria-hidden><path d="M6.6 9.4a3 3 0 0 0 4.2 0l2.3-2.3a3 3 0 0 0-4.2-4.2l-.9.9M9.4 6.6a3 3 0 0 0-4.2 0L2.9 8.9a3 3 0 0 0 4.2 4.2l.9-.9" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
+    </span>
+  );
+}
+
 // 줄 하나. 볼 때와 고칠 때 같은 자리에 같은 크기로 그린다
 function LineRow({ l, editing, active, cls, grip, onFocus, onKey, onText }: RowProps) {
   const ch = useStore((s) => (l.type === 'say' ? s.project.characters.find((c) => c.id === l.who) : undefined));
@@ -568,6 +578,7 @@ function LineRow({ l, editing, active, cls, grip, onFocus, onKey, onText }: RowP
       )}
       {l.type === 'say' && l.attr && <span className="attr">({l.attr})</span>}
       {l.type === 'note' && <span className="mark">#</span>}
+      {isSayLine(l) && l.say?.box === 'media' && l.say.media_link && <LinkMark />}
       {body}
     </div>
   );

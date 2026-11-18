@@ -45,7 +45,7 @@ label ward.n1:
             jump ward.n4
 ```
 
-**선택지 뒤 그림/영상** (대본 편집기 `FEATURE` 24, pygaki 플러그인 `ui_kit` 4.14 `choice_menu.rpy`, 연결을 켰을 때만): `"문구" (idle_media="…", hover_media="…", select_media="…", select_time=1.0, media_fit="image", media_offset=(-40, 15), media_zoom=1.1, media_angle=-8) if 조건:  # @c:c1`. 대본 편집기 값은 선택지의 `media`(`idle` `hover` `select` `time` `fit`, 게임 안 편집 화면 선택지 탭 [뒤 그림]에서 정해서 받아 적는 `x` `y` `zoom` `angle`, `ui_kit` 4.15 `FEATURE` 25. 세 그림에 같이 씀). 영상 이름이 `mask_`로 시작하면 투명 영상(왼쪽 색, 오른쪽 투명도. 렌파이 `side_mask`)으로 틀고(`ui_kit` 4.16, 파일마다), 대본 편집기는 예전 플러그인(4.14~4.15)도 알게 선택지의 영상이 모두 `mask_` 이름이면 `media_mask=True`를 적습니다(`FEATURE` 26). 하나라도 있으면 플러그인이 기본 버튼 배경을 없애고 버튼을 글 크기 + `media_padding`으로 줄입니다. `select_media`가 있으면 누른 뒤 `select_time`초(기본 0.5) 그 그림을 보여 주고 다른 곳을 못 누르게 막은 뒤 넘어갑니다. 대본 편집기는 게임의 `ui_kit/engine/text_box.rpy`에 `BOX_KINDS`의 `"media"`가 없으면(예전 판) 검사 탭에 오류로 알립니다.
+**선택지 뒤 그림/영상** (대본 편집기 `FEATURE` 24, pygaki 플러그인 `ui_kit` 4.14 `choice_menu.rpy`, 연결을 켰을 때만): `"문구" (idle_media="…", hover_media="…", select_media="…", select_time=1.0, media_fit="image", media_offset=(-40, 15), media_zoom=1.1, media_angle=-8) if 조건:  # @c:c1`. 대본 편집기 값은 선택지의 `media`(`idle` `hover` `select` `time` `fit`, 게임 안 편집 화면 선택지 탭 [뒤 그림]에서 정해서 받아 적는 `x` `y` `zoom` `angle`, `ui_kit` 4.15 `FEATURE` 25. 세 그림에 같이 씀). 묶기, 네 점 변형, 그림 효과(`link` `quad` `text_quad` `fx`, 괄호는 `media_link` `media_quad` `media_text_quad` `media_fx`, `ui_kit` 4.18 `FEATURE` 28, 뜻은 아래 대사 표와 같음)가 하나라도 있으면 플러그인은 뒤 그림을 버튼 배경이 아니라 선택지 글의 그림/영상 상자(글 + `media_padding`)로 그려서 글도 같이 휘고 돕니다. 영상 이름이 `mask_`로 시작하면 투명 영상(왼쪽 색, 오른쪽 투명도. 렌파이 `side_mask`)으로 틀고(`ui_kit` 4.16, 파일마다), 대본 편집기는 예전 플러그인(4.14~4.15)도 알게 선택지의 영상이 모두 `mask_` 이름이면 `media_mask=True`를 적습니다(`FEATURE` 26). 하나라도 있으면 플러그인이 기본 버튼 배경을 없애고 버튼을 글 크기 + `media_padding`으로 줄입니다. `select_media`가 있으면 누른 뒤 `select_time`초(기본 0.5) 그 그림을 보여 주고 다른 곳을 못 누르게 막은 뒤 넘어갑니다. 대본 편집기는 게임의 `ui_kit/engine/text_box.rpy`에 `BOX_KINDS`의 `"media"`가 없으면(예전 판) 검사 탭에 오류로 알립니다.
 
 캐릭터 `define` 줄 아래에는 플래그의 처음 값 `default 이름 = 값  # 메모`가 한 줄씩 옵니다(대본 편집기 플래그 카드, `FEATURE` 14). 선택지의 조건은 `"문구" if 조건:`, 고르면 바꾸는 값은 그 아래 `$ 식` 줄입니다. 모두 평범한 렌파이 문법이라 플러그인이 따로 읽지 않습니다.
 
@@ -92,6 +92,10 @@ label ward.n1:  # @node:n1 도입
 | `media_offset=(60, -25)`, `media_zoom=1.3`, `media_angle=12` | `media_x` `media_y` `media_zoom` `media_angle` | 그림 옮김(글 가운데 기준), 배율(글에 맞춤이면 맞춘 크기에 곱함), 그림만 돌리기(도). 게임 안 편집 화면 대사 탭 [그림]에서 정해서 대본 편집기가 받아 적음 (3장, `ui_kit` 4.15, `FEATURE` 25) |
 | `media_mask=True`, `media_mask=False` | `media_mask` | 투명 영상(왼쪽 색, 오른쪽 투명도. 렌파이 `side_mask`)인지. 플러그인은 안 적으면 파일 이름이 `mask_`로 시작할 때 투명 영상으로 봄(`ui_kit` 4.16, 그 앞은 `False`). 대본 편집기는 영상일 때만, 투명 영상이면 늘 `True`를 적고(예전 플러그인도 알게) `mask_` 이름인데 끈 것만 `False`. 대본 값이 없으면 이름으로 (`FEATURE` 26). 대본 편집기의 [투명 영상 만들기]가 투명 webm·움직이는 그림·PNG 연속·초록 화면 영상을 `game/movies/mask_이름.webm`으로 바꿈 |
 | `media_alpha=0.7` | `media_alpha` | 그림 투명도 0~1. 1이면 안 적음 (`ui_kit` 4.14, `FEATURE` 26) |
+| `media_link=(1.0, 0, 0, 0)` | `media_link` `[크기, 회전, 가로, 세로]` | 글을 그림에 묶음 (`ui_kit` 4.18, `FEATURE` 28). 값은 묶을 때의 `media_zoom` `media_angle` `media_offset`이고, 그 값에서 달라진 만큼 글이 그림과 같이 커지고 돌고 옮겨짐. 플러그인은 `True`도 받음(`(1, 0, 0, 0)`과 같음). 묶으면 아래 `media_quad`와 `media_fx`도 글이 같이 받음. 게임 안 편집 화면 [글과 묶기]나 대본 편집기 [글 묶기]가 적음 |
+| `media_quad=(0.1, 0, -0.1, 0, 0, 0, 0, 0)` | `media_quad` (숫자 8개) | 그림 네 모서리 자유변형 (`ui_kit` 4.18). 왼위, 오른위, 오른아래, 왼아래 모서리를 (가로, 세로)로 옮긴 양이고 그림 크기(배율을 곱한 크기)에 대한 비율. 원근으로 휨(플러그인 `text_box.rpy` `quad_homography`, 대본 편집기 미리보기 `SayPreview.tsx` `quadMatrix`). 돌리고 놓는 기준은 휘기 전 그림 가운데. 모두 0이면 안 적음. 게임 안 편집 화면에서 분홍 모서리 점을 끌어 정해서 받아 적음 |
+| `media_text_quad=(…8개)` | `media_text_quad` | 글 네 모서리 자유변형 (`ui_kit` 4.18). 값은 `media_quad`와 같고 글 크기에 대한 비율. 묶었으면 그림 쪽 변형 안에서 한 번 더 휨. 하늘색 모서리 점 |
+| `media_fx="vibrate", media_fx_time=0.8, media_fx_values={"amount": 20}` | `media_fx` (`img_fx.use("vibrate", 0.8, amount=20)` 꼴 글) | 글 상자가 나타날 때 효과 폴더의 그림 효과(8장 `@transition`)를 빈 그림에서 글 상자로 돌림 (`ui_kit` 4.18). 묶었으면 글도 같이. 시간을 안 적으면 효과 파일의 `@time`. 효과 폴더에 없는 이름이면 효과 없이 나옴(개발 모드에서 한 번 알림). 렌파이 기본 전환(`dissolve` 등)은 못 씀 |
 | `x=…`, `y=…`, `name_x=…`, `name_y=…` | 위치 | pygaki 플러그인이 정해서 대본 편집기가 받아 적음 (3장) |
 
 상자의 나머지 값(`bubble_color`, `pill_line` 등)은 pygaki 플러그인 원고나 `say_style.box_styles`에서만 고칩니다. 연결을 끈 파일에는 상자와 pygaki 플러그인 효과를 내보내지 않습니다(검사 탭에 경고).
@@ -171,8 +175,8 @@ pygaki 플러그인이 쓰고, 대본 편집기가 읽은 뒤 비웁니다. 대�
 | `box` | 줄이 들어갈 상자. 기준 줄이 사라졌을 때 그 상자의 끝에 넣습니다 |
 | `before` `after` `end` | `insert`의 자리. 줄 앞, 줄 뒤, 상자 끝 중 하나 |
 | `line` | `replace`, `remove`, `say_pos`, `say_fx`로 바꾸거나 지울 줄의 id |
-| `pos` | `say_pos`의 값. `x` `y` `name_x` `name_y`, 대사창 왼쪽 위 기준. 그림/영상 상자의 `media_x` `media_y`(옮김, 글 가운데 기준) `media_zoom` `media_angle`(pygaki 플러그인 `ui_kit` 4.15). `null`이면 지움 |
-| `choice` `media` | `choice_media`(`ui_kit` 4.15): 선택지 id(`# @c:`)와 뒤 그림 값 `x` `y`(옮김, 선택지 가운데 기준) `zoom` `angle`. `null`이면 지움. 대본 편집기는 선택지 `media`의 같은 이름에 적고, 뒤 그림이 없는 선택지면 버림 |
+| `pos` | `say_pos`의 값. `x` `y` `name_x` `name_y`, 대사창 왼쪽 위 기준. 그림/영상 상자의 `media_x` `media_y`(옮김, 글 가운데 기준) `media_zoom` `media_angle`(pygaki 플러그인 `ui_kit` 4.15), `media_link`(숫자 4개) `media_quad` `media_text_quad`(숫자 8개, `ui_kit` 4.18). `null`이면 지움 |
+| `choice` `media` | `choice_media`(`ui_kit` 4.15): 선택지 id(`# @c:`)와 뒤 그림 값 `x` `y`(옮김, 선택지 가운데 기준) `zoom` `angle`, `link`(숫자 4개) `quad` `text_quad`(숫자 8개, `ui_kit` 4.18). `null`이면 지움. 대본 편집기는 선택지 `media`의 같은 이름에 적고, 뒤 그림이 없는 선택지면 버림 |
 | `sayFx` | `say_fx`의 값. 대본 편집기 `LineFx`와 같은 이름: `fx` `transition`(`none`은 바로) `overlay`(`on` `off`) `warp` `cursor` `exclude`(목록). `null`이면 지움 |
 | `screen` `item` | `screen`, `screen_item`의 화면 id, 항목 id (대본 편집기 `project.screens`의 id) |
 | `set` | `screen`: 고친 것만 `anchor`(`tl` `t` `tr` `l` `c` `r` `bl` `b` `br`) `dx` `dy` `w` `h`. `screen_item`: `x` `y` `text`(글, 글 버튼, 놓는 곳만) |

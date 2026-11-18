@@ -11,7 +11,7 @@ import { useStore } from './store';
 import { GLASS, usePrefs } from './prefs';
 
 // 카드 유리 색 (fluidkit LiquidCard). 뒤의 캔버스가 비치게 반투명. 접으면 하늘색.
-// 사용 중(in-use)은 바탕색이 아니라 테두리 바깥에서 도는 무지개 빛으로 보인다 (styles.css `.card.in-use::before`, 세션 79·81)
+// 사용 중(in-use)은 바탕색이 아니라 테두리 바깥에서 도는 분홍·보라·노랑 빛으로 보인다 (styles.css `.card.in-use::before`, 세션 79·81)
 // 투명도는 환경 설정의 [카드 투명도] 하나로 모든 카드가 같이 바뀐다(세션 82, prefs.ts glass).
 // 투명할수록 테두리 빛(intensity)을 세게 하고, 50% 넘으면 가장자리 굴절(refraction, 크롬·Electron만)도 켜서 유리로 읽히게 한다
 export function glassOf(g: number) {
@@ -212,10 +212,10 @@ export function Card({ id, title, extra, defFolded = false, className = '', domI
 // 접을 때는 아래 줄부터 거꾸로 작아지며 제목 안으로 들어간 뒤 빠진다. 애니메이션 줄이기면 짧은 페이드만.
 // 움직이는 동안에도 다시 누를 수 있다(하던 움직임을 멈추고 지금 자리에서 반대로)
 const MAX_STAGGER = 10; // 이보다 아래 줄은 같이 움직임 (긴 목록이 늦게 끝나지 않게)
-function motionToken(name: string, fallback: string) {
+export function motionToken(name: string, fallback: string) {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
 }
-function ms(v: string) {
+export function ms(v: string) {
   const n = parseFloat(v);
   return v.endsWith('ms') ? n : n * 1000;
 }

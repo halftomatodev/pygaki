@@ -3,7 +3,7 @@ import { Hint } from './Help';
 import { useStore } from './store';
 import * as ops from './ops';
 import type { BoxNode, Choice, ChoiceMedia, ExitType, Line, Project } from './types';
-import { MediaField, MediaPlace } from './MediaField';
+import { MediaField, MediaGroupFields, MediaPlace } from './MediaField';
 import { uid } from './util';
 import { Card } from './Card';
 import { LineLook, OldAttr, SpeakerSelect, StageFields, useLineDrag } from './LineFields';
@@ -14,6 +14,7 @@ import { StageCards } from './StageCards';
 import { VoiceCard } from './VoiceCard';
 import { syncOuts } from './screens';
 import { useLive } from './showpyLive';
+import { useGameFolder } from './gameFolder';
 import { useScreenSel } from './ScreensView';
 import { CursorCard, SayUiCard } from './UiPanel';
 import { ActionInput, CondInput, firstAction } from './FlagFields';
@@ -393,6 +394,7 @@ function ChoiceRow({ b, c, i, upd }: { b: BoxNode; c: Choice; i: number; upd: Up
   const has = !!c.condition || c.actions.length > 0;
   const [open, setOpen] = useState(has);
   const m = c.media ?? {};
+  const oldGroup = useGameFolder((f) => f.mediaGroup === false);
   const hasMedia = !!(m.idle || m.hover || m.select);
   const [openMedia, setOpenMedia] = useState(hasMedia);
   const setC = (fn: (x: Choice) => void, key?: string) => upd((x) => void (x.exit.type === 'menu' && fn(x.exit.choices[i])), key);
@@ -447,6 +449,12 @@ function ChoiceRow({ b, c, i, upd }: { b: BoxNode; c: Choice; i: number; upd: Up
               x.media = nm;
             })} />
           </div>
+          <MediaGroupFields g={m} place={m} old={oldGroup} onChange={(fn, key) => setC((x) => {
+            if (!x.media) return;
+            const nm: ChoiceMedia = { ...x.media };
+            fn(nm);
+            x.media = nm;
+          }, key && key + c.id)} />
         </div>
       )}
       {open && (

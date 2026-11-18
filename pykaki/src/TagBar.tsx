@@ -1,6 +1,6 @@
 // 태그 상자: 대사·내레이션 글 칸에 커서가 있으면 뜨는 작은 창. 고른 글을 렌파이 텍스트 태그로 감싸거나 진행 태그(멈춤, 지우고 이어서)를 넣는다
 // 상자 안 편집에서는 상자 오른쪽 위 바깥에, 오른쪽 편집 탭에서는 글자 효과 칸 위쪽에 붙는다
-import { useEffect, useReducer, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react';
 import { create } from 'zustand';
 import { useStore } from './store';
 import { useGameFolder } from './gameFolder';
@@ -9,6 +9,7 @@ import { EFFECTS, effectKnobs, formatEffect, parseEffect } from './stage';
 import { shaderEffect } from './fx/textShaders';
 import { RUBY_NOTE, insertRuby, insertTag, removeTag, retag, rubyAt, setRubyStyle, setTagValue, stepSize, tagsAt, toggleTag, type Edit } from './tagEdit';
 import { TagDemo, type Tip } from './TagDemo';
+import { motionToken, ms } from './Card';
 
 // 지금 태그를 넣을 글 칸(textarea id). 태그 상자 안으로 포커스가 옮겨 가도 그대로 둔다
 export const useTagTarget = create<{ id: string | null }>(() => ({ id: null }));
@@ -563,7 +564,7 @@ export function TagBar({ targetId, className = '', extra }: { targetId: string; 
           </div>
         </div>
       )}
-      {more && (
+      <MoreReveal open={more}>
         <>
           <div className="tb-card" style={{ '--hue': 268 } as React.CSSProperties}>
             <div className="tb-row" {...tipOn('alpha')}>
@@ -687,7 +688,7 @@ export function TagBar({ targetId, className = '', extra }: { targetId: string; 
             </div>
           </div>
         </>
-      )}
+      </MoreReveal>
       {extraCard}
       {palette && (
         <div className="tb-card" style={{ '--hue': palette === 'color' ? 215 : palette === 'rubycolor' ? 330 : 268 } as React.CSSProperties}>
@@ -718,4 +719,73 @@ export function TagBar({ targetId, className = '', extra }: { targetId: string; 
       )}
     </div>
   );
+}
+
+// [더 보기] 카드 묶음이 펴지고 접히는 움직임 (세션 83, 사용자 참고 영상: 채팅 카드가 아래에서 옅게 올라오며 자리가 늘어남).
+// 펼칠 때: 자리 높이가 스프링으로 늘고, 카드가 한 장씩 아래에서 옅고 흐리게 올라와 제자리로(50ms씩 늦게).
+// 접을 때: 카드가 위로 조금 뜨며 옅어지고 자리가 줄어든 뒤 빠진다. 움직이는 도중에 다시 눌러도 지금 자리에서 반대로.
+// 애니메이션 줄이기면 짧은 페이드만. 바깥 .tagbar의 gap(5px)도 같이 늘고 줄어서 끝에 튀지 않음
+function MoreReveal({ open, children }: { open: boolean; children: React.ReactNode }) {
+  const [shown, setShown] = useState(open);
+  const ref = useRef<HTMLDivElement | null>(null);
+  const anims = useRef<Animation[]>([]);
+  const first = useRef(true);
+  const stop = () => {
+    for (const a of anims.current) a.cancel();
+    anims.current = [];
+  };
+  useEffect(() => {
+    if (first.current) {
+      first.current = false;
+      return;
+    }
+    if (open) return setShown(true);
+    const el = ref.current;
+    if (!el) return setShown(false);
+    const from = el.offsetHeight;
+    stop();
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const dur = ms(motionToken('--dur-pop', '250ms'));
+    const easeIn = motionToken('--ease-in', 'ease-in');
+    const kids = [...el.children] as HTMLElement[];
+    if (!reduce)
+      kids.forEach((k, i) =>
+        anims.current.push(k.animate([{}, { opacity: 0, translate: '0 -6px', filter: 'blur(4px)' }], { duration: dur * 0.8, delay: (kids.length - 1 - i) * 30, easing: easeIn, fill: 'forwards' })),
+      );
+    el.style.overflow = 'clip';
+    const last = reduce
+      ? el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 120, easing: easeIn, fill: 'forwards' })
+      : el.animate([{ height: from + 'px', marginTop: '0px' }, { height: '0px', marginTop: '-5px' }], { duration: dur + (kids.length - 1) * 30, easing: easeIn, fill: 'forwards' });
+    anims.current.push(last);
+    last.finished.then(() => setShown(false), () => {});
+  }, [open]);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!open || !shown || !el || first.current) return;
+    const from = anims.current.length ? el.offsetHeight : 0;
+    stop();
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) {
+      anims.current.push(el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 150, easing: motionToken('--ease-out', 'ease-out') }));
+      return;
+    }
+    const dur = ms(motionToken('--dur-view', '400ms'));
+    const spring = motionToken('--ease-spring', 'ease-out');
+    const kids = [...el.children] as HTMLElement[];
+    kids.forEach((k, i) =>
+      anims.current.push(
+        k.animate([{ opacity: 0, translate: '0 14px', filter: 'blur(5px)' }, { opacity: 1, translate: '0 0', filter: 'blur(0px)' }], { duration: dur, delay: 40 + i * 50, easing: spring, fill: 'backwards' }),
+      ),
+    );
+    el.style.overflow = 'clip';
+    const h = el.scrollHeight;
+    const a = el.animate([{ height: from + 'px', marginTop: from ? '0px' : '-5px' }, { height: h + 'px', marginTop: '0px' }], { duration: dur, easing: spring });
+    anims.current.push(a);
+    a.finished.then(() => {
+      el.style.overflow = '';
+      anims.current = [];
+    }, () => {});
+  }, [open, shown]);
+  if (!shown) return null;
+  return <div className="tb-more-wrap" ref={ref}>{children}</div>;
 }

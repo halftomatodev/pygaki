@@ -90,6 +90,26 @@ export function mediaPlace(x?: number, y?: number, zoom?: number, angle?: number
   return a;
 }
 
+// 글 상자 묶기·네 점 변형·그림 효과 (FEATURE 28, ui_kit 4.18). 대사와 선택지가 같이 씀
+const pyNum = (n: number) => String(Math.round(n * 10000) / 10000);
+const pyTuple = (a: number[]) => `(${a.map(pyNum).join(', ')})`;
+export const hasQuad = (q?: number[]) => !!q && q.length === 8 && q.some((n) => Math.abs(n) > 1e-4);
+export function mediaGroupArgs(link?: number[], quad?: number[], textQuad?: number[], fx?: string): string[] {
+  const a: string[] = [];
+  if (link && link.length === 4) a.push(`media_link=${pyTuple(link)}`);
+  if (hasQuad(quad)) a.push(`media_quad=${pyTuple(quad!)}`);
+  if (hasQuad(textQuad)) a.push(`media_text_quad=${pyTuple(textQuad!)}`);
+  const u = parseImageFx(fx);
+  if (u) {
+    a.push(`media_fx=${pyStr(u.name)}`);
+    if (u.time) a.push(`media_fx_time=${u.time}`);
+    if (u.args.length) a.push(`media_fx_values={${u.args.map(([k, v]) => `${pyStr(k)}: ${/^-?\d+(\.\d+)?$/.test(v) ? v : pyStr(v)}`).join(', ')}}`);
+  }
+  return a;
+}
+// 대사·선택지에 묶기·변형·그림 효과 값이 있는지 (예전 플러그인 알림용)
+export const sayHasGroup = (s?: SayStyle) => !!s && s.box === 'media' && !!(s.media_link || hasQuad(s.media_quad) || hasQuad(s.media_text_quad) || s.media_fx);
+
 // 대사 줄의 괄호 안 값: fx="ascii", fx_warp=3 ...
 export function fxArgs(f?: LineFx): string[] {
   if (!f) return [];
@@ -207,12 +227,13 @@ const NATIVE: Record<keyof SayStyle, string> = {
   sound: '', // 대사 소리는 플러그인의 대사 소리 콜백이 받아서 연결을 켰을 때만
   box: '', tail: '', box_rotate: '', // 글 상자는 showpy가 있어야 해서 원래 이름이 없다 (내보내지 않음)
   media: '', media_fit: '', media_x: '', media_y: '', media_zoom: '', media_angle: '', media_mask: '', media_alpha: '',
+  media_link: '', media_quad: '', media_text_quad: '', media_fx: '',
   name_size: 'who_size', name_font: 'who_font', name_color: 'who_color',
   x: 'what_xpos', y: 'what_ypos', name_x: 'namebox_xpos', name_y: 'namebox_ypos',
 };
 
 // 대사 줄의 괄호 안 값: size=30, cps=20 ... 위치는 showpy가 뒤에 덧붙이는 순서와 맞춰 맨 뒤에 둔다
-export function sayArgs(s0?: SayStyle, native = false, text?: string): string[] {
+export function sayArgs(s0?: SayStyle, native = false, text?: string, oldGroup = false): string[] {
   const tagged = tagEffectNames(text).length > 0;
   if (!s0 && !tagged) return [];
   const s: SayStyle = s0 ?? {};
@@ -243,6 +264,7 @@ export function sayArgs(s0?: SayStyle, native = false, text?: string): string[] 
         else if (isMaskName(s.media)) a.push('media_mask=False');
       }
       if (s.media_alpha !== undefined && s.media_alpha < 1) a.push(`media_alpha=${s.media_alpha}`);
+      if (!oldGroup) a.push(...mediaGroupArgs(s.media_link, s.media_quad, s.media_text_quad, s.media_fx));
       if (s.box_rotate) a.push(`box_rotate=${s.box_rotate}`);
     }
   } else if (!native && s.box) {

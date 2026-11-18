@@ -2586,3 +2586,25 @@ label 이름	label 名	label name
 이름·변수·색 고치기 (F2, 더블클릭)	名前・変数・色を編集 (F2、ダブルクリック)	Edit name, variable, and color (F2, double-click)
 이름·제목·색 고치기 (F2, 더블클릭)	名前・タイトル・色を編集 (F2、ダブルクリック)	Edit name, title, and color (F2, double-click)
 캐릭터가 없어요. [+ 캐릭터]로 만들어요.	キャラクターがいません。[+ キャラクター]で作成します。	No characters yet. Create one with [+ Character].
+글 묶기	文字をリンク	Link text
+글 묶음	文字リンク中	Text linked
+나타날 때	出るとき	On appear
+네 점 변형	4点変形	Corner warp
+진동	振動	Vibrate
+떨리는 횟수	揺れる回数	Shakes
+떨리는 폭 (픽셀)	揺れ幅 (ピクセル)	Amount (pixels)
+방향 (0 모두, 1 가로, 2 세로)	方向 (0 両方、1 横、2 縦)	Direction (0 both, 1 horizontal, 2 vertical)
+잦아드는 정도 (1 끝에서 멈춤, 0 끝까지 같게)	収まり具合 (1 最後に止まる、0 最後まで同じ)	Decay (1 stops at the end, 0 stays the same)
+네 점 변형 지우기	4点変形を消す	Clear corner warp
+플러그인 올려야 함	プラグイン更新が必要	Plugin update needed
+네 점 변형은 게임에서	4点変形はゲームで	Corner warp is set in the game
+효과 없이 바로 나와요	効果なしですぐ出ます	Appears right away with no effect
+글 상자가 나타날 때의 그림 효과예요. 묶었으면 글도 같이 받아요	テキストボックスが出るときの画像効果です。リンクしていれば文字にもかかります	Picture effect when the text box appears. Linked text gets it too
+게임 안 편집 화면(Shift+M)에서 모서리 점을 끌어 정한 네 점 변형이에요	ゲーム内編集画面(Shift+M)で角の点をドラッグして決めた4点変形です	Corner warp set by dragging the corner dots in the in-game editor (Shift+M)
+글이 글 상자 그림에 묶여 있어요. 그림의 크기, 회전, 옮김, 네 점 변형, 그림 효과를 글도 같이 받아요	文字がテキストボックスの画像にリンクされています。画像のサイズ、回転、移動、4点変形、画像効果が文字にもかかります	The text is linked to the text box image. It follows the image's size, rotation, offset, corner warp and picture effect
+글이 그림에 묶여 있어요. 그림의 크기, 회전, 옮김, 네 점 변형, 그림 효과를 글도 같이 받아요. 누르면 풀어요	文字が画像にリンクされています。画像のサイズ、回転、移動、4点変形、画像効果が文字にもかかります。押すと解除します	The text is linked to the image and follows its size, rotation, offset, corner warp and picture effect. Click to unlink
+글을 그림에 묶어요. 지금 그림 값을 기준으로, 그 뒤로 바꾼 크기, 회전, 옮김, 네 점 변형, 그림 효과를 글도 같이 받아요	文字を画像にリンクします。今の画像の値を基準に、その後に変えたサイズ、回転、移動、4点変形、画像効果が文字にもかかります	Link the text to the image. From the current image values on, size, rotation, offset, corner warp and picture effect changes apply to the text too
+게임 안 편집 화면(Shift+M) [그림]에서 모서리 점(분홍 그림, 하늘색 글)을 끌면 네 점 변형이 돼요. 저장하면 여기로 받아 적어요	ゲーム内編集画面(Shift+M)の[画像]で角の点(ピンク 画像、水色 文字)をドラッグすると4点変形になります。保存するとここに取り込みます	In the in-game editor (Shift+M) [Image], drag the corner dots (pink image, light blue text) to warp. Saving brings it here
+게임의 pygaki 플러그인이 예전 판이라 이 값은 내보내지 않아요. 런처의 [플러그인 올리기]로 올려 주세요	ゲームのpygakiプラグインが古いため、この値は書き出しません。ランチャーの [プラグインを更新] で更新してください	The game's pygaki plugin is old, so these values are not exported. Update it with [Update plugins] in the launcher
+게임의 pygaki 플러그인이 예전 판이라 선택지 "${c.text}"의 묶기, 네 점 변형, 그림 효과를 내보내지 않았어요. 런처의 [플러그인 올리기]로 올려 주세요	ゲームのpygakiプラグインが古いため、選択肢「{0}」のリンク、4点変形、画像効果を書き出しませんでした。ランチャーの [プラグインを更新] で更新してください	The game's pygaki plugin is old, so the link, corner warp and picture effect of choice "{0}" were not exported. Update it with [Update plugins] in the launcher
+게임의 pygaki 플러그인이 예전 판이라 글 상자 묶기, 네 점 변형, 그림 효과를 내보내지 않았어요. 런처의 [플러그인 올리기]로 올려 주세요 (${b.title || b.id})	ゲームのpygakiプラグインが古いため、テキストボックスのリンク、4点変形、画像効果を書き出しませんでした。ランチャーの [プラグインを更新] で更新してください ({0})	The game's pygaki plugin is old, so the text box link, corner warp and picture effect were not exported. Update it with [Update plugins] in the launcher ({0})

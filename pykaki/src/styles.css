@@ -987,6 +987,7 @@ fieldset.plain:disabled { opacity: 0.4; }
 }
 .tagbar-box { position: absolute; left: calc(100% + 14px); bottom: calc(100% - 28px); z-index: 6; width: max-content; max-width: 340px; }
 .tagbar-look { margin: 2px 0; }
+.tb-more-wrap { display: flex; flex-direction: column; gap: 5px; }
 .tagbar-look .tb-card { box-shadow: none; }
 .tb-slide { display: inline-flex; align-items: center; gap: 2px; }
 .tagbar input.tb-num { width: 40px; flex: none; font-size: 11px; padding: 1px 3px; text-align: center; font-family: var(--mono); }
@@ -1062,6 +1063,11 @@ canvas.media-bg.natural { width: var(--nat-w, auto); }
 .media-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .media-row .sf-in { flex: 1; min-width: 120px; }
 .media-row .cf-kw { min-width: 64px; }
+/* 글 상자 묶기 (FEATURE 28): 🔗 단추와 캔버스 줄의 체인 표시 */
+.media-link { display: inline-flex; align-items: center; gap: 4px; }
+.media-link.on { background: color-mix(in srgb, #a855f7 18%, transparent); color: color-mix(in srgb, #9333ea 80%, var(--text)); box-shadow: inset 0 0 0 1px color-mix(in srgb, #a855f7 45%, transparent); }
+.media-row .sf-lab { font-size: 11.5px; color: var(--muted); }
+.link-mark { display: inline-flex; align-items: center; color: #a855f7; margin-right: 3px; vertical-align: -1px; }
 .choice-media-thumb { width: 44px; height: 22px; object-fit: cover; border-radius: 4px; border: 1px solid var(--line); flex: none; }
 .textbox .say.sbox-bubble { margin: -17px 0 0 -25px; }
 .textbox .say.sbox-pill { margin: -9px 0 0 -21px; }
@@ -1300,24 +1306,29 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 
 /* 지금 쓰는 줄과 이어진 카드 (대사를 쓰면 대사·글자 효과, 연출 줄이면 그 종류 카드).
    [게임 줄 따라가기: 켬]의 녹색보다 살짝 밝게 */
-/* "사용 중" 카드 (세션 79, 81): 테두리 바깥으로 번지는 흐린 무지개 빛이 카드 둘레를 천천히 계속 돈다.
+/* "사용 중" 카드 (세션 79, 81): 테두리 바깥으로 번지는 흐린 분홍·보라·노랑 빛이 카드 둘레를 천천히 계속 돈다.
    카드 안쪽은 비워 둔다(유리라 비치지 않게). 올리면 진해진다. 애니메이션 줄이기면 멈춘 채 */
 @property --spin { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
 @keyframes in-use-spin { to { --spin: 360deg; } }
 .card.in-use { isolation: isolate; }
 .card.in-use::before {
-  content: ''; position: absolute; inset: -7px; padding: 7px; z-index: -1; border-radius: 21px; pointer-events: none;
-  background: conic-gradient(from var(--spin), #4f9dff, #a855f7, #ec4899, #fb923c, #facc15, #4ade80, #4f9dff);
-  filter: blur(5px); opacity: 0.75;
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  /* 빛 칸을 넓게(16px) 두고 바깥으로 갈수록 마스크가 옅어져 배경에 녹아든다(세션 83 사용자: 경계가 뚜렷함).
+     예전에는 흐린 빛을 마스크가 칸 끝에서 잘라 바깥 경계가 칼같이 보였다. 안쪽(카드 자리)은 그대로 비움 */
+  content: ''; position: absolute; inset: -16px; padding: 16px; z-index: -1; border-radius: 30px; pointer-events: none;
+  /* 색은 분홍·보라·노랑만(세션 83 사용자), 더 옅게, 바깥으로 길게 사라짐 */
+  background: conic-gradient(from var(--spin), #f472b6, #c084fc, #fde047, #f9a8d4, #a78bfa, #fcd34d, #f472b6);
+  filter: blur(6px); opacity: 0.5;
+  --glow-fade: transparent 0, rgb(0 0 0 / 0.03) 3px, rgb(0 0 0 / 0.1) 6px, rgb(0 0 0 / 0.25) 9px, rgb(0 0 0 / 0.5) 12px, rgb(0 0 0 / 0.8) 15px, #000 16px;
+  --glow-fade-r: #000 calc(100% - 16px), rgb(0 0 0 / 0.8) calc(100% - 15px), rgb(0 0 0 / 0.5) calc(100% - 12px), rgb(0 0 0 / 0.25) calc(100% - 9px), rgb(0 0 0 / 0.1) calc(100% - 6px), rgb(0 0 0 / 0.03) calc(100% - 3px), transparent 100%;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(to right, var(--glow-fade), var(--glow-fade-r)), linear-gradient(to bottom, var(--glow-fade), var(--glow-fade-r));
+  -webkit-mask-composite: xor, source-in;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(to right, var(--glow-fade), var(--glow-fade-r)) intersect, linear-gradient(to bottom, var(--glow-fade), var(--glow-fade-r));
   animation: in-use-spin 6s linear infinite;
   transition: opacity var(--dur-pop) var(--ease-out);
 }
-.card.in-use:hover::before { opacity: 1; }
+.card.in-use:hover::before { opacity: 0.75; }
 @media (prefers-reduced-motion: reduce) { .card.in-use::before { animation: none; } }
-:root[data-dark='1'] .card.in-use::before { opacity: 0.8; }
+:root[data-dark='1'] .card.in-use::before { opacity: 0.6; }
 .card.in-use > [data-fluidkit='liquid-card-content'] > h3 .card-title::after { content: var(--t-in-use, '사용 중'); font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 8px; color: #fff; background: #9333ea; box-shadow: 0 1px 4px color-mix(in srgb, #9333ea 45%, transparent); }
 .sc-char { margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed var(--line); }
 .sc-char-h { font-size: 12px; color: var(--muted); margin: 2px 0 6px; }

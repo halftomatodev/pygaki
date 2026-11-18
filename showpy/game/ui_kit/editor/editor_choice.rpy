@@ -15,6 +15,8 @@ init offset = 1
 
 init -8 python in ui_editor:
 
+    import math
+
     class ChoiceTab(Tab):
 
         id = "choice"
@@ -73,7 +75,7 @@ init -8 python in ui_editor:
 
         ## ── 뒤 그림/영상 (4.15): 끌면 media_offset, 휠·A/D 크기 media_zoom, Q/E 회전 media_angle ──
         ## 평소·올렸을 때·확정할 때 그림에 똑같이 씁니다.
-        MEDIA_KEYS = ("media_offset", "media_zoom", "media_angle")
+        MEDIA_KEYS = ("media_offset", "media_zoom", "media_angle", "media_link", "media_quad", "media_text_quad")
 
         def has_media(self, c=None):
             c = c or self._choice()
@@ -156,9 +158,152 @@ init -8 python in ui_editor:
             c = self._choice()
             if c is None:
                 return
-            for k, d in (("media_offset", (0, 0)), ("media_zoom", 1.0), ("media_angle", 0.0)):
+            for k, d in (("media_offset", (0, 0)), ("media_zoom", 1.0), ("media_angle", 0.0),
+                    ("media_link", None), ("media_quad", None), ("media_text_quad", None)):
                 self._put_media(c, k, d, d)
-            msg("뒤 그림 자리, 크기, 회전을 처음으로 돌렸습니다.")
+            msg("뒤 그림 자리, 크기, 회전, 묶기, 네 점 변형을 처음으로 돌렸습니다.")
+
+        ## ── 묶기, 네 점 변형 (4.18): 하나라도 있으면 뒤 그림을 글의 상자로 그려서 글도 같이 받음 ──
+
+        def media_link(self, c=None):
+            c = c or self._choice()
+            if c is None:
+                return None
+            v = self._media_val(c, "media_link", None)
+            try:
+                return store.say_style.link_base(v)
+            except Exception:
+                return None
+
+        def toggle_link(self):
+            c = self._choice()
+            if c is None or not self.has_media(c):
+                return
+            if self.media_link(c) is not None:
+                self._put_media(c, "media_link", None, None)
+                msg("묶음을 풀었습니다. 글은 제자리로 돌아갑니다.")
+            else:
+                ox, oy = self.media_offset(c)
+                a = self.media_angle(c)
+                self._set(c, media_link=(round(self.media_zoom(c), 3), int(a) if a == int(a) else a, ox, oy))
+                msg("글을 뒤 그림에 묶었습니다. 이제 그림의 크기, 회전, 옮김, 네 점 변형을 글도 같이 받습니다.")
+
+        def _quad(self, c, k):
+            v = self._media_val(c, k, None)
+            try:
+                return store.say_style.quad_corners(v)
+            except Exception:
+                return None
+
+        def reset_quads(self):
+            c = self._choice()
+            if c is None:
+                return
+            self._put_media(c, "media_quad", None, None)
+            self._put_media(c, "media_text_quad", None, None)
+            msg("네 점 변형을 처음으로 돌렸습니다.")
+
+        def _geom(self, c):
+            """선택지 뒤 그림의 자리와 글의 화면 왼쪽 위. 상자로 그린 선택지면 그린 값, 아니면 버튼 크기로 짐작."""
+            ss = store.say_style
+            r = self.rects().get(c.number)
+            if r is None:
+                return None, None
+            bx, by, bw, bh = r
+            geom = None
+            w = None
+            try:
+                import renpy.text.text as _rtt
+                btn = store.renpy.get_displayable("choice", "cmenu_btn_%d" % c.number)
+                ## 버튼 안의 선택지 글
+                w = getattr(btn, "child", None)
+                for _n in range(4):
+                    if w is None or isinstance(w, _rtt.Text):
+                        break
+                    w = getattr(w, "child", None)
+                if w is not None and not isinstance(w, _rtt.Text):
+                    w = None
+                geom = ss.GEOM.get(id(w)) if w is not None else None
+            except Exception:
+                geom = None
+            ## 렌파이가 남긴 버튼 영역은 모양(회전, 기울기, 확대, 옮김)을 건 뒤의 자리라 가운데만 씀 (폭은 잘려 있을 때가 있음)
+            center = (bx + bw / 2.0, by + bh / 2.0)
+            pl = self._place(c, None, center)
+            if geom is None:
+                ## 아직 버튼 배경으로 그리는 선택지: 글을 재서 버튼 크기 = 글 + media_padding
+                if self._media_val(c, "media_fit", "text") != "text" or w is None:
+                    return None, None
+                try:
+                    tw, th = store.renpy.render(w, store.config.screen_width, store.config.screen_height, 0, 0).get_size()
+                except Exception:
+                    return None, None
+                pl_, pt, pr, pb = ss._padding(self._media_val(c, "media_padding", (36, 14)))
+                W, H = max(1.0, float(tw)), max(1.0, float(th))
+                z = self.media_zoom(c)
+                mw, mh = (W + pl_ + pr) * z, (H + pt + pb) * z
+                ox, oy = self.media_offset(c)
+                geom = dict(W=W, H=H, rot=0.0, angle=self.media_angle(c), dest=(W / 2.0 + (pr - pl_) / 2.0 + ox, H / 2.0 + (pb - pt) / 2.0 + oy),
+                    tq=None, link=None, size=(mw, mh), rect=(0.0, 0.0, mw, mh), mq=None, Hm=None, g=(0.0, 0.0), pv=(mw / 2.0, mh / 2.0))
+            ## 글 왼쪽 위 (모양을 걸기 전): 글은 버튼 가운데
+            pl["o"] = (center[0] - geom["W"] / 2.0, center[1] - geom["H"] / 2.0)
+            return geom, pl
+
+        def _place(self, c, o, center):
+            """글 기준 자리 → 화면 자리. 버튼 전체에 걸린 모양(cmenu_shape: 회전, 기울기, 확대를 버튼 가운데 기준으로, 옮김)까지.
+            마우스가 버튼 위면 선택됐을 때(hover) 모양. 옮김은 버튼 영역에 이미 들어 있어서 더하지 않습니다."""
+            hov = False
+            try:
+                import renpy.display.focus as _f
+                f = _f.get_focused()
+                hov = (getattr(f, "id", None) or "") == "cmenu_btn_%d" % c.number
+            except Exception:
+                pass
+            if hov:
+                r, sk, z, dx, dy = c.h_rotate, c.h_skew, c.h_zoom, c.h_dx, c.h_dy
+            else:
+                r, sk, z, dx, dy = c.rotate, c.skew, c.zoom, c.idle_dx, c.idle_dy
+            a = math.radians(r)
+            cs, sn = math.cos(a), math.sin(a)
+            t = math.tan(math.radians(max(-80.0, min(80.0, sk))))
+            M = (z * cs, z * (-cs * t - sn), z * sn, z * (cs - sn * t))
+            det = M[0] * M[3] - M[1] * M[2]
+            if abs(det) < 1e-9:
+                M, det = (1.0, 0.0, 0.0, 1.0), 1.0
+            Mi = (M[3] / det, -M[1] / det, -M[2] / det, M[0] / det)
+            return dict(o=o, center=center, M=M, Mi=Mi, off=(0.0, 0.0))
+
+        def _scr(self, pl, p):
+            """글 기준 자리 p → 화면 자리."""
+            x = pl["o"][0] + p[0] - pl["center"][0]
+            y = pl["o"][1] + p[1] - pl["center"][1]
+            M = pl["M"]
+            return (pl["center"][0] + M[0] * x + M[1] * y + pl["off"][0], pl["center"][1] + M[2] * x + M[3] * y + pl["off"][1])
+
+        def _unscr(self, pl, dx, dy):
+            """화면에서 끈 만큼 → 글 기준으로 끈 만큼 (모양을 거꾸로)."""
+            Mi = pl["Mi"]
+            return (Mi[0] * dx + Mi[1] * dy, Mi[2] * dx + Mi[3] * dy)
+
+        def corner_dots(self):
+            c = self._choice()
+            if c is None or not self._media_part(c):
+                return [ ]
+            geom, pl = self._geom(c)
+            if geom is None:
+                return [ ]
+            ss = store.say_style
+            rv = [ self._scr(pl, p) + ("#ff3b8d",) for p in ss.geom_media_corners(geom) ]
+            rv += [ self._scr(pl, p) + ("#3bd6ff",) for p in ss.geom_text_corners(geom) ]
+            return rv
+
+        def _set_quad_corner(self, c, k, i, qx, qy):
+            q = list(self._quad(c, k) or [ 0.0 ] * 8)
+            q[i * 2] = round(max(-2.0, min(2.0, qx)), 4)
+            q[i * 2 + 1] = round(max(-2.0, min(2.0, qy)), 4)
+            if all(abs(n) < 1e-4 for n in q):
+                self._put_media(c, k, None, None)
+            else:
+                self._set(c, **{ k : tuple(q) })
 
         def _all(self):
             ## "모든 선택지 기본값"은 이제 choice_menu_config.rpy에서 고칩니다.
@@ -252,10 +397,14 @@ init -8 python in ui_editor:
             return rv
 
         def focus_rect(self):
-            """고른 선택지의 클릭 영역 (패널이 가리면 비킵니다)."""
+            """고른 선택지의 클릭 영역 (패널이 가리면 비킵니다). 뒤 그림을 고칠 때는 모서리 점을 모두 감싸는 사각형 (4.18)."""
             c = self._choice()
             if c is None:
                 return None
+            if self._media_part(c):
+                r = dots_rect(self.corner_dots())
+                if r is not None:
+                    return r
             return self.rects().get(c.number)
 
         def _under(self):
@@ -330,6 +479,17 @@ init -8 python in ui_editor:
             self._sync_preview()
 
         def drag_begin(self, x, y):
+            ## 고른 선택지의 뒤 그림 모서리 점은 버튼 밖에 있어도 먼저 집음 (4.18)
+            c = self._choice()
+            if c is not None and self._media_part(c):
+                geom, pl = self._geom(c)
+                if geom is not None:
+                    ss = store.say_style
+                    for k, pts in (("media_text_quad", ss.geom_text_corners(geom)), ("media_quad", ss.geom_media_corners(geom))):
+                        for i, p in enumerate(pts):
+                            sx, sy = self._scr(pl, p)
+                            if abs(sx - x) <= 10 and abs(sy - y) <= 10:
+                                return (c.number, ("corner", k, i, p, pl))
             under = self._under()
             if under is not None:
                 self.sel = under
@@ -340,6 +500,15 @@ init -8 python in ui_editor:
             if c is None:
                 return None
             if self._media_part(c):
+                ## 모서리 점 위면 그 모서리만 (네 점 변형, 4.18)
+                geom, pl = self._geom(c)
+                if geom is not None:
+                    ss = store.say_style
+                    for k, pts in (("media_text_quad", ss.geom_text_corners(geom)), ("media_quad", ss.geom_media_corners(geom))):
+                        for i, p in enumerate(pts):
+                            sx, sy = self._scr(pl, p)
+                            if abs(sx - x) <= 10 and abs(sy - y) <= 10:
+                                return (c.number, ("corner", k, i, p, pl))
                 return (c.number, ("media",) + self.media_offset(c))
             st = self._start(c)
             if st is None:
@@ -347,7 +516,23 @@ init -8 python in ui_editor:
             return (c.number, st)
 
         def drag_move(self, token, dx, dy):
-            number, (kind, sx, sy) = token
+            number, t = token
+            if t[0] == "corner":
+                _c, k, i, p, pl = t
+                for c in self.choices():
+                    if c.number == number:
+                        geom, _pl = self._geom(c)
+                        if geom is None:
+                            return
+                        ss = store.say_style
+                        ## 끌기 시작할 때의 버튼 모양으로 거꾸로 (끄는 동안 마우스가 버튼을 드나들어도 흔들리지 않게)
+                        ux, uy = self._unscr(pl, dx, dy)
+                        P = (p[0] + ux, p[1] + uy)
+                        qx, qy = ss.geom_text_q(geom, P, i) if k == "media_text_quad" else ss.geom_media_q(geom, P, i)
+                        self._set_quad_corner(c, k, i, qx, qy)
+                        return
+                return
+            kind, sx, sy = t
             if kind == "media":
                 for c in self.choices():
                     if c.number == number:
@@ -532,6 +717,11 @@ init -8 python in ui_editor:
                 if k == "media_offset":
                     rv["x"] = None if gone else int(v[0])
                     rv["y"] = None if gone else int(v[1])
+                elif k == "media_link":
+                    rv["link"] = None if gone or v is None or v is False else [ round(float(n), 3) for n in store.say_style.link_base(v) ]
+                elif k in ("media_quad", "media_text_quad"):
+                    q = None if gone else store.say_style.quad_corners(v)
+                    rv[k[6:]] = [ round(n, 4) for n in q ] if q else None
                 else:
                     rv[k[6:]] = None if gone else round(float(v), 3)
             return rv
@@ -611,7 +801,8 @@ init -8 python in ui_editor:
                     where, c.rotate, c.skew, c.zoom, c.values.get("size", "-")))
             if self._media_part(c):
                 ox, oy = self.media_offset(c)
-                rv.append("뒤 그림 옮김 x {:+d}   y {:+d}   (선택지 가운데 기준)   크기 {:g}배   회전 {:g}도".format(ox, oy, self.media_zoom(c), self.media_angle(c)))
+                rv.append("뒤 그림 옮김 x {:+d}   y {:+d}   (선택지 가운데 기준)   크기 {:g}배   회전 {:g}도   {}".format(ox, oy, self.media_zoom(c), self.media_angle(c),
+                    "글 묶음" if self.media_link(c) is not None else "글 따로"))
             rv.append("괄호: " + self.line_text(c))
 
             l = self.pending_lines()
@@ -661,6 +852,7 @@ screen ui_editor_choice_overlay():
     $ _lp = cmenu.state.list_pos
     if _lp is not None:
         add Solid("#ffd23b", xysize=(9, 9)) pos (int(_lp[0]), int(_lp[1])) anchor (0.5, 0.5)
+    ## 뒤 그림의 모서리 점 (4.18)은 편집 패널 위에 그림 (editor.rpy ui_editor_main)
 
 
 screen ui_editor_choice_panel(tab):
@@ -672,6 +864,12 @@ screen ui_editor_choice_panel(tab):
             textbutton "선택지" style "ui_editor_button" action Function(tab.set_part, "button") selected (tab.part != "media")
             textbutton "뒤 그림" style "ui_editor_button" action Function(tab.set_part, "media") selected (tab.part == "media")
             textbutton "그림 처음으로" style "ui_editor_button" text_size 13 action Function(tab.reset_media)
+        if tab.part == "media":
+            hbox:
+                spacing 6
+                textbutton ("묶음 풀기" if tab.media_link() is not None else "글과 묶기") style "ui_editor_button" text_size 13 action Function(tab.toggle_link) selected (tab.media_link() is not None)
+                textbutton "네 점 처음으로" style "ui_editor_button" text_size 13 action Function(tab.reset_quads)
+                text "모서리 점(분홍 그림, 하늘색 글)을 끌면 네 점 변형" style "ui_editor_text" size 12 yalign 0.5
 
     use ui_editor_style_row(tab, tab.style_keys())
 
