@@ -2634,3 +2634,53 @@ label 이름	label 名	label name
 플래그를 고르면 그 플래그의 꼴(레벨 인디케이터·스위치·체크박스·라디오·풀다운)과 꾸미기를 그대로 가져와요	フラグを選ぶと、そのフラグの見た目(レベルインジケーター・スイッチ・チェックボックス・ラジオ・プルダウン)と飾りをそのまま取り込みます	Pick a flag to bring in its look (level indicator, switch, checkbox, radio, pull-down) and styling as is
 꼴과 꾸미기는 그 플래그의 것이라, 여기서 고치면 플래그 카드와 이 플래그를 쓰는 다른 화면도 같이 바뀌어요.	見た目と飾りはそのフラグのものなので、ここで変えるとフラグカードとこのフラグを使うほかの画面も変わります。	The look and styling belong to the flag, so changing them here also changes the flag card and other screens that use this flag.
 켜면 플레이어가 꼴로 값을 바꿔요. 이어진 막대는 끌기, 칸 막대·별은 칸 누르기, 스위치·체크박스는 누르기, 라디오는 줄 누르기, 풀다운은 펼쳐서 고르기	オンにするとプレイヤーが見た目で値を変えます。連続バーはドラッグ、セグメントバー・星はマスをクリック、スイッチ・チェックボックスはクリック、ラジオは行をクリック、プルダウンは開いて選択	When on, the player changes the value with the look: drag a continuous bar, click a cell or star, click a switch or checkbox, click a radio row, or open the pull-down and pick
+썸	つまみ	Thumb
+간격	間隔	Gap
+광택	光沢	Gloss
+위험	危険	Danger
+그림만	画像のみ	Image only
+늘이기	伸ばす	Stretch
+칸 수	マス数	Cells
+프레임	フレーム	Frame
+끝 높이	先端の高さ	Tip height
+끝 장식	先端の飾り	Tip
+위험 방향	危険の向き	Danger direction
+채움 방식	塗りの方式	Fill mode
+타일 반복	タイル繰り返し	Tile
+썸 · 켜짐	つまみ · オン	Thumb · on
+칸 · 경고	マス · 警告	Cell · warning
+칸 · 빈칸	マス · 空	Cell · empty
+칸 · 위험	マス · 危険	Cell · danger
+칸 · 채움	マス · 塗り	Cell · filled
+채움 · 경고	塗り · 警告	Fill · warning
+채움 · 위험	塗り · 危険	Fill · danger
+채움 · 정상	塗り · 通常	Fill · normal
+트랙 · 꺼짐	トラック · オフ	Track · off
+트랙 · 켜짐	トラック · オン	Track · on
+프레임 (통)	フレーム (外枠)	Frame (case)
+채움 아래 바닥	塗りの下の土台	The base under the fill
+트랙 (빈 칸)	トラック (空のマス)	Track (empty cell)
+비우면 썸 그대로	空ならつまみのまま	Empty: same as the thumb
+칸형 (별·하트)	マス型 (星・ハート)	Cells (stars, hearts)
+트랙 (빈 막대)	トラック (空のバー)	Track (empty bar)
+자르기 (원본 폭)	切り抜き (元の幅)	Clip (original width)
+채움 끝을 따라다녀요	塗りの端について動きます	Follows the end of the fill
+낮을수록 위험 (HP)	低いほど危険 (HP)	Lower is danger (HP)
+높을수록 위험 (과열)	高いほど危険 (過熱)	Higher is danger (overheat)
+좌우로 움직이는 손잡이	左右に動くつまみ	The knob that slides left and right
+그림·영상 (게임 폴더)	画像・動画 (ゲームフォルダ)	Image or video (game folder)
+맨 위에 덮는 반투명 그림	一番上にかぶせる半透明の画像	A translucent image laid on top
+채움 그림을 어떻게 보일지	塗りの画像の見せ方	How the fill image is shown
+켜지면 서서히 겹쳐 나타나요	オンになると徐々に重なって現れます	Fades in over the off track when on
+칸 사이 간격(px). 비우면 2	マスの間隔(px)。空なら 2	Gap between cells (px). Empty: 2
+끝 장식 높이(px). 비우면 막대 높이	先端の飾りの高さ(px)。空ならバーの高さ	Tip height (px). Empty: the bar height
+프레임 안쪽 여백(px). 비우면 1 (칸 막대는 2)	フレーム内側の余白(px)。空なら 1 (セグメントバーは 2)	Padding inside the frame (px). Empty: 1 (2 for segment bars)
+이 값에 닿으면 경고 채움으로 그려요. 비우면 경고 없음	この値に達すると警告の塗りで描きます。空なら警告なし	At this value the warning fill is used. Empty: no warning
+이 값에 닿으면 위험 채움으로 그려요. 비우면 위험 없음	この値に達すると危険の塗りで描きます。空なら危険なし	At this value the danger fill is used. Empty: no danger
+비우면 정상 채움 그림의 색조만 바꿔요 (그림이 없으면 기본 색)	空なら通常の塗り画像の色相だけ変えます (画像がなければ既定の色)	Empty: shifts the hue of the normal fill image (the default color if there's no image)
+뒤에 깔리는 바깥 틀. 9-slice를 정하면 늘여도 모서리가 그대로예요	後ろに敷く外枠。9-slice を決めると伸ばしても角はそのままです	The outer frame behind. With 9-slice set, the corners stay when stretched
+비우면 최솟값~최댓값만큼(20칸까지). 한 칸이 여러 값이면 칸 안쪽을 잘라 반 칸도 보여요	空なら最小値〜最大値の分(20マスまで)。1マスが複数の値なら内側を切り抜いて半マスも表示します	Empty: one per value from min to max (up to 20). If a cell holds several values, partial cells are shown
+프레임 그림의 모서리 크기(px). 정하면 늘여도 모서리가 그대로예요. 비우면 그림을 통째로 늘여요	フレーム画像の角の大きさ(px)。決めると伸ばしても角はそのまま。空なら画像ごと伸ばします	Corner size of the frame image (px). The corners stay when stretched. Empty: the whole image is stretched
+GIF·투명 webm·PNG 연속 그림을 렌파이가 쓰는 투명 영상으로 바꿔 넣어요 (렌파이는 GIF를 움직이지 못해요)	GIF・透明 webm・PNG 連番を Ren'Py が使う透明動画に変換して入れます (Ren'Py は GIF を動かせません)	Converts a GIF, transparent webm, or PNG sequence into a transparent video Ren'Py can use (Ren'Py can't animate GIFs)
+탐색기에서 그림·영상(PNG, JPG, WebP, WebM 등)을 골라요. 게임 폴더 밖이면 game/images·movies로 복사해요	エクスプローラーで画像・動画(PNG, JPG, WebP, WebM など)を選びます。ゲームフォルダの外なら game/images・movies にコピーします	Pick an image or video (PNG, JPG, WebP, WebM, etc.) in Explorer. Files outside the game folder are copied to game/images or game/movies
+그림·영상을 넣으면 그 부품을 그것으로 그려요(늘여 맞춤). 영상은 반복·소리 없이 돌고, GIF는 🎞로 투명 영상으로 바꿔 넣어요. "그림만" 부품은 비우면 안 그려요	画像・動画を入れるとその部品をそれで描きます(伸ばして合わせる)。動画は繰り返し・無音で再生、GIF は 🎞 で透明動画に変換します。「画像のみ」の部品は空なら描きません	With an image or video, the part is drawn with it (stretched to fit). Videos loop silently; convert GIFs with 🎞. "Image only" parts aren't drawn when empty

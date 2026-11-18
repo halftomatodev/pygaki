@@ -1,19 +1,36 @@
-// 플래그의 꼴 (FEATURE 20, 29): 레벨 인디케이터(이어진 막대, 칸 막대, 별), 스위치, 체크박스, 라디오, 풀다운.
-// 플래그 카드에서는 끌거나 눌러 시험 값을 바꾸고, 용례 메뉴의 견본에서는 저절로 움직인다. 부품마다 색이나 그림(게임 그림)으로 꾸민다
-import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent as RPE } from 'react';
+// 플래그의 꼴 (FEATURE 20, 29): 레벨 인디케이터(이어진 막대, 칸 막대, 칸형), 스위치, 체크박스, 라디오, 풀다운.
+// 플래그 카드에서는 끌거나 눌러 시험 값을 바꾸고, 용례 메뉴의 견본에서는 저절로 움직인다. 부품마다 색이나 그림·영상(게임 폴더)으로 꾸민다.
+// 막대 짜임 (FEATURE 29, HUD 요소 데모): 프레임(9-slice) 안쪽 여백에 트랙 → 채움(정상·경고·위험, 자르기·늘이기·타일) → 끝 장식 → 광택
+import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent as RPE, type ReactNode } from 'react';
 import type { FlagUi } from './types';
-import { cornerOf, partColor, uiMax, uiMin } from './flagUi';
-import { usePic } from './ScreensView';
+import { cornerOf, levelState, partColor, SHIFT_CSS, statePart, uiMax, uiMin } from './flagUi';
+import { useMediaPic } from './ScreensView';
 import type { Val } from './trace';
 
-const PARTS = ['fill', 'track', 'border', 'on', 'off', 'thumb', 'box', 'text', 'mark', 'ring', 'dot'] as const;
+const PARTS = ['fill', 'fillWarn', 'fillCrit', 'track', 'border', 'tip', 'gloss', 'on', 'onWarn', 'onCrit', 'off', 'thumb', 'thumbOn', 'box', 'text', 'mark', 'ring', 'dot'] as const;
+type Pic = { url: string; video: boolean } | null;
 
-// 부품마다 그림 주소 (훅 수가 늘 같게 부품 이름을 다 부름)
+// 부품마다 그림·영상 (훅 수가 늘 같게 부품 이름을 다 부름)
 function useSkin(ui: FlagUi) {
-  const pics: Record<string, string | null> = {};
-  for (const p of PARTS) pics[p] = usePic(ui.skin?.[p]?.image ?? ''); // eslint-disable-line react-hooks/rules-of-hooks
-  const paint = (part: string): CSSProperties => (pics[part] ? { backgroundImage: `url("${pics[part]}")`, backgroundSize: '100% 100%', backgroundColor: 'transparent' } : { background: partColor(ui, part) });
+  const pics: Record<string, Pic> = {};
+  for (const p of PARTS) pics[p] = useMediaPic(ui.skin?.[p]?.image ?? ''); // eslint-disable-line react-hooks/rules-of-hooks
+  const paint = (part: string): CSSProperties => (pics[part] && !pics[part]!.video ? { backgroundImage: `url("${pics[part]!.url}")`, backgroundSize: '100% 100%', backgroundColor: 'transparent' } : { background: partColor(ui, part) });
   return { pics, paint, color: (part: string) => partColor(ui, part) };
+}
+
+// 그림이나 영상 하나 (늘여 맞춤). 영상은 반복·소리 없이
+function Media({ p, className, style }: { p: NonNullable<Pic>; className?: string; style?: CSSProperties }) {
+  return p.video ? <video className={className} style={style} src={p.url} autoPlay loop muted playsInline /> : <img className={className} style={style} src={p.url} alt="" draggable={false} />;
+}
+// 칸을 덮는 부품 한 겹: 그림·영상이면 그것, 아니면 색 (color가 false면 안 그림)
+function Layer({ p, color, className = '', style, children }: { p: Pic; color: string | false; className?: string; style?: CSSProperties; children?: ReactNode }) {
+  if (!p && color === false) return null;
+  return (
+    <span className={'fw-ly ' + className} style={{ ...(!p && color ? { background: color } : null), ...style }}>
+      {p && <Media p={p} />}
+      {children}
+    </span>
+  );
 }
 
 interface Props {
@@ -24,6 +41,7 @@ interface Props {
   label?: string; // 읽어 주는 이름 (플래그 이름)
   marks?: { value: number; label: string; ok: boolean; n?: number }[]; // 숫자 꼴 위의 조건 눈금 (2단계, Steps 꼴)
   onMark?: (i: number, v: number) => void; // 눈금을 끌면 그 조건의 기준 값
+  height?: number; // 숫자 꼴 막대 높이 (px). 화면 탭 무대는 항목 높이, 없으면 카드용 작은 높이
 }
 
 export function FlagWidget(props: Props) {
@@ -35,8 +53,10 @@ export function FlagWidget(props: Props) {
   return <NumberLook {...props} />;
 }
 
-function NumberLook({ ui, value, onChange, label, marks, onMark }: Props) {
-  const { pics, paint, color } = useSkin(ui);
+const cellCount = (ui: FlagUi, steps: number) => Math.max(1, Math.min(Number.isFinite(ui.cells) && ui.cells! > 0 ? Math.round(ui.cells!) : steps, 20));
+
+function NumberLook({ ui, value, onChange, label, marks, onMark, height }: Props) {
+  const { pics, color } = useSkin(ui);
   const ref = useRef<HTMLDivElement>(null);
   const lo = uiMin(ui), hi = uiMax(ui);
   const n = typeof value === 'number' && Number.isFinite(value) ? value : lo;
@@ -44,12 +64,16 @@ function NumberLook({ ui, value, onChange, label, marks, onMark }: Props) {
   const frac = (v - lo) / (hi - lo);
   const steps = hi - lo;
   const set = (x: number) => onChange?.(Math.round(Math.min(hi, Math.max(lo, x))));
+  const st = levelState(ui, v);
+  const cells = ui.style === 'rating';
 
-  // 끌기: 누른 자리와 끄는 자리로 값. 별은 칸마다 한 값
+  // 끌기: 누른 자리와 끄는 자리로 값. 칸형은 칸마다 그 칸까지 찬 값
   const at = (e: { clientX: number }) => {
     const r = ref.current!.getBoundingClientRect();
     const t = Math.min(1, Math.max(0, (e.clientX - r.left) / Math.max(1, r.width)));
-    return ui.look === 'level' && ui.style === 'rating' ? lo + Math.ceil(t * steps) : lo + t * steps;
+    if (!cells) return lo + t * steps;
+    const c = cellCount(ui, steps);
+    return lo + Math.ceil((Math.ceil(t * c) * steps) / c);
   };
   const down = (e: RPE<HTMLDivElement>) => {
     if (!onChange || e.button !== 0) return;
@@ -75,29 +99,90 @@ function NumberLook({ ui, value, onChange, label, marks, onMark }: Props) {
   };
   const aria = { role: 'slider', tabIndex: onChange ? 0 : -1, 'aria-label': label, 'aria-valuemin': lo, 'aria-valuemax': hi, 'aria-valuenow': v, 'aria-readonly': !onChange || undefined };
 
+  // 지금 단계의 채움 (제 것이 없으면 정상 채움 그림의 색조만 바꿈)
+  const fillOf = (base: 'fill' | 'on') => {
+    const sp = statePart(ui, base, st);
+    return { p: pics[sp.part], color: color(sp.part), filter: sp.shift ? SHIFT_CSS[sp.shift] : undefined };
+  };
+
   let body;
-  if (ui.look === 'level' && ui.style === 'rating') {
-    const count = Math.min(steps, 10);
+  if (cells) {
+    // 칸형: 칸마다 빈칸 위에 채움을 그 칸 몫만큼 잘라 덮음 (한 칸이 여러 값이면 반 칸도)
+    const count = cellCount(ui, steps);
     const per = steps / count;
+    const fl = fillOf('on');
+    const h = height ?? 18;
     body = (
-      <div className="fw-stars">
+      <div className="fw-cells" style={{ gap: ui.gap ?? 2, height: h }}>
         {Array.from({ length: count }, (_, i) => {
-          const on = v >= lo + (i + 1) * per;
-          const pic = on ? pics.on : pics.off;
-          return pic ? <img key={i} src={pic} alt="" draggable={false} /> : <span key={i} style={{ color: color(on ? 'on' : 'off') }}>★</span>;
+          const f = Math.min(1, Math.max(0, (v - lo) / per - i));
+          const sym = (c: string) => <span className="fw-sym" style={{ color: c, fontSize: h }}>★</span>;
+          return (
+            <span key={i} className="fw-cell" style={{ width: h }}>
+              {pics.off ? <Layer p={pics.off} color={false} /> : sym(color('off'))}
+              <span className="fw-ly fw-cut" style={{ clipPath: `inset(0 ${(1 - f) * 100}% 0 0)`, filter: fl.filter }}>
+                {fl.p ? <Media p={fl.p} /> : sym(fl.color)}
+              </span>
+            </span>
+          );
         })}
       </div>
     );
   } else {
     const discrete = ui.style === 'discrete';
-    const count = Math.min(steps, 20);
+    const pad = Math.max(0, ui.pad ?? (discrete ? 2 : 1));
+    const h = height ?? (pics.border ? 16 : 12);
+    const fl = fillOf('fill');
+    const bp = pics.border;
+    // 프레임: 9-slice면 border-image (그림만), 아니면 늘인 그림·영상이나 색
+    const frame = bp && !bp.video && ui.slice ? (
+      <span className="fw-ly" style={{ borderStyle: 'solid', borderWidth: ui.slice, borderColor: 'transparent', borderImage: `url("${bp.url}") ${ui.slice} fill / ${ui.slice}px stretch`, boxSizing: 'border-box' }} />
+    ) : (
+      <Layer p={bp} color={color('border')} />
+    );
+    let fill;
+    if (discrete) {
+      const count = Math.min(steps, 20);
+      fill = (
+        <span className="fw-segs">
+          {Array.from({ length: count }, (_, i) => (
+            <span key={i} className="fw-seg">
+              <Layer p={pics.track} color={color('track')} />
+              {(i + 1) / count <= frac + 1e-9 && <Layer p={fl.p} color={fl.color} style={{ filter: fl.filter }} />}
+            </span>
+          ))}
+        </span>
+      );
+    } else {
+      const tile = ui.fit === 'tile' && fl.p && !fl.p.video;
+      const cut: CSSProperties = { clipPath: `inset(0 ${(1 - frac) * 100}% 0 0)`, filter: fl.filter };
+      fill = (
+        <>
+          <Layer p={pics.track} color={color('track')} />
+          {ui.fit === 'stretch' ? (
+            <span className="fw-ly fw-grow" style={{ width: frac * 100 + '%', filter: fl.filter }}>
+              <Layer p={fl.p} color={fl.color} />
+            </span>
+          ) : tile ? (
+            <span className="fw-ly fw-cut" style={{ ...cut, backgroundImage: `url("${fl.p!.url}")`, backgroundRepeat: 'repeat-x', backgroundSize: 'auto 100%' }} />
+          ) : (
+            <Layer p={fl.p} color={fl.color} className="fw-cut" style={cut} />
+          )}
+          {pics.tip && (
+            <span className="fw-tip" style={{ left: frac * 100 + '%', height: ui.tip ?? h }}>
+              <Media p={pics.tip} />
+            </span>
+          )}
+          {pics.gloss && <Layer p={pics.gloss} color={false} />}
+        </>
+      );
+    }
     body = (
-      <div className={'fw-level' + (discrete ? ' discrete' : '')} style={{ ...paint('track'), borderColor: color('border') }}>
-        {discrete ? (
-          Array.from({ length: count }, (_, i) => <span key={i} className="fw-seg" style={(i + 1) / count <= frac + 1e-9 ? paint('fill') : undefined} />)
-        ) : (
-          <span className="fw-fill" style={{ ...paint('fill'), width: frac * 100 + '%' }} />
-        )}
+      <div className={'fw-level' + (discrete ? ' discrete' : '')} style={{ height: h }}>
+        {frame}
+        <span className="fw-in" style={{ inset: pad }}>
+          {fill}
+        </span>
       </div>
     );
   }
@@ -127,7 +212,7 @@ function NumberLook({ ui, value, onChange, label, marks, onMark }: Props) {
           </span>
         ))}
       </div>
-      <span className="fw-val">
+      <span className={'fw-val' + (st ? ' st' + st : '')} title={st === 2 ? '위험' : st === 1 ? '경고' : undefined}>
         {onChange ? <NumInput value={v} lo={lo} hi={hi} label={label} onChange={set} /> : v}
         <small> / {hi}</small>
       </span>
@@ -168,12 +253,19 @@ function NumInput({ value, lo, hi, label, onChange }: { value: number; lo: numbe
   );
 }
 
+// 스위치: 트랙 꺼짐 위에 켜짐이 서서히 겹치고, 썸이 옮겨 가며 켜짐 썸(있으면)으로 바뀜
 function SwitchLook({ ui, value, onChange, label }: Props) {
-  const { pics, paint } = useSkin(ui);
+  const { pics, color } = useSkin(ui);
   const on = value === true;
+  const thumbOn = pics.thumbOn || ui.skin?.thumbOn?.color;
   return (
-    <button type="button" role="switch" aria-checked={on} aria-label={label} className={'fw-switch c-' + cornerOf(ui) + (on ? ' on' : '')} style={paint(on ? 'on' : 'off')} disabled={!onChange} onClick={() => onChange?.(!on)}>
-      {pics.thumb ? <img className="fw-knob img" src={pics.thumb} alt="" draggable={false} /> : <span className="fw-knob" style={paint('thumb')} />}
+    <button type="button" role="switch" aria-checked={on} aria-label={label} className={'fw-switch c-' + cornerOf(ui) + (on ? ' on' : '')} disabled={!onChange} onClick={() => onChange?.(!on)}>
+      <Layer p={pics.off} color={color('off')} className="fw-trk" />
+      <Layer p={pics.on} color={color('on')} className="fw-trk fw-x" />
+      <span className="fw-knob">
+        <Layer p={pics.thumb} color={color('thumb')} className={thumbOn ? 'fw-kx0' : ''} />
+        {thumbOn && <Layer p={pics.thumbOn} color={color('thumbOn')} className="fw-kx" />}
+      </span>
       <span className="fw-sw-text">{on ? '켜짐' : '꺼짐'}</span>
     </button>
   );
@@ -195,13 +287,15 @@ function TextLook({ ui, value, onChange, options = [], label }: Props) {
 
 // 체크박스: 상자(체크되면 "체크된 상자")와 체크 마크. 마크가 그림이 아니면 ✓ 선
 function CheckLook({ ui, value, onChange, label }: Props) {
-  const { pics, paint, color } = useSkin(ui);
+  const { pics, color } = useSkin(ui);
   const on = value === true;
+  const useOn = on && (pics.on || ui.skin?.on?.color || !pics.box); // 상자 그림만 있으면 체크돼도 그 그림
   return (
     <button type="button" role="checkbox" aria-checked={on} aria-label={label} className={'fw-check c-' + cornerOf(ui) + (on ? ' on' : '')} disabled={!onChange} onClick={() => onChange?.(!on)}>
-      <span className="fw-cbox" style={{ ...paint(on && (pics.on || ui.skin?.on?.color || !pics.box) ? 'on' : 'box'), borderColor: on ? 'transparent' : color('border') }}>
+      <span className="fw-cbox" style={{ borderColor: useOn || pics.box ? 'transparent' : color('border') }}>
+        <Layer p={useOn ? pics.on : pics.box} color={color(useOn ? 'on' : 'box')} />
         {pics.mark ? (
-          <img className="fw-cmark" src={pics.mark} alt="" draggable={false} />
+          <Media p={pics.mark} className="fw-cmark" />
         ) : (
           <svg className="fw-cmark" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke={color('mark')} strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
         )}
@@ -213,7 +307,7 @@ function CheckLook({ ui, value, onChange, label }: Props) {
 
 // 라디오: 고를 값마다 링 + 선택 점 + 글. 같은 플래그는 하나만 고름 (방향키로 옮김)
 function RadioLook({ ui, value, onChange, options = [], label }: Props) {
-  const { pics, paint, color } = useSkin(ui);
+  const { pics, color } = useSkin(ui);
   const s = typeof value === 'string' ? value : '';
   const list = options.length ? (options.includes(s) || s === '' ? options : [s, ...options]) : s ? [s] : [];
   const move = (e: KeyboardEvent, i: number) => {
@@ -232,8 +326,9 @@ function RadioLook({ ui, value, onChange, options = [], label }: Props) {
         const ring = on ? 'on' : 'ring';
         return (
           <button key={o} type="button" role="radio" aria-checked={on} tabIndex={on || (!list.includes(s) && i === 0) ? 0 : -1} className={on ? 'on' : ''} disabled={!onChange} onClick={() => onChange?.(o)} onKeyDown={(e) => move(e, i)}>
-            <span className="fw-ring" style={pics[ring] ? paint(ring) : { borderColor: color(ring), background: '#fff' }}>
-              {pics.dot ? <img className="fw-dot" src={pics.dot} alt="" draggable={false} /> : <span className="fw-dot" style={{ background: color('dot') }} />}
+            <span className="fw-ring" style={pics[ring] ? { borderColor: 'transparent' } : { borderColor: color(ring), background: '#fff' }}>
+              {pics[ring] && <Layer p={pics[ring]} color={false} />}
+              {pics.dot ? <Media p={pics.dot} className="fw-dot" /> : <span className="fw-dot" style={{ background: color('dot') }} />}
             </span>
             <span style={ui.skin?.text?.color ? { color: color('text') } : undefined}>{o === '' ? '(빈 글)' : o}</span>
           </button>

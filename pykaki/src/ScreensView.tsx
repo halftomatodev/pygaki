@@ -8,7 +8,8 @@ import { Card } from './Card';
 import { Hint } from './Help';
 import { useStore } from './store';
 import { useLive } from './showpyLive';
-import { pictureOf, useGameFolder } from './gameFolder';
+import { fileUrl, pictureOf, useGameFolder } from './gameFolder';
+import { isMovieFile } from './stage';
 import type { Project, ScreenAct, ScreenDef, ScreenItem, ScreenItemKind } from './types';
 import { uid } from './util';
 import { lookCode, lookSize, actOf, addHudTemplate, ANCHORS, BAR_H, BAR_W, canDrag, DROP_H, DROP_W, hasAct, HUD_H, HUD_TEMPLATES, HUD_W, hudInner, hudPos, hudSize, hudTemplateCode, isDragged, isHud, newScreenName, screenNameProblem, SCREENS_FILE, screensCode, type HudTemplate } from './screens';
@@ -308,6 +309,21 @@ export function usePic(name: string) {
   return url;
 }
 
+// 꼴 부품 (FEATURE 29): 그림 이름 또는 game 기준 파일 경로 (그림·영상). 영상이면 video
+export const isPartPath = (v: string) => /[/\\]|\.[A-Za-z0-9]{2,4}$/.test(v);
+export function useMediaPic(v: string): { url: string; video: boolean } | null {
+  const [pic, setPic] = useState<{ url: string; video: boolean } | null>(null);
+  const seq = useGameFolder((s) => s.fxSeq);
+  useEffect(() => {
+    let live = true;
+    const t = v.trim();
+    if (!t) return setPic(null);
+    (isPartPath(t) ? fileUrl(t.replace(/\\/g, '/')).then((url) => url && { url, video: isMovieFile(t) }) : pictureOf(t)).then((p) => live && setPic(p || null));
+    return () => void (live = false);
+  }, [v, seq]);
+  return pic;
+}
+
 const ACT_TAG: Record<ScreenAct, string> = { return: '값', flag: '⚑', jump: '→', toggle: '⇆' };
 
 function StageItem({ sc, it, scale, on, onMove, vars, hidden }: { sc: ScreenDef; it: ScreenItem; scale: number; on: boolean; onMove?: (id: string, x: number, y: number) => void; vars: Vars; hidden: boolean }) {
@@ -352,7 +368,7 @@ function StageItem({ sc, it, scale, on, onMove, vars, hidden }: { sc: ScreenDef;
     body = f ? (
       <span className="scv-look" style={{ width: w * scale, height: h * scale }}>
         <span style={{ width: w, height: h, transform: `scale(${scale})` }}>
-          <FlagWidget ui={flagUi(f)} value={f.name in vars ? vars[f.name] : (f.init as never)} options={f.kind === 'str' ? strOptions(project, f) : undefined} label={f.name} />
+          <FlagWidget ui={flagUi(f)} value={f.name in vars ? vars[f.name] : (f.init as never)} options={f.kind === 'str' ? strOptions(project, f) : undefined} label={f.name} height={h} />
         </span>
       </span>
     ) : (

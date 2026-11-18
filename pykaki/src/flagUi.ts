@@ -5,20 +5,25 @@ import { evalExpr, applyAction, initVars, UNKNOWN, type Val, type Vars } from '.
 import { condText, exprNames, parseAction, parseCond, type CmpOp } from './flags';
 
 export const LOOK_LABEL: Record<FlagLook, string> = { level: '레벨 인디케이터', switch: '스위치', checkbox: '체크박스', radio: '라디오', pulldown: '풀다운' };
-export const STYLE_LABEL: Record<LevelStyle, string> = { continuous: '이어진 막대', discrete: '칸 막대', rating: '별' };
+export const STYLE_LABEL: Record<LevelStyle, string> = { continuous: '이어진 막대', discrete: '칸 막대', rating: '칸형 (별·하트)' };
 // 모서리 (FEATURE 23): 없으면 둥글게 (앱 꼴의 처음 모양). 렌파이 원고도 같은 모서리로 (그림 부품은 그림 그대로)
 export const CORNER_LABEL: Record<'round' | FlagCorner, string> = { round: '둥글게', square: '각지게', pill: '알약' };
 export const cornerOf = (u: FlagUi): 'round' | FlagCorner => u.corner ?? 'round';
 export const looksFor = (k: Flag['kind']): FlagLook[] => (k === 'int' ? ['level'] : k === 'bool' ? ['switch', 'checkbox'] : ['radio', 'pulldown']);
 
-// 꾸밀 부품: [이름, 한국어 이름, 기본 색]. 그림을 넣으면 그 부품을 그림으로 그림
-export type PartDef = [part: string, label: string, color: string];
+// 꾸밀 부품: [이름, 한국어 이름, 기본 색, 도움말]. 그림·영상을 넣으면 그 부품을 그것으로 그림. 기본 색이 ''이면 그림만 (비우면 안 그림)
+export type PartDef = [part: string, label: string, color: string, hint?: string];
+const SHIFT_HINT = '비우면 정상 채움 그림의 색조만 바꿔요 (그림이 없으면 기본 색)';
 export function skinParts(ui: FlagUi): PartDef[] {
-  if (ui.look === 'level')
-    return ui.style === 'rating'
-      ? [['on', '찬 기호', '#f5b301'], ['off', '빈 기호', '#c9c4b8']]
-      : [['fill', '채움', '#e0607a'], ['track', '바탕', '#8080804d'], ['border', '테두리', '#80808080']];
-  if (ui.look === 'switch') return [['on', '켜짐 바탕', '#34c759'], ['off', '꺼짐 바탕', '#80808066'], ['thumb', '손잡이', '#ffffff']];
+  if (ui.look === 'level') {
+    if (ui.style === 'rating')
+      return [['on', '칸 · 채움', '#f5b301'], ['off', '칸 · 빈칸', '#c9c4b8'], ['onWarn', '칸 · 경고', '#f59e0b', SHIFT_HINT], ['onCrit', '칸 · 위험', '#dc2626', SHIFT_HINT]];
+    const fills: PartDef[] = [['fill', '채움 · 정상', '#e0607a'], ['fillWarn', '채움 · 경고', '#f59e0b', SHIFT_HINT], ['fillCrit', '채움 · 위험', '#dc2626', SHIFT_HINT]];
+    if (ui.style === 'discrete') return [['border', '프레임', '#80808080'], ['track', '트랙 (빈 칸)', '#8080804d'], ...fills];
+    return [['border', '프레임 (통)', '#80808080', '뒤에 깔리는 바깥 틀. 9-slice를 정하면 늘여도 모서리가 그대로예요'], ['track', '트랙 (빈 막대)', '#8080804d', '채움 아래 바닥'], ...fills,
+      ['tip', '끝 장식', '', '채움 끝을 따라다녀요'], ['gloss', '광택', '', '맨 위에 덮는 반투명 그림']];
+  }
+  if (ui.look === 'switch') return [['off', '트랙 · 꺼짐', '#80808066'], ['on', '트랙 · 켜짐', '#34c759', '켜지면 서서히 겹쳐 나타나요'], ['thumb', '썸', '#ffffff', '좌우로 움직이는 손잡이'], ['thumbOn', '썸 · 켜짐', '', '비우면 썸 그대로']];
   if (ui.look === 'checkbox') return [['box', '상자', '#ffffff'], ['on', '체크된 상자', '#4f46e5'], ['mark', '체크 마크', '#ffffff'], ['border', '테두리', '#94a3b8']];
   if (ui.look === 'radio') return [['ring', '링', '#94a3b8'], ['on', '고른 링', '#4f46e5'], ['dot', '선택 점', '#4f46e5'], ['text', '글자 (게임)', '#ffffff']];
   return [['box', '바탕', '#ffffff'], ['text', '글자', '#1f2328'], ['border', '테두리', '#80808080']];
@@ -34,6 +39,22 @@ export function flagUi(f: Pick<Flag, 'kind' | 'ui'>): FlagUi {
 export const uiMin = (u: FlagUi) => (Number.isFinite(u.min) ? u.min! : 0);
 export const uiMax = (u: FlagUi) => Math.max(uiMin(u) + 1, Number.isFinite(u.max) ? u.max! : 10);
 export const partColor = (u: FlagUi, part: string) => u.skin?.[part]?.color || skinParts(u).find((p) => p[0] === part)?.[2] || '#888888';
+export const partImage = (u: FlagUi, part: string) => u.skin?.[part]?.image?.trim() || '';
+
+// 경고·위험 (FEATURE 29): 0 정상, 1 경고, 2 위험. 임계를 안 정했으면 그 단계 없음
+export function levelState(u: FlagUi, v: number): 0 | 1 | 2 {
+  const hi = u.dir === 'high';
+  const past = (t?: number) => t !== undefined && (hi ? v >= t : v <= t);
+  return past(u.crit) ? 2 : past(u.warn) ? 1 : 0;
+}
+// 그 단계의 채움 부품: 제 것(색이나 그림)이 있으면 그것, 없고 정상 채움이 그림이면 그 그림의 색조만 바꿈(shift), 아니면 기본 색
+export const STATE_PART = { fill: ['fill', 'fillWarn', 'fillCrit'], on: ['on', 'onWarn', 'onCrit'] } as const;
+export function statePart(u: FlagUi, base: 'fill' | 'on', s: 0 | 1 | 2): { part: string; shift: 0 | 1 | 2 } {
+  const k = STATE_PART[base][s];
+  if (s === 0 || u.skin?.[k]?.color || partImage(u, k)) return { part: k, shift: 0 };
+  return partImage(u, base) ? { part: base, shift: s } : { part: k, shift: 0 };
+}
+export const SHIFT_CSS = ['none', 'hue-rotate(45deg) saturate(1.3)', 'hue-rotate(-35deg) saturate(1.8) brightness(.9)'];
 
 // 불러온 값 정리 (normalizeFlags에서)
 export function normalizeUi(raw: unknown): FlagUi | undefined {
@@ -47,6 +68,9 @@ export function normalizeUi(raw: unknown): FlagUi | undefined {
   if (typeof r.min === 'number' && Number.isFinite(r.min)) u.min = r.min;
   if (typeof r.max === 'number' && Number.isFinite(r.max)) u.max = r.max;
   if (r.corner === 'square' || r.corner === 'pill') u.corner = r.corner;
+  for (const k of ['warn', 'crit', 'slice', 'pad', 'tip', 'cells', 'gap'] as const) if (typeof r[k] === 'number' && Number.isFinite(r[k])) u[k] = r[k] as number;
+  if (r.dir === 'high') u.dir = 'high';
+  if (r.fit === 'stretch' || r.fit === 'tile') u.fit = r.fit;
   if (Array.isArray(r.options)) u.options = r.options.filter((x): x is string => typeof x === 'string');
   if (r.skin && typeof r.skin === 'object') {
     const s: FlagUi['skin'] = {};

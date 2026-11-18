@@ -1740,20 +1740,35 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .fw-area:focus-visible { box-shadow: 0 0 0 2px var(--accent-soft); border-radius: 6px; }
 .fw-val { font: 600 12px var(--mono); min-width: 40px; white-space: nowrap; }
 .fw-val small { font-weight: 400; color: var(--muted); }
-.fw-level { position: relative; height: 12px; border: 1px solid; border-radius: 3px; overflow: hidden; box-sizing: border-box; }
-.fw-level .fw-fill { position: absolute; inset: 0 auto 0 0; transition: width .18s ease-out; }
-.fw-level.discrete { display: flex; gap: 2px; padding: 1px; }
-.fw-level.discrete .fw-seg { flex: 1; border-radius: 1px; background: transparent; transition: background .15s; }
-.fw-stars { display: flex; width: 100%; font-size: 17px; line-height: 1; }
-.fw-stars > * { flex: 1 1 0; min-width: 0; text-align: center; }
-.fw-stars img { height: 18px; object-fit: contain; }
-.fw-num.live .fw-area:active .fw-fill { transition: none; }
+.fw-level { position: relative; height: 12px; border-radius: 3px; box-sizing: border-box; }
+/* 꼴 부품 한 겹 (FEATURE 29): 색이나 늘인 그림·영상 */
+.fw-ly { position: absolute; inset: 0; display: block; border-radius: inherit; overflow: hidden; pointer-events: none; }
+.fw-ly > img, .fw-ly > video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; display: block; }
+.fw-in { position: absolute; border-radius: inherit; }
+.fw-cut { transition: clip-path .18s ease-out, filter .18s; }
+.fw-grow { right: auto; transition: width .18s ease-out; }
+.fw-grow > .fw-ly { border-radius: 0; }
+.fw-tip { position: absolute; top: 50%; transform: translate(-50%, -50%); transition: left .18s ease-out; pointer-events: none; }
+.fw-tip > img, .fw-tip > video { height: 100%; width: auto; display: block; }
+.fw-segs { position: absolute; inset: 0; display: flex; gap: 2px; }
+.fw-seg { position: relative; flex: 1; border-radius: 1px; overflow: hidden; }
+.fw-cells { display: flex; width: 100%; }
+.fw-cell { position: relative; flex: none; height: 100%; }
+.fw-sym { position: absolute; inset: 0; display: grid; place-items: center; line-height: 1; }
+.fw-val.st1 { color: #d97706; }
+.fw-val.st2 { color: #dc2626; }
+.fw-num.live .fw-area:active :is(.fw-cut, .fw-grow, .fw-tip) { transition: none; }
 .fw-mark { position: absolute; top: -9px; transform: translateX(-50%); font-size: 9px; line-height: 1; color: var(--muted); pointer-events: auto; }
 .fw-mark.ok { color: #22a55b; font-weight: 700; }
-.fw-switch { display: inline-flex; align-items: center; gap: 6px; position: relative; width: 40px; height: 22px; padding: 0; border: 0; border-radius: 11px; cursor: pointer; transition: background .2s; flex: none; }
+.fw-switch { display: inline-flex; align-items: center; gap: 6px; position: relative; width: 40px; height: 22px; padding: 0; border: 0; border-radius: 11px; cursor: pointer; flex: none; background: none; }
+.fw-switch .fw-x { opacity: 0; transition: opacity .2s; }
+.fw-switch.on .fw-x { opacity: 1; }
 .fw-switch:disabled { cursor: default; opacity: 1; }
 .fw-switch .fw-knob { position: absolute; left: 2px; top: 2px; width: 18px; height: 18px; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: left .2s; }
-.fw-switch .fw-knob.img { object-fit: contain; box-shadow: none; border-radius: 0; }
+.fw-switch .fw-knob:has(img, video) { box-shadow: none; }
+.fw-switch .fw-kx { opacity: 0; transition: opacity .2s; }
+.fw-switch.on .fw-kx { opacity: 1; }
+.fw-switch.on .fw-kx0 { opacity: 0; transition: opacity .2s; }
 .fw-switch.on .fw-knob { left: 20px; }
 .fw-switch .fw-sw-text { position: absolute; left: 46px; font-size: 11.5px; color: var(--text); white-space: nowrap; }
 .fw-switch:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -1761,7 +1776,9 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 /* 체크박스·라디오 (FEATURE 29) */
 .fw-check { display: inline-flex; align-items: center; gap: 6px; padding: 0; border: 0; background: none; cursor: pointer; flex: none; color: var(--text); }
 .fw-check:disabled { cursor: default; opacity: 1; }
-.fw-check .fw-cbox { position: relative; width: 20px; height: 20px; border: 2px solid; border-radius: 5px; box-sizing: border-box; display: grid; place-items: center; transition: background .15s, border-color .15s; }
+.fw-check .fw-cbox { position: relative; width: 20px; height: 20px; border: 2px solid; border-radius: 5px; box-sizing: border-box; display: grid; place-items: center; transition: border-color .15s; }
+.fw-check .fw-cbox > .fw-ly { inset: -2px; }
+.fw-check .fw-cmark { position: relative; }
 .fw-check .fw-cmark { width: 16px; height: 16px; object-fit: contain; opacity: 0; transform: scale(.4); transition: opacity .15s, transform .15s var(--ease-out, ease-out); }
 .fw-check.on .fw-cmark { opacity: 1; transform: none; }
 .fw-check .fw-sw-text { font-size: 11.5px; white-space: nowrap; }
@@ -1771,7 +1788,8 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .fw-radio > button:disabled { cursor: default; opacity: 1; }
 .fw-radio > button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
 .fw-radio .fw-ring { position: relative; width: 16px; height: 16px; border: 2px solid; border-radius: 50%; box-sizing: border-box; background-size: 100% 100%; display: grid; place-items: center; }
-.fw-radio .fw-dot { width: 8px; height: 8px; border-radius: 50%; object-fit: contain; opacity: 0; transform: scale(.4); transition: opacity .15s, transform .15s var(--ease-out, ease-out); }
+.fw-radio .fw-ring > .fw-ly { inset: -2px; border-radius: 50%; }
+.fw-radio .fw-dot { position: relative; width: 8px; height: 8px; border-radius: 50%; object-fit: contain; opacity: 0; transform: scale(.4); transition: opacity .15s, transform .15s var(--ease-out, ease-out); }
 .fw-radio img.fw-dot { width: 12px; height: 12px; border-radius: 0; }
 .fw-radio .on .fw-dot { opacity: 1; transform: none; }
 .fw-radio-empty { font-size: 11.5px; color: var(--muted); }
@@ -1807,7 +1825,10 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .flook-chips .chip .x { min-width: 22px; min-height: 20px; padding: 0; border: 0; background: transparent; }
 .flook-chips .chip.add { padding: 1px 8px; border: 1px dashed var(--line); background: transparent; color: var(--muted); }
 .flook-part { display: flex; align-items: center; gap: 4px; }
-.flook-plabel { flex: 0 0 64px; font-size: 11.5px; }
+.flook-plabel { flex: 0 0 84px; font-size: 11.5px; }
+.flook-hint { font-style: normal; color: var(--muted); font-size: 10px; margin-left: 2px; cursor: help; }
+.flook-noc { flex: 0 0 112px; font-size: 11px; color: var(--muted); }
+.flook-row select { font-size: 12px; }
 .flook-part input[type=color] { width: 26px; height: 22px; padding: 0 1px; flex: none; }
 .flook-hex { width: 82px; font-family: var(--mono); font-size: 11px; flex: none; }
 .flook-img { flex: 1; min-width: 0; font-size: 11.5px; }

@@ -6,6 +6,9 @@ import type { Flag, FlagLook, FlagUi, LevelStyle } from './types';
 import { FlagWidget } from './FlagWidget';
 import { CORNER_LABEL, cornerOf, flagEffects, flagMarks, setMarkValue, flagUi, LOOK_LABEL, looksFor, skinParts, STYLE_LABEL, strOptions, testValue, testVars, uiMax, uiMin, useFlagTest } from './flagUi';
 import { useGameFolder } from './gameFolder';
+import { desktop } from './desktop';
+import { pickMediaFile } from './MediaField';
+import { openMaskDialog } from './MaskVideoDialog';
 import type { Val } from './trace';
 
 export function FlagLookRow({ f }: { f: Flag }) {
@@ -193,9 +196,9 @@ export function LookPop({ f, anchor, onClose }: { f: Flag; anchor: HTMLElement; 
           <label>
             최댓값 <input type="number" value={uiMax(ui)} onChange={(e) => set((u) => void (u.max = Math.round(Number(e.target.value) || 0)), key + 'max')} />
           </label>
-          {ui.look === 'level' && ui.style === 'rating' && uiMax(ui) - uiMin(ui) > 10 && <span className="tip">별은 10개까지 (한 별이 여러 값)</span>}
         </div>
       )}
+      {ui.look === 'level' && <LevelKnobs ui={ui} set={set} k={key} />}
       {f.kind === 'str' && (
         <div className="flook-opts">
           <span className="flook-sub">고를 값</span>
@@ -215,7 +218,7 @@ export function LookPop({ f, anchor, onClose }: { f: Flag; anchor: HTMLElement; 
       )}
       <div className="flook-skin">
         <span className="flook-sub">꾸미기</span>
-        {skinParts(ui).map(([part, label, def]) => {
+        {skinParts(ui).map(([part, label, def, hint]) => {
           const s = ui.skin?.[part] ?? {};
           const color = s.color || def;
           const putPart = (fn: (x: { color?: string; image?: string }) => void, k?: string) =>
@@ -230,10 +233,22 @@ export function LookPop({ f, anchor, onClose }: { f: Flag; anchor: HTMLElement; 
             }, k);
           return (
             <div key={part} className="flook-part">
-              <span className="flook-plabel">{label}</span>
-              <input type="color" aria-label={`${label} 색`} value={color.slice(0, 7)} onChange={(e) => putPart((x) => void (x.color = e.target.value + color.slice(7)), key + part + 'c')} />
-              <input className="flook-hex" aria-label={`${label} 색 (#rrggbbaa)`} value={color} spellCheck={false} onChange={(e) => /^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/.test(e.target.value) && putPart((x) => void (x.color = e.target.value), key + part + 'h')} />
-              <input className="flook-img" aria-label={`${label} 그림`} value={s.image ?? ''} placeholder="그림 (게임 폴더)" list="flook-images" spellCheck={false} onChange={(e) => putPart((x) => void (x.image = e.target.value.trim()), key + part + 'i')} />
+              <span className="flook-plabel" title={hint}>{label}{hint && <i className="flook-hint" aria-hidden>ⓘ</i>}</span>
+              {def ? (
+                <>
+                  <input type="color" aria-label={`${label} 색`} value={color.slice(0, 7)} onChange={(e) => putPart((x) => void (x.color = e.target.value + color.slice(7)), key + part + 'c')} />
+                  <input className="flook-hex" aria-label={`${label} 색 (#rrggbbaa)`} value={color} spellCheck={false} onChange={(e) => /^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/.test(e.target.value) && putPart((x) => void (x.color = e.target.value), key + part + 'h')} />
+                </>
+              ) : (
+                <span className="flook-noc">그림만</span>
+              )}
+              <input className="flook-img" aria-label={`${label} 그림`} value={s.image ?? ''} placeholder="그림·영상 (게임 폴더)" list="flook-images" spellCheck={false} onChange={(e) => putPart((x) => void (x.image = e.target.value.trim()), key + part + 'i')} />
+              {desktop?.pickFile && (
+                <button className="x" title="탐색기에서 그림·영상(PNG, JPG, WebP, WebM 등)을 골라요. 게임 폴더 밖이면 game/images·movies로 복사해요" onClick={() => void pickMediaFile().then((rel) => rel && putPart((x) => void (x.image = rel)))}>📂</button>
+              )}
+              {desktop?.pickMaskSource && (
+                <button className="x" title="GIF·투명 webm·PNG 연속 그림을 렌파이가 쓰는 투명 영상으로 바꿔 넣어요 (렌파이는 GIF를 움직이지 못해요)" onClick={() => openMaskDialog((rel) => putPart((x) => void (x.image = rel)))}>🎞</button>
+              )}
               {(s.color || s.image) && <button className="x" title="기본으로" onClick={() => putPart((x) => void (delete x.color, delete x.image))}>↺</button>}
             </div>
           );
@@ -243,9 +258,53 @@ export function LookPop({ f, anchor, onClose }: { f: Flag; anchor: HTMLElement; 
             <option key={n} value={n} />
           ))}
         </datalist>
-        <span className="tip">그림을 넣으면 그 부품을 그림으로 그려요(늘여 맞춤). 그림은 연결한 게임 폴더에서 찾아요</span>
+        <span className="tip">그림·영상을 넣으면 그 부품을 그것으로 그려요(늘여 맞춤). 영상은 반복·소리 없이 돌고, GIF는 🎞로 투명 영상으로 바꿔 넣어요. "그림만" 부품은 비우면 안 그려요</span>
       </div>
     </div>,
     document.body,
+  );
+}
+
+// 레벨 인디케이터 세부 (FEATURE 29): 경고·위험 임계와 방향, 막대의 프레임 9-slice·여백·채움 방식·끝 장식 높이, 칸형의 칸 수·간격
+function LevelKnobs({ ui, set, k }: { ui: FlagUi; set: (fn: (u: FlagUi) => void, k?: string) => void; k: string }) {
+  const num = (field: 'warn' | 'crit' | 'slice' | 'pad' | 'tip' | 'cells' | 'gap', label: string, title: string, min = 0) => (
+    <label title={title}>
+      {label}{' '}
+      <input type="number" min={min} value={ui[field] ?? ''} placeholder="-" onChange={(e) => set((u) => void (e.target.value.trim() === '' ? delete u[field] : (u[field] = Math.max(min, Math.round(Number(e.target.value) || 0)))), k + field)} />
+    </label>
+  );
+  const bar = ui.style !== 'rating';
+  return (
+    <>
+      <div className="flook-row">
+        {num('warn', '경고', '이 값에 닿으면 경고 채움으로 그려요. 비우면 경고 없음', -9999)}
+        {num('crit', '위험', '이 값에 닿으면 위험 채움으로 그려요. 비우면 위험 없음', -9999)}
+        <select aria-label="위험 방향" value={ui.dir ?? 'low'} onChange={(e) => set((u) => void (e.target.value === 'high' ? (u.dir = 'high') : delete u.dir))}>
+          <option value="low">낮을수록 위험 (HP)</option>
+          <option value="high">높을수록 위험 (과열)</option>
+        </select>
+      </div>
+      {bar ? (
+        <div className="flook-row">
+          {num('slice', '9-slice', '프레임 그림의 모서리 크기(px). 정하면 늘여도 모서리가 그대로예요. 비우면 그림을 통째로 늘여요')}
+          {num('pad', '여백', '프레임 안쪽 여백(px). 비우면 1 (칸 막대는 2)')}
+          {ui.style !== 'discrete' && (
+            <>
+              <select aria-label="채움 방식" title="채움 그림을 어떻게 보일지" value={ui.fit ?? 'clip'} onChange={(e) => set((u) => void (e.target.value === 'clip' ? delete u.fit : (u.fit = e.target.value as 'stretch' | 'tile')))}>
+                <option value="clip">자르기 (원본 폭)</option>
+                <option value="stretch">늘이기</option>
+                <option value="tile">타일 반복</option>
+              </select>
+              {num('tip', '끝 높이', '끝 장식 높이(px). 비우면 막대 높이')}
+            </>
+          )}
+        </div>
+      ) : (
+        <div className="flook-row">
+          {num('cells', '칸 수', '비우면 최솟값~최댓값만큼(20칸까지). 한 칸이 여러 값이면 칸 안쪽을 잘라 반 칸도 보여요', 1)}
+          {num('gap', '간격', '칸 사이 간격(px). 비우면 2')}
+        </div>
+      )}
+    </>
   );
 }

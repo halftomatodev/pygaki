@@ -3,7 +3,8 @@ import type { BoxNode, Flag, Project, ScreenAnchor, ScreenDef, ScreenItem } from
 import { addFixup } from './store';
 import { IDENT, RESERVED, uid } from './util';
 import { parseAction } from './flags';
-import { cornerOf, flagUi, partColor, strOptions, uiMax, uiMin } from './flagUi';
+import { cornerOf, flagUi, partColor, partImage, statePart, strOptions, uiMax, uiMin } from './flagUi';
+import { isMaskName, isMovieFile } from './stage';
 
 // HUD (FEATURE 18): 대사가 흐르는 동안 떠 있는 화면. 없으면 전체 화면 (call screen)
 export const isHud = (s?: ScreenDef | null) => s?.kind === 'hud';
@@ -165,6 +166,13 @@ const isColor = (s?: string) => !!s && /^#[0-9a-f]{3,8}$/i.test(s);
 
 // 그림 이름 칸: "bg room" 같은 렌파이 그림 이름, 또는 game 기준 파일 경로(images/x.png)
 const imgRef = (s: string) => py(s.trim());
+// 꼴 부품 그림·영상 (FEATURE 29): 그림 이름이나 game 기준 파일 경로. 영상은 Movie(반복, 소리 없음. mask_ 이름은 투명 영상 side_mask)로.
+// pw가 'None'이고 aspect면 높이만 맞추고 비율은 그대로 (끝 장식)
+function mediaCode(v: string, pw: number | string, ph: number | string, aspect = false): string {
+  const t = v.trim().replace(/\\/g, '/');
+  const d = isMovieFile(t) ? `Movie(play=${py(t)}, loop=True${isMaskName(t) ? ', side_mask=True' : ''})` : py(t);
+  return aspect ? `Transform(${d}, ysize=${ph}, fit="contain")` : `Transform(${d}, xysize=(${pw}, ${ph}))`;
+}
 
 // 상자 id → 렌파이 label 이름 (label 첫 상자는 label 이름, 나머지는 label.상자)
 export function boxRef(p: Project, id: string | null | undefined): string | null {
@@ -258,10 +266,30 @@ export function lookCode(p: Project, it: ScreenItem): string[] {
   const rad = (ph: number) => (cn === 'square' ? 0 : cn === 'pill' ? ph / 2 : Math.min(ph / 4, 8));
   const pillR = (ph: number) => (cn === 'square' ? 0 : ph / 2); // 슬라이더 트랙·스위치는 둥글게도 알약 (앱 꼴과 같게)
   const roundOf = (d: string, r: number) => (r > 0.5 ? `_pk_round(${d}, ${+r.toFixed(1)})` : d);
-  // 부품: 그림이 있으면 그림(늘여 맞춤), 없으면 색
+  // 부품: 그림·영상이 있으면 그것(늘여 맞춤), 없으면 색
   const part = (k: string, pw: number | string, ph: number | string, r = 0) => {
-    const img = u.skin?.[k]?.image?.trim();
-    return img ? `Transform(${imgRef(img)}, xysize=(${pw}, ${ph}))` : roundOf(`Solid(${py(partColor(u, k))}, xysize=(${pw}, ${ph}))`, r);
+    const img = partImage(u, k);
+    return img ? mediaCode(img, pw, ph) : roundOf(`Solid(${py(partColor(u, k))}, xysize=(${pw}, ${ph}))`, r);
+  };
+  // 경고·위험 (FEATURE 29): 단계마다 채움 부품. 제 것이 없고 정상 채움이 그림이면 그 그림의 색조만 바꿈 (앱 SHIFT_CSS와 비슷하게)
+  const SHIFT = ['', 'HueMatrix(45) * SaturationMatrix(1.3)', 'HueMatrix(-35) * SaturationMatrix(1.8) * BrightnessMatrix(-0.1)'];
+  const stateCode = (base: 'fill' | 'on', pw: number | string, ph: number | string, r = 0, zero?: string) => {
+    const one = (s: 0 | 1 | 2) => {
+      const sp = statePart(u, base, s);
+      const d = zero && sp.part === base ? zero : part(sp.part, pw, ph, r);
+      return sp.shift ? `Transform(${d}, matrixcolor=${SHIFT[sp.shift]})` : d;
+    };
+    const cmp = u.dir === 'high' ? '>=' : '<=';
+    const c = (t?: number) => (t === undefined ? '' : `${n} ${cmp} ${t}`);
+    let out = one(0);
+    if (u.warn !== undefined) out = `(${one(1)} if ${c(u.warn)} else ${out})`;
+    if (u.crit !== undefined) out = `(${one(2)} if ${c(u.crit)} else ${out})`;
+    return out;
+  };
+  // 프레임: 그림이면 9-slice(Frame) 또는 늘인 그림·영상, 아니면 둥근 색
+  const frameCode = (pw: number, ph: number) => {
+    const img = partImage(u, 'border');
+    return img && u.slice && !isMovieFile(img) ? `Transform(Frame(${imgRef(img)}, ${u.slice}, ${u.slice}), xysize=(${pw}, ${ph}))` : part('border', pw, ph, rad(ph));
   };
   // 올리거나 키보드로 고르면(렌파이는 둘 다 hover) 살짝 밝게. 모서리도 맞춤
   const LIT = '"#ffffff30"';
@@ -276,35 +304,70 @@ export function lookCode(p: Project, it: ScreenItem): string[] {
     return `SetVariable(${py(n)}, (${lo} if i == 0 and ${n} == ${t} else ${t}))`;
   };
   if (f.kind === 'int' && u.look === 'level' && u.style === 'rating') {
-    const count = Math.min(hi - lo, 10), per = (hi - lo) / count;
-    const on = u.skin?.on?.image?.trim(), off = u.skin?.off?.image?.trim();
-    const I2 = edit ? I + I + I : I + I;
-    const sym = on && off ? [`${I2}add (${imgRef(on)} if ${n} - ${lo} >= (i + 1) * ${per} else ${imgRef(off)}):`, `${I2}${I}fit "contain"`, `${I2}${I}xysize (${h}, ${h})`]
-      : [`${I2}text "★" font "DejaVuSans.ttf" size ${h} color (${py(partColor(u, 'on'))} if ${n} - ${lo} >= (i + 1) * ${per} else ${py(partColor(u, 'off'))})`];
-    return ['hbox:', `${I}xysize (${w}, ${h})`, `${I}spacing 2`, `${I}for i in range(${count}):`, ...(edit ? press(I + I, stepSet(count)) : []), ...sym];
+    // 칸형 (FEATURE 29): 칸마다 빈칸 위에 채움을 그 칸 몫만큼 잘라 덮음 (한 칸이 여러 값이면 반 칸도). 그림이 없으면 ★ (DejaVuSans)
+    const count = Math.max(1, Math.min(u.cells && u.cells > 0 ? Math.round(u.cells) : hi - lo, 20)), per = (hi - lo) / count;
+    const gap = Math.max(0, u.gap ?? 2);
+    const cw = Math.max(4, Math.min(h, Math.floor((w - gap * (count - 1)) / count)));
+    const sym = (k: string) => `Text("★", font="DejaVuSans.ttf", size=${h}, color=${py(partColor(u, k))}, align=(0.5, 0.5))`;
+    const off = partImage(u, 'off') ? part('off', cw, h) : `Fixed(${sym('off')}, xysize=(${cw}, ${h}))`;
+    const one = (s: 0 | 1 | 2) => {
+      const sp = statePart(u, 'on', s);
+      const d = partImage(u, sp.part) ? part(sp.part, cw, h) : `Fixed(${sym(sp.part)}, xysize=(${cw}, ${h}))`;
+      return sp.shift ? `Transform(${d}, matrixcolor=${SHIFT[sp.shift]})` : d;
+    };
+    const cmp = u.dir === 'high' ? '>=' : '<=';
+    let on = one(0);
+    if (u.warn !== undefined) on = `(${one(1)} if ${n} ${cmp} ${u.warn} else ${on})`;
+    if (u.crit !== undefined) on = `(${one(2)} if ${n} ${cmp} ${u.crit} else ${on})`;
+    const fr = `(${n} - ${lo}) / ${per} - i`;
+    const cell = (I1: string) => [`${I1}fixed:`, `${I1}${I}xysize (${cw}, ${h})`, `${I1}${I}add ${off}`, `${I1}${I}if ${fr} > 0:`, `${I1}${I}${I}add Crop((0, 0, int(${cw} * min(1.0, ${fr})), ${h}), ${on})`];
+    return ['hbox:', `${I}xysize (${w}, ${h})`, `${I}spacing ${gap}`, `${I}for i in range(${count}):`, ...(edit ? [...press(I + I, stepSet(count)), ...cell(I + I + I)] : cell(I + I))];
   }
+  const pad = Math.max(0, u.pad ?? (u.style === 'discrete' ? 2 : 1));
+  const iw = Math.max(1, w - 2 * pad), ih = Math.max(1, h - 2 * pad);
   if (f.kind === 'int' && u.look === 'level' && u.style === 'discrete') {
     const count = Math.min(hi - lo, 20);
-    const seg = `(${w} - ${count + 1} * 2) // ${count}`;
-    const sr = cn === 'square' ? 0 : cn === 'pill' ? (h - 4) / 2 : 1;
-    const cell = `add (${part('fill', seg, h - 4, sr)} if (${n} - ${lo}) * ${count} >= (i + 1) * ${hi - lo} else ${part('track', seg, h - 4, sr)})`;
-    return ['frame:', `${I}background ${part('border', w, h, rad(h))}`, `${I}padding (2, 2)`, `${I}xysize (${w}, ${h})`, `${I}hbox:`, `${I}${I}spacing 2`, `${I}${I}for i in range(${count}):`,
+    const seg = `(${iw} - ${count - 1} * 2) // ${count}`;
+    const sr = cn === 'square' ? 0 : cn === 'pill' ? ih / 2 : 1;
+    const cell = `add (${stateCode('fill', seg, ih, sr)} if (${n} - ${lo}) * ${count} >= (i + 1) * ${hi - lo} else ${part('track', seg, ih, sr)})`;
+    return ['fixed:', `${I}xysize (${w}, ${h})`, `${I}add ${frameCode(w, h)}`, `${I}hbox:`, `${I}${I}pos (${pad}, ${pad})`, `${I}${I}spacing 2`, `${I}${I}for i in range(${count}):`,
       ...(edit ? [...press(I + I + I, stepSet(count), sr), `${I}${I}${I}${I}${cell}`] : [`${I}${I}${I}${cell}`])];
   }
   if (f.kind === 'int') {
+    // 이어진 막대 (FEATURE 29): 프레임 → 안쪽 여백에 bar(트랙·채움) → 끝 장식 → 광택.
     // 바꿀 수 있으면 끌어서 정수로 (VariableValue, 최솟값~최댓값). 아니면 따라가기만 (AnimatedValue)
     const v = edit ? `VariableValue(${py(n)}, min=${lo}, max=${hi}, step=1, force_step=True)` : `AnimatedValue(${n} - ${lo}, ${hi - lo}, 0.3)`;
-    const value = `${I}value ${v}`;
-    const ir = Math.max(0, rad(h) - 1);
-    return ['frame:', `${I}background ${part('border', w, h, rad(h))}`, `${I}padding (1, 1)`, `${I}xysize (${w}, ${h})`,
-      `${I}bar:`, I + value, `${I}${I}xysize (${w - 2}, ${h - 2})`, `${I}${I}left_bar ${part('fill', w - 2, h - 2, ir)}`, `${I}${I}right_bar ${part('track', w - 2, h - 2, ir)}`,
-      ...(edit ? [`${I}${I}hover_left_bar ${lit(part('fill', w - 2, h - 2), w - 2, h - 2, ir)}`, `${I}${I}hover_right_bar ${lit(part('track', w - 2, h - 2), w - 2, h - 2, ir)}`] : []), `${I}${I}thumb None`];
+    const ir = Math.max(0, rad(h) - pad);
+    // 채움 맞춤: 자르기(없을 때, bar가 자름), 늘이기(bar_resizing), 타일(높이에 맞춘 그림을 옆으로 반복)
+    const fillImg = partImage(u, 'fill');
+    const tile = u.fit === 'tile' && fillImg && !isMovieFile(fillImg);
+    // 타일은 정상 채움만 (경고·위험은 제 부품이나 색조만 바꾼 타일)
+    const fill = stateCode('fill', iw, ih, ir, tile ? `Tile(Transform(${imgRef(fillImg)}, ysize=${ih}, fit="contain"), size=(${iw}, ${ih}))` : undefined);
+    const out = ['fixed:', `${I}xysize (${w}, ${h})`, `${I}add ${frameCode(w, h)}`, `${I}fixed:`, `${I}${I}pos (${pad}, ${pad})`, `${I}${I}xysize (${iw}, ${ih})`,
+      `${I}${I}bar:`, `${I}${I}${I}value ${v}`, `${I}${I}${I}xysize (${iw}, ${ih})`, `${I}${I}${I}left_bar ${fill}`, `${I}${I}${I}right_bar ${part('track', iw, ih, ir)}`];
+    if (u.fit === 'stretch') {
+      // 늘이기: bar가 양쪽을 제 몫 크기로 그리게 (bar_resizing). 크기를 정한 부품은 Frame(테두리 0)으로 감싸 그 몫에 늘여 맞춤
+      const L = out.findIndex((x) => x.startsWith(`${I}${I}${I}left_bar `));
+      out[L] = `${I}${I}${I}left_bar Frame(${fill}, 0, 0)`;
+      out[L + 1] = `${I}${I}${I}right_bar Frame(${part('track', iw, ih, ir)}, 0, 0)`;
+      out.push(`${I}${I}${I}bar_resizing True`);
+    }
+    if (edit) out.push(`${I}${I}${I}hover_left_bar ${lit(fill, iw, ih, ir)}`, `${I}${I}${I}hover_right_bar ${lit(part('track', iw, ih), iw, ih, ir)}`);
+    out.push(`${I}${I}${I}thumb None`);
+    const tip = partImage(u, 'tip');
+    if (tip) {
+      const th = Math.max(1, u.tip ?? h);
+      out.push(`${I}${I}add ${mediaCode(tip, `None`, th, true)}:`, `${I}${I}${I}xpos int(${iw} * max(0.0, min(1.0, (${n} - ${lo}) / ${hi - lo})))`, `${I}${I}${I}xanchor 0.5`, `${I}${I}${I}yalign 0.5`);
+    }
+    const gl = partImage(u, 'gloss');
+    if (gl) out.push(`${I}${I}add ${mediaCode(gl, iw, ih)}`);
+    return out;
   }
   if (f.kind === 'bool' && u.look === 'checkbox') {
     // 체크박스: 테두리 + 상자, 체크되면 "체크된 상자" + 마크(그림이 없으면 ✓ 글자)
     const r = rad(h), mk = u.skin?.mark?.image?.trim();
     const off = u.skin?.box?.image?.trim() ? part('box', w, h) : `Fixed(${part('border', w, h, r)}, Transform(${part('box', w - 4, h - 4, Math.max(0, r - 2))}, pos=(2, 2)), xysize=(${w}, ${h}))`;
-    const mark = mk ? `Transform(${imgRef(mk)}, xysize=(${Math.round(w * 0.8)}, ${Math.round(h * 0.8)}), fit="contain", align=(0.5, 0.5))`
+    const mark = mk ? `Transform(${mediaCode(mk, Math.round(w * 0.8), Math.round(h * 0.8))}, align=(0.5, 0.5))`
       : `Text("✓", font="DejaVuSans.ttf", size=${Math.round(h * 0.8)}, color=${py(partColor(u, 'mark'))}, align=(0.5, 0.5))`;
     const onD = u.skin?.box?.image?.trim() && !u.skin?.on ? off : part('on', w, h, r); // 상자 그림만 있으면 체크돼도 그 그림 (앱 꼴과 같게)
     const inner = (I1: string) => [`${I1}add (${onD} if ${n} else ${off})`, `${I1}if ${n}:`, `${I1}${I}add ${mark}`];
@@ -319,7 +382,7 @@ export function lookCode(p: Project, it: ScreenItem): string[] {
     const ts = Math.max(12, Math.round(rh * 0.55)), tc = py(partColor(u, 'text'));
     const ring = (key: string) => (u.skin?.[key]?.image?.trim() ? part(key, k, k)
       : `Fixed(${roundOf(`Solid(${py(partColor(u, key))}, xysize=(${k}, ${k}))`, k / 2)}, Transform(${roundOf(`Solid("#ffffff", xysize=(${k - 4}, ${k - 4}))`, (k - 4) / 2)}, pos=(2, 2)), xysize=(${k}, ${k}))`);
-    const dot = u.skin?.dot?.image?.trim() ? `Transform(${imgRef(u.skin.dot.image.trim())}, xysize=(${k}, ${k}), fit="contain")` : `Transform(${roundOf(`Solid(${py(partColor(u, 'dot'))}, xysize=(${d}, ${d}))`, d / 2)}, align=(0.5, 0.5))`;
+    const dot = partImage(u, 'dot') ? mediaCode(partImage(u, 'dot'), k, k) : `Transform(${roundOf(`Solid(${py(partColor(u, 'dot'))}, xysize=(${d}, ${d}))`, d / 2)}, align=(0.5, 0.5))`;
     const onRing = ring('on');
     const out = ['vbox:', `${I}xsize ${w}`];
     for (const o of opts) {
@@ -332,8 +395,11 @@ export function lookCode(p: Project, it: ScreenItem): string[] {
     return out;
   }
   if (f.kind === 'bool') {
+    // 스위치: 트랙 꺼짐·켜짐, 썸(켜짐 썸이 있으면 켜졌을 때 그것)
     const k = Math.round(h * 0.8), m = Math.round((h - k) / 2);
-    const inner = (I1: string) => [`${I1}add (${part('on', w, h, pillR(h))} if ${n} else ${part('off', w, h, pillR(h))})`, `${I1}add ${part('thumb', k, k, pillR(k))}:`, `${I1}${I}xpos (${w - k - m} if ${n} else ${m})`, `${I1}${I}ypos ${m}`];
+    const thumbOn = partImage(u, 'thumbOn') || u.skin?.thumbOn?.color;
+    const thumb = thumbOn ? `(${part('thumbOn', k, k, pillR(k))} if ${n} else ${part('thumb', k, k, pillR(k))})` : part('thumb', k, k, pillR(k));
+    const inner = (I1: string) => [`${I1}add (${part('on', w, h, pillR(h))} if ${n} else ${part('off', w, h, pillR(h))})`, `${I1}add ${thumb}:`, `${I1}${I}xpos (${w - k - m} if ${n} else ${m})`, `${I1}${I}ypos ${m}`];
     if (!edit) return ['fixed:', `${I}xysize (${w}, ${h})`, ...inner(I)];
     return ['button:', `${I}xysize (${w}, ${h})`, `${I}background None`, `${I}padding (0, 0)`, `${I}hover_foreground ${litFg(pillR(h))}`, `${I}action ToggleVariable(${py(n)})`, `${I}fixed:`, ...inner(I + I)];
   }

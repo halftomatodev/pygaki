@@ -251,7 +251,7 @@ export type FlagLook = 'level' | 'switch' | 'checkbox' | 'radio' | 'pulldown';
 export type LevelStyle = 'continuous' | 'discrete' | 'rating';
 export interface FlagSkinPart {
   color?: string; // #rrggbb 또는 #rrggbbaa
-  image?: string; // 게임 그림 이름 (예: gui/heart.png)
+  image?: string; // 게임 그림 이름 (예: heart) 또는 game 기준 파일 경로 (예: images/ui/heart.png, movies/mask_fire.webm. 영상은 반복·소리 없이, mask_는 투명 영상)
 }
 export interface FlagUi {
   look: FlagLook;
@@ -261,6 +261,16 @@ export interface FlagUi {
   options?: string[]; // 글자: 고를 값 목록
   skin?: Record<string, FlagSkinPart>; // 부품마다 색·그림 (부품 이름은 flagUi.ts SKIN_PARTS)
   corner?: FlagCorner; // 모서리 (FEATURE 23): 없으면 둥글게. 각지게, 알약(높이의 반)
+  // FEATURE 29 (레벨 인디케이터, HUD 요소 데모의 짜임): 경고·위험 임계와 방향, 막대의 프레임 9-slice·여백·채움 맞춤·끝 장식, 칸의 수·간격
+  warn?: number; // 이 값 이하(dir high면 이상)면 경고 채움. 없으면 경고 없음
+  crit?: number; // 위험 채움
+  dir?: 'high'; // 없으면 낮을수록 위험 (HP), high면 높을수록 위험 (과열)
+  slice?: number; // 프레임 그림 9-slice 모서리 (px). 없으면 늘여 맞춤
+  pad?: number; // 프레임 안쪽 여백 (px). 없으면 1
+  fit?: 'stretch' | 'tile'; // 채움 그림: 없으면 자르기(원본 폭에서 값만큼 보임), 늘이기, 타일 반복
+  tip?: number; // 끝 장식 높이 (px). 없으면 막대 높이
+  cells?: number; // 별(칸형) 칸 수. 없으면 범위만큼 (10개까지). 한 칸이 여러 값이면 칸 안쪽을 잘라 보임
+  gap?: number; // 칸 간격 (px). 없으면 2
 }
 export type FlagCorner = 'square' | 'pill';
 
