@@ -168,9 +168,13 @@ const isColor = (s?: string) => !!s && /^#[0-9a-f]{3,8}$/i.test(s);
 const imgRef = (s: string) => py(s.trim());
 // 꼴 부품 그림·영상 (FEATURE 29): 그림 이름이나 game 기준 파일 경로. 영상은 Movie(반복, 소리 없음. mask_ 이름은 투명 영상 side_mask)로.
 // pw가 'None'이고 aspect면 높이만 맞추고 비율은 그대로 (끝 장식)
-function mediaCode(v: string, pw: number | string, ph: number | string, aspect = false): string {
+// 그림 이름·경로를 렌파이 displayable로 (영상이면 Movie). 화면 항목 그림·그림 버튼도 씀
+const dispRef = (v: string) => {
   const t = v.trim().replace(/\\/g, '/');
-  const d = isMovieFile(t) ? `Movie(play=${py(t)}, loop=True${isMaskName(t) ? ', side_mask=True' : ''})` : py(t);
+  return isMovieFile(t) ? `Movie(play=${py(t)}, loop=True${isMaskName(t) ? ', side_mask=True' : ''})` : py(t);
+};
+function mediaCode(v: string, pw: number | string, ph: number | string, aspect = false): string {
+  const d = dispRef(v);
   return aspect ? `Transform(${d}, ysize=${ph}, fit="contain")` : `Transform(${d}, xysize=(${pw}, ${ph}))`;
 }
 
@@ -216,7 +220,7 @@ function itemCode(p: Project, s: ScreenDef, it: ScreenItem, I0: string): string[
   const pos = `${I}pos (${Math.round(it.x)}, ${Math.round(it.y)})`;
   const act = `${I}action ${actionCode(p, s, it)}`;
   let out: string[] = [];
-  if (it.kind === 'image') out = it.image?.trim() ? [`add ${imgRef(it.image)}:`, pos] : [];
+  if (it.kind === 'image') out = it.image?.trim() ? [`add ${dispRef(it.image)}:`, pos] : [];
   else if (it.kind === 'text') {
     out = [`text ${py(it.text ?? '')}:`, pos];
     if (it.size) out.push(`${I}size ${it.size}`);
@@ -231,8 +235,8 @@ function itemCode(p: Project, s: ScreenDef, it: ScreenItem, I0: string): string[
     out.splice(1, 0, pos);
   } else if (it.kind === 'imagebutton') {
     if (!it.image?.trim()) return [];
-    out = ['imagebutton:', `${I}idle ${imgRef(it.image)}`];
-    if (it.hover?.trim()) out.push(`${I}hover ${imgRef(it.hover)}`);
+    out = ['imagebutton:', `${I}idle ${dispRef(it.image)}`];
+    if (it.hover?.trim()) out.push(`${I}hover ${dispRef(it.hover)}`);
     out.push(pos, act);
   } else {
     out = [`textbutton ${py(it.text ?? '')}:`, pos];

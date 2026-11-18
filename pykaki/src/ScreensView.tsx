@@ -10,6 +10,8 @@ import { useStore } from './store';
 import { useLive } from './showpyLive';
 import { fileUrl, pictureOf, useGameFolder } from './gameFolder';
 import { isMovieFile } from './stage';
+import { desktop } from './desktop';
+import { pickMediaFile } from './MediaField';
 import type { Project, ScreenAct, ScreenDef, ScreenItem, ScreenItemKind } from './types';
 import { uid } from './util';
 import { lookCode, lookSize, actOf, addHudTemplate, ANCHORS, BAR_H, BAR_W, canDrag, DROP_H, DROP_W, hasAct, HUD_H, HUD_TEMPLATES, HUD_W, hudInner, hudPos, hudSize, hudTemplateCode, isDragged, isHud, newScreenName, screenNameProblem, SCREENS_FILE, screensCode, type HudTemplate } from './screens';
@@ -329,7 +331,7 @@ const ACT_TAG: Record<ScreenAct, string> = { return: '값', flag: '⚑', jump: '
 function StageItem({ sc, it, scale, on, onMove, vars, hidden }: { sc: ScreenDef; it: ScreenItem; scale: number; on: boolean; onMove?: (id: string, x: number, y: number) => void; vars: Vars; hidden: boolean }) {
   const look = useGameFolder((s) => s.look);
   const project = useStore((s) => s.project);
-  const pic = usePic(it.kind === 'imagebutton' || it.kind === 'image' ? it.image ?? '' : '');
+  const pic = useMediaPic(it.kind === 'imagebutton' || it.kind === 'image' ? it.image ?? '' : '');
   const down = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!onMove) return;
     e.preventDefault();
@@ -347,11 +349,21 @@ function StageItem({ sc, it, scale, on, onMove, vars, hidden }: { sc: ScreenDef;
   const act = actOf(sc, it);
   let body;
   if (it.kind === 'imagebutton' || it.kind === 'image')
-    body = pic ? <img src={pic} alt="" draggable={false} style={{ transform: `scale(${scale})`, transformOrigin: '0 0' }} onLoad={(e) => {
-      const im = e.currentTarget;
-      im.parentElement!.style.width = im.naturalWidth * scale + 'px';
-      im.parentElement!.style.height = im.naturalHeight * scale + 'px';
-    }} /> : <span className="scv-noimg">{it.image?.trim() || '그림 이름 없음'}</span>;
+    body = pic ? (
+      pic.video ? (
+        <video src={pic.url} autoPlay loop muted playsInline style={{ transform: `scale(${scale})`, transformOrigin: '0 0' }} onLoadedMetadata={(e) => {
+          const v = e.currentTarget;
+          v.parentElement!.style.width = v.videoWidth * scale + 'px';
+          v.parentElement!.style.height = v.videoHeight * scale + 'px';
+        }} />
+      ) : (
+        <img src={pic.url} alt="" draggable={false} style={{ transform: `scale(${scale})`, transformOrigin: '0 0' }} onLoad={(e) => {
+          const im = e.currentTarget;
+          im.parentElement!.style.width = im.naturalWidth * scale + 'px';
+          im.parentElement!.style.height = im.naturalHeight * scale + 'px';
+        }} />
+      )
+    ) : <span className="scv-noimg">{it.image?.trim() || '그림 이름 없음'}</span>;
   else if (it.kind === 'bar') {
     const max = it.max && it.max > 0 ? it.max : 10;
     const v = it.flag && typeof vars[it.flag] === 'number' ? (vars[it.flag] as number) : 0;
@@ -641,12 +653,14 @@ function ItemCard({ sc, it, upd, remove, dup }: { sc: ScreenDef; it: ScreenItem;
         <div className="row">
           <label>그림</label>
           <input className="grow" list="scv-images" value={it.image ?? ''} placeholder="그림 이름 (예: door)" onChange={(e) => upd((x) => void (x.image = e.target.value), 'scr-img' + it.id)} />
+          <BrowseBtn onPick={(rel) => upd((x) => void (x.image = rel))} />
         </div>
       )}
       {it.kind === 'imagebutton' && (
         <div className="row">
           <label>올렸을 때</label>
           <input className="grow" list="scv-images" value={it.hover ?? ''} placeholder="비우면 그대로 (예: door hover)" onChange={(e) => upd((x) => void (e.target.value ? (x.hover = e.target.value) : delete x.hover), 'scr-hover' + it.id)} />
+          <BrowseBtn onPick={(rel) => upd((x) => void (x.hover = rel))} />
         </div>
       )}
       {it.kind === 'look' && (
@@ -833,5 +847,15 @@ function LookSkinBtn({ flag }: { flag?: Flag }) {
       </button>
       {open && btn.current && <LookPop f={flag} anchor={btn.current} onClose={() => setOpen(false)} />}
     </div>
+  );
+}
+
+// 📂 (FEATURE 29): 탐색기에서 그림·영상을 골라 game 기준 경로로 (게임 폴더 밖이면 game/images·movies로 복사). 앱에서만
+function BrowseBtn({ onPick }: { onPick: (rel: string) => void }) {
+  if (!desktop?.pickFile) return null;
+  return (
+    <button className="scv-browse" title="탐색기에서 그림을 골라요. 게임 폴더 밖이면 game/images로 복사해요" onClick={() => void pickMediaFile().then((rel) => rel && onPick(rel))}>
+      📂
+    </button>
   );
 }
