@@ -8,3 +8,6 @@ docs/local/
 
 # Claude Code 개인 권한 설정 (로컬 전용)
 .claude/settings.local.json
+
+# 옵시디언 볼트 설정 (안내서 원본을 옵시디언으로 고칠 때)
+.obsidian/
