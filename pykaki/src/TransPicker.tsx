@@ -2,6 +2,7 @@
 // [효과] 화면의 그림 효과와 같은 목록(effectCatalog)에 샘플을 붙여 보여 준다. 게임의 효과 폴더에 있는 것만 (숨긴 것은 빠짐).
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { GooMenu } from './GooMenu';
 import { effectCatalog, type EffectCard } from './effectsLib';
 import { PictureSample, SOURCE_LABEL } from './EffectsView';
 import { shaderEffect } from './fx/textShaders';
@@ -25,6 +26,7 @@ export function TransPicker({ value, onPick, className = '' }: Props) {
   const [hover, setHover] = useState<string | null>(null);
   const box = useRef<HTMLDivElement>(null);
   const pop = useRef<HTMLDivElement>(null);
+  const btn = useRef<HTMLButtonElement>(null);
   const [at, setAt] = useState<{ left: number; top: number; maxH: number } | null>(null);
   useGameFolder((f) => f.fxSeq); // 효과를 넣거나 끄면 목록을 다시 그린다
   const cards = open ? effectCatalog().filter((c) => c.kind === 'transition') : [];
@@ -78,11 +80,12 @@ export function TransPicker({ value, onPick, className = '' }: Props) {
 
   return (
     <div className={'tp ' + className} ref={box}>
-      <button className="tp-btn" title="나타나는 방식: 눌러서 [효과] 화면의 그림 효과 가운데서 골라요" onClick={toggle}>
+      <button ref={btn} className="tp-btn" title="나타나는 방식: 눌러서 [효과] 화면의 그림 효과 가운데서 골라요" onClick={toggle}>
         {curLabel} ▾
       </button>
       {open && at && createPortal(
         <div className="tp-pop" ref={pop} style={{ left: at.left, top: at.top, maxHeight: at.maxH }} onMouseLeave={() => setHover(null)}>
+          <GooMenu anchor={btn.current} ready />
           <div className="tp-sample">
             {fx?.kind === 'transition' ? (
               <PictureSample key={fx.name} effect={fx} args={{}} time={fx.time} picture={null} onReplay={() => setHover((h) => h)} />

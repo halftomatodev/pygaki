@@ -2,6 +2,7 @@
 // 위아래 화살표로 고르고 Enter로 만들기, Esc나 바깥을 누르면 닫힘. [화면] 탭의 [+ HUD 틀에서]도 같은 메뉴(PickMenu)를 쓴다
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { GooMenu } from './GooMenu';
 import { FLAG_RECIPES, type DemoStep } from './flagRecipes';
 import type { FlagKind, FlagUi } from './types';
 import { FlagWidget } from './FlagWidget';
@@ -77,6 +78,7 @@ export function PickMenu({ anchor, items, first = 0, placeholder, section, empty
 
   return createPortal(
     <div ref={box} className="fmenu" style={pos ? { left: pos.left, top: pos.top, transformOrigin: pos.top < anchor.getBoundingClientRect().top ? 'bottom right' : 'top right' } : { opacity: 0 }} onKeyDown={key}>
+      <GooMenu anchor={anchor} ready={!!pos} />
       <div className="fmenu-search">
         <input autoFocus value={q} placeholder={placeholder} spellCheck={false} onChange={(e) => (setQ(e.target.value), setCur(0))} />
         <kbd>Esc</kbd>

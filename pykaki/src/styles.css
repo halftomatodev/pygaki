@@ -641,6 +641,13 @@ fieldset.plain:disabled { opacity: 0.4; }
 .vs-pill, .vs-drop { position: absolute; border-radius: 7px; background: var(--accent); }
 .vs-pill { top: 3px; bottom: 3px; }
 @media (prefers-reduced-motion: reduce) { .vs-goo { filter: none; } }
+/* 끈적 드롭다운 (GooMenu.tsx). 판 배경은 뒤 액체 층이 그리고, 단추는 판과 같은 색 알약으로 */
+.goo-liq { position: fixed; inset: 0; pointer-events: none; filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.2)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.12)); }
+:root[data-dark='1'] .goo-liq { filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.55)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3)); }
+.goo-in { position: absolute; inset: 0; }
+.goo-blob { position: absolute; }
+.goo-panel { background: transparent !important; border-color: transparent !important; box-shadow: none !important; animation: none !important; }
+.goo-anchor { background: var(--goo-fill) !important; border-radius: var(--goo-r) !important; box-shadow: none !important; }
 /* 새 화면이 탭이 움직인 방향에서 밀려 들어옴 (App.tsx) */
 .view-in { animation: view-in-move var(--dur-view) var(--ease-spring), view-in-fade 200ms var(--ease-out); }
 @keyframes view-in-move { from { translate: calc(var(--dir, 1) * 32px) 0; filter: blur(var(--pop-blur)); } }

@@ -2,6 +2,7 @@
 // 대본 편집기의 기능마다 쓰는 폴더를 모아 두고, 고르면 탐색기로 연다. game 안의 폴더가 아직 없으면 만들고 연다.
 // 위아래 화살표로 고르고 Enter로 열기, 찾기 칸에 치면 걸러짐, Esc나 바깥을 누르면 닫힘
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { GooMenu } from './GooMenu';
 import { createPortal } from 'react-dom';
 import { desktop } from './desktop';
 import { useStore } from './store';
@@ -114,6 +115,7 @@ export function FolderMenu({ anchor, onClose }: { anchor: HTMLElement; onClose: 
 
   return createPortal(
     <div ref={box} className="fmenu folder-menu" role="dialog" aria-label="폴더 관리" style={pos ? { left: pos.left, top: pos.top } : { opacity: 0 }} onKeyDown={key}>
+      <GooMenu anchor={anchor} ready={!!pos} />
       <div className="fmenu-search">
         <input autoFocus value={q} placeholder="어느 폴더를 열까요?" spellCheck={false} onChange={(e) => (setQ(e.target.value), setCur(0))} />
         <kbd>Esc</kbd>
