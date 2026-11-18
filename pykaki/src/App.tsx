@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { ReactFlowProvider, useReactFlow } from '@xyflow/react';
 import { Toolbar } from './Toolbar';
 import { Sidebar } from './Sidebar';
@@ -138,6 +138,9 @@ function SideResizer({ side }: { side: 'left' | 'right' }) {
   return <Resizer size={side === 'left' ? 'leftW' : 'rightW'} grow={side === 'left' ? 1 : -1} className={side} />;
 }
 
+// 상단 탭 차례 (화면 전환 방향을 정함). Toolbar.tsx ViewSwitch와 같은 차례
+const VIEW_ORDER = ['script', 'showpy', 'screens', 'effects', 'shaders', 'fonts'];
+
 export function App() {
   const focus = useStore((s) => s.focusMode);
   const showPrefs = useStore((s) => s.showPrefs);
@@ -152,10 +155,27 @@ export function App() {
     if (isDesktop) startLive();
   }, []);
 
+  // 화면을 바꾸면 새 화면이 탭이 움직인 방향에서 밀려 들어온다 (docs/MOTION.md, 끈적 탭과 짝)
+  const appRef = useRef<HTMLDivElement>(null);
+  const lastView = useRef(view);
+  useLayoutEffect(() => {
+    const prev = lastView.current;
+    lastView.current = view;
+    if (prev === view || !appRef.current) return;
+    const el = [...appRef.current.children].find((c) => !c.classList.contains('toolbar') && !(c as HTMLElement).hidden) as HTMLElement | undefined;
+    if (!el) return;
+    el.style.setProperty('--dir', String(VIEW_ORDER.indexOf(view) > VIEW_ORDER.indexOf(prev) ? 1 : -1));
+    el.classList.remove('view-in');
+    void el.offsetWidth;
+    el.classList.add('view-in');
+    const done = () => el.classList.remove('view-in');
+    el.addEventListener('animationend', done, { once: true });
+  }, [view]);
+
   return (
     <ReactFlowProvider>
       <Keys />
-      <div className={'app' + (focus ? ' focus' : '')}>
+      <div ref={appRef} className={'app' + (focus ? ' focus' : '')}>
         <Toolbar />
         {/* 대본 화면은 showpy 화면을 보는 동안에도 그대로 둔다 (캔버스 상태 유지) */}
         <div className={'main' + (hideLeft ? ' no-left' : '') + (hideRight ? ' no-right' : '')} hidden={view !== 'script'}>
@@ -180,6 +200,12 @@ export function App() {
             <animate attributeName="baseFrequency" dur="3s" values="0.02 0.05;0.026 0.062;0.02 0.05" repeatCount="indefinite" />
           </feTurbulence>
           <feDisplacementMap in="SourceGraphic" scale={5} xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+        {/* 끈적(gooey): 흐린 뒤 알파를 날카롭게 잘라 가까운 모양끼리 녹아 붙게. 상단 탭 색 막대가 씀 */}
+        <filter id="pk-goo" x="-20%" y="-50%" width="140%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation={5} result="blur" />
+          <feColorMatrix in="blur" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -9" result="goo" />
+          <feComposite in="SourceGraphic" in2="goo" operator="atop" />
         </filter>
       </svg>
       {showPrefs && <SettingsModal />}

@@ -633,6 +633,19 @@ fieldset.plain:disabled { opacity: 0.4; }
 .view-switch { display: inline-flex; gap: 3px; margin-right: 10px; padding: 3px; border-radius: 10px; background: var(--faint); border: 1px solid var(--line); }
 .view-switch button { font-size: 14px; font-weight: 700; padding: 5px 14px; border-radius: 7px; color: var(--muted); }
 .view-switch button.on, .view-switch button.on:hover:not(:disabled) { background: var(--accent); color: #fff; box-shadow: none; }
+/* 맨 위 화면 바꾸기: 색 막대를 단추 뒤 끈적 층(#pk-goo)에 따로 그린다 (Toolbar.tsx ViewSwitch) */
+.top-switch { position: relative; }
+.top-switch button { position: relative; z-index: 1; transition: color var(--dur-press) var(--ease-out); }
+.top-switch button.on, .top-switch button.on:hover:not(:disabled) { background: transparent; }
+.vs-goo { position: absolute; inset: 0; pointer-events: none; filter: url(#pk-goo); }
+.vs-pill, .vs-drop { position: absolute; border-radius: 7px; background: var(--accent); }
+.vs-pill { top: 3px; bottom: 3px; }
+@media (prefers-reduced-motion: reduce) { .vs-goo { filter: none; } }
+/* 새 화면이 탭이 움직인 방향에서 밀려 들어옴 (App.tsx) */
+.view-in { animation: view-in-move var(--dur-view) var(--ease-spring), view-in-fade 200ms var(--ease-out); }
+@keyframes view-in-move { from { translate: calc(var(--dir, 1) * 32px) 0; filter: blur(var(--pop-blur)); } }
+@keyframes view-in-fade { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .view-in { animation: view-in-fade 150ms var(--ease-out); } }
 .live-dot { font-size: 9px; color: var(--muted); opacity: 0.5; }
 .live-dot.on { color: #22c55e; opacity: 1; text-shadow: 0 0 2px #fff; }
 .sp-view { flex: 1; display: flex; min-height: 0; }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Hint, openHelp } from './Help';
 import { useStore } from './store';
 import { exportRpyFile, followLine, hasRpyTarget, newProject, openProject, runInRenpy, saveProject, setFollowLine } from './files';
@@ -15,8 +15,59 @@ import { FolderMenu } from './FolderMenu';
 function ViewSwitch() {
   const view = useLive((l) => l.view);
   const go = (v: typeof view) => useLive.setState({ view: v });
+  const box = useRef<HTMLSpanElement>(null);
+  const pill = useRef<HTMLSpanElement>(null);
+  const drop = useRef<HTMLSpanElement>(null);
+  const last = useRef<number>(-1);
+  // 끈적 색 막대: 앞쪽 끝이 먼저, 뒤쪽 끝이 늦게 따라오고 떠난 자리에 물방울이 남아 녹아 붙었다 끊어진다
+  useLayoutEffect(() => {
+    const b = box.current, p = pill.current, d = drop.current;
+    if (!b || !p || !d) return;
+    const tabs = [...b.querySelectorAll('button')];
+    const i = tabs.findIndex((t) => t.classList.contains('on'));
+    if (i < 0) return;
+    const edge = (n: number) => ({ left: tabs[n].offsetLeft, right: b.clientWidth - tabs[n].offsetLeft - tabs[n].offsetWidth });
+    const from = { left: parseFloat(getComputedStyle(p).left), right: parseFloat(getComputedStyle(p).right) };
+    const to = edge(i);
+    p.getAnimations().forEach((a) => a.cancel());
+    p.style.left = to.left + 'px';
+    p.style.right = to.right + 'px';
+    const prev = last.current;
+    last.current = i;
+    if (prev < 0 || prev === i || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const spring = getComputedStyle(document.documentElement).getPropertyValue('--ease-spring').trim() || 'ease-out';
+    const lead = i > prev ? 'right' : 'left', tail = i > prev ? 'left' : 'right';
+    p.animate([{ [lead]: from[lead] + 'px' }, { [lead]: to[lead] + 'px' }], { duration: 340, easing: spring });
+    p.animate([{ [tail]: from[tail] + 'px' }, { [tail]: to[tail] + 'px' }], { duration: 460, delay: 60, easing: spring, fill: 'backwards' });
+    const h = b.clientHeight - 8, w = b.clientWidth - from.left - from.right, cx = from.left + w / 2, top = (b.clientHeight - 2 - h) / 2;
+    d.getAnimations().forEach((a) => a.cancel());
+    d.hidden = false;
+    d.animate([
+      { left: from.left + 'px', width: w + 'px', top: top + 'px', height: h + 'px', borderRadius: '7px' },
+      { left: cx - h * 0.45 + 'px', width: h * 0.9 + 'px', top: top + h * 0.05 + 'px', height: h * 0.9 + 'px', borderRadius: '50%', offset: 0.35 },
+      { left: cx + 'px', width: '0px', top: top + h / 2 + 'px', height: '0px', borderRadius: '50%' },
+    ], { duration: 420, easing: 'cubic-bezier(0.4, 0, 1, 1)' }).finished.then(() => { d.hidden = true; }, () => {});
+  }, [view]);
+  // 글자 크기·언어가 바뀌어 단추 폭이 달라지면 막대만 바로 맞춤
+  useEffect(() => {
+    const b = box.current, p = pill.current;
+    if (!b || !p) return;
+    const fit = () => {
+      const t = b.querySelector<HTMLElement>('button.on');
+      if (!t || p.getAnimations().length) return;
+      p.style.left = t.offsetLeft + 'px';
+      p.style.right = b.clientWidth - t.offsetLeft - t.offsetWidth + 'px';
+    };
+    const ro = new ResizeObserver(fit);
+    ro.observe(b);
+    return () => ro.disconnect();
+  }, []);
   return (
-    <span className="view-switch">
+    <span className="view-switch top-switch" ref={box}>
+      <span className="vs-goo" aria-hidden="true">
+        <span className="vs-drop" ref={drop} hidden />
+        <span className="vs-pill" ref={pill} />
+      </span>
       <button className={view === 'script' ? 'on' : ''} onClick={() => go('script')} title="상자와 선으로 대본을 써요">
         대본 편집
       </button>
