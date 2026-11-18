@@ -296,7 +296,7 @@ export function EffectsView() {
   };
 
   const kindBar = (
-    <span className="view-switch fxv-kind">
+    <span className="seg-switch fxv-kind">
       <button className={kind === 'effect' ? 'on' : ''} onClick={() => setKind('effect')} title="대사 글자가 나오는 모양">글자 효과</button>
       <button className={kind === 'transition' ? 'on' : ''} onClick={() => setKind('transition')} title="배경, 캐릭터가 나타나는 모양">그림 효과</button>
     </span>

@@ -225,7 +225,7 @@ function TransList({ bar }: { bar: ReactNode }) {
 export function ShadersView() {
   const [part, setPart] = useState<'shader' | 'trans'>('shader');
   const bar = (
-    <span className="view-switch fxv-kind">
+    <span className="seg-switch fxv-kind">
       <button className={part === 'shader' ? 'on' : ''} onClick={() => setPart('shader')} title="화면 전체에 씌우는 셰이더">셰이더</button>
       <button className={part === 'trans' ? 'on' : ''} onClick={() => setPart('trans')} title="셰이더가 바뀔 때의 모양">전환</button>
     </span>

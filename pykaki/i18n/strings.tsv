@@ -2537,3 +2537,9 @@ game/{0}이(가) 이미 있어요. 덮어쓸까요?	game/{0} はもうありま�
 스크립트 따라가기	スクリプトを追う	Follow script
 실행 중	実行中	Running
 게임이 켜져 있어요. 고친 대본은 게임이 저절로 다시 불러와요	ゲームが起動しています。直した台本はゲームが自動で読み直します	The game is running. It reloads the edited script by itself
+축소	縮小	Zoom out
+모두 보기	全体を表示	Fit all
+확대·축소	拡大・縮小	Zoom
+눌러서 펼쳐요	押して開きます	Click to expand
+프로젝트와 실행	プロジェクトと実行	Project and run
+상자가 모두 보이게	ボックスがすべて見えるように	Fit all boxes in view

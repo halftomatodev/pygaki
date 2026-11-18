@@ -1,4 +1,4 @@
-<!-- 원본: pykaki/docs/GUIDE.md @ c259050647 -->
+<!-- 원본: pykaki/docs/GUIDE.md @ 14118fdb6f -->
 # pygaki user guide
 
 A tool for writing Ren'Py scripts with boxes and lines and exporting them as Ren'Py script files (`.rpy`).
@@ -12,12 +12,12 @@ The in-app [Help] (F1) is the Korean version of this document. Button names here
 ## 1. A tour of the screen
 
 - **Top row, left**: the big tabs **[Script | GUI | Screen | Effects | Shaders | Font]**. In the app, next to them is the **game connection button** (light blue "● Connected to game" when attached to the game, yellow "◐ Game reloading" while the game rereads a changed script (it reattaches by itself when done), gray otherwise. Click it to go to GUI).
-- **Menu panel, top right**: the project title at the top (click to edit), and below it **[Run in Ren'Py]** and **[Follow script]**. A row that is on has a light pink background. [Run in Ren'Py] is dimmed and can't be clicked while the game is running ("Running"). [Follow script] switches on/off each time you click it.
+- **Pink group** (tab row, right of the game connection button): the project title (click to edit), **[Run in Ren'Py]** and **[Follow script]**. It floats on the same row as the blue tab group, as a separate group. A button that is on has a light pink background. [Run in Ren'Py] is dimmed and can't be clicked while the game is running ("Running"). [Follow script] switches on/off each time you click it.
 - **Second row menu** (from the left): undo and redo arrows, **[Focus]** (light purple button), settings, **Help**, then file New/Open/Save, project folder (Reload, Folders, Other project), versions, Export. Together with the tabs they float in the center as translucent groups, and a button gets a white background when the mouse is over it.
 - **Left**: label (scenes, with box and layout buttons below), Characters, **Check** (errors and warnings that come up on export; click to go to that box), Ren'Py project info (project, script file, save state, number of images and sounds found), **Script** (the script to be exported; [Expand] to see it, [Copy], [Export .rpy]), Settings. Each group is a rounded card.
 - **Right**: the same kind of cards as the left, without tabs. Click a box and you get the box, text effects, dialogue and next flow cards; click ◐ Shader and you get the shader and transition cards.
 - **Panel size**: hover the border between the left or right panel and the canvas and the cursor becomes ↔. Drag to change that panel's width; double-click the border to reset only that panel. Panel borders in [GUI], [Effects] and [Shaders] drag the same way. **[Start size]** in the left "Settings" resets the panels of every screen at once, and **[Lock]** keeps them from changing when dragged. Sizes and the lock are remembered in this browser (app).
-- **Center canvas**: boxes and lines. Zoom with the mouse wheel and drag an empty spot to pan. The small **‹ ›** buttons at both top ends of the canvas fold and unfold the left and right panels separately (they stay folded next time).
+- **Center canvas**: boxes and lines. Zoom with the mouse wheel and drag an empty spot to pan. The **＋ − ⛶** buttons next to "Canvas controls" at the top left also zoom in and out and fit all boxes in view, with the minimap below them. The small **‹ ›** buttons at both top ends of the canvas fold and unfold the left and right panels separately (they stay folded next time).
 
 The first time you open it, a sample script ("A rainy day") is loaded. Press [New] to start with an empty script.
 
@@ -37,7 +37,7 @@ The same list is under **Canvas controls ⓘ** at the top left of the canvas.
 - **Shift+drag** to select several boxes, **Delete** to delete them.
 - Boxes in the same label (scene) share a color. Labels are managed in the list on the left.
 - Click **◐ Shader** at the top right of a box or label to set screen shaders on the right. Dialogue sounds and speed are set per dialogue line, cursor and click-to-continue per box, in the cards of the box editor.
-- Click [Fold] to the right of a card's title to fold it down to its name.
+- Click a card's title to fold it down to its name.
 
 ## 2. Basic concepts
 
@@ -184,7 +184,7 @@ When the game was started with [▶ Run in Ren'Py] and is connected to the app:
 - Without a game connection, the box card buttons are gray and the per-line buttons are hidden.
 
 ### Folding cards
-Cards in the left, right and GUI panels fold to a single line with their name (sky blue) when you click the gray **[Fold]** to the right of the title. **[Expand]** opens them again. Left panel cards all start folded each time; right panel cards remember which you folded. **[Fold all]** at the top right of a panel ([Expand all] when all are folded) folds or unfolds all its cards at once. The left panel's scrollbar is on the left.
+Cards in the left, right and GUI panels fold to a single line with their name (sky blue, only as wide as the name) when you **click the title row**. Click again and the rows pop out one by one as it opens. Left panel cards all start folded each time; right panel cards remember which you folded. **[Fold all]** with the folded-paper icon at the top right of a panel ([Expand all] when all are folded) folds or unfolds all its cards at once. The left panel's scrollbar is on the left.
 - Old "✨ Screen effect" lines still work, but if you use box shaders at all, each box re-sets shaders on its first line, so it's best to use only one of the two.
 
 ### Line layout in the right panel
@@ -518,7 +518,7 @@ Ren'Py 8.5.3 can't play a webm with transparent areas as is (they come out black
 - After exporting once, **Ctrl+E** (or [Again to same place]) overwrites it right away.
 - Press **Shift+R** with Ren'Py running to reload the changed script.
 - **Auto export** (with a Ren'Py folder connected, pygaki plugin ui_kit 4.2 or later): edit the script and pause for a moment, and `script_flow.rpy` is written without pressing Ctrl+E; a game running in developer mode reloads by itself. If the [Check] card on the left has errors, it doesn't export until they're fixed.
-- **[Follow script]** (menu panel at the top right, formerly Follow game line): when on, the reloaded game goes to the line you're writing (rolling back if it's a line already passed, otherwise skipping ahead to it). Turn it off if you want to look through from the start after editing many places. When off, the game stays where it was.
+- **[Follow script]** (pink group on the tab row, formerly Follow game line): when on, the reloaded game goes to the line you're writing (rolling back if it's a line already passed, otherwise skipping ahead to it). Turn it off if you want to look through from the start after editing many places. When off, the game stays where it was.
 
 > **Caution**: if you edit the exported `.rpy` directly in VSCode, it will be overwritten on the next export. Always edit the script in this tool.
 

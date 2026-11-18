@@ -54,7 +54,7 @@ export function GallerySwitch() {
           {move ? '❚❚ 멈추기' : '▶ 움직이기'}
         </button>
       )}
-      <span className="view-switch fxv-kind gal-switch">
+      <span className="seg-switch fxv-kind gal-switch">
         <button className={gallery ? 'on' : ''} onClick={() => usePrefs.setState({ gallery: true })} title="미리보기 카드를 여러 개 같이 보며 고르기">▦ 갤러리</button>
         <button className={gallery ? '' : 'on'} onClick={() => usePrefs.setState({ gallery: false })} title="이름만 한 줄씩">☰ 목록</button>
       </span>

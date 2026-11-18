@@ -117,11 +117,22 @@ export function Toolbar() {
 
   return (
     <div className="toolbar">
-      {/* 가운데 두 줄: 큰 탭 묶음(+ 게임 연결 표시), 그 아래 메뉴 묶음. 둘 다 가운데 정렬 (세션 77) */}
+      {/* 가운데 두 줄: 첫 줄은 파란 탭 묶음 + 게임 연결 표시 + 분홍 묶음, 둘째 줄은 메뉴 묶음. 모두 가운데 정렬 (세션 77·78) */}
       <div className="tb-center">
       <div className="tb-left">
       <ViewSwitch />
       <LiveBadge />
+      {/* 분홍 묶음: 프로젝트 제목, 렌파이에서 실행, 스크립트 따라가기. 파란 탭 묶음과 같은 줄·같은 높이에 두되 따로 떨어진 묶음 (세션 78) */}
+      <div className="tb-ctx" role="group" aria-label="프로젝트와 실행">
+      <input
+        className="ptitle"
+        value={s.project.project.title}
+        onChange={(e) => s.update((p) => void (p.project.title = e.target.value), 'ptitle')}
+        placeholder="프로젝트 제목"
+        title="프로젝트 제목 (눌러서 고쳐요)"
+      />
+      <RunItems />
+      </div>
       </div>
       {/* 메뉴: 둘째 줄 왼쪽부터. 자주 쓰는 되돌리기, 집중, 설정이 맨 앞 */}
       <div className="tb-right">
@@ -146,17 +157,6 @@ export function Toolbar() {
       {hasRpyTarget() && <button onClick={() => exportRpyFile(true)} title={keyOf('export')}>같은 곳에 다시</button>}
       </div>
       </div>
-      {/* 오른쪽 위: 메뉴 패널 하나(Context Menu 꼴). 맨 위 프로젝트 제목, 구분선, 렌파이에서 실행, 스크립트 따라가기 */}
-      <div className="tb-ctx">
-      <input
-        className="ptitle"
-        value={s.project.project.title}
-        onChange={(e) => s.update((p) => void (p.project.title = e.target.value), 'ptitle')}
-        placeholder="프로젝트 제목"
-        title="프로젝트 제목 (눌러서 고쳐요)"
-      />
-      <RunItems />
-      </div>
       {showVersions && <Versions onClose={() => setShowVersions(false)} />}
     </div>
   );
@@ -179,7 +179,7 @@ function FolderButtons() {
   return null;
 }
 
-// 오른쪽 위 메뉴 패널의 두 줄 (세션 77). 둘 다 켜짐/꺼짐 꼴: 켜짐은 옅은 바탕, 꺼짐은 바탕 없음
+// 분홍 묶음의 두 단추 (세션 77, 78에 첫 줄로 옮김). 둘 다 켜짐/꺼짐 꼴: 켜짐은 옅은 바탕, 꺼짐은 바탕 없음
 // - 렌파이에서 실행: 게임이 꺼져 있으면 켜짐(누를 수 있음). 게임이 켜져 있으면(앱과 연결됨, 다시 읽는 중) 꺼짐(누를 수 없음).
 //   플러그인이 없는 게임은 앱이 켜진 줄 몰라서 켜짐으로 보이고, 누르면 runInRenpy가 "이미 켜져 있어요"라고 알린다
 // - 스크립트 따라가기(예전 이름 게임 줄 따라가기): 렌파이 폴더를 연결했을 때만. 고치고 잠깐 멈추면 script_flow.rpy로 저절로 내보내고,

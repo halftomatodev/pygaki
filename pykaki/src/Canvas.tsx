@@ -1,8 +1,9 @@
 import type { BoxNode } from './types';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Hint } from './Help';
+import { Maximize, Minus, Plus } from 'lucide-react';
 import {
-  ReactFlow, Background, Controls, MiniMap, MarkerType, applyNodeChanges, useReactFlow, getViewportForBounds,
+  ReactFlow, Background, MiniMap, MarkerType, applyNodeChanges, useReactFlow, getViewportForBounds,
   type Connection, type Edge, type Viewport, type EdgeChange, type Node, type NodeChange, type OnConnectEnd,
 } from '@xyflow/react';
 import { useStore } from './store';
@@ -248,11 +249,13 @@ export function Canvas() {
         multiSelectionKeyCode={['Control', 'Meta', 'Shift']}
         minZoom={0.1}
         maxZoom={2}
+        proOptions={{ hideAttribution: true }}
       >
         {/* 다른 탭을 보는 동안(캔버스가 숨어 크기 0) 점 무늬가 NaN을 내서 그리지 않는다 */}
         {scriptView && <Background gap={24} color="var(--line)" />}
-        <Controls showInteractive={false} onFitView={() => fitVisible(rf, { padding: 0.2, maxZoom: 1, duration: 300 })} />
+        {/* 미니맵은 왼쪽 위, [캔버스 조작] 줄 아래 (세션 78) */}
         <MiniMap
+          position="top-left"
           pannable
           zoomable
           nodeColor={(n) => (n.type === 'frame' ? 'transparent' : gradBox ?? ops.findBox(project, n.id)?.color ?? project.labels.find((g) => g.id === ops.findBox(project, n.id)?.group)?.color ?? '#ddd')}
@@ -268,7 +271,17 @@ export function Canvas() {
       <button className={'side-toggle r' + (hideRight ? ' off' : '')} title={hideRight ? '오른쪽 칸 펴기' : '오른쪽 칸 접기'} onClick={() => useStore.getState().togglePanel('right')}>
         {hideRight ? '‹' : '›'}
       </button>
-      <div className="canvas-hint">캔버스 조작<Hint text="빈 곳 더블클릭: 새 상자 · 상자 더블클릭: 글 쓰기 · 선을 빈 곳에 놓기: 새 상자로 연결 · 선 더블클릭: jump↔call · Shift+드래그: 여러 개 선택 · Delete: 삭제" topic="흐름 잇기" /></div>
+      {/* 왼쪽 위: [캔버스 조작] ⓘ 옆에 가로 캡슐 확대·축소·모두 보기 (세션 78. React Flow 기본 Controls 대신) */}
+      <div className="canvas-hint">
+        <span className="canvas-hint-t">
+          캔버스 조작<Hint text="빈 곳 더블클릭: 새 상자 · 상자 더블클릭: 글 쓰기 · 선을 빈 곳에 놓기: 새 상자로 연결 · 선 더블클릭: jump↔call · Shift+드래그: 여러 개 선택 · Delete: 삭제" topic="흐름 잇기" />
+        </span>
+        <span className="zoom-btns" role="group" aria-label="확대·축소">
+          <button aria-label="확대" title="확대" onClick={() => rf.zoomIn({ duration: 200 })}><Plus size={14} strokeWidth={2.2} aria-hidden /></button>
+          <button aria-label="축소" title="축소" onClick={() => rf.zoomOut({ duration: 200 })}><Minus size={14} strokeWidth={2.2} aria-hidden /></button>
+          <button aria-label="모두 보기" title="상자가 모두 보이게" onClick={() => fitVisible(rf, { padding: 0.2, maxZoom: 1, duration: 300 })}><Maximize size={13} strokeWidth={2.2} aria-hidden /></button>
+        </span>
+      </div>
     </div>
   );
 }

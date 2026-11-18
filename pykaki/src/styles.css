@@ -85,11 +85,8 @@ code { font-family: var(--mono); }
   display: flex; flex-wrap: wrap; gap: 2px; align-items: center;
   padding: 6px 10px; background: var(--bg);
 }
-/* 왼쪽(제목, 큰 탭, 게임 돌려보기)은 늘 또렷하게, 오른쪽에 모은 메뉴는 마우스를 올리기 전까지 흐리게 */
-.toolbar { justify-content: flex-end; --run: #34c759; }
-.tb-left, .tb-run, .tb-right { display: flex; align-items: center; gap: 2px; }
-.tb-left { margin-right: auto; }
-.tb-run { gap: 4px; margin-right: 6px; }
+/* 메뉴 묶음은 마우스를 올리기 전까지 흐리게 (사과 스타일은 아래에서 또렷하게 덮음) */
+.tb-left, .tb-right { display: flex; align-items: center; gap: 2px; }
 .tb-right { flex-wrap: wrap; justify-content: flex-end; opacity: 0.6; transition: opacity 0.2s; }
 .toolbar:hover .tb-right, .toolbar:focus-within .tb-right { opacity: 1; }
 .toolbar .sep { width: 1px; height: 14px; background: var(--line); margin: 0 4px; }
@@ -97,11 +94,6 @@ code { font-family: var(--mono); }
   field-sizing: content; min-width: 72px; max-width: 280px; margin-right: 8px; padding: 4px 8px;
   font-size: 16px; font-weight: 800; letter-spacing: -0.01em; background: transparent; text-overflow: ellipsis;
 }
-/* 게임 돌려보기 단추는 초록 톤: 실행은 채운 초록, 줄 따라가기는 옅은 초록 */
-.toolbar .run, .toolbar .run:hover:not(:disabled) { background: var(--run); color: #fff; font-weight: 700; padding: 6px 14px; }
-.toolbar .follow { padding: 6px 10px; background: var(--faint); }
-.toolbar .follow.on, .toolbar .follow.on:hover:not(:disabled) { background: color-mix(in srgb, var(--run) 16%, var(--panel)); color: color-mix(in srgb, var(--run) 62%, var(--text)); font-weight: 600; }
-.toolbar .run:hover:not(:disabled) { filter: brightness(1.08); }
 .dirty { color: var(--play); font-style: normal; }
 .toast {
   position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 200;
@@ -142,19 +134,46 @@ code { font-family: var(--mono); }
 :is(.sec, .card > [data-fluidkit='liquid-card-content']) > h3 { font-size: 13.5px; font-weight: 700; color: var(--text); margin: 0 0 8px; display: flex; justify-content: space-between; align-items: center; }
 :is(.sec, .card > [data-fluidkit='liquid-card-content']) > h3 button { font-size: 11.5px; font-weight: 600; padding: 2px 8px; color: var(--accent); }
 .sidebar > * { direction: ltr; }
-/* 카드 접기 (Card.tsx): 접으면 이름만 한 줄, 하늘색 톤. 접기·펼치기 단추는 회색 */
+/* 카드 접기 (Card.tsx): 접으면 이름만 한 줄, 하늘색 톤. 칸 맨 위 일괄 단추만 있음 */
 .card > [data-fluidkit='liquid-card-content'] > h3 { gap: 6px; }
 .card-title { min-width: 0; display: flex; align-items: center; gap: 6px; user-select: none; }
 .card-acts { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
-:is(.sec, .card > [data-fluidkit='liquid-card-content']) > h3 .fold-btn, :is(.sec, .card > [data-fluidkit='liquid-card-content']) > h3 .fold-btn:hover:not(:disabled) { color: var(--muted); background: var(--faint); font-weight: 500; }
-:is(.sec, .card > [data-fluidkit='liquid-card-content']) > h3 .fold-btn:hover:not(:disabled) { background: var(--line); color: var(--text); }
 .sec.folded { --sky: color-mix(in srgb, #38bdf8 15%, var(--panel)); background: var(--sky); padding: 6px 10px; }
 :is(.sec.folded, .card.folded > [data-fluidkit='liquid-card-content']) > h3 { margin: 0; font-weight: 600; color: color-mix(in srgb, #0284c7 60%, var(--text)); }
-:is(.sec.folded, .card.folded > [data-fluidkit='liquid-card-content']) > h3 .fold-btn { background: color-mix(in srgb, var(--text) 7%, var(--sky)); }
 .fold-all { display: flex; justify-content: flex-end; margin: 0 2px -6px; flex-shrink: 0; }
 .fold-all .fold-btn { color: var(--muted); background: var(--faint); font-weight: 500; font-size: 11.5px; padding: 2px 8px; }
 .fold-all .fold-btn:hover:not(:disabled) { background: var(--line); color: var(--text); text-decoration: none; }
-:is(.sec, .card > [data-fluidkit='liquid-card-content']) > .tip, .sec .link-panel > .tip { margin: 6px 0 2px; }
+:is(.sec, .card > [data-fluidkit='liquid-card-content'], .card-body) > .tip, .sec .link-panel > .tip { margin: 6px 0 2px; }
+/* ── 카드 머리와 펼침 (세션 78, 사용자 손그림) ──
+   카드마다 접기 단추 없음: 제목 줄을 누르면 접고 편다. 칸 맨 위 일괄 단추에 학종이 아이콘.
+   접은 카드는 제목 길이만큼만 넓다(펼치면 칸 폭). 머리의 작은 단추는 모두 캡슐 */
+.card > [data-fluidkit='liquid-card-content'] > h3.card-head { margin: 0; cursor: pointer; min-height: 24px; }
+.card-body { padding-top: 8px; }
+.card-body > * { transform-origin: 24px 0; }
+.card-title:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+.card.folded:not(:has(.card-body)) { align-self: self-start; width: fit-content; max-width: 100%; }
+.card.folded > [data-fluidkit='liquid-card-content'] > h3.card-head:hover { color: color-mix(in srgb, #0284c7 85%, var(--text)); }
+:is(.sec, .card > [data-fluidkit='liquid-card-content']) > h3 .card-acts button,
+:is(.sec, .card > [data-fluidkit='liquid-card-content']) > h3 .card-acts button:hover:not(:disabled) {
+  border-radius: 999px; padding: 3px 11px; font-size: 11.5px; font-weight: 600; line-height: 1.3;
+  color: color-mix(in srgb, var(--accent) 85%, var(--text)); background: color-mix(in srgb, var(--accent) 11%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 16%, transparent); text-decoration: none;
+  transition: background var(--dur-hover) var(--ease-out), box-shadow var(--dur-hover) var(--ease-out);
+}
+:is(.sec, .card > [data-fluidkit='liquid-card-content']) > h3 .card-acts button:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 19%, transparent); }
+:is(.sec, .card > [data-fluidkit='liquid-card-content']) > h3 .card-acts button.on { background: var(--accent); color: #fff; box-shadow: none; }
+.card-acts { gap: 4px; }
+.fold-all .fold-btn, .fold-all .fold-btn:hover:not(:disabled) { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 3px 10px 3px 8px; }
+.paper-fold { flex: none; overflow: visible; }
+.paper-fold .pf-base { fill: color-mix(in srgb, #f472b6 55%, var(--panel)); }
+.paper-fold .pf-flap {
+  fill: color-mix(in srgb, #f472b6 70%, var(--panel)); transform-box: view-box; transform-origin: 8px 8px;
+  transform: rotate(-45deg) scaleY(1) rotate(45deg);
+  transition: transform var(--dur-view) var(--ease-spring), fill 0s linear calc(var(--dur-view) * 0.14);
+}
+.paper-fold.folded .pf-flap { transform: rotate(-45deg) scaleY(-1) rotate(45deg); fill: color-mix(in srgb, #fff 80%, #f472b6); }
+.paper-fold .pf-crease { stroke: color-mix(in srgb, #be185d 45%, transparent); stroke-width: 0.8; fill: none; }
+.paper-fold.folded .pf-crease { opacity: 0; }
 .mini-btns { display: flex; gap: 4px; }
 .mini-btns button { background: var(--faint); padding: 2px 8px; font-size: 11.5px; }
 .mini-btns button.on { background: var(--accent-soft); }
@@ -630,9 +649,10 @@ fieldset.plain:disabled { opacity: 0.4; }
 .sf-pos { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-family: var(--mono); color: var(--muted); margin-right: 8px; }
 
 /* ── showpy 화면 (데스크톱 앱, ShowpyView.tsx) ── */
-.view-switch { display: inline-flex; gap: 3px; margin-right: 10px; padding: 3px; border-radius: 10px; background: var(--faint); border: 1px solid var(--line); }
-.view-switch button { font-size: 14px; font-weight: 700; padding: 5px 14px; border-radius: 7px; color: var(--muted); }
-.view-switch button.on, .view-switch button.on:hover:not(:disabled) { background: var(--accent); color: #fff; box-shadow: none; }
+/* 화면 안의 작은 전환 단추(세그먼트: 효과·셰이더 화면의 종류, 갤러리/목록). 맨 위 화면 탭은 아래 .view-tabs */
+.seg-switch { display: inline-flex; gap: 3px; margin-right: 10px; padding: 3px; border-radius: 10px; background: var(--faint); border: 1px solid var(--line); }
+.seg-switch button { font-size: 14px; font-weight: 700; padding: 5px 14px; border-radius: 7px; color: var(--muted); }
+.seg-switch button.on, .seg-switch button.on:hover:not(:disabled) { background: var(--accent); color: #fff; box-shadow: none; }
 /* 맨 위 화면 바꾸기 (Toolbar.tsx ViewSwitch, fluidkit LiquidTabs 유리) */
 .view-tabs { margin-right: 10px; flex: none; font-weight: 700; }
 .view-tabs [role='tab'] { font-size: 14px; font-weight: 700; }
@@ -680,7 +700,7 @@ fieldset.plain:disabled { opacity: 0.4; }
 /* 오른쪽 칸: 대본 편집·GUI 편집처럼 바탕 위에 카드 (샘플 / 세부 값 / 쓰인 곳) */
 .fxv-side { width: var(--fx-side-w, 440px); max-width: 60%; flex-shrink: 0; overflow: auto; padding: 10px 10px 16px 4px; background: var(--bg); display: flex; flex-direction: column; gap: 10px; }
 .fxv-side .sec { box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); }
-.fxv-side :is(.sec, .card > [data-fluidkit='liquid-card-content']) > .tip:first-of-type { margin: 0 0 8px; }
+.fxv-side :is(.sec, .card > [data-fluidkit='liquid-card-content'], .card-body) > .tip:first-of-type { margin: 0 0 8px; }
 .fxv-stage { height: 190px; padding: 0 22px; }
 .fxv-stage .preview-text { font-size: 34px; }
 .fxv-bad { position: absolute; left: 8px; right: 8px; bottom: 6px; font-size: 11px; color: #fca5a5; line-height: 1.35; overflow: hidden; max-height: 4.2em; }
@@ -1161,6 +1181,17 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .main .side-toggle.l { left: calc(var(--lw) + 6px); }
 .main .side-toggle.r { right: calc(var(--rw) + 6px); }
 .main .canvas-hint { left: calc(var(--lw) + 32px); }
+/* 왼쪽 위 캔버스 조작 줄 (세션 78): 글 + ⓘ + 가로 캡슐 확대·축소·모두 보기. 그 아래 미니맵 */
+.canvas-hint { display: flex; align-items: center; gap: 8px; opacity: 1; }
+.canvas-hint-t { display: inline-flex; align-items: center; opacity: 0.7; }
+.zoom-btns {
+  pointer-events: auto; display: inline-flex; align-items: center; padding: 2px; gap: 1px; border-radius: 999px;
+  background: color-mix(in srgb, var(--panel) 70%, transparent); box-shadow: inset 0 0 0 1px var(--line);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+}
+.zoom-btns button { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 22px; padding: 0; border-radius: 999px; color: var(--muted); background: transparent; }
+.zoom-btns button:hover:not(:disabled) { background: color-mix(in srgb, var(--text) 8%, transparent); color: var(--text); }
+.main .react-flow__minimap.top.left { left: var(--lw); top: 30px; margin: 0 0 0 32px; border-radius: 10px; overflow: hidden; }
 .main .react-flow__panel.left { left: var(--lw); }
 .main .react-flow__panel.right { right: var(--rw); }
 /* 대사 카드 줄의 [위치 옮기기] [여기로 이동]: 카드 왼쪽 바깥에 작은 팝업 (PickPos.tsx useSidePop) */
@@ -1795,16 +1826,16 @@ button.primary.solid:hover:not(:disabled) { background: color-mix(in srgb, var(-
 [data-look='apple'] :is(.app, .toolbar, .sidebar, .right-panel) { background: transparent; }
 [data-look='apple'] .react-flow { --xy-background-color: transparent; }
 [data-look='apple'] .toolbar { padding: 10px 14px 8px; row-gap: 8px; column-gap: 8px; }
-/* 유리 묶음: 탭 묶음, 메뉴 묶음, 연결 표시, 실행 묶음 */
-[data-look='apple'] :is(.view-switch, .tb-right, .live-badge) {
+/* 유리 묶음: 메뉴 묶음, 연결 표시, 화면 안 전환 단추 (맨 위 탭은 fluidkit LiquidTabs가 그림) */
+[data-look='apple'] :is(.seg-switch, .tb-right, .live-badge) {
   background: var(--glass); border: 1px solid var(--glass-line); box-shadow: var(--glass-shadow);
   -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
 }
-/* 첫 줄 탭: 둘째 줄보다 크게, 고른 탭은 반투명 연한 파랑 */
-[data-look='apple'] .view-switch { gap: 2px; padding: 4px; margin-right: 8px; border-radius: 999px; }
-[data-look='apple'] .view-switch button { font-size: 14.5px; font-weight: 600; padding: 7px 18px; border-radius: 999px; color: color-mix(in srgb, var(--text) 72%, transparent); }
-[data-look='apple'] .view-switch button:hover:not(:disabled):not(.on) { background: var(--glass-hover); color: var(--text); }
-[data-look='apple'] .view-switch button.on, [data-look='apple'] .view-switch button.on:hover:not(:disabled) { background: var(--tab-on); color: var(--tab-on-text); box-shadow: inset 0 0 0 1px rgba(0, 122, 255, 0.18); }
+/* 화면 안 전환 단추: 알약, 고른 것은 반투명 연한 파랑 (맨 위 유리 탭과 같은 톤) */
+[data-look='apple'] .seg-switch { gap: 2px; padding: 4px; border-radius: 999px; }
+[data-look='apple'] .seg-switch button { font-size: 14.5px; font-weight: 600; padding: 7px 18px; border-radius: 999px; color: color-mix(in srgb, var(--text) 72%, transparent); }
+[data-look='apple'] .seg-switch button:hover:not(:disabled):not(.on) { background: var(--glass-hover); color: var(--text); }
+[data-look='apple'] .seg-switch button.on, [data-look='apple'] .seg-switch button.on:hover:not(:disabled) { background: var(--tab-on); color: var(--tab-on-text); box-shadow: inset 0 0 0 1px rgba(0, 122, 255, 0.18); }
 [data-look='apple'] .live-badge { border-radius: 999px; padding: 7px 14px; font-weight: 500; color: color-mix(in srgb, var(--text) 62%, transparent); }
 [data-look='apple'] .live-badge.on, [data-look='apple'] .live-badge.on:hover:not(:disabled) { background: rgba(59, 130, 246, 0.14); color: #1d5fd6; }
 [data-look='apple'] .live-badge.reloading, [data-look='apple'] .live-badge.reloading:hover:not(:disabled) { background: rgba(255, 159, 10, 0.16); color: #b26a00; }
@@ -1821,27 +1852,28 @@ button.primary.solid:hover:not(:disabled) { background: color-mix(in srgb, var(-
 
 /* ── 툴바 배치 (세션 77): 가운데 두 줄(탭 묶음, 메뉴 묶음)을 창 가운데에, 오른쪽 위에 메뉴 패널 ──
    왼쪽 칸은 비워 두고 오른쪽 칸과 같은 폭(1fr)이라 가운데가 정말 가운데. 좁으면 왼쪽부터 줄고 메뉴는 줄바꿈 */
-.toolbar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, max-content) minmax(max-content, 1fr); align-items: start; column-gap: 12px; }
-.tb-center { grid-column: 2; display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; }
-.tb-center .tb-left { margin-right: 0; justify-content: center; }
+.toolbar { display: flex; justify-content: center; align-items: start; }
+.tb-center { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; }
+.tb-center .tb-left { margin-right: 0; justify-content: center; flex-wrap: wrap; gap: 10px; }
 .tb-center .tb-right { flex-basis: auto; order: 0; justify-content: center; }
-.tb-ctx { grid-column: 3; justify-self: end; display: flex; flex-direction: column; align-items: stretch; gap: 1px; min-width: 190px; padding: 4px; border-radius: 12px; }
-.tb-ctx .ptitle { margin: 0; font-size: 14px; font-weight: 700; padding: 5px 10px; }
-.ctx-sep { height: 1px; margin: 3px 8px; background: var(--line); }
-.ctx-item { display: flex; justify-content: space-between; align-items: center; gap: 16px; width: 100%; text-align: left; padding: 6px 10px; border-radius: 8px; color: var(--text); font-weight: 500; }
+/* 분홍 묶음(세션 78): 파란 탭 묶음과 같은 줄, 같은 높이의 알약. 탭과 붙지 않게 10px 띄움 */
+.tb-ctx { display: flex; flex-direction: row; align-items: center; gap: 2px; padding: 4px; border-radius: 999px; }
+.tb-ctx .ptitle { margin: 0; font-size: 14px; font-weight: 700; padding: 5px 12px; width: auto; min-width: 0; border-radius: 999px; }
+.ctx-sep { width: 1px; height: 18px; margin: 0 4px; background: var(--line); }
+.ctx-item { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; padding: 6px 14px; border-radius: 999px; color: var(--text); font-weight: 500; }
 .ctx-item.on { background: var(--accent-soft); }
 .ctx-state { color: var(--muted); font-size: 11.5px; }
 /* 사과 스타일: 메뉴보다 더 투명한 판, 글자는 메뉴와 같은 색, 켜짐은 옅은 분홍 */
 :root[data-look='apple'] { --ctx-glass: rgba(255, 255, 255, 0.2); --ctx-on: rgba(255, 192, 214, 0.5); --ctx-on-hover: rgba(255, 178, 204, 0.62); --menu-text: color-mix(in srgb, var(--text) 78%, transparent); }
 [data-look='apple'] .toolbar { column-gap: 14px; }
 [data-look='apple'] .tb-ctx {
-  padding: 5px; border-radius: 16px; background: var(--ctx-glass); border: 1px solid rgba(255, 255, 255, 0.55); box-shadow: var(--glass-shadow);
+  padding: 4px; border-radius: 999px; background: var(--ctx-glass); border: 1px solid rgba(255, 255, 255, 0.55); box-shadow: var(--glass-shadow);
   -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
 }
-[data-look='apple'] .tb-ctx .ptitle, [data-look='apple'] .tb-ctx .ptitle:hover { background: transparent; color: var(--menu-text); font-weight: 600; border-radius: 10px; }
+[data-look='apple'] .tb-ctx .ptitle, [data-look='apple'] .tb-ctx .ptitle:hover { background: transparent; color: var(--menu-text); font-weight: 600; border-radius: 999px; }
 [data-look='apple'] .tb-ctx .ptitle:focus { background: rgba(255, 255, 255, 0.5); box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.25); color: var(--text); }
 [data-look='apple'] .ctx-sep { background: rgba(60, 60, 90, 0.14); }
-[data-look='apple'] .ctx-item { color: var(--menu-text); border-radius: 10px; background: transparent; }
+[data-look='apple'] .ctx-item { color: var(--menu-text); border-radius: 999px; background: transparent; }
 [data-look='apple'] .ctx-item:hover:not(:disabled) { background: rgba(255, 255, 255, 0.5); color: var(--text); }
 [data-look='apple'] .ctx-item.on { background: var(--ctx-on); color: var(--menu-text); }
 [data-look='apple'] .ctx-item.on:hover:not(:disabled) { background: var(--ctx-on-hover); color: var(--text); }
