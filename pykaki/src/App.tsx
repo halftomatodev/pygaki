@@ -138,7 +138,7 @@ function SideResizer({ side }: { side: 'left' | 'right' }) {
   return <Resizer size={side === 'left' ? 'leftW' : 'rightW'} grow={side === 'left' ? 1 : -1} className={side} />;
 }
 
-// 상단 탭 차례 (화면 전환 방향을 정함). Toolbar.tsx ViewSwitch와 같은 차례
+// 상단 탭 차례 (화면 전환 방향을 정함). Toolbar.tsx VIEW_TABS와 같은 차례
 const VIEW_ORDER = ['script', 'showpy', 'screens', 'effects', 'shaders', 'fonts'];
 
 export function App() {
@@ -155,7 +155,7 @@ export function App() {
     if (isDesktop) startLive();
   }, []);
 
-  // 화면을 바꾸면 새 화면이 탭이 움직인 방향에서 밀려 들어온다 (docs/MOTION.md, 끈적 탭과 짝)
+  // 화면을 바꾸면 새 화면이 탭이 움직인 방향에서 밀려 들어온다 (docs/MOTION.md, 상단 탭과 짝)
   const appRef = useRef<HTMLDivElement>(null);
   const lastView = useRef(view);
   useLayoutEffect(() => {
@@ -200,12 +200,6 @@ export function App() {
             <animate attributeName="baseFrequency" dur="3s" values="0.02 0.05;0.026 0.062;0.02 0.05" repeatCount="indefinite" />
           </feTurbulence>
           <feDisplacementMap in="SourceGraphic" scale={5} xChannelSelector="R" yChannelSelector="G" />
-        </filter>
-        {/* 끈적(gooey): 흐린 뒤 알파를 날카롭게 잘라 가까운 모양끼리 녹아 붙게. 상단 탭 색 막대가 씀 */}
-        <filter id="pk-goo" x="-20%" y="-50%" width="140%" height="200%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation={5} result="blur" />
-          <feColorMatrix in="blur" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -9" result="goo" />
-          <feComposite in="SourceGraphic" in2="goo" operator="atop" />
         </filter>
       </svg>
       {showPrefs && <SettingsModal />}

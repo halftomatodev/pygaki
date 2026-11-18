@@ -40,14 +40,21 @@
 - 화면 전체가 바뀌는 곳은 `document.startViewTransition()`으로 이전 화면과 새 화면을 겹쳐 바꿀 수 있다.
 - JS로 움직일 때는 `element.animate()`(Web Animations)에 같은 토큰 값을 쓴다. 토큰 값은 `getComputedStyle(document.documentElement).getPropertyValue('--ease-out')`로 읽는다.
 
-## 4. 빼는 것
+## 4. 유리 면과 끈적 움직임
+
+- **상단 탭**(`Toolbar.tsx` `ViewSwitch`)과 **카드**(`Card.tsx`)는 fluidkit(`LiquidTabs`, `LiquidCard`, MIT, motion 위에서 돈다)의 유리 재질을 쓴다. 탭 막대는 물방울처럼 흘러가고 꼬리가 늦게 따라와 다시 합쳐진다(`flow="slide"`). 탭 바탕은 옅은 회색, 막대만 강조색 유리. 카드는 반투명 바탕 색 유리라 뒤의 캔버스가 비친다(접으면 하늘색, 사용 중이면 연두).
+- fluidkit은 애니메이션 줄이기를 스스로 따른다(막대는 바로 옮기고 카드는 원래 움직이지 않음).
+- **드롭다운 메뉴**는 `GooMenu.tsx`의 끈적 드롭다운: 단추에서 녹아 나와 커지고, 자리를 잡으면 흐림을 0으로 줄여 목을 완전히 끊는다.
+- 새 유리 면을 만들 때는 직접 `backdrop-filter`를 쓰기보다 fluidkit의 재질(`material="glass"`, `tint`)을 쓴다. 글자는 필터가 걸린 층에 넣지 않는다.
+
+## 5. 빼는 것
 
 - **모션 블러**: 브라우저에 없다. 흉내 내려고 프레임마다 `filter`를 바꾸지 않는다.
 - **빛이 쓸고 지나가는 반짝임**: 기다리는 자리 표시(`.gal-wait`)에만 쓴다. 평소 화면에는 쓰지 않는다.
 - **SF Pro 글꼴**: 애플 기기 밖에서 쓰거나 묶어 배포할 수 없다. 글꼴은 지금처럼 `--font`(Pretendard 등)를 쓴다.
 - **글자 등장 효과**(`.fx-*`): 게임에서 보일 모양을 그대로 보여 주는 미리보기라 이 원칙 밖이다. 렌파이 쪽 셰이더와 같아야 한다.
 
-## 5. 데스크톱 앱에서 되는지
+## 6. 데스크톱 앱에서 되는지
 
 앱은 Electron 33.2.1(Chromium 130)을 쓴다. 2026-11-18에 그 Electron을 직접 켜서 다음이 모두 되는 것을 확인했다:
 `cubic-bezier()`, `linear()` 이징, `backdrop-filter`, `filter: blur()`, `scale`·`translate` 낱개 속성, `@starting-style`, `transition-behavior: allow-discrete`, `document.startViewTransition()`, `element.animate()`, `prefers-reduced-motion`.

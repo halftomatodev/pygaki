@@ -95,3 +95,11 @@
 - 열린 동안 찾기로 목록이 줄어 판 크기가 바뀌면 `ResizeObserver`로 판 모양을 따라간다.
 - 애니메이션 줄이기: 액체 층 없이 판 제 배경으로 짧은 페이드.
 - 웹 빌드에서 플래그 [+ 추가]로 확인: 열리고, 목이 끊어진 뒤 필터 꺼짐, 닫힌 뒤 액체 층·단추 칠 모두 지워짐, 오류 없음.
+
+## 11. 상단 탭과 카드를 fluidkit 유리로 (사용자 결정)
+
+- 사용자가 상단 탭과 카드의 유리 효과를 fluidkit(React 유리·물방울 UI 라이브러리, MIT, `motion` 필요, React 18 이상) 것으로 바꾸라고 함. npm `fluidkit@0.5.0`, `motion@12.43.0` 설치. 고지는 `pykaki/licenses/MIT-fluidkit.txt`, `MIT-motion.txt`. 배포 파일에 외부 주소나 `fetch`가 없는 것 확인(SVG 이름공간 주소만).
+- 상단 탭: 앞서 직접 짠 끈적 탭(막대 + 물방울 + `#pk-goo` 필터)을 지우고 `LiquidTabs`(`flow="slide"`, `material="glass"`, `size="sm"`, 반사·그림자 켬)로. 막대 색은 `--accent` 82%, 글자 색은 `--muted`를 rgb로 바꿔 넘김(`useThemeInk`, 환경 설정이 바뀌면 다시 읽음). 처음엔 탭 바탕까지 강조색 유리가 되어 글자가 안 보여서 바탕은 `style`로 옅은 회색으로 덮음. 새 화면이 미끄러져 들어오는 것(`App.tsx` `.view-in`)은 그대로.
+- 카드: `<section class="sec card">`를 `LiquidCard`(`material="glass"`, `radius=14`)로. 내용이 `[data-fluidkit='liquid-card-content']` 칸 안으로 한 겹 들어가서 `.sec > h3` 같은 CSS를 `:is(.sec, .card > [data-fluidkit='liquid-card-content']) > h3`로 고침(인스펙터의 맨 `.sec`도 계속 맞게). 카드 바탕·그림자 CSS는 빼고 LiquidCard가 그림. 접힘·사용 중 색은 `tint`로.
+- 웹 빌드 크기 5,957KB → 6,131KB(gzip 3,219 → 3,278KB). 웹 빌드를 크롬으로 열어 확인: 카드 10장 유리로, 탭 막대 흐름, 오류 없음. 윈도우 앱과 어두운 화면은 아직 안 봄.
+- 드롭다운 메뉴는 그대로 `GooMenu`(fluidkit에도 `LiquidMenu`가 있지만 사용자가 고른 끈적 드롭다운을 유지).

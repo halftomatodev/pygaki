@@ -1,4 +1,5 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { LiquidTabs } from 'fluidkit';
 import { Hint, openHelp } from './Help';
 import { useStore } from './store';
 import { exportRpyFile, followLine, hasRpyTarget, newProject, openProject, runInRenpy, saveProject, setFollowLine } from './files';
@@ -12,86 +13,68 @@ import { useLive } from './showpyLive';
 import { FolderMenu } from './FolderMenu';
 
 // 화면 바꾸기: 대본 편집 / GUI 편집(데스크톱 앱에서만) / 화면 / 효과 / 셰이더 / 글꼴(앱에서만)
+// fluidkit LiquidTabs: 유리 물방울 막대가 탭 사이를 흘러가고, 꼬리가 늦게 따라와 다시 합쳐진다
+const VIEW_TABS: { id: View; label: string; title: string; app?: boolean }[] = [
+  { id: 'script', label: '대본 편집', title: '상자와 선으로 대본을 써요' },
+  { id: 'showpy', label: 'GUI 편집', title: '게임 화면을 보면서 타이틀, 대사 창, 선택지 같은 GUI를 고쳐요', app: true },
+  { id: 'screens', label: '화면', title: '버튼을 끌어 놓아 렌파이 화면(screen)을 만들어요. 흐름의 [화면 부르기]로 띄워요' },
+  { id: 'effects', label: '효과', title: '글자 효과와 그림 효과를 보고, 켜고 끄고, 넣고 빼요' },
+  { id: 'shaders', label: '셰이더', title: '화면 전체에 씌우는 셰이더와 셰이더가 바뀔 때의 전환을 봐요' },
+  { id: 'fonts', label: '글꼴', title: '게임에 글꼴을 넣고, 대사·이름·선택지·메뉴의 기본 글꼴을 정해요', app: true },
+];
+type View = ReturnType<typeof useLive.getState>['view'];
+
 function ViewSwitch() {
   const view = useLive((l) => l.view);
-  const go = (v: typeof view) => useLive.setState({ view: v });
-  const box = useRef<HTMLSpanElement>(null);
-  const pill = useRef<HTMLSpanElement>(null);
-  const drop = useRef<HTMLSpanElement>(null);
-  const last = useRef<number>(-1);
-  // 끈적 색 막대: 앞쪽 끝이 먼저, 뒤쪽 끝이 늦게 따라오고 떠난 자리에 물방울이 남아 녹아 붙었다 끊어진다
-  useLayoutEffect(() => {
-    const b = box.current, p = pill.current, d = drop.current;
-    if (!b || !p || !d) return;
-    const tabs = [...b.querySelectorAll('button')];
-    const i = tabs.findIndex((t) => t.classList.contains('on'));
-    if (i < 0) return;
-    const edge = (n: number) => ({ left: tabs[n].offsetLeft, right: b.clientWidth - tabs[n].offsetLeft - tabs[n].offsetWidth });
-    const from = { left: parseFloat(getComputedStyle(p).left), right: parseFloat(getComputedStyle(p).right) };
-    const to = edge(i);
-    p.getAnimations().forEach((a) => a.cancel());
-    p.style.left = to.left + 'px';
-    p.style.right = to.right + 'px';
-    const prev = last.current;
-    last.current = i;
-    if (prev < 0 || prev === i || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const spring = getComputedStyle(document.documentElement).getPropertyValue('--ease-spring').trim() || 'ease-out';
-    const lead = i > prev ? 'right' : 'left', tail = i > prev ? 'left' : 'right';
-    p.animate([{ [lead]: from[lead] + 'px' }, { [lead]: to[lead] + 'px' }], { duration: 340, easing: spring });
-    p.animate([{ [tail]: from[tail] + 'px' }, { [tail]: to[tail] + 'px' }], { duration: 460, delay: 60, easing: spring, fill: 'backwards' });
-    const h = b.clientHeight - 8, w = b.clientWidth - from.left - from.right, cx = from.left + w / 2, top = (b.clientHeight - 2 - h) / 2;
-    d.getAnimations().forEach((a) => a.cancel());
-    d.hidden = false;
-    d.animate([
-      { left: from.left + 'px', width: w + 'px', top: top + 'px', height: h + 'px', borderRadius: '7px' },
-      { left: cx - h * 0.45 + 'px', width: h * 0.9 + 'px', top: top + h * 0.05 + 'px', height: h * 0.9 + 'px', borderRadius: '50%', offset: 0.35 },
-      { left: cx + 'px', width: '0px', top: top + h / 2 + 'px', height: '0px', borderRadius: '50%' },
-    ], { duration: 420, easing: 'cubic-bezier(0.4, 0, 1, 1)' }).finished.then(() => { d.hidden = true; }, () => {});
-  }, [view]);
-  // 글자 크기·언어가 바뀌어 단추 폭이 달라지면 막대만 바로 맞춤
-  useEffect(() => {
-    const b = box.current, p = pill.current;
-    if (!b || !p) return;
-    const fit = () => {
-      const t = b.querySelector<HTMLElement>('button.on');
-      if (!t || p.getAnimations().length) return;
-      p.style.left = t.offsetLeft + 'px';
-      p.style.right = b.clientWidth - t.offsetLeft - t.offsetWidth + 'px';
-    };
-    const ro = new ResizeObserver(fit);
-    ro.observe(b);
-    return () => ro.disconnect();
-  }, []);
+  const ink = useThemeInk();
+  const items = VIEW_TABS.filter((t) => !t.app || isDesktop).map((t) => ({ id: t.id, label: <span title={t.title}>{t.label}</span> }));
   return (
-    <span className="view-switch top-switch" ref={box}>
-      <span className="vs-goo" aria-hidden="true">
-        <span className="vs-drop" ref={drop} hidden />
-        <span className="vs-pill" ref={pill} />
-      </span>
-      <button className={view === 'script' ? 'on' : ''} onClick={() => go('script')} title="상자와 선으로 대본을 써요">
-        대본 편집
-      </button>
-      {isDesktop && (
-        <button className={view === 'showpy' ? 'on' : ''} onClick={() => go('showpy')} title="게임 화면을 보면서 타이틀, 대사 창, 선택지 같은 GUI를 고쳐요">
-          GUI 편집
-        </button>
-      )}
-      <button className={view === 'screens' ? 'on' : ''} onClick={() => go('screens')} title="버튼을 끌어 놓아 렌파이 화면(screen)을 만들어요. 흐름의 [화면 부르기]로 띄워요">
-        화면
-      </button>
-      <button className={view === 'effects' ? 'on' : ''} onClick={() => go('effects')} title="글자 효과와 그림 효과를 보고, 켜고 끄고, 넣고 빼요">
-        효과
-      </button>
-      <button className={view === 'shaders' ? 'on' : ''} onClick={() => go('shaders')} title="화면 전체에 씌우는 셰이더와 셰이더가 바뀔 때의 전환을 봐요">
-        셰이더
-      </button>
-      {isDesktop && (
-        <button className={view === 'fonts' ? 'on' : ''} onClick={() => go('fonts')} title="게임에 글꼴을 넣고, 대사·이름·선택지·메뉴의 기본 글꼴을 정해요">
-          글꼴
-        </button>
-      )}
-    </span>
+    <LiquidTabs
+      className="view-tabs"
+      items={items}
+      value={view}
+      onChange={(v) => useLive.setState({ view: v as View })}
+      flow="slide"
+      material="glass"
+      size="sm"
+      tint={ink.tint}
+      labelColor={ink.muted}
+      activeLabelColor="#ffffff"
+      reflection
+      shadow
+      style={{ background: 'color-mix(in srgb, var(--text) 6%, transparent)', boxShadow: 'inset 0 0 0 1px var(--line)' }}
+      aria-label="화면 바꾸기"
+    />
   );
+}
+
+// 테마 색을 LiquidTabs가 섞을 수 있는 rgb()로. 환경 설정에서 색이나 어두운 화면이 바뀌면 다시 읽는다
+function useThemeInk() {
+  const read = () => {
+    const probe = document.createElement('span');
+    document.body.append(probe);
+    const rgb = (v: string) => {
+      probe.style.color = v;
+      const c = document.createElement('canvas').getContext('2d')!;
+      c.fillStyle = getComputedStyle(probe).color;
+      c.fillRect(0, 0, 1, 1);
+      const [r, g, b] = c.getImageData(0, 0, 1, 1).data;
+      return [r, g, b];
+    };
+    const m = rgb('var(--muted)'), a = rgb('var(--accent)');
+    probe.remove();
+    return { muted: `rgb(${m.join(', ')})`, tint: `rgba(${a.join(', ')}, 0.82)` };
+  };
+  const [ink, setInk] = useState(read);
+  useEffect(() => {
+    const mo = new MutationObserver(() => setInk((o) => {
+      const n = read();
+      return n.muted === o.muted && n.tint === o.tint ? o : n;
+    }));
+    mo.observe(document.documentElement, { attributes: true, attributeFilter: ['style', 'data-dark', 'class'] });
+    return () => mo.disconnect();
+  }, []);
+  return ink;
 }
 
 // 게임과 붙어 있는지 (데스크톱 앱). 붙어 있으면 옅은 파란색, 게임이 원고를 다시 읽는 중이면 노란색, 아니면 회색. 누르면 GUI 편집으로

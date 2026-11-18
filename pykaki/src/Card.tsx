@@ -1,9 +1,17 @@
-// 왼쪽·오른쪽 칸과 GUI 편집 칸이 같이 쓰는 카드. 접으면 이름만 남고 하늘색 톤이 된다.
+// 왼쪽·오른쪽 칸과 GUI 편집 칸이 같이 쓰는 카드 (fluidkit LiquidCard 유리, 내용은 그 안 content 칸). 접으면 이름만 남고 하늘색 톤이 된다.
 // 접은 카드는 이 브라우저에 기억한다 (localStorage `pygaki-folded`, 카드 id → 접힘).
 // 왼쪽 칸 카드(FRESH)는 기억을 안 쓰고 켤 때마다 접혀서 시작한다.
 import { createContext, useContext, useEffect, type ReactNode } from 'react';
 import { create } from 'zustand';
+import { LiquidCard } from 'fluidkit';
 import { Hint } from './Help';
+
+// 카드 유리 색 (fluidkit LiquidCard). 뒤의 캔버스가 비치게 반투명. 접으면 하늘색, 사용 중이면 연두
+const TINT = {
+  base: 'color-mix(in srgb, var(--panel) 72%, transparent)',
+  folded: 'color-mix(in srgb, color-mix(in srgb, #38bdf8 15%, var(--panel)) 78%, transparent)',
+  inUse: 'color-mix(in srgb, color-mix(in srgb, #34c759 8%, var(--panel)) 78%, transparent)',
+};
 
 const KEY = 'pygaki-folded';
 export const FRESH = ['labels', 'chars', 'warn', 'project', 'script', 'settings', 'usage'];
@@ -86,7 +94,15 @@ export function Card({ id, title, extra, defFolded = false, className = '', domI
       });
   }, [scope, id, defFolded]);
   return (
-    <section className={'sec card' + (folded ? ' folded' : '') + (className ? ' ' + className : '')} id={domId}>
+    <LiquidCard
+      className={'sec card' + (folded ? ' folded' : '') + (className ? ' ' + className : '')}
+      id={domId}
+      material="glass"
+      radius={14}
+      style={{ padding: undefined }}
+      tint={folded ? TINT.folded : /\bin-use\b/.test(className) ? TINT.inUse : TINT.base}
+      intensity="whisper"
+    >
       <h3>
         <span className="card-title" onDoubleClick={() => toggleFold(id, defFolded)}>
           {title}
@@ -100,6 +116,6 @@ export function Card({ id, title, extra, defFolded = false, className = '', domI
         </span>
       </h3>
       {!folded && children}
-    </section>
+    </LiquidCard>
   );
 }

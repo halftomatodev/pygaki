@@ -139,22 +139,22 @@ code { font-family: var(--mono); }
 .sidebar { direction: rtl; width: var(--left-w, 244px); overflow: auto; background: var(--bg); padding: 4px 4px 16px 6px; flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; }
 /* 묶음마다 둥근 카드. 모든 카드가 같은 바탕색(면 색) */
 .sec { background: var(--panel); border-radius: 14px; padding: 10px 10px 8px; flex-shrink: 0; }
-.sec > h3 { font-size: 13.5px; font-weight: 700; color: var(--text); margin: 0 0 8px; display: flex; justify-content: space-between; align-items: center; }
-.sec > h3 button { font-size: 11.5px; font-weight: 600; padding: 2px 8px; color: var(--accent); }
+:is(.sec, .card > [data-fluidkit='liquid-card-content']) > h3 { font-size: 13.5px; font-weight: 700; color: var(--text); margin: 0 0 8px; display: flex; justify-content: space-between; align-items: center; }
+:is(.sec, .card > [data-fluidkit='liquid-card-content']) > h3 button { font-size: 11.5px; font-weight: 600; padding: 2px 8px; color: var(--accent); }
 .sidebar > * { direction: ltr; }
 /* 카드 접기 (Card.tsx): 접으면 이름만 한 줄, 하늘색 톤. 접기·펼치기 단추는 회색 */
-.card > h3 { gap: 6px; }
+.card > [data-fluidkit='liquid-card-content'] > h3 { gap: 6px; }
 .card-title { min-width: 0; display: flex; align-items: center; gap: 6px; user-select: none; }
 .card-acts { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
-.sec > h3 .fold-btn, .sec > h3 .fold-btn:hover:not(:disabled) { color: var(--muted); background: var(--faint); font-weight: 500; }
-.sec > h3 .fold-btn:hover:not(:disabled) { background: var(--line); color: var(--text); }
+:is(.sec, .card > [data-fluidkit='liquid-card-content']) > h3 .fold-btn, :is(.sec, .card > [data-fluidkit='liquid-card-content']) > h3 .fold-btn:hover:not(:disabled) { color: var(--muted); background: var(--faint); font-weight: 500; }
+:is(.sec, .card > [data-fluidkit='liquid-card-content']) > h3 .fold-btn:hover:not(:disabled) { background: var(--line); color: var(--text); }
 .sec.folded { --sky: color-mix(in srgb, #38bdf8 15%, var(--panel)); background: var(--sky); padding: 6px 10px; }
-.sec.folded > h3 { margin: 0; font-weight: 600; color: color-mix(in srgb, #0284c7 60%, var(--text)); }
-.sec.folded > h3 .fold-btn { background: color-mix(in srgb, var(--text) 7%, var(--sky)); }
+:is(.sec.folded, .card.folded > [data-fluidkit='liquid-card-content']) > h3 { margin: 0; font-weight: 600; color: color-mix(in srgb, #0284c7 60%, var(--text)); }
+:is(.sec.folded, .card.folded > [data-fluidkit='liquid-card-content']) > h3 .fold-btn { background: color-mix(in srgb, var(--text) 7%, var(--sky)); }
 .fold-all { display: flex; justify-content: flex-end; margin: 0 2px -6px; flex-shrink: 0; }
 .fold-all .fold-btn { color: var(--muted); background: var(--faint); font-weight: 500; font-size: 11.5px; padding: 2px 8px; }
 .fold-all .fold-btn:hover:not(:disabled) { background: var(--line); color: var(--text); text-decoration: none; }
-.sec > .tip, .sec .link-panel > .tip { margin: 6px 0 2px; }
+:is(.sec, .card > [data-fluidkit='liquid-card-content']) > .tip, .sec .link-panel > .tip { margin: 6px 0 2px; }
 .mini-btns { display: flex; gap: 4px; }
 .mini-btns button { background: var(--faint); padding: 2px 8px; font-size: 11.5px; }
 .mini-btns button.on { background: var(--accent-soft); }
@@ -633,14 +633,9 @@ fieldset.plain:disabled { opacity: 0.4; }
 .view-switch { display: inline-flex; gap: 3px; margin-right: 10px; padding: 3px; border-radius: 10px; background: var(--faint); border: 1px solid var(--line); }
 .view-switch button { font-size: 14px; font-weight: 700; padding: 5px 14px; border-radius: 7px; color: var(--muted); }
 .view-switch button.on, .view-switch button.on:hover:not(:disabled) { background: var(--accent); color: #fff; box-shadow: none; }
-/* 맨 위 화면 바꾸기: 색 막대를 단추 뒤 끈적 층(#pk-goo)에 따로 그린다 (Toolbar.tsx ViewSwitch) */
-.top-switch { position: relative; }
-.top-switch button { position: relative; z-index: 1; transition: color var(--dur-press) var(--ease-out); }
-.top-switch button.on, .top-switch button.on:hover:not(:disabled) { background: transparent; }
-.vs-goo { position: absolute; inset: 0; pointer-events: none; filter: url(#pk-goo); }
-.vs-pill, .vs-drop { position: absolute; border-radius: 7px; background: var(--accent); }
-.vs-pill { top: 3px; bottom: 3px; }
-@media (prefers-reduced-motion: reduce) { .vs-goo { filter: none; } }
+/* 맨 위 화면 바꾸기 (Toolbar.tsx ViewSwitch, fluidkit LiquidTabs 유리) */
+.view-tabs { margin-right: 10px; flex: none; font-weight: 700; }
+.view-tabs [role='tab'] { font-size: 14px; font-weight: 700; }
 /* 끈적 드롭다운 (GooMenu.tsx). 판 배경은 뒤 액체 층이 그리고, 단추는 판과 같은 색 알약으로 */
 .goo-liq { position: fixed; inset: 0; pointer-events: none; filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.2)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.12)); }
 :root[data-dark='1'] .goo-liq { filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.55)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3)); }
@@ -685,7 +680,7 @@ fieldset.plain:disabled { opacity: 0.4; }
 /* 오른쪽 칸: 대본 편집·GUI 편집처럼 바탕 위에 카드 (샘플 / 세부 값 / 쓰인 곳) */
 .fxv-side { width: var(--fx-side-w, 440px); max-width: 60%; flex-shrink: 0; overflow: auto; padding: 10px 10px 16px 4px; background: var(--bg); display: flex; flex-direction: column; gap: 10px; }
 .fxv-side .sec { box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); }
-.fxv-side .sec > .tip:first-of-type { margin: 0 0 8px; }
+.fxv-side :is(.sec, .card > [data-fluidkit='liquid-card-content']) > .tip:first-of-type { margin: 0 0 8px; }
 .fxv-stage { height: 190px; padding: 0 22px; }
 .fxv-stage .preview-text { font-size: 34px; }
 .fxv-bad { position: absolute; left: 8px; right: 8px; bottom: 6px; font-size: 11px; color: #fca5a5; line-height: 1.35; overflow: hidden; max-height: 4.2em; }
@@ -1182,7 +1177,7 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 /* 지금 쓰는 줄과 이어진 카드 (대사를 쓰면 대사·글자 효과, 연출 줄이면 그 종류 카드).
    [게임 줄 따라가기: 켬]의 녹색보다 살짝 밝게 */
 .card.in-use { background: color-mix(in srgb, #34c759 8%, var(--panel)); box-shadow: inset 0 0 0 1px color-mix(in srgb, #34c759 28%, transparent); }
-.card.in-use > h3 .card-title::after { content: var(--t-in-use, '사용 중'); font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 8px; color: color-mix(in srgb, #34c759 62%, var(--text)); background: color-mix(in srgb, #34c759 16%, var(--panel)); }
+.card.in-use > [data-fluidkit='liquid-card-content'] > h3 .card-title::after { content: var(--t-in-use, '사용 중'); font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 8px; color: color-mix(in srgb, #34c759 62%, var(--text)); background: color-mix(in srgb, #34c759 16%, var(--panel)); }
 .sc-char { margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed var(--line); }
 .sc-char-h { font-size: 12px; color: var(--muted); margin: 2px 0 6px; }
 
@@ -1778,3 +1773,6 @@ button.primary.solid { background: var(--accent); color: #fff; font-weight: 600;
 button.primary.solid:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 85%, #000); color: #fff; }
 .sf-check { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); white-space: nowrap; }
 @media (max-width: 720px) { .mask-body { grid-template-columns: 1fr; } }
+
+/* 카드는 fluidkit LiquidCard가 유리 면과 그림자를 그린다 (Card.tsx). 칸마다 준 바탕·그림자는 빼고 */
+.sec.card.card { background: transparent; box-shadow: none; }
