@@ -105,9 +105,8 @@ function BoxInspector({ b }: { b: BoxNode }) {
   };
   // 멈춤·흔들기 줄: 지금 쓰는 줄 바로 뒤에 (없으면 상자 끝)
   const huds = (project.screens ?? []).filter((s) => s.kind === 'hud');
-  const addStageLine = (type: 'pause' | 'shake' | 'hud') => {
+  const addStageLine = (type: 'pause' | 'shake') => {
     const nl: Line = { id: uid('l'), type, text: '' };
-    if (type === 'hud' && huds[0]) nl.screen = huds[0].id;
     upd((x) => {
       const i = x.lines.findIndex((y) => y.id === activeLine);
       x.lines.splice(i >= 0 ? i + 1 : x.lines.length, 0, nl);
@@ -145,6 +144,8 @@ function BoxInspector({ b }: { b: BoxNode }) {
       </div>
       </Card>
 
+      <HudCard b={b} upd={upd} huds={huds} />
+
       {lookLine && (
         <Card id="i-look" title="글자 효과" className={'look-panel ' + use('i-look')}>
           <LineLook l={lookLine} set={(fn, key) => upd((x) => fn(x.lines.find((l) => l.id === lookLine.id)!), key)} />
@@ -155,15 +156,12 @@ function BoxInspector({ b }: { b: BoxNode }) {
       )}
 
       <Card id="i-lines" title="대사" className={use('i-lines')}>
-      {b.lines.map((l, i) => (
-        <LineRow key={l.id} l={l} i={i} upd={upd} drag={drag} />
-      ))}
+      {b.lines.map((l, i) => (l.type === 'hud' ? null : <LineRow key={l.id} l={l} i={i} upd={upd} drag={drag} />))}
       <div className="row">
         <button onClick={addLine}>+ 줄 추가</button>
         <button onClick={addFlagLine} title="이 자리에서 플래그를 바꿔요 (예: met_alice 켜기, love +1)">+ 플래그 바꾸기</button>
         <button onClick={() => addStageLine('pause')} title="지금 쓰는 줄 뒤에서 잠깐 멈춰요 (초, 또는 클릭할 때까지)">+ 멈춤</button>
         <button onClick={() => addStageLine('shake')} title="지금 쓰는 줄 뒤에서 화면을 흔들거나 번쩍여요">+ 흔들기</button>
-        {huds.length > 0 && <button onClick={() => addStageLine('hud')} title="지금 쓰는 줄 뒤에서 HUD를 띄우거나 내려요 (show screen / hide screen)">+ HUD</button>}
         <span className="tip">Ctrl+Enter: 같은 화자로 아래에 새 줄</span>
       </div>
       <GameOffTip what="대사" />
@@ -179,6 +177,52 @@ function BoxInspector({ b }: { b: BoxNode }) {
       <ExitEditor b={b} upd={upd} />
       </Card>
     </div>
+  );
+}
+
+// 이 상자에서 HUD 보이기/숨기기 (세션 79, 상자 머리 [HUD] 단추와 짝). HUD마다 [그대로 | 보이기 | 숨기기].
+// 고르면 그 HUD의 hud 줄을 모두 지우고 상자 맨 앞에 하나만 둔다. 화면을 안 고른 hud 줄(예전 것)도 이때 지운다
+function HudCard({ b, upd, huds }: { b: BoxNode; upd: Upd; huds: NonNullable<Project['screens']> }) {
+  const hl = b.lines.filter((l) => l.type === 'hud');
+  if (!huds.length && !hl.length) return null;
+  const known = (l: Line) => huds.some((h) => h.id === l.screen);
+  const stray = hl.filter((l) => !known(l)).length;
+  const state = (id: string) => {
+    const last = [...hl].reverse().find((l) => l.screen === id);
+    return !last ? '' : last.stop ? 'hide' : 'show';
+  };
+  const choose = (id: string, v: '' | 'show' | 'hide') =>
+    upd((x) => {
+      x.lines = x.lines.filter((l) => l.type !== 'hud' || (l.screen !== id && known(l)));
+      if (!v) return;
+      let at = 0;
+      while (x.lines[at]?.type === 'hud') at++;
+      x.lines.splice(at, 0, { id: uid('l'), type: 'hud', text: '', screen: id, ...(v === 'hide' && { stop: true }) });
+    });
+  const clean = () => upd((x) => void (x.lines = x.lines.filter((l) => l.type !== 'hud' || known(l))));
+  return (
+    <Card id="i-hud" domId="card-hud" title="HUD" hint="이 상자가 시작될 때 HUD를 띄우거나 내려요 (show screen / hide screen). 그대로면 앞 상자의 HUD가 이어져요" topic="HUD">
+      {!huds.length && <p className="tip">HUD가 없어요. [화면] 탭에서 화면을 HUD로 만들어 주세요.</p>}
+      {huds.map((h) => {
+        const v = state(h.id);
+        return (
+          <div className="row hud-row" key={h.id}>
+            <label title={h.name}>{h.title || h.name}</label>
+            <span className="seg-switch hud-seg">
+              {([['', '그대로'], ['show', '보이기'], ['hide', '숨기기']] as const).map(([k, t]) => (
+                <button key={k} className={v === k ? 'on' : ''} onClick={() => choose(h.id, k)}>{t}</button>
+              ))}
+            </span>
+          </div>
+        );
+      })}
+      {stray > 0 && (
+        <div className="row">
+          <span className="tip">{`HUD를 안 고른 예전 줄이 ${stray}개 있어요`}</span>
+          <button onClick={clean}>지우기</button>
+        </div>
+      )}
+    </Card>
   );
 }
 

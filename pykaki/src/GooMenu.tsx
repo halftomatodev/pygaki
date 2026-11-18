@@ -59,8 +59,10 @@ function start(panel: HTMLElement, anchor: HTMLElement): Goo {
   const liq = document.createElement('div');
   liq.className = 'goo-liq';
   liq.style.zIndex = String(z);
+  // 구멍은 단추와 같은 둥근 모서리로 (네모 구멍이면 단추를 골랐을 때 모서리가 네모로 잘려 보임, 세션 79)
+  const hole = `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='${a.width}' height='${a.height}'><rect width='100%' height='100%' rx='${aRadius}' ry='${aRadius}'/></svg>`)}")`;
   Object.assign(liq.style, {
-    maskImage: 'linear-gradient(#000 0 0), linear-gradient(#000 0 0)',
+    maskImage: `linear-gradient(#000 0 0), ${hole}`,
     maskSize: `100% 100%, ${a.width}px ${a.height}px`,
     maskPosition: `0 0, ${a.left}px ${a.top}px`,
     maskRepeat: 'no-repeat',

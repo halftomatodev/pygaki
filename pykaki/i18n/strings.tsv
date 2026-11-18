@@ -2543,3 +2543,12 @@ game/{0}이(가) 이미 있어요. 덮어쓸까요?	game/{0} はもうありま�
 눌러서 펼쳐요	押して開きます	Click to expand
 프로젝트와 실행	プロジェクトと実行	Project and run
 상자가 모두 보이게	ボックスがすべて見えるように	Fit all boxes in view
+효과 종류	エフェクトの種類	Effect type
+셰이더 종류	シェーダーの種類	Shader type
+HUD를 안 고른 예전 줄이 ${stray}개 있어요	HUD を選んでいない古い行が {0} 個あります	{0} old line(s) have no HUD chosen
+HUD를 아직 안 고른 자리가 있어요	まだ HUD を選んでいない所があります	Some places have no HUD chosen yet
+가운데 스크립트(지금 원고 줄) 칸을 접어요	中央のスクリプト(今のスクリプト行)欄をたたみます	Collapse the middle script (current line) pane
+게임이 지금 읽는 원고 줄을 가운데 칸에 펴서 봐요	ゲームが今読んでいるスクリプト行を中央の欄に開いて見ます	Open the script line the game is reading in the middle pane
+HUD가 없어요. [화면] 탭에서 화면을 HUD로 만들어 주세요.	HUD がありません。[画面] タブで画面を HUD にしてください。	No HUD yet. Make a screen a HUD in the [Screens] tab.
+이 상자에서 HUD를 보일지 숨길지 골라요\n눌러서 오른쪽에서 골라요	このボックスで HUD を表示するか隠すかを選びます\n押すと右で選べます	Choose whether this box shows or hides each HUD\nClick to choose on the right
+이 상자가 시작될 때 HUD를 띄우거나 내려요 (show screen / hide screen). 그대로면 앞 상자의 HUD가 이어져요	このボックスが始まるときに HUD を出したり下げたりします (show screen / hide screen)。そのままなら前のボックスの HUD が続きます	Shows or hides HUDs when this box starts (show screen / hide screen). Unchanged keeps the previous box's HUD

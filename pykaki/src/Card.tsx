@@ -8,11 +8,11 @@ import { create } from 'zustand';
 import { LiquidCard } from 'fluidkit';
 import { Hint } from './Help';
 
-// 카드 유리 색 (fluidkit LiquidCard). 뒤의 캔버스가 비치게 반투명. 접으면 하늘색, 사용 중이면 연두
+// 카드 유리 색 (fluidkit LiquidCard). 뒤의 캔버스가 비치게 반투명. 접으면 하늘색.
+// 사용 중(in-use)은 바탕색이 아니라 테두리 바깥의 무지개 빛으로 보인다 (styles.css `.card.in-use::before`, 세션 79)
 const TINT = {
   base: 'color-mix(in srgb, var(--panel) 72%, transparent)',
   folded: 'color-mix(in srgb, color-mix(in srgb, #38bdf8 15%, var(--panel)) 78%, transparent)',
-  inUse: 'color-mix(in srgb, color-mix(in srgb, #34c759 8%, var(--panel)) 78%, transparent)',
 };
 
 const KEY = 'pygaki-folded';
@@ -72,14 +72,23 @@ export function FoldAll() {
   );
 }
 
-// 학종이 아이콘 (14px). 아래 왼쪽 반은 그대로, 위 오른쪽 반(날개)이 대각선을 축으로 뒤집혀 아래로 접힌다.
-// 3D 회전은 SVG 안에서 납작해지므로 대각선에 수직인 방향으로 scale을 1 → -1로 바꿔 뒤집힘을 낸다. 반을 넘으면 뒷면 색으로
+// 학종이 아이콘 (16px). 펼친 카드가 있으면 펴진 종이, 모두 접히면 종이학(세션 79, 사용자 손그림).
+// 바뀔 때: 종이의 위 오른쪽 반이 대각선을 축으로 뒤집혀 접히며 작아지고, 그 자리에서 학이 커지며 나온다.
+// 3D 회전은 SVG 안에서 납작해지므로 대각선에 수직인 방향으로 scale을 1 → -1로 바꿔 뒤집힘을 낸다
 function PaperFold({ folded }: { folded: boolean }) {
   return (
-    <svg className={'paper-fold' + (folded ? ' folded' : '')} width="14" height="14" viewBox="0 0 16 16" aria-hidden>
-      <path className="pf-base" d="M2 2 L2 14 L14 14 Z" />
-      <path className="pf-flap" d="M2 2 L14 2 L14 14 Z" />
-      <path className="pf-crease" d="M2.6 2.6 L13.4 13.4" />
+    <svg className={'paper-fold' + (folded ? ' folded' : '')} width="16" height="16" viewBox="0 0 16 16" aria-hidden>
+      <g className="pf-paper">
+        <path className="pf-base" d="M2 2 L2 14 L14 14 Z" />
+        <path className="pf-flap" d="M2 2 L14 2 L14 14 Z" />
+        <path className="pf-crease" d="M2.6 2.6 L13.4 13.4" />
+      </g>
+      <g className="pf-crane">
+        <path className="pc-back" d="M5.2 10.6 L1.2 3.6 L2.3 3.4 L7.2 9.6 Z M10.8 10.6 L15.2 4.4 L14.1 4.2 L8.8 9.6 Z" />
+        <path className="pc-head" d="M1.2 3.6 L0.6 5.8 L2.3 3.4 Z" />
+        <path className="pc-body" d="M4.6 10.2 L8 13.8 L11.4 10.2 L8 8.8 Z" />
+        <path className="pc-wing" d="M6.2 9.6 L9.9 0.9 L10.4 9.5 Z" />
+      </g>
     </svg>
   );
 }
@@ -110,6 +119,28 @@ export function Card({ id, title, extra, defFolded = false, className = '', domI
       });
   }, [scope, id, defFolded]);
   const toggle = () => toggleFold(id, defFolded);
+  // 사용 중 카드의 무지개 빛이 마우스 쪽으로 따라오게 (--gx --gy, 카드 안 %). 애니메이션 줄이기면 그대로
+  const inUse = className.split(" ").includes("in-use");
+  useEffect(() => {
+    const el = headRef.current?.closest('.card') as HTMLElement | null;
+    if (!el || !inUse || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const move = (e: PointerEvent) => {
+      const r = el.getBoundingClientRect();
+      el.style.setProperty('--gx', (((e.clientX - r.left) / r.width) * 100).toFixed(1) + '%');
+      el.style.setProperty('--gy', (((e.clientY - r.top) / r.height) * 100).toFixed(1) + '%');
+    };
+    const leave = () => {
+      el.style.removeProperty('--gx');
+      el.style.removeProperty('--gy');
+    };
+    el.addEventListener('pointermove', move);
+    el.addEventListener('pointerleave', leave);
+    return () => {
+      el.removeEventListener('pointermove', move);
+      el.removeEventListener('pointerleave', leave);
+      leave();
+    };
+  }, [inUse]);
   // 접은 카드는 제목 길이만큼만 넓고, 펼치면 칸 폭으로 (세션 78). 폭이 바뀌면 이전 폭에서 스프링으로 늘고 준다
   const headRef = useRef<HTMLHeadingElement>(null);
   const width = useRef(0);
@@ -158,7 +189,7 @@ export function Card({ id, title, extra, defFolded = false, className = '', domI
       material="glass"
       radius={14}
       style={{ padding: undefined }}
-      tint={folded ? TINT.folded : /\bin-use\b/.test(className) ? TINT.inUse : TINT.base}
+      tint={folded ? TINT.folded : TINT.base}
       intensity="whisper"
     >
       <h3 ref={headRef} className="card-head" onClick={onHead} title={folded ? '눌러서 펼쳐요' : undefined}>

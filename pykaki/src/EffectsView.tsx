@@ -1,5 +1,6 @@
 // [효과] 화면: 글자 효과와 그림 효과를 한곳에서 보고, 켜고 끄고, 넣고 뺀다 (docs/EFFECTS_TAB_SPEC.md 3장).
 // 목록과 파일 다루기는 effectsLib.ts가 하고, 여기는 화면만 그린다. 샘플에서 맞춘 값은 저장하지 않는다 (값은 대사 줄마다 정함)
+import { SegTabs } from './SegTabs';
 import { tr } from './i18n';
 import { Hint } from './Help';
 import { Card } from './Card';
@@ -296,10 +297,16 @@ export function EffectsView() {
   };
 
   const kindBar = (
-    <span className="seg-switch fxv-kind">
-      <button className={kind === 'effect' ? 'on' : ''} onClick={() => setKind('effect')} title="대사 글자가 나오는 모양">글자 효과</button>
-      <button className={kind === 'transition' ? 'on' : ''} onClick={() => setKind('transition')} title="배경, 캐릭터가 나타나는 모양">그림 효과</button>
-    </span>
+    <SegTabs
+      className="fxv-kind"
+      label="효과 종류"
+      value={kind}
+      onChange={setKind}
+      items={[
+        { id: 'effect', label: '글자 효과', title: '대사 글자가 나오는 모양' },
+        { id: 'transition', label: '그림 효과', title: '배경, 캐릭터가 나타나는 모양' },
+      ]}
+    />
   );
 
   return (

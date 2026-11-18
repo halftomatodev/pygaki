@@ -50,7 +50,7 @@ function ViewSwitch() {
 }
 
 // 테마 색을 LiquidTabs가 섞을 수 있는 rgb()로. 환경 설정에서 색이나 어두운 화면이 바뀌면 다시 읽는다
-function useThemeInk() {
+export function useThemeInk() {
   const read = () => {
     const probe = document.createElement('span');
     document.body.append(probe);

@@ -174,6 +174,27 @@ code { font-family: var(--mono); }
 .paper-fold.folded .pf-flap { transform: rotate(-45deg) scaleY(-1) rotate(45deg); fill: color-mix(in srgb, #fff 80%, #f472b6); }
 .paper-fold .pf-crease { stroke: color-mix(in srgb, #be185d 45%, transparent); stroke-width: 0.8; fill: none; }
 .paper-fold.folded .pf-crease { opacity: 0; }
+/* 모두 접으면 종이학 (세션 79): 종이가 접히며 작아지고 학이 커지며 나옴 */
+.paper-fold .pf-paper, .paper-fold .pf-crane { transform-box: view-box; transform-origin: 8px 9px; transition: opacity var(--dur-pop) var(--ease-out), scale var(--dur-view) var(--ease-spring); }
+.paper-fold .pf-crane { opacity: 0; scale: 0.4; }
+.paper-fold.folded .pf-paper { opacity: 0; scale: 0.5; transition-delay: calc(var(--dur-view) * 0.25); }
+.paper-fold.folded .pf-crane { opacity: 1; scale: 1; transition-delay: calc(var(--dur-view) * 0.35); }
+.paper-fold .pc-back { fill: color-mix(in srgb, #f472b6 62%, var(--panel)); }
+.paper-fold .pc-head { fill: color-mix(in srgb, #be185d 70%, var(--panel)); }
+.paper-fold .pc-body { fill: color-mix(in srgb, #f472b6 75%, var(--panel)); }
+.paper-fold .pc-wing { fill: color-mix(in srgb, #fff 55%, #f472b6); stroke: color-mix(in srgb, #be185d 35%, transparent); stroke-width: 0.5; stroke-linejoin: round; }
+@media (prefers-reduced-motion: reduce) { .paper-fold :is(.pf-paper, .pf-crane, .pf-flap) { transition-duration: 0s; transition-delay: 0s; } }
+/* 왼쪽 칸 [모두 펼치기]는 왼쪽 끝에 (세션 79) */
+.sidebar .fold-all { justify-content: flex-start; }
+/* 오른쪽 칸 카드는 내용 폭만큼 (세션 79, 왼쪽의 접은 카드처럼). 오른쪽에 붙고 칸 폭보다 넓어지지 않음 */
+.right-scroll :is(.card, .insp > section.sec) { align-self: flex-end; width: fit-content; min-width: min(240px, 100%); max-width: 100%; }
+/* 오른쪽 칸 카드 머리 단추는 바탕(복숭아·분홍)에 맞춰 분홍 톤 (세션 79) */
+.right-panel :is(.sec, .card > [data-fluidkit='liquid-card-content']) > h3 .card-acts button,
+.right-panel :is(.sec, .card > [data-fluidkit='liquid-card-content']) > h3 .card-acts button:hover:not(:disabled) {
+  color: color-mix(in srgb, #db2777 85%, var(--text)); background: color-mix(in srgb, #f472b6 14%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, #f472b6 24%, transparent);
+}
+.right-panel :is(.sec, .card > [data-fluidkit='liquid-card-content']) > h3 .card-acts button:hover:not(:disabled) { background: color-mix(in srgb, #f472b6 24%, transparent); }
+.right-panel :is(.sec, .card > [data-fluidkit='liquid-card-content']) > h3 .card-acts button.on { background: #ec4899; color: #fff; box-shadow: none; }
 .mini-btns { display: flex; gap: 4px; }
 .mini-btns button { background: var(--faint); padding: 2px 8px; font-size: 11.5px; }
 .mini-btns button.on { background: var(--accent-soft); }
@@ -1009,6 +1030,11 @@ canvas.media-bg.natural { width: var(--nat-w, auto); }
   max-width: 120px; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
   background: transparent; color: var(--muted); border: 1px solid transparent; opacity: 0.55;
 }
+.hud-btn + .sh-btn { margin-left: 4px; }
+.sh-btn.hud-btn.bad { color: var(--danger, #d33); border-color: color-mix(in srgb, var(--danger, #d33) 50%, transparent); opacity: 1; }
+.row.hud-row > label { width: auto; flex: 1 0 auto; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.seg-switch.hud-seg { margin-right: 0; }
+.seg-switch.hud-seg button, [data-look='apple'] .seg-switch.hud-seg button { font-size: 12px; padding: 3px 10px; }
 .box:hover .sh-btn, .frame:hover .sh-btn, .sh-btn:hover, .sh-btn.open { opacity: 1; }
 .sh-btn:hover:not(:disabled) { background: var(--hover); }
 .sh-btn.inh { border: 1px dashed color-mix(in srgb, var(--accent) 55%, transparent); opacity: 0.8; }
@@ -1089,7 +1115,17 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .sp-cards > .resizer.left { left: calc(var(--gui-left-w, 250px) - 3px); }
 .sp-cards > .resizer.right { right: calc(var(--gui-right-w, 380px) - 3px); }
 .fxv > .resizer.right { right: calc(var(--fx-side-w, 440px) - 3px); }
-.sp-cards > .sp-hint { grid-column: 1 / -1; font-size: 11px; color: var(--muted); opacity: 0.75; padding: 6px 14px 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sp-cards > .sp-hint { grid-column: 1 / -1; font-size: 11px; color: var(--muted); padding: 6px 14px 2px; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
+.sp-hint-t { opacity: 0.75; overflow: hidden; text-overflow: ellipsis; }
+/* 가운데 스크립트 칸 펴고 접기 (세션 79). 접으면 오른쪽 편집 칸이 가운데까지 넓어짐 */
+.sp-script-tg { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 4px 12px 4px 9px; border-radius: 999px; color: var(--muted); background: var(--glass-bg, color-mix(in srgb, var(--panel) 60%, transparent)); border: 1px solid var(--line); }
+.sp-script-tg:hover:not(:disabled) { color: var(--text); background: var(--glass-hover, var(--hover)); }
+.sp-script-tg.on, .sp-script-tg.on:hover:not(:disabled) { color: var(--pink-ink, #be185d); background: color-mix(in srgb, #f472b6 16%, var(--panel)); border-color: color-mix(in srgb, #f472b6 40%, transparent); }
+.sp-view.sp-cards.script-off { grid-template-columns: var(--gui-left-w, 250px) minmax(0, 1fr); }
+.sp-cards.script-off > .sp-panel { padding-left: 10px; }
+.sp-cards.script-off > .sp-panel > .card { width: 100%; max-width: 980px; }
+/* GUI 편집 칸도 대본 편집처럼 배경이 비치는 유리 카드 (세션 79): 칸 바탕은 투명 */
+.sp-cards > .sp-nav, .sp-cards > .sp-panel, .sp-cards > .sp-main { background: transparent; }
 .sp-cards > .sp-nav { width: auto; gap: 10px; padding: 6px 4px 16px 10px; min-height: 0; }
 .sp-cards > .sp-main, .sp-cards > .sp-panel { width: auto; min-height: 0; }
 .sp-group { display: flex; flex-direction: column; gap: 2px; }
@@ -1098,7 +1134,7 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .sp-group .sp-nav-item.sub { padding-left: 22px; } /* 조작 안내 화면 아래 [단축키 수정] */
 
 /* GUI 편집 오른쪽 칸: 왼쪽 칸처럼 바탕 위에 카드 (세션 32) */
-.sp-cards > .sp-panel { background: var(--bg); border-left: 0; padding: 6px 10px 16px 4px; display: flex; flex-direction: column; gap: 10px; }
+.sp-cards > .sp-panel { background: transparent; border-left: 0; padding: 6px 10px 16px 4px; display: flex; flex-direction: column; gap: 10px; }
 .sp-panel .card .sp-bar { border-bottom: 0; padding-bottom: 0; margin-bottom: 0; }
 .sp-panel .card p:first-child { margin-top: 0; }
 
@@ -1207,8 +1243,20 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 
 /* 지금 쓰는 줄과 이어진 카드 (대사를 쓰면 대사·글자 효과, 연출 줄이면 그 종류 카드).
    [게임 줄 따라가기: 켬]의 녹색보다 살짝 밝게 */
-.card.in-use { background: color-mix(in srgb, #34c759 8%, var(--panel)); box-shadow: inset 0 0 0 1px color-mix(in srgb, #34c759 28%, transparent); }
-.card.in-use > [data-fluidkit='liquid-card-content'] > h3 .card-title::after { content: var(--t-in-use, '사용 중'); font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 8px; color: color-mix(in srgb, #34c759 62%, var(--text)); background: color-mix(in srgb, #34c759 16%, var(--panel)); }
+/* "사용 중" 카드 (세션 79, 참고 영상): 연두 바탕 대신 테두리 바깥으로 번지는 흐린 무지개 빛.
+   평소엔 옅고 아래쪽에, 마우스를 올리면 진해지며 마우스 쪽으로 따라옴(Card.tsx가 --gx --gy를 줌) */
+.card.in-use { isolation: isolate; }
+.card.in-use::before {
+  content: ''; position: absolute; inset: -6px; z-index: -1; border-radius: 20px; pointer-events: none;
+  background: conic-gradient(from 200deg, #4f9dff, #a855f7, #ec4899, #fb923c, #facc15, #4ade80, #4f9dff);
+  filter: blur(6px); opacity: 0.6;
+  -webkit-mask-image: radial-gradient(ellipse 70% 80% at var(--gx, 30%) var(--gy, 105%), #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 85%);
+  mask-image: radial-gradient(ellipse 70% 80% at var(--gx, 30%) var(--gy, 105%), #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 85%);
+  transition: opacity var(--dur-pop) var(--ease-out);
+}
+.card.in-use:hover::before { opacity: 1; }
+:root[data-dark='1'] .card.in-use::before { opacity: 0.7; }
+.card.in-use > [data-fluidkit='liquid-card-content'] > h3 .card-title::after { content: var(--t-in-use, '사용 중'); font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 8px; color: color-mix(in srgb, #9333ea 55%, var(--text)); background: linear-gradient(90deg, color-mix(in srgb, #7cc4ff 22%, var(--panel)), color-mix(in srgb, #f472b6 22%, var(--panel))); }
 .sc-char { margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed var(--line); }
 .sc-char-h { font-size: 12px; color: var(--muted); margin: 2px 0 6px; }
 
@@ -1879,3 +1927,27 @@ button.primary.solid:hover:not(:disabled) { background: color-mix(in srgb, var(-
 [data-look='apple'] .ctx-item.on:hover:not(:disabled) { background: var(--ctx-on-hover); color: var(--text); }
 [data-look='apple'] .ctx-item:disabled { opacity: 0.55; }
 [data-look='apple'] .ctx-state { color: color-mix(in srgb, var(--text) 50%, transparent); }
+
+/* ── 세션 79: 카드 그림자가 칸 끝에서 잘리지 않게 ──
+   카드 그림자(fluidkit, 아래로 약 30px 번짐)가 스크롤 칸 끝에서 칼로 자른 듯 사라지던 것.
+   스크롤 칸을 그림자만큼 넓히고 그만큼 안쪽 여백을 줘서 카드 자리는 그대로 둔다 (넓힌 곳은 눌림이 캔버스로 감) */
+.main > .sidebar { width: calc(var(--left-w, 244px) + 28px); padding-right: 32px; padding-bottom: 44px; }
+.right-scroll { margin: -6px -10px -16px -28px; padding: 6px 10px 44px 28px; }
+.sp-cards > .sp-nav { padding: 6px 20px 44px 10px; }
+.sp-cards > .sp-panel { padding: 6px 20px 44px 14px; }
+.sp-cards > .sp-main { padding-bottom: 44px; }
+
+/* ── 세션 79: 효과·셰이더 화면도 같은 유리 (사용자 손그림) ──
+   작은 전환 탭은 LiquidTabs(SegTabs.tsx), 갤러리 카드는 반투명 유리, 오른쪽 칸 바탕은 비움 */
+.seg-tabs { flex: none; margin-right: 10px; }
+.fxv-bar .seg-tabs.gal-switch { margin-right: 0; }
+.fxv, .fxv-list { background: transparent; }
+.fxv-side { background: transparent; padding: 10px 20px 44px 14px; }
+.gal-card {
+  background: color-mix(in srgb, var(--panel) 62%, transparent); border: 1px solid color-mix(in srgb, #fff 70%, transparent);
+  box-shadow: 0 6px 20px rgba(70, 80, 140, 0.08), 0 1px 2px rgba(70, 80, 140, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  border-radius: 14px; transition: border-color var(--dur-hover) var(--ease-out), box-shadow var(--dur-hover) var(--ease-out), background var(--dur-hover) var(--ease-out);
+}
+.gal-card:hover { background: color-mix(in srgb, var(--panel) 80%, transparent); border-color: color-mix(in srgb, #fff 90%, transparent); box-shadow: 0 10px 28px rgba(70, 80, 140, 0.13), 0 1px 3px rgba(70, 80, 140, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.7); }
+.gal-card.on { background: color-mix(in srgb, var(--panel) 82%, transparent); border-color: color-mix(in srgb, var(--accent) 55%, transparent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent), 0 8px 24px rgba(70, 80, 140, 0.12); }
+:root[data-dark='1'] .gal-card { border-color: rgba(255, 255, 255, 0.1); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); }

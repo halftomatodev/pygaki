@@ -1,5 +1,6 @@
 // 위쪽 [셰이더] 화면: 화면 전체에 씌우는 셰이더와, 셰이더가 바뀔 때의 전환을 보고 켜고 끈다 (docs/LINK.md 11장).
 // 셰이더 목록은 게임 폴더의 screen_fx/shader_list.json에서 온다. 어느 상자에 걸지와 세부 값은 [대본 편집]의 ◐ 셰이더에서 정한다
+import { SegTabs } from './SegTabs';
 import { Hint } from './Help';
 import { Card } from './Card';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
@@ -225,10 +226,16 @@ function TransList({ bar }: { bar: ReactNode }) {
 export function ShadersView() {
   const [part, setPart] = useState<'shader' | 'trans'>('shader');
   const bar = (
-    <span className="seg-switch fxv-kind">
-      <button className={part === 'shader' ? 'on' : ''} onClick={() => setPart('shader')} title="화면 전체에 씌우는 셰이더">셰이더</button>
-      <button className={part === 'trans' ? 'on' : ''} onClick={() => setPart('trans')} title="셰이더가 바뀔 때의 모양">전환</button>
-    </span>
+    <SegTabs
+      className="fxv-kind"
+      label="셰이더 종류"
+      value={part}
+      onChange={setPart}
+      items={[
+        { id: 'shader', label: '셰이더', title: '화면 전체에 씌우는 셰이더' },
+        { id: 'trans', label: '전환', title: '셰이더가 바뀔 때의 모양' },
+      ]}
+    />
   );
   return part === 'shader' ? <ShaderList bar={bar} /> : <TransList bar={bar} />;
 }

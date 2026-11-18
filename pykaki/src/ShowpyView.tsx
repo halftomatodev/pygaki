@@ -73,11 +73,35 @@ export function ShowpyView() {
     liveSend({ cmd: 'editor', open: true, tab: s.tab });
   };
 
+  // 가운데 스크립트 칸은 볼 일이 드물어 기본은 접고, 위의 [>_ 스크립트] 단추로 편다 (세션 79). 접으면 오른쪽 편집 칸이 그 자리까지 넓어진다
+  const [script, setScript] = useState(() => {
+    try {
+      return localStorage.getItem('pygaki-gui-script') === 'on';
+    } catch {
+      return false;
+    }
+  });
+  const toggleScript = () =>
+    setScript((v) => {
+      try {
+        localStorage.setItem('pygaki-gui-script', v ? 'off' : 'on');
+      } catch {
+        // 기억 못 해도 이번 창에서는 바뀜
+      }
+      return !v;
+    });
+
   return (
-    <div className="sp-view sp-cards">
+    <div className={'sp-view sp-cards' + (script ? '' : ' script-off')}>
       <div className="sp-hint">
-        GUI 편집
-        <Hint text={`게임 창 옆에 두고 써요 · 왼쪽에서 고칠 곳을 고르면 게임도 그 화면으로 · 게임 화면에서 끌어서 옮기고 숫자는 오른쪽에서 · ${keyOf('save')} 저장 · 게임 창에서 Esc: 편집 닫고 게임 진행`} topic="GUI 편집] 화면" />
+        <span className="sp-hint-t">
+          GUI 편집
+          <Hint text={`게임 창 옆에 두고 써요 · 왼쪽에서 고칠 곳을 고르면 게임도 그 화면으로 · 게임 화면에서 끌어서 옮기고 숫자는 오른쪽에서 · ${keyOf('save')} 저장 · 게임 창에서 Esc: 편집 닫고 게임 진행`} topic="GUI 편집] 화면" />
+        </span>
+        <button className={'sp-script-tg' + (script ? ' on' : '')} aria-pressed={script} onClick={toggleScript} title={script ? '가운데 스크립트(지금 원고 줄) 칸을 접어요' : '게임이 지금 읽는 원고 줄을 가운데 칸에 펴서 봐요'}>
+          <TermIcon />
+          스크립트
+        </button>
       </div>
       <nav className="sp-nav">
         {GROUPS.map((g) => (
@@ -122,16 +146,18 @@ export function ShowpyView() {
         ))}
       </nav>
       <Resizer size="guiLeftW" grow={1} className="left" />
-      <div className="sp-main">
-        {!on ? <NotConnected /> : st ? <Where st={st} sec={sec.id} /> : <p className="tip">게임 상태를 기다리는 중...</p>}
-      </div>
-      <Resizer size="guiRightW" grow={-1} className="right" />
+      {script && (
+        <div className="sp-main">
+          {!on ? <NotConnected /> : st ? <Where st={st} sec={sec.id} /> : <p className="tip">게임 상태를 기다리는 중...</p>}
+        </div>
+      )}
+      {script && <Resizer size="guiRightW" grow={-1} className="right" />}
       {/* 오른쪽 칸도 대본 편집처럼 카드: 저장·편집기 카드 + 고치는 칸 카드 (커서·대사 소리는 칸마다 카드) */}
       <div className="sp-panel">
         <Card id="g-bar" title="저장과 게임 안 편집 화면">
           {on && st && <EditorBar st={st} />}
           {err && <p className="sp-err">{err}</p>}
-          {!on && <p className="tip">게임과 연결되면 여기서 고쳐요.</p>}
+          {!on && (script ? <p className="tip">게임과 연결되면 여기서 고쳐요.</p> : <NotConnected />)}
         </Card>
         {on && st && (sec.id === 'custom_ui' && st.custom_ui !== undefined ? (
           <CustomUIPanel cu={st.custom_ui} />
@@ -148,6 +174,17 @@ export function ShowpyView() {
         ))}
       </div>
     </div>
+  );
+}
+
+// [스크립트] 단추의 터미널 아이콘 (>_)
+function TermIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="1.5" y="2.5" width="13" height="11" rx="2.5" />
+      <path d="M4.5 6.5 L6.8 8.5 L4.5 10.5" />
+      <path d="M8.5 10.5 H11.5" />
+    </svg>
   );
 }
 

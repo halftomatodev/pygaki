@@ -28,7 +28,7 @@ export function SpeakerSelect({ l, set, className }: { l: Line; set: SetLine; cl
       </optgroup>
       <optgroup label="연출">
         {/* 화면 효과는 렌파이 편집기에서 고친다. 예전에 넣은 줄만 그대로 보여 준다 */}
-        {STAGE_TYPES.filter((t) => t !== 'fx' || l.type === 'fx').map((t) => (
+        {STAGE_TYPES.filter((t) => (t !== 'fx' && t !== 'hud') || l.type === t).map((t) => (
           <option key={t} value={t}>{STAGE_LABEL[t]}</option>
         ))}
       </optgroup>

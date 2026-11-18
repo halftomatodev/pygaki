@@ -1,5 +1,6 @@
 // [효과]·[셰이더] 왼쪽의 갤러리 보기: 카드마다 미리보기 그림. 고르면 오른쪽 칸에서 세부 값을 맞춘다.
 // 카드는 멈춘 그림(fx/thumbs.ts, WebGL 판 하나로 차례대로 그림)을 보여 주고, 마우스를 올린 카드 하나만 움직인다
+import { SegTabs } from './SegTabs';
 import { tr } from './i18n';
 import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useGameFolder, gameFont } from './gameFolder';
@@ -54,10 +55,16 @@ export function GallerySwitch() {
           {move ? '❚❚ 멈추기' : '▶ 움직이기'}
         </button>
       )}
-      <span className="seg-switch fxv-kind gal-switch">
-        <button className={gallery ? 'on' : ''} onClick={() => usePrefs.setState({ gallery: true })} title="미리보기 카드를 여러 개 같이 보며 고르기">▦ 갤러리</button>
-        <button className={gallery ? '' : 'on'} onClick={() => usePrefs.setState({ gallery: false })} title="이름만 한 줄씩">☰ 목록</button>
-      </span>
+      <SegTabs
+        className="fxv-kind gal-switch"
+        label="보기"
+        value={gallery ? 'gal' : 'list'}
+        onChange={(v) => usePrefs.setState({ gallery: v === 'gal' })}
+        items={[
+          { id: 'gal', label: '▦ 갤러리', title: '미리보기 카드를 여러 개 같이 보며 고르기' },
+          { id: 'list', label: '☰ 목록', title: '이름만 한 줄씩' },
+        ]}
+      />
     </>
   );
 }

@@ -14,6 +14,7 @@ import { ActionInput, CondInput } from './FlagFields';
 import { hit, keyOf } from './prefs';
 import { TagBar, useTagTarget } from './TagBar';
 import { TagView } from './textTags';
+import { useFolded } from './Card';
 
 // 볼 때와 글을 고칠 때 상자 모양이 같다. 고칠 때는 글자 자리가 입력칸으로 바뀌고,
 // 줄 종류·순서·삭제 단추는 상자 왼쪽 바깥에, 연출 입력칸은 오른쪽 바깥에 붙는다
@@ -63,6 +64,7 @@ export const BoxView = memo(function BoxView({ id, selected }: NodeProps) {
         ) : (
           <span className="box-title" data-part="title">{b.title || '(제목 없음)'}</span>
         )}
+        <HudButton b={b} />
         <ShaderButton kind="box" id={b.id} own={b.shader} inherited={g?.shader} />
       </div>
       <Lines b={b} editing={editing} active={active} setActive={setActive} />
@@ -243,6 +245,34 @@ function Exits({ b, editing, tb, active, setActive }: { b: BoxNode; editing: boo
   );
 }
 
+// 상자 오른쪽 위 [셰이더] 옆의 [HUD] 버튼 (세션 79). HUD 보이기/숨기기는 대사 줄이 아니라 상자에서 고른다.
+// 누르면 상자를 고르고 오른쪽 [HUD] 카드를 펴서 보여 준다. 데이터는 그대로 상자 맨 앞의 hud 줄(FEATURE 18)
+function HudButton({ b }: { b: BoxNode }) {
+  const screens = useStore((s) => s.project.screens);
+  const hl = b.lines.filter((l) => l.type === 'hud');
+  const huds = (screens ?? []).filter((s) => s.kind === 'hud');
+  if (!huds.length && !hl.length) return null;
+  const bad = hl.some((l) => !huds.some((h) => h.id === l.screen));
+  const shown = hl.filter((l) => !l.stop && huds.some((h) => h.id === l.screen)).length;
+  const hidden = hl.filter((l) => l.stop && huds.some((h) => h.id === l.screen)).length;
+  const label = bad ? '▣ HUD ⚠' : shown || hidden ? `▣ HUD${shown ? ' ' + shown : ''}${hidden ? ' −' + hidden : ''}` : '▣ HUD';
+  return (
+    <button
+      className={'nodrag sh-btn hud-btn' + (shown || hidden ? ' set' : '') + (bad ? ' bad' : '')}
+      title={(bad ? 'HUD를 아직 안 고른 자리가 있어요\n' : '') + '이 상자에서 HUD를 보일지 숨길지 골라요\n눌러서 오른쪽에서 골라요'}
+      onClick={(e) => {
+        e.stopPropagation();
+        useStore.getState().select([b.id]);
+        useFolded.setState({ 'i-hud': false });
+        requestAnimationFrame(() => document.getElementById('card-hud')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }));
+      }}
+      onDoubleClick={(e) => e.stopPropagation()}
+    >
+      {label}
+    </button>
+  );
+}
+
 // 상자와 label 오른쪽 위의 [셰이더] 버튼. 누르면 오른쪽 편집 칸이 셰이더 고르기로 바뀐다
 // 정해 둔 셰이더가 있으면 켜진 색, label 것을 따르는 상자는 흐린 테두리
 function ShaderButton({ kind, id, own, inherited }: { kind: 'box' | 'label'; id: string; own?: BoxShader; inherited?: BoxShader }) {
@@ -335,7 +365,7 @@ function Lines({ b, editing, active, setActive }: { b: BoxNode; editing: boolean
           onText={(v) => upd((x) => void (x.lines[i].text = v), 'text' + l.id)}
         />
       ))}
-      {!b.lines.length && <div className="more">대사 없음</div>}
+      {!b.lines.some((l) => l.type !== 'hud') && <div className="more">대사 없음</div>}
 
       {editing && al && top !== null && (
         <>
@@ -461,6 +491,8 @@ function LineRow({ l, editing, active, cls, grip, onFocus, onKey, onText }: RowP
       className={'pl ' + kind + (editing ? ' nodrag' : '') + (active ? ' active' : '') + cls}
       data-part={l.id}
       data-line={l.id}
+      // HUD 줄은 상자 머리 [HUD]에서 고르므로 줄 목록에서는 숨김 (끌기 순서 번호는 그대로 맞게 DOM에는 둠)
+      style={l.type === 'hud' ? { display: 'none' } : undefined}
       onFocus={editing ? onFocus : undefined}
       // 연출 줄은 글을 쓰지 않으니 줄 자체가 포커스를 받는다
       id={editing && stage ? 'in-' + l.id : undefined}

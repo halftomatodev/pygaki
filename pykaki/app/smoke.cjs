@@ -389,7 +389,11 @@ async function until(what, fn, ms = 10000) {
   console.log('렌파이에서 실행 (이미 켜짐):', run2);
   await page.locator('.view-tabs [role=tab]').nth(1).click();
   await page.waitForSelector('.live-badge.on', { timeout: 10000 });
+  // 가운데 스크립트 칸은 기본으로 접혀 있음 (세션 79): [>_ 스크립트]로 펴고 봄
+  // (시험은 사용자 앱과 같은 설정 폴더를 써서, 본 뒤 기억을 지워 사용자의 접힘 상태를 남기지 않음)
+  if (!(await page.locator('.sp-script-tg.on').count())) await page.click('.sp-script-tg');
   await page.waitForSelector('.sp-script .cur', { timeout: 10000 });
+  await page.evaluate(() => localStorage.removeItem('pygaki-gui-script'));
   await page.click('.sp-nav-item >> text=/^셰이더/');
   await until('편집기 명령을 보내지 않음', () => got.some((m) => m.cmd === 'editor' && m.tab === 'screen_fx'));
   // 게임 안 패널을 통째로 그린 칸 (ui_kit 3.16): 버튼을 누르면 그 자리 번호를 보내는지
