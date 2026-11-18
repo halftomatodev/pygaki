@@ -129,6 +129,11 @@ export function normalizeProject(raw: any): Project {
     for (const l of n.lines) if (typeof l.text !== 'string') l.text = '';
     n.exit ??= { type: 'return' };
     n.pos ??= { x: 0, y: 0 };
+    if (n.w !== undefined && !(typeof n.w === 'number' && n.w > 0)) delete n.w;
+  }
+  for (const g of p.labels) {
+    if (g.hud !== undefined && !Array.isArray(g.hud)) delete g.hud;
+    if (g.hud) g.hud = g.hud.filter((h: any) => h && typeof h.screen === 'string');
   }
   // 없는 상자를 가리키는 흐름은 "연결 안 됨"으로 돌린다 (손으로 고친 파일, 상자가 잘린 파일에서 화면이 멈추지 않게)
   const ids = new Set(p.nodes.map((n) => n.id));

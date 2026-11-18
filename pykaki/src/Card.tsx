@@ -9,7 +9,7 @@ import { LiquidCard } from 'fluidkit';
 import { Hint } from './Help';
 
 // 카드 유리 색 (fluidkit LiquidCard). 뒤의 캔버스가 비치게 반투명. 접으면 하늘색.
-// 사용 중(in-use)은 바탕색이 아니라 테두리 바깥의 무지개 빛으로 보인다 (styles.css `.card.in-use::before`, 세션 79)
+// 사용 중(in-use)은 바탕색이 아니라 테두리 바깥에서 도는 무지개 빛으로 보인다 (styles.css `.card.in-use::before`, 세션 79·81)
 const TINT = {
   base: 'color-mix(in srgb, var(--panel) 72%, transparent)',
   folded: 'color-mix(in srgb, color-mix(in srgb, #38bdf8 15%, var(--panel)) 78%, transparent)',
@@ -119,28 +119,6 @@ export function Card({ id, title, extra, defFolded = false, className = '', domI
       });
   }, [scope, id, defFolded]);
   const toggle = () => toggleFold(id, defFolded);
-  // 사용 중 카드의 무지개 빛이 마우스 쪽으로 따라오게 (--gx --gy, 카드 안 %). 애니메이션 줄이기면 그대로
-  const inUse = className.split(" ").includes("in-use");
-  useEffect(() => {
-    const el = headRef.current?.closest('.card') as HTMLElement | null;
-    if (!el || !inUse || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const move = (e: PointerEvent) => {
-      const r = el.getBoundingClientRect();
-      el.style.setProperty('--gx', (((e.clientX - r.left) / r.width) * 100).toFixed(1) + '%');
-      el.style.setProperty('--gy', (((e.clientY - r.top) / r.height) * 100).toFixed(1) + '%');
-    };
-    const leave = () => {
-      el.style.removeProperty('--gx');
-      el.style.removeProperty('--gy');
-    };
-    el.addEventListener('pointermove', move);
-    el.addEventListener('pointerleave', leave);
-    return () => {
-      el.removeEventListener('pointermove', move);
-      el.removeEventListener('pointerleave', leave);
-      leave();
-    };
-  }, [inUse]);
   // 접은 카드는 제목 길이만큼만 넓고, 펼치면 칸 폭으로 (세션 78). 폭이 바뀌면 이전 폭에서 스프링으로 늘고 준다
   const headRef = useRef<HTMLHeadingElement>(null);
   const width = useRef(0);

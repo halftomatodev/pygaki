@@ -260,6 +260,16 @@ input[type='color']::-webkit-color-swatch { border: none; border-radius: 50%; }
   border: 1px solid var(--box-border);
   box-shadow: 0 1px 2px rgba(0, 0, 0, calc(var(--box-strength) * 0.06));
 }
+/* 상자 오른쪽 아래 크기 손잡이 (BoxView BoxResize, 세션 81): 올렸을 때만 보이는 두 줄 빗금 */
+.box-resize {
+  position: absolute; right: 0; bottom: 0; width: 14px; height: 14px; cursor: ew-resize; touch-action: none; opacity: 0;
+  border-bottom-right-radius: 10px;
+  background: linear-gradient(135deg, transparent 52%, var(--muted) 52% 60%, transparent 60% 70%, var(--muted) 70% 78%, transparent 78%);
+  transition: opacity var(--dur-hover) var(--ease-out);
+}
+.box:hover > .box-resize, .box-resize:active { opacity: 0.7; }
+.box-resize:hover { opacity: 1; }
+body.box-resizing, body.box-resizing * { cursor: ew-resize !important; user-select: none; }
 .box.sel { outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent); }
 .box.editing { cursor: default; }
 .box-head { display: flex; gap: 4px; align-items: center; padding: 6px 8px 4px; }
@@ -1030,7 +1040,10 @@ canvas.media-bg.natural { width: var(--nat-w, auto); }
   max-width: 120px; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
   background: transparent; color: var(--muted); border: 1px solid transparent; opacity: 0.55;
 }
-.hud-btn + .sh-btn { margin-left: 4px; }
+/* [셰이더] 아래 [HUD] (세션 81): 오른쪽 위에 세로로 쌓아서 제목이 셰이더 단추 폭만 양보한다 */
+.box-tools { margin-left: auto; flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; align-self: flex-start; }
+.box-tools > .sh-btn { margin-left: 0; }
+.hud-inh { margin-left: 6px; font-size: 10px; color: var(--muted); }
 .sh-btn.hud-btn.bad { color: var(--danger, #d33); border-color: color-mix(in srgb, var(--danger, #d33) 50%, transparent); opacity: 1; }
 .row.hud-row > label { width: auto; flex: 1 0 auto; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .seg-switch.hud-seg { margin-right: 0; }
@@ -1041,7 +1054,8 @@ canvas.media-bg.natural { width: var(--nat-w, auto); }
 .sh-btn.set { background: var(--accent); color: #fff; opacity: 1; }
 .sh-btn.set:hover:not(:disabled) { background: var(--accent); filter: brightness(1.1); }
 .sh-btn.open { outline: 2px solid var(--accent); outline-offset: 1px; }
-.frame .sh-btn { position: absolute; top: 3px; right: 12px; pointer-events: auto; color: var(--gt); font-size: 11px; }
+.frame .box-tools { position: absolute; top: 3px; right: 12px; }
+.frame .sh-btn { pointer-events: auto; color: var(--gt); font-size: 11px; }
 .frame .sh-btn.set { color: #fff; }
 .grow { flex: 1; }
 .shader-panel .row > label { flex: 0 0 76px; color: var(--muted); white-space: nowrap; }
@@ -1243,20 +1257,25 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 
 /* 지금 쓰는 줄과 이어진 카드 (대사를 쓰면 대사·글자 효과, 연출 줄이면 그 종류 카드).
    [게임 줄 따라가기: 켬]의 녹색보다 살짝 밝게 */
-/* "사용 중" 카드 (세션 79, 참고 영상): 연두 바탕 대신 테두리 바깥으로 번지는 흐린 무지개 빛.
-   평소엔 옅고 아래쪽에, 마우스를 올리면 진해지며 마우스 쪽으로 따라옴(Card.tsx가 --gx --gy를 줌) */
+/* "사용 중" 카드 (세션 79, 81): 테두리 바깥으로 번지는 흐린 무지개 빛이 카드 둘레를 천천히 계속 돈다.
+   카드 안쪽은 비워 둔다(유리라 비치지 않게). 올리면 진해진다. 애니메이션 줄이기면 멈춘 채 */
+@property --spin { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+@keyframes in-use-spin { to { --spin: 360deg; } }
 .card.in-use { isolation: isolate; }
 .card.in-use::before {
-  content: ''; position: absolute; inset: -6px; z-index: -1; border-radius: 20px; pointer-events: none;
-  background: conic-gradient(from 200deg, #4f9dff, #a855f7, #ec4899, #fb923c, #facc15, #4ade80, #4f9dff);
-  filter: blur(6px); opacity: 0.6;
-  -webkit-mask-image: radial-gradient(ellipse 70% 80% at var(--gx, 30%) var(--gy, 105%), #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 85%);
-  mask-image: radial-gradient(ellipse 70% 80% at var(--gx, 30%) var(--gy, 105%), #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 85%);
+  content: ''; position: absolute; inset: -7px; padding: 7px; z-index: -1; border-radius: 21px; pointer-events: none;
+  background: conic-gradient(from var(--spin), #4f9dff, #a855f7, #ec4899, #fb923c, #facc15, #4ade80, #4f9dff);
+  filter: blur(5px); opacity: 0.75;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: in-use-spin 6s linear infinite;
   transition: opacity var(--dur-pop) var(--ease-out);
 }
 .card.in-use:hover::before { opacity: 1; }
-:root[data-dark='1'] .card.in-use::before { opacity: 0.7; }
-.card.in-use > [data-fluidkit='liquid-card-content'] > h3 .card-title::after { content: var(--t-in-use, '사용 중'); font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 8px; color: color-mix(in srgb, #9333ea 55%, var(--text)); background: linear-gradient(90deg, color-mix(in srgb, #7cc4ff 22%, var(--panel)), color-mix(in srgb, #f472b6 22%, var(--panel))); }
+@media (prefers-reduced-motion: reduce) { .card.in-use::before { animation: none; } }
+:root[data-dark='1'] .card.in-use::before { opacity: 0.8; }
+.card.in-use > [data-fluidkit='liquid-card-content'] > h3 .card-title::after { content: var(--t-in-use, '사용 중'); font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 8px; color: #fff; background: #9333ea; box-shadow: 0 1px 4px color-mix(in srgb, #9333ea 45%, transparent); }
 .sc-char { margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed var(--line); }
 .sc-char-h { font-size: 12px; color: var(--muted); margin: 2px 0 6px; }
 

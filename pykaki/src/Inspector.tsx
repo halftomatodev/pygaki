@@ -27,7 +27,9 @@ export function Inspector() {
   const ids = useStore((s) => s.selectedIds);
   const project = useStore((s) => s.project);
   const shaderOf = useStore((s) => s.shaderOf);
+  const hudOf = useStore((s) => s.hudOf);
   if (shaderOf) return <ShaderPanel />;
+  if (hudOf) return <LabelHudPanel />;
   if (!ids.length)
     return (
       <div className="insp">
@@ -180,17 +182,63 @@ function BoxInspector({ b }: { b: BoxNode }) {
   );
 }
 
+type HudPick = '' | 'show' | 'hide';
+const HUD_PICKS = [['', '그대로'], ['show', '보이기'], ['hide', '숨기기']] as const;
+const HUD_WORD: Record<HudPick, string> = { '': '그대로', show: '보이기', hide: '숨기기' };
+
+// HUD마다 [그대로 | 보이기 | 숨기기] 줄들 (상자 HUD 카드와 label HUD 칸이 같이 씀). inh: label에서 정한 것 (상자에서만)
+function HudRows({ huds, state, choose, inh }: { huds: NonNullable<Project['screens']>; state: (id: string) => HudPick; choose: (id: string, v: HudPick) => void; inh?: (id: string) => HudPick }) {
+  if (!huds.length)
+    return (
+      <div className="row">
+        <span className="tip">HUD가 없어요. [화면] 탭에서 화면을 HUD로 만들어 주세요.</span>
+        <button onClick={() => useLive.setState({ view: 'screens' })}>[화면] 탭으로</button>
+      </div>
+    );
+  return (
+    <>
+      {huds.map((h) => {
+        const v = state(h.id);
+        const from = !v && inh ? inh(h.id) : '';
+        return (
+          <div className="row hud-row" key={h.id}>
+            <label title={h.name}>
+              {h.title || h.name}
+              {from && (
+                <small className="hud-inh">
+                  label: <span>{HUD_WORD[from]}</span>
+                </small>
+              )}
+            </label>
+            <span className="seg-switch hud-seg">
+              {HUD_PICKS.map(([k, t]) => (
+                <button key={k} className={v === k ? 'on' : ''} onClick={() => choose(h.id, k)}>{t}</button>
+              ))}
+            </span>
+          </div>
+        );
+      })}
+    </>
+  );
+}
+
 // 이 상자에서 HUD 보이기/숨기기 (세션 79, 상자 머리 [HUD] 단추와 짝). HUD마다 [그대로 | 보이기 | 숨기기].
-// 고르면 그 HUD의 hud 줄을 모두 지우고 상자 맨 앞에 하나만 둔다. 화면을 안 고른 hud 줄(예전 것)도 이때 지운다
+// 고르면 그 HUD의 hud 줄을 모두 지우고 상자 맨 앞에 하나만 둔다. 화면을 안 고른 hud 줄(예전 것)도 이때 지운다.
+// "그대로"이면 label에서 정한 것을 따른다 (FEATURE 27)
 function HudCard({ b, upd, huds }: { b: BoxNode; upd: Upd; huds: NonNullable<Project['screens']> }) {
+  const g = useStore((s) => s.project.labels.find((x) => x.id === b.group));
   const hl = b.lines.filter((l) => l.type === 'hud');
   const known = (l: Line) => huds.some((h) => h.id === l.screen);
   const stray = hl.filter((l) => !known(l)).length;
-  const state = (id: string) => {
+  const state = (id: string): HudPick => {
     const last = [...hl].reverse().find((l) => l.screen === id);
     return !last ? '' : last.stop ? 'hide' : 'show';
   };
-  const choose = (id: string, v: '' | 'show' | 'hide') =>
+  const inh = (id: string): HudPick => {
+    const h = g?.hud?.find((x) => x.screen === id);
+    return !h ? '' : h.stop ? 'hide' : 'show';
+  };
+  const choose = (id: string, v: HudPick) =>
     upd((x) => {
       x.lines = x.lines.filter((l) => l.type !== 'hud' || (l.screen !== id && known(l)));
       if (!v) return;
@@ -200,26 +248,8 @@ function HudCard({ b, upd, huds }: { b: BoxNode; upd: Upd; huds: NonNullable<Pro
     });
   const clean = () => upd((x) => void (x.lines = x.lines.filter((l) => l.type !== 'hud' || known(l))));
   return (
-    <Card id="i-hud" domId="card-hud" title="HUD" hint="이 상자가 시작될 때 HUD를 띄우거나 내려요 (show screen / hide screen). 그대로면 앞 상자의 HUD가 이어져요" topic="HUD">
-      {!huds.length && (
-        <div className="row">
-          <span className="tip">HUD가 없어요. [화면] 탭에서 화면을 HUD로 만들어 주세요.</span>
-          <button onClick={() => useLive.setState({ view: 'screens' })}>[화면] 탭으로</button>
-        </div>
-      )}
-      {huds.map((h) => {
-        const v = state(h.id);
-        return (
-          <div className="row hud-row" key={h.id}>
-            <label title={h.name}>{h.title || h.name}</label>
-            <span className="seg-switch hud-seg">
-              {([['', '그대로'], ['show', '보이기'], ['hide', '숨기기']] as const).map(([k, t]) => (
-                <button key={k} className={v === k ? 'on' : ''} onClick={() => choose(h.id, k)}>{t}</button>
-              ))}
-            </span>
-          </div>
-        );
-      })}
+    <Card id="i-hud" domId="card-hud" title="HUD" hint="이 상자가 시작될 때 HUD를 띄우거나 내려요 (show screen / hide screen). 그대로면 label에서 정한 것을, 그것도 없으면 앞 상자의 HUD가 이어져요" topic="HUD">
+      <HudRows huds={huds} state={state} choose={choose} inh={inh} />
       {stray > 0 && (
         <div className="row">
           <span className="tip">{`HUD를 안 고른 예전 줄이 ${stray}개 있어요`}</span>
@@ -227,6 +257,54 @@ function HudCard({ b, upd, huds }: { b: BoxNode; upd: Upd; huds: NonNullable<Pro
         </div>
       )}
     </Card>
+  );
+}
+
+// label의 [♡ HUD] 단추를 누르면 오른쪽 편집 칸이 이걸로 바뀐다 (FEATURE 27). 셰이더 고르기 칸(ShaderPanel)과 같은 자리.
+// 여기서 정한 것은 그 label의 상자마다 첫머리에 show/hide screen으로 나가고, 상자에서 같은 HUD를 정하면 상자 것
+export function LabelHudPanel() {
+  const id = useStore((s) => s.hudOf)!;
+  const project = useStore((s) => s.project);
+  const update = useStore((s) => s.update);
+  const g = project.labels.find((x) => x.id === id);
+  const close = () => useStore.setState({ hudOf: null });
+  if (!g) return null;
+  const huds = (project.screens ?? []).filter((s) => s.kind === 'hud');
+  const nBoxes = project.nodes.filter((n) => n.group === g.id).length;
+  const state = (sid: string): HudPick => {
+    const h = g.hud?.find((x) => x.screen === sid);
+    return !h ? '' : h.stop ? 'hide' : 'show';
+  };
+  const choose = (sid: string, v: HudPick) =>
+    update((p) => {
+      const x = p.labels.find((l) => l.id === id);
+      if (!x) return;
+      const list = (x.hud ?? []).filter((h) => h.screen !== sid);
+      if (v) list.push({ screen: sid, ...(v === 'hide' && { stop: true }) });
+      if (list.length) x.hud = list;
+      else delete x.hud;
+    });
+  const stray = (g.hud ?? []).filter((h) => !huds.some((s) => s.id === h.screen)).length;
+  const clean = () =>
+    update((p) => {
+      const x = p.labels.find((l) => l.id === id);
+      if (!x?.hud) return;
+      x.hud = x.hud.filter((h) => huds.some((s) => s.id === h.screen));
+      if (!x.hud.length) delete x.hud;
+    });
+  return (
+    <div className="insp shader-panel">
+      <Card id="s-label-hud" title="HUD" hint="이 label의 상자마다 시작할 때 HUD를 띄우거나 내려요 (show screen / hide screen). 상자에서 같은 HUD를 정하면 상자 것을 따라요" topic="HUD" extra={<button onClick={close}>닫기</button>}>
+        <p className="tip">{g.title ? `${g.title} (${g.name})` : g.name}{` · 상자 ${nBoxes}개`}</p>
+        <HudRows huds={huds} state={state} choose={choose} />
+        {stray > 0 && (
+          <div className="row">
+            <span className="tip">{`지운 HUD를 고른 것이 ${stray}개 있어요`}</span>
+            <button onClick={clean}>지우기</button>
+          </div>
+        )}
+      </Card>
+    </div>
   );
 }
 

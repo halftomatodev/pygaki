@@ -34,6 +34,8 @@ interface S {
   hideLeft: boolean; // 왼쪽 칸 접음
   hideRight: boolean; // 오른쪽 칸 접음
   openShader(kind: 'box' | 'label', id: string): void;
+  hudOf: string | null; // 오른쪽 칸에서 HUD를 고르는 중인 label id (FEATURE 27)
+  openLabelHud(id: string): void;
   togglePanel(side: 'left' | 'right'): void;
   update(fn: (p: Project) => void, key?: string): void;
   load(p: Project, o?: { fileName?: string | null; dirty?: boolean }): void;
@@ -78,6 +80,7 @@ export const useStore = create<S>((set, get) => ({
   showDesign: false,
   flowMenu: false,
   shaderOf: null,
+  hudOf: null,
   hideLeft: readFlag('pygaki-hide-left'),
   hideRight: readFlag('pygaki-hide-right'),
 
@@ -86,7 +89,13 @@ export const useStore = create<S>((set, get) => ({
     const cur = get().shaderOf;
     if (cur?.kind === kind && cur.id === id) return set({ shaderOf: null });
     get().select(kind === 'box' ? [id] : []);
-    set({ shaderOf: { kind, id }, tab: 'edit', hideRight: false });
+    set({ shaderOf: { kind, id }, hudOf: null, tab: 'edit', hideRight: false });
+  },
+  // label의 [♡ HUD] 버튼: 오른쪽 편집 칸을 그 label의 HUD 고르기로
+  openLabelHud: (id) => {
+    if (get().hudOf === id) return set({ hudOf: null });
+    get().select([]);
+    set({ hudOf: id, shaderOf: null, tab: 'edit', hideRight: false });
   },
 
   togglePanel: (side) =>
@@ -130,6 +139,7 @@ export const useStore = create<S>((set, get) => ({
       selectedIds: [],
       inlineEdit: null,
       shaderOf: null,
+      hudOf: null,
       focusReq: { ids: p.nodes.map((n) => n.id), t: Date.now() },
     }),
 
@@ -152,7 +162,7 @@ export const useStore = create<S>((set, get) => ({
     // 셰이더 고르기는 그 상자만 골라져 있는 동안(label은 아무 상자도 안 고른 동안)만 열어 둔다
     const so = get().shaderOf;
     const keep = so && (so.kind === 'box' ? ids.length === 1 && ids[0] === so.id : !ids.length);
-    set({ selectedIds: ids, inlineEdit: ie && ids.includes(ie) ? ie : null, shaderOf: keep ? so : null });
+    set({ selectedIds: ids, inlineEdit: ie && ids.includes(ie) ? ie : null, shaderOf: keep ? so : null, ...(ids.length ? { hudOf: null } : {}) });
   },
 
   focusNodes: (ids) => set({ focusReq: { ids, t: Date.now() } }),

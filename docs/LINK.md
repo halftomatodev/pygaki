@@ -98,6 +98,8 @@ label ward.n1:  # @node:n1 도입
 
 **상자와 label의 셰이더** (대본 편집기 `FEATURE` 5, `src/shader.ts`): 대본에서 상자나 label에 셰이더를 한 곳이라도 정하면, 대본 편집기는 **모든 상자의 첫 줄**(상자 label 바로 아래, 첫 `# @l:` 앞)에 표시 없이 `$ screen_fx.shaders("ascii", "vhs_crt", transition="fade")`를, 셰이더가 없는 상자에는 `$ screen_fx.clear()`를 적습니다. `call` 줄 바로 뒤에도 한 번 더 적습니다. 대본 편집기가 고르게 하는 전환은 `transition="tv"`와 `transition=None` 둘입니다(예전 판으로 쓴 대본에는 `transition="fade"`나 전환을 적지 않은 줄이 남아 있을 수 있고, 그대로 내보냅니다. 플러그인은 셋 다 그대로 받습니다). 적는 전환은 들어오는 상자의 "시작할 때" → (그게 없음이면) 앞 상자의 "끝날 때" 차례로 고르고, 둘 다 없음이면 `transition=None`(그대로 이어짐)입니다. 플러그인은 `shaders()`·`clear()`에 `transition=`을 적으면 셰이더가 지금과 같아도 그 전환을 돌립니다(screen_fx 5.6. 전환을 안 적은 줄은 예전처럼 같은 값이면 전환 없이 넘어감. 이 동작을 바꾸면 대본 편집기 `shader.ts` `enterTransTv`도 같이). 이 줄은 `# @l:` 표시가 없어서 받아 적기(3장)의 대상이 아니고, 내보낼 때마다 대본 값으로 다시 만들어집니다. 게임 안 편집기에서 이 줄을 고치거나 지워도 다음 내보내기 때 되돌아옵니다.
 
+**label의 HUD** (대본 편집기 `FEATURE` 27): label에서 HUD를 보이기/숨기기로 정하면(대본 `labels[].hud`, `{ "screen": 화면 id, "stop": 숨기기면 true }`), 대본 편집기는 그 label의 **모든 상자의 첫머리**(셰이더·커서 줄 뒤, 첫 `# @l:` 앞)에 표시 없이 `show screen 이름` / `hide screen 이름`을 적습니다. 상자에서 같은 HUD를 정했으면(상자의 `hud` 줄, `# @l:` 표시 있음) label 것은 그 상자에 적지 않습니다. 셰이더 줄처럼 받아 적기(3장)의 대상이 아니고 내보낼 때마다 다시 만들어집니다. 플러그인은 바뀌는 것이 없습니다(렌파이 `show screen`/`hide screen` 그대로).
+
 **셰이더와 TV 전환의 세부 값** (대본 편집기 `FEATURE` 6, screen_fx 5.5): 상자·label의 셰이더 칸에서 고른 셰이더 아래 막대로 값을 바꾸면 대본에 `shader.va`(1번), `shader.vb`(2번), `shader.tv`(TV 전환)로 저장되고, 원고 줄에 이렇게 붙습니다.
 
 ```renpy

@@ -256,6 +256,15 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
       if (enterSh) body.push(enterSh.code);
       const bui = uiOfBox(b);
       if (sceneUi) body.push(sceneCode(bui));
+      // label의 HUD (FEATURE 27): 상자마다 첫머리에. 상자가 같은 HUD를 정했으면 상자 것(그 hud 줄)만. 표시 없이 내보낼 때마다 다시 만듦
+      for (const h of g.hud ?? []) {
+        if (b.lines.some((l) => l.type === 'hud' && l.screen === h.screen)) continue;
+        const { code, problem } = stageCode({ id: '', type: 'hud', text: '', screen: h.screen, ...(h.stop && { stop: true }) }, p.screens);
+        // 경고는 label마다 한 번 (지운 HUD를 골라 둔 것)
+        if (problem && i === 0)
+          W.push({ level: 'warn', msg: p.screens?.some((s) => s.id === h.screen) ? `label "${g.name}"의 HUD: ${problem}` : `label "${g.name}"의 HUD: 지운 HUD를 골라 두었어요. label의 [♡ HUD]에서 지워 주세요`, nodeId: b.id });
+        if (code) body.push(code);
+      }
       const pct =(t: string, where: string) => {
         if (!S.escapePercent && loosePercent(t)) W.push({ level: 'error', msg: `${where}의 %에서 렌파이가 멈춰요. 설정에서 "% 를 글자 그대로"를 켜 주세요 (${b.title || b.id})`, nodeId: b.id });
         // 텍스트 태그 짝 (렌파이 check_text_tags와 같은 규칙)

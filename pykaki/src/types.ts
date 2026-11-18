@@ -219,6 +219,7 @@ export interface BoxNode {
   ui?: BoxUi; // 이 상자의 커서, 클릭 대기. 값마다 없으면 게임 처음 값
   title: string;
   pos: { x: number; y: number };
+  w?: number; // 캔버스 상자 폭 (px, 오른쪽 아래 손잡이로 끌어 정함). 없으면 기본 폭. 원고와는 상관없음
   lines: Line[];
   exit: Exit;
 }
@@ -265,6 +266,13 @@ export interface LabelGroup {
   color: string;
   entry: string | null;
   shader?: BoxShader; // 이 label의 상자 모두에 거는 셰이더
+  hud?: LabelHud[]; // 이 label의 상자 모두에서 HUD 보이기/숨기기 (FEATURE 27). 상자가 같은 HUD를 정하면 상자 것
+}
+
+// label의 HUD 하나 (FEATURE 27): screen = 화면 id (project.screens), stop이면 숨기기
+export interface LabelHud {
+  screen: string;
+  stop?: boolean;
 }
 
 export interface Settings {

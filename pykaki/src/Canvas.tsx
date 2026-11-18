@@ -243,7 +243,7 @@ export function Canvas() {
           const g = (n.data as any).groupId;
           useStore.getState().select(useStore.getState().project.nodes.filter((b) => b.group === g).map((b) => b.id));
         }}
-        onPaneClick={() => useStore.setState({ inlineEdit: null, shaderOf: null })}
+        onPaneClick={() => useStore.setState({ inlineEdit: null, shaderOf: null, hudOf: null })}
         zoomOnDoubleClick={false}
         deleteKeyCode={['Delete']}
         multiSelectionKeyCode={['Control', 'Meta', 'Shift']}

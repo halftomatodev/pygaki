@@ -2,7 +2,7 @@ import { memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { useStore } from './store';
 import * as ops from './ops';
-import type { BoxNode, BoxShader, Line, MenuAsk } from './types';
+import type { BoxNode, BoxShader, LabelGroup, Line, MenuAsk } from './types';
 import { shaderLabel } from './shader';
 import { isLight, uid } from './util';
 import { changeThenFocus } from './actions';
@@ -36,7 +36,7 @@ export const BoxView = memo(function BoxView({ id, selected }: NodeProps) {
   const cls = ['box', selected && 'sel', editing && 'editing'].filter(Boolean).join(' ');
   const onEsc = (e: React.KeyboardEvent) => e.key === 'Escape' && useStore.setState({ inlineEdit: null });
   return (
-    <div className={cls + (b.color ? ' own-color' : '')} style={{ '--g': b.color ?? g?.color ?? 'var(--panel)', ...(b.color && { '--own-bt': isLight(b.color) ? '#1c1c1e' : '#ffffff' }) } as React.CSSProperties}>
+    <div className={cls + (b.color ? ' own-color' : '')} style={{ '--g': b.color ?? g?.color ?? 'var(--panel)', ...(b.color && { '--own-bt': isLight(b.color) ? '#1c1c1e' : '#ffffff' }), ...(b.w && { width: b.w }) } as React.CSSProperties}>
       {editing && <FlowMenu b={b} />}
       {tagLine && (
         <TagBar
@@ -64,14 +64,68 @@ export const BoxView = memo(function BoxView({ id, selected }: NodeProps) {
         ) : (
           <span className="box-title" data-part="title">{b.title || '(제목 없음)'}</span>
         )}
-        <HudButton b={b} />
-        <ShaderButton kind="box" id={b.id} own={b.shader} inherited={g?.shader} />
+        <div className="box-tools">
+          <ShaderButton kind="box" id={b.id} own={b.shader} inherited={g?.shader} />
+          <HudButton b={b} />
+        </div>
       </div>
       <Lines b={b} editing={editing} active={active} setActive={setActive} />
       <Exits b={b} editing={editing} tb={tb} active={active} setActive={setActive} />
+      <BoxResize b={b} />
     </div>
   );
 });
+
+// 상자 오른쪽 아래 크기 손잡이 (세션 81): 끌면 상자 폭이 바뀐다(긴 제목도 다 보이게). 더블클릭하면 기본 폭.
+// 폭은 대본 nodes[].w (FEATURE 27), 원고와는 상관없음. 끄는 동안 바뀐 것은 되돌리기 한 번으로 묶인다(같은 key)
+export const BOX_W = 250;
+const BOX_W_MAX = 900;
+function BoxResize({ b }: { b: BoxNode }) {
+  const update = useStore((s) => s.update);
+  const onDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return;
+    e.stopPropagation();
+    e.preventDefault();
+    const box = e.currentTarget.parentElement as HTMLElement;
+    const zoom = box.getBoundingClientRect().width / box.offsetWidth || 1; // 캔버스 확대 비율
+    const x0 = e.clientX;
+    const w0 = box.offsetWidth;
+    const key = 'w' + b.id + ':' + Date.now();
+    const el = e.currentTarget;
+    el.setPointerCapture(e.pointerId);
+    document.body.classList.add('box-resizing');
+    const move = (ev: PointerEvent) => {
+      const w = Math.round(Math.min(BOX_W_MAX, Math.max(BOX_W, w0 + (ev.clientX - x0) / zoom)));
+      update((p) => {
+        const n = ops.findBox(p, b.id);
+        if (!n) return;
+        if (w === BOX_W) delete n.w;
+        else n.w = w;
+      }, key);
+    };
+    const up = () => {
+      el.removeEventListener('pointermove', move);
+      el.removeEventListener('pointerup', up);
+      el.removeEventListener('pointercancel', up);
+      document.body.classList.remove('box-resizing');
+    };
+    el.addEventListener('pointermove', move);
+    el.addEventListener('pointerup', up);
+    el.addEventListener('pointercancel', up);
+  };
+  return (
+    <div
+      className="nodrag nopan box-resize"
+      title="끌어서 상자 폭 바꾸기 · 더블클릭: 기본 폭"
+      onPointerDown={onDown}
+      onClick={(e) => e.stopPropagation()}
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        if (b.w) update((p) => void delete ops.findBox(p, b.id)!.w);
+      }}
+    />
+  );
+}
 
 const isSayLine = (l: Line) => l.type === 'say' || l.type === 'narration';
 
@@ -245,30 +299,37 @@ function Exits({ b, editing, tb, active, setActive }: { b: BoxNode; editing: boo
   );
 }
 
-// 상자 오른쪽 위 [셰이더] 옆의 [♡ HUD] 버튼 (세션 79). HUD 보이기/숨기기는 대사 줄이 아니라 상자에서 고른다.
-// [셰이더]처럼 늘 있고(흐리게, 올리면 진하게), 고른 것이 있으면 꽉 찬 하트로 칠해진다.
-// 누르면 상자를 고르고 오른쪽 [HUD] 카드를 펴서 보여 준다. 데이터는 그대로 상자 맨 앞의 hud 줄(FEATURE 18)
-function HudButton({ b }: { b: BoxNode }) {
+// 상자와 label의 [셰이더] 아래 [♡ HUD] 버튼 (세션 79, 81). HUD 보이기/숨기기는 대사 줄이 아니라 상자나 label에서 고른다.
+// [셰이더]처럼 늘 있고(흐리게, 올리면 진하게), 고른 것이 있으면 꽉 찬 하트로 칠해진다. label 것을 따르는 상자는 흐린 점선 테두리.
+// 상자: 누르면 상자를 고르고 오른쪽 [HUD] 카드를 펴서 보여 준다. 데이터는 상자 맨 앞의 hud 줄(FEATURE 18).
+// label: 누르면 오른쪽 칸이 그 label의 HUD 고르기로 바뀐다(LabelHudPanel). 데이터는 labels[].hud (FEATURE 27)
+function HudButton({ b, label }: { b?: BoxNode; label?: LabelGroup }) {
   const screens = useStore((s) => s.project.screens);
-  const hl = b.lines.filter((l) => l.type === 'hud');
+  const g = useStore((s) => label ?? s.project.labels.find((x) => x.id === b?.group));
+  const open = useStore((s) => !!label && s.hudOf === label.id);
   const huds = (screens ?? []).filter((s) => s.kind === 'hud');
-  const bad = hl.some((l) => !huds.some((h) => h.id === l.screen));
-  const shown = hl.filter((l) => !l.stop && huds.some((h) => h.id === l.screen)).length;
-  const hidden = hl.filter((l) => l.stop && huds.some((h) => h.id === l.screen)).length;
-  const label = bad ? '♡ HUD ⚠' : shown || hidden ? `♥ HUD${shown ? ' ' + shown : ''}${hidden ? ' −' + hidden : ''}` : '♡ HUD';
+  const known = (id?: string) => huds.some((h) => h.id === id);
+  const picks = b ? b.lines.filter((l) => l.type === 'hud').map((l) => ({ screen: l.screen, stop: !!l.stop })) : (label?.hud ?? []).map((h) => ({ screen: h.screen as string | undefined, stop: !!h.stop }));
+  const bad = picks.some((x) => !known(x.screen));
+  const shown = picks.filter((x) => !x.stop && known(x.screen)).length;
+  const hidden = picks.filter((x) => x.stop && known(x.screen)).length;
+  const inh = !!b && !shown && !hidden && (g?.hud ?? []).some((h) => known(h.screen));
+  const text = bad ? '♡ HUD ⚠' : shown || hidden ? `♥ HUD${shown ? ' ' + shown : ''}${hidden ? ' −' + hidden : ''}` : '♡ HUD';
   return (
     <button
-      className={'nodrag sh-btn hud-btn' + (shown || hidden ? ' set' : '') + (bad ? ' bad' : '')}
-      title={(bad ? 'HUD를 아직 안 고른 자리가 있어요\n' : '') + '이 상자에서 HUD를 보일지 숨길지 골라요\n눌러서 오른쪽에서 골라요'}
+      className={'nodrag sh-btn hud-btn' + (shown || hidden ? ' set' : inh ? ' inh' : '') + (bad ? ' bad' : '') + (open ? ' open' : '')}
+      title={(bad ? 'HUD를 아직 안 고른 자리가 있어요\n' : '') + (inh ? 'label의 HUD를 따라요\n' : '') + (b ? '이 상자에서 HUD를 보일지 숨길지 골라요\n눌러서 오른쪽에서 골라요' : '이 label의 상자마다 HUD를 보일지 숨길지 골라요\n눌러서 오른쪽에서 골라요')}
       onClick={(e) => {
         e.stopPropagation();
+        if (label) return useStore.getState().openLabelHud(label.id);
+        if (!b) return;
         useStore.getState().select([b.id]);
         useFolded.setState({ 'i-hud': false });
         requestAnimationFrame(() => document.getElementById('card-hud')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }));
       }}
       onDoubleClick={(e) => e.stopPropagation()}
     >
-      {label}
+      {text}
     </button>
   );
 }
@@ -570,7 +631,10 @@ export function GroupFrame({ data }: NodeProps) {
         {g.title ? `${g.title} · ` : ''}
         <code>{g.name}</code>
       </span>
-      <ShaderButton kind="label" id={g.id} own={g.shader} />
+      <div className="box-tools">
+        <ShaderButton kind="label" id={g.id} own={g.shader} />
+        <HudButton label={g} />
+      </div>
     </div>
   );
 }

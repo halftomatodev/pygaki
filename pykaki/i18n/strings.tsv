@@ -2555,3 +2555,12 @@ HUD가 없어요. [화면] 탭에서 화면을 HUD로 만들어 주세요.	HUD �
 [화면] 탭으로	[画面] タブへ	Go to [Screens]
 흔드는 시간(0이면 계속)	揺れる時間(0 なら続く)	Shake time (0 = forever)
 글자마다 따로	文字ごとに別々	Each letter on its own
+label의 HUD를 따라요	label の HUD に従います	Follows the label's HUD
+끌어서 상자 폭 바꾸기	ドラッグでボックスの幅を変更	Drag to change the box width
+더블클릭: 기본 폭	ダブルクリック: 標準の幅	Double-click: default width
+지운 HUD를 고른 것이 ${stray}개 있어요	削除した HUD を選んだものが {0} 個あります	{0} deleted HUD(s) are still chosen
+이 label의 상자마다 HUD를 보일지 숨길지 골라요\n눌러서 오른쪽에서 골라요	この label のボックスごとに HUD を表示するか隠すかを選びます\n押すと右で選べます	Choose whether each box in this label shows or hides HUDs\nClick to choose on the right
+이 label의 상자마다 시작할 때 HUD를 띄우거나 내려요 (show screen / hide screen). 상자에서 같은 HUD를 정하면 상자 것을 따라요	この label のボックスごとに、始まるときに HUD を出したり下げたりします (show screen / hide screen)。ボックスで同じ HUD を決めると、ボックスのほうに従います	Shows or hides HUDs when each box in this label starts (show screen / hide screen). If a box sets the same HUD, the box wins
+이 상자가 시작될 때 HUD를 띄우거나 내려요 (show screen / hide screen). 그대로면 label에서 정한 것을, 그것도 없으면 앞 상자의 HUD가 이어져요	このボックスが始まるときに HUD を出したり下げたりします (show screen / hide screen)。そのままなら label で決めたものに、それもなければ前のボックスの HUD が続きます	Shows or hides HUDs when this box starts (show screen / hide screen). Keep follows the label's choice, or else carries over the previous box's HUD
+label "${g.name}"의 HUD: ${problem}	label "{0}" の HUD: {1}	HUD of label "{0}": {1}
+label "${g.name}"의 HUD: 지운 HUD를 골라 두었어요. label의 [♡ HUD]에서 지워 주세요	label "{0}" の HUD: 削除した HUD が選ばれています。label の [♡ HUD] で外してください	HUD of label "{0}": a deleted HUD is still chosen. Remove it with the label's [♡ HUD]
