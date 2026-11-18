@@ -1,4 +1,4 @@
-<!-- 원본: pykaki/docs/GUIDE.md @ 171df27857 -->
+<!-- 원본: pykaki/docs/GUIDE.md @ 7c67d243f9 -->
 # pygaki user guide
 
 A tool for writing Ren'Py scripts with boxes and lines and exporting them as Ren'Py script files (`.rpy`).
@@ -499,7 +499,7 @@ Press **[Fonts]** in the toolbar to see the fonts in your game, add new ones, an
 
 ## 7-3. Making transparent videos (app)
 
-Ren'Py 8.5.3 can't play a webm with transparent areas as is (they come out black). A transparent video for Ren'Py holds **color on the left and transparency on the right (white = visible)** side by side. The pygaki app converts to this form for you. You don't need ffmpeg or any other program.
+Ren'Py (up to 8.6.1) can't play a webm with transparent areas as is (they come out black). A transparent video for Ren'Py holds **color on the left and transparency on the right (white = visible)** side by side. The pygaki app converts to this form for you. You don't need ffmpeg or any other program.
 
 - **Where to open it**: **[🎞]** next to an image/video field (dialogue text box, image behind a choice), or **[🎞 Make transparent video]** on the [Images, video] card.
 - **What you can use**: a transparent webm, an animated GIF/WebP/PNG, a **PNG sequence** (pick several at once; they're ordered by the number in the name) or a **green-screen video** (mp4, webm). You can also drag files onto the window.

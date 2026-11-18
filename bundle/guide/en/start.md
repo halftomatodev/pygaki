@@ -1,4 +1,4 @@
-<!-- 원본: bundle/guide/parts/start.md @ 9a8d047c04 -->
+<!-- 원본: bundle/guide/parts/start.md @ e3aee035cb -->
 # Getting started
 
 ## What pygaki does
@@ -37,7 +37,7 @@ If Windows shows a "Windows protected your PC" window the first time you start t
 
 ## What's in the plugins
 
-Four plugins that change the screens just by putting their folders in `game/`, without editing the `screens.rpy` of Ren'Py's default template. They were built and tested on Ren'Py 8.5.3. You can pick only the ones you need (each works without the others).
+Four plugins that change the screens just by putting their folders in `game/`, without editing the `screens.rpy` of Ren'Py's default template. They are tested on Ren'Py 8.6.1 (and also work on 8.5.3). You can pick only the ones you need (each works without the others).
 
 | Folder | What it does | Files you edit |
 | --- | --- | --- |

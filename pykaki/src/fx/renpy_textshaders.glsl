@@ -1,4 +1,4 @@
-// 렌파이에 들어 있는 등장 효과 (렌파이 8.5.3 renpy/common/00textshader_ren.py를 같은 형식으로 옮김)
+// 렌파이에 들어 있는 등장 효과 (렌파이 8.6.1 renpy/common/00textshader_ren.py를 같은 형식으로 옮김)
 // PyKaki 미리보기만 씁니다. 렌파이에는 이미 들어 있어서 showpy에는 없습니다.
 // Copyright 2004-2026 Tom Rothamel. MIT 라이선스 (licenses 폴더 참고)
 // 적는 법은 text_effects.glsl 맨 위와 같습니다.
@@ -70,13 +70,33 @@
 @effect jitter 떨림
 @redraw always
 @set u__jitter (3.0, 3.0)
+@set u__duration 0.0
+@set u__individual 0.0
+@param u__duration 0 5 흔드는 시간(0이면 계속)
+@param u__individual 0 1 글자마다 따로
 @variables
     uniform vec2 u__jitter;
+    uniform float u__duration;
+    uniform float u__individual;
     uniform vec4 u_random;
+    uniform float u_text_time;
     uniform float u_text_to_drawable;
+    attribute float a_text_index;
 @vertex_30
-    vec2 l__jitter = u__jitter * u_text_to_drawable;
-    gl_Position.xy += l__jitter * u_random.xy - l__jitter / 2.0;
+    if (u__duration <= 0.0 || u_text_time < u__duration) {
+        vec2 l__random = u_random.xy;
+
+        if (u__individual != 0.0) {
+            vec2 l__seed = vec2(a_text_index, a_text_index + 1.0) + u_random.xy;
+            l__random = fract(sin(vec2(
+                dot(l__seed, vec2(12.9898, 78.233)),
+                dot(l__seed, vec2(39.3468, 11.135))
+            )) * 43758.5453);
+        }
+
+        vec2 l__jitter = u__jitter * u_text_to_drawable;
+        gl_Position.xy += l__jitter * l__random - l__jitter / 2.0;
+    }
 
 @effect wave 물결
 @redraw always
@@ -85,7 +105,7 @@
 @set u__wavelength 20.0
 @variables
     uniform float u__amplitude;
-    uniform float u__frequency
+    uniform float u__frequency;
     uniform float u__wavelength;
 
     uniform float u_time;

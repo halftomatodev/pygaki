@@ -1,4 +1,4 @@
-렌파이 텍스트 셰이더 (src/fx/renpy_textshaders.glsl, 렌파이 8.5.3 renpy/common/00textshader_ren.py에서 옮김)
+렌파이 텍스트 셰이더 (src/fx/renpy_textshaders.glsl, 렌파이 8.6.1 renpy/common/00textshader_ren.py에서 옮김)
 
 Copyright 2004-2026 Tom Rothamel <pytom@bishoujo.us>
 

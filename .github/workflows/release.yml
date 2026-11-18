@@ -14,7 +14,7 @@ permissions:
   contents: write
 
 env:
-  RENPY_VERSION: 8.5.3
+  RENPY_VERSION: 8.6.1
 
 jobs:
   app:

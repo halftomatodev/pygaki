@@ -218,6 +218,9 @@ init -10 python in say_style:
         import re
         return re.match(r"^[a-z][a-z0-9_]*$", name) is not None
 
+    ## 렌파이 8.6 이후에 필요한 문법 버전 (screen_fx.register_shader와 같음). 효과 코드는 예전 문법(GLSL ES 1.00)으로 씁니다
+    _TFX_GLSL = { "glsl": 100 } if hasattr(store.renpy.config, "glsl_version") else { }
+
     def _tfx_register():
         main = _tfx_find()
         parts = { }
@@ -250,6 +253,7 @@ init -10 python in say_style:
             kw.update(e["uniforms"])
             if e["redraw"] == "always":
                 kw["redraw"] = 0.0
+            kw.update(_TFX_GLSL)
             store.renpy.register_textshader(e["name"], include_default=False,
                 adjust_function=_tfx_adjuster(e["slow"], e["redraw"]), **kw)
             if e["outlines"]:
@@ -283,6 +287,7 @@ init -10 python in say_style:
                 continue
             decl = "".join("uniform %s %s;\n" % ("vec4" if isinstance(v, str) else "float", k) for k, v in values)
             kw = dict(values)
+            kw.update(_TFX_GLSL)
             store.renpy.register_textshader(name, include_default=False,
                 variables=decl + "uniform float u_text_slow_time;\nattribute float a_text_min_time;\nvarying float v__min_time;\n",
                 vertex_200="v__min_time = a_text_min_time;\n",

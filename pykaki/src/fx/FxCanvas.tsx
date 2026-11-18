@@ -382,6 +382,7 @@ export function FxCanvas({ target, ts, tagTs, parsed, shown, limit, holding, fas
           ['u_random', [Math.random(), Math.random(), Math.random(), Math.random()]],
           ['u_drawable_size', [cw, ch]],
           ['u_text_slow_time', slow],
+          ['u_text_time', elapsed],
           ['u_text_slow_duration', slowDur],
           ['u_text_depth', maxDepth - n],
           ['u_text_max_depth', maxDepth],

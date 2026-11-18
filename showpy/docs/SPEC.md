@@ -5,7 +5,7 @@
 - 묶음 버전 5.0 (`ui_kit` 4.0, `screen_fx` 5.1, `hotkeys` 1.0, `splash` 2.0) = pygaki v1.3 (2026-11-09)
 - 만드는 중: `screen_fx` 5.2 줄기표 (9장)
 - 5.0에 들어간 것: `screen_fx` 5.1 (새 화면 효과 일곱), `ui_kit` 3.23 (게임 안 편집 화면 이름, UI 글 탭, 폴더 열기, F9), `ui_kit` 4.0 (글자 효과 11개, 글 상자 `bubble` `pill`)
-- 렌파이 8.5.3 기준
+- 렌파이 8.6.1 기준 (8.5.3에서도 동작. 셰이더는 예전 문법 GLSL ES 1.00으로 쓰고 8.6에서는 `glsl=100`을 붙여 등록)
 - 작업 규칙: [DEV_RULES.md](DEV_RULES.md)
 - 대본 편집기 연결 형식: [LINK.md](../../docs/LINK.md)
 - 대본 편집기 명세: https://github.com/halftomatodev/pygaki/blob/main/pykaki/docs/SPEC.md

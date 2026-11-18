@@ -146,7 +146,7 @@ init -10 python in watermorph:
     import store as _store
 
     for _q in (1, 2, 3):
-        _store.renpy.register_shader(
+        _store.screen_fx.register_shader(
             "watermorph.q{}".format(_q),
             variables=_VARIABLES,
             fragment_functions=_FUNCTIONS.replace("WM_OCTAVES", str(_q)),

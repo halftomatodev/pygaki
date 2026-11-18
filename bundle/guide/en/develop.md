@@ -1,4 +1,4 @@
-<!-- 원본: bundle/guide/parts/develop.md @ 261aa0b0e7 -->
+<!-- 원본: bundle/guide/parts/develop.md @ 3129bffd70 -->
 # Changing it yourself
 
 For people who want to adapt pygaki to their game, add features, or share their changes with others. If you only want to change settings values, the "Plugin customization guide" chapter is enough; this chapter is for editing code and effect files directly.
@@ -21,7 +21,7 @@ This guide is also built from the repository's documents. The Korean version rea
 
 ## Setup
 
-* **Ren'Py SDK 8.5.3**: to test plugins and run Lint. If you downloaded the pygaki bundle, that folder is the SDK.
+* **Ren'Py SDK 8.6.1**: to test plugins and run Lint. If you downloaded the pygaki bundle, that folder is the SDK.
 * **Node.js** (to change pygaki): run `npm ci` once in `pykaki/` and `pykaki/app/`.
 * **Python 3** (to make the bundle): runs `bundle/make_bundle.py`.
 * Make a test Ren'Py project (launcher's new project → Pygaki). Don't edit your real game directly.

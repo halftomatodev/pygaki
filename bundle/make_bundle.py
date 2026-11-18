@@ -247,7 +247,7 @@ def main():
     a = ap.parse_args()
 
     if not a.sdk:
-        sys.exit("렌파이 SDK 폴더를 --sdk로 주세요. 예: --sdk D:\renpy-8.5.3-sdk (또는 환경 변수 RENPY_SDK)")
+        sys.exit("렌파이 SDK 폴더를 --sdk로 주세요. 예: --sdk D:\renpy-8.6.1-sdk (또는 환경 변수 RENPY_SDK)")
     sdk = os.path.abspath(a.sdk)
     if not os.path.exists(os.path.join(sdk, "renpy.exe")) or not os.path.isdir(os.path.join(sdk, "launcher", "game")):
         sys.exit("렌파이 SDK 폴더가 아니에요 (renpy.exe, launcher/game이 없음): " + sdk)

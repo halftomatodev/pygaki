@@ -447,7 +447,7 @@ const ROUND_HELPER = [
   '        vec2 pk_q = abs(v_pk_pos - pk_h) - (pk_h - vec2(u_pk_radius));',
   '        float pk_d = length(max(pk_q, 0.0)) + min(max(pk_q.x, pk_q.y), 0.0) - u_pk_radius;',
   '        gl_FragColor *= clamp(0.5 - pk_d, 0.0, 1.0);',
-  '    """)',
+  '    """, **({"glsl": 100} if hasattr(renpy.config, "glsl_version") else {}))  # 렌파이 8.6부터: 예전 문법(GLSL ES 1.00)이라고 알림',
   '',
   '    def _pk_round(d, r):',
   '        # 색 칸 d의 모서리를 반지름 r(px)만큼 둥글게',

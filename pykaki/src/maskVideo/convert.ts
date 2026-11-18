@@ -1,6 +1,6 @@
 // 투명 영상 만들기: 투명 webm, PNG 연속 그림, 움직이는 GIF·WebP·PNG, 초록 화면 영상 →
 // 렌파이가 바로 쓰는 "왼쪽 색 + 오른쪽 투명도(흑백)" webm (렌파이 Movie(side_mask=True), 플러그인은 mask_ 이름이면 저절로).
-// 렌파이 8.5.3은 알파가 든 webm을 그대로 못 틀어서 이 꼴로 바꿔야 한다.
+// 렌파이(8.6.1까지)는 알파가 든 webm을 그대로 못 틀어서 이 꼴로 바꿔야 한다.
 // 앱 안의 Chromium으로 다 한다: <video>·ImageDecoder로 프레임을 읽고 → 캔버스에서 두 쪽을 그리고 →
 // WebCodecs VideoEncoder(VP9)로 굽고 → webm.ts로 묶는다. ffmpeg나 다른 프로그램은 쓰지 않는다.
 import { muxWebm, type Chunk } from './webm';

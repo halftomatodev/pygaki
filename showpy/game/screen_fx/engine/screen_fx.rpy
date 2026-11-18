@@ -43,7 +43,7 @@ init -110 python in screen_fx:
 
     import store
 
-    VERSION = "5.8"
+    VERSION = "5.9"
 
     ## ── 플러그인 폴더 위치 ──
     ## 이 파일은 <플러그인 폴더>/engine/screen_fx.rpy 에 있습니다.
@@ -2203,14 +2203,15 @@ init 998 python in screen_fx:
             if _l not in store.config.context_clear_layers:
                 store.config.context_clear_layers.append(_l)
 
-        ## 다른 코드가 이미 바꿔 둔 층은 건드리지 않음
-        if store.config.say_layer == "screens":
+        ## 다른 코드가 이미 바꿔 둔 층은 건드리지 않음. 렌파이 8.6 새 게임은 기본값이 None(스크린의 layer를 따름, 없으면 screens)
+        _plain_layer = ("screens", None)
+        if store.config.say_layer in _plain_layer:
             store.config.say_layer = SAY_LAYER
-        if store.config.choice_layer == "screens":
+        if store.config.choice_layer in _plain_layer:
             store.config.choice_layer = CHOICE_LAYER
-        if getattr(store.config, "nvl_layer", "screens") == "screens":
+        if getattr(store.config, "nvl_layer", "screens") in _plain_layer:
             store.config.nvl_layer = SAY_LAYER
-        if getattr(store.config, "nvl_choice_layer", "screens") == "screens":
+        if getattr(store.config, "nvl_choice_layer", "screens") in _plain_layer:
             store.config.nvl_choice_layer = CHOICE_LAYER
 
         ## renpy.get_screen("say") 처럼 층을 적지 않고 찾을 때도 찾히도록, 스크린이 속한 층도 바꿈

@@ -7,7 +7,7 @@
 | `pygaki-<태그>-renpy-<버전>.zip` (약 280MB) | 렌파이가 아직 없는 사람 | 아무 폴더에 풀고 `renpy.exe` |
 | `pygaki-<태그>-addon.zip` (약 120MB) | 렌파이 SDK가 이미 있는 사람 | zip 안의 `launcher`, `pygaki`를 SDK 폴더(`renpy.exe`가 있는 곳)에 끌어 넣고 런처를 껐다 켬 |
 
-덧붙임은 렌파이의 원래 파일을 고치지 않고 파일만 더해요(`launcher/game/pygaki_launcher.rpy`, `pygaki/`). 템플릿의 기본 프로젝트는 묶을 때 쓴 렌파이(지금 8.5.3)로 만들어서, 다른 렌파이 8에서도 대개 되지만 확실한 건 묶음이에요.
+덧붙임은 렌파이의 원래 파일을 고치지 않고 파일만 더해요(`launcher/game/pygaki_launcher.rpy`, `pygaki/`). 템플릿의 기본 프로젝트는 묶을 때 쓴 렌파이(지금 8.6.1)로 만들어서, 다른 렌파이 8에서도 대개 되지만 확실한 건 묶음이에요.
 
 ## GitHub Releases에 올리기 (보통은 이것)
 
@@ -35,7 +35,7 @@ Actions 화면에서 손으로 돌리면(Run workflow) Releases에는 안 올리
    ```bash
    python bundle/make_bundle.py --sdk 렌파이SDK폴더 --app 받은폴더\pygaki-win --zip --tag v1.0
    ```
-   `bundle/out/`에 `pygaki-v1.0-renpy-8.5.3/`, `pygaki-v1.0-addon/`과 같은 이름의 zip이 생겨요. `--tag`를 빼면 이름에 태그가 안 붙어요. 다시 만들 때는 `bundle/out`을 먼저 지워요. (`bundle/out`은 저장소에 안 올라가요)
+   `bundle/out/`에 `pygaki-v1.0-renpy-8.6.1/`, `pygaki-v1.0-addon/`과 같은 이름의 zip이 생겨요. `--tag`를 빼면 이름에 태그가 안 붙어요. 다시 만들 때는 `bundle/out`을 먼저 지워요. (`bundle/out`은 저장소에 안 올라가요)
 
 ## 묶음 안
 
