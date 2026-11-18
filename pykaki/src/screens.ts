@@ -237,15 +237,26 @@ function itemCode(p: Project, s: ScreenDef, it: ScreenItem, I0: string): string[
     if (!it.image?.trim()) return [];
     out = ['imagebutton:', `${I}idle ${dispRef(it.image)}`];
     if (it.hover?.trim()) out.push(`${I}hover ${dispRef(it.hover)}`);
+    // 고른 상태 (FEATURE 29): 그림이 있으면 selected_idle·selected_hover, 조건이 있으면 selected
+    if (it.selImage?.trim()) out.push(`${I}selected_idle ${dispRef(it.selImage)}`, `${I}selected_hover ${dispRef(it.selImage)}`);
+    if (it.selected?.trim()) out.push(`${I}selected (${it.selected.trim()})`);
     out.push(pos, act);
   } else {
     out = [`textbutton ${py(it.text ?? '')}:`, pos];
+    // 배경 그림 (FEATURE 29): 기본·올렸을 때·고른 상태. 버튼 크기에 늘여 맞춤. 하나라도 있으면 여백을 둠
+    const bg = (d: string) => `Frame(${dispRef(d)}, 0, 0)`;
+    if (it.image?.trim()) out.push(`${I}background ${bg(it.image)}`);
+    if (it.hover?.trim()) out.push(`${I}hover_background ${bg(it.hover)}`);
+    if (it.selImage?.trim()) out.push(`${I}selected_background ${bg(it.selImage)}`, `${I}selected_hover_background ${bg(it.selImage)}`);
+    if (it.image?.trim() || it.hover?.trim() || it.selImage?.trim()) out.push(`${I}padding (14, 6)`);
     if (it.size) out.push(`${I}text_size ${it.size}`);
     if (it.color) out.push(`${I}text_color ${py(it.color)}`);
     if (it.hoverColor) out.push(`${I}text_hover_color ${py(it.hoverColor)}`);
+    if (it.selColor) out.push(`${I}text_selected_idle_color ${py(it.selColor)}`, `${I}text_selected_hover_color ${py(it.selColor)}`);
+    if (it.selected?.trim()) out.push(`${I}selected (${it.selected.trim()})`);
     out.push(act);
   }
-  return withCond(it, mark(out, 'i:' + it.id), I0);
+  return withCond(it, mark(animAt(it, out), 'i:' + it.id), I0);
 }
 
 // 플래그 꼴 (FEATURE 21): 플래그 카드의 꼴과 꾸미기를 렌파이 화면 언어로. 첫 줄은 맨 바깥 칸(뒤에 pos가 들어감)
@@ -430,9 +441,50 @@ export function lookCode(p: Project, it: ScreenItem): string[] {
 }
 
 // 보이는 조건 (FEATURE 18)
+// 나타날 때·사라질 때 (FEATURE 29): 보이는 조건이 있고 움직임을 골랐으면 showif로 감싸고 항목에 at _pk_anim_종류(효과음)
+const hasAnim = (it: ScreenItem) => !!(it.anim && it.cond?.trim());
+export const ANIM_LABEL: Record<NonNullable<ScreenItem['anim']>, string> = { fade: '서서히', slide: '옆에서 미끄러짐', rise: '아래에서 올라옴', pop: '커지며' };
+function animAt(it: ScreenItem, out: string[]): string[] {
+  if (!out.length || !hasAnim(it)) return out;
+  const snd = (f?: string) => (f?.trim() ? py(f.trim().replace(/\\/g, '/')) : 'None');
+  return [out[0], `    at _pk_anim_${it.anim}(${snd(it.sfxIn)}, ${snd(it.sfxOut)})`, ...out.slice(1)];
+}
+const ANIM_HELPER = [
+  '# 보이는 조건이 바뀔 때의 움직임과 효과음 ([화면] 탭 항목의 "나타날 때"). 처음 보일 때는 움직이지 않음 (showif의 appear)',
+  'init -1 python:',
+  '    class _PkSfx(object):',
+  '        def __init__(self, f):',
+  '            self.f = f',
+  '        def __call__(self, trans, st, at):',
+  '            if self.f:',
+  '                renpy.sound.play(self.f, channel="audio")',
+  '            return None',
+  '',
+  ...(
+    [
+      ['fade', 'alpha 0.0', 'linear 0.3 alpha 1.0', 'linear 0.3 alpha 0.0'],
+      ['slide', 'alpha 0.0 xoffset -40', 'easeout 0.3 alpha 1.0 xoffset 0', 'easein 0.25 alpha 0.0 xoffset 40'],
+      ['rise', 'alpha 0.0 yoffset 30', 'easeout 0.3 alpha 1.0 yoffset 0', 'easein 0.25 alpha 0.0 yoffset -20'],
+      ['pop', 'alpha 0.0 zoom 0.6', 'easeout_back 0.35 alpha 1.0 zoom 1.0', 'easein 0.2 alpha 0.0 zoom 0.6'],
+    ] as const
+  ).flatMap(([k, from, to, out]) => [
+    `transform _pk_anim_${k}(sin=None, sout=None):`,
+    '    on appear:',
+    '        alpha 1.0 xoffset 0 yoffset 0 zoom 1.0',
+    '    on show:',
+    '        function _PkSfx(sin)',
+    `        ${from}`,
+    `        ${to}`,
+    '    on hide:',
+    '        function _PkSfx(sout)',
+    `        ${out}`,
+    '',
+  ]),
+];
+
 function withCond(it: ScreenItem, out: string[], I0: string): string[] {
   if (!out.length) return out;
-  if (it.cond?.trim()) return [`${I0}if ${it.cond.trim()}:`, ...out.map((x) => I0 + '    ' + x)];
+  if (it.cond?.trim()) return [`${I0}${hasAnim(it) ? 'showif' : 'if'} ${it.cond.trim()}:`, ...out.map((x) => I0 + '    ' + x)];
   return out.map((x) => I0 + x);
 }
 
@@ -534,6 +586,8 @@ const ROUND_HELPER = [
 function bgCode(s: ScreenDef, I0: string): string[] {
   const a = s.bgAlpha !== undefined && s.bgAlpha < 100 ? ` alpha ${pct(s.bgAlpha)}` : '';
   if (isColor(s.bg)) return [`${I0}add Solid(${py(s.bg!)})${a}`];
+  // HUD 배경 그림 (FEATURE 29): HUD 크기에 늘여 맞춤 (영상도). 전체 화면은 그림 크기 그대로
+  if (s.bg?.trim() && isHud(s)) return [`${I0}add ${mediaCode(s.bg, hudSize(s).w, hudSize(s).h)}${a}`];
   if (s.bg?.trim()) return [`${I0}add ${imgRef(s.bg)}${a}`];
   return [];
 }
@@ -582,6 +636,7 @@ export function screensCode(p: Project, only?: string): string {
   }
   if (!only && (p.screens ?? []).some((s) => s.items.some(isDD))) out.push(...DRAG_HELPERS);
   if (out.some((x) => x.includes('_pk_round('))) out.push(...ROUND_HELPER);
+  if (!only && out.some((x) => x.includes(' at _pk_anim_'))) out.push(...ANIM_HELPER);
   return out.join('\n') + '\n';
 }
 
@@ -590,9 +645,9 @@ export type HudTemplate = 'inventory' | 'love' | 'map';
 // [+ HUD 틀에서] 메뉴 (Command Palette 꼴, 설명 카드에 영상): 메뉴 줄 글, 설명, 만드는 플래그, ✎ 바꾸는 곳, ? 보는 곳
 export interface HudTpl { id: HudTemplate; icon: string; title: string; kindHint: string; desc: string; flags: string[]; write: string[]; read: string[] }
 export const HUD_TEMPLATES: HudTpl[] = [
-  { id: 'inventory', icon: '🎒', title: '인벤토리', kindHint: '켜짐/꺼짐', desc: '오른쪽 위에 가진 물건을 늘어놓아요. 플래그가 켜진 물건만 보여요.', flags: ['has_key', 'has_map', 'has_lamp'], write: ['대본에서 물건을 얻을 때: has_key = True'], read: ['물건마다 보이는 조건: has_key'] },
+  { id: 'inventory', icon: '🎒', title: '인벤토리', kindHint: '켜짐/꺼짐', desc: '오른쪽 위에 가진 물건을 늘어놓아요. 플래그가 켜진 물건만 보이고, 생기거나 없어질 때 움직여요(움직임·효과음은 물건마다 바꿔요). 물건 글은 그림·영상으로 바꿀 수 있어요.', flags: ['has_key', 'has_map', 'has_lamp'], write: ['대본에서 물건을 얻을 때: has_key = True'], read: ['물건마다 보이는 조건: has_key'] },
   { id: 'love', icon: '♥', title: '호감도 막대', kindHint: '숫자', desc: '왼쪽 위에 호감도를 레벨 인디케이터와 숫자로 보여요. 막대는 love 플래그의 꼴이라 플래그 카드에서 꾸민 모양 그대로예요.', flags: ['love'], write: ['선택지를 고르면: love += 1'], read: ['플래그 꼴과 글 속 [love]'] },
-  { id: 'map', icon: '⌖', title: '미니맵', kindHint: '글자', desc: '오른쪽 아래에 장소 버튼을 늘어놓아요. 누르면 그 상자로 가요. 지금 장소는 글자 플래그로 보여요.', flags: ['place'], write: ['장소 상자에 들어갈 때: place = "부엌"'], read: ['글 속 [place]', '버튼마다 갈 상자를 골라요'] },
+  { id: 'map', icon: '⌖', title: '미니맵', kindHint: '글자', desc: '오른쪽 아래에 장소 버튼을 늘어놓아요. 누르면 그 상자로 가요. 지금 장소 버튼은 고른 상태(노란 글)로 보여요. 버튼마다 기본·올렸을 때·고른 상태 그림을 넣을 수 있고, 비우면 글자 색만 바뀌어요.', flags: ['place'], write: ['장소 상자에 들어갈 때: place = "부엌"'], read: ['글 속 [place]', '버튼마다 고른 상태 조건: place == "부엌"', '버튼마다 갈 상자를 골라요'] },
 ];
 // 틀의 글은 대본에 저장되는 글이라 화면 사전으로 바꾸지 않고 처음부터 화면 언어로 넣는다 (sample.ts 새 대본 이름과 같게)
 const TPL_WORDS = {
@@ -628,9 +683,9 @@ export function addHudTemplate(p: Project, t: HudTemplate): string {
     ensureFlag(p, 'has_lamp', 'bool', false, W.lampN);
     p.screens.push({ ...base, name: freeName(p, 'hud_inventory'), title: W.inv, anchor: 'tr', dx: -20, dy: 20, w: 220, h: 170, items: [
       it({ kind: 'text', x: 14, y: 10, text: W.have, size: 22, color: '#ffd27a' }),
-      it({ kind: 'text', x: 14, y: 48, text: W.key, size: 24, cond: 'has_key' }),
-      it({ kind: 'text', x: 14, y: 84, text: W.map, size: 24, cond: 'has_map' }),
-      it({ kind: 'text', x: 14, y: 120, text: W.lamp, size: 24, cond: 'has_lamp' }),
+      it({ kind: 'text', x: 14, y: 48, text: W.key, size: 24, cond: 'has_key', anim: 'pop' }),
+      it({ kind: 'text', x: 14, y: 84, text: W.map, size: 24, cond: 'has_map', anim: 'pop' }),
+      it({ kind: 'text', x: 14, y: 120, text: W.lamp, size: 24, cond: 'has_lamp', anim: 'pop' }),
     ] });
   } else if (t === 'love') {
     ensureFlag(p, 'love', 'int', 0, W.loveN, { look: 'level', style: 'continuous', min: 0, max: 10 });
@@ -642,7 +697,7 @@ export function addHudTemplate(p: Project, t: HudTemplate): string {
     ensureFlag(p, 'place', 'str', W.rooms[0], W.place);
     p.screens.push({ ...base, name: freeName(p, 'hud_map'), title: W.mini, anchor: 'br', dx: -20, dy: -230, w: 260, h: 190, items: [
       it({ kind: 'text', x: 14, y: 10, text: W.now + ': [place]', size: 22, color: '#9fd8ff' }),
-      ...W.rooms.map((n, i) => it({ kind: 'textbutton', x: 24, y: 52 + i * 42, text: n, size: 24, color: '#cccccc', hoverColor: '#ffffff', act: 'jump', target: null })),
+      ...W.rooms.map((n, i) => it({ kind: 'textbutton', x: 24, y: 52 + i * 42, text: n, size: 24, color: '#cccccc', hoverColor: '#ffffff', selColor: '#ffd27a', selected: `place == ${JSON.stringify(n)}`, act: 'jump', target: null })),
     ] });
   }
   return id;

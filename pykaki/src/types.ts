@@ -167,6 +167,14 @@ export interface ScreenItem {
   // 끌어 놓기 (FEATURE 19, 렌파이 Drag): text·image는 drag면 끌 수 있고 놓으면 제자리로. drop(놓는 곳)은 w·h 칸, 글 text, 놓으면 act(버튼과 같음)
   drag?: boolean;
   accept?: string | null; // drop: 받는 것 (끌 수 있는 항목 id). 없으면 아무거나
+  // FEATURE 29: 버튼 상태 (미니맵 등). 글 버튼은 image·hover가 기본·올렸을 때 배경 그림(비우면 배경 없음, 글자 색만)
+  selected?: string; // 고른 상태가 되는 조건 (렌파이 selected, 예: place == "부엌")
+  selImage?: string; // 고른 상태 그림 (그림 버튼) 또는 배경 그림 (글 버튼)
+  selColor?: string; // 글 버튼: 고른 상태 글자 색
+  // FEATURE 29: 보이는 조건이 바뀔 때 (인벤토리 등). 렌파이 showif + 나타날 때·사라질 때 ATL
+  anim?: 'fade' | 'slide' | 'rise' | 'pop';
+  sfxIn?: string; // 나타날 때 효과음 (game 기준 경로)
+  sfxOut?: string; // 사라질 때 효과음
   edit?: boolean; // look (FEATURE 22): 게임에서 꼴로 플래그 값을 바꿀 수 있음 (슬라이더·막대는 끌기, 칸·별은 누르기, 스위치는 누르기, 풀다운·콤보는 펼쳐서 고르기). 없으면 보이기만
 }
 export interface ScreenDef {

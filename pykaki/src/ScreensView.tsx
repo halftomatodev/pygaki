@@ -12,9 +12,10 @@ import { fileUrl, pictureOf, useGameFolder } from './gameFolder';
 import { isMovieFile } from './stage';
 import { desktop } from './desktop';
 import { pickMediaFile } from './MediaField';
+import { pickGameFile } from './StageCards';
 import type { Project, ScreenAct, ScreenDef, ScreenItem, ScreenItemKind } from './types';
 import { uid } from './util';
-import { lookCode, lookSize, actOf, addHudTemplate, ANCHORS, BAR_H, BAR_W, canDrag, DROP_H, DROP_W, hasAct, HUD_H, HUD_TEMPLATES, HUD_W, hudInner, hudPos, hudSize, hudTemplateCode, isDragged, isHud, newScreenName, screenNameProblem, SCREENS_FILE, screensCode, type HudTemplate } from './screens';
+import { ANIM_LABEL, lookCode, lookSize, actOf, addHudTemplate, ANCHORS, BAR_H, BAR_W, canDrag, DROP_H, DROP_W, hasAct, HUD_H, HUD_TEMPLATES, HUD_W, hudInner, hudPos, hudSize, hudTemplateCode, isDragged, isHud, newScreenName, screenNameProblem, SCREENS_FILE, screensCode, type HudTemplate } from './screens';
 import { PickMenu, type PickEntry } from './FlagMenu';
 import { ActionInput, CondInput, firstAction } from './FlagFields';
 import { evalExpr, initVars, UNKNOWN, type Vars } from './trace';
@@ -266,7 +267,7 @@ function Stage({ sc, sel, onMove, onMoveHud }: { sc: ScreenDef; sel: string | nu
 export function ScreenArt({ sc, scale, vars, sel = null, onMove, onHudDown }: { sc: ScreenDef; scale: number; vars: Vars; sel?: string | null; onMove?: (id: string, x: number, y: number) => void; onHudDown?: (e: React.PointerEvent<HTMLDivElement>) => void }) {
   const look = useGameFolder((s) => s.look);
   const bgColor = sc.bg?.startsWith('#') ? sc.bg : undefined;
-  const bgPic = usePic(sc.bg && !sc.bg.startsWith('#') ? sc.bg : '');
+  const bgPic = useMediaPic(sc.bg && !sc.bg.startsWith('#') ? sc.bg : '');
   const hud = isHud(sc);
   const box = hud ? hudPos(sc, look.width, look.height) : { x: 0, y: 0, w: look.width, h: look.height };
   const alpha = (sc.bgAlpha ?? 100) / 100;
@@ -283,7 +284,13 @@ export function ScreenArt({ sc, scale, vars, sel = null, onMove, onHudDown }: { 
       onPointerDown={hud ? onHudDown : undefined}
     >
       {bgColor && <div className="scv-bgc" style={{ background: bgColor, opacity: alpha }} />}
-      {bgPic && <img className="scv-bg" src={bgPic} alt="" style={{ transform: `scale(${scale})`, opacity: alpha }} draggable={false} />}
+      {bgPic &&
+        // HUD는 HUD 크기에 늘여 맞춤 (원고와 같게), 전체 화면은 그림 크기 그대로
+        (bgPic.video ? (
+          <video className={'scv-bg' + (hud ? ' fit' : '')} src={bgPic.url} autoPlay loop muted playsInline style={hud ? { opacity: alpha } : { transform: `scale(${scale})`, opacity: alpha }} />
+        ) : (
+          <img className={'scv-bg' + (hud ? ' fit' : '')} src={bgPic.url} alt="" style={hud ? { opacity: alpha } : { transform: `scale(${scale})`, opacity: alpha }} draggable={false} />
+        ))}
       {!sc.bg && !hud && onMove && <span className="scv-see tip">배경 없음: 게임에서는 아래 화면이 그대로 보여요</span>}
       {inner ? (
         // 스크롤 (FEATURE 23): HUD 크기 안에서 안쪽 칸을 넘겨 봄. 빈 곳을 끌면 HUD가 옮겨짐
@@ -331,7 +338,10 @@ const ACT_TAG: Record<ScreenAct, string> = { return: '값', flag: '⚑', jump: '
 function StageItem({ sc, it, scale, on, onMove, vars, hidden }: { sc: ScreenDef; it: ScreenItem; scale: number; on: boolean; onMove?: (id: string, x: number, y: number) => void; vars: Vars; hidden: boolean }) {
   const look = useGameFolder((s) => s.look);
   const project = useStore((s) => s.project);
-  const pic = useMediaPic(it.kind === 'imagebutton' || it.kind === 'image' ? it.image ?? '' : '');
+  // 고른 상태 (FEATURE 29): 조건이 참이면 고른 상태 그림·글자 색. 글 버튼은 그림을 배경으로
+  const sel = !!it.selected?.trim() && evalExpr(it.selected, vars) === true;
+  const pic = useMediaPic(it.kind === 'imagebutton' || it.kind === 'image' ? (sel && it.selImage?.trim() ? it.selImage : it.image ?? '') : '');
+  const bgPicT = useMediaPic(it.kind === 'textbutton' ? (sel && it.selImage?.trim() ? it.selImage : it.image ?? '') : '');
   const down = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!onMove) return;
     e.preventDefault();
@@ -392,7 +402,17 @@ function StageItem({ sc, it, scale, on, onMove, vars, hidden }: { sc: ScreenDef;
         {fillFlags(it.text || '', vars)}
       </span>
     );
-  else body = <span style={{ fontSize: size, color: it.color ?? (it.kind === 'textbutton' ? '#aaaaaa' : look.textColor) }}>{fillFlags(it.text || ' ', vars)}</span>;
+  else {
+    const tc = sel && it.selColor ? it.selColor : it.color ?? (it.kind === 'textbutton' ? '#aaaaaa' : look.textColor);
+    body = bgPicT ? (
+      <span className="scv-tbg" style={{ fontSize: size, color: tc, padding: `${6 * scale}px ${14 * scale}px` }}>
+        {bgPicT.video ? <video src={bgPicT.url} autoPlay loop muted playsInline /> : <img src={bgPicT.url} alt="" draggable={false} />}
+        <span>{fillFlags(it.text || ' ', vars)}</span>
+      </span>
+    ) : (
+      <span style={{ fontSize: size, color: tc }}>{fillFlags(it.text || ' ', vars)}</span>
+    );
+  }
   const tag = hasAct(it.kind) ? (act === 'return' ? it.value || '값 없음' : ACT_TAG[act]) : null;
   return (
     <div
@@ -535,6 +555,7 @@ function ScreenCard({ sc, updScreen }: { sc: ScreenDef; updScreen: (fn: (s: Scre
         {sc.bg && !color && (
           <>
             <input className="grow" list="scv-images" value={sc.bg} placeholder="그림 이름 (예: bg room)" onChange={(e) => updScreen((s) => void (s.bg = e.target.value), 'scr-bg' + sc.id)} />
+            <BrowseBtn onPick={(rel) => updScreen((s) => void (s.bg = rel))} />
           </>
         )}
       </div>
@@ -616,7 +637,7 @@ function ItemCard({ sc, it, upd, remove, dup }: { sc: ScreenDef; it: ScreenItem;
       }
     />
   );
-  const col = (k: 'color' | 'hoverColor' | 'bgColor', title: string) => (
+  const col = (k: 'color' | 'hoverColor' | 'bgColor' | 'selColor', title: string) => (
     <span className="sf-color" title={title}>
       <input type="color" value={(it[k] ?? '#ffffff').slice(0, 7)} onChange={(e) => upd((x) => void (x[k] = e.target.value), 'scr-' + k + it.id)} />
       {it[k] && <button onClick={() => upd((x) => void delete x[k])}>✕</button>}
@@ -648,6 +669,46 @@ function ItemCard({ sc, it, upd, remove, dup }: { sc: ScreenDef; it: ScreenItem;
             </select>
           )}
         </div>
+      )}
+      {(it.kind === 'text' || it.kind === 'image' || it.kind === 'textbutton' || it.kind === 'imagebutton') && (
+        <div className="row">
+          <label>종류</label>
+          <span className="flook-seg scv-kind" role="radiogroup" aria-label="종류">
+            {(it.kind === 'text' || it.kind === 'image' ? (['text', 'image'] as const) : (['textbutton', 'imagebutton'] as const)).map((k) => (
+              <button key={k} role="radio" aria-checked={it.kind === k} className={it.kind === k ? 'on' : ''} onClick={() => upd((x) => void (x.kind = k))} title="글은 그대로 두고 그림으로 바꾸거나 되돌려요 (그림·영상은 아래 칸)">
+                {KIND[k]}
+              </button>
+            ))}
+          </span>
+        </div>
+      )}
+      {it.kind === 'textbutton' && (
+        <>
+          <div className="row">
+            <label>배경 그림</label>
+            <input className="grow" list="scv-images" value={it.image ?? ''} placeholder="비우면 배경 없이 글만 (예: btn idle)" onChange={(e) => upd((x) => void (e.target.value ? (x.image = e.target.value) : delete x.image), 'scr-img' + it.id)} />
+            <BrowseBtn onPick={(rel) => upd((x) => void (x.image = rel))} />
+          </div>
+          <div className="row">
+            <label>올렸을 때 배경</label>
+            <input className="grow" list="scv-images" value={it.hover ?? ''} placeholder="비우면 기본 배경 그대로" onChange={(e) => upd((x) => void (e.target.value ? (x.hover = e.target.value) : delete x.hover), 'scr-hover' + it.id)} />
+            <BrowseBtn onPick={(rel) => upd((x) => void (x.hover = rel))} />
+          </div>
+        </>
+      )}
+      {(it.kind === 'textbutton' || it.kind === 'imagebutton') && (
+        <>
+          <div className="row" title="이 조건이 참이면 버튼이 고른 상태로 보여요 (예: 미니맵의 지금 장소)">
+            <label>고른 상태</label>
+            <CondInput compact value={it.selected ?? ''} placeholder='조건 (예: place == "부엌")' onChange={(v) => upd((x) => void (v.trim() ? (x.selected = v) : delete x.selected), 'scr-sel' + it.id)} />
+          </div>
+          <div className="row">
+            <label>고른 상태 {it.kind === 'textbutton' ? '배경' : '그림'}</label>
+            <input className="grow" list="scv-images" value={it.selImage ?? ''} placeholder={it.kind === 'textbutton' ? '비우면 기본 배경 (글자 색만)' : '비우면 기본 그림'} onChange={(e) => upd((x) => void (e.target.value ? (x.selImage = e.target.value) : delete x.selImage), 'scr-selimg' + it.id)} />
+            <BrowseBtn onPick={(rel) => upd((x) => void (x.selImage = rel))} />
+            {it.kind === 'textbutton' && col('selColor', '고른 상태 글자 색')}
+          </div>
+        </>
       )}
       {(it.kind === 'imagebutton' || it.kind === 'image') && (
         <div className="row">
@@ -810,6 +871,7 @@ function ItemCard({ sc, it, upd, remove, dup }: { sc: ScreenDef; it: ScreenItem;
         <label>보이는 조건</label>
         <CondInput compact value={it.cond ?? ''} placeholder="비우면 늘 보여요 (예: has_key)" onChange={(v) => upd((x) => void (v.trim() ? (x.cond = v) : delete x.cond), 'scr-cond' + it.id)} />
       </div>
+      {it.cond?.trim() && <AnimRows it={it} upd={upd} />}
       <div className="row">
         <label>자리</label>
         {num('x', 'x')}
@@ -857,5 +919,45 @@ function BrowseBtn({ onPick }: { onPick: (rel: string) => void }) {
     <button className="scv-browse" title="탐색기에서 그림을 골라요. 게임 폴더 밖이면 game/images로 복사해요" onClick={() => void pickMediaFile().then((rel) => rel && onPick(rel))}>
       📂
     </button>
+  );
+}
+
+// 나타날 때·사라질 때 (FEATURE 29, 인벤토리 등): 보이는 조건이 바뀌면 움직임과 효과음. 처음 화면이 뜰 때는 움직이지 않음
+function AnimRows({ it, upd }: { it: ScreenItem; upd: (fn: (it: ScreenItem) => void, key?: string) => void }) {
+  const audio = useGameFolder((s) => s.media.audio);
+  const snd = (k: 'sfxIn' | 'sfxOut', label: string) => (
+    <div className="row">
+      <label>{label}</label>
+      <input className="grow" list="scv-audio" value={it[k] ?? ''} placeholder="효과음 (비우면 소리 없음)" spellCheck={false} onChange={(e) => upd((x) => void (e.target.value.trim() ? (x[k] = e.target.value.trim()) : delete x[k]), 'scr-' + k + it.id)} />
+      {desktop?.pickFile && (
+        <button className="scv-browse" title="탐색기에서 소리 파일을 골라요. 게임 폴더 밖이면 game/audio로 복사해요" onClick={() => void pickGameFile('sound').then((rel) => rel && upd((x) => void (x[k] = rel)))}>
+          📂
+        </button>
+      )}
+    </div>
+  );
+  return (
+    <>
+      <div className="row" title="보이는 조건이 참이 되거나 거짓이 될 때의 움직임이에요. 게임에서는 화면이 처음 뜰 때는 움직이지 않아요">
+        <label>생길 때·없어질 때</label>
+        <select className="grow" value={it.anim ?? ''} onChange={(e) => upd((x) => void (e.target.value ? (x.anim = e.target.value as NonNullable<ScreenItem['anim']>) : (delete x.anim, delete x.sfxIn, delete x.sfxOut)))}>
+          <option value="">움직이지 않음 (바로 나타나고 사라짐)</option>
+          {(Object.keys(ANIM_LABEL) as (keyof typeof ANIM_LABEL)[]).map((k) => (
+            <option key={k} value={k}>{ANIM_LABEL[k]}</option>
+          ))}
+        </select>
+      </div>
+      {it.anim && (
+        <>
+          {snd('sfxIn', '생길 때 소리')}
+          {snd('sfxOut', '없어질 때 소리')}
+          <datalist id="scv-audio">
+            {audio.map((a) => (
+              <option key={a} value={'audio/' + a} />
+            ))}
+          </datalist>
+        </>
+      )}
+    </>
   );
 }

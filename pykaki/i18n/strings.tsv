@@ -2685,3 +2685,28 @@ GIF·투명 webm·PNG 연속 그림을 렌파이가 쓰는 투명 영상으로 �
 탐색기에서 그림·영상(PNG, JPG, WebP, WebM 등)을 골라요. 게임 폴더 밖이면 game/images·movies로 복사해요	エクスプローラーで画像・動画(PNG, JPG, WebP, WebM など)を選びます。ゲームフォルダの外なら game/images・movies にコピーします	Pick an image or video (PNG, JPG, WebP, WebM, etc.) in Explorer. Files outside the game folder are copied to game/images or game/movies
 그림·영상을 넣으면 그 부품을 그것으로 그려요(늘여 맞춤). 영상은 반복·소리 없이 돌고, GIF는 🎞로 투명 영상으로 바꿔 넣어요. "그림만" 부품은 비우면 안 그려요	画像・動画を入れるとその部品をそれで描きます(伸ばして合わせる)。動画は繰り返し・無音で再生、GIF は 🎞 で透明動画に変換します。「画像のみ」の部品は空なら描きません	With an image or video, the part is drawn with it (stretched to fit). Videos loop silently; convert GIFs with 🎞. "Image only" parts aren't drawn when empty
 탐색기에서 그림을 골라요. 게임 폴더 밖이면 game/images로 복사해요	エクスプローラーで画像を選びます。ゲームフォルダの外なら game/images にコピーします	Pick an image in Explorer. Files outside the game folder are copied to game/images
+고른 상태	選択状態	Selected
+배경 그림	背景画像	Background image
+생길 때 소리	現れるときの音	Sound when appearing
+아래에서 올라옴	下から上がる	Rise from below
+없어질 때 소리	消えるときの音	Sound when disappearing
+옆에서 미끄러짐	横からスライド	Slide in from the side
+올렸을 때 배경	ホバー時の背景	Hover background
+고른 상태 글자 색	選択状態の文字色	Selected text color
+생길 때·없어질 때	現れるとき・消えるとき	Appear / disappear
+비우면 기본 배경 그대로	空なら通常の背景のまま	Empty: same as the normal background
+효과음 (비우면 소리 없음)	効果音 (空なら音なし)	Sound effect (empty: none)
+비우면 기본 배경 (글자 색만)	空なら通常の背景 (文字色だけ)	Empty: normal background (text color only)
+움직이지 않음 (바로 나타나고 사라짐)	動かない (すぐ現れて消える)	No motion (appears and disappears at once)
+조건 (예: place == "부엌")	条件 (例: place == "部屋")	Condition (e.g. place == "kitchen")
+버튼마다 고른 상태 조건: place == "부엌"	ボタンごとの選択状態の条件: place == "台所"	Selected condition per button: place == "Kitchen"
+글은 그대로 두고 그림으로 바꾸거나 되돌려요 (그림·영상은 아래 칸)	文字はそのままで画像に替えたり戻したりします (画像・動画は下の欄)	Switch to an image or back while keeping the text (set the image or video below)
+이 조건이 참이면 버튼이 고른 상태로 보여요 (예: 미니맵의 지금 장소)	この条件が真ならボタンは選択状態で表示されます (例: ミニマップの現在地)	When this condition is true the button shows as selected (e.g. the current place on a minimap)
+탐색기에서 소리 파일을 골라요. 게임 폴더 밖이면 game/audio로 복사해요	エクスプローラーで音声ファイルを選びます。ゲームフォルダの外なら game/audio にコピーします	Pick a sound file in Explorer. Files outside the game folder are copied to game/audio
+오른쪽 위에 가진 물건을 늘어놓아요. 플래그가 켜진 물건만 보이고, 생기거나 없어질 때 움직여요(움직임·효과음은 물건마다 바꿔요). 물건 글은 그림·영상으로 바꿀 수 있어요.	右上に持ち物を並べます。フラグがオンの持ち物だけ表示され、現れたり消えたりするときに動きます(動き・効果音は持ち物ごとに変更可)。持ち物の文字は画像・動画に替えられます。	Lists your items at the top right. Only items whose flag is on are shown, and they move when they appear or disappear (motion and sound per item). Item text can be swapped for an image or video.
+오른쪽 아래에 장소 버튼을 늘어놓아요. 누르면 그 상자로 가요. 지금 장소 버튼은 고른 상태(노란 글)로 보여요. 버튼마다 기본·올렸을 때·고른 상태 그림을 넣을 수 있고, 비우면 글자 색만 바뀌어요.	右下に場所ボタンを並べます。押すとそのボックスへ移動します。現在地のボタンは選択状態(黄色い文字)で表示されます。ボタンごとに通常・ホバー・選択状態の画像を入れられ、空なら文字色だけ変わります。	Lists place buttons at the bottom right. Clicking one goes to that box. The current place's button shows as selected (yellow text). Each button can take normal, hover, and selected images; when empty, only the text color changes.
+서서히	ふわっと	Fade
+커지며	拡大しながら	Grow
+비우면 기본 그림	空なら通常の画像	Empty: the normal image
+비우면 배경 없이 글만 (예: btn idle)	空なら背景なしで文字だけ (例: btn idle)	Empty: text only, no background (e.g. btn idle)
+보이는 조건이 참이 되거나 거짓이 될 때의 움직임이에요. 게임에서는 화면이 처음 뜰 때는 움직이지 않아요	表示条件が真や偽になるときの動きです。ゲームでは画面が最初に表示されるときは動きません	Motion when the show condition becomes true or false. In game it doesn't play when the screen first appears

@@ -110,7 +110,7 @@ function lineText(l: Line) {
 const words = (n: string) => n.split(' ');
 
 // [📂 파일 고르기] (앱): 탐색기로 고른 파일의 game 기준 경로. game 밖이면 묻고 images·movies·audio로 복사한다
-async function pickGameFile(kind: 'image' | 'sound'): Promise<string | null> {
+export async function pickGameFile(kind: 'image' | 'sound'): Promise<string | null> {
   const r = await desktop?.pickFile?.(kind).catch((e) => (alert('파일을 고르지 못했어요: ' + e.message), null));
   if (!r) return null;
   const dir = kind === 'sound' ? 'audio' : /\.webm$/i.test(r.name) ? 'movies' : 'images';
