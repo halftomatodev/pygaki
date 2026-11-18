@@ -1,4 +1,4 @@
-<!-- 원본: pykaki/docs/GUIDE.md @ 5a69279015 -->
+<!-- 원본: pykaki/docs/GUIDE.md @ 171df27857 -->
 # pygaki user guide
 
 A tool for writing Ren'Py scripts with boxes and lines and exporting them as Ren'Py script files (`.rpy`).
@@ -297,7 +297,7 @@ The screen card has two **Kinds**. A **full screen** (`call screen`) covers the 
 - A button's **On click**: **Change flag** (any number of changes; dialogue keeps going), **Jump to box** (jumps to that box) or **Open/close HUD** (shows or hides another HUD). Full screens can also **Return a value** (branching as before).
 - **Drag and drop**: turn on **Draggable** for a text or image item to let players drag it in game (it snaps back when dropped). Add a box with **[+ Drop zone]** and pick what it **Accepts** (one draggable item, or any) and **On drop** (same as a button's "On click"). On full screens a drop can also return a value to branch. Dragged items move only inside their screen's box. On the stage, draggable items get a **✋** and drop zones are dashed boxes.
 - Turn on **Always show** to keep the HUD up without HUD lines (`config.overlay_screens`).
-- In the script, press **[▣ HUD]** at the top right of a box (next to ◐ Shader), then in the **HUD** card on the right pick **Keep / Show** (`show screen name`) **/ Hide** (`hide screen name`) for each HUD. It is shown or hidden when the box starts. Once shown, it stays up across boxes until you hide it (Keep carries over the previous box). It does not appear in the dialogue line list.
+- In the script, press **[♡ HUD]** at the top right of a box (next to ◐ Shader), then in the **HUD** card on the right pick **Keep / Show** (`show screen name`) **/ Hide** (`hide screen name`) for each HUD. It is shown or hidden when the box starts. Once shown, it stays up across boxes until you hide it (Keep carries over the previous box). It does not appear in the dialogue line list.
 - **▶ Trace** shows the HUDs that are up, small, with the current flag values. The Flags card lists the screens that use a flag as **?** (shows it) and **✎** (a button changes it), and the Flag design table's yellow notes count HUD uses too.
 
 #### HUD template samples
@@ -415,7 +415,7 @@ label map_cafe:
 #### Words used with HUDs
 | Ren'Py | Meaning |
 |---|---|
-| `show screen name` / `hide screen name` | Show or close it from the script (the box's **[▣ HUD]**) |
+| `show screen name` / `hide screen name` | Show or close it from the script (the box's **[♡ HUD]**) |
 | `config.overlay_screens` | Keep it up for the whole game (screen card "Always show") |
 | `zorder` | Which is on top when screens overlap |
 | `text "[love]"`, `bar value …` | Show a flag's value as text or a bar |

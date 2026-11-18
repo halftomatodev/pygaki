@@ -184,7 +184,6 @@ function BoxInspector({ b }: { b: BoxNode }) {
 // 고르면 그 HUD의 hud 줄을 모두 지우고 상자 맨 앞에 하나만 둔다. 화면을 안 고른 hud 줄(예전 것)도 이때 지운다
 function HudCard({ b, upd, huds }: { b: BoxNode; upd: Upd; huds: NonNullable<Project['screens']> }) {
   const hl = b.lines.filter((l) => l.type === 'hud');
-  if (!huds.length && !hl.length) return null;
   const known = (l: Line) => huds.some((h) => h.id === l.screen);
   const stray = hl.filter((l) => !known(l)).length;
   const state = (id: string) => {
@@ -202,7 +201,12 @@ function HudCard({ b, upd, huds }: { b: BoxNode; upd: Upd; huds: NonNullable<Pro
   const clean = () => upd((x) => void (x.lines = x.lines.filter((l) => l.type !== 'hud' || known(l))));
   return (
     <Card id="i-hud" domId="card-hud" title="HUD" hint="이 상자가 시작될 때 HUD를 띄우거나 내려요 (show screen / hide screen). 그대로면 앞 상자의 HUD가 이어져요" topic="HUD">
-      {!huds.length && <p className="tip">HUD가 없어요. [화면] 탭에서 화면을 HUD로 만들어 주세요.</p>}
+      {!huds.length && (
+        <div className="row">
+          <span className="tip">HUD가 없어요. [화면] 탭에서 화면을 HUD로 만들어 주세요.</span>
+          <button onClick={() => useLive.setState({ view: 'screens' })}>[화면] 탭으로</button>
+        </div>
+      )}
       {huds.map((h) => {
         const v = state(h.id);
         return (

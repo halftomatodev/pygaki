@@ -245,17 +245,17 @@ function Exits({ b, editing, tb, active, setActive }: { b: BoxNode; editing: boo
   );
 }
 
-// 상자 오른쪽 위 [셰이더] 옆의 [HUD] 버튼 (세션 79). HUD 보이기/숨기기는 대사 줄이 아니라 상자에서 고른다.
+// 상자 오른쪽 위 [셰이더] 옆의 [♡ HUD] 버튼 (세션 79). HUD 보이기/숨기기는 대사 줄이 아니라 상자에서 고른다.
+// [셰이더]처럼 늘 있고(흐리게, 올리면 진하게), 고른 것이 있으면 꽉 찬 하트로 칠해진다.
 // 누르면 상자를 고르고 오른쪽 [HUD] 카드를 펴서 보여 준다. 데이터는 그대로 상자 맨 앞의 hud 줄(FEATURE 18)
 function HudButton({ b }: { b: BoxNode }) {
   const screens = useStore((s) => s.project.screens);
   const hl = b.lines.filter((l) => l.type === 'hud');
   const huds = (screens ?? []).filter((s) => s.kind === 'hud');
-  if (!huds.length && !hl.length) return null;
   const bad = hl.some((l) => !huds.some((h) => h.id === l.screen));
   const shown = hl.filter((l) => !l.stop && huds.some((h) => h.id === l.screen)).length;
   const hidden = hl.filter((l) => l.stop && huds.some((h) => h.id === l.screen)).length;
-  const label = bad ? '▣ HUD ⚠' : shown || hidden ? `▣ HUD${shown ? ' ' + shown : ''}${hidden ? ' −' + hidden : ''}` : '▣ HUD';
+  const label = bad ? '♡ HUD ⚠' : shown || hidden ? `♥ HUD${shown ? ' ' + shown : ''}${hidden ? ' −' + hidden : ''}` : '♡ HUD';
   return (
     <button
       className={'nodrag sh-btn hud-btn' + (shown || hidden ? ' set' : '') + (bad ? ' bad' : '')}
