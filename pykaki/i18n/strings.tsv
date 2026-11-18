@@ -2566,3 +2566,23 @@ label "${g.name}"의 HUD: ${problem}	label "{0}" の HUD: {1}	HUD of label "{0}"
 label "${g.name}"의 HUD: 지운 HUD를 골라 두었어요. label의 [♡ HUD]에서 지워 주세요	label "{0}" の HUD: 削除した HUD が選ばれています。label の [♡ HUD] で外してください	HUD of label "{0}": a deleted HUD is still chosen. Remove it with the label's [♡ HUD]
 카드 투명도	カードの透明度	Card transparency
 높일수록 카드 뒤의 캔버스가 비치고 가장자리 빛이 세져요. 글이 읽기 어려우면 낮춰요	上げるほどカードの後ろのキャンバスが透けて、縁の光が強くなります。文字が読みにくければ下げてください	Higher values let the canvas show through the cards and brighten their edges. Lower it if text gets hard to read
+장면	シーン	Scenes
++ 장면	+ シーン	+ Scene
+장면 색	シーンの色	Scene color
++ 캐릭터	+ キャラクター	+ Character
+변수 이름	変数名	Variable name
+캐릭터 색	キャラクターの色	Character color
+표시 제목	表示タイトル	Display title
+장면 고치기	シーンを編集	Edit scene
+장면 지우기	シーンを削除	Delete scene
+장면과 캐릭터	シーンとキャラクター	Scenes and characters
+캐릭터 고치기	キャラクターを編集	Edit character
+캐릭터 지우기	キャラクターを削除	Delete character
+label 이름	label 名	label name
+새 캐릭터 만들기	新しいキャラクターを作成	Create a character
+다 고쳤어요 (Enter)	編集完了 (Enter)	Done (Enter)
+새 장면(label) 만들기	新しいシーン(label)を作成	Create a scene (label)
+이 장면의 상자들로 이동하고 모두 선택	このシーンのボックスへ移動してすべて選択	Go to this scene's boxes and select them all
+이름·변수·색 고치기 (F2, 더블클릭)	名前・変数・色を編集 (F2、ダブルクリック)	Edit name, variable, and color (F2, double-click)
+이름·제목·색 고치기 (F2, 더블클릭)	名前・タイトル・色を編集 (F2、ダブルクリック)	Edit name, title, and color (F2, double-click)
+캐릭터가 없어요. [+ 캐릭터]로 만들어요.	キャラクターがいません。[+ キャラクター]で作成します。	No characters yet. Create one with [+ Character].

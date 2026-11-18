@@ -196,6 +196,38 @@ code { font-family: var(--mono); }
 /* 카드 투명도(세션 82): 투명할수록 뒤 흐림을 줄여 뿌옇지 않게 (Card.tsx glassOf). fluidkit이 style로 넣는 값을 덮음 */
 .card [data-fluidkit='liquid-fill'] { -webkit-backdrop-filter: blur(var(--card-blur, 8px)) saturate(1.6) !important; backdrop-filter: blur(var(--card-blur, 8px)) saturate(1.6) !important; }
 .card [data-fluidkit='liquid-shadow'] { opacity: var(--card-shadow, 1); }
+/* ── 장면·캐릭터 트리 (세션 82, SceneTree.tsx). 줄 높이 30px, 단추 26px(정할 것 D), 원래 말은 회색 작은 글(E) ── */
+.scene-tree { display: flex; flex-direction: column; gap: 1px; margin: 2px -4px 4px; }
+.tree-row { position: relative; display: flex; align-items: center; gap: 5px; min-height: 30px; padding-right: 4px; border-radius: 8px; cursor: pointer; font-size: 13px; outline: none; user-select: none; }
+.tree-row:hover { background: color-mix(in srgb, var(--text) 6%, transparent); }
+.tree-row:focus-visible { box-shadow: inset 0 0 0 2px var(--accent); }
+.tree-row.sel { background: color-mix(in srgb, var(--accent) 16%, transparent); color: color-mix(in srgb, var(--accent) 70%, var(--text)); }
+.tree-car { flex: none; width: 14px; text-align: center; font-size: 10px; color: var(--muted); transition: rotate var(--dur-hover) var(--ease-out); }
+.tree-row[aria-expanded='true'] > .tree-car { rotate: 90deg; }
+.tree-name { flex: 0 1 auto; min-width: 2em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tree-name.strong { font-weight: 600; }
+.tree-name.none { color: var(--muted); font-style: italic; }
+.tree-orig { flex: 0 20 auto; min-width: 0; font-size: 11px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tree-orig.mono { font-family: var(--mono); }
+.tree-dot { flex: none; width: 10px; height: 10px; border-radius: 3px; }
+.tree-dot.round { border-radius: 50%; }
+.tree-box { flex: none; width: 9px; height: 9px; border-radius: 2px; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--text) 35%, transparent); }
+.tree-row .sp { flex: 1; }
+/* ✎ ✕는 자리를 차지하지 않고 줄 오른쪽(상자 수 앞)에 겹쳐 뜬다. 줄 바탕색을 깔아 밑 글을 가림 */
+.tree-acts { position: absolute; right: 32px; top: 2px; display: flex; gap: 2px; padding-left: 6px; border-radius: 999px; background: var(--panel); pointer-events: none; opacity: 0; transition: opacity var(--dur-hover) var(--ease-out); }
+.tree-row:hover .tree-acts, .tree-row:focus-within .tree-acts, .tree-row:focus .tree-acts { opacity: 1; pointer-events: auto; }
+.tree-row:not(:has(.tree-count)) .tree-acts { right: 4px; }
+.tree-acts button, .tree-count { flex: none; min-width: 26px; height: 26px; padding: 0 6px; border-radius: 999px; font-size: 12px; background: transparent; color: var(--muted); }
+.tree-acts button:hover:not(:disabled) { background: color-mix(in srgb, var(--text) 9%, transparent); color: var(--text); }
+.tree-count { background: color-mix(in srgb, var(--text) 6%, transparent); font-family: var(--mono); font-size: 11px; }
+.tree-count:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--text); }
+.tree-add { flex: none; height: 26px; border-radius: 999px; padding: 0 10px; font-size: 11.5px; font-weight: 600; color: color-mix(in srgb, var(--accent) 85%, var(--text)); background: color-mix(in srgb, var(--accent) 11%, transparent); }
+.tree-add:hover { background: color-mix(in srgb, var(--accent) 19%, transparent); }
+.tree-edit { border-left: 3px solid; border-radius: 4px; padding: 4px 4px 4px 8px; margin: 2px 0 4px 18px; background: color-mix(in srgb, var(--panel) 60%, transparent); }
+.tree-edit .item { margin-bottom: 4px; }
+.tree-edit .cid { width: 100%; font-family: var(--mono); font-size: 12px; }
+.tree-empty { margin: 2px 0 4px 22px; }
+@media (prefers-reduced-motion: reduce) { .tree-car, .tree-acts { transition: none; } }
 /* 오른쪽 칸 카드는 내용 폭만큼 (세션 79, 왼쪽의 접은 카드처럼). 오른쪽에 붙고 칸 폭보다 넓어지지 않음 */
 .right-scroll :is(.card, .insp > section.sec) { align-self: flex-end; width: fit-content; min-width: min(240px, 100%); max-width: 100%; }
 /* 오른쪽 칸 카드 머리 단추는 바탕(복숭아·분홍)에 맞춰 분홍 톤 (세션 79) */

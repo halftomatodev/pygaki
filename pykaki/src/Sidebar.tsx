@@ -9,9 +9,8 @@ import { keyOf, SIZE_KEYS, SIZES, sizeDefaults, usePrefs } from './prefs';
 import { forgetFlow } from './flowPick';
 import { useStore } from './store';
 import { Card, FoldAll, FoldScope } from './Card';
-import * as ops from './ops';
-import type { Character, LabelGroup } from './types';
-import { IDENT, RESERVED, timeStr } from './util';
+import { SceneTree } from './SceneTree';
+import { timeStr } from './util';
 import { generateRpy, type Warn as Warning } from './exportRpy';
 import { exportRpyFile } from './files';
 
@@ -23,21 +22,13 @@ export function Sidebar() {
   const sizeLock = usePrefs((p) => p.sizeLock);
   const resized = usePrefs((p) => SIZE_KEYS.some((k) => p[k] !== SIZES[k].def));
 
-  const addChar = () =>
-    update((p) => {
-      let i = p.characters.length + 1;
-      while (p.characters.some((c) => c.id === 'c' + i)) i++;
-      p.characters.push({ id: 'c' + i, name: '새 캐릭터', color: '#c8c8ff' });
-    });
-
   return (
     <aside className="sidebar">
       <FoldScope name="left">
       <FoldAll side="left" />
-      <Card id="labels" defFolded title="label (장면)" hint="상자를 묶는 장면. 렌파이 label 하나가 돼요" topic="label(장면) 관리" extra={<button onClick={() => update((p) => void ops.addGroup(p))}>+ 추가</button>}>
-        {project.labels.map((g) => (
-          <GroupRow key={g.id} g={g} />
-        ))}
+      {/* 장면·상자·캐릭터는 트리, 나머지는 카드 (세션 82, UI_PLAN B "섞기") */}
+      <Card id="labels" defFolded title="장면과 캐릭터">
+        <SceneTree />
         <div className="sec-sub">상자와 정렬</div>
         <div className="sec-btns">
           <button className="primary" onClick={() => addBoxCenter(rf)} title={`캔버스 빈 곳 더블클릭으로도 만들 수 있어요 (${keyOf('newBox')})`}>+ 상자</button>
@@ -52,13 +43,6 @@ export function Sidebar() {
             <option value="LR">→ 왼→오른</option>
           </select>
         </label>
-      </Card>
-
-      <Card id="chars" defFolded title="캐릭터" hint="대사를 말할 캐릭터. 내레이션은 등록하지 않아도 돼요" topic="캐릭터 등록" extra={<button onClick={addChar}>+ 추가</button>}>
-        {project.characters.length === 0 && <p className="tip">캐릭터가 없어요.</p>}
-        {project.characters.map((c, i) => (
-          <CharRow key={i} c={c} i={i} />
-        ))}
       </Card>
 
       <WarnCard />
@@ -231,76 +215,6 @@ function LinkPanel() {
       <SaveInfo />
       <p className="tip">개발용 화면 (렌파이 프로젝트는 앱에서)</p>
       {newer}
-    </div>
-  );
-}
-
-function CharRow({ c, i }: { c: Character; i: number }) {
-  const update = useStore((s) => s.update);
-  const chars = useStore((s) => s.project.characters);
-  const [id, setId] = useState(c.id);
-  useEffect(() => setId(c.id), [c.id]);
-  const bad = !IDENT.test(id) || RESERVED.has(id) || chars.some((o, j) => j !== i && o.id === id);
-
-  // id는 입력을 마쳤을 때 확정하고, 그 캐릭터의 대사도 같이 바꾼다
-  const commit = () => {
-    if (id === c.id) return;
-    if (bad) {
-      alert(`"${id}"는 캐릭터 id로 쓸 수 없어요 (영문·숫자·_ , 중복 불가)`);
-      return setId(c.id);
-    }
-    update((p) => {
-      p.characters[i].id = id;
-      for (const n of p.nodes) for (const l of n.lines) if (l.type === 'say' && l.who === c.id) l.who = id;
-    });
-  };
-
-  const remove = () => {
-    const used = useStore.getState().project.nodes.some((n) => n.lines.some((l) => l.who === c.id));
-    if (used && !confirm(`${c.name}의 대사가 남아 있어요. 그래도 지울까요? (대사는 "등록되지 않은 화자"로 남아요)`)) return;
-    update((p) => void p.characters.splice(i, 1));
-  };
-
-  return (
-    <div className="item">
-      <input type="color" value={c.color} onChange={(e) => update((p) => void (p.characters[i].color = e.target.value), 'ccolor' + i)} />
-      <input
-        className={'cid' + (bad ? ' invalid' : '')}
-        value={id}
-        onChange={(e) => setId(e.target.value)}
-        onBlur={commit}
-        onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
-        title="렌파이 변수 이름 (예: a, alice)"
-      />
-      <input value={c.name} onChange={(e) => update((p) => void (p.characters[i].name = e.target.value), 'cname' + i)} placeholder="표시 이름" />
-      <button className="x" onClick={remove} title="삭제">✕</button>
-    </div>
-  );
-}
-
-function GroupRow({ g }: { g: LabelGroup }) {
-  const update = useStore((s) => s.update);
-  const project = useStore((s) => s.project);
-  const ids = project.nodes.filter((n) => n.group === g.id).map((n) => n.id);
-  const bad = !IDENT.test(g.name) || RESERVED.has(g.name) || project.labels.some((o) => o.id !== g.id && o.name === g.name);
-  const set = (fn: (x: LabelGroup) => void, key?: string) =>
-    update((p) => fn(p.labels.find((l) => l.id === g.id)!), key);
-
-  const focus = () => {
-    if (!ids.length) return;
-    useStore.getState().select(ids);
-    useStore.getState().focusNodes(ids);
-  };
-
-  return (
-    <div className="grp" style={{ borderLeftColor: g.color }}>
-      <div className="item">
-        <input type="color" value={g.color} onChange={(e) => set((x) => void (x.color = e.target.value), 'gcolor' + g.id)} />
-        <input className={'gname' + (bad ? ' invalid' : '')} value={g.name} onChange={(e) => set((x) => void (x.name = e.target.value.replace(/\s/g, '_')), 'gname' + g.id)} title="렌파이 label 이름 (영문·숫자·_)" />
-        <button onClick={focus} disabled={!ids.length} title="이 label의 상자들로 이동하고 선택">{ids.length}</button>
-        <button className="x" disabled={!!ids.length} onClick={() => update((p) => void (p.labels = p.labels.filter((l) => l.id !== g.id)))} title={ids.length ? '상자가 남아 있으면 지울 수 없어요' : '삭제'}>✕</button>
-      </div>
-      <input className="gtitle" value={g.title} onChange={(e) => set((x) => void (x.title = e.target.value), 'gtitle' + g.id)} placeholder="표시 제목 (한글 가능)" />
     </div>
   );
 }
