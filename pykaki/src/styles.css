@@ -465,6 +465,8 @@ input.title { width: 100%; font-weight: 700; font-size: 15px; margin-bottom: 8px
 .answer-ed > .choice-ed { margin-bottom: 3px; }
 .answer-ed > .answer-sub { padding-left: 14px; }
 .answer-ed > .answer-sub select { flex: 1 1 0; min-width: 0; }
+.answer-retry { padding-left: 12px; border-left: 2px solid var(--line, #8884); margin: 2px 0 8px; }
+.answer-retry .retry-n { white-space: nowrap; flex: none; }
 .menu-ask select { flex: 0 0 auto; max-width: 34%; }
 .menu-ask input { flex: 2; }
 /* 상자 안 선택지 위 질문 대사 */
@@ -1523,6 +1525,11 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .tr-changes { margin: 4px 0 0 16px; padding: 0; font-size: 12px; }
 .tr-opts { display: flex; flex-direction: column; gap: 3px; }
 .tr-opt { text-align: left; }
+.tr-type { display: flex; align-items: center; gap: 6px; }
+.tr-type > .tip { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tr-type > input { flex: 1 1 80px; min-width: 60px; }
+.tr-inputs { display: flex; flex-direction: column; gap: 3px; margin: 4px 0 6px; }
+.tr-hint { padding: 4px 8px; border-left: 3px solid var(--accent, #a78bfa); background: color-mix(in srgb, var(--accent, #a78bfa) 10%, transparent); border-radius: 4px; }
 .tr-opt.pick { outline: 2px solid #34c759; }
 .tr-opt.unk { border-style: dashed; }
 .tr-opt.off { opacity: .45; }

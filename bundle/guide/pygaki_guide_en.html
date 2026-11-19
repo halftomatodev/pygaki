@@ -496,6 +496,8 @@ mark{background:var(--mark);color:inherit;border-radius:2px}
 <ul>
 <li>Write the <b>prompt</b> (e.g. "Who is the culprit?") and the <b>answers</b>, and connect a box to each answer with a line. Answers are checked from the top; if none matches it goes to <b>Wrong</b>. Connect Wrong back to this box and it keeps asking until the answer is right (to count wrong tries, put a ⚑ change in the Wrong box).
 </li>
+<li>Turn on <b>[Ask again if wrong]</b> to ask again right there without connecting a line back. With <b>Tries</b> set to 3 it goes to the Wrong box after three wrong answers; 0 keeps asking until the answer is right (the Wrong branch goes away). <b>Hints</b> are lines shown after each wrong answer: the first hint after the first miss, the second after the second, and the last hint repeats when they run out. Missing the last try goes to Wrong without a hint. You can pick the character who says the hints (narration by default). The Wrong line on the canvas shows the tries, like "Wrong (3)".
+</li>
 <li>Separate several answers for one branch with <code>/</code> (e.g. <code>Kim / Chulsoo</code>). Pick a flag in <b>Flag value is also an answer</b> to accept that flag's current value too (for a culprit that changes each game).
 </li>
 <li>By default spaces and letter case don't matter (<code>Kim</code> = <code>kim</code>, <code>Kim Chulsoo</code> = <code>KimChulsoo</code>). Turn on <b>[Spaces and case must match exactly]</b> to require the same text apart from leading and trailing spaces.
@@ -641,7 +643,9 @@ else:
 </li>
 <li><b>Conditions</b>: the branch that matches the current values gets a green border. You can click other branches to go there too.
 </li>
-<li><b>Answer input</b>: a button for each answer and [Wrong]. A flag input line passes with the value unchanged (change the value to test in the flag card).
+<li><b>Answer input</b>: type an answer in [Try an answer] and press Enter or [Check]; it is compared the way the game does (same spacing and case rules) and goes to the matching branch. There are also a button for each answer and [Wrong]. With ask-again on, a wrong answer stays in that box and shows the miss count and hint; when the tries run out it goes to the Wrong box.
+</li>
+<li><b>Flag input lines</b>: if the box has ✎ flag input lines, each gets an input field. Type a value and press Enter or [Insert] to set it the way the game does (empty text gives the initial value, numbers are kept between min and max). If you don't type, the value passes unchanged.
 </li>
 <li>After a call, when the called scene ends (return), it comes back to the "After return" box. <b>↶</b> steps back once, <b>[From start]</b> starts over.
 </li>

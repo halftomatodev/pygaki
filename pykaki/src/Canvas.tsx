@@ -126,7 +126,7 @@ export function Canvas() {
         res.push({
           id, source: b.id, sourceHandle: l.handle, target: l.target, targetHandle: 'in',
           className: cls.join(' '), selected: id === selEdge,
-          label: l.kind === 'answer' ? answerLabel(b, l.handle) : l.kind === 'else' && b.exit.type === 'answer' ? '틀림' : l.kind === 'screen' ? screenLabel(b, l.handle) : l.kind === 'call' ? 'call' : l.kind === 'then' ? '복귀 후' : l.kind === 'else' ? '그 밖' : l.kind === 'if' ? condLabel(b, l.handle) : undefined,
+          label: l.kind === 'answer' ? answerLabel(b, l.handle) : l.kind === 'else' && b.exit.type === 'answer' ? (b.exit.retry ? `틀림 (${b.exit.retry.tries}번)` : '틀림') : l.kind === 'screen' ? screenLabel(b, l.handle) : l.kind === 'call' ? 'call' : l.kind === 'then' ? '복귀 후' : l.kind === 'else' ? '그 밖' : l.kind === 'if' ? condLabel(b, l.handle) : undefined,
           markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16 },
         });
       }

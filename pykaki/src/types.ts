@@ -125,6 +125,13 @@ export interface Branch {
   target: string | null;
 }
 
+// 정답 입력의 다시 묻기 (FEATURE 33)
+export interface AnswerRetry {
+  tries: number;
+  hints: string[];
+  who: string | null;
+}
+
 // 선택지 위에 보이는 질문 대사 (FEATURE 15). who가 null이면 내레이션. 글이 비면 내보내지 않는다
 export interface MenuAsk {
   who: string | null;
@@ -216,7 +223,8 @@ export type Exit =
   | { type: 'screen'; screen: string | null; outs: ScreenOut[]; else: string | null }
   // 정답 입력 (FEATURE 32): 플레이어가 답을 치고, 맞는 갈래로 (위부터). 어느 것도 아니면 else (틀림).
   // ask: 묻는 글. keep: 친 값을 넣을 글자·숫자 플래그 id. exact: 띄어쓰기·대소문자까지 똑같아야 정답 (없으면 무시). length: 최대 글자 수
-  | { type: 'answer'; ask: string; cases: AnswerCase[]; else: string | null; keep?: string; exact?: true; length?: number }
+  // retry (FEATURE 33): 틀리면 이 자리에서 다시 묻기. tries 번 틀리면 else로 (0이면 맞힐 때까지), 틀릴 때마다 hints[틀린 횟수-1] (넘치면 마지막), who 힌트 화자 (null 내레이션)
+  | { type: 'answer'; ask: string; cases: AnswerCase[]; else: string | null; keep?: string; exact?: true; length?: number; retry?: AnswerRetry }
   | { type: 'return' };
 
 export type ExitType = Exit['type'];

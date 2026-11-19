@@ -535,6 +535,7 @@ function ScreenExitEditor({ b, upd }: { b: BoxNode; upd: Upd }) {
 // 정답 입력 (FEATURE 32): 묻는 글, 정답마다 (글 / 플래그 값) 갈 상자, 틀림, 친 값 넣을 플래그, 정확히
 function AnswerExitEditor({ b, upd }: { b: BoxNode; upd: Upd }) {
   const vars = useStore((s) => s.project.variables);
+  const chars = useStore((s) => s.project.characters);
   if (b.exit.type !== 'answer') return null;
   const e = b.exit;
   const typable = vars.filter((f) => f.kind === 'str' || f.kind === 'int');
@@ -570,9 +571,45 @@ function AnswerExitEditor({ b, upd }: { b: BoxNode; upd: Upd }) {
       ))}
       <button onClick={() => put((x) => void x.cases.push(ops.newAnswer()))} title="다른 답이면 다른 상자로 (예: 틀린 범인을 고르면 나쁜 엔딩)">+ 정답 추가</button>
       <div className="row">
-        <label>틀림<Hint text="어느 정답에도 안 맞으면 이 상자로. 이 상자로 다시 이으면 맞힐 때까지 다시 물어요" topic="흐름 잇기" /></label>
-        <TargetSelect self={b.id} value={e.else} onChange={(v) => upd((x) => ops.setLink(x, 'else', v))} />
+        <label className="pick">
+          <input type="checkbox" checked={!!e.retry} onChange={(ev) => put((x) => void (ev.target.checked ? (x.retry = { tries: 3, hints: [''], who: null }) : delete x.retry))} /> 틀리면 다시 묻기
+        </label>
+        <Hint text="틀리면 이 자리에서 다시 물어요. 정한 기회를 다 쓰면 틀림 상자로 가고, 틀릴 때마다 힌트를 보여 줄 수 있어요" topic="흐름 잇기" />
       </div>
+      {e.retry && (
+        <div className="answer-retry">
+          <div className="row">
+            <label>기회</label>
+            <input type="number" min={0} max={99} style={{ width: 60 }} value={e.retry.tries} onChange={(ev) => put((x) => void (x.retry && (x.retry.tries = Math.max(0, Math.round(Number(ev.target.value) || 0)))), 'atries' + b.id)} />
+            <span className="tip">{e.retry.tries > 0 ? `번 틀리면 틀림으로` : '맞힐 때까지 물어요'}</span>
+          </div>
+          <div className="row">
+            <label>힌트</label>
+            <select title="힌트를 말하는 사람" value={e.retry.who ?? ''} onChange={(ev) => put((x) => void (x.retry && (x.retry.who = ev.target.value || null)))}>
+              <option value="">내레이션</option>
+              {chars.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+              {e.retry.who && !chars.some((c) => c.id === e.retry!.who) && <option value={e.retry.who}>? {e.retry.who}</option>}
+            </select>
+          </div>
+          {e.retry.hints.map((h, i) => (
+            <div className="choice-ed" key={i}>
+              <span className="tip retry-n" title={`${i + 1}번째로 틀리면 보여요`}>{i + 1}번</span>
+              <input id={`ed-hint-${b.id}-${i}`} className="grow" value={h} placeholder={i === 0 ? '첫 글자는 ㄱ이야' : '힌트 (비우면 없음)'} onChange={(ev) => put((x) => void (x.retry && (x.retry.hints[i] = ev.target.value)), `ahint${b.id}-${i}`)} />
+              <button onClick={() => put((x) => void x.retry?.hints.splice(i, 1))}>✕</button>
+            </div>
+          ))}
+          <button onClick={() => put((x) => void x.retry?.hints.push(''))}>+ 힌트 추가</button>
+          <p className="tip">힌트가 모자라면 마지막 힌트를 다시 보여요.{e.retry.tries > 0 ? ' 마지막 기회를 놓치면 힌트 없이 틀림으로 가요.' : ''}</p>
+        </div>
+      )}
+      {!(e.retry && e.retry.tries <= 0) && (
+        <div className="row">
+          <label>틀림<Hint text={e.retry ? '기회를 다 쓰면 이 상자로 가요' : '어느 정답에도 안 맞으면 이 상자로. 이 상자로 다시 이으면 맞힐 때까지 다시 물어요'} topic="흐름 잇기" /></label>
+          <TargetSelect self={b.id} value={e.else} onChange={(v) => upd((x) => ops.setLink(x, 'else', v))} />
+        </div>
+      )}
       <div className="row">
         <label>친 값<Hint text="플레이어가 친 글을 이 플래그에 넣어요. 대사에서 [이름]으로 보여 줄 수 있어요 (숫자 플래그는 숫자만)" topic="흐름 잇기" /></label>
         {flagSel(e.keep, (v) => put((x) => void (v ? (x.keep = v) : delete x.keep)), '남기지 않음', '친 값을 넣을 플래그')}

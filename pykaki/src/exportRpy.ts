@@ -480,14 +480,18 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
         if (!e.cases.length) W.push({ level: 'error', msg: `정답 입력에 정답이 없어요 (${name})`, nodeId: b.id });
         pct(e.ask, '정답 입력');
         const len = e.length; // 친 값 플래그의 글자 수는 안 따름 (답이 플래그 범위보다 길 수 있음)
-        body.push(`$ _pk_typed = renpy.input("${escapeText(e.ask, { ...S, escapePercent: false }, subs)}"${len && len > 0 ? `, length=${Math.round(len)}` : ''}).strip()`);
+        // 다시 묻기 (FEATURE 33): while 안에서 묻고, 맞으면 jump. 틀리면 _pk_miss를 세고 힌트를 보인 뒤 다시 묻는다
+        const rt = e.retry;
+        const J = rt ? I : ''; // while 안이면 한 칸 들임
+        const ask: string[] = [];
+        ask.push(`$ _pk_typed = renpy.input("${escapeText(e.ask, { ...S, escapePercent: false }, subs)}"${len && len > 0 ? `, length=${Math.round(len)}` : ''}).strip()`);
         if (keep && canInput(keep)) {
           const r = flagRef(p, keep.name);
           const u = flagUi(keep);
-          body.push(keep.kind === 'int' ? `$ ${r} = max(${uiMin(u)}, min(${uiMax(u)}, int(_pk_typed))) if _pk_typed.lstrip("-").isdigit() else ${r}` : `$ ${r} = _pk_typed`);
+          ask.push(keep.kind === 'int' ? `$ ${r} = max(${uiMin(u)}, min(${uiMax(u)}, int(_pk_typed))) if _pk_typed.lstrip("-").isdigit() else ${r}` : `$ ${r} = _pk_typed`);
         }
         const norm = (x: string) => (e.exact ? x : `"".join(${x}.split()).lower()`);
-        body.push(`$ _pk_answer = ${norm('_pk_typed')}`);
+        ask.push(`$ _pk_answer = ${norm('_pk_typed')}`);
         const normConst = (t: string) => (e.exact ? t.trim() : t.replace(/\s+/g, '').toLowerCase());
         e.cases.forEach((c, i) => {
           const words = [...new Set(c.text.split('/').map(normConst).filter(Boolean))];
@@ -500,12 +504,44 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
           if (!parts.length) W.push({ level: 'error', msg: `정답 입력의 ${i + 1}번 정답이 비어 있어요 (${name})`, nodeId: b.id });
           const shown = c.text || f?.name || '(빈 정답)';
           if (!c.target) W.push({ level: 'warn', msg: `정답 "${shown}"의 갈래가 연결되지 않았어요 (${name})`, nodeId: b.id });
-          body.push(`${i === 0 ? 'if' : 'elif'} ${parts.length ? parts.join(' or ') : 'False  # TODO: 정답 없음'}:`);
-          body.push(I + (c.target ? `jump ${ref(c.target)}` : todo));
+          ask.push(`${i === 0 ? 'if' : 'elif'} ${parts.length ? parts.join(' or ') : 'False  # TODO: 정답 없음'}:`);
+          // 맞힌 갈래는 바로 다음 상자여도 늘 jump (다시 묻는 while을 나가야 해서)
+          ask.push(I + (c.target ? `jump ${ref(c.target)}` : todo));
         });
-        if (!e.else) W.push({ level: 'warn', msg: `정답 입력의 "틀림"이 연결되지 않았어요 (${name})`, nodeId: b.id });
-        const rest = flow(e.else);
-        if (rest.length) body.push(...(e.cases.length ? ['else:', ...rest.map((x) => I + x)] : rest));
+        const endless = !!rt && rt.tries <= 0;
+        if (!e.else && !endless) W.push({ level: 'warn', msg: `정답 입력의 "틀림"이 연결되지 않았어요 (${name})`, nodeId: b.id });
+        if (rt) {
+          const hints = rt.hints.filter((h) => h.trim());
+          const hc = rt.who ? charById.get(rt.who) : undefined;
+          if (rt.who && !hc) W.push({ level: 'error', msg: `정답 입력 힌트의 화자 "${rt.who}"가 등록되지 않았어요 (${name})`, nodeId: b.id });
+          hints.forEach((h) => pct(h, '정답 입력 힌트'));
+          const sayHint = (h: string) => (hc ? hc.id + ' ' : '') + q(h);
+          const hintLines: string[] = [];
+          if (hints.length === 1) hintLines.push(sayHint(hints[0]));
+          else if (hints.length > 1)
+            hints.forEach((h, k) => {
+              if (k === hints.length - 1) hintLines.push('else:');
+              else hintLines.push(`${k === 0 ? 'if' : 'elif'} _pk_miss == ${k + 1}:`);
+              hintLines.push(I + sayHint(h));
+            });
+          body.push('$ _pk_miss = 0');
+          body.push(endless ? 'while True:' : `while _pk_miss < ${Math.round(rt.tries)}:`);
+          body.push(...ask.map((x) => J + x));
+          body.push(J + '$ _pk_miss += 1');
+          if (hintLines.length) {
+            if (endless) body.push(...hintLines.map((x) => J + x));
+            else {
+              // 마지막 기회를 놓치면 힌트 없이 틀림으로
+              body.push(J + `if _pk_miss < ${Math.round(rt.tries)}:`);
+              body.push(...hintLines.map((x) => J + I + x));
+            }
+          }
+          if (!endless) body.push(...flow(e.else));
+        } else {
+          body.push(...ask);
+          const rest = flow(e.else);
+          if (rest.length) body.push(...(e.cases.length ? ['else:', ...rest.map((x) => I + x)] : rest));
+        }
       } else if (e.type === 'call') {
         if (!e.target) {
           W.push({ level: 'error', msg: `call 대상이 없어요 (${b.title || b.id})`, nodeId: b.id });

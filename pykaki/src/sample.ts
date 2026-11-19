@@ -185,6 +185,13 @@ export function normalizeProject(raw: any): Project {
       if (typeof e.keep !== 'string' || !e.keep) delete e.keep;
       if (e.exact !== true) delete e.exact;
       if (!(typeof e.length === 'number' && e.length > 0)) delete e.length;
+      // 다시 묻기 (FEATURE 33)
+      if (e.retry && typeof e.retry === 'object') {
+        const r = e.retry;
+        r.tries = typeof r.tries === 'number' && r.tries > 0 ? Math.round(r.tries) : 0;
+        r.hints = Array.isArray(r.hints) ? r.hints.filter((h: any) => typeof h === 'string') : [];
+        r.who = typeof r.who === 'string' && r.who ? r.who : null;
+      } else delete e.retry;
     } else if (e.type !== 'return') n.exit = { type: 'return' };
   }
   p.project.startNode = live(p.project.startNode);

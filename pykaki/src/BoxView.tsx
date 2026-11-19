@@ -668,11 +668,19 @@ function AnswerExit({ b, editing }: { b: BoxNode; editing: boolean }) {
           + 정답
         </button>
       )}
-      <div className="choice branch else" data-part="else">
-        <span className="br-kw">틀림</span>
-        {!ex.else && <span className="todo"> (연결 안 됨)</span>}
-        <Handle type="source" id="else" position={Position.Right} />
-      </div>
+      {ex.retry && (
+        <div className="exit-label answer-retry-view" data-part="retry" title={ex.retry.hints.filter((h) => h.trim()).join(' / ') || undefined}>
+          ↻ 틀리면 다시 묻기 · {ex.retry.tries > 0 ? `기회 ${ex.retry.tries}번` : '맞힐 때까지'}
+          {ex.retry.hints.some((h) => h.trim()) && ` · 힌트 ${ex.retry.hints.filter((h) => h.trim()).length}`}
+        </div>
+      )}
+      {!(ex.retry && ex.retry.tries <= 0) && (
+        <div className="choice branch else" data-part="else">
+          <span className="br-kw">틀림</span>
+          {!ex.else && <span className="todo"> (연결 안 됨)</span>}
+          <Handle type="source" id="else" position={Position.Right} />
+        </div>
+      )}
     </>
   );
 }

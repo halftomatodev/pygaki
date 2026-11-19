@@ -23,7 +23,8 @@ export function exitLinks(b: BoxNode): Link[] {
   if (e.type === 'answer')
     return [
       ...e.cases.map((c) => ({ handle: 'a:' + c.id, target: c.target, kind: 'answer' as const })),
-      { handle: 'else', target: e.else, kind: 'else' as const },
+      // 맞힐 때까지 다시 묻기(FEATURE 33, 기회 0)면 틀림 갈래가 없다
+      ...(e.retry && e.retry.tries <= 0 ? [] : [{ handle: 'else', target: e.else, kind: 'else' as const }]),
     ];
   if (e.type === 'call')
     return [
@@ -37,6 +38,7 @@ export function exitLinks(b: BoxNode): Link[] {
 export function fallTarget(b: BoxNode) {
   if (b.exit.type === 'next') return b.exit.target;
   if (b.exit.type === 'call') return b.exit.then;
+  if (b.exit.type === 'answer' && b.exit.retry && b.exit.retry.tries <= 0) return null; // 맞힐 때까지 다시 물으면 아래로 안 이어짐
   if (b.exit.type === 'if' || b.exit.type === 'screen' || b.exit.type === 'answer') return b.exit.else; // 조건이 모두 아니면 아래로 이어진다
   return null;
 }

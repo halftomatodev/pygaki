@@ -2836,3 +2836,37 @@ HUD에 입력칸 꼴을 놓고 [게임에서 바꿀 수 있음]: 아무 때나 �
 플레이어가 친 글을 이 플래그에 넣어요. 대사에서 [이름]으로 보여 줄 수 있어요 (숫자 플래그는 숫자만)	プレイヤーが入力した文字をこのフラグに入れます。セリフで [名前] として表示できます (数値フラグは数字のみ)	Stores what the player typed in this flag. Show it in dialogue as [name] (number flags take digits only)
 정답 "${shown}"의 갈래가 연결되지 않았어요 (${name})	正解「{0}」の分岐が接続されていません ({1})	Branch for answer "{0}" not connected ({1})
 정답 입력: 친 값을 넣을 플래그 "${keep.name}"는 켜짐/꺼짐이라 넣을 수 없어요. 글자나 숫자 플래그를 골라 주세요 (${name})	正解入力: 入力値を入れるフラグ「{0}」はオン/オフなので入れられません。文字か数値のフラグを選んでください ({1})	Answer input: flag "{0}" is on/off, so it can't hold the typed value. Choose a text or number flag ({1})
+기회	チャンス	Tries
+힌트	ヒント	Hints
+번 틀림	回間違い	wrong
+다시 묻기	聞き直す	ask again
+답 쳐 보기	答えを打ってみる	Try an answer
+맞힐 때까지	当てるまで	until right
++ 힌트 추가	+ ヒントを追加	+ Add hint
+(맞힐 때까지)	(当てるまで)	(until right)
+정답 입력 힌트	正解入力のヒント	Answer input hint
+첫 글자는 ㄱ이야	最初の文字は「か」行だよ	It starts with K
+틀리면 다시 묻기	間違えたら聞き直す	Ask again if wrong
+맞힐 때까지 물어요	当てるまで聞きます	Asks until right
+번 틀리면 틀림으로	回間違えたら不正解へ	wrong answers go to Wrong
+힌트를 말하는 사람	ヒントを話す人	Who says the hints
+힌트 (비우면 없음)	ヒント (空ならなし)	Hint (empty: none)
+↻ 틀리면 다시 묻기 ·	↻ 間違えたら聞き直す ·	↻ Ask again if wrong ·
+"${t.trim()}" 맞음	「{0}」正解	"{0}" right
+"${t.trim()}" 틀림	「{0}」不正解	"{0}" wrong
+/ 기회 ${rt.tries}번	/ チャンス {0} 回	/ {0} tries
+기회를 다 쓰면 이 상자로 가요	チャンスを使い切るとこのボックスへ進みます	Goes to this box when the tries run out
+게임처럼 견줘서 맞는 갈래로 가요	ゲームと同じように比べて合う分岐へ進みます	Compared the way the game does, goes to the matching branch
+${i + 1}번째로 틀리면 보여요	{0} 回目に間違えたら見せます	Shown on miss {0}
+${via} · ${miss}번 틀림	{0} · {1} 回間違い	{0} · {1} wrong
+기회 ${ex.retry.tries}번	チャンス {0} 回	{0} tries
+힌트가 모자라면 마지막 힌트를 다시 보여요.	ヒントが足りなければ最後のヒントをくり返します。	The last hint repeats when they run out.
+마지막 기회를 놓치면 힌트 없이 틀림으로 가요.	最後のチャンスを逃すとヒントなしで不正解へ進みます。	Missing the last try goes to Wrong without a hint.
+틀림 (${b.exit.retry.tries}번)	不正解 ({0}回)	Wrong ({0})
+${via} · 기회 ${rt.tries}번을 다 씀	{0} · チャンス {1} 回を使い切り	{0} · used all {1} tries
+✎ ${l.text || '플래그 입력'} → ${f.name}	✎ {0} → {1}	✎ {0} → {1}
+정답 입력 힌트의 화자 "${rt.who}"가 등록되지 않았어요 (${name})	正解入力のヒントの話し手「{0}」が登録されていません ({1})	Answer input hint speaker "{0}" is not registered ({1})
+게임처럼 넣어요 (글자는 비우면 처음 값, 숫자는 범위 안으로). 안 치면 값은 그대로	ゲームと同じように入れます (文字は空なら最初の値、数字は範囲の中へ)。打たなければ値はそのまま	Sets it the way the game does (empty text gives the initial value, numbers stay in range). If you don't type, the value stays
+· 힌트 ${ex.retry.hints.filter((h) => h.trim()).length}	· ヒント {0}	· hints {0}
+틀리면 이 자리에서 다시 물어요. 정한 기회를 다 쓰면 틀림 상자로 가고, 틀릴 때마다 힌트를 보여 줄 수 있어요	間違えるとその場で聞き直します。決めたチャンスを使い切ると不正解のボックスへ進み、間違えるたびにヒントを見せられます	Asks again right there when wrong. When the set tries run out it goes to the Wrong box, and you can show a hint after each miss
+맞혀 보기	答え合わせ	Check

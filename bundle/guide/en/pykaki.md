@@ -1,4 +1,4 @@
-<!-- 원본: pykaki/docs/GUIDE.md @ b46a6af7ee -->
+<!-- 원본: pykaki/docs/GUIDE.md @ ffffba23ad -->
 # pygaki user guide
 
 A tool for writing Ren'Py scripts with boxes and lines and exporting them as Ren'Py script files (`.rpy`).
@@ -220,6 +220,7 @@ The side panels float over the canvas. Gaps between cards and space left by fold
 Use it where the player must type the answer, like the culprit's name or a password. Pick **✎ Answer input** in the next-flow window or in [Next flow] on the right.
 
 - Write the **prompt** (e.g. "Who is the culprit?") and the **answers**, and connect a box to each answer with a line. Answers are checked from the top; if none matches it goes to **Wrong**. Connect Wrong back to this box and it keeps asking until the answer is right (to count wrong tries, put a ⚑ change in the Wrong box).
+- Turn on **[Ask again if wrong]** to ask again right there without connecting a line back. With **Tries** set to 3 it goes to the Wrong box after three wrong answers; 0 keeps asking until the answer is right (the Wrong branch goes away). **Hints** are lines shown after each wrong answer: the first hint after the first miss, the second after the second, and the last hint repeats when they run out. Missing the last try goes to Wrong without a hint. You can pick the character who says the hints (narration by default). The Wrong line on the canvas shows the tries, like "Wrong (3)".
 - Separate several answers for one branch with `/` (e.g. `Kim / Chulsoo`). Pick a flag in **Flag value is also an answer** to accept that flag's current value too (for a culprit that changes each game).
 - By default spaces and letter case don't matter (`Kim` = `kim`, `Kim Chulsoo` = `KimChulsoo`). Turn on **[Spaces and case must match exactly]** to require the same text apart from leading and trailing spaces.
 - Pick a text or number flag in **[Typed value]** to keep what was typed and show it in dialogue like `[guess]`. You can also set the **maximum length**.
@@ -268,7 +269,8 @@ Press **[▶ Trace]** in the flag card (from the start of the script) or **[▶ 
 - It shows the current box and the flags changed there (`kindness 0 → 1`), the path taken so far, and the current values of all flags. The canvas moves to that box too.
 - **Choices**: choices whose Show if is false are dimmed and blocked; picking one applies its "On pick" changes and goes to that box.
 - **Conditions**: the branch that matches the current values gets a green border. You can click other branches to go there too.
-- **Answer input**: a button for each answer and [Wrong]. A flag input line passes with the value unchanged (change the value to test in the flag card).
+- **Answer input**: type an answer in [Try an answer] and press Enter or [Check]; it is compared the way the game does (same spacing and case rules) and goes to the matching branch. There are also a button for each answer and [Wrong]. With ask-again on, a wrong answer stays in that box and shows the miss count and hint; when the tries run out it goes to the Wrong box.
+- **Flag input lines**: if the box has ✎ flag input lines, each gets an input field. Type a value and press Enter or [Insert] to set it the way the game does (empty text gives the initial value, numbers are kept between min and max). If you don't type, the value passes unchanged.
 - After a call, when the called scene ends (return), it comes back to the "After return" box. **↶** steps back once, **[From start]** starts over.
 - Expressions it can compute are numbers, text and on/off values, arithmetic like addition and subtraction, comparisons and and/or/not. Expressions with functions or the game's other variables show as "unknown"; then you choose yourself. `$ name += value` in direct command lines is computed too.
 
