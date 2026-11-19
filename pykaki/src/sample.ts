@@ -172,6 +172,19 @@ export function normalizeProject(raw: any): Project {
       e.outs = Array.isArray(e.outs) ? e.outs.filter((o: any) => o && typeof o.value === 'string') : [];
       for (const o of e.outs) o.target = live(o.target);
       e.else = live(e.else);
+    } else if (e.type === 'answer') {
+      // 정답 입력 (FEATURE 32)
+      e.ask = typeof e.ask === 'string' ? e.ask : '';
+      e.cases = Array.isArray(e.cases) ? e.cases.filter((c: any) => c && typeof c.id === 'string') : [];
+      for (const c of e.cases) {
+        c.text = typeof c.text === 'string' ? c.text : '';
+        c.target = live(c.target);
+        if (typeof c.flag !== 'string' || !c.flag) delete c.flag;
+      }
+      e.else = live(e.else);
+      if (typeof e.keep !== 'string' || !e.keep) delete e.keep;
+      if (e.exact !== true) delete e.exact;
+      if (!(typeof e.length === 'number' && e.length > 0)) delete e.length;
     } else if (e.type !== 'return') n.exit = { type: 'return' };
   }
   p.project.startNode = live(p.project.startNode);

@@ -469,6 +469,43 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
         const rest = flow(e.else);
         // 그 밖이 바로 다음 상자면 else 없이 아래로 이어진다
         if (rest.length) body.push(...(e.branches.length ? ['else:', ...rest.map((x) => I + x)] : rest));
+      } else if (e.type === 'answer') {
+        // 정답 입력 (FEATURE 32): 친 글을 _pk_typed에, 견줄 글은 _pk_answer(띄어쓰기를 빼고 소문자로. 정확히면 앞뒤 빈칸만 뺌)
+        const name = b.title || b.id;
+        const flagOf = (id?: string) => (id ? p.variables.find((v) => v.id === id) : undefined);
+        const keep = flagOf(e.keep);
+        if (e.keep && !keep) W.push({ level: 'warn', msg: `정답 입력: 친 값을 넣을 플래그가 없어졌어요. 다시 골라 주세요 (${name})`, nodeId: b.id });
+        if (keep && !canInput(keep)) W.push({ level: 'error', msg: `정답 입력: 친 값을 넣을 플래그 "${keep.name}"는 켜짐/꺼짐이라 넣을 수 없어요. 글자나 숫자 플래그를 골라 주세요 (${name})`, nodeId: b.id });
+        if (!e.ask.trim()) W.push({ level: 'warn', msg: `정답 입력의 묻는 글이 비어 있어요 (${name})`, nodeId: b.id });
+        if (!e.cases.length) W.push({ level: 'error', msg: `정답 입력에 정답이 없어요 (${name})`, nodeId: b.id });
+        pct(e.ask, '정답 입력');
+        const len = e.length; // 친 값 플래그의 글자 수는 안 따름 (답이 플래그 범위보다 길 수 있음)
+        body.push(`$ _pk_typed = renpy.input("${escapeText(e.ask, { ...S, escapePercent: false }, subs)}"${len && len > 0 ? `, length=${Math.round(len)}` : ''}).strip()`);
+        if (keep && canInput(keep)) {
+          const r = flagRef(p, keep.name);
+          const u = flagUi(keep);
+          body.push(keep.kind === 'int' ? `$ ${r} = max(${uiMin(u)}, min(${uiMax(u)}, int(_pk_typed))) if _pk_typed.lstrip("-").isdigit() else ${r}` : `$ ${r} = _pk_typed`);
+        }
+        const norm = (x: string) => (e.exact ? x : `"".join(${x}.split()).lower()`);
+        body.push(`$ _pk_answer = ${norm('_pk_typed')}`);
+        const normConst = (t: string) => (e.exact ? t.trim() : t.replace(/\s+/g, '').toLowerCase());
+        e.cases.forEach((c, i) => {
+          const words = [...new Set(c.text.split('/').map(normConst).filter(Boolean))];
+          const f = flagOf(c.flag);
+          if (c.flag && !f) W.push({ level: 'warn', msg: `정답 입력: 정답으로 고른 플래그가 없어졌어요 (${name})`, nodeId: b.id });
+          const parts: string[] = [];
+          if (words.length) parts.push(words.length === 1 ? `_pk_answer == ${pyValue({ kind: 'str', init: words[0] })}` : `_pk_answer in [${words.map((w) => pyValue({ kind: 'str', init: w })).join(', ')}]`);
+          // 플래그 값이 정답: 빈 값이면 맞지 않게
+          if (f) parts.push(`(${norm(`str(${flagRef(p, f.name)})`)} != "" and _pk_answer == ${norm(`str(${flagRef(p, f.name)})`)})`);
+          if (!parts.length) W.push({ level: 'error', msg: `정답 입력의 ${i + 1}번 정답이 비어 있어요 (${name})`, nodeId: b.id });
+          const shown = c.text || f?.name || '(빈 정답)';
+          if (!c.target) W.push({ level: 'warn', msg: `정답 "${shown}"의 갈래가 연결되지 않았어요 (${name})`, nodeId: b.id });
+          body.push(`${i === 0 ? 'if' : 'elif'} ${parts.length ? parts.join(' or ') : 'False  # TODO: 정답 없음'}:`);
+          body.push(I + (c.target ? `jump ${ref(c.target)}` : todo));
+        });
+        if (!e.else) W.push({ level: 'warn', msg: `정답 입력의 "틀림"이 연결되지 않았어요 (${name})`, nodeId: b.id });
+        const rest = flow(e.else);
+        if (rest.length) body.push(...(e.cases.length ? ['else:', ...rest.map((x) => I + x)] : rest));
       } else if (e.type === 'call') {
         if (!e.target) {
           W.push({ level: 'error', msg: `call 대상이 없어요 (${b.title || b.id})`, nodeId: b.id });

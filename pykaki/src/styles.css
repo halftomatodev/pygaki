@@ -457,6 +457,11 @@ input.title { width: 100%; font-weight: 700; font-size: 15px; margin-bottom: 8px
 .choice-ed { display: flex; gap: 4px; margin-bottom: 5px; }
 .choice-ed input { flex: 1.2; }
 .choice-ed select { flex: 1; }
+/* 정답 입력 (FEATURE 32): 정답 글 줄 아래에 플래그 값·갈 상자 줄 */
+.answer-ed { margin-bottom: 8px; }
+.answer-ed > .choice-ed { margin-bottom: 3px; }
+.answer-ed > .answer-sub { padding-left: 14px; }
+.answer-ed > .answer-sub select { flex: 1 1 0; min-width: 0; }
 .menu-ask select { flex: 0 0 auto; max-width: 34%; }
 .menu-ask input { flex: 2; }
 /* 상자 안 선택지 위 질문 대사 */

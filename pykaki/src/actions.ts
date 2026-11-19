@@ -149,7 +149,7 @@ export function goNextBox(fromId: string) {
   const b = ops.findBox(s.project, fromId);
   if (!b) return;
   // 선택지·조건 분기: 아직 안 이어진 첫 갈래(없으면 첫 갈래)로
-  if (b.exit.type === 'menu' || b.exit.type === 'if' || b.exit.type === 'screen') {
+  if (b.exit.type === 'menu' || b.exit.type === 'if' || b.exit.type === 'screen' || b.exit.type === 'answer') {
     const links = ops.exitLinks(b);
     const l = links.find((x) => !x.target) ?? links[0];
     if (!l) return;

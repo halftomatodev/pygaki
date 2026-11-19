@@ -2795,3 +2795,44 @@ HUD에 입력칸 꼴을 놓고 [게임에서 바꿀 수 있음]: 아무 때나 �
 플레이어가 이름을 쳐서 정해요. 대사 속 [pname]과 캐릭터 이름 칸에 친 이름이 보여요. 친구·애완동물 이름도 같은 방법으로 받아요.	プレイヤーが名前を入力して決めます。セリフの [pname] とキャラクターの名前欄に入力した名前が表示されます。友だちやペットの名前も同じ方法で受け取れます。	The player types a name. It shows in [pname] in dialogue and in the character's name box. Friends' and pets' names work the same way.
 플래그 입력 줄의 플래그 "${f.name}"는 켜짐/꺼짐이라 칠 수 없어요. 글자나 숫자 플래그를 골라 주세요 (${b.title || b.id})	フラグ入力の行のフラグ "{0}" はオン/オフなので入力できません。文字か数値のフラグを選んでください ({1})	The flag input line's flag "{0}" is on/off and can't be typed. Choose a text or number flag ({1})
 플래그 입력 줄: 플래그 "${f.name}"의 처음 값이 비어 있어서, 안 치고 넘어가면 빈 글이 돼요. 처음 값에 기본 이름을 적어 주세요 (${b.title || b.id})	フラグ入力の行: フラグ "{0}" の初期値が空なので、入力せずに進むと空の文字になります。初期値に既定の名前を書いてください ({1})	Flag input line: flag "{0}" has an empty initial value, so skipping it leaves blank text. Put a default name in its initial value ({1})
+정답	正解	Answer
+틀림	不正解	Wrong
+친 값	入力値	Typed value
++ 정답	+ 正解	+ Answer
+정답 입력	正解入力	Answer input
+(글 없음)	(文字なし)	(no text)
+(빈 정답)	(空の正解)	(empty answer)
+남기지 않음	残さない	Don't keep
+정답 입력:	正解入力:	Answer input:
++ 정답 추가	+ 正解を追加	+ Add answer
+✎ 정답 입력	✎ 正解入力	✎ Answer input
+? 없는 플래그	? 存在しないフラグ	? Missing flag
+범인의 이름은?	犯人の名前は?	Who is the culprit?
+철수 / 김철수	太郎 / 山田太郎	John / John Smith
+(묻는 글 없음)	(質問文なし)	(no question)
+정답 입력의 정답	正解入力の正解	Answer of answer input
+정답 입력의 틀림	正解入力の不正解	Wrong of answer input
+친 값을 넣을 플래그	入力値を入れるフラグ	Flag to store the typed value
+이 플래그의 값도 정답	このフラグの値も正解	This flag's value is also correct
+✎ 정답 입력 (주관식)	✎ 正解入力 (記述式)	✎ Answer input (free text)
+플래그 값도 정답: 없음	フラグの値も正解: なし	Flag value is also correct: none
+친 값을 이 플래그에 넣어요	入力値をこのフラグに入れます	Stores the typed value in this flag
+· 플래그 ${f.name} 값	· フラグ {0} の値	· value of flag {0}
+묻는 글 (예: 범인의 이름은?)	質問文 (例: 犯人の名前は?)	Question (e.g. Who is the culprit?)
+띄어쓰기·대소문자까지 똑같아야 정답	空白・大文字小文字まで同じなら正解	Spaces and case must match exactly
+철수 / 김철수 (여러 개는 / 로)	太郎 / 山田太郎 (複数は / で区切る)	John / John Smith (separate several with /)
+정답 입력에 정답이 없어요 (${name})	正解入力に正解がありません ({0})	Answer input has no answers ({0})
+정답 입력의 묻는 글이 비어 있어요 (${name})	正解入力の質問文が空です ({0})	Answer input question is empty ({0})
+정답 "${shown}"	正解「{0}」	Answer "{0}"
+정답 입력의 "틀림"이 연결되지 않았어요 (${name})	正解入力の「不正解」が接続されていません ({0})	Answer input's "wrong" is not connected ({0})
+다른 답이면 다른 상자로 (예: 틀린 범인을 고르면 나쁜 엔딩)	別の答えなら別の箱へ (例: 違う犯人を答えたらバッドエンド)	A different answer goes to a different box (e.g. naming the wrong culprit leads to a bad ending)
+정답 입력: 정답으로 고른 플래그가 없어졌어요 (${name})	正解入力: 正解に選んだフラグがなくなりました ({0})	Answer input: the flag chosen as an answer is gone ({0})
+정답 입력의 ${i + 1}번 정답이 비어 있어요 (${name})	正解入力の {0} 番目の正解が空です ({1})	Answer {0} of the answer input is empty ({1})
+"김 철수", "KIM"처럼 띄어쓰기·대소문자가 달라도 맞다고 봐요.	「山田 太郎」「KIM」のように空白・大文字小文字が違っても正解とみなします。	Answers like "John  Smith" or "KIM" count as correct even if spaces or case differ.
+이 플래그의 값도 정답이에요 (게임마다 바뀌는 답, 예: 이번 판의 범인)	このフラグの値も正解です (プレイごとに変わる答え。例: 今回の犯人)	This flag's value is also correct (an answer that changes per playthrough, e.g. this run's culprit)
+정답 입력: 친 값을 넣을 플래그가 없어졌어요. 다시 골라 주세요 (${name})	正解入力: 入力値を入れるフラグがなくなりました。選び直してください ({0})	Answer input: the flag for the typed value is gone. Please choose again ({0})
+어느 정답에도 안 맞으면 이 상자로. 이 상자로 다시 이으면 맞힐 때까지 다시 물어요	どの正解にも合わなければこの箱へ。この箱につなぎ直すと正解するまで聞き直します	If no answer matches, go to this box. Link it back to this box to ask again until correct
+플레이어에게 보이는 질문이에요 (예: 범인의 이름은?). 글 속 [이름]은 플래그 값으로 보여요	プレイヤーに見える質問です (例: 犯人の名前は?)。文中の [名前] はフラグの値で表示されます	The question shown to the player (e.g. Who is the culprit?). [name] in the text shows the flag value
+플레이어가 친 글을 이 플래그에 넣어요. 대사에서 [이름]으로 보여 줄 수 있어요 (숫자 플래그는 숫자만)	プレイヤーが入力した文字をこのフラグに入れます。セリフで [名前] として表示できます (数値フラグは数字のみ)	Stores what the player typed in this flag. Show it in dialogue as [name] (number flags take digits only)
+정답 "${shown}"의 갈래가 연결되지 않았어요 (${name})	正解「{0}」の分岐が接続されていません ({1})	Branch for answer "{0}" not connected ({1})
+정답 입력: 친 값을 넣을 플래그 "${keep.name}"는 켜짐/꺼짐이라 넣을 수 없어요. 글자나 숫자 플래그를 골라 주세요 (${name})	正解入力: 入力値を入れるフラグ「{0}」はオン/オフなので入れられません。文字か数値のフラグを選んでください ({1})	Answer input: flag "{0}" is on/off, so it can't hold the typed value. Choose a text or number flag ({1})

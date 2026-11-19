@@ -200,12 +200,23 @@ export interface ScreenDef {
   ch?: number;
 }
 
+// 정답 입력의 갈래 하나 (FEATURE 32). text: 정답 글 (여러 개는 / 로 나눔), flag: 그 플래그의 값도 정답 (플래그 id)
+export interface AnswerCase {
+  id: string;
+  text: string;
+  flag?: string;
+  target: string | null;
+}
+
 export type Exit =
   | { type: 'next'; target: string | null }
   | { type: 'if'; branches: Branch[]; else: string | null }
   | { type: 'menu'; choices: Choice[]; ask?: MenuAsk }
   | { type: 'call'; target: string | null; then: string | null }
   | { type: 'screen'; screen: string | null; outs: ScreenOut[]; else: string | null }
+  // 정답 입력 (FEATURE 32): 플레이어가 답을 치고, 맞는 갈래로 (위부터). 어느 것도 아니면 else (틀림).
+  // ask: 묻는 글. keep: 친 값을 넣을 글자·숫자 플래그 id. exact: 띄어쓰기·대소문자까지 똑같아야 정답 (없으면 무시). length: 최대 글자 수
+  | { type: 'answer'; ask: string; cases: AnswerCase[]; else: string | null; keep?: string; exact?: true; length?: number }
   | { type: 'return' };
 
 export type ExitType = Exit['type'];

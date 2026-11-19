@@ -532,6 +532,65 @@ function ScreenExitEditor({ b, upd }: { b: BoxNode; upd: Upd }) {
   );
 }
 
+// 정답 입력 (FEATURE 32): 묻는 글, 정답마다 (글 / 플래그 값) 갈 상자, 틀림, 친 값 넣을 플래그, 정확히
+function AnswerExitEditor({ b, upd }: { b: BoxNode; upd: Upd }) {
+  const vars = useStore((s) => s.project.variables);
+  if (b.exit.type !== 'answer') return null;
+  const e = b.exit;
+  const typable = vars.filter((f) => f.kind === 'str' || f.kind === 'int');
+  const put = (fn: (x: Extract<BoxNode['exit'], { type: 'answer' }>) => void, key?: string) => upd((x) => void (x.exit.type === 'answer' && fn(x.exit)), key);
+  const flagSel = (value: string | undefined, onChange: (v: string | undefined) => void, none: string, title: string) => (
+    <select title={title} value={value ?? ''} onChange={(ev) => onChange(ev.target.value || undefined)}>
+      <option value="">{none}</option>
+      {typable.map((f) => (
+        <option key={f.id} value={f.id}>{f.name}{f.note ? ` (${f.note})` : ''}</option>
+      ))}
+      {value && !typable.some((f) => f.id === value) && <option value={value}>? 없는 플래그</option>}
+    </select>
+  );
+  return (
+    <>
+      <div className="row">
+        <label>묻는 글<Hint text="플레이어에게 보이는 질문이에요 (예: 범인의 이름은?). 글 속 [이름]은 플래그 값으로 보여요" topic="흐름 잇기" /></label>
+        <input id={'ed-ask-' + b.id} className="grow" value={e.ask} placeholder="범인의 이름은?" onChange={(ev) => put((x) => void (x.ask = ev.target.value), 'ask' + b.id)} />
+      </div>
+      {e.cases.map((c, i) => (
+        <div className="answer-ed" key={c.id}>
+          <div className="choice-ed">
+            <span className="br-kw">정답</span>
+            <input id={'ed-' + c.id} value={c.text} placeholder="철수 / 김철수 (여러 개는 / 로)" onChange={(ev) => put((x) => void (x.cases[i].text = ev.target.value), 'answer' + c.id)} />
+            <button disabled={i === 0} onClick={() => put((x) => void x.cases.splice(i - 1, 0, ...x.cases.splice(i, 1)))}>↑</button>
+            <button disabled={e.cases.length < 2} onClick={() => put((x) => void x.cases.splice(i, 1))}>✕</button>
+          </div>
+          <div className="choice-ed answer-sub">
+            {flagSel(c.flag, (v) => put((x) => void (v ? (x.cases[i].flag = v) : delete x.cases[i].flag)), '플래그 값도 정답: 없음', '이 플래그의 값도 정답이에요 (게임마다 바뀌는 답, 예: 이번 판의 범인)')}
+            <TargetSelect self={b.id} value={c.target} onChange={(v) => upd((x) => ops.setLink(x, 'a:' + c.id, v))} />
+          </div>
+        </div>
+      ))}
+      <button onClick={() => put((x) => void x.cases.push(ops.newAnswer()))} title="다른 답이면 다른 상자로 (예: 틀린 범인을 고르면 나쁜 엔딩)">+ 정답 추가</button>
+      <div className="row">
+        <label>틀림<Hint text="어느 정답에도 안 맞으면 이 상자로. 이 상자로 다시 이으면 맞힐 때까지 다시 물어요" topic="흐름 잇기" /></label>
+        <TargetSelect self={b.id} value={e.else} onChange={(v) => upd((x) => ops.setLink(x, 'else', v))} />
+      </div>
+      <div className="row">
+        <label>친 값<Hint text="플레이어가 친 글을 이 플래그에 넣어요. 대사에서 [이름]으로 보여 줄 수 있어요 (숫자 플래그는 숫자만)" topic="흐름 잇기" /></label>
+        {flagSel(e.keep, (v) => put((x) => void (v ? (x.keep = v) : delete x.keep)), '남기지 않음', '친 값을 넣을 플래그')}
+      </div>
+      <div className="row">
+        <label className="pick">
+          <input type="checkbox" checked={!!e.exact} onChange={(ev) => put((x) => void (ev.target.checked ? (x.exact = true) : delete x.exact))} /> 띄어쓰기·대소문자까지 똑같아야 정답
+        </label>
+      </div>
+      <div className="row">
+        <label className="pick">최대 글자 수</label>
+        <input type="number" min={1} max={200} style={{ width: 70 }} value={e.length ?? ''} placeholder="없음" onChange={(ev) => put((x) => { const n = Math.round(Number(ev.target.value)); if (n > 0) x.length = n; else delete x.length; }, 'alen' + b.id)} />
+      </div>
+      {!e.exact && <p className="tip">"김 철수", "KIM"처럼 띄어쓰기·대소문자가 달라도 맞다고 봐요.</p>}
+    </>
+  );
+}
+
 // 선택지 위 질문 대사 (FEATURE 15): 화자와 글. 글을 비우면 질문 없이 선택지만 나와요
 function MenuAskRow({ b, upd }: { b: BoxNode; upd: Upd }) {
   const chars = useStore((s) => s.project.characters);
@@ -571,6 +630,7 @@ export function ExitEditor({ b, upd }: { b: BoxNode; upd: Upd }) {
           <option value="menu">◆ 선택지 (menu)</option>
           <option value="if">◇ 조건 분기 (if)</option>
           <option value="screen">▣ 화면 부르기 (call screen)</option>
+          <option value="answer">✎ 정답 입력 (주관식)</option>
           <option value="call">⤷ call 후 계속</option>
           <option value="return">■ 끝 (return)</option>
         </select>
@@ -630,6 +690,7 @@ export function ExitEditor({ b, upd }: { b: BoxNode; upd: Upd }) {
         </>
       )}
       {e.type === 'screen' && <ScreenExitEditor b={b} upd={upd} />}
+      {e.type === 'answer' && <AnswerExitEditor b={b} upd={upd} />}
       {e.type === 'return' && <p className="tip">여기서 끝 (call로 불렸으면 부른 곳으로)</p>}
     </div>
   );

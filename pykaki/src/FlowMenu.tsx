@@ -22,6 +22,7 @@ const TYPES: [ExitType, string][] = [
   ['return', '■ 끝 (return)'],
   ['menu', '◆ 선택지'],
   ['if', '◇ 조건 분기'],
+  ['answer', '✎ 정답 입력'],
 ];
 
 export function FlowMenu({ b }: { b: BoxNode }) {
@@ -87,6 +88,12 @@ export function FlowMenu({ b }: { b: BoxNode }) {
     close(false);
     if (x?.exit.type === 'if' && x.exit.branches[0]) focusField('in-' + x.exit.branches[0].id);
   };
+  // 정답 입력으로 바꾸면(이미 정답 입력이면 그대로) 묻는 글 칸에서 쓴다 (FEATURE 32)
+  const toAnswer = () => {
+    if (b.exit.type !== 'answer') update((p) => ops.setExitType(ops.findBox(p, b.id)!, 'answer'));
+    close(false);
+    focusField('in-ask-' + b.id);
+  };
   // 다음 상자로 이어 쓰기: 이어진 상자가 있으면 그리로, 없으면 새 상자를 만들어 잇는다.
   // 끝(return)이면 다음 상자로 바꾸고, 선택지·조건 분기면 아직 안 이어진 첫 갈래(없으면 첫 갈래)로
   const goOn = () => {
@@ -103,7 +110,7 @@ export function FlowMenu({ b }: { b: BoxNode }) {
       key: 'type:' + t,
       label,
       on: b.exit.type === t,
-      run: t === 'menu' ? toMenu : t === 'if' ? toIf : () => (b.exit.type !== t && update((p) => ops.setExitType(ops.findBox(p, b.id)!, t)), close()),
+      run: t === 'menu' ? toMenu : t === 'if' ? toIf : t === 'answer' ? toAnswer : () => (b.exit.type !== t && update((p) => ops.setExitType(ops.findBox(p, b.id)!, t)), close()),
     })),
     { key: 'go', label: '↪ 다음 상자로 이어 쓰기', hint: keyOf('nextBox'), run: goOn },
   ];

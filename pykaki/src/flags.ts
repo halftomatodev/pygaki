@@ -154,6 +154,12 @@ export function flagUses(p: Project, name: string): FlagUse[] {
         if (c.actions.some(writes)) out.push({ nodeId: n.id, where: '선택지 고르면', write: true });
       }
     if (e.type === 'if' && e.branches.some((b) => has(b.cond))) out.push({ nodeId: n.id, where: '조건 분기', write: false });
+    if (e.type === 'answer') {
+      const id = p.variables.find((f) => f.name === name)?.id;
+      if (id && e.keep === id) out.push({ nodeId: n.id, where: '정답 입력', write: true });
+      if (id && e.cases.some((c) => c.flag === id)) out.push({ nodeId: n.id, where: '정답 입력의 정답', write: false });
+      if (subNames(e.ask).includes(name)) out.push({ nodeId: n.id, where: '정답 입력', write: false });
+    }
   }
   // 같은 상자의 같은 자리는 한 번만
   const seen = new Set<string>();
@@ -182,6 +188,7 @@ export function renameFlag(p: Project, from: string, to: string) {
         c.actions = c.actions.map((a) => renameIn(a, from, to));
       }
     if (e.type === 'if') for (const b of e.branches) b.cond = renameIn(b.cond, from, to);
+    if (e.type === 'answer') e.ask = renameSub(e.ask, from, to);
   }
   // 화면의 보이는 조건, 버튼의 바꾸기, 막대, 글 속 [이름] (FEATURE 18)
   for (const s of p.screens ?? [])

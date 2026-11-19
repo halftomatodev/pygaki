@@ -144,6 +144,27 @@ export function TracePanel() {
         </div>
       );
     }
+    if (e.type === 'answer') {
+      // 정답 입력 (FEATURE 32): 칠 답을 고름. 친 값을 넣는 플래그가 글자면 그 정답 글을 넣음
+      const keep = project.variables.find((f) => f.id === e.keep);
+      const typed = (t: string) => (keep?.kind === 'str' && t ? [`${keep.name} = ${JSON.stringify(t)}`] : []);
+      return (
+        <div className="tr-opts">
+          <div className="tip">정답 입력: {e.ask || '(묻는 글 없음)'}</div>
+          {e.cases.map((c) => {
+            const first = c.text.split('/').map((x) => x.trim()).find(Boolean) ?? '';
+            const f = project.variables.find((v) => v.id === c.flag);
+            const shown = first || f?.name || '';
+            return (
+              <button key={c.id} className="tr-opt" onClick={() => go(c.target, `정답 "${shown}"`, { pre: typed(first) })}>
+                ✎ {c.text || '(글 없음)'}{f ? ` · 플래그 ${f.name} 값` : ''} <span className="tip">→ {name(c.target)}</span>
+              </button>
+            );
+          })}
+          <button className="tr-opt" onClick={() => go(e.else, '정답 입력의 틀림')}>틀림 <span className="tip">→ {name(e.else)}</span></button>
+        </div>
+      );
+    }
     // 조건 분기: 위에서부터 첫 참인 갈래. 앞에 알 수 없는 조건이 있으면 정하지 않고 모두 고를 수 있게
     let pick: string | null | undefined;
     let unsure = false;

@@ -42,6 +42,7 @@ function exits(b: BoxNode): { to: string | null; acts?: string[] }[] {
   if (e.type === 'menu') return e.choices.map((c) => ({ to: c.target, acts: c.actions }));
   if (e.type === 'call') return [{ to: e.target }];
   if (e.type === 'screen') return [...e.outs.map((x) => ({ to: x.target })), { to: e.else }];
+  if (e.type === 'answer') return [...e.cases.map((x) => ({ to: x.target })), { to: e.else }];
   return [];
 }
 

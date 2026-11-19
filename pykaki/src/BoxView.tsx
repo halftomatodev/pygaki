@@ -280,6 +280,7 @@ function Exits({ b, editing, tb, active, setActive }: { b: BoxNode; editing: boo
           </>
         )}
         {ex.type === 'screen' && <ScreenExit b={b} />}
+        {ex.type === 'answer' && <AnswerExit b={b} editing={editing} />}
         {ex.type === 'return' && <div className="exit-label end">■ 끝 (return)</div>}
       </div>
       {ai >= 0 && top !== null && (
@@ -609,6 +610,66 @@ function ScreenExit({ b }: { b: BoxNode }) {
       ))}
       <div className="choice branch else" data-part="else">
         <span className="br-kw">그 밖</span>
+        {!ex.else && <span className="todo"> (연결 안 됨)</span>}
+        <Handle type="source" id="else" position={Position.Right} />
+      </div>
+    </>
+  );
+}
+
+// 정답 입력 (FEATURE 32): 묻는 글, 정답마다 갈래 점, 틀림. 쓰는 중이면 묻는 글과 정답 글을 바로 고침 (플래그·정확히는 오른쪽 카드)
+function AnswerExit({ b, editing }: { b: BoxNode; editing: boolean }) {
+  const update = useStore((s) => s.update);
+  const vars = useStore((s) => s.project.variables);
+  if (b.exit.type !== 'answer') return null;
+  const ex = b.exit;
+  const put = (fn: (x: Extract<BoxNode['exit'], { type: 'answer' }>) => void, key: string) =>
+    update((p) => {
+      const x = ops.findBox(p, b.id)!.exit;
+      if (x.type === 'answer') fn(x);
+    }, key);
+  const onEsc = (e: React.KeyboardEvent) => e.key === 'Escape' && useStore.setState({ inlineEdit: null });
+  const keep = vars.find((f) => f.id === ex.keep);
+  return (
+    <>
+      <div className="exit-label answer-ask" data-part="ask">
+        ✎{' '}
+        {editing ? (
+          <input id={'in-ask-' + b.id} className="nodrag ed" value={ex.ask} placeholder="묻는 글 (예: 범인의 이름은?)" onKeyDown={onEsc} onChange={(e) => put((x) => void (x.ask = e.target.value), 'ask' + b.id)} />
+        ) : (
+          ex.ask || <i className="todo">(묻는 글 없음)</i>
+        )}
+        {keep && <span className="ch-act" title="친 값을 이 플래그에 넣어요">⚑ {keep.name}</span>}
+      </div>
+      {ex.cases.map((c, i) => {
+        const f = vars.find((v) => v.id === c.flag);
+        return (
+          <div key={c.id} className="choice branch" data-part={c.id}>
+            <span className="br-kw">정답</span>
+            {editing ? (
+              <input
+                id={'in-' + c.id}
+                className="nodrag ed"
+                value={c.text}
+                placeholder="철수 / 김철수"
+                onKeyDown={onEsc}
+                onChange={(e) => put((x) => void (x.cases[i].text = e.target.value), 'answer' + c.id)}
+              />
+            ) : (
+              <span className="br-cond" title={c.text}>{c.text || (!f && <i className="todo">(빈 정답)</i>)}</span>
+            )}
+            {f && <span className="ch-cond" title="이 플래그의 값도 정답">[{f.name}]</span>}
+            <Handle type="source" id={'a:' + c.id} position={Position.Right} />
+          </div>
+        );
+      })}
+      {editing && (
+        <button className="nodrag faint-add" onClick={() => put((x) => void x.cases.push(ops.newAnswer()), 'add' + b.id)}>
+          + 정답
+        </button>
+      )}
+      <div className="choice branch else" data-part="else">
+        <span className="br-kw">틀림</span>
         {!ex.else && <span className="todo"> (연결 안 됨)</span>}
         <Handle type="source" id="else" position={Position.Right} />
       </div>

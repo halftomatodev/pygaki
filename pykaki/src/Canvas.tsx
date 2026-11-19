@@ -107,6 +107,14 @@ export function Canvas() {
     return t.length > 18 ? t.slice(0, 17) + '…' : t;
   };
   const screenLabel = (b: BoxNode, handle: string) => (b.exit.type === 'screen' ? b.exit.outs.find((o) => 's:' + o.id === handle)?.value : undefined);
+  // 정답 입력 선에는 정답을 짧게 (FEATURE 32)
+  const answerLabel = (b: BoxNode, handle: string) => {
+    const c = b.exit.type === 'answer' ? b.exit.cases.find((x) => 'a:' + x.id === handle) : null;
+    if (!c) return undefined;
+    const f = c.flag ? project.variables.find((v) => v.id === c.flag) : undefined;
+    const t = [c.text.trim(), f ? `[${f.name}]` : ''].filter(Boolean).join(' / ') || '(빈 정답)';
+    return '✎ ' + (t.length > 16 ? t.slice(0, 15) + '…' : t);
+  };
   const edges = useMemo<Edge[]>(() => {
     const groupOf = new Map(project.nodes.map((b) => [b.id, b.group]));
     const res: Edge[] = [];
@@ -118,7 +126,7 @@ export function Canvas() {
         res.push({
           id, source: b.id, sourceHandle: l.handle, target: l.target, targetHandle: 'in',
           className: cls.join(' '), selected: id === selEdge,
-          label: l.kind === 'screen' ? screenLabel(b, l.handle) : l.kind === 'call' ? 'call' : l.kind === 'then' ? '복귀 후' : l.kind === 'else' ? '그 밖' : l.kind === 'if' ? condLabel(b, l.handle) : undefined,
+          label: l.kind === 'answer' ? answerLabel(b, l.handle) : l.kind === 'else' && b.exit.type === 'answer' ? '틀림' : l.kind === 'screen' ? screenLabel(b, l.handle) : l.kind === 'call' ? 'call' : l.kind === 'then' ? '복귀 후' : l.kind === 'else' ? '그 밖' : l.kind === 'if' ? condLabel(b, l.handle) : undefined,
           markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16 },
         });
       }
