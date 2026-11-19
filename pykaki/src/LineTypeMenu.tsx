@@ -1,10 +1,11 @@
 // 줄 종류(화자) 고르기 (세션 90). 예전 <select>를 바꾼 것.
-// 단추를 누르거나 단축키(기본 Alt+↓, [다음 흐름]의 Alt+Enter처럼 하나)로 열면, 대사·연출·기타 세 칸이 단추에서 끈적하게(liquid-gooey) 흘러나와
+// 세션 94부터 상자 안의 이 창을 "대사 버블"이라 부른다. 단추를 누르거나 단축키(기본 Alt+←, 세션 94 전에는 Alt+↓)로 열면, 대사·연출·기타 세 칸이 단추에서 끈적하게(liquid-gooey) 흘러나와
 // 한눈에 펼쳐진다. ↑↓로 칸 안에서, Tab(Shift+Tab)으로 칸 사이를 옮기고 Enter로 정한다(세션 91, ←→도 됨). Esc나 같은 단축키는 고르지 않고 글로 돌아간다.
 // 상자 안에서는 단추 없이 고치는 줄 왼쪽 방울(LineChip)에 붙어, 상자 왼쪽 바깥에 세 칸을 세로로 조금씩 엇갈려 쌓는다(TypeMenuFor, 세션 91 사용자 손그림)
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Liquid } from 'liquid-gooey';
+import { GLASS_GOO, arcRow, useArc } from './GooGlass';
 import { useStore } from './store';
 import * as ops from './ops';
 import type { Line } from './types';
@@ -38,8 +39,7 @@ function columns(l: Line, chars: { id: string; name: string }[], val: string): C
   ];
 }
 
-// 끈적한 덩어리 모양: 줄 종류 고르기, 태그 상자, 다음 흐름이 같이 쓴다(세션 92)
-export const GOO = { blur: 7, contrast: 20, fill: 'var(--panel)', shadow: '0 8px 24px rgba(0,0,0,0.16), 0 1px 3px rgba(0,0,0,0.08)' };
+// 끈적한 덩어리 모양: 줄 종류 고르기, 태그 상자, 다음 흐름이 같이 쓴다(세션 92). 세션 93부터 유리(GooGlass.tsx)
 
 const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -81,8 +81,7 @@ export function TypeMenuFor({ l, set, where, anchor }: { l: Line; set: SetLine; 
   return <TypeMenu side anchor={anchor.current} cols={columns(l, chars, val)} val={val} onPick={(v) => set((x) => ops.setSpeaker(x, v))} />;
 }
 
-// 세로로 쌓을 때 칸마다 오른쪽에서 들어간 거리(px): 대사·기타는 상자 가까이, 연출은 조금 더 왼쪽으로 (손그림처럼 엇갈림)
-const STAGGER = [12, 46, 0];
+// 세로로 쌓을 때(side) 칸마다 상자를 둘러싼 호를 따라 왼쪽으로 엇갈린다 (useArc, 세션 93. 예전에는 정해 둔 거리)
 
 function TypeMenu({ anchor, cols, val, onPick, side = false }: { anchor: HTMLElement; cols: Col[]; val: string; onPick: (v: string) => void; side?: boolean }) {
   const input = useRef<HTMLInputElement>(null);
@@ -91,6 +90,7 @@ function TypeMenu({ anchor, cols, val, onPick, side = false }: { anchor: HTMLEle
   const [sideRight, setSideRight] = useState<number | null>(null);
   const colRefs = useRef<(HTMLDivElement | null)[]>([]);
   const back = useRef<string | null>(null);
+  const backEl = useRef<HTMLElement | null>(null); // 다른 버블의 키 칸(id 없음)에서 들어왔으면 그리로 (세션 94)
   // 처음 자리: 지금 고른 것
   const start = (() => {
     for (let c = 0; c < cols.length; c++) {
@@ -100,6 +100,7 @@ function TypeMenu({ anchor, cols, val, onPick, side = false }: { anchor: HTMLEle
     return { c: 0, r: 0 };
   })();
   const [pos, setPos] = useState(start);
+  const arc = useArc(menu, () => (side ? (anchor.closest('.box') as HTMLElement | null) : null), 'left');
   // 칸마다 단추 쪽으로 되돌아갈 거리 (열 때는 거기서 나오고, 닫을 때는 거기로 빨려 듦)
   const [home, setHome] = useState<{ x: number; y: number }[] | null>(null);
   const [shown, setShown] = useState(false);
@@ -116,6 +117,7 @@ function TypeMenu({ anchor, cols, val, onPick, side = false }: { anchor: HTMLEle
   useLayoutEffect(() => {
     const el = document.activeElement as HTMLElement | null;
     if (el && el.id) back.current = el.id;
+    else if (el?.classList.contains('fm-keys')) backEl.current = el;
     input.current?.focus({ preventScroll: true });
     if (side && menu.current) {
       const h = menu.current.offsetHeight;
@@ -150,7 +152,8 @@ function TypeMenu({ anchor, cols, val, onPick, side = false }: { anchor: HTMLEle
     if (leaving) return;
     const done = () => {
       useStore.setState({ typeMenu: null });
-      if (refocus && back.current) focusField(back.current);
+      if (refocus && backEl.current?.isConnected) backEl.current.focus();
+      else if (refocus && back.current) focusField(back.current);
     };
     if (reduced()) return done();
     setLeaving(true);
@@ -168,10 +171,18 @@ function TypeMenu({ anchor, cols, val, onPick, side = false }: { anchor: HTMLEle
       e.stopPropagation();
       return close();
     }
+    // 다른 버블의 단축키(Alt+↑, Alt+→ 등)는 App.tsx로 보낸다
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
     if (k === 'ArrowDown' || k === 'ArrowUp') {
       e.preventDefault();
+      // 칸 끝에서 더 가면 다음(앞) 칸의 처음(끝)으로 넘어간다 (세션 94 사용자: Tab 없이 위아래만으로 세 칸을 다 돎)
       const n = cols[pos.c].opts.length;
-      setPos({ c: pos.c, r: (pos.r + (k === 'ArrowDown' ? 1 : -1) + n) % n });
+      const r = pos.r + (k === 'ArrowDown' ? 1 : -1);
+      if (r >= 0 && r < n) setPos({ c: pos.c, r });
+      else {
+        const c = (pos.c + (r < 0 ? -1 : 1) + cols.length) % cols.length;
+        setPos({ c, r: r < 0 ? cols[c].opts.length - 1 : 0 });
+      }
     } else if (k === 'ArrowRight' || k === 'ArrowLeft') {
       e.preventDefault();
       const c = (pos.c + (k === 'ArrowRight' ? 1 : -1) + cols.length) % cols.length;
@@ -190,6 +201,8 @@ function TypeMenu({ anchor, cols, val, onPick, side = false }: { anchor: HTMLEle
 
   const out = shown && !leaving;
   const still = reduced();
+  // 바탕이 나오고 들어가는 곳: 칸마다 잰 단추 쪽 거리의 가운데
+  const hub = home && home.length ? { x: home.reduce((a, h) => a + h.x, 0) / home.length, y: home.reduce((a, h) => a + h.y, 0) / home.length } : { x: 0, y: 0 };
   return createPortal(
     <div ref={menu} className={'lt-menu nodrag' + (side ? ' lt-side' : '') + (out ? ' out' : '')} style={place} onMouseDown={(e) => e.target === e.currentTarget && e.preventDefault()}>
       <input
@@ -199,22 +212,22 @@ function TypeMenu({ anchor, cols, val, onPick, side = false }: { anchor: HTMLEle
         value=""
         aria-label="줄 종류 고르기"
         onKeyDown={onKey}
-        onBlur={() => setTimeout(() => document.activeElement?.closest('.lt-menu') || close(false), 0)}
+        // 상자 안(side)에서는 커서가 떠나도 닫지 않는다(세션 94: 글꼴·흐름 버블과 같이 열어 둠). 오른쪽 칸에서는 고르기 창이라 닫음
+        onBlur={() => setTimeout(() => side || document.activeElement?.closest('.lt-menu') || close(false), 0)}
       />
-      <Liquid className="lt-liquid" {...GOO}>
+      {/* 거의 투명한 유리 바탕 한 장 (세션 93). 칸들은 그 안에서 상자를 둘러싼 호를 따라 엇갈리고, 바탕이 단추 자리에서 부풀어 나온다 */}
+      <Liquid className="lt-liquid" {...GLASS_GOO}>
+        <Liquid.Item
+          x={still || out ? 0 : hub.x}
+          y={still || out ? 0 : hub.y}
+          scale={still || out ? 1 : 0.3}
+          transition={out ? 'bouncy' : { duration: 220, ease: 'cubic-bezier(0.5, 0, 0.75, 0)' }}
+        >
+        <div className={'gg-one lt-one'} style={{ ['--arc-pad' as string]: Math.max(0, ...cols.map((c) => Math.abs(arc.x[c.title] ?? 0))) + 'px' }} data-side={side ? 'left' : 'right'}>
         {cols.map((c, ci) => {
-          const h = home?.[ci] ?? { x: 0, y: 0 };
           return (
-            <Liquid.Item
-              key={c.title}
-              x={still || out ? 0 : h.x}
-              y={still || out ? 0 : h.y}
-              scale={still || out ? 1 : 0.35}
-              transition={out ? 'bouncy' : { duration: 220, ease: 'cubic-bezier(0.5, 0, 0.75, 0)' }}
-              delay={out ? ci * 45 : (cols.length - 1 - ci) * 25}
-            >
-              <div className="lt-col" ref={(el) => (colRefs.current[ci] = el)} role="listbox" aria-label={c.title} style={side ? { marginRight: STAGGER[ci] ?? 0 } : undefined}>
-                <div className="lt-title">{c.title}</div>
+              <div className="lt-col" key={c.title} data-arc={c.title} style={arcRow(arc, c.title)} ref={(el) => (colRefs.current[ci] = el)} role="listbox" aria-label={c.title}>
+                <div className="lt-title gg-title">{c.title}</div>
                 {c.opts.map((o, ri) => (
                   <button
                     key={o.value}
@@ -230,9 +243,10 @@ function TypeMenu({ anchor, cols, val, onPick, side = false }: { anchor: HTMLEle
                   </button>
                 ))}
               </div>
-            </Liquid.Item>
           );
         })}
+        </div>
+        </Liquid.Item>
       </Liquid>
       <div className="lt-help">Tab 칸 옮기기 · ↑↓ 고르기 · Enter 정하기 · Esc 글로 돌아가기</div>
     </div>,

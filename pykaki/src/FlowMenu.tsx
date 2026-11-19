@@ -1,6 +1,7 @@
 // 글을 고치는 동안 상자 오른쪽에 붙는 "다음 흐름" 창.
 // 다섯 가지: 다음 상자로 / 끝(return) / 선택지 / 조건 분기 / 다음 상자로 이어 쓰기. 어디로 이어지는지는 캔버스에서 선을 끌어 붙인다
-// 단축키(기본 Alt+Enter)로 들어가 ↑↓(←→)·Enter·Esc로 키보드만으로 고른다
+// 흐름 버블(세션 94 이름). 단축키(기본 Alt+→)로 들어가 ↑↓(←→)·Enter·Esc로 키보드만으로 고른다
+// 세션 93(사용자 요청): 평소에는 녹색 방울 [→] 하나로 접혀 있고, 방울을 누르거나 단축키로 펼친다. 고르거나 Esc·바깥을 누르면 다시 접힌다
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useStore } from './store';
 import * as ops from './ops';
@@ -8,6 +9,10 @@ import type { BoxNode, ExitType } from './types';
 import { continueInNewBox, focusField, goNextBox } from './actions';
 import { hit, keyOf } from './prefs';
 import { FlowTipView } from './FlowDemo';
+import { GooPill } from './GooPill';
+import { Liquid } from 'liquid-gooey';
+import { useStore as useFlow } from '@xyflow/react';
+import { GLASS_GOO, GlassOne, arcRow, useArc, useReveal } from './GooGlass';
 
 interface Item {
   key: string;
@@ -60,9 +65,11 @@ export function FlowMenu({ b }: { b: BoxNode }) {
 
   // 들어오면 키를 받을 칸에 커서를 둔다(지금 고른 흐름에서 시작). 나갈 때는 쓰던 글자 칸으로 돌려보낸다
   const back = useRef<string | null>(null);
+  const backEl = useRef<HTMLElement | null>(null); // 다른 버블의 키 칸(id 없음)에서 들어왔으면 그리로 (세션 94)
   useLayoutEffect(() => {
     if (active) {
       const el = document.activeElement as HTMLElement | null;
+      backEl.current = el && el !== input.current && !el.id && el.classList.contains('fm-keys') ? el : null;
       if (el && el !== input.current && el.id) back.current = el.id;
       setCur(Math.max(0, TYPES.findIndex(([t]) => t === b.exit.type)));
       input.current?.focus();
@@ -71,7 +78,8 @@ export function FlowMenu({ b }: { b: BoxNode }) {
 
   const close = (refocus = true) => {
     useStore.setState({ flowMenu: false });
-    if (refocus && back.current) focusField(back.current);
+    if (refocus && backEl.current?.isConnected) backEl.current.focus();
+    else if (refocus && back.current) focusField(back.current);
   };
 
   // 선택지로 바꾸면(이미 선택지면 그대로) 첫 선택지 칸에서 문구를 쓴다
@@ -129,6 +137,10 @@ export function FlowMenu({ b }: { b: BoxNode }) {
     return () => clearTimeout(t);
   }, [want]);
 
+  const zoom = useFlow((s) => s.transform[2]);
+  const arc = useArc(ref, () => ref.current?.parentElement ?? null, 'right');
+  const out = useReveal(active);
+
   // 고른 항목이 보이게 굴린다
   useLayoutEffect(() => {
     if (active) ref.current?.querySelector('.fm-item.cur')?.scrollIntoView({ block: 'nearest' });
@@ -142,6 +154,8 @@ export function FlowMenu({ b }: { b: BoxNode }) {
       e.stopPropagation();
       return close();
     }
+    // 다른 버블의 단축키(Alt+← 등)는 App.tsx로 보낸다
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
     if (k === 'ArrowDown' || k === 'ArrowUp' || k === 'ArrowRight' || k === 'ArrowLeft') {
       e.preventDefault();
       setCur((at + (k === 'ArrowDown' || k === 'ArrowRight' ? 1 : -1) + items.length) % items.length);
@@ -156,11 +170,21 @@ export function FlowMenu({ b }: { b: BoxNode }) {
     }
   };
 
-  return (
-    <div className={'side side-flow fm nodrag' + (active ? ' active' : '')} style={{ top }} ref={ref}>
-      <div className="side-title">
-        다음 흐름 <span className="fm-key">{keyOf('flowMenu')}</span>
+  if (!active)
+    return (
+      <div className="side-flow-pill nodrag" style={{ top }} ref={ref}>
+        <GooPill color="green" label="→" seed={3} tip={`흐름 제어 · ${keyOf('flowMenu')}로 펼치기`} onOpen={() => useStore.setState({ flowMenu: true })} />
       </div>
+    );
+
+  // 유리 바탕 한 장 안의 줄. 상자를 둘러싼 호를 따라 엇갈린다 (세션 93)
+  const row = (k: string, _i: number, body: React.ReactNode) => (
+    <div key={k} className="fm-row" data-arc={k} style={arcRow(arc, k)}>
+      {body}
+    </div>
+  );
+  return (
+    <div className="side-flow fm nodrag" style={{ top }} ref={ref} onMouseDown={(e) => (e.target as HTMLElement).closest('input, select, textarea') || e.preventDefault()}>
       {/* 키만 받는 숨은 칸 */}
       <input
         ref={input}
@@ -169,28 +193,36 @@ export function FlowMenu({ b }: { b: BoxNode }) {
         value=""
         aria-label="다음 흐름 메뉴"
         onKeyDown={onKey}
-        onBlur={() => setTimeout(() => ref.current?.contains(document.activeElement) || useStore.setState({ flowMenu: false }), 0)}
+        // 커서가 떠나도 닫지 않는다(세션 94: 대사·글꼴 버블과 같이 열어 둠). 상자 편집을 끝내면 store.ts가 접는다
       />
-      <div className="fm-list">
-        {items.map((it, i) => (
-          <div
-            key={it.key}
-            className={'fm-item' + (it.key === 'go' ? ' fm-act' : '') + (active && i === at ? ' cur' : '') + (it.on ? ' on' : '')}
-            onMouseEnter={() => (active && setCur(i), setHover(it.key))}
-            onMouseLeave={() => setHover(null)}
-            onClick={() => it.run()}
-          >
-            <span className="fm-dot">{it.on ? '●' : ''}</span>
-            <span className="fm-label">{it.label}</span>
-            {it.hint && <span className="fm-hint">{it.hint}</span>}
-          </div>
-        ))}
-      </div>
-      {tip && <FlowTipView k={tip} anchor={ref.current} />}
-      {isCall && <div className="tip fm-help">지금은 call로 이어져요. 선을 두 번 누르면 바뀌어요</div>}
-      <div className="tip fm-help">
-        {active ? '방향키 고르기 · Enter 정하기 · Esc 글로 돌아가기' : `${keyOf('flowMenu')}: 방향키로 고르기 · 이어지는 곳은 선을 끌어 붙여요`}
-      </div>
+      <Liquid className="fm-liquid" {...GLASS_GOO} style={{ '--lg-unscale': 1 / zoom } as React.CSSProperties}>
+        <GlassOne arc={arc} out={out} side="right" from="tl" className="fm-one">
+        {row(
+          'head',
+          0,
+          <div className="gg-title tip" data-tip={`${keyOf('flowMenu')} 펼치기/접기 · 방향키 고르기 · Enter 정하기 · Esc 접기 · 이어지는 곳은 선을 끌어 붙여요`}>
+            다음 흐름
+          </div>,
+        )}
+        {items.map((it, i) =>
+          row(
+            it.key,
+            i + 1,
+            <div
+              className={'fm-item' + (it.key === 'go' ? ' fm-act' : '') + (i === at ? ' cur' : '') + (it.on ? ' on' : '')}
+              onMouseEnter={() => (setCur(i), setHover(it.key))}
+              onMouseLeave={() => setHover(null)}
+              onClick={() => it.run()}
+            >
+              <span className="fm-dot">{it.on ? '●' : ''}</span>
+              <span className="fm-label">{it.label}</span>
+            </div>,
+          ),
+        )}
+        {isCall && row('call', items.length + 1, <div className="fm-help">지금은 call로 이어져요. 선을 두 번 누르면 바뀌어요</div>)}
+        </GlassOne>
+      </Liquid>
+      {tip && <FlowTipView k={tip} anchor={ref.current} keyHint={items.find((x) => x.key === tip)?.hint} />}
     </div>
   );
 }

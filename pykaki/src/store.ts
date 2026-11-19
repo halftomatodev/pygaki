@@ -31,6 +31,7 @@ interface S {
   showTrace: string | null; // 플래그 따라가 보기 창. 시작 상자 id ('' = 대본 시작)
   showDesign: boolean; // 플래그 설계 창 (캔버스 아래쪽 시트)
   flowMenu: boolean; // 다음 흐름 창을 키보드로 고르는 중
+  tagBox: boolean; // 상자 안 편집에서 태그 상자를 펼친 중 (접으면 보라 방울)
   typeMenu: TypeMenuAt; // 줄 종류 고르기 창이 열린 줄 (LineTypeMenu.tsx, 세션 90)
   shaderOf: { kind: 'box' | 'label'; id: string } | null; // 오른쪽 칸에서 셰이더를 고르는 중인 상자나 label
   hideLeft: boolean; // 왼쪽 칸 접음
@@ -81,6 +82,7 @@ export const useStore = create<S>((set, get) => ({
   showTrace: null,
   showDesign: false,
   flowMenu: false,
+  tagBox: false,
   typeMenu: null,
   shaderOf: null,
   hudOf: null,
@@ -176,3 +178,11 @@ export const useStore = create<S>((set, get) => ({
     flashTimer = setTimeout(() => set({ flash: null }), 2500);
   },
 }));
+
+// 상자 안 편집을 끝내거나 다른 상자로 옮기면 세 버블(대사·글꼴·흐름)을 접는다.
+// 버블끼리는 서로 닫지 않아서(세션 94 사용자: 셋 다 같이 열기) 여기서 한 번에 닫는다
+useStore.subscribe((s, o) => {
+  if (s.inlineEdit === o.inlineEdit) return;
+  const tm = s.typeMenu?.where === 'box' ? null : s.typeMenu;
+  if (s.flowMenu || s.tagBox || tm !== s.typeMenu) useStore.setState({ flowMenu: false, tagBox: false, typeMenu: tm });
+});

@@ -121,6 +121,34 @@ const IF = svg(
   </>
 );
 
+// 정답 입력: 묻는 칸에 글자가 하나씩 쳐지고, 맞으면 위 상자로, 틀리면 아래 상자로 (세션 93)
+const ANSWER = svg(
+  <>
+    <Box x={4} y={37} w={56} on />
+    <path d="M60,50 L74,50" className="fd-line still" />
+    <g className="fd-chip">
+      <rect x={74} y={40} width={70} height={20} rx={10} />
+      <text x={84} y={54}>✎</text>
+      <text x={96} y={54} opacity={0}>
+        <animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.08;0.1;1" dur={DUR} repeatCount="indefinite" />
+        수
+      </text>
+      <text x={107} y={54} opacity={0}>
+        <animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.16;0.18;1" dur={DUR} repeatCount="indefinite" />
+        박
+      </text>
+    </g>
+    <Line d="M144,50 L162,26 L188,26" from={0.05} to={0.2} />
+    <Line d="M144,50 L162,74 L188,74" from={0.05} to={0.2} dashed />
+    <text x={166} y={20} className="fd-label">정답</text>
+    <text x={166} y={92} className="fd-label">틀림</text>
+    <Box x={190} y={13} />
+    <Box x={190} y={61} />
+    <Dot path="M144,50 L162,26 L188,26" from={0.3} to={0.48} />
+    <Dot path="M144,50 L162,74 L188,74" from={0.68} to={0.86} />
+  </>
+);
+
 const GO = svg(
   <>
     <Box x={96} y={6} w={68} on />
@@ -162,6 +190,12 @@ export const FLOW_TIPS: Record<string, FlowTip> = {
     code: 'if love >= 5:\n    jump 고백\nelse:\n    jump 평범한_끝',
     demo: IF,
   },
+  'type:answer': {
+    label: '✎ 정답 입력',
+    desc: '플레이어가 글을 쳐서 답해요. 친 글이 정답과 같으면 그 갈래로, 아니면 "틀림"으로 가요. 틀리면 다시 묻거나 힌트를 보여 줄 수도 있어요.',
+    code: '$ _pk_typed = renpy.input("과일 이름은?").strip()\nif _pk_answer == "수박":\n    jump 정답\nelse:\n    jump 틀림',
+    demo: ANSWER,
+  },
   go: {
     label: '↪ 다음 상자로 이어 쓰기',
     desc: '이어진 상자가 있으면 그 상자로, 없으면 아래에 새 상자를 만들어 이어 놓고 바로 거기서 써요.',
@@ -171,7 +205,7 @@ export const FLOW_TIPS: Record<string, FlowTip> = {
 };
 
 // 창은 캔버스 안이라 오른쪽 칸에 가려질 수 있어서, 툴팁은 화면 맨 위에 띄운다 (창 오른쪽, 자리가 없으면 왼쪽)
-export function FlowTipView({ k, anchor }: { k: string; anchor: HTMLElement | null }) {
+export function FlowTipView({ k, anchor, keyHint }: { k: string; anchor: HTMLElement | null; keyHint?: string }) {
   const t = FLOW_TIPS[k];
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
@@ -191,6 +225,7 @@ export function FlowTipView({ k, anchor }: { k: string; anchor: HTMLElement | nu
     <div ref={ref} className="tb-tip fm-tip" style={pos ? { left: pos.left, top: pos.top } : { visibility: 'hidden' }}>
       <div className="tb-tip-head">
         <b>{t.label}</b>
+        {keyHint && <code>{keyHint}</code>}
       </div>
       <div className="tb-tip-desc">{t.desc}</div>
       <div className="fd-demo">{t.demo}</div>

@@ -4,7 +4,6 @@ import { SegTabs } from './SegTabs';
 import { tr } from './i18n';
 import { Card } from './Card';
 import { useMemo, useRef, useState } from 'react';
-import readme from '../../showpy/game/ui_kit/effects/README.md?raw';
 import { useStore } from './store';
 import { useLive } from './showpyLive';
 import { folderReady, gameFont, useGameFolder } from './gameFolder';
@@ -23,8 +22,6 @@ export const SOURCE_LABEL: Record<EffectCard['source'], string> = { renpy: '렌�
 const SAMPLE_CPS = 30;
 const SAMPLE_TEXT = '안녕, 반가워!';
 const TIME_KEY = '@time'; // 그림 효과 샘플의 걸리는 시간 막대 (효과 값 이름과 겹치지 않게)
-// 효과 폴더 README의 "클로드에게 새 효과를 부탁할 때" 글 (사본을 두지 않고 그 파일에서 꺼낸다)
-const REQUEST_TEXT = /## 클로드에게[\s\S]*?```text\r?\n([\s\S]*?)```/.exec(readme)?.[1].trim() ?? '';
 
 // 글자 효과 샘플: 대사 미리보기와 같은 그리기(FxCanvas). 셰이더 코드가 틀리면 이유를 보여 준다
 export function TextSample({ spec, name, text, onReplay, onFrame }: { spec: string; name: string; text: string; onReplay(): void; onFrame?(canvas: HTMLCanvasElement, slow: number, maxTime: number): void }) {
@@ -188,11 +185,6 @@ export function EffectsView() {
       if (!r.ok) say(r.why);
       else say(c.on ? `"${c.label}"을(를) 숨겼어요. 고르는 목록에서만 빠지고, 이미 쓴 줄은 그대로 돌아요` : `"${c.label}"의 숨김을 풀었어요`);
     });
-  const copyRequest = () =>
-    navigator.clipboard.writeText(REQUEST_TEXT).then(
-      () => say('새 효과 요청문을 복사했어요. 만들고 싶은 모양과 같이 클로드에게 주세요'),
-      () => alert(REQUEST_TEXT),
-    );
   const goTo = (u: EffectUse) => {
     useLive.setState({ view: 'script' });
     useStore.getState().select([u.nodeId]);
@@ -316,7 +308,6 @@ export function EffectsView() {
           <input className="fxv-find" placeholder="찾기 (이름)" value={query} onChange={(e) => setQuery(e.target.value)} />
           <span className="grow" />
           <HiddenLastSwitch count={here.filter((c) => !c.on).length} />
-          <button title="클로드에게 새 효과를 부탁할 때 같이 줄 글을 복사해요 (앱은 밖으로 통신하지 않아요)" onClick={copyRequest}>새 효과 요청문 복사</button>
           <GallerySwitch />
         </div>
         {blocked && <p className="tip fxv-note">{blocked}. 지금은 구경만 할 수 있어요.</p>}

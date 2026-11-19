@@ -3,15 +3,17 @@ import { create } from 'zustand';
 // Pretendard (SIL OFL 1.1, licenses/OFL-Pretendard.txt). 굵기를 고를 수 있는 가변 글꼴 하나를 파일 안에 넣는다
 import pretendardUrl from 'pretendard/dist/web/variable/woff2/PretendardVariable.woff2?url';
 
-export type ActionId = 'focus' | 'nextBox' | 'flowMenu' | 'save' | 'saveAs' | 'export' | 'undo' | 'redo' | 'newBox' | 'duplicate' | 'newLine' | 'lineType' | 'tagBold' | 'tagItalic' | 'tagUnderline' | 'gamePanel' | 'find';
+export type ActionId = 'focus' | 'nextBox' | 'flowMenu' | 'tagBox' | 'save' | 'saveAs' | 'export' | 'undo' | 'redo' | 'newBox' | 'duplicate' | 'newLine' | 'lineType' | 'tagBold' | 'tagItalic' | 'tagUnderline' | 'gamePanel' | 'find';
 
 // 키는 e.code(자판 위치)로 적는다. 한글 입력 상태에서도 같은 키로 동작한다
 export const ACTIONS: { id: ActionId; label: string; def: string }[] = [
   { id: 'focus', label: '집중 모드 (화면 정리)', def: 'Ctrl+Backslash' },
   { id: 'newLine', label: '같은 화자로 새 줄', def: 'Ctrl+Enter' },
   { id: 'nextBox', label: '다음 상자로 이어 쓰기', def: 'Ctrl+Shift+Enter' },
-  { id: 'flowMenu', label: '다음 흐름 창 열기/닫기 (키보드로 고르기)', def: 'Alt+Enter' },
-  { id: 'lineType', label: '줄 종류 고르기 열기/닫기 (방향키로 고르기)', def: 'Alt+ArrowDown' },
+  // 상자 안 편집의 세 버블 (세션 94): 대사 버블(줄 종류), 글꼴 버블(글자 스타일), 흐름 버블(다음 흐름). 셋 다 같이 열 수 있다
+  { id: 'lineType', label: '대사 버블 열기/닫기 (줄 종류, 방향키로 고르기)', def: 'Alt+ArrowLeft' },
+  { id: 'tagBox', label: '글꼴 버블 펼치기/접기 (글자 스타일, 상자 안 대사 칸에서)', def: 'Alt+ArrowUp' },
+  { id: 'flowMenu', label: '흐름 버블 열기/닫기 (다음 흐름, 키보드로 고르기)', def: 'Alt+ArrowRight' },
   { id: 'save', label: '파일 저장', def: 'Ctrl+KeyS' },
   { id: 'saveAs', label: '다른 이름으로 저장', def: 'Ctrl+Shift+KeyS' },
   { id: 'export', label: '.rpy 같은 곳에 다시 내보내기', def: 'Ctrl+KeyE' },
@@ -104,10 +106,12 @@ interface Prefs {
   gallery: boolean; // [효과]·[셰이더] 왼쪽을 갤러리(미리보기 카드)로 보기
   galleryMove: boolean; // 갤러리에서 보이는 카드를 계속 움직이기 (FxGallery.tsx MAX_LIVE개까지)
   hiddenLast: boolean; // [효과]·[셰이더] 목록에서 숨긴 것을 아래로 모으기
+  keysRev?: number; // 단축키 처음 값을 바꾼 차례 (KEYS_REV). 예전 처음 값 그대로인 키만 새 처음 값으로 옮긴다
 }
 
 // 카드 투명도의 처음 값과 범위 (세션 82)
-export const GLASS = { def: 28, min: 0, max: 85 } as const;
+// 처음 값은 80% (세션 94 사용자. 예전 28%)
+export const GLASS = { def: 80, min: 0, max: 85 } as const;
 
 // 칸 너비의 처음 값과 범위 (대본 편집 양쪽, GUI 편집 양쪽, 효과·셰이더 오른쪽)
 export const SIZES = {
@@ -123,12 +127,16 @@ export const clampSize = (k: SizeKey, w: number) => Math.round(Math.min(SIZES[k]
 export const sizeDefaults = () => Object.fromEntries(SIZE_KEYS.map((k) => [k, SIZES[k].def])) as Record<SizeKey, number>;
 
 const KEY = 'pykaki-prefs';
+// 세션 94: 글꼴 버블 Alt+T → Alt+↑, 흐름 버블 Alt+Enter → Alt+→, 대사 버블 Alt+↓ → Alt+←
+// [바꾼 차례, 키, 예전 처음 값]: 저장된 차례가 그보다 앞이고 값이 예전 처음 값 그대로면 새 처음 값으로
+const KEYS_REV = 2;
+const OLD_DEF_KEYS: [number, ActionId, string][] = [[1, 'tagBox', 'Alt+KeyT'], [1, 'flowMenu', 'Alt+Enter'], [2, 'lineType', 'Alt+ArrowDown']];
 const defKeys = () => Object.fromEntries(ACTIONS.map((a) => [a.id, a.def])) as Record<ActionId, string>;
 
 // 처음 값
 const defaults = (): Prefs => ({
   theme: 'apple', custom: { ...THEMES.find((t) => t.id === 'apple')!.colors, box: '#ffffff' }, keys: defKeys(),
-  dim: 'mid', frameWidth: 3, glass: GLASS.def, grads: structuredClone(GRAD_DEFAULTS), textColor: null, runSkip: true,
+  keysRev: KEYS_REV, dim: 'mid', frameWidth: 3, glass: GLASS.def, grads: structuredClone(GRAD_DEFAULTS), textColor: null, runSkip: true,
   ...sizeDefaults(), sizeLock: false, gallery: true, galleryMove: false, hiddenLast: true,
 });
 
@@ -140,6 +148,8 @@ function loadPrefs(): Prefs {
       // 없앤 테마(사과 컬러풀, 밝게, 1비트)는 처음 값으로, 글꼴은 고를 수 없어서 버린다
       delete raw.font;
       if (!THEME_IDS.includes(raw.theme)) delete raw.theme;
+      if (raw.keys) for (const [rev, id, old] of OLD_DEF_KEYS) if ((raw.keysRev ?? 0) < rev && raw.keys[id] === old) delete raw.keys[id];
+      raw.keysRev = KEYS_REV;
       return { ...d, ...raw, custom: { ...d.custom, ...raw.custom }, keys: { ...d.keys, ...raw.keys }, grads: { dark: { ...d.grads.dark, ...raw.grads?.dark } } };
     }
   } catch {
@@ -180,8 +190,8 @@ export function glassOf(g: number) {
     intensity: Math.round((0.35 + t * 0.6) * 100) / 100,
     // fluidkit 유리는 뒤를 늘 8px 흐린다. 틴트가 옅어지면 그 흐린 상이 드러나 뿌옇게 보여서(세션 82 사용자),
     // 투명할수록 흐림을 줄인다(styles.css `--card-blur`가 fluidkit의 backdrop-filter를 덮음, 굴절은 이때 빠짐)
-    blur: Math.round((8 - Math.max(0, t - 0.28) / 0.57 * 7) * 10) / 10 + 'px', // 처음 값 28%까지 8px, 85%에서 1px
-    // 그림자는 카드 크기의 짙은 판이라 틴트가 옅으면 비쳐 회색이 된다(세션 82 사용자) → 처음 값 28%까지는 그대로, 60%까지 옅어지다 그 위로는 없음
+    blur: Math.round((8 - Math.max(0, t - 0.28) / 0.57 * 7) * 10) / 10 + 'px', // 28%까지 8px, 85%에서 1px
+    // 그림자는 카드 크기의 짙은 판이라 틴트가 옅으면 비쳐 회색이 된다(세션 82 사용자) → 28%까지는 그대로, 60%까지 옅어지다 그 위로는 없음
     shadow: Math.round(Math.min(1, Math.max(0, (0.6 - t) / 0.32)) * 100) / 100,
   };
 }

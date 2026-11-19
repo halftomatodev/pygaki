@@ -48,6 +48,7 @@ export const BoxView = memo(function BoxView({ id, selected }: NodeProps) {
           targetId={'in-' + tagLine.id}
           className="tagbar-box"
           zoom={zoom}
+          fold
           extra={<BoxFields l={tagLine} set={(fn, key) => update((p) => { const x = ops.findBox(p, b.id)?.lines.find((v) => v.id === tagLine.id); if (x) fn(x); }, key)} />}
         />
       )}
@@ -442,7 +443,7 @@ function Lines({ b, editing, active, setActive }: { b: BoxNode; editing: boolean
 
       {editing && al && top !== null && (
         <>
-          {/* 왼쪽: 손잡이와 줄 삭제만 있는 끈적한 방울 (세션 91). 손잡이를 톡 누르거나 Alt+↓면 줄 종류 고르기 */}
+          {/* 왼쪽: 손잡이와 줄 삭제만 있는 끈적한 방울 (세션 91). 손잡이를 톡 누르거나 Alt+←면 줄 종류 고르기 */}
           <div className="side-chip" style={{ top }} key="l" ref={chip}>
             <LineChip
               grip={drag.grip(ai, () => useStore.setState({ typeMenu: { line: al.id, where: 'box' } }))}

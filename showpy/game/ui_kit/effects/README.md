@@ -87,7 +87,7 @@ e "그림 말풍선." (effect="bubble:u__image=gui/bubble.png:u__image_on=1:u__s
 `meltglitch`는 글자 네모를 아래로 늘려 그 안에서 흘러내리므로, 길게 하면 아랫줄 글자와 겹칩니다(`u__length`로 길이).
 TV 지직 소리는 전환에 들어 있지 않습니다. `play sound "static.ogg"`처럼 같은 자리에 적습니다.
 
-`pixelsort`, `datamosh`, `static`, `calibrate`, `tapestretch`, `blink`는 셰이더가 바뀔 때의 전환으로도 씁니다. 대본 편집기 상자의 ◐ 셰이더 → 전환의 "시작할 때", "끝날 때"에서 고르면,
+`pixelsort`, `datamosh`, `static`, `calibrate`, `tapestretch`, `blink`, `bendwave`는 셰이더가 바뀔 때의 전환으로도 씁니다. 대본 편집기 상자의 ◐ 셰이더 → 전환의 "시작할 때", "끝날 때"에서 고르면,
 앞 상자의 마지막 화면이 깨진 채 멈췄다가 다음 상자의 첫 화면으로 끊어 넘어가고, 셰이더도 끊기는 순간에 바뀝니다(화면 효과 `screen_fx` 5.6부터).
 원고로 직접 쓸 때는 이렇게 적습니다.
 

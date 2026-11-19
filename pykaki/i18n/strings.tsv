@@ -2911,3 +2911,43 @@ Tab 칸 옮기기 · ↑↓ 고르기 · Enter 정하기 · Esc 글로 돌아가
 빨려 드는 시간	吸い込む時間	Pull-in time
 완료 · {0}	完了 · {0}	Done · {0}
 취소 · Esc	キャンセル · Esc	Cancel · Esc
+완료	完了	Done
+게임	ゲーム	Game
+지금	現在	Now
+곳 더	か所 さらに	more places
+줄 더	行 さらに	more lines
+가진 것	持ち物	Inventory
+글꼴 관리	フォント管理	Manage fonts
+화면 바꾸기	画面切り替え	Switch screen
+· 끌 수 있음	· ドラッグ可	· draggable
+${secs}초	{0}秒	{0}s
+지금 있는 장소	現在の場所	Current place
+음성 빛 미리보기 셰이더	ボイス光プレビューシェーダー	Voice glow preview shader
+음성 빛 미리보기 셰이더 링크	ボイス光プレビューシェーダーのリンク	Voice glow preview shader link
+음성 파일을 읽지 못했어요	ボイスファイルを読み込めませんでした	Couldn't read the voice file
+음성 소리 크기 표를 못 썼어요	ボイス音量表を書き込めませんでした	Couldn't write the voice level table
+대본 시작에서 닿지 않는 상자 ·	台本の開始から届かないボックス ·	Boxes not reachable from the script start ·
+그림 ${files.length}장	画像 {0}枚	{0} images
+game/${rel}을(를) 만들었어요	game/{0} を作成しました	Created game/{0}
+완료 · ${keyOf('newLine')}	完了 · {0}	Done · {0}
+끌어서 상자 폭 바꾸기 · 더블클릭: 기본 폭	ドラッグでボックス幅を変更 · ダブルクリック: 既定の幅	Drag to change box width · Double-click: default width
+대사 버블 열기/닫기 (줄 종류, 방향키로 고르기)	セリフバブルを開く/閉じる (行の種類、方向キーで選択)	Open/close dialogue bubble (line type, pick with arrow keys)
+흐름 버블 열기/닫기 (다음 흐름, 키보드로 고르기)	フローバブルを開く/閉じる (次の流れ、キーボードで選択)	Open/close flow bubble (next flow, pick with keyboard)
+글꼴 버블 펼치기/접기 (글자 스타일, 상자 안 대사 칸에서)	フォントバブルを展開/折りたたむ (文字スタイル、ボックス内のセリフ欄で)	Expand/collapse font bubble (text style, in the dialogue field inside a box)
+표시 이름을 "${backName(c)}"로 돌려요	表示名を「{0}」に戻します	Restores the display name to "{0}"
+… 외 ${uses.lines.length - 30}줄	… ほか {0}行	… and {0} more lines
+game/${rel}이(가) 이미 있어요. 덮어쓸까요?	game/{0} はすでにあります。上書きしますか?	game/{0} already exists. Overwrite?
+글자 스타일 고치기 · ${keyOf('tagBox')}	文字スタイルを編集 · {0}	Edit text style · {0}
+그림을 읽지 못했어요: ${src.files[i].name}	画像を読み込めませんでした: {0}	Couldn't read the image: {0}
+흐름 제어 · ${keyOf('flowMenu')}로 펼치기	フロー制御 · {0} で展開	Flow control · expand with {0}
+쓰는 상자 ${uses.length}개는 "화면 없음"이 돼요.	使っているボックス {0}個は「画面なし」になります。	{0} boxes using it will become "No screen".
+누르거나 Enter: 플래그 ${r.flags.length}개 만들기	クリックまたは Enter: フラグを {0}個作成	Click or Enter: create {0} flags
+줄 종류 바꾸기 (${keyOf('lineType')}, 방향키로 고르기)	行の種類を変更 ({0}、方向キーで選択)	Change line type ({0}, pick with arrow keys)
+${out.w}×${out.h}, 파일은 ${out.w * 2}×${out.h}	{0}×{1}、ファイルは {2}×{3}	{0}×{1}, file is {2}×{3}
+끌어서 순서 바꾸기 · 톡 누르면 줄 종류 (${keyOf('lineType')})	ドラッグで並べ替え · タップで行の種類 ({0})	Drag to reorder · Tap for line type ({0})
+안 치면 "${String(cur.init ?? '')}". 대사에서 [${cur.name}]	入力しなければ「{0}」。セリフでは [{1}]	If left blank: "{0}". In dialogue: [{1}]
+${mb(result.size)}. 대사·선택지 그림 칸에 넣거나, 대본에서 show 줄로 보여요.	{0}。セリフ・選択肢の画像欄に入れるか、台本の show 行で表示します。	{0}. Put it in a dialogue/choice image field, or show it with a show line in the script.
+${keyOf('flowMenu')} 펼치기/접기 · 방향키 고르기 · Enter 정하기 · Esc 접기 · 이어지는 곳은 선을 끌어 붙여요	{0} 展開/折りたたみ · 方向キーで選択 · Enter で決定 · Esc で折りたたむ · つなぎ先は線をドラッグしてつなぎます	{0} expand/collapse · arrow keys to pick · Enter to choose · Esc to collapse · drag a line to set where it goes
+플레이어가 글을 쳐서 답해요. 친 글이 정답과 같으면 그 갈래로, 아니면 "틀림"으로 가요. 틀리면 다시 묻거나 힌트를 보여 줄 수도 있어요.	プレイヤーが文字を入力して答えます。入力が正解と同じならその分岐へ、違えば「不正解」へ進みます。間違えたら聞き直したりヒントを出したりもできます。	The player answers by typing. If the text matches an answer it goes to that branch, otherwise to "Wrong". You can also ask again or show hints after a wrong answer.
+한 점(또는 화면 아래·왼쪽 끝)에서 색 물결이 퍼지며 앞 상자의 마지막 화면을 렌즈처럼 휘게 하고, 물결이 지나간 자리에 이 상자의 첫 화면이 나와요. 시간의 절반쯤에 셰이더가 바뀌어요.	一点(または画面の下端・左端)から色の波が広がって前のボックスの最後の画面をレンズのように曲げ、波が通った所にこのボックスの最初の画面が現れます。時間の半分ほどでシェーダーが切り替わります。	A colored wave spreads from a point (or the bottom/left edge), bending the previous box's last screen like a lens, and this box's first screen appears where the wave has passed. The shader switches about halfway through.
+${frames ? `그림 ${files.length}장` : files[0].name} · ${o.width}×${o.height} · ${mb(total)}	{0} · {1}×{2} · {3}	{0} · {1}×{2} · {3}

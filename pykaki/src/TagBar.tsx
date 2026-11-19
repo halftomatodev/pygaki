@@ -1,6 +1,6 @@
 // 태그 상자: 대사·내레이션 글 칸에 커서가 있으면 뜨는 작은 창. 고른 글을 렌파이 텍스트 태그로 감싸거나 진행 태그(멈춤, 지우고 이어서)를 넣는다
 // 상자 안 편집에서는 상자 오른쪽 위 바깥에, 오른쪽 편집 탭에서는 글자 효과 칸 위쪽에 붙는다
-import { useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import { create } from 'zustand';
 import { useStore } from './store';
 import type { Flag } from './types';
@@ -10,9 +10,9 @@ import { EFFECTS, effectKnobs, knobNum, knobText, formatEffect, parseEffect } fr
 import { shaderEffect } from './fx/textShaders';
 import { RUBY_NOTE, insertRuby, insertTag, removeTag, retag, rubyAt, setRubyStyle, setTagValue, stepSize, tagsAt, toggleTag, type Edit } from './tagEdit';
 import { TagDemo, type Tip } from './TagDemo';
-import { motionToken, ms } from './Card';
 import { Liquid } from 'liquid-gooey';
-import { GOO } from './LineTypeMenu';
+import { GLASS_GOO, GlassOne, NO_ARC, arcRow, useArc, useReveal, type Arc } from './GooGlass';
+import { GooPill } from './GooPill';
 
 // 지금 태그를 넣을 글 칸(textarea id). 태그 상자 안으로 포커스가 옮겨 가도 그대로 둔다
 export const useTagTarget = create<{ id: string | null }>(() => ({ id: null }));
@@ -20,7 +20,8 @@ if (typeof document !== 'undefined') {
   document.addEventListener('focusin', (e) => {
     const t = e.target as HTMLElement;
     if (t instanceof HTMLTextAreaElement && t.dataset.tags) useTagTarget.setState({ id: t.id });
-    else if (!t.closest?.('.tagbar')) useTagTarget.setState({ id: null });
+    // 대사·흐름 버블의 키 칸으로 커서가 가도 글꼴 버블은 그대로 둔다 (세션 94, 세 버블을 같이 열기)
+    else if (!t.closest?.('.tagbar, .lt-menu, .side-flow')) useTagTarget.setState({ id: null });
   });
   document.addEventListener('focusout', (e) => {
     const to = (e as FocusEvent).relatedTarget as HTMLElement | null;
@@ -73,15 +74,6 @@ const saveRecent = (c: string) => {
 };
 const HEX = /^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
 const SIZE = /^[+\-*]?\d+(?:\.\d+)?$/;
-const MORE_KEY = 'pykaki-tag-more';
-const readMore = () => {
-  try {
-    return localStorage.getItem(MORE_KEY) === '1';
-  } catch {
-    return false;
-  }
-};
-
 const KNOBS_KEY = 'pykaki-tag-knobs';
 const readKnobs = () => {
   try {
@@ -288,15 +280,20 @@ const DEMO_BASE = 14; // 견본 글의 보통 속도 (TagDemo DEMO_CPS와 같음
 // extra: 태그 말고 줄 전체에 거는 칸(상자 안 편집의 글 상자 칸). 접어도 늘 보인다
 // 카드들은 줄 종류 고르기(LineTypeMenu)와 같은 끈적한 덩어리(liquid-gooey)로 붙는다(세션 92).
 // zoom: 캔버스 확대 배율. 끈적 그림 층은 화면 크기로 재므로 캔버스 안에서는 1/zoom으로 되돌려 맞춘다
-export function TagBar({ targetId, className = '', extra, zoom = 1 }: { targetId: string; className?: string; extra?: React.ReactNode; zoom?: number }) {
+// fold: 상자 안 편집의 글꼴 버블(세션 94 이름). 처음에는 보라 방울 [⋯]로 접혀 있고, 누르거나 단축키(기본 Alt+↑)로 펼치면 모두 한 덩어리로 보인다(세션 93). Esc로 다시 접힘
+export function TagBar({ targetId, className = '', extra, zoom = 1, fold = false }: { targetId: string; className?: string; extra?: React.ReactNode; zoom?: number; fold?: boolean }) {
   const tagsOn = useStore((s) => s.project.settings.allowTextTags);
+  const opened = useStore((s) => s.tagBox);
+  const root = useRef<HTMLDivElement>(null);
+  const arc = useArc(root, () => (fold ? (root.current?.closest('.box') as HTMLElement | null) : null), 'right');
+  const out = useReveal(!fold || opened);
+  const arcCtx = { arc, out };
   const flags = useStore((s) => s.project.variables);
   const update = useStore((s) => s.update);
   const [, redraw] = useReducer((x: number) => x + 1, 0);
   const [palette, setPalette] = useState<false | 'color' | 'outlinecolor' | 'rubycolor'>(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [size, setSize] = useState<string | null>(null); // 크기 칸에 치는 중인 값
-  const [more, setMore] = useState(readMore);
   const [knobsOpen, setKnobsOpen] = useState(readKnobs); // 고른 글에만 효과의 [세부 값]
   const [knob, setKnob] = useState<{ i: number; key: string; v: string } | null>(null); // 세부 값 막대를 끄는 중인 값
   const knobRef = useRef(knob); // 놓은 뒤 blur가 또 와도 한 번만 넣게
@@ -354,8 +351,14 @@ export function TagBar({ targetId, className = '', extra, zoom = 1 }: { targetId
 
   const cls = 'tagbar nodrag nowheel ' + className;
   const goo = { '--lg-unscale': 1 / zoom } as React.CSSProperties;
+  if (fold && !opened)
+    return (
+      <div className={cls + ' tb-folded'} ref={root}>
+        <GooPill color="purple" label="⋯" tip={`글자 스타일 고치기 · ${keyOf('tagBox')}`} onOpen={() => useStore.setState({ tagBox: true })} />
+      </div>
+    );
   const extraCard = extra && (
-    <TbCard className="tb-extra" hue={45}>
+    <TbCard k="extra" className="tb-extra" hue={45}>
       <div className="tb-row">
         <span className="tb-chip">글 상자</span>
         {extra}
@@ -364,21 +367,26 @@ export function TagBar({ targetId, className = '', extra, zoom = 1 }: { targetId
   );
   if (!tagsOn)
     return (
-      <div className={cls} onMouseDown={keep}>
-        <Liquid className="tb-liquid" {...GOO} style={goo}>
-        <TbCard className="tb-off">
+      <div className={cls + (fold ? ' tb-open' : '')} onMouseDown={keep} ref={root}>
+        <ArcCtx.Provider value={arcCtx}>
+        <Liquid className="tb-liquid" {...GLASS_GOO} style={goo}>
+        {/* 바탕 한 장. 펼칠 때 접힌 보라 방울 자리(왼쪽 아래)에서 부풀어 나온다 */}
+        <GlassOne arc={arc} out={out} side="right" from={fold ? 'bl' : undefined} className="tb-one">
+        <TbCard k="off" className="tb-off">
           텍스트 태그가 꺼져 있어요. <code>{'{'}</code>가 글자 그대로 나가요.
           <button className="primary" onClick={() => update((p) => void (p.settings.allowTextTags = true))}>켜기</button>
         </TbCard>
         {flags.length > 0 && (
-          <TbCard hue={28}>
+          <TbCard k="flag" hue={28}>
             <div className="tb-row">
               <FlagValuePick flags={flags} onPick={(n) => run((x, s, e) => insertTag(x, s, e, `[${n}]`))} />
             </div>
           </TbCard>
         )}
         {extraCard}
+        </GlassOne>
         </Liquid>
+        </ArcCtx.Provider>
       </div>
     );
 
@@ -458,14 +466,6 @@ export function TagBar({ targetId, className = '', extra, zoom = 1 }: { targetId
     }
     setKnobsOpen(!knobsOpen);
   };
-  const toggleMore = () => {
-    try {
-      localStorage.setItem(MORE_KEY, more ? '0' : '1');
-    } catch {
-      /* 이번 창에서만 */
-    }
-    setMore(!more);
-  };
   // 속도 {cps=N}: 1초에 N글자 (대사 칸의 텍스트 속도와 같은 단위). 예전 {cps=*배}는 그 배율을 따로 알려 준다
   const cpsTag = at.get('cps');
   const cpsMul = cpsTag?.startsWith('*') ? cpsTag.slice(1) : undefined;
@@ -488,10 +488,29 @@ export function TagBar({ targetId, className = '', extra, zoom = 1 }: { targetId
   };
   const tipInfo = tip ? TIPS[tip] ?? slideTips[tip] : null;
 
+  const palCard = () => palette && (
+        <TbCard k="palette" hue={palette === 'color' ? 215 : palette === 'rubycolor' ? 330 : 268}>
+          <Palette
+            key={palette}
+            current={palette === 'color' ? color : palette === 'rubycolor' ? ruby?.color : outline}
+            onPick={pickColor}
+            onRemove={() => {
+              const name = palette || 'color';
+              setPalette(false);
+              if (name === 'rubycolor') return run((x, s, e) => setRubyStyle(x, s, e, 'color', null));
+              run((x, s, e) => removeTag(x, s, e, name, name === 'color' ? '색' : '외곽선 색'));
+            }}
+            onClose={() => (setPalette(false), el()?.focus())}
+          />
+        </TbCard>
+  );
   return (
-    <div className={cls} onMouseDown={keep} onKeyDown={(e) => e.key === 'Escape' && (e.stopPropagation(), setPalette(false), el()?.focus())}>
-      <Liquid className="tb-liquid" {...GOO} style={goo}>
-      <TbCard hue={215}>
+    <div className={cls + (fold ? ' tb-open' : '')} onMouseDown={keep} onKeyDown={(e) => e.key === 'Escape' && (e.stopPropagation(), setPalette(false), fold && !palette && useStore.setState({ tagBox: false }), el()?.focus())} ref={root}>
+      <ArcCtx.Provider value={arcCtx}>
+      <Liquid className="tb-liquid" {...GLASS_GOO} style={goo}>
+        {/* 바탕 한 장. 펼칠 때 접힌 보라 방울 자리(왼쪽 아래)에서 부풀어 나온다 */}
+        <GlassOne arc={arc} out={out} side="right" from={fold ? 'bl' : undefined} className="tb-one">
+      <TbCard k="glyph" hue={215}>
         <div className="tb-row">
           <span className="tb-chip">글자</span>
           {tog('b', 'B', `굵게 {b}  ${keyOf('tagBold')}`)}
@@ -519,97 +538,8 @@ export function TagBar({ targetId, className = '', extra, zoom = 1 }: { targetId
           </button>
         </div>
       </TbCard>
-      <TbCard hue={28}>
-        <div className="tb-row">
-          <span className="tb-chip">진행</span>
-          {ins('{w}', 'w')}
-          {ins('{w=0.5}', 'w05', '0.5')}
-          {ins('{p}', 'p')}
-          {ins('{nw}', 'nw')}
-          {ins('{fast}', 'fast')}
-          {ins('{clear}', 'clear')}
-          {flags.length > 0 && (
-            <>
-              <span className="tb-sep" />
-              <FlagValuePick flags={flags} onPick={(n) => run((x, s, e) => insertTag(x, s, e, `[${n}]`))} />
-            </>
-          )}
-        </div>
-      </TbCard>
-      <TbCard hue={150}>
-        <div className="tb-row">
-          <span className="tb-chip">속도</span>
-          <span className="tb-slide" {...tipOn('cps')}>
-            <Slide
-              cur={cpsFixed}
-              def={20}
-              min={1}
-              max={300}
-              stops={CPS_STOPS}
-              pre="1초에"
-              unit="글자"
-              title="고른 글만 1초에 몇 글자로 나올지 {cps=N}"
-              onLive={live('cps')}
-              onCommit={(v) => putOrDrop('cps', '속도', String(Math.round(v)))}
-            />
-          </span>
-          {cpsMul !== undefined && <span className="tb-hint" title="예전 배율 태그 {cps=*배}. 막대를 움직이면 1초에 몇 글자로 바뀌어요">보통의 {cpsMul}배</span>}
-          {at.has('cps') && <button className="tb-btn" title="속도 태그 빼기" onClick={() => run((x, s, e) => removeTag(x, s, e, 'cps', '속도'))}>보통</button>}
-          <span className="tb-fill" />
-          <button className={'tb-btn tb-more' + (more ? ' on' : '')} title="투명도, 자간, 외곽선 색, 글꼴, 고른 글에만 효과, 띄우기, 루비, 글 속 그림" onClick={toggleMore}>{more ? '접기 ▴' : '더 보기 ▾'}</button>
-        </div>
-      </TbCard>
-      {ruby && (
-        <TbCard hue={330}>
-          <div className="tb-row">
-            <span className="tb-chip">루비 글</span>
-            <span className="tb-slide">
-              <Slide
-                cur={rubySize}
-                def={RUBY_SIZE_DEF}
-                min={6}
-                max={60}
-                unit="크기"
-                title="루비 글 크기 {rt}{size=N}…{/rt}. 비워 두면 본문의 절반"
-                onLive={live('ruby')}
-                onCommit={(v) => run((x, s, e) => setRubyStyle(x, s, e, 'size', String(Math.round(v))))}
-              />
-            </span>
-            <button className={'tb-btn tb-color' + (palette === 'rubycolor' ? ' on' : '')} title="루비 글 색 {rt}{color=}…{/rt}" onClick={() => setPalette((v) => (v === 'rubycolor' ? false : 'rubycolor'))}>
-              <span className="tb-dot" style={{ background: ruby.color ?? 'conic-gradient(#ef4444, #eab308, #22c55e, #0ea5e9, #8b5cf6, #ef4444)' }} />색
-            </button>
-            {(ruby.size !== undefined || ruby.color !== undefined) && (
-              <button className="tb-btn" title="루비 글의 크기·색을 빼고 기본으로 (본문의 절반 크기)" onClick={() => run((x, s, e) => {
-                const r = setRubyStyle(x, s, e, 'size', null);
-                return 'error' in r ? r : setRubyStyle(r.text, r.s, r.e, 'color', null);
-              })}>기본</button>
-            )}
-          </div>
-        </TbCard>
-      )}
-      <MoreReveal open={more}>
-        <>
-          <TbCard hue={268}>
-            <div className="tb-row" {...tipOn('alpha')}>
-              <span className="tb-chip">투명도</span>
-              <Slide cur={alphaV} def={1} min={0} max={1} step={0.05} title="고른 글의 투명도 {alpha=}" onLive={live('alpha')} onCommit={(v) => putOrDrop('alpha', '투명도', v >= 1 ? null : fmt(v))} />
-            </div>
-            <div className="tb-row" {...tipOn('k')}>
-              <span className="tb-chip">자간</span>
-              <Slide cur={kV} def={0} min={-10} max={30} step={0.5} unit="px" title="고른 글의 자간 {k=}" onLive={live('k')} onCommit={(v) => putOrDrop('k', '자간', v === 0 ? null : fmt(v))} />
-            </div>
-            <div className="tb-row">
-              <span className="tb-chip">외곽선</span>
-              <button
-                className={'tb-btn tb-color' + (palette === 'outlinecolor' ? ' on' : '')}
-                title="외곽선 색 {outlinecolor=}: 글자 스타일에 외곽선(outlines)이 있을 때만 게임에서 보여요"
-                onClick={() => setPalette((v) => (v === 'outlinecolor' ? false : 'outlinecolor'))}
-              >
-                <span className="tb-dot tb-ring" style={{ borderColor: outline ?? 'var(--muted)' }} />외곽선 색
-              </button>
-            </div>
-          </TbCard>
-          <TbCard hue={330}>
+      {palette === 'color' && palCard()}
+          <TbCard k="font" hue={330}>
             <div className="tb-row">
               <span className="tb-chip">글꼴</span>
               {linked && media.fonts.length ? (
@@ -630,6 +560,29 @@ export function TagBar({ targetId, className = '', extra, zoom = 1 }: { targetId
                 <span className="tb-hint">{linked ? 'game 폴더나 game/fonts에 글꼴 파일(.ttf, .otf)이 없어요' : '게임 폴더를 연결하면 그 안의 글꼴을 골라요'}</span>
               )}
             </div>
+          </TbCard>
+          <TbCard k="alpha" hue={268}>
+            <div className="tb-row" {...tipOn('alpha')}>
+              <span className="tb-chip">투명도</span>
+              <Slide cur={alphaV} def={1} min={0} max={1} step={0.05} title="고른 글의 투명도 {alpha=}" onLive={live('alpha')} onCommit={(v) => putOrDrop('alpha', '투명도', v >= 1 ? null : fmt(v))} />
+            </div>
+            <div className="tb-row" {...tipOn('k')}>
+              <span className="tb-chip">자간</span>
+              <Slide cur={kV} def={0} min={-10} max={30} step={0.5} unit="px" title="고른 글의 자간 {k=}" onLive={live('k')} onCommit={(v) => putOrDrop('k', '자간', v === 0 ? null : fmt(v))} />
+            </div>
+            <div className="tb-row">
+              <span className="tb-chip">외곽선</span>
+              <button
+                className={'tb-btn tb-color' + (palette === 'outlinecolor' ? ' on' : '')}
+                title="외곽선 색 {outlinecolor=}: 글자 스타일에 외곽선(outlines)이 있을 때만 게임에서 보여요"
+                onClick={() => setPalette((v) => (v === 'outlinecolor' ? false : 'outlinecolor'))}
+              >
+                <span className="tb-dot tb-ring" style={{ borderColor: outline ?? 'var(--muted)' }} />외곽선 색
+              </button>
+            </div>
+          </TbCard>
+      {palette === 'outlinecolor' && palCard()}
+          <TbCard k="fx" hue={330}>
             <div className="tb-row">
               <span className="tb-chip">효과</span>
               <select
@@ -687,7 +640,45 @@ export function TagBar({ targetId, className = '', extra, zoom = 1 }: { targetId
               </div>
             ))}
           </TbCard>
-          <TbCard hue={188}>
+      <TbCard k="prog" hue={28}>
+        <div className="tb-row">
+          <span className="tb-chip">진행</span>
+          {ins('{w}', 'w')}
+          {ins('{w=0.5}', 'w05', '0.5')}
+          {ins('{p}', 'p')}
+          {ins('{nw}', 'nw')}
+          {ins('{fast}', 'fast')}
+          {ins('{clear}', 'clear')}
+          {flags.length > 0 && (
+            <>
+              <span className="tb-sep" />
+              <FlagValuePick flags={flags} onPick={(n) => run((x, s, e) => insertTag(x, s, e, `[${n}]`))} />
+            </>
+          )}
+        </div>
+      </TbCard>
+      <TbCard k="speed" hue={150}>
+        <div className="tb-row">
+          <span className="tb-chip">속도</span>
+          <span className="tb-slide" {...tipOn('cps')}>
+            <Slide
+              cur={cpsFixed}
+              def={20}
+              min={1}
+              max={300}
+              stops={CPS_STOPS}
+              pre="1초에"
+              unit="글자"
+              title="고른 글만 1초에 몇 글자로 나올지 {cps=N}"
+              onLive={live('cps')}
+              onCommit={(v) => putOrDrop('cps', '속도', String(Math.round(v)))}
+            />
+          </span>
+          {cpsMul !== undefined && <span className="tb-hint" title="예전 배율 태그 {cps=*배}. 막대를 움직이면 1초에 몇 글자로 바뀌어요">보통의 {cpsMul}배</span>}
+          {at.has('cps') && <button className="tb-btn" title="속도 태그 빼기" onClick={() => run((x, s, e) => removeTag(x, s, e, 'cps', '속도'))}>보통</button>}
+        </div>
+      </TbCard>
+          <TbCard k="insert" hue={188}>
             <div className="tb-row">
               <span className="tb-chip">넣기</span>
               {ins('{space=30}', 'space', '30')}
@@ -710,27 +701,40 @@ export function TagBar({ targetId, className = '', extra, zoom = 1 }: { targetId
               )}
             </div>
           </TbCard>
-        </>
-      </MoreReveal>
-      {extraCard}
-      {palette && (
-        <TbCard hue={palette === 'color' ? 215 : palette === 'rubycolor' ? 330 : 268}>
-          <Palette
-            key={palette}
-            current={palette === 'color' ? color : palette === 'rubycolor' ? ruby?.color : outline}
-            onPick={pickColor}
-            onRemove={() => {
-              const name = palette;
-              setPalette(false);
-              if (name === 'rubycolor') return run((x, s, e) => setRubyStyle(x, s, e, 'color', null));
-              run((x, s, e) => removeTag(x, s, e, name, name === 'color' ? '색' : '외곽선 색'));
-            }}
-            onClose={() => (setPalette(false), el()?.focus())}
-          />
+      {ruby && (
+        <TbCard k="ruby" hue={330}>
+          <div className="tb-row">
+            <span className="tb-chip">루비 글</span>
+            <span className="tb-slide">
+              <Slide
+                cur={rubySize}
+                def={RUBY_SIZE_DEF}
+                min={6}
+                max={60}
+                unit="크기"
+                title="루비 글 크기 {rt}{size=N}…{/rt}. 비워 두면 본문의 절반"
+                onLive={live('ruby')}
+                onCommit={(v) => run((x, s, e) => setRubyStyle(x, s, e, 'size', String(Math.round(v))))}
+              />
+            </span>
+            <button className={'tb-btn tb-color' + (palette === 'rubycolor' ? ' on' : '')} title="루비 글 색 {rt}{color=}…{/rt}" onClick={() => setPalette((v) => (v === 'rubycolor' ? false : 'rubycolor'))}>
+              <span className="tb-dot" style={{ background: ruby.color ?? 'conic-gradient(#ef4444, #eab308, #22c55e, #0ea5e9, #8b5cf6, #ef4444)' }} />색
+            </button>
+            {(ruby.size !== undefined || ruby.color !== undefined) && (
+              <button className="tb-btn" title="루비 글의 크기·색을 빼고 기본으로 (본문의 절반 크기)" onClick={() => run((x, s, e) => {
+                const r = setRubyStyle(x, s, e, 'size', null);
+                return 'error' in r ? r : setRubyStyle(r.text, r.s, r.e, 'color', null);
+              })}>기본</button>
+            )}
+          </div>
         </TbCard>
       )}
-      {msg && <TbCard className="tb-msg">{msg}</TbCard>}
+      {palette === 'rubycolor' && palCard()}
+      {extraCard}
+      {msg && <TbCard k="msg" className="tb-msg">{msg}</TbCard>}
+      </GlassOne>
       </Liquid>
+      </ArcCtx.Provider>
       {tipInfo && (
         <div className="tb-tip">
           <div className="tb-tip-head">
@@ -745,10 +749,6 @@ export function TagBar({ targetId, className = '', extra, zoom = 1 }: { targetId
   );
 }
 
-// [더 보기] 카드 묶음이 펴지고 접히는 움직임 (세션 83, 사용자 참고 영상: 채팅 카드가 아래에서 옅게 올라오며 자리가 늘어남).
-// 펼칠 때: 자리 높이가 스프링으로 늘고, 카드가 한 장씩 아래에서 옅고 흐리게 올라와 제자리로(50ms씩 늦게).
-// 접을 때: 카드가 위로 조금 뜨며 옅어지고 자리가 줄어든 뒤 빠진다. 움직이는 도중에 다시 눌러도 지금 자리에서 반대로.
-// 애니메이션 줄이기면 짧은 페이드만. 바깥 .tagbar의 gap(5px)도 같이 늘고 줄어서 끝에 튀지 않음
 // 대사에 플래그 값 넣기 [이름]: 게임에서 그때 값이 보임 (글은 처음 값, 켜짐/꺼짐은 True/False)
 function FlagValuePick({ flags, onPick }: { flags: Flag[]; onPick: (name: string) => void }) {
   return (
@@ -764,79 +764,14 @@ function FlagValuePick({ flags, onPick }: { flags: Flag[]; onPick: (name: string
   );
 }
 
-// 카드 한 장 = 끈적한 덩어리 하나. 카드 바탕은 비우고 뒤의 덩어리가 바탕이 된다(observe: 카드 크기·움직임을 따라감)
-function TbCard({ hue, className = '', children }: { hue?: number; className?: string; children: React.ReactNode }) {
+// 묶음 한 칸. 세션 93부터 칸마다 덩어리를 따로 두지 않고 한 장(TbOne)에 모아, 폭이 달라 생기던 요철 없이 둥근 덩어리 하나가 된다
+function TbCard({ k, className = '', children }: { k: string; hue?: number; className?: string; children: React.ReactNode }) {
+  const a = useContext(ArcCtx);
   return (
-    <Liquid.Item observe>
-      <div className={'tb-card ' + className} style={hue !== undefined ? ({ '--hue': hue } as React.CSSProperties) : undefined}>{children}</div>
-    </Liquid.Item>
+    <div className={'tb-sec ' + className} data-arc={k} style={arcRow(a.arc, k)}>
+      {children}
+    </div>
   );
 }
+const ArcCtx = createContext<{ arc: Arc; out: boolean }>({ arc: NO_ARC, out: true });
 
-// [더 보기] 안 카드들: 끈적 덩어리 껍데기(display: contents) 안의 진짜 카드. 크기를 줄이면 덩어리도 따라 줄어 빨려 들듯 보인다
-const cardsIn = (el: HTMLElement) => [...el.children].map((c) => (c.firstElementChild ?? c) as HTMLElement);
-
-function MoreReveal({ open, children }: { open: boolean; children: React.ReactNode }) {
-  const [shown, setShown] = useState(open);
-  const ref = useRef<HTMLDivElement | null>(null);
-  const anims = useRef<Animation[]>([]);
-  const first = useRef(true);
-  const stop = () => {
-    for (const a of anims.current) a.cancel();
-    anims.current = [];
-  };
-  useEffect(() => {
-    if (first.current) {
-      first.current = false;
-      return;
-    }
-    if (open) return setShown(true);
-    const el = ref.current;
-    if (!el) return setShown(false);
-    const from = el.offsetHeight;
-    stop();
-    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const dur = ms(motionToken('--dur-pop', '250ms'));
-    const easeIn = motionToken('--ease-in', 'ease-in');
-    const kids = cardsIn(el);
-    if (!reduce)
-      kids.forEach((k, i) =>
-        anims.current.push(k.animate([{}, { opacity: 0, translate: '0 -6px', scale: '0.6', filter: 'blur(4px)' }], { duration: dur * 0.8, delay: (kids.length - 1 - i) * 30, easing: easeIn, fill: 'forwards' })),
-      );
-    el.style.overflow = 'clip';
-    const last = reduce
-      ? el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 120, easing: easeIn, fill: 'forwards' })
-      : el.animate([{ height: from + 'px', marginTop: '0px' }, { height: '0px', marginTop: '-5px' }], { duration: dur + (kids.length - 1) * 30, easing: easeIn, fill: 'forwards' });
-    anims.current.push(last);
-    last.finished.then(() => setShown(false), () => {});
-  }, [open]);
-  useLayoutEffect(() => {
-    const el = ref.current;
-    if (!open || !shown || !el || first.current) return;
-    const from = anims.current.length ? el.offsetHeight : 0;
-    stop();
-    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) {
-      anims.current.push(el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 150, easing: motionToken('--ease-out', 'ease-out') }));
-      return;
-    }
-    const dur = ms(motionToken('--dur-view', '400ms'));
-    const spring = motionToken('--ease-spring', 'ease-out');
-    const kids = cardsIn(el);
-    kids.forEach((k, i) =>
-      anims.current.push(
-        k.animate([{ opacity: 0, translate: '0 14px', scale: '0.6', filter: 'blur(5px)' }, { opacity: 1, translate: '0 0', scale: '1', filter: 'blur(0px)' }], { duration: dur, delay: 40 + i * 50, easing: spring, fill: 'backwards' }),
-      ),
-    );
-    el.style.overflow = 'clip';
-    const h = el.scrollHeight;
-    const a = el.animate([{ height: from + 'px', marginTop: from ? '0px' : '-5px' }, { height: h + 'px', marginTop: '0px' }], { duration: dur, easing: spring });
-    anims.current.push(a);
-    a.finished.then(() => {
-      el.style.overflow = '';
-      anims.current = [];
-    }, () => {});
-  }, [open, shown]);
-  if (!shown) return null;
-  return <div className="tb-more-wrap" ref={ref}>{children}</div>;
-}

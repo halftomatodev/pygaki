@@ -58,9 +58,14 @@ function Keys() {
       }
       if (hit(e, 'focus')) run(toggleFocus);
       else if (s.inlineEdit && hit(e, 'nextBox')) run(() => goNextBox(s.inlineEdit!));
-      else if (s.inlineEdit && hit(e, 'flowMenu')) run(() => useStore.setState({ flowMenu: !s.flowMenu }));
-      // 줄 종류 고르기: 상자 안에서 쓰는 중이면 그 줄, 아니면 오른쪽 [대사] 카드에서 쓰는 줄 (닫기는 창이 받음)
-      else if (s.activeLine && !s.typeMenu && hit(e, 'lineType') && (s.inlineEdit || (e.target as HTMLElement).closest?.('.insp')))
+      // 세 버블(대사·글꼴·흐름)은 같이 열 수 있다(세션 94). 열린 버블의 키 칸에 커서가 없으면 단축키는 그 버블로 커서를 옮기고,
+      // 버블 안에서 다시 누르면 버블이 받아서 닫는다
+      else if (s.inlineEdit && hit(e, 'flowMenu'))
+        run(() => (s.flowMenu ? document.querySelector<HTMLInputElement>('.side-flow .fm-keys')?.focus() : useStore.setState({ flowMenu: true })));
+      else if (s.inlineEdit && hit(e, 'tagBox')) run(() => useStore.setState({ tagBox: !s.tagBox }));
+      // 대사 버블(줄 종류 고르기): 상자 안에서 쓰는 중이면 그 줄, 아니면 오른쪽 [대사] 카드에서 쓰는 줄
+      else if (s.typeMenu && hit(e, 'lineType')) run(() => document.querySelector<HTMLInputElement>('.lt-menu .fm-keys')?.focus());
+      else if (s.activeLine && hit(e, 'lineType') && (s.inlineEdit || (e.target as HTMLElement).closest?.('.insp')))
         run(() => useStore.setState({ typeMenu: { line: s.activeLine!, where: s.inlineEdit ? 'box' : 'insp' } }));
       else if (hit(e, 'save')) run(() => saveProject());
       else if (hit(e, 'saveAs')) run(() => saveProject(true));
