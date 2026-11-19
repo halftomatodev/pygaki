@@ -1,4 +1,4 @@
-<!-- 원본: bundle/guide/parts/develop.md @ 3129bffd70 -->
+<!-- 원본: bundle/guide/parts/develop.md @ 5655515d9c -->
 # Changing it yourself
 
 For people who want to adapt pygaki to their game, add features, or share their changes with others. If you only want to change settings values, the "Plugin customization guide" chapter is enough; this chapter is for editing code and effect files directly.
@@ -60,7 +60,7 @@ A file is made of marker lines starting with `@` and indented GLSL code.
 
 In an image transition's `@fragment`, use `l__t` (progress 0→1), `l__uv` (pixel position 0–1), `l__size` (width and height in pixels), `l__old` (color of the old image) and `l__new` (color of the new image); read other positions with `texture2D(tex0, pos)` (old image) and `texture2D(tex1, pos)` (new image). At the end, put the color in `gl_FragColor`. Image transitions used for shader transitions set the moment the screen shader switches with `@set u__cut value` (0–1).
 
-The effects in the folder (text `maskup`, `tracking`, `sweep`, `backbox`, `karaoke`, `meltglitch`, `droplets`, `scramble`; image `irisin`, `bands`, `pixelsort`, `datamosh`, `slide`, `mosaic`, `blinds`, `static`, `calibrate`, `tapestretch`, `blink`, `pushup`) are examples. The full format, and a prompt to use when asking an AI for a new effect, are in `ui_kit/effects/README.md`. The base text effects are in the single file `ui_kit/engine/text_effects.glsl`; pygaki also takes this file as is when building and draws effects the same way Ren'Py does.
+The effects in the folder (text `maskup`, `tracking`, `sweep`, `backbox`, `karaoke`, `meltglitch`, `droplets`, `scramble`; image `irisin`, `bands`, `pixelsort`, `datamosh`, `slide`, `mosaic`, `blinds`, `static`, `calibrate`, `tapestretch`, `blink`, `pushup`, `vibrate`, `springin`) are examples. The full format, and a prompt to use when asking an AI for a new effect, are in `ui_kit/effects/README.md`. The base text effects are in the single file `ui_kit/engine/text_effects.glsl`; pygaki also takes this file as is when building and draws effects the same way Ren'Py does.
 
 ## Adding a screen shader
 

@@ -1,4 +1,4 @@
-<!-- 원본: pykaki/docs/GUIDE.md @ eb9729315a -->
+<!-- 원본: pykaki/docs/GUIDE.md @ b46a6af7ee -->
 # pygaki user guide
 
 A tool for writing Ren'Py scripts with boxes and lines and exporting them as Ren'Py script files (`.rpy`).
@@ -14,10 +14,10 @@ The in-app [Help] (F1) is the Korean version of this document. Button names here
 - **Top row, left**: the big tabs **[Script | GUI | Screen | Effects | Shaders | Font]**. In the app, next to them is the **game connection button** (light blue "● Connected to game" when attached to the game, yellow "◐ Game reloading" while the game rereads a changed script (it reattaches by itself when done), gray otherwise. Click it to go to GUI).
 - **Pink group** (tab row, right of the game connection button): the project title (click to edit), **[Run in Ren'Py]** and **[Follow script]**. It floats on the same row as the blue tab group, as a separate group. A button that is on has a light pink background. [Run in Ren'Py] is dimmed and can't be clicked while the game is running ("Running"). [Follow script] switches on/off each time you click it.
 - **Second row menu** (from the left): undo and redo arrows, **[Focus]** (light purple button), settings, **Help**, then file New/Open/Save, project folder (Reload, Folders, Other project), versions, Export. Together with the tabs they float in the center as translucent groups, and a button gets a white background when the mouse is over it.
-- **Left**: label (scenes, with box and layout buttons below), Characters, **Check** (errors and warnings that come up on export; click to go to that box), Ren'Py project info (project, script file, save state, number of images and sounds found), **Script** (the script to be exported; [Expand] to see it, [Copy], [Export .rpy]), Settings. Each group is a rounded card.
+- **Left**: **Scenes and characters** (scenes (labels) with their boxes, and characters, in one tree), box and layout buttons, **Check** (errors and warnings that come up on export; click to go to that box), Ren'Py project info (project, script file, save state, number of images and sounds found), **Script** (the script to be exported; [Expand] to see it, [Copy], [Export .rpy]), Settings. Each group is a rounded card.
 - **Right**: the same kind of cards as the left, without tabs. Click a box and you get the box, text effects, dialogue and next flow cards; click ◐ Shader and you get the shader and transition cards.
 - **Panel size**: hover the border between the left or right panel and the canvas and the cursor becomes ↔. Drag to change that panel's width; double-click the border to reset only that panel. Panel borders in [GUI], [Effects] and [Shaders] drag the same way. **[Start size]** in the left "Settings" resets the panels of every screen at once, and **[Lock]** keeps them from changing when dragged. Sizes and the lock are remembered in this browser (app).
-- **Center canvas**: boxes and lines. Zoom with the mouse wheel and drag an empty spot to pan. The **＋ − ⛶** buttons next to "Canvas controls" at the top left also zoom in and out and fit all boxes in view, with the minimap below them. The small **‹ ›** buttons at both top ends of the canvas fold and unfold the left and right panels separately (they stay folded next time).
+- **Center canvas**: boxes and lines. Zoom with the mouse wheel and drag an empty spot to pan. The **＋ − ⛶** buttons next to "Canvas controls" at the top left also zoom in and out and fit all boxes in view, with the minimap below them. The small **‹ ›** button right next to [Fold all] at the top of each panel folds and unfolds the left and right panels separately. A folded panel leaves only an unfold button at the canvas edge (they stay folded next time).
 
 The first time you open it, a sample script ("A rainy day") is loaded. Press [New] to start with an empty script.
 
@@ -35,7 +35,7 @@ The same list is under **Canvas controls ⓘ** at the top left of the canvas.
 - Drag the dot (●) under a box onto another box to connect them. Drop it on an empty spot to make a new connected box.
 - **Double-click** a line to switch jump ↔ call.
 - **Shift+drag** to select several boxes, **Delete** to delete them.
-- Boxes in the same label (scene) share a color. Labels are managed in the list on the left.
+- Boxes in the same label (scene) share a color. Labels are managed in the "Scenes and characters" tree on the left.
 - Click **◐ Shader** at the top right of a box or label to set screen shaders on the right. Dialogue sounds and speed are set per dialogue line, cursor and click-to-continue per box, in the cards of the box editor.
 - Click a card's title to fold it down to its name.
 
@@ -44,17 +44,17 @@ The same list is under **Canvas controls ⓘ** at the top left of the canvas.
 | Term | Meaning |
 |---|---|
 | **Box** | a group of dialogue. You can write several lines in it. |
-| **Line** | one of: narration, character dialogue, staging (background, show, hide, music, sound effect, pause, shake), flag change (⚑), direct command (⚙), memo (#) |
+| **Line** | one of: narration, character dialogue, staging (background, show, hide, music, sound effect, pause, shake), flag change (⚑), flag input (✎), direct command (⚙), memo (#) |
 | **Connection line** | where to go after a box |
 | **label (scene)** | a unit that groups several boxes. It becomes one Ren'Py `label`. Boxes in the same label have the same background color. |
 
 ## 3. Writing the script
 
 ### Registering characters
-Press **Characters [+ Add]** on the left.
+Press **[+ Character]** on the "Characters" row of the **Scenes and characters** tree on the left. Edit a character with ✎ on its row (or double-click, F2) and delete it with ✕.
 - **Color**: name color (exported as `Character(..., color=)`)
 - **id**: the Ren'Py variable name. Use only English letters, digits and `_`. E.g. `a`, `alice`
-- **Name**: the name shown on screen. E.g. Alice
+- **Name**: the name shown on screen. E.g. Alice. To use a name the player typed, link it from the flag's input box look (see "Flag input" below).
 
 Narration doesn't need to be registered.
 
@@ -86,8 +86,9 @@ Narration doesn't need to be registered.
   - **B I U S**: bold `{b}`, italic `{i}`, underline `{u}`, strikethrough `{s}`. Shortcuts **Ctrl+B / Ctrl+I / Ctrl+U**. If you're already inside that tag, press again to remove it (select only the middle to remove it from just that part).
   - **Size**: **가−** and **가+** make it 10 smaller or larger (`{size=-10}`, `{size=+10}`, changes each press). Type `30` (that size), `+10`, `-10` or `*1.5` (1.5×) in the middle field and press Enter.
   - **Color**: opens a palette. 32 basic colors, this project's colors (the dialogue window's default text color, character name colors), 8 recently used colors, a `#rrggbb` field and [Custom]. Move with ←↑→↓ and choose with Enter. If you're already inside a color tag, only the color value changes; remove it with [Remove color].
-  - **Progress**: [Click-to-continue] `{w}`, [Brief] `{w=0.5}` (the number is selected when inserted, so you can type the seconds right away), [Wait with line break] `{p}`, [Auto] `{nw}` (goes at the end of the text), [Up to here at once] `{fast}`, [Clear and continue] `{clear}`
+  - **Progress**: [Click-to-continue] `{w}`, [Brief] `{w=0.5}` (the number is selected when inserted, so you can type the seconds right away), [Wait with line break] `{p}`, [Auto] `{nw}` (goes at the end of the text), [Up to here at once] `{fast}`, [Clear and continue] `{clear}`, [Flag value ▾] (below)
     - **Clear and continue**: when the text up to here is shown, it waits for a click, makes the earlier text **invisible while keeping its space**, and the same person goes on speaking. With the line breaks and spaces as written, the next text appears in its original place (second line, third line …). E.g. with `Line 1{clear}`(line break)`Line 2{clear}`(line break)`Line 3`, line 1 appears; a click hides line 1 and shows line 2 in the second line's place; another click shows only line 3 in the third line's place. In the exported script it is split there into several dialogue lines by the same speaker. Tags spanning the split, like bold, color and speed, are reapplied to each part, and line settings like text effects and dialogue sounds are applied the same to each part. [Go here in Ren'Py] goes to the first part, and changing the dialogue position in the in-game editor and bringing it back to pygaki works only on the first part.
+    - **Flag value**: pick a flag in [Flag value ▾] and something like `[love]` goes in; in the game the value at that moment shows (e.g. `Affection is now [love]`, `[pname], hi`). On the canvas it is a green chip, and the preview shows the start value. It works in choice text too. A `[name]` that is not in the flag card is reported by [Check]. To write a literal `[`, use `[[`.
   - **Speed**: drag the slider or type in the number field and press Enter. Only the selected text appears at **that many characters per second** `{cps=20}` (the same unit as the text speed of the dialogue field). [Normal] removes the tag. A ratio tag inserted earlier, `{cps=*2}`, shows as "2× normal" beside it and changes to characters per second when you move the slider
   - **More ▾**: at the right end of the speed row. Click to unfold the rows below, click again to fold (remembered while unfolded).
     - **Opacity**: drag the slider or type a number to make the selected text faint `{alpha=0.5}`. At 1 the tag is removed.
@@ -184,7 +185,7 @@ When the game was started with [▶ Run in Ren'Py] and is connected to the app:
 - Without a game connection, the box card buttons are gray and the per-line buttons are hidden.
 
 ### Folding cards
-Cards in the left, right and GUI panels fold to a single line with their name (sky blue, only as wide as the name) when you **click the title row**. Click again and the rows pop out one by one as it opens. Left panel cards all start folded each time; right panel cards remember which you folded. **[Fold all]** with the folded-paper icon at the top right of a panel ([Expand all] when all are folded) folds or unfolds all its cards at once. The left panel's scrollbar is on the left.
+Cards in the left, right and GUI panels fold to a single line with their name (sky blue, only as wide as the name) when you **click the title row**. Click again and the rows pop out one by one as it opens. Left panel cards all start folded each time; right panel cards remember which you folded. **[Fold all]** with the folded-paper icon at the top of a panel ([Expand all] when all are folded) folds or unfolds all its cards at once. The **‹ ›** right next to it folds the panel itself. The left panel's scrollbar is on the left.
 - Old "✨ Screen effect" lines still work, but if you use box shaders at all, each box re-sets shaders on its first line, so it's best to use only one of the two.
 
 ### Line layout in the right panel
@@ -199,6 +200,7 @@ The side panels float over the canvas. Gaps between cards and space left by fold
 - **⚙ Direct command**: write a Ren'Py command that the staging above can't do, as is. E.g. `show eileen at truecenter`, `$ renpy.pause(1.0, hard=True)`
 - **# Memo**: a note for the writer. It goes into the script as a comment (`#`) and isn't visible in the game.
 - **⚑ Flag change**: changes a flag at this point (e.g. turn on `met_alice`, `love` +1). Add it with [+ Change flag] in the dialogue card or choose it in the speaker field. See "Flags" below.
+- **✎ Flag input**: the player types text in the game and it goes into a text or number flag (the hero's name, a password and so on). Add it with [+ Flag input] in the dialogue card or under "Other" in the line type, and set the **flag to fill**, the **prompt** (e.g. "What's your name?") and a one-line hint. [+ New name flag] creates `pname` (start value "Hero"). For a text flag, finishing with nothing typed gives the start value. A number flag accepts only digits and is kept between its min and max (anything else leaves the value as is). Set the maximum length in that flag's input box look ([Look ▾]). The script is `$ pname = renpy.input("What's your name?", default=pname, length=12).strip() or "Hero"`.
 
 ## 4. Connecting the flow
 
@@ -210,8 +212,19 @@ The side panels float over the canvas. Gaps between cards and space left by fold
 | **◆ Choice** | Each choice goes to a different box. When writing inside a box, delete one with **✕** in the set outside to the left, or with **BackSpace** on an empty choice. Write a **question line** (speaker and text, e.g. "Shall I lend you my umbrella?") in the top row of [Next flow] on the right and it stays in the dialogue window while the choices are shown (a dialogue line right under `menu:`). Leave it empty for choices without a question. |
 | **◇ Condition** | Goes to different boxes depending on conditions. On the **If** row, choose a flag with [Pick flag]; for on/off flags choose **is on / is off**, for number flags a number and **at least / at most / greater than / less than / equals / not equal**, for text flags text and **equals / not equal**. Add clauses with [+ Add clause] and they are joined with **and** (all must match) or **or** (any one matches). Press `{ }` to write a Ren'Py condition directly (e.g. `love >= 5 and (met_alice or rich)`; expressions the pickers can't show appear as a text field). Add **Else if** rows with [+ Condition]; if none of the conditions above match, it goes to the **Else** box. |
 | **▣ Call screen** | Shows a screen made in the [Screen] tab and goes to a different box for each **return value** of the button pressed. Branches are made automatically from the screen's button values (buttons with the same value share a branch); if no value matches, it goes to **Else**. See "Making screens" below. |
+| **✎ Answer input** | A free-answer question. It shows a prompt and goes to the branch the player's answer matches. See "Answer input" below. |
 | **⤷ Call and continue** | Calls another scene and, when it ends, comes back and continues to the "After return" box. Handy for scenes used many times. |
 | **■ End (return)** | Ends here. In a scene called with call, it goes back to where it was called. |
+
+### Answer input (free answer)
+Use it where the player must type the answer, like the culprit's name or a password. Pick **✎ Answer input** in the next-flow window or in [Next flow] on the right.
+
+- Write the **prompt** (e.g. "Who is the culprit?") and the **answers**, and connect a box to each answer with a line. Answers are checked from the top; if none matches it goes to **Wrong**. Connect Wrong back to this box and it keeps asking until the answer is right (to count wrong tries, put a ⚑ change in the Wrong box).
+- Separate several answers for one branch with `/` (e.g. `Kim / Chulsoo`). Pick a flag in **Flag value is also an answer** to accept that flag's current value too (for a culprit that changes each game).
+- By default spaces and letter case don't matter (`Kim` = `kim`, `Kim Chulsoo` = `KimChulsoo`). Turn on **[Spaces and case must match exactly]** to require the same text apart from leading and trailing spaces.
+- Pick a text or number flag in **[Typed value]** to keep what was typed and show it in dialogue like `[guess]`. You can also set the **maximum length**.
+- While writing inside the box you can edit the prompt and answers right there. Lines on the canvas show the answers and "Wrong". Follow-along shows a button for each answer and [Wrong].
+- The script uses Ren'Py's `renpy.input`, so it works without the pygaki plugin.
 
 ### Connecting with lines
 - **Drag the dot (●)** under a box (for choices and conditions, on the right of each row) and drop it on another box to connect them.
@@ -226,10 +239,17 @@ Values the story remembers and uses later to branch, like "did we meet Alice" or
 - **Change**: press **⚑** on a choice row and use [+ Change flag] under **On pick**. Choose a flag and set on, off or toggle (on/off), add, subtract or set (number), or text (text). To change one anywhere in a box, add a **⚑ Flag change** line. Press `{ }` to write an expression directly (e.g. `love += 2`).
 - **Read**: write a condition in a choice's **Show if** and the choice is shown only when it holds (always shown if empty). You can also branch automatically with the next flow **◇ Condition**. Conditions are built by picking flags, the same as for conditions.
 - On export, starting values like `default love = 0` go at the top of the script, `$ love += 1` where it changes, and `"Text" if love >= 5:` on choices. If a condition uses a name not in the flag card, [Check] tells you (a variable made in another file of the game is fine to use as is).
-- **Look**: each flag shows its value as a control. Numbers use a **level indicator** (continuous bar, segmented bar, stars) or a **slider**, on/off uses a **switch**, and text uses a **pull-down** or a **combo box** (you can also type text not in the list). Pick it with [Look ▾] on the right; for numbers set the min and max, for text set the options (text found in the script shows up as + chips). In **Customize**, give each part (fill, background, thumb, ticks, on background and so on) a color or an image from the game folder. **Corners** can be rounded (default), square or pill (rounded by half the height); stars have no corners. The look taken into an in-game HUD uses the same corners.
-- **Test value**: drag the look with the mouse (arrow keys work too), type a number in the box next to a level indicator or slider (kept between the min and max), or click the switch to change the value, and **At this value** below shows what the script does: choices shown or hidden, which ◇ branch runs and what line comes next, and the value after each change. Test values aren't saved; [Back to start value] resets it.
+- **Kept after endings**: turn it on next to the memo and the value stays even after an ending and a new game (ending collections, playthrough counts, endings seen). In the script editor you use the plain name; only the exported script uses `persistent.name`. Writing just that name in a ⚙ direct command line stops Ren'Py, so [Check] tells you (write `persistent.name`).
+- **Look**: each flag shows its value as a control. Numbers use a **level indicator** (continuous bar, segmented bar, cell style such as stars or hearts), on/off uses a **switch** or a **checkbox**, text uses **radio buttons** (default) or a **pull-down**, and text or numbers can use an **input box** the player types in. Pick it with [Look ▾] on the right; for numbers set the min and max, for text set the options (text found in the script shows up as + chips). Older scripts' sliders open as continuous bars, and combo boxes as pull-downs.
+- **Customize**: give each part (fill, background, border, thumb, ring, check mark and so on) a color or an image or video. Pick images in Explorer with 📂 (files outside the game folder are copied); videos (webm) loop without sound. Ren'Py can't animate GIFs, so convert an animated GIF to a transparent video with 🎞. **Corners** can be rounded (default), square or pill (rounded by half the height); the cell style has no corners. The look taken into an in-game HUD is drawn the same way.
+  - **Level indicator**: set **warning and danger** thresholds and a direction (lower is danger / higher is danger) and the fill switches to that stage's fill (leave a stage fill empty to only shift the hue of the normal fill image). A bar takes a frame (stretched as 9-slice when it is an image), inner padding, fill fitting (clip / stretch / tile), an end cap and gloss. The cell style sets the number of cells and the gap, and draws values between cells as half cells.
+  - **Switch** takes a separate thumb image for "on" (in Ren'Py the thumb changes at once instead of sliding).
+  - **Input box**: set the maximum length and **characters that use this as their name**. Characters picked with [+ Character] get the display name `[pname]`, so they show the name the player typed. Remove one with ✕ and it gets its original name back. Players type into it in a ✎ flag input line in the script, or in an input box on a HUD in the [Screen] tab.
+- **Test value**: drag the look with the mouse (arrow keys work too), type a number in the box next to a level indicator (kept between the min and max), or click a switch, checkbox or radio button to change the value, and **At this value** below shows what the script does: choices shown or hidden, which ◇ branch runs and what line comes next, and the value after each change. Test values aren't saved; [Back to start value] resets it.
 - **Condition marks**: when a condition compares a number flag (a choice's show condition, a ◇ branch), numbered circles sit on top of the look. When the test value passes the threshold the circle turns into ✓, and the list below shows the choice as **Open**/**Locked** and the branch as **This branch**. Drag a circle sideways to change that condition's threshold (the 3 in `courage >= 3`). One undo puts it back.
 - **Judgments**: at the bottom of the flag card, each ◇ branch box that splits on number flags gets a group. It has the looks of the flags it uses (drag for test values), each branch's condition (if, elif) and target box; the branch the current values take is shaded green with that box's first line. At the bottom, pick a judgment kind (**If all are enough**, **If any is enough**, **If the sum is enough**, **If it's the largest**), the flags and a threshold, then [+ Add judgment] adds it as the last branch (link its box with a line on the canvas). ↑ reorders branches (they're checked from the top). Open a ◇ box that doesn't use flags yet with [+ Open a ◇ box].
+
+- **Condition panel**: the [Condition] card below the flag card shows ◇ conditional branches as a tree: flag (yellow) → box (purple) → branch condition (blue) → target box (green). With the test values, the branch taken gets a ✓ and the others are dimmed. Filter by scene, and turn on choices with conditions (◆) too. Click a box name to move the canvas there. When you pick a target for a next box, choice or branch, conditional-branch boxes are gathered at the top of the list with a condition summary.
 
 ### Flag recipes
 Press **[+ Add]** on the flag card to open the flag menu. Pick a common pattern (a recipe) such as affection or a scene seen once, and it makes the flags for you.
@@ -248,6 +268,7 @@ Press **[▶ Trace]** in the flag card (from the start of the script) or **[▶ 
 - It shows the current box and the flags changed there (`kindness 0 → 1`), the path taken so far, and the current values of all flags. The canvas moves to that box too.
 - **Choices**: choices whose Show if is false are dimmed and blocked; picking one applies its "On pick" changes and goes to that box.
 - **Conditions**: the branch that matches the current values gets a green border. You can click other branches to go there too.
+- **Answer input**: a button for each answer and [Wrong]. A flag input line passes with the value unchanged (change the value to test in the flag card).
 - After a call, when the called scene ends (return), it comes back to the "After return" box. **↶** steps back once, **[From start]** starts over.
 - Expressions it can compute are numbers, text and on/off values, arithmetic like addition and subtraction, comparisons and and/or/not. Expressions with functions or the game's other variables show as "unknown"; then you choose yourself. `$ name += value` in direct command lines is computed too.
 
@@ -286,16 +307,16 @@ In the **[Screen]** tab at the top, drag and drop buttons to make a Ren'Py scree
 The screen card has two **Kinds**. A **full screen** (`call screen`) covers the dialogue and waits until a button is pressed. A **HUD** (`show screen`, an info panel on top of the game screen) stays in a corner while the dialogue keeps going. Affection bars, bags, minimaps and clocks are made this way. The videos below are samples recorded in Ren'Py (choices and buttons were clicked automatically; the text in the videos is Korean).
 
 #### Making a HUD in the [Screen] tab
-- **[+ HUD from template]** on the left: pick **Inventory** (shows only items whose on/off flag such as `has_key` is on), **Affection bar** (number flag `love`), **Minimap** (place buttons; the current place is the text flag `place`) or **Use an item** (drag the key onto the door to turn on `door_open`). Hover a menu row to see a video recorded in Ren'Py and the script in the card next to it (↑↓ to pick, Enter to create, Esc to close). It also creates the flags it needs, reusing flags with the same name. You can also switch an existing screen's **Kind** to **HUD**.
+- **[+ HUD from template]** on the left: pick **Inventory** (shows only items whose on/off flag such as `has_key` is on), **Affection bar** (number flag `love`), or **Minimap** (place buttons; the current place is the text flag `place`, and that button is selected). The affection bar uses the look of the `love` flag as is. Hover a menu row to see a video recorded in Ren'Py and the script in the card next to it (↑↓ to pick, Enter to create, Esc to close). It also creates the flags it needs, reusing flags with the same name. You can also switch an existing screen's **Kind** to **HUD**.
 - Screen card: **Size** (px), **Anchor** (nine cells: top left, top center … bottom right), **Offset** (px from the anchor), **Order** (`zorder`, higher is in front), **Background** and **Opacity**. You can also drag an empty part of the HUD on the stage. Item positions are measured from the HUD's top-left corner.
 - **Scroll**: turn it on in the screen card and make the **Inner size** larger than the HUD, and in the game you scroll it by dragging or with the mouse wheel (for a wide minimap and so on). Items are measured from the inner top-left corner, and the stage scrolls too. Clicking an empty spot or turning the wheel does not advance the dialogue.
 - **Edit in game**: in the **[Screens]** tab of the in-game editor (Shift+M; "Screens and HUD layout" in the app's [GUI]), pick a screen and its items are drawn over the game. Drag items to move them, drag an empty part of the HUD to move the HUD, and change the anchor, size and text. Ctrl+S updates `pykaki_screens.rpy` and the script picks up the change. Adding or removing items, button actions, and look or bar sizes are done here in the [Screen] tab.
-- **[+ Bar]**: shows a number flag's value as a bar. Pick the flag, the full value, the size, and the fill and empty colors.
-- **[+ Flag look]**: brings in the look made in the flag card (level indicator, slider, switch, pull-down or combo) with its customization (colors, images) as is. Here you only pick the flag, place and size; changing the look updates the HUD right away. In the game it only shows the value (bars move smoothly when the value changes, stars use the DejaVuSans font, text flags show the value as text). Turn on **[Changeable in game]** and the player changes the value with the look: drag a slider or continuous bar, click a cell of a segmented bar or a star (clicking the first one again sets the minimum), click a switch, open a pull-down and pick, or for a combo pick or click the bottom field, type and press Enter. Clicking during dialogue does not advance it, and rollback undoes the change too. It works with the keyboard too: pick a look with the arrow keys (the picked look gets brighter) and press Enter. For bars and sliders, press Enter to grab, change with ←→, then Enter again. The look on the stage gets a ✋. Corners follow **Corners** in the flag card's [Look ▾] and are drawn round without images (parts with an image keep the image).
+- **[+ Import a flag ▾]**: pick the flag name first (the card shows its look as a moving sample). It brings in the look made in the flag card (level indicator, switch, checkbox, radio, pull-down, input box) with its customization (colors, images, videos) as is. Here you only set place and size; change the look with [· Style ▾] on the item or in the flag card and the HUD updates right away. In the game it only shows the value (bars move smoothly when the value changes, stars use the DejaVuSans font, text flags show the value as text). Turn on **[Changeable in game]** and the player changes the value with the look: drag a continuous bar, click a cell of a segmented bar or a star (clicking the first one again sets the minimum), click a switch or checkbox, click an option of a radio, open a pull-down and pick, or click an input box, type and press Enter (Enter with nothing typed gives the start value, numbers accept only digits and stay in range, clicking another field moves there). Clicking during dialogue does not advance it, and rollback undoes the change too. It works with the keyboard too: pick a look with the arrow keys (the picked look gets brighter) and press Enter. For bars, press Enter to grab, change with ←→, then Enter again. The look on the stage gets a ✋. Corners follow **Corners** in the flag card's [Look ▾] and are drawn round without images (parts with an image keep the image).
+- **Images and buttons**: pick images, image buttons and the HUD background image with 📂. Text buttons take background images for normal, hover and selected (leave them empty for text color only); put a condition on **Selected** and the button uses that image and text color when it is true (the current place on a minimap, say). [Kind] switches text ↔ image. **Appear / disappear** picks a motion (fade, slide from the side, rise from below, grow) and a sound effect. They move only when the Show if changes, not when the screen first appears. The HUD background image fits the HUD size.
 - Put `[flag name]` in a **Text** to show its value in game (e.g. `Affection [love]`). Insert it with **[Flag ▾]** next to it. The stage draws with the flags' starting values.
 - **Show if** for each item: the same field as a choice condition (e.g. if `has_key` is on). On the stage, items hidden right now are faded, and items with a condition get a green **?**.
 - A button's **On click**: **Change flag** (any number of changes; dialogue keeps going), **Jump to box** (jumps to that box) or **Open/close HUD** (shows or hides another HUD). Full screens can also **Return a value** (branching as before).
-- **Drag and drop**: turn on **Draggable** for a text or image item to let players drag it in game (it snaps back when dropped). Add a box with **[+ Drop zone]** and pick what it **Accepts** (one draggable item, or any) and **On drop** (same as a button's "On click"). On full screens a drop can also return a value to branch. Dragged items move only inside their screen's box. On the stage, draggable items get a **✋** and drop zones are dashed boxes.
+- **Drag and drop**: draggable items and drop zones made in older scripts still open and export as before. The [+ Drop zone] button and the Use an item template were removed.
 - Turn on **Always show** to keep the HUD up without HUD lines (`config.overlay_screens`).
 - In the script, press **[♡ HUD]** at the top right of a box (below ◐ Shader), then in the **HUD** card on the right pick **Keep / Show** (`show screen name`) **/ Hide** (`hide screen name`) for each HUD. It is shown or hidden when the box starts. Once shown, it stays up across boxes until you hide it (Keep carries over the previous box). It does not appear in the dialogue line list.
 - **Per label**: press **[♡ HUD]** at the top right of a label frame to pick that label's HUDs in the right panel. Each box in the label shows or hides them when it starts. If a box picks the same HUD itself, the box wins. A box that follows the label shows a dashed [♡ HUD] border, and its HUD card says something like "label: Show".
@@ -312,22 +333,6 @@ These videos run screens made with [+ HUD from template] in Ren'Py, unchanged (c
 
 **Minimap**: a place button goes to its box (`Jump`), and when the box changes `place` the "Now:" text changes too.
 <!-- clip hud-map -->
-
-**Use an item (drag and drop)**: the key dropped elsewhere snaps back; dropped on the door it turns `door_open` on and `has_key` off. Dialogue doesn't advance while you drag.
-<!-- clip hud-use -->
-
-```
-draggroup:
-    if has_key:
-        drag:
-            drag_name "key"
-            dragged _PkBack(24, 64)      # snaps back when dropped
-            text "Key"
-    drag:
-        draggable False
-        dropped _PkDrop("key", [SetVariable("door_open", True), SetVariable("has_key", False)])
-        text "Door (drop here)"
-```
 
 Below is how HUDs behave in Ren'Py and what the script looks like.
 
@@ -425,17 +430,17 @@ label map_cafe:
 | `Jump("label")` | A button goes to that scene |
 | `ToggleScreen("name")` | Open or close another HUD |
 | `Return("value")` | Close a call screen and return a value (the [Screen] tab's "Return value") |
-| `draggroup`, `drag` | Drag and drop (the [Screen] tab's "Draggable", "Drop zone") |
+| `draggroup`, `drag` | Drag and drop ("Draggable", "Drop zone" in older scripts) |
 
 - Use the flags you made in pygaki's flag card as they are (`default love = 0` is added on export).
 - HUDs made in the [Screen] tab go into `pykaki_screens.rpy` (hand edits are overwritten on the next export). For things the tab can't make (`for` loops, `selected`), write a new `.rpy` file in the `game` folder (e.g. `my_screens.rpy`).
 
 ## 5. Managing labels (scenes)
 
-- Change names, display titles and colors in the **label list** on the left.
+- In the **Scenes and characters** tree on the left, each label sits under the "Scenes" row with its boxes below it (click ▸ to expand or fold; arrow keys and Enter work too). **[+ Scene]** makes a new label. ✎ on a label row (or double-click, F2) edits the name, display title and color, and ✕ deletes it (not while it still has boxes).
   - The **name** is the Ren'Py label name, so use only English letters, digits and `_`. E.g. `chapter1_rain`
-  - The **display title** can be anything.
-- Click a number button to move the view to that label's boxes.
+  - The **display title** can be anything. The tree shows the display title first; in a narrow panel the label name next to it shrinks. Hover to see both.
+- The number button at the end of the row moves the view to that label's boxes and selects them all. Click a box row to go to that box.
 - To move a box to another label, choose it under **label** in the right panel. There's also **[+ Split into new label]**.
 - Select several boxes with **Shift+drag** and you can **group them into one label** on the right.
 - **[Make first box of label]**: sets the box where that label starts.
@@ -462,7 +467,11 @@ The play screen inside pygaki was removed. You view the script by running it as 
   - **Details**: press [Details] beside an effect to adjust its values (duration, distance, strength, color, etc.) with sliders. Shown in the preview right away; ↺ resets to the default. If values were changed, the button shows how many.
   - **Text box**: change [No box] to [Speech bubble] or [Rounded frame] and a box surrounds the dialogue text. For the speech bubble you can choose the tail direction (down, up, left, right, none), and for both a tilt (degrees). Speech bubbles use dark text unless you set a text color. The preview is an approximation; see the exact shape in Ren'Py. Exported only for games with the pygaki plugins.
   - **Image/video box**: pick [Image/video] to lay an image or video (webm etc.) behind the dialogue text. It is centered on the text, and the default dialogue window and name box backgrounds go away so the image takes the window's place. Type a path relative to the game folder (e.g. `images/say/cloud.png`) or pick one with [📂] (a file outside game is copied into `images` or `movies` after asking). [Fit to text] stretches it to the text; [Keep image size] lays it at its own size. **Position, size and rotation are set in the game**: in the in-game editor (Shift+M) dialogue tab, press [Images] next to Edit:, drag the image to move it, use the wheel (or A/D) to resize and Q/E to rotate, then save with Ctrl+S and the script editor copies the values in (shown as [Image offset · x · ° ✕] next to the field; ✕ resets). The preview shows the image too. Besides the edit tab on the right, the [Text box] row at the bottom of the tag box that appears next to the text while you edit inside a box offers the same choices. For a video, a [Transparent video] checkbox appears. It lays a video that holds color on the left and transparency on the right (turned on automatically when the name starts with `mask_`) as transparent. Convert a transparent webm or green-screen video with [🎞] next to the field (7-3). The [Opacity] field (0-1) fades the image.
-  - **Images/video behind choices**: press [🖼] on a choice row under [Next flow] to set an image or video for [Normal], [On hover] (mouse over or keyboard focus) and [On select] (shown briefly after the click, then the game moves on; seconds in the next box, default 0.5). Like dialogue, position, size and rotation are set in the in-game editor choice tab under [Edit: Image behind], shared by all three images. Choices with an image lose the default button background and shrink to the text. Exported only with the pygaki plugin link on; if the game's plugins are too old, the Check tab tells you to [Update plugins].
+    - **🔗 Link text**: from then on the text also takes the image's size, rotation and move (relative to the image when you linked). The canvas row gets a chain mark. You can also press [Link with text] under [Edit: Image] in the in-game editor's dialogue tab.
+    - **Corner warp**: under [Edit: Image] in the in-game editor, drag the four corners of the image (pink dots) and the text (sky-blue dots) separately to tilt them with perspective. [Reset four corners] undoes it, and Ctrl+S saves it into the script. The field shows "Corner warp" with ✕, and the preview tilts it too.
+    - **On appear**: applies an image effect from the effects folder (e.g. vibrate `vibrate`, spring in `springin`) when the text box appears. Change the time and values with [Details]. Linked text moves along.
+    - If the game's pygaki plugin is an older version, linking, corner warp and on-appear are not exported and [Check] tells you.
+  - **Images/video behind choices**: press [🖼] on a choice row under [Next flow] to set an image or video for [Normal], [On hover] (mouse over or keyboard focus) and [On select] (shown briefly after the click, then the game moves on; seconds in the next box, default 0.5). Like dialogue, position, size and rotation are set in the in-game editor choice tab under [Edit: Image behind], shared by all three images (linking and corner warp work as for dialogue). Choices with an image lose the default button background and shrink to the text. Exported only with the pygaki plugin link on; if the game's plugins are too old, the Check tab tells you to [Update plugins].
   - **Effects folder**: put effect files (`.glsl`) in the game's `game/ui_kit/effects` folder and they appear at the end of the text effect list and at the end of the "how it appears" list of background/show lines. Take a file out and it disappears from the lists (the samples too). Adding, removing and hiding can be done by clicking in the **[Effects] screen** (chapter 7-1). By hand, to only hide one from lists without deleting it, write effect names one per line in `effects_off.txt` in that folder. Lines that already use a hidden effect keep working. Samples included: rise from below, letter spacing closing in, light sweep (text), iris open, bands cover and open (images). See the image ones in the [Effects] screen samples and in the game. How to make a new effect is in that folder's `README.md`.
   - **Preview**: the top field shows this line's text with its effects. You don't need to start Ren'Py. Text effects are drawn with the same shader code as Ren'Py. Changing a value plays it again; click the field or ↺ to see it again. Text is fitted to fill the field, so the size field's value doesn't show here.
   - **Text effects**: Ren'Py's built-in effects (dissolve, flip, grow, jitter, wave) and pygaki plugin effects (scatter and gather, fall, random order, color flash, big stamp in, cursor typewriter, color trail, glitch, blur to sharp, block glitch, shimmer, VHS static, float up, tilt in, stretch in, slide and stop, slight shake, box per character, stamp, squash and bounce, 3D text). pygaki plugin effects are exported only for games with the pygaki plugins. If an old script still has effects removed from the list (typewriter, blurred wait, melt, datamosh, flip out, LED board, split up and down, spin, light bleed, draw from top, outline fill, pop zoom, pop out), they show by name in the field and appear one character at a time in the game.
@@ -625,6 +634,7 @@ Languages elsewhere:
 Change them in **[Settings]** at the right of the toolbar. These settings are saved only in that browser and don't go into the script file.
 
 - **Screen theme**: just **Apple style** (a translucent toolbar on a pastel background). The old dark theme, custom colors and text color option were removed.
+- **Card transparency** (0–85%, default 28%): changes all the cards in the left, right and GUI panels together. Higher shows more of the canvas behind and a stronger edge glow (less blur and shadow).
 - **Label border** (0–6px, default 3px): thickness of the line grouping boxes of the same label. At 0 the line is hidden.
 - **Box color (saved in this script)**: paints the selected box. Click a color swatch or type a hex code (#RRGGBB or #RGB). Clear it with [Back to label color]. The color is saved in the script file and can be undone with Ctrl+Z. This is the only screen setting that goes into the script file.
 - **Font**: just Pretendard 500. It's included in the app, so it shows without the internet.

@@ -1,4 +1,4 @@
-<!-- 원본: bundle/guide/parts/start.md @ e3aee035cb -->
+<!-- 원본: bundle/guide/parts/start.md @ 34c59b7072 -->
 # はじめに
 
 ## pygaki でできること
@@ -26,12 +26,12 @@ Ren'Py のコードを覚えなくてもゲームを作れるようにする、�
 
 ## ダウンロードと最初のプロジェクト
 
-1. GitHub リポジトリの Releases から pygaki パックをダウンロードします。Ren'Py がなければ Ren'Py 入りの zip(`pygaki-…-renpy-….zip`)を好きなフォルダーに展開します。Ren'Py SDK がすでにあれば、追加用 zip(`pygaki-…-addon.zip`)の中の `launcher`、`pygaki` を SDK フォルダー(`renpy.exe` がある場所)に入れます。
+1. GitHub リポジトリ [github.com/halftomatodev/pygaki](https://github.com/halftomatodev/pygaki) · ダウンロード [github.com/halftomatodev/pygaki/releases/latest](https://github.com/halftomatodev/pygaki/releases/latest)
 2. `renpy.exe` でランチャーを起動します。
-3. ランチャー左下の **[+ Create New Project]**(新しいプロジェクトを作成)で **Pygaki** を選び、名前と解像度を決めます(アクセント色・背景色は聞きません。ボックスは透明にしておき、画像を入れて使います)。pygaki プラグインとカーソル・クリック待ちのサンプル画像が入ったプロジェクトができます。「기본 (Vanilla)」(基本)を選ぶと Ren'Py 本来の新規プロジェクトです。VHS オーバーレイは最初はオフです。
+3. ランチャー左下の **[+ Create New Project]**(新しいプロジェクトを作成)で **Pygaki** を選び、名前と解像度を決めます。
    * Pygaki テンプレートは韓国語のプロジェクトとして作られます(サンプルのスクリプト、共通の文言)。ゲームの言語は Ren'Py の設定(`game/options.rpy`、`game/tl/`)で変えます。
 4. 左の一覧でプロジェクトを選んで **[pygaki로 편집]**(pygaki で編集)を押すと、pygaki アプリがそのプロジェクトを開きます。シナリオはプロジェクトフォルダーの `プロジェクト名.flow.json` に自動で保存されます。
-5. アプリ右上の **[▶ Ren'Pyで実行]** でゲームを起動して確認します。ランチャーの [Launch Project] で起動しても、アプリの [GUI編集] がゲームにつながります(緑の点)。
+5. アプリ上部タブの **[▶ Ren'Pyで実行]** でゲームを起動して確認します。ランチャーの [Launch Project] で起動しても、アプリの [GUI編集] がゲームにつながります(緑の点)。
 
 初めてアプリを起動したとき、Windows が「PC が保護されました」画面を出したら [詳細情報] → [実行] を押します(アプリに署名がないためです)。この案内書は、ランチャーの **[pygaki 안내서]**(pygaki 案内書)ボタンや、パックの `pygaki/pygaki_guide_ja.html` からいつでも開けます。
 

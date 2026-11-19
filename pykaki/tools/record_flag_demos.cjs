@@ -16,7 +16,7 @@ const ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(ROOT, 'dist', 'index.html');
 const OUT = path.join(ROOT, 'src', 'flagclips');
 // 용례 id → 메뉴 줄 이름, 걸음 수 (flagRecipes.ts의 demo 길이. 걸음마다 1.5초)
-const RECIPES = { affection: ['호감도', 5], met_once: ['한 번 본 장면', 3], item: ['물건 얻기·쓰기', 3], locked_choice: ['잠긴 선택지', 4], route: ['갈래 정하기', 3], ending: ['여러 끝', 4] };
+const RECIPES = { affection: ['호감도', 5], met_once: ['한 번 본 장면', 3], item: ['물건 얻기·쓰기', 3], locked_choice: ['잠긴 선택지', 4], route: ['갈래 정하기', 3], player_name: ['주인공 이름', 3], ending: ['여러 끝', 4] };
 const STEP = 1.5;
 const slash = (p) => p.split(path.sep).join('/');
 

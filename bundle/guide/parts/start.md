@@ -23,11 +23,11 @@
 
 ## 받기와 첫 프로젝트
 
-1. GitHub 저장소의 Releases에서 pygaki 묶음을 받습니다. 렌파이가 없으면 렌파이까지 든 zip(`pygaki-…-renpy-….zip`)을 아무 폴더에 풀고, 렌파이 SDK가 이미 있으면 덧붙임 zip(`pygaki-…-addon.zip`) 안의 `launcher`, `pygaki`를 SDK 폴더(`renpy.exe`가 있는 곳)에 넣습니다.
+1. GitHub 저장소 [github.com/halftomatodev/pygaki](https://github.com/halftomatodev/pygaki) · 다운로드 [github.com/halftomatodev/pygaki/releases/latest](https://github.com/halftomatodev/pygaki/releases/latest)
 2. `renpy.exe`로 런처를 켭니다(영어로 나오면 preferences → Language → 한국어).
-3. 런처 왼쪽 아래 **[+ Create New Project]**(새 프로젝트 만들기)에서 **Pygaki**를 고르고 이름과 해상도를 정합니다(강조·배경 색은 묻지 않아요. 상자는 투명하게 두고 그림을 넣어 써요). pygaki 플러그인과 커서·클릭 대기 샘플 그림이 들어 있는 한국어 프로젝트가 생깁니다. "기본 (Vanilla)"을 고르면 렌파이 원래 새 프로젝트입니다. VHS 덮개는 처음에는 꺼져 있습니다.
+3. 런처 왼쪽 아래 **[+ Create New Project]**(새 프로젝트 만들기)에서 **Pygaki**를 고르고 이름과 해상도를 정합니다.
 4. 왼쪽 목록에서 프로젝트를 고르고 **[pygaki로 편집]**을 누르면 pygaki 앱이 그 프로젝트를 엽니다. 대본은 프로젝트 폴더의 `프로젝트이름.flow.json`에 저절로 저장됩니다.
-5. 앱 오른쪽 위 **[▶ 렌파이에서 실행]**으로 게임을 켜서 봅니다. 런처의 [Launch Project]로 켜도 앱의 [GUI 편집]이 게임에 붙습니다(초록 점).
+5. 앱 상단 탭의 **[▶ 렌파이에서 실행]**으로 게임을 켜서 봅니다. 런처의 [Launch Project]로 켜도 앱의 [GUI 편집]이 게임에 붙습니다(초록 점).
 
 처음 앱을 켤 때 윈도우가 "PC 보호" 창을 띄우면 [추가 정보] → [실행]을 누릅니다(앱에 서명이 없어서 그렇습니다). 이 안내서는 런처의 **[pygaki 안내서]** 단추나 묶음의 `pygaki/pygaki_안내서.html`로 다시 열 수 있습니다.
 

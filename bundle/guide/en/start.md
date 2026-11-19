@@ -1,4 +1,4 @@
-<!-- 원본: bundle/guide/parts/start.md @ e3aee035cb -->
+<!-- 원본: bundle/guide/parts/start.md @ 34c59b7072 -->
 # Getting started
 
 ## What pygaki does
@@ -26,12 +26,12 @@ Language: the language button at the top right of the pygaki app switches the sc
 
 ## Download and your first project
 
-1. Download the pygaki bundle from the Releases page of the GitHub repository. If you don't have Ren'Py, unzip the zip with Ren'Py inside (`pygaki-…-renpy-….zip`) into any folder. If you already have the Ren'Py SDK, put `launcher` and `pygaki` from the add-on zip (`pygaki-…-addon.zip`) into the SDK folder (where `renpy.exe` is).
+1. GitHub repository [github.com/halftomatodev/pygaki](https://github.com/halftomatodev/pygaki) · Download [github.com/halftomatodev/pygaki/releases/latest](https://github.com/halftomatodev/pygaki/releases/latest)
 2. Start the launcher with `renpy.exe`.
-3. In **[+ Create New Project]** at the bottom left of the launcher, choose **Pygaki** and set the name and resolution (it does not ask for accent and background colors: boxes stay transparent and you put in your own images). You get a project with the pygaki plugins and sample cursor and click-to-continue images. Choosing "기본 (Vanilla)" (default) gives you Ren'Py's own new project. The VHS overlay starts off.
+3. In **[+ Create New Project]** at the bottom left of the launcher, choose **Pygaki** and set the name and resolution.
    * The Pygaki template creates a Korean project (sample script and common text). Change the game's language with Ren'Py's settings (`game/options.rpy`, `game/tl/`).
 4. Select the project in the list on the left and press **[pygaki로 편집]** (Edit with pygaki); the pygaki app opens that project. The script is saved automatically to `ProjectName.flow.json` in the project folder.
-5. Press **[▶ Run in Ren'Py]** at the top right of the app to start the game and see it. If you start it with the launcher's [Launch Project] instead, the app's [GUI] still connects to the game (green dot).
+5. Press **[▶ Run in Ren'Py]** in the tabs at the top of the app to start the game and see it. If you start it with the launcher's [Launch Project] instead, the app's [GUI] still connects to the game (green dot).
 
 If Windows shows a "Windows protected your PC" window the first time you start the app, press [More info] → [Run anyway] (the app is not signed). You can reopen this guide with the launcher's **[pygaki 안내서]** (pygaki guide) button or from `pygaki/pygaki_guide_en.html` in the bundle.
 

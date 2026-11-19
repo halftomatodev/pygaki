@@ -1399,7 +1399,7 @@ e "삐빅." (fx="gameboy", font="screen_fx/fonts/neodgm.ttf", size=32)   # 대�
 | 글자 등장 효과 (`@effect`) | pygaki 글자 효과 카드의 등장 효과 목록 | `e "아래에서 올라온다." (cps=30, effect="maskup")` |
 | 그림 전환 (`@transition`) | pygaki 배경·보이기 줄의 "나타나는 방식" | `scene bg hall with img_fx.use("irisin")`, 시간과 값은 `img_fx.use("bands", 1.4, count=10)` |
 
-들어 있는 효과: 글자 `maskup` 아래에서 올라오기, `tracking` 자간이 좁아지며, `sweep` 빛 지나가기, `backbox` 뒤에 상자, `karaoke` 노래방, `meltglitch` 녹는 글리치, `droplets` 물방울, `spring` 튕기며 자리 잡기, `marquee` 옆으로 흐르기, `scramble` 글자 해독, `bubble` 말풍선(모양 넷, 그림으로 바꿔 끼우기는 효과 폴더 README) / 그림 `irisin` 원으로 열리기, `bands` 띠로 덮였다 열리기, `pixelsort` 픽셀소트 (크래시), `datamosh` 데이터모싱 (크래시), `slide` 옆으로 밀기, `mosaic` 모자이크로 바뀌기, `blinds` 가로 블라인드, `static` TV 지직, `calibrate` 조정 화면, `tapestretch` 테이프 늘어짐, `blink` 점멸, `pushup` 밀어 올리기. 앱의 [효과] 화면에서는 목록에서 [숨김]만 할 수 있고, 넣거나 빼려면 이 폴더에 파일을 넣거나 지웁니다.
+들어 있는 효과: 글자 `maskup` 아래에서 올라오기, `tracking` 자간이 좁아지며, `sweep` 빛 지나가기, `backbox` 뒤에 상자, `karaoke` 노래방, `meltglitch` 녹는 글리치, `droplets` 물방울, `spring` 튕기며 자리 잡기, `marquee` 옆으로 흐르기, `scramble` 글자 해독, `bubble` 말풍선(모양 넷, 그림으로 바꿔 끼우기는 효과 폴더 README) / 그림 `irisin` 원으로 열리기, `bands` 띠로 덮였다 열리기, `pixelsort` 픽셀소트 (크래시), `datamosh` 데이터모싱 (크래시), `slide` 옆으로 밀기, `mosaic` 모자이크로 바뀌기, `blinds` 가로 블라인드, `static` TV 지직, `calibrate` 조정 화면, `tapestretch` 테이프 늘어짐, `blink` 점멸, `pushup` 밀어 올리기, `vibrate` 진동, `springin` 튕기며 들어오기. 앱의 [효과] 화면에서는 목록에서 [숨김]만 할 수 있고, 넣거나 빼려면 이 폴더에 파일을 넣거나 지웁니다.
 
 **셰이더가 바뀔 때 그림 전환으로**: `pixelsort`, `datamosh`는 화면 셰이더를 바꿀 때의 전환으로도 씁니다. 앞 화면이 깨진 채 잠깐 멈췄다가 새 화면으로 끊어 넘어가고, 셰이더도 그 순간에 바뀝니다. pygaki에서는 상자의 ◐ 셰이더 → 전환 "시작할 때", "끝날 때"에서 고르고 그 아래 "방향"을 정합니다. 원고로 직접 쓸 때는 이렇게 적습니다.
 

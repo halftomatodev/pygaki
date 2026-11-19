@@ -1,4 +1,4 @@
-<!-- 원본: bundle/guide/parts/overview.md @ 10bea5c7ab -->
+<!-- 원본: bundle/guide/parts/overview.md @ 891412bfe3 -->
 # At a glance: where docs and files are
 
 What is where in the bundle you downloaded, in a game project you made, and in the repository. Look here when you wonder "can I delete this file?" or "where is my work saved?".
@@ -95,5 +95,6 @@ The repository's documents are in Korean. The Japanese and English versions of t
 | v1.4 | 5.1 | conditions and flags in scripts, copy, paste and duplicate boxes, handles on choice and condition branches (drag to reorder, delete), the effects folder and twelve image transitions, shader transitions (pixel sort, datamosh, TV static, etc.), nine more screen shaders (ripple, old film, fisheye, old camcorder, etc.), more text effects (speech bubble, karaoke, box behind, droplets, etc.), missing effects fall back to defaults instead of stopping, tag box (cards, sliders, sample tooltips), ruby, `{clear}`, speed as "characters per second", app [Effects]·[Shaders] galleries and hiding (hidden ones go to the bottom), pygaki as a desktop app only, this HTML guide |
 | v1.5 | 5.2 | language button (Japanese, English), [Screen] tab and calling screens, voice card, find and replace, following flags, music and sound details, pause and shake lines, front/behind for shown images, choice questions, image name checks, [⇔ Beside game], shader block corruption, VHS worn tape |
 | v1.6 | 5.3 | Edit shortcuts (change each function's key by pressing it in the game window, a warning on overlaps, added to the controls help list automatically), the splash controls guide follows the shortcut table, Japanese and English guides, removed the [⇔ Beside game] button (the automatic move in settings stays) |
+| v1.7 | 5.4 | Ren'Py 8.6.1 support, flag looks (checkbox, radio, input box, part customization), flag input and answer input (free answer), flag values in dialogue, flags kept after endings, linked text boxes and corner warp, image effects vibrate and spring in, per-label HUDs, the scenes and characters tree, the condition panel, transparent video maker, [Fonts] screen |
 
 Details for each version are in `showpy/CHANGELOG.md`.

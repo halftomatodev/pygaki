@@ -59,7 +59,7 @@ pygaki를 내 게임에 맞게 고치거나, 기능을 더하거나, 고친 것�
 
 그림 전환의 `@fragment`에서는 `l__t`(진행 0→1), `l__uv`(점의 자리 0~1), `l__size`(가로 세로 픽셀), `l__old`(앞 그림 색), `l__new`(새 그림 색)를 쓰고, 다른 자리는 `texture2D(tex0, 자리)`(앞 그림), `texture2D(tex1, 자리)`(새 그림)로 읽습니다. 끝에 `gl_FragColor`에 색을 넣습니다. 셰이더 전환에 쓰는 그림 전환은 `@set u__cut 값`(0~1)으로 화면 셰이더가 바뀌는 때를 정합니다.
 
-폴더에 들어 있는 효과(글자 `maskup`, `tracking`, `sweep`, `backbox`, `karaoke`, `meltglitch`, `droplets`, `scramble`, 그림 `irisin`, `bands`, `pixelsort`, `datamosh`, `slide`, `mosaic`, `blinds`, `static`, `calibrate`, `tapestretch`, `blink`, `pushup`)가 본보기입니다. 자세한 형식과 AI에게 새 효과를 부탁할 때 쓸 요청문은 `ui_kit/effects/README.md`에 있습니다. 글자 효과의 기본 효과는 `ui_kit/engine/text_effects.glsl` 한 파일에 있고, pygaki도 빌드할 때 이 파일을 그대로 가져가서 렌파이와 같은 모양으로 그립니다.
+폴더에 들어 있는 효과(글자 `maskup`, `tracking`, `sweep`, `backbox`, `karaoke`, `meltglitch`, `droplets`, `scramble`, 그림 `irisin`, `bands`, `pixelsort`, `datamosh`, `slide`, `mosaic`, `blinds`, `static`, `calibrate`, `tapestretch`, `blink`, `pushup`, `vibrate`, `springin`)가 본보기입니다. 자세한 형식과 AI에게 새 효과를 부탁할 때 쓸 요청문은 `ui_kit/effects/README.md`에 있습니다. 글자 효과의 기본 효과는 `ui_kit/engine/text_effects.glsl` 한 파일에 있고, pygaki도 빌드할 때 이 파일을 그대로 가져가서 렌파이와 같은 모양으로 그립니다.
 
 ## 화면 셰이더 하나 더하기
 

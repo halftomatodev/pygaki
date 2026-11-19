@@ -1,4 +1,4 @@
-<!-- 원본: bundle/guide/parts/develop.md @ 3129bffd70 -->
+<!-- 원본: bundle/guide/parts/develop.md @ 5655515d9c -->
 # 自分で手を入れる
 
 pygaki を自分のゲームに合わせて直したい、機能を足したい、直したものをほかの人と共有したい人のための章です。設定値を変えるだけなら「プラグイン カスタムガイド」の章で足ります。この章はコードやエフェクトファイルを直接直すときに見ます。
@@ -60,7 +60,7 @@ pygaki を自分のゲームに合わせて直したい、機能を足したい�
 
 画像トランジションの `@fragment` では `l__t`(進み具合 0→1)、`l__uv`(点の位置 0〜1)、`l__size`(横縦のピクセル)、`l__old`(前の画像の色)、`l__new`(新しい画像の色)を使い、ほかの位置は `texture2D(tex0, 位置)`(前の画像)、`texture2D(tex1, 位置)`(新しい画像)で読みます。最後に `gl_FragColor` に色を入れます。シェーダートランジションに使う画像トランジションは、`@set u__cut 値`(0〜1)で画面シェーダーが切り替わる時点を決めます。
 
-フォルダーに入っているエフェクト(文字 `maskup`、`tracking`、`sweep`、`backbox`、`karaoke`、`meltglitch`、`droplets`、`scramble`、画像 `irisin`、`bands`、`pixelsort`、`datamosh`、`slide`、`mosaic`、`blinds`、`static`、`calibrate`、`tapestretch`、`blink`、`pushup`)がお手本です。詳しい形式と、AI に新しいエフェクトを頼むときの依頼文は `ui_kit/effects/README.md` にあります。文字エフェクトの基本エフェクトは `ui_kit/engine/text_effects.glsl` 1 ファイルにあり、pygaki もビルド時にこのファイルをそのまま取り込んで、Ren'Py と同じ見た目で描きます。
+フォルダーに入っているエフェクト(文字 `maskup`、`tracking`、`sweep`、`backbox`、`karaoke`、`meltglitch`、`droplets`、`scramble`、画像 `irisin`、`bands`、`pixelsort`、`datamosh`、`slide`、`mosaic`、`blinds`、`static`、`calibrate`、`tapestretch`、`blink`、`pushup`、`vibrate`、`springin`)がお手本です。詳しい形式と、AI に新しいエフェクトを頼むときの依頼文は `ui_kit/effects/README.md` にあります。文字エフェクトの基本エフェクトは `ui_kit/engine/text_effects.glsl` 1 ファイルにあり、pygaki もビルド時にこのファイルをそのまま取り込んで、Ren'Py と同じ見た目で描きます。
 
 ## 画面シェーダーを 1 つ足す
 
