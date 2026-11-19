@@ -363,6 +363,7 @@ function CharEdit({ c, i, onDone }: { c: Character; i: number; onDone: () => voi
     });
     return true;
   };
+  const strs = useStore((s) => s.project.variables).filter((f) => f.kind === 'str');
   const done = () => commit() && onDone();
   const keys = (e: KeyboardEvent) => {
     if (e.key === 'Escape') return e.preventDefault(), setId(c.id), onDone();
@@ -378,6 +379,13 @@ function CharEdit({ c, i, onDone }: { c: Character; i: number; onDone: () => voi
         </button>
       </div>
       <input className={'cid' + (bad ? ' invalid' : '')} value={id} onChange={(e) => setId(e.target.value)} onBlur={commit} title="렌파이 변수 이름 (예: a, alice)" aria-label="변수 이름" />
+      {/* 이름을 플레이어가 정할 때: 이름 칸을 글자 플래그 값 [pname]으로 (이름 입력 줄과 같이 씀, FEATURE 30) */}
+      {strs.length > 0 && (
+        <select className="cid" value="" onChange={(e) => e.target.value && update((p) => void (p.characters[i].name = `[${e.target.value}]`), 'cname' + i)} title="표시 이름을 글자 플래그 값으로: 이름 입력 줄에서 플레이어가 친 이름이 보여요">
+          <option value="">이름을 플래그 값으로</option>
+          {strs.map((f) => <option key={f.id} value={f.name}>[{f.name}]{f.note ? ` ${f.note}` : ''}</option>)}
+        </select>
+      )}
     </div>
   );
 }

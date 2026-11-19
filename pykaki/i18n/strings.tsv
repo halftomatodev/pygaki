@@ -2727,3 +2727,26 @@ GIF·투명 webm·PNG 연속 그림을 렌파이가 쓰는 투명 영상으로 �
 플래그 값 [이름]: 커서 자리에 넣으면 게임에서 그때의 값이 보여요 (예: 호감도 [love])	フラグの値 [名前]: カーソル位置に入れると、ゲームでその時の値が表示されます (例: 好感度 [love])	Flag value [name]: insert at the cursor and the game shows its current value (e.g. Affection [love])
 ${where}의 [${n}]: "${n}"는 플래그 카드에 없는 이름이에요. 게임에 없으면 렌파이가 멈춰요 (${b.title || b.id})	{0}の [{1}]: "{2}" はフラグカードにない名前です。ゲームになければ Ren'Py が止まります ({3})	[{1}] in {0}: "{2}" is not on the flag card. If the game doesn't define it, Ren'Py will stop ({3})
 ${where}의 [${n}]: "${n}"는 플래그가 아니라 글자 그대로 보여요. 값을 보이려면 플래그 카드에 만들어 주세요 (${b.title || b.id})	{0}の [{1}]: "{2}" はフラグではないので文字のまま表示されます。値を表示するにはフラグカードで作ってください ({3})	[{1}] in {0}: "{2}" is not a flag, so it is shown as text. Create it on the flag card to show its value ({3})
+이름 입력	名前入力	Name input
+✎ 이름 입력	✎ 名前入力	✎ Name input
+이름 입력 줄	名前入力の行	Name input line
+최대 글자	最大文字数	Max chars
+최대 글자 수	最大文字数	Max characters
+주인공 이름	主人公の名前	Hero's name
++ 새 이름 플래그	+ 新しい名前フラグ	+ New name flag
+이름을 플래그 값으로	名前をフラグの値に	Use a flag value as the name
+(글자 플래그가 아님)	(文字フラグではない)	(not a text flag)
+넣을 플래그	入れるフラグ	Flag to set
+묻는 글	質問文	Prompt
+묻는 글 (예: 이름이 뭐야?)	質問文 (例: 名前は?)	Prompt (e.g. What's your name?)
+친 이름을 넣을 글자 플래그를 골라 주세요	入力した名前を入れる文字フラグを選んでください	Choose a text flag to store the typed name
+칠 수 있는 최대 글자 수. 비우면 렌파이 기본	入力できる最大文字数。空なら Ren'Py の既定	Maximum characters that can be typed. Empty uses the Ren'Py default
+친 이름을 이 글자 플래그에 넣어요. 대사에서 [이름]으로 보여요	入力した名前をこの文字フラグに入れます。セリフでは [名前] で表示されます	Stores the typed name in this text flag. Show it in dialogue with [name]
+이름을 안 치면 "${String(cur.init ?? '')}" (플래그 ${cur.name}의 처음 값). 대사에서 [${cur.name}]으로 보여요	名前を入力しなければ "{0}" (フラグ {1} の初期値)。セリフでは [{2}] で表示されます	If no name is typed: "{0}" (initial value of flag {1}). Show it in dialogue with [{2}]
+이름 입력 줄에 넣을 플래그를 골라 주세요 (${b.title || b.id})	名前入力の行に入れるフラグを選んでください ({0})	Choose a flag for the name input line ({0})
+표시 이름을 글자 플래그 값으로: 이름 입력 줄에서 플레이어가 친 이름이 보여요	表示名を文字フラグの値に: 名前入力の行でプレイヤーが入力した名前が表示されます	Use a text flag value as the display name: shows the name the player typed in the name input line
+이름 입력 줄의 플래그 "${f.name}"는 글자 플래그여야 해요 (${b.title || b.id})	名前入力の行のフラグ "{0}" は文字フラグにしてください ({1})	The name input line's flag "{0}" must be a text flag ({1})
+이름 입력 줄: 플래그 "${f.name}"의 처음 값이 비어 있어서, 이름을 안 치면 빈 이름이 돼요. 처음 값에 기본 이름을 적어 주세요 (${b.title || b.id})	名前入力の行: フラグ "{0}" の初期値が空なので、名前を入力しないと空の名前になります。初期値に既定の名前を書いてください ({1})	Name input line: flag "{0}" has an empty initial value, so skipping the name leaves it blank. Put a default name in its initial value ({1})
++ 이름 입력	+ 名前入力	+ Name input
+지금 쓰는 줄 뒤에서 플레이어가 이름을 쳐요. 친 이름은 글자 플래그에 들어가서 대사에서 [이름]으로 보여요	今の行の後でプレイヤーが名前を入力します。入力した名前は文字フラグに入り、セリフでは [名前] で表示されます	After the current line the player types a name. It is stored in a text flag and shown in dialogue with [name]
+최대	最大	Max

@@ -86,7 +86,7 @@
 
 - **상자(node)**: 대사 묶음 하나. 반드시 label 그룹 하나(`group`)에 속한다. `color`(선택)는 상자 색으로, 없으면 label 색을 따른다. `.rpy`에는 영향이 없다.
 - **label 그룹**: 렌파이 `label` 하나. 상자 여러 개를 묶는다. `entry`가 그 label의 첫 상자다.
-- **줄(line) 종류**: `narration`(내레이션), `say`(캐릭터 대사, `who`=캐릭터 id, `attr`=표정 등), 연출 줄(`scene` `show` `hide` `music` `sound` `pause` `shake` `hud`, 예전 `fx`), `flag`(플래그 바꾸기), `command`(렌파이 명령 그대로), `note`(주석).
+- **줄(line) 종류**: `narration`(내레이션), `say`(캐릭터 대사, `who`=캐릭터 id, `attr`=표정 등), 연출 줄(`scene` `show` `hide` `music` `sound` `pause` `shake` `hud`, 예전 `fx`), `flag`(플래그 바꾸기), `input`(이름 입력), `command`(렌파이 명령 그대로), `note`(주석).
 - **연출 줄** (`src/stage.ts`): 명령을 직접 쓰지 않고 칸을 채운다. `text`는 쓰지 않는다.
   - `scene` `{ image, trans }`: 배경 이름(`bg` 뒤), 전환
   - `show` `{ kind, who, attr, image, at, trans, zorder?, behind? }`: `kind`는 `char`(who+attr) | `bg`(image) | `etc`(image), 위치 `left`/`right`(비우면 가운데). 앞뒤(`FEATURE` 15): `zorder` 숫자 또는 `behind` 태그 하나(화면은 둘 중 하나만, `LayerPick`)
@@ -96,6 +96,7 @@
   - `pause` `{ secs? }`: 멈춤(`FEATURE` 15). 없으면 클릭할 때까지
   - `shake` `{ shake? }`: 흔들기(`FEATURE` 15). `vpunch`(없을 때) | `hpunch` | `flash`(렌파이에 없어서 `Fade(0.1, 0.0, 0.5, color="#fff")`, `stage.ts` `FLASH_CODE`)
   - `hud` `{ screen?, stop? }`: HUD 보이기/숨기기(`FEATURE` 18). `screen`은 `project.screens`의 id(HUD 종류만 고름), `stop`이면 `hide screen 이름`, 아니면 `show screen 이름`. 화면이 없거나 전체 화면이면 `stageCode`가 문제로 알림(`stageCode(l, screens)`). 세션 79부터 대사 줄로 넣지 않고 상자 머리 [♡ HUD](BoxView `HudButton`, 세션 81부터 [◐ 셰이더] 아래 `.box-tools`)와 오른쪽 HUD 카드(Inspector `HudCard`)에서 HUD마다 그대로/보이기/숨기기를 고른다. 고르면 그 HUD의 hud 줄을 모두 지우고 상자 맨 앞에 하나만 둔다(저장 형식은 그대로). hud 줄은 상자와 대사 카드의 줄 목록, 줄 종류 고르기에서 숨긴다. 단추는 셰이더 단추처럼 늘 있고(HUD를 고르면 꽉 찬 하트 ♥), HUD 카드도 늘 있어 HUD가 없으면 [화면] 탭으로 안내한다. **label의 HUD** (`FEATURE` 27, 세션 81): `labels[].hud` `{ screen, stop? }[]`. label 틀 [♡ HUD] → `openLabelHud` → 오른쪽 칸 `LabelHudPanel`(store `hudOf`, 셰이더 칸 자리, 상자를 고르면 닫힘). 내보내기는 상자마다 첫머리(커서 줄 뒤)에 표시 없이 `show/hide screen`, 상자에 같은 HUD의 hud 줄이 있으면 뺌, 지운 HUD는 label마다 경고 한 번. 상자 [♡ HUD]는 label 것을 따르면 `.inh`(점선), HUD 카드 "그대로" 줄에 "label: 보이기"
+  - `input` `{ text, flag?, length? }`: 이름 입력(`FEATURE` 30). `text`는 묻는 글, `flag`는 친 글을 넣을 글자 플래그 id(이름이 아니라 id라 이름을 바꿔도 그대로), `length`는 최대 글자 수. 내보내기 `flags.ts` `inputCode`: `$ 이름 = renpy.input("묻는 글", default=이름, length=N).strip() or "처음 값"`(비우면 플래그 처음 값). 묻는 글은 렌파이가 `%%`를 풀지 않아서 `%`를 바꾸지 않는다(8.6.1에서 봄). 칸은 `LineFields.tsx` `InputFields`(묻는 글, 플래그 고르기 + [+ 새 이름 플래그](`pname`, 처음 값 "주인공"), 최대), 줄 종류 "기타"의 ✎ 이름 입력과 상자 편집 [+ 이름 입력]. 캔버스는 플래그 줄처럼 `✎ 이름 입력 pname · 묻는 글`. 검사: 플래그 없음(경고), 글자 플래그가 아님(오류), 처음 값이 빔(경고). 캐릭터 이름 칸 아래 [이름을 플래그 값으로](`SceneTree.tsx`)는 표시 이름을 `[pname]`으로 바꾼다(원고 `Character("[pname]", …)`). 플래그 이름을 바꾸면 대사·선택지·이름 입력 글과 캐릭터 이름의 `[이름]`도 바뀐다(`renameFlag` `renameSub`), 쓰인 곳에 "이름 입력 줄"(✎)과 "대사 글"(?)
   - `fx` `{ fx: { fx, transition, overlay, warp, cursor } }`: pygaki 플러그인 화면 효과 명령. 값은 `src/stage.ts`의 `FX_*`. 화면 효과는 렌파이 편집기에서 고치므로 줄 종류 목록에서 뺐고, 예전 파일의 이 줄만 그대로 보여 주고 내보낸다.
   - `trans`는 `dissolve` | `fade` | 비움, 또는 게임 안 편집 화면에서 받아 적은 식(`stage.move("inleft", 0.8)` 등). 모두 선택 칸이라 예전 파일은 그대로 열린다.
 - **대사 줄의 `fx`**: `say`, `narration` 줄도 같은 `fx` 값(`exclude` 포함)을 가질 수 있다. pygaki 플러그인 대사 탭에서 받아 적고, pygaki에서는 고치지 않는다. 연결을 켜면 대사 괄호로 내보낸다.

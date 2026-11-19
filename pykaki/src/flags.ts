@@ -26,6 +26,16 @@ export const shownValue = (v: unknown) => (v === true ? 'True' : v === false ? '
 // 미리보기: 플래그 [이름]을 값으로 (없는 이름은 그대로)
 export const fillFlags = (t: string, vars: Record<string, unknown>) => t.replace(FLAG_SUB, (m, n) => (n in vars ? shownValue(vars[n]) : m));
 
+// 글 안 플래그 값 [from]을 [to]로 (플래그 이름을 바꿀 때)
+export const renameSub = (t: string, from: string, to: string) => t.replace(FLAG_SUB, (m, n) => (n === from ? `[${to}]` : m));
+
+// 이름 입력 줄의 원고 (FEATURE 30): $ 이름 = renpy.input("묻는 글", default=이름, length=N).strip() or "처음 값"
+// ref는 원고에 쓰는 플래그 식(게임 밖에도 남는 플래그는 persistent.이름), q는 대사처럼 바꾼 글
+export function inputCode(f: Pick<Flag, 'kind' | 'init'>, ref: string, prompt: string, length?: number) {
+  const len = length && length > 0 ? `, length=${Math.round(length)}` : '';
+  return `$ ${ref} = renpy.input(${prompt}, default=${ref}${len}).strip() or ${pyValue({ kind: 'str', init: String(f.init ?? '') })}`;
+}
+
 const pyStr = (s: string) => '"' + s.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\r?\n/g, '\\n') + '"';
 
 // 파이썬 값으로
@@ -115,6 +125,8 @@ export function flagUses(p: Project, name: string): FlagUse[] {
     for (const l of n.lines) {
       if (l.type === 'flag' && writes(l.text)) out.push({ nodeId: n.id, where: '바꾸기 줄', write: true });
       else if (l.type === 'flag' && has(l.text)) out.push({ nodeId: n.id, where: '바꾸기 줄', write: false });
+      else if (l.type === 'input' && l.flag && p.variables.find((f) => f.id === l.flag)?.name === name) out.push({ nodeId: n.id, where: '이름 입력 줄', write: true });
+      else if ((l.type === 'say' || l.type === 'narration') && subNames(l.text).includes(name)) out.push({ nodeId: n.id, where: '대사 글', write: false });
       else if (l.type === 'command' && new RegExp(`(?<![A-Za-z0-9_.])${name}(?![A-Za-z0-9_])`).test(l.text)) out.push({ nodeId: n.id, where: '명령 줄', write: false });
     }
     const e = n.exit;
@@ -135,8 +147,16 @@ export function flagUses(p: Project, name: string): FlagUse[] {
 
 // 플래그 이름을 바꾸면 쓰인 곳도 같이 (명령 줄은 사용자가 쓴 글이라 그대로)
 export function renameFlag(p: Project, from: string, to: string) {
+  for (const c of p.characters) c.name = renameSub(c.name, from, to);
   for (const n of p.nodes) {
-    for (const l of n.lines) if (l.type === 'flag') l.text = renameIn(l.text, from, to);
+    for (const l of n.lines) {
+      if (l.type === 'flag') l.text = renameIn(l.text, from, to);
+      if (l.type === 'say' || l.type === 'narration' || l.type === 'input') l.text = renameSub(l.text, from, to);
+    }
+    if (n.exit.type === 'menu') {
+      for (const c of n.exit.choices) c.text = renameSub(c.text, from, to);
+      if (n.exit.ask) n.exit.ask.text = renameSub(n.exit.ask.text, from, to);
+    }
     const e = n.exit;
     if (e.type === 'menu')
       for (const c of e.choices) {

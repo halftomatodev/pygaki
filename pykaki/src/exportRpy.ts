@@ -9,7 +9,7 @@ import { voiceCode, voiceFile, voiceIndex } from './voice';
 import { actOf, boxRef, flagAction, hasAct, isDragged, isHud, screenNameProblem } from './screens';
 import { checkTags, shaderTags, splitClear } from './tagEdit';
 import { sceneCode, sceneSupported, uiOfBox, usesSceneUi } from './boxUi';
-import { exprNames, FLAG_SUB, flagNameProblem, parseAction, pyValue, subNames } from './flags';
+import { exprNames, FLAG_SUB, flagNameProblem, inputCode, parseAction, pyValue, subNames } from './flags';
 import { flagUi, strOptions } from './flagUi';
 import { enterTransTv, imgTransSupported, isImgTrans, shaderCode, shaderOfBox, usesShaderValues, usesShaders, usesTvValues, valuesSupported } from './shader';
 
@@ -276,7 +276,7 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
         if (code) body.push(code);
       }
       const pct =(t: string, where: string) => {
-        if (!S.escapePercent && loosePercent(t)) W.push({ level: 'error', msg: `${where}의 %에서 렌파이가 멈춰요. 설정에서 "% 를 글자 그대로"를 켜 주세요 (${b.title || b.id})`, nodeId: b.id });
+        if (!S.escapePercent && where !== '이름 입력' && loosePercent(t)) W.push({ level: 'error', msg: `${where}의 %에서 렌파이가 멈춰요. 설정에서 "% 를 글자 그대로"를 켜 주세요 (${b.title || b.id})`, nodeId: b.id });
         // 텍스트 태그 짝 (렌파이 check_text_tags와 같은 규칙)
         if (S.allowTextTags) for (const w of checkTags(t)) W.push({ level: w.level, msg: `${where}: ${w.msg} (${b.title || b.id})`, nodeId: b.id });
         // 선택지 글에는 등장 효과가 없어서 {shader=}를 쓰면 렌파이가 멈춘다
@@ -314,6 +314,19 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
           }
           checkAction(a, '플래그 바꾸기', b);
           return body.push('$ ' + a);
+        }
+        if (l.type === 'input') {
+          // 이름 입력 (FEATURE 30): 받은 글을 글 플래그에, 비우면 처음 값
+          const f = p.variables.find((v) => v.id === l.flag);
+          if (!f) {
+            W.push({ level: 'warn', msg: `이름 입력 줄에 넣을 플래그를 골라 주세요 (${b.title || b.id})`, nodeId: b.id });
+            return body.push('pass  # 이름 입력: 플래그를 고르세요');
+          }
+          if (f.kind !== 'str') W.push({ level: 'error', msg: `이름 입력 줄의 플래그 "${f.name}"는 글자 플래그여야 해요 (${b.title || b.id})`, nodeId: b.id });
+          if (!String(f.init ?? '').trim()) W.push({ level: 'warn', msg: `이름 입력 줄: 플래그 "${f.name}"의 처음 값이 비어 있어서, 이름을 안 치면 빈 이름이 돼요. 처음 값에 기본 이름을 적어 주세요 (${b.title || b.id})`, nodeId: b.id });
+          pct(l.text, '이름 입력');
+          // 묻는 글은 렌파이가 %%를 풀지 않아서(대사·선택지와 다름, 8.6.1에서 봄) %는 그대로
+          return body.push(inputCode(f, subs.get(f.name) ?? f.name, '"' + escapeText(l.text, { ...S, escapePercent: false }, subs) + '"', l.length));
         }
         if (isStage(l.type)) {
           const { code, problem } = stageCode(l, p.screens);

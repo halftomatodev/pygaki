@@ -4,7 +4,7 @@
 // flag: 플래그 바꾸기 줄 (FEATURE 14). text에 바꾸는 식 (예: love += 1, met_alice = True)을 두고 $ 줄로 내보낸다
 // pause: 멈춤 줄, shake: 흔들기 줄 (FEATURE 15)
 // hud: HUD 보이기/숨기기 줄 (FEATURE 18). screen에 화면 id, stop이면 숨기기 (show screen / hide screen)
-export type LineType = 'narration' | 'say' | 'scene' | 'show' | 'hide' | 'music' | 'sound' | 'fx' | 'command' | 'note' | 'flag' | 'pause' | 'shake' | 'hud';
+export type LineType = 'narration' | 'say' | 'scene' | 'show' | 'hide' | 'music' | 'sound' | 'fx' | 'command' | 'note' | 'flag' | 'pause' | 'shake' | 'hud' | 'input';
 export type ShakeKind = 'vpunch' | 'hpunch' | 'flash';
 
 // showpy 화면 효과 값. 대사 줄은 괄호로, 연출 줄(fx)은 명령으로 내보낸다. 빈 칸은 안 내보낸다
@@ -79,6 +79,9 @@ export interface Line {
   zorder?: number; // show: 앞뒤 (숫자가 클수록 앞)
   screen?: string; // hud: 보이거나 숨길 화면 id (project.screens)
   behind?: string; // show: 이 태그의 그림 뒤에
+  // 이름 입력 (FEATURE 30, input 줄): text는 묻는 글, flag는 받은 글을 넣을 글 플래그 id, length는 최대 글자 수(없으면 렌파이 기본). 비우면 플래그의 처음 값
+  flag?: string;
+  length?: number;
   // 음성 (FEATURE 16, say 줄). vno: label 안 음성 번호 (한 번 매기면 그대로). voice: 직접 고른 파일 (audio 기준), ''이면 이 줄은 음성 없음, 없으면 이름 규칙으로
   vno?: number;
   voice?: string;

@@ -10,6 +10,8 @@ import { LinePreview } from './SayPreview';
 import { TransPicker } from './TransPicker';
 import { TagBar, useTagTarget } from './TagBar';
 import { MediaField, MediaGroupFields, MediaPlace } from './MediaField';
+import { uid } from './util';
+import { freeFlagName } from './flagRecipes';
 
 type SetLine = (fn: (x: Line) => void, key?: string) => void;
 
@@ -34,6 +36,7 @@ export function SpeakerSelect({ l, set, className }: { l: Line; set: SetLine; cl
       </optgroup>
       <optgroup label="기타">
         <option value="flag">⚑ 플래그 바꾸기</option>
+        <option value="input">✎ 이름 입력</option>
         <option value="command">⚙ 직접 명령</option>
         <option value="note"># 메모</option>
       </optgroup>
@@ -417,6 +420,37 @@ function useSuggest(l: Line) {
   const attr = media.images.filter((n) => words(n)[0] === l.who && words(n).length > 1).map((n) => words(n).slice(1).join(' '));
   const etc = media.images.filter((n) => words(n)[0] !== 'bg' && !chars.some((c) => c.id === words(n)[0]));
   return { bg, attr, etc, audio: media.audio };
+}
+
+// 이름 입력 줄 (FEATURE 30): 묻는 글, 넣을 글 플래그, 최대 글자 수. 이름을 안 치면 플래그의 처음 값
+export function InputFields({ l, set, nd = '' }: { l: Line; set: SetLine; nd?: string }) {
+  const flags = useStore((s) => s.project.variables);
+  const update = useStore((s) => s.update);
+  const strs = flags.filter((f) => f.kind === 'str');
+  const cur = flags.find((f) => f.id === l.flag);
+  // 글 플래그가 없으면 "주인공 이름" 플래그를 만들어 바로 고름
+  const make = () => {
+    const id = uid('v');
+    update((p) => {
+      p.variables.push({ id, name: freeFlagName(p, 'pname'), kind: 'str', init: '주인공', note: '주인공 이름' });
+      for (const n of p.nodes) for (const x of n.lines) if (x.id === l.id) x.flag = id;
+    });
+  };
+  return (
+    <div className="sf">
+      <div className="sf-row">
+        <input className={'sf-in wide ' + nd} value={l.text} placeholder="묻는 글 (예: 이름이 뭐야?)" onChange={(e) => set((x) => void (x.text = e.target.value), 'text' + l.id)} aria-label="묻는 글" />
+        <select className={nd} value={cur ? cur.id : ''} onChange={(e) => (e.target.value === '+' ? make() : set((x) => void (x.flag = e.target.value || undefined)))} aria-label="넣을 플래그" title="친 이름을 이 글자 플래그에 넣어요. 대사에서 [이름]으로 보여요">
+          <option value="">넣을 플래그</option>
+          {strs.map((f) => <option key={f.id} value={f.id}>{f.name}{f.note ? ` (${f.note})` : ''}</option>)}
+          {cur && cur.kind !== 'str' && <option value={cur.id}>? {cur.name} (글자 플래그가 아님)</option>}
+          <option value="+">+ 새 이름 플래그</option>
+        </select>
+        <input className={'sf-num ' + nd} type="number" min={1} max={99} value={l.length ?? ''} placeholder="최대" title="칠 수 있는 최대 글자 수. 비우면 렌파이 기본" onChange={(e) => set((x) => void (e.target.value ? (x.length = Math.max(1, Math.round(+e.target.value))) : delete x.length), 'len' + l.id)} aria-label="최대 글자 수" />
+      </div>
+      {cur ? <span className="sf-code">{`이름을 안 치면 "${String(cur.init ?? '')}" (플래그 ${cur.name}의 처음 값). 대사에서 [${cur.name}]으로 보여요`}</span> : <span className="sf-code todo">친 이름을 넣을 글자 플래그를 골라 주세요</span>}
+    </div>
+  );
 }
 
 export function StageFields({ l, set, firstId, nd = '' }: { l: Line; set: SetLine; firstId?: string; nd?: string }) {

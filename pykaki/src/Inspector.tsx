@@ -6,7 +6,7 @@ import type { BoxNode, Choice, ChoiceMedia, ExitType, Line, Project } from './ty
 import { MediaField, MediaGroupFields, MediaPlace } from './MediaField';
 import { uid } from './util';
 import { Card } from './Card';
-import { LineLook, OldAttr, SpeakerSelect, StageFields, useLineDrag } from './LineFields';
+import { LineLook, OldAttr, SpeakerSelect, StageFields, useLineDrag, InputFields } from './LineFields';
 import { isStage } from './stage';
 import { hit } from './prefs';
 import { ShaderPanel } from './ShaderPanel';
@@ -109,7 +109,7 @@ function BoxInspector({ b }: { b: BoxNode }) {
   };
   // 멈춤·흔들기 줄: 지금 쓰는 줄 바로 뒤에 (없으면 상자 끝)
   const huds = (project.screens ?? []).filter((s) => s.kind === 'hud');
-  const addStageLine = (type: 'pause' | 'shake') => {
+  const addStageLine = (type: 'pause' | 'shake' | 'input') => {
     const nl: Line = { id: uid('l'), type, text: '' };
     upd((x) => {
       const i = x.lines.findIndex((y) => y.id === activeLine);
@@ -166,6 +166,7 @@ function BoxInspector({ b }: { b: BoxNode }) {
         <button onClick={addFlagLine} title="이 자리에서 플래그를 바꿔요 (예: met_alice 켜기, love +1)">+ 플래그 바꾸기</button>
         <button onClick={() => addStageLine('pause')} title="지금 쓰는 줄 뒤에서 잠깐 멈춰요 (초, 또는 클릭할 때까지)">+ 멈춤</button>
         <button onClick={() => addStageLine('shake')} title="지금 쓰는 줄 뒤에서 화면을 흔들거나 번쩍여요">+ 흔들기</button>
+        <button onClick={() => addStageLine('input')} title="지금 쓰는 줄 뒤에서 플레이어가 이름을 쳐요. 친 이름은 글자 플래그에 들어가서 대사에서 [이름]으로 보여요">+ 이름 입력</button>
         <span className="tip">Ctrl+Enter: 같은 화자로 아래에 새 줄</span>
       </div>
       <GameOffTip what="대사" />
@@ -352,9 +353,11 @@ function LineRow({ l, i, upd, drag }: { l: Line; i: number; upd: Upd; drag: Retu
         {voiceOn && l.type === 'say' && l.vno && <span className="vc-chip" title="음성 번호 (아래 [음성] 카드)">🎙{String(l.vno).padStart(3, '0')}</span>}
       </div>
       {/* 연출·플래그 줄은 고르는 칸이라 칸을 감싼 곳에서 Ctrl+Enter를 받음 (글 칸은 자기 onKeyDown) */}
-      <div className="line-body" onKeyDown={isStage(l.type) || l.type === 'flag' ? onKey : undefined}>
+      <div className="line-body" onKeyDown={isStage(l.type) || l.type === 'flag' || l.type === 'input' ? onKey : undefined}>
         {isStage(l.type) ? (
           <StageFields l={l} set={set} />
+        ) : l.type === 'input' ? (
+          <InputFields l={l} set={set} />
         ) : l.type === 'flag' ? (
           <ActionInput id={'ed-' + l.id} value={l.text} onChange={(v) => upd((x) => void (x.lines[i].text = v), 'text' + l.id)} />
         ) : (

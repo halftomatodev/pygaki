@@ -7,7 +7,7 @@ import { shaderLabel } from './shader';
 import { isLight, uid } from './util';
 import { changeThenFocus } from './actions';
 import { FlowMenu } from './FlowMenu';
-import { BoxFields, OldAttr, SpeakerSelect, StageFields } from './LineFields';
+import { BoxFields, OldAttr, SpeakerSelect, StageFields, InputFields } from './LineFields';
 import { isStage, STAGE_ICON, stageCode } from './stage';
 import { actionWords, condWords } from './flags';
 import { ActionInput, CondInput } from './FlagFields';
@@ -443,6 +443,11 @@ function Lines({ b, editing, active, setActive }: { b: BoxNode; editing: boolean
               <StageFields l={al} nd="nodrag" set={setLine(ai)} />
             </div>
           )}
+          {al.type === 'input' && (
+            <div className="side side-r nodrag" style={{ top }} onKeyDown={onSideKey}>
+              <InputFields l={al} nd="nodrag" set={setLine(ai)} />
+            </div>
+          )}
           {al.type === 'flag' && (
             <div className="side side-r nodrag" style={{ top }} onKeyDown={onSideKey}>
               <ActionInput value={al.text} onChange={(v) => upd((x) => void (x.lines[ai].text = v), 'text' + al.id)} />
@@ -525,15 +530,18 @@ function LinkMark() {
 function LineRow({ l, editing, active, cls, grip, onFocus, onKey, onText }: RowProps) {
   const ch = useStore((s) => (l.type === 'say' ? s.project.characters.find((c) => c.id === l.who) : undefined));
   const tagsOn = useStore((s) => s.project.settings.allowTextTags);
-  const project = useStore((s) => (l.type === 'flag' ? s.project : null));
+  const project = useStore((s) => (l.type === 'flag' || l.type === 'input' ? s.project : null));
   const screens = useStore((s) => (l.type === 'hud' ? s.project.screens : undefined));
   // 플래그 바꾸기 줄은 글을 쓰지 않아 연출 줄처럼 그린다 (오른쪽 칸에서 고름)
-  const stage = isStage(l.type) || l.type === 'flag';
-  const kind = l.type === 'flag' ? 'pl-stage pl-flag' : stage ? 'pl-stage' : l.type === 'command' ? 'cmd' : l.type === 'note' ? 'note' : l.type === 'narration' ? 'narr' : 'say';
+  const stage = isStage(l.type) || l.type === 'flag' || l.type === 'input';
+  const kind = l.type === 'flag' || l.type === 'input' ? 'pl-stage pl-flag' : stage ? 'pl-stage' : l.type === 'command' ? 'cmd' : l.type === 'note' ? 'note' : l.type === 'narration' ? 'narr' : 'say';
   const empty = { narration: '(빈 내레이션)', say: '(빈 대사)', command: '(빈 명령)', note: '(빈 메모)' }[l.type as 'say'];
 
   let body;
-  if (l.type === 'flag')
+  if (l.type === 'input') {
+    const f = project!.variables.find((v) => v.id === l.flag);
+    body = <span className="pl-text">✎ 이름 입력 {f ? <code>{f.name}</code> : <i className="todo">(플래그를 고르세요)</i>}{l.text.trim() && <> · {l.text}</>}</span>;
+  } else if (l.type === 'flag')
     body = <span className="pl-text">⚑ {l.text.trim() ? <code>{actionWords(project!, l.text)}</code> : <i className="todo">(플래그를 고르세요)</i>}</span>;
   else if (stage) {
     const { code, problem } = stageCode(l, screens);
