@@ -11,7 +11,7 @@ import { BoxFields, OldAttr, SpeakerSelect, StageFields, InputFields } from './L
 import { isStage, STAGE_ICON, stageCode } from './stage';
 import { actionWords, condWords } from './flags';
 import { ActionInput, CondInput } from './FlagFields';
-import { hit, keyOf } from './prefs';
+import { hit } from './prefs';
 import { TagBar, useTagTarget } from './TagBar';
 import { TagView } from './textTags';
 import { useFolded } from './Card';

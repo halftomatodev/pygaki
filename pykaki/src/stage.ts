@@ -179,7 +179,15 @@ export const formatEffect = (parts: EffectPart[]) =>
     .join('|') || undefined;
 
 // 효과의 고칠 수 있는 값(막대, 색 칸). 효과 파일에 @param이 있으면 그 범위와 이름, 없으면 기본값에서 어림한다
-export interface EffectKnob { key: string; label: string; kind: 'num' | 'color'; min: number; max: number; step: number; def: string }
+// pair: 기본값이 두 값 "(3.0, 3.0)"(vec2, 렌파이 jitter)이라 막대 하나로 두 값을 같이 고침
+export interface EffectKnob { key: string; label: string; kind: 'num' | 'color'; min: number; max: number; step: number; def: string; pair?: boolean }
+// 막대에 보일 숫자: "(3.0, 3.0)"이면 앞 값. 못 읽으면 0
+export const knobNum = (v: string) => {
+  const n = Number(v.replace(/^\s*\(/, '').split(',')[0]);
+  return Number.isFinite(n) ? n : 0;
+};
+// 막대 값을 효과 값 글로: 두 값 막대면 "(n,n)" (렌파이 to_uniform_value가 괄호를 떼고 쉼표로 나눔)
+export const knobText = (k: EffectKnob, n: number) => (k.pair ? `(${n},${n})` : String(n));
 const KNOB_LABEL: Record<string, string> = {
   duration: '걸리는 시간', color: '색', zoom: '확대', shift: '밀림', angle: '각도', split: '갈라짐', speed: '속도', rotate: '기울기', rate: '빠르기',
   radius: '번짐 크기', distance: '거리', depth: '깊이', band: '띠', amount: '정도', strength: '세기', stagger: '차례 간격', spread: '벌어짐',
@@ -193,12 +201,15 @@ export function effectKnobs(name: string, preview = false): EffectKnob[] {
   const e = shaderEffect(name, preview);
   if (!e) return [];
   const ranges = new Map(e.params.map(([k, lo, hi, label]) => [k, { lo, hi, label }]));
-  return e.uniforms.map(([key, def]): EffectKnob => {
+  return e.uniforms.flatMap(([key, def]): EffectKnob[] => {
     const short = key.replace(/^u__/, '');
     const r = ranges.get(key);
     const label = r?.label ?? KNOB_LABEL[short] ?? short;
-    if (def.startsWith('#')) return { key, label, kind: 'color', min: 0, max: 0, step: 0, def };
-    const d = Number(def);
+    if (def.startsWith('#')) return [{ key, label, kind: 'color', min: 0, max: 0, step: 0, def }];
+    // 두 값 "(3.0, 3.0)"은 막대 하나로, 그 밖에 숫자로 못 읽는 값은 막대를 안 만듦 (예전에는 NaN 막대)
+    const two = /^\(\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*\)$/.exec(def);
+    const d = two ? Number(two[1]) : Number(def);
+    if (!Number.isFinite(d)) return [];
     let lo = 0;
     let hi = 1;
     if (r) [lo, hi] = [r.lo, r.hi];
@@ -206,7 +217,7 @@ export function effectKnobs(name: string, preview = false): EffectKnob[] {
     else if (short === 'rotate') [lo, hi] = [-180, 180];
     else if (d < 0) [lo, hi] = [d * 3, -d * 3];
     else if (d > 0) hi = d <= 1 ? Math.max(1, d * 2) : d * 3;
-    return { key, label, kind: 'num', min: lo, max: hi, step: niceStep(hi - lo), def };
+    return [{ key, label, kind: 'num', min: lo, max: hi, step: niceStep(hi - lo), def, ...(two ? { pair: true } : {}) }];
   });
 }
 

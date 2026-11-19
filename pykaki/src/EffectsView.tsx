@@ -2,7 +2,6 @@
 // 목록과 파일 다루기는 effectsLib.ts가 하고, 여기는 화면만 그린다. 샘플에서 맞춘 값은 저장하지 않는다 (값은 대사 줄마다 정함)
 import { SegTabs } from './SegTabs';
 import { tr } from './i18n';
-import { Hint } from './Help';
 import { Card } from './Card';
 import { useMemo, useRef, useState } from 'react';
 import readme from '../../showpy/game/ui_kit/effects/README.md?raw';
@@ -10,7 +9,7 @@ import { useStore } from './store';
 import { useLive } from './showpyLive';
 import { folderReady, gameFont, useGameFolder } from './gameFolder';
 import { allPacks, effectCatalog, effectUses, setEffectOn, type EffectCard, type EffectUse, type FxKind } from './effectsLib';
-import { effectKnobs, formatEffect, type EffectKnob } from './stage';
+import { effectKnobs, knobNum, knobText, formatEffect, type EffectKnob } from './stage';
 import { parseTextShader, previewPack, shaderEffect, type ShaderEffect } from './fx/textShaders';
 import { FxCanvas, webglOk } from './fx/FxCanvas';
 import { TransitionCanvas } from './fx/TransitionCanvas';
@@ -396,8 +395,8 @@ export function EffectsView() {
                                 <input type="color" value={v.slice(0, 7)} onChange={(e) => putArg(k.key, e.target.value)} />
                               ) : (
                                 <>
-                                  <input type="range" min={k.min} max={k.max} step={k.step} value={Number(v)} onChange={(e) => putArg(k.key, String(Number(e.target.value)))} />
-                                  <span className="fx-kv">{Number(v)}</span>
+                                  <input type="range" min={k.min} max={k.max} step={k.step} value={knobNum(v)} onChange={(e) => putArg(k.key, knobText(k, Number(e.target.value)))} />
+                                  <span className="fx-kv">{knobNum(v)}</span>
                                 </>
                               )}
                               <button className="fx-x" style={{ visibility: set !== undefined ? 'visible' : 'hidden' }} title="기본값으로" onClick={(e) => (e.preventDefault(), putArg(k.key, undefined))}>↺</button>

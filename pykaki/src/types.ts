@@ -303,6 +303,7 @@ export interface Character {
   id: string; // 렌파이 변수 이름
   name: string;
   color: string;
+  nameBefore?: string; // 표시 이름을 플래그 값 "[pname]"으로 잇기 전 이름. 잇기를 빼면 이 이름으로 돌림 (FlagLook InputKnobs)
 }
 
 export interface LabelGroup {

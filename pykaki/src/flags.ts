@@ -5,8 +5,6 @@ import { normalizeUi } from './flagUi';
 
 export const KIND_LABEL: Record<FlagKind, string> = { bool: '켜짐/꺼짐', int: '숫자', str: '글자' };
 
-export const defaultInit = (k: FlagKind): Flag['init'] => (k === 'bool' ? false : k === 'int' ? 0 : '');
-
 // 종류에 맞게 처음 값을 고친다 (손으로 고친 파일, 종류를 바꿀 때)
 export function fitInit(k: FlagKind, v: unknown): Flag['init'] {
   if (k === 'bool') return v === true || v === 'True' || v === 'true' || v === 1;

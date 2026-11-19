@@ -256,15 +256,6 @@ export function stepSize(text: string, s0: number, e0: number, step: number): Ed
   return nv === null ? unwrap(text, p, s, e) : setTagValue(text, s0, e0, 'size', nv);
 }
 
-// 자간 {k=}을 step만큼 넓히거나 좁힌다. 이미 자간 태그 안이면 그 값에 더하고, 0이 되면 뺀다
-export function stepK(text: string, s0: number, e0: number, step: number): Edit {
-  const { pairs, s, e } = prep(text, s0, e0);
-  const p = inner(pairs, 'k', s, e);
-  if (!p || !(s === e || exact(p, s, e))) return setTagValue(text, s0, e0, 'k', String(step));
-  const n = Math.round(((Number(p.o.val) || 0) + step) * 10) / 10;
-  return n === 0 ? unwrap(text, p, s, e) : setTagValue(text, s0, e0, 'k', String(n));
-}
-
 // 루비: 고른 글을 {rb}…{/rb}로 감싸고 뒤에 {rt}읽는 법{/rt}을 붙인다. 고른 글이 없으면 {rt}만 넣는다(바로 앞 글자 위에 뜸)
 // 넣은 뒤에는 읽는 법 자리를 골라 둔다
 export function insertRuby(text: string, s0: number, e0: number, hint: string): Edit {

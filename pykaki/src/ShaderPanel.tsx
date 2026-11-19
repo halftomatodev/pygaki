@@ -13,7 +13,7 @@ import { ScreenFxKnobs } from './fx/ScreenFxCanvas';
 import { TvKnobs } from './ShadersView';
 import { shaderEffect } from './fx/textShaders';
 import { AllRow } from './UiPanel';
-import { effectKnobs } from './stage';
+import { effectKnobs, knobNum } from './stage';
 import { sceneCode, sceneSupported, uiOfBox, usesSceneUi } from './boxUi';
 
 type Vals = Record<string, unknown>;
@@ -194,8 +194,8 @@ export function ShaderPanel() {
                 <input type="color" value={String(v).slice(0, 7)} onChange={(e) => putIv(fxName, k.key, e.target.value)} />
               ) : (
                 <>
-                  <input type="range" min={k.min} max={k.max} step={k.step} value={Number(v)} onChange={(e) => putIv(fxName, k.key, Number(e.target.value))} />
-                  <span className="fx-kv">{Number(v)}</span>
+                  <input type="range" min={k.min} max={k.max} step={k.step} value={knobNum(String(v))} onChange={(e) => putIv(fxName, k.key, Number(e.target.value))} />
+                  <span className="fx-kv">{knobNum(String(v))}</span>
                 </>
               )}
               <button className="fx-x" style={{ visibility: cur !== undefined ? 'visible' : 'hidden' }} title="기본값으로" onClick={(e) => (e.preventDefault(), putIv(fxName, k.key, undefined))}>↺</button>

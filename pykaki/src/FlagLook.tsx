@@ -2,7 +2,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useStore } from './store';
-import type { Flag, FlagLook, FlagUi, LevelStyle } from './types';
+import type { Character, Flag, FlagLook, FlagUi, LevelStyle } from './types';
 import { FlagWidget } from './FlagWidget';
 import { CORNER_LABEL, cornerOf, flagEffects, flagMarks, setMarkValue, flagUi, inputLen, LOOK_LABEL, looksFor, skinParts, STYLE_LABEL, strOptions, testValue, testVars, uiMax, uiMin, useFlagTest } from './flagUi';
 import { useGameFolder } from './gameFolder';
@@ -317,11 +317,19 @@ function InputKnobs({ f, ui, set, k }: { f: Flag; ui: FlagUi; set: (fn: (u: Flag
   const tag = `[${f.name}]`;
   const named = chars.filter((c) => c.name === tag);
   const others = chars.filter((c) => c.name !== tag);
-  // 이름을 빼면 플래그의 처음 값(없으면 변수 이름)으로 돌려 둠
+  // 이을 때 원래 이름을 적어 두고, 빼면 그 이름으로 돌림. 적어 둔 이름이 없으면(세션 87 전 파일) 플래그의 처음 값, 그것도 없으면 변수 이름
+  const backName = (c: Character) => c.nameBefore?.trim() || String(f.init ?? '').trim() || c.id;
   const setName = (id: string, on: boolean) =>
     update((p) => {
       const c = p.characters.find((x) => x.id === id);
-      if (c) c.name = on ? tag : String(f.init ?? '').trim() || c.id;
+      if (!c) return;
+      if (on) {
+        if (c.name !== tag) c.nameBefore = c.name;
+        c.name = tag;
+      } else {
+        c.name = backName(c);
+        delete c.nameBefore;
+      }
     });
   return (
     <>
@@ -339,7 +347,7 @@ function InputKnobs({ f, ui, set, k }: { f: Flag; ui: FlagUi; set: (fn: (u: Flag
             {named.map((c) => (
               <span key={c.id} className="chip">
                 {c.id}
-                <button className="x" aria-label={`${c.id} 빼기`} title={`표시 이름을 "${String(f.init ?? '') || c.id}"로 돌려요`} onClick={() => setName(c.id, false)}>✕</button>
+                <button className="x" aria-label={`${c.id} 빼기`} title={`표시 이름을 "${backName(c)}"로 돌려요`} onClick={() => setName(c.id, false)}>✕</button>
               </span>
             ))}
             {others.length > 0 && (

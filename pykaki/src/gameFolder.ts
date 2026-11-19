@@ -394,8 +394,6 @@ export async function pullInbox(ask = false) {
   return res.applied;
 }
 
-// 고른 폴더가 렌파이 프로젝트인지. 새 프로젝트에는 늘 gui.rpy나 options.rpy가 있다
-export const looksLikeGame = async () => (await readText(dir, 'gui.rpy')) !== null || (await readText(dir, 'options.rpy')) !== null;
 export const readRpyFromFolder = () => readText(dir, RPY_FILE);
 
 // screens: 화면 만들기 원고 (pykaki_screens.rpy). 화면이 없는 대본이면 null (예전에 쓴 파일이 있을 때만 비운다). 바뀐 것만 쓴다

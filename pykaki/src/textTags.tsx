@@ -96,26 +96,6 @@ export function parseTagged(text: string, tagsOn: boolean, fontOf: (path: string
   return out;
 }
 
-// 선택지 글처럼 한 번에 보이는 글: 대사와 같은 읽기(parseTagged)로 모양만 입힌다. 멈춤, 속도, 효과 태그는 뜻이 없어 넘긴다
-export function renderTagged(text: string, tagsOn: boolean, fontOf: (path: string) => string | undefined = () => undefined): ReactNode[] {
-  if (!tagsOn) return [text];
-  const out: ReactNode[] = [];
-  let buf = '';
-  let style: CSSProperties | undefined;
-  let k = 0;
-  const flush = () => {
-    if (buf) out.push(<span key={k++} style={style}>{buf}</span>);
-    buf = '';
-  };
-  for (const g of parseTagged(text, true, fontOf).glyphs) {
-    if (g.style !== style) (flush(), (style = g.style));
-    if (g.ch === '\n') (flush(), out.push(<br key={k++} />));
-    else buf += g.ch;
-  }
-  flush();
-  return out;
-}
-
 // 상자 보기 화면용: 태그 글자는 흐리게 그대로 두고, 안쪽 글에 모양을 입힌다.
 // 고칠 때(textarea)와 같은 자리, 같은 크기여야 해서 글자 수와 크기는 바꾸지 않는다 (굵게는 폭이 안 변하는 그림자로)
 const VIEW_STYLE: Record<string, (v: string) => CSSProperties> = {

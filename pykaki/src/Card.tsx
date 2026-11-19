@@ -8,26 +8,7 @@ import { create } from 'zustand';
 import { LiquidCard } from 'fluidkit';
 import { Hint } from './Help';
 import { useStore } from './store';
-import { GLASS, usePrefs } from './prefs';
-
-// 카드 유리 색 (fluidkit LiquidCard). 뒤의 캔버스가 비치게 반투명. 접으면 하늘색.
-// 사용 중(in-use)은 바탕색이 아니라 테두리 바깥에서 도는 분홍·보라·노랑 빛으로 보인다 (styles.css `.card.in-use::before`, 세션 79·81)
-// 투명도는 환경 설정의 [카드 투명도] 하나로 모든 카드가 같이 바뀐다(세션 82, prefs.ts glass).
-// 투명할수록 테두리 빛(intensity)을 세게 하고, 50% 넘으면 가장자리 굴절(refraction, 크롬·Electron만)도 켜서 유리로 읽히게 한다
-export function glassOf(g: number) {
-  const t = Math.min(GLASS.max, Math.max(GLASS.min, g)) / 100;
-  const solid = Math.round(100 - t * 100);
-  return {
-    base: `color-mix(in srgb, var(--panel) ${solid}%, transparent)`,
-    folded: `color-mix(in srgb, color-mix(in srgb, #38bdf8 15%, var(--panel)) ${Math.min(100, solid + 6)}%, transparent)`,
-    intensity: Math.round((0.35 + t * 0.6) * 100) / 100,
-    // fluidkit 유리는 뒤를 늘 8px 흐린다. 틴트가 옅어지면 그 흐린 상이 드러나 뿌옇게 보여서(세션 82 사용자),
-    // 투명할수록 흐림을 줄인다(styles.css `--card-blur`가 fluidkit의 backdrop-filter를 덮음, 굴절은 이때 빠짐)
-    blur: Math.round((8 - Math.max(0, t - 0.28) / 0.57 * 7) * 10) / 10 + 'px', // 처음 값 28%까지 8px, 85%에서 1px
-    // 그림자는 카드 크기의 짙은 판이라 틴트가 옅으면 비쳐 회색이 된다(세션 82 사용자) → 처음 값 28%까지는 그대로, 60%까지 옅어지다 그 위로는 없음
-    shadow: Math.round(Math.min(1, Math.max(0, (0.6 - t) / 0.32)) * 100) / 100,
-  };
-}
+import { glassOf, usePrefs } from './prefs';
 
 const KEY = 'pygaki-folded';
 export const FRESH = ['labels', 'chars', 'warn', 'project', 'script', 'settings', 'usage'];

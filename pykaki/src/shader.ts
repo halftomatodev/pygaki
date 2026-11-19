@@ -120,20 +120,11 @@ export function shaderOfBox(p: Project, b: BoxNode): BoxShader | null {
 }
 export const usesShaders = (p: Project) => p.nodes.some((n) => n.shader) || p.labels.some((g) => g.shader);
 
-const key = (s: BoxShader | null) => (s ? `${s.a}|${s.b}|${JSON.stringify(s.va ?? {})}|${JSON.stringify(s.vb ?? {})}` : '');
-export const sameShader = (x: BoxShader | null, y: BoxShader | null) => key(x) === key(y);
-
 // 화면에 보일 이름: "아스키 + VHS", 아무것도 없으면 "셰이더 끔"
 export function shaderLabel(s: BoxShader | null) {
   if (!s) return '게임 설정대로';
   const on = [s.a, s.b].filter((n) => n && n !== 'none').map(nameOf);
   return on.length ? on.join(' + ') : '셰이더 끔';
-}
-
-// 플레이 화면에 보일 이름. 켜진 것이 없으면 null
-export function shaderShown(s: BoxShader | null) {
-  const on = s ? [s.a, s.b].filter((n) => n && n !== 'none').map(nameOf) : [];
-  return on.length ? on.join(' + ') : null;
 }
 
 const pyStr =(s: string) => '"' + s.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
@@ -186,4 +177,3 @@ export function enterTransTv(p: Project, b: BoxNode, from: BoxNode[]): { t: stri
   }
   return { t: mine?.in ?? (prevNone ? 'none' : '') };
 }
-export const enterTrans = (p: Project, b: BoxNode, from: BoxNode[]) => enterTransTv(p, b, from).t;

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useStore } from './store';
 import { Hint } from './Help';
 import { isDesktop } from './desktop';
-import { ACTIONS, DIMS, GLASS, GRAD_DEFAULTS, THEMES, colorsOf, gradColors, gradOf, comboLabel, comboOf, resetKeys, resetPrefs, usePrefs, type ActionId, type Colors } from './prefs';
+import { ACTIONS, DIMS, GLASS, gradOf, comboLabel, comboOf, resetKeys, resetPrefs, usePrefs, type ActionId } from './prefs';
 
 const close = () => useStore.setState({ showPrefs: false });
 

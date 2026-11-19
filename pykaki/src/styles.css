@@ -131,6 +131,8 @@ code { font-family: var(--mono); }
 .sidebar { direction: rtl; width: var(--left-w, 244px); overflow: auto; background: var(--bg); padding: 4px 4px 16px 6px; flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; }
 /* 묶음마다 둥근 카드. 모든 카드가 같은 바탕색(면 색) */
 .sec { background: var(--panel); border-radius: 14px; padding: 10px 10px 8px; flex-shrink: 0; }
+/* 유리 카드가 아닌 칸(오른쪽 상자 편집 등)도 [카드 투명도]를 따름 (prefs.ts apply `--glass-tint`·`--glass-blur`) */
+.sec:not(.card):not(.folded) { background: var(--glass-tint, var(--panel)); -webkit-backdrop-filter: blur(var(--glass-blur, 8px)) saturate(1.6); backdrop-filter: blur(var(--glass-blur, 8px)) saturate(1.6); }
 :is(.sec, .card > [data-fluidkit='liquid-card-content']) > h3 { font-size: 13.5px; font-weight: 700; color: var(--text); margin: 0 0 8px; display: flex; justify-content: space-between; align-items: center; }
 :is(.sec, .card > [data-fluidkit='liquid-card-content']) > h3 button { font-size: 11.5px; font-weight: 600; padding: 2px 8px; color: var(--accent); }
 .sidebar > * { direction: ltr; }
@@ -207,7 +209,8 @@ code { font-family: var(--mono); }
 .tree-name { flex: 0 1 auto; min-width: 2em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tree-name.strong { font-weight: 600; }
 .tree-name.none { color: var(--muted); font-style: italic; }
-.tree-orig { flex: 0 20 auto; min-width: 0; font-size: 11px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* 칸이 좁으면 원래 이름(label, define)이 먼저 다 줄고 나서 표시 이름이 줄어듦 (세션 88, 예전에는 같이 줄어 제목이 4~5글자) */
+.tree-orig { flex: 0 10000 auto; min-width: 0; font-size: 11px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tree-orig.mono { font-family: var(--mono); }
 .tree-dot { flex: none; width: 10px; height: 10px; border-radius: 3px; }
 .tree-dot.round { border-radius: 50%; }

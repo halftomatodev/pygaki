@@ -6,7 +6,7 @@ import { shaderEffect } from './fx/textShaders';
 import { TransPicker } from './TransPicker';
 import { openMaskDialog } from './MaskVideoDialog';
 import { scanFolder } from './gameFolder';
-import { effectKnobs, formatImageFx, hasQuad, isMovieFile, parseImageFx, type EffectKnob } from './stage';
+import { effectKnobs, knobNum, knobText, formatImageFx, hasQuad, isMovieFile, parseImageFx, type EffectKnob } from './stage';
 import { useStore } from './store';
 
 export async function pickMediaFile(): Promise<string | null> {
@@ -143,8 +143,8 @@ export function MediaGroupFields({ g, place, onChange, old }: { g: MediaGroup; p
                   <input type="color" value={v.slice(0, 7)} onChange={(e) => putKnob(k.key, e.target.value)} />
                 ) : (
                   <>
-                    <input type="range" min={k.min} max={k.max} step={k.step} value={Number(v)} onChange={(e) => putKnob(k.key, String(Number(e.target.value)))} />
-                    <span className="fx-kv">{Number(v)}</span>
+                    <input type="range" min={k.min} max={k.max} step={k.step} value={knobNum(v)} onChange={(e) => putKnob(k.key, knobText(k, Number(e.target.value)))} />
+                    <span className="fx-kv">{knobNum(v)}</span>
                   </>
                 )}
                 <button className="fx-x" style={{ visibility: c !== undefined ? 'visible' : 'hidden' }} title="기본값으로" onClick={(e) => (e.preventDefault(), putKnob(k.key, undefined))}>↺</button>

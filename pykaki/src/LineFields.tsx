@@ -1,10 +1,10 @@
 // 상자 안 편집과 오른쪽 편집 탭이 함께 쓰는 줄 입력 부품
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useStore } from './store';
 import * as ops from './ops';
 import type { ImageKind, Line, LineFx, SayStyle } from './types';
 import { shaderEffect } from './fx/textShaders';
-import { BOXES, EFFECTS, effectKnobs, formatEffect, formatImageFx, parseEffect, parseImageFx, type EffectKnob, type EffectPart, FX_BASE, TAILS, FX_CURSOR, FX_OVERLAY, FX_TRANS, FX_WARP, isMaskName, isMovieFile, mediaMasked, POSITIONS, SHAKES, STAGE_LABEL, STAGE_TYPES, DEFAULT_FADEOUT, fxArgs, imageName, stageCode } from './stage';
+import { BOXES, EFFECTS, effectKnobs, knobNum, knobText, formatEffect, formatImageFx, parseEffect, parseImageFx, type EffectKnob, type EffectPart, FX_BASE, TAILS, FX_CURSOR, FX_OVERLAY, FX_TRANS, FX_WARP, isMaskName, isMovieFile, mediaMasked, POSITIONS, SHAKES, STAGE_LABEL, STAGE_TYPES, DEFAULT_FADEOUT, fxArgs, imageName, stageCode } from './stage';
 import { useGameFolder } from './gameFolder';
 import { LinePreview } from './SayPreview';
 import { TransPicker } from './TransPicker';
@@ -157,8 +157,8 @@ export function SayFields({ l, set }: { l: Line; set: SetLine }) {
                     <input type="color" value={v.slice(0, 7)} onChange={(e) => putArg(i, k.key, e.target.value)} />
                   ) : (
                     <>
-                      <input type="range" min={k.min} max={k.max} step={k.step} value={Number(v)} onChange={(e) => putArg(i, k.key, String(Number(e.target.value)))} />
-                      <span className="fx-kv">{Number(v)}</span>
+                      <input type="range" min={k.min} max={k.max} step={k.step} value={knobNum(v)} onChange={(e) => putArg(i, k.key, knobText(k, Number(e.target.value)))} />
+                      <span className="fx-kv">{knobNum(v)}</span>
                     </>
                   )}
                   <button className="fx-x" style={{ visibility: set !== undefined ? 'visible' : 'hidden' }} title="기본값으로" onClick={(e) => (e.preventDefault(), putArg(i, k.key, undefined))}>↺</button>
@@ -556,8 +556,8 @@ export function StageFields({ l, set, firstId, nd = '' }: { l: Line; set: SetLin
               <input type="color" value={v.slice(0, 7)} onChange={(e) => putPic(k.key, e.target.value)} />
             ) : (
               <>
-                <input type="range" min={k.min} max={k.max} step={k.step} value={Number(v)} data-knob={k.key} onChange={(e) => putPic(k.key, String(Number(e.target.value)))} />
-                <span className="fx-kv">{Number(v)}</span>
+                <input type="range" min={k.min} max={k.max} step={k.step} value={knobNum(v)} data-knob={k.key} onChange={(e) => putPic(k.key, knobText(k, Number(e.target.value)))} />
+                <span className="fx-kv">{knobNum(v)}</span>
               </>
             )}
             <button className="fx-x" style={{ visibility: cur !== undefined ? 'visible' : 'hidden' }} title="기본값으로" onClick={(e) => (e.preventDefault(), putPic(k.key, undefined))}>↺</button>

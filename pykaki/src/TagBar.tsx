@@ -6,7 +6,7 @@ import { useStore } from './store';
 import type { Flag } from './types';
 import { useGameFolder } from './gameFolder';
 import { hit, keyOf } from './prefs';
-import { EFFECTS, effectKnobs, formatEffect, parseEffect } from './stage';
+import { EFFECTS, effectKnobs, knobNum, knobText, formatEffect, parseEffect } from './stage';
 import { shaderEffect } from './fx/textShaders';
 import { RUBY_NOTE, insertRuby, insertTag, removeTag, retag, rubyAt, setRubyStyle, setTagValue, stepSize, tagsAt, toggleTag, type Edit } from './tagEdit';
 import { TagDemo, type Tip } from './TagDemo';
@@ -662,14 +662,14 @@ export function TagBar({ targetId, className = '', extra }: { targetId: string; 
                             min={k.min}
                             max={k.max}
                             step={k.step}
-                            value={Number(v)}
+                            value={knobNum(v)}
                             data-knob={k.key}
-                            onChange={(e) => setKnob({ i, key: k.key, v: String(Number(e.target.value)) })}
+                            onChange={(e) => setKnob({ i, key: k.key, v: knobText(k, Number(e.target.value)) })}
                             onPointerUp={applyKnob}
                             onKeyUp={applyKnob}
                             onBlur={applyKnob}
                           />
-                          <span className="fx-kv">{Number(v)}</span>
+                          <span className="fx-kv">{knobNum(v)}</span>
                         </>
                       )}
                       <button className="fx-x" style={{ visibility: set !== undefined ? 'visible' : 'hidden' }} title="기본값으로" onClick={(e) => (e.preventDefault(), putKnob(i, k.key, undefined))}>↺</button>

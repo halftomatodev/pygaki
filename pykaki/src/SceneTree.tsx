@@ -214,7 +214,7 @@ export function SceneTree() {
               3,
               <>
                 <span className="tree-box" aria-hidden />
-                <span className={'tree-name' + (b.title ? '' : ' none')}>{b.title || '(제목 없음)'}</span>
+                <span className={'tree-name' + (b.title ? '' : ' none')} title={b.title || undefined}>{b.title || '(제목 없음)'}</span>
               </>,
               { sel: selected.includes(b.id), testid: 'tree-box-' + b.id, onClick: () => goBox(b.id) },
             ),
@@ -270,7 +270,7 @@ function LabelLine({ g, count, onEdit }: { g: LabelGroup; count: number; onEdit:
   return (
     <>
       <span className="tree-dot" style={{ background: g.color }} aria-hidden />
-      <span className="tree-name">{g.title || g.name}</span>
+      <span className="tree-name" title={g.title ? `${g.title} (${g.name})` : g.name}>{g.title || g.name}</span>
       {g.title && <span className="tree-orig mono">{g.name}</span>}
       <span className="sp" />
       <span className="tree-acts">
@@ -327,7 +327,7 @@ function CharLine({ c, i, onEdit }: { c: Character; i: number; onEdit: () => voi
   return (
     <>
       <span className="tree-dot round" style={{ background: c.color }} aria-hidden />
-      <span className="tree-name">{c.name}</span>
+      <span className="tree-name" title={`${c.name} (${c.id})`}>{c.name}</span>
       <span className="tree-orig mono">{c.id}</span>
       <span className="sp" />
       <span className="tree-acts">
