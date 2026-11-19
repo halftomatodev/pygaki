@@ -1,11 +1,11 @@
-<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ 2ea4e9f296 -->
-# pygaki plugin customization guide (5.1)
+<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ 10dcd58bab -->
+# pygaki plugin customization guide (5.4)
 
-2026-11-13 · version 5.1 (changed in 5.1: the effects folder and image transitions, files to turn off effects and shaders, photo collage (instead of shifting shards), the shimmer shader `ripple`, detail values on shader lines and per-scene dialogue sound and cursor, pixel sort and datamosh as shader transitions, the tree diagram, pygaki as a desktop app only. Changed in 5.0: seven new screen effects (glitch, jitter, halftone, hologram, night vision, shifting shards, flying shards), effects on a single image, eleven text effects, text boxes (speech bubble, rounded frame), editing the splash on screen, the in-game editor's "UI text" tab. Changed in 4.22: lines where shaders change and per-line transitions, "from here" for cursor and shaders, a tidier dialogue tab, cursor and CTC image folders. Changed in 4.21: shader section details moved under slots 1 and 2, clicking a line moves the game there too. Changed in 4.20: two shader slots and "Apply from here", title and in-game menu shaders, title background and title, subtitle, text effects, rotation handle)
+2026-11-19 · version 5.4 (changed in 5.4: pictures and videos behind dialogue and choices (picture/video boxes), moving, scaling and rotating that picture in the game, transparent videos for names starting with `mask_`, tying the text to the picture, four-corner warp and a picture effect on appearing, the picture effects `vibrate` and `springin`, Ren'Py 8.6.1 support. Changed in 5.3: the in-game editor's "Edit shortcuts" tab. 5.2 changed only the script editor. Changed in 5.1: the effects folder and image transitions, files to turn off effects and shaders, photo collage (instead of shifting shards), the shimmer shader `ripple`, detail values on shader lines and per-scene dialogue sound and cursor, pixel sort and datamosh as shader transitions, the tree diagram, pygaki as a desktop app only. Changed in 5.0: seven new screen effects (glitch, jitter, halftone, hologram, night vision, shifting shards, flying shards), effects on a single image, eleven text effects, text boxes (speech bubble, rounded frame), editing the splash on screen, the in-game editor's "UI text" tab. Changed in 4.22: lines where shaders change and per-line transitions, "from here" for cursor and shaders, a tidier dialogue tab, cursor and CTC image folders. Changed in 4.21: shader section details moved under slots 1 and 2, clicking a line moves the game there too. Changed in 4.20: two shader slots and "Apply from here", title and in-game menu shaders, title background and title, subtitle, text effects, rotation handle)
 
 ## How to read this document
 
-This document is for people who installed the pygaki plugins 5.1 to look up **which value in which file changes what**. Full descriptions of setting names are in each folder's `README.md` (Korean); this document starts from "what you want to do". If you write your text in pygaki, start with "Using it with pygaki".
+This document is for people who installed the pygaki plugins 5.4 to look up **which value in which file changes what**. Full descriptions of setting names are in each folder's `README.md` (Korean); this document starts from "what you want to do". If you write your text in pygaki, start with "Using it with pygaki".
 
 The in-game editor (Shift+M) can be switched to Japanese or English with the [Language] button on its panel (it starts out following the game's language). This document sometimes gives the Korean screen names next to tab and button names (e.g. "dialogue tab" = 대사 탭). Comments in the settings files are in Korean.
 
@@ -52,6 +52,9 @@ Find what you want to change and edit the value in the file on the right. Items 
 | Show the quick menu from the start | `ui_kit/custom_ui_config.rpy` | `custom_ui.quick_menu` | cursor/dialogue sound tab |
 | Position, size and color of one dialogue line | the script | parentheses after the line `(x=…, y=…, size=…, color=…)` | dialogue tab → Ctrl+S (straight into the script) |
 | Name position, size and color of one dialogue line | the script | parentheses after the line `(name_x=…, name_y=…, name_size=…, name_color=…)` | dialogue tab, Tab to "name" → Ctrl+S |
+| A picture or video behind the dialogue text (picture/video box) | the script | parentheses after the line `(box="media", media="images/say/cloud.png")` (5.4) | dialogue tab [Edit: Image] to move, scale and rotate → Ctrl+S |
+| A picture or video behind a choice (normal, hover, picked) | the script | parentheses after the choice `(idle_media=…, hover_media=…, select_media=…)` (5.4) | choice tab [Edit: Image behind] → Ctrl+S |
+| Tie the text to the picture, warp the four corners, an effect on appearing | the script | `media_link=True`, `media_quad=(…8 numbers)`, `media_text_quad=(…8 numbers)`, `media_fx="vibrate"` (5.4) | [Link text], drag the corner points → Ctrl+S |
 | Speed and text effect of one dialogue line | the script | parentheses after the line `(cps=20, effect="jitter")` (`cps` is characters per second), or a ratio `(speed=0.5)` | dialogue tab, speed and effect buttons → Ctrl+S |
 | Position and enter/exit transitions of images and videos (show / hide / scene lines) | the script | `show eileen at stage.pos(420, 720) with dissolve`, `hide eileen with moveoutright` | image/video tab → Ctrl+S (straight into the script) |
 | Change the image of a show / scene line to another file, add new show / scene lines | the script | `scene fx_bg` → `scene room`, `show hand` below (3.0) | image/video tab "choose image/video" → Ctrl+S |
@@ -694,6 +697,7 @@ menu (font="fonts/KBLJump_c.ttf", size=28, appear="slide"):
 | Wrap width | `width=400` (`None`: no wrapping) | `"width"` |
 | Rotation, tilt, scale | `rotate=`, `skew=`, `zoom=`, on hover `hover_rotate=`, `hover_zoom=`, `hover_offset=(8, 0)` | the same names |
 | Intro animation | `appear="pop"` / `"fade"` / `"slide"` / `None`, `delay=0.5` | `cmenu.appear`, `appear_time`, `appear_stagger`, `appear_offset` |
+| Picture or video behind the text (5.4) | `idle_media=`, `hover_media=`, `select_media=`, `select_time=0.8`. See "Picture/video box" below |  |
 | Video behind on hover | `hover_movie="movies/red.webm"` (`None`: off) | `"hover_movie"`, `"hover_movie_size"`, `"hover_movie_zoom"`, `"hover_movie_offset"` |
 | Button background, padding, width | `button_background=…`, `button_padding=(30, 8)`, `button_xsize=500` | `"button_background"`, `"button_hover_background"`, `"button_padding"`, `"button_xsize"` |
 | Color of choices that can't be picked | `insensitive_color="#555"` | `"insensitive_color"` |
@@ -809,6 +813,32 @@ e "속까지." (box="pill", pill_fill="#ffd23b", pill_line=None, color="#000000"
 - The tail doesn't find the speaker by itself. Set a direction or `(x, y)`.
 - You can also choose it in the "box" field of the editor's dialogue tab and in [Box] of pygaki's text effect field.
 
+**Picture/video box** (5.4, `ui_kit` 4.14–4.18): write `box="media"` to lay a picture or video behind the dialogue text. It is centered on the text, and the default dialogue window and name box backgrounds become transparent so only the picture shows. Use it for a cloud-shaped thought bubble, a bursting sound-effect word, text on a note paper picture and so on.
+
+```py
+e "It was a dream." (box="media", media="images/say/cloud.png")                    # stretched to the text size + padding
+e "Boom!" (box="media", media="movies/boom.webm", media_fit="image", media_zoom=0.6)  # the picture's own size (0.6x)
+e "Tilted." (box="media", media="images/say/cloud.png", media_offset=(20, -10), media_angle=8)
+e "Shake!" (box="media", media="images/say/boom.png", media_link=True, media_fx="vibrate")   # the text shakes in with it
+```
+
+| Name | Meaning |
+| --- | --- |
+| `media` | picture or video file (relative to the game folder). `.webm` `.ogv` `.mp4` `.mkv` are videos |
+| `media_fit` | `"text"` stretch to the text size + padding (default), `"image"` keep the picture's own size |
+| `media_zoom`, `media_offset`, `media_angle` | scale, move (x, y pixels), rotate only the picture (degrees; to rotate the text too, use `box_rotate` or `media_link`) |
+| `media_padding`, `media_alpha` | space between the text and the picture's edge, opacity (0.0–1.0) |
+| `media_mask`, `media_loop` | transparent video mode, loop playback (default `True`). A video whose name starts with `mask_` is a transparent video automatically |
+| `media_pop` | pop in (`True`, `False`, or seconds) |
+| `media_link` | tie the text to the picture. With `True` (or the `(scale, rotation, x, y)` at the time of tying) the text also takes later changes in scale, rotation and offset |
+| `media_quad`, `media_text_quad` | move the four corners of the picture or the text separately to warp it (8 numbers: how far the top-left, top-right, bottom-right and bottom-left corners move across and down, as a ratio of the size) |
+| `media_fx`, `media_fx_time`, `media_fx_values` | a picture effect from the effects folder when the text box appears (e.g. `"vibrate"`, `"springin"`), its seconds, detail values `{"amount": 20}`. If tied, the text too. Ren'Py's built-in transitions (`dissolve` etc.) can't be used |
+
+- **Choices** use the same box. Write `idle_media` (normal), `hover_media` (on mouse hover; the normal picture if missing) and `select_media` (shown for `select_time` seconds when picked, then it moves on; default 0.5). `media_fit` `media_zoom` `media_offset` `media_angle` `media_link` `media_quad` `media_fx` mean the same. A choice with a picture drops the default button background and shrinks to the text size + `media_padding` (`media_button=True` keeps the button).
+- **Editing in the game**: in the editor (Shift+M), use [Edit: Image] on the dialogue tab or [Edit: Image behind] on the choice tab. Drag the picture to move it, the wheel or A/D to scale, Q/E to rotate. Turn on [Link text] and the text follows; drag the corner points (pink for the picture, sky blue for the text) for a four-corner warp, and undo with [Reset corners] and [Reset image]. Ctrl+S writes it on that script line, and for pygaki scripts the script editor takes it in.
+- **Transparent videos**: Ren'Py (up to 8.6.1) can't play a webm with alpha as is. Turn transparent webm, animated GIF/WebP/PNG, PNG sequences and green-screen videos into `movies/mask_name.webm` (color on the left, alpha on the right) with [🎞 Make transparent video] in the pygaki app.
+- In the pygaki script editor, pick them in [Picture/video] under [Text box] on a dialogue line, and with [🖼] on a choice line. If the game's plugin is older, the script editor's check tab tells you.
+
 - If you need a new short name, add it to `say_style.alias` in the settings file, like `"alpha": "what_alpha",`.
 - Ordinary characters have the dialogue window at the bottom of the screen, so moving the name above the window makes `name_y` negative. The editor panel also shows the screen-based position.
 - If the text speed is "instant" (the default for new Ren'Py projects), effects like `speed` and dissolve aren't visible. Wave and jitter are. Set `custom_ui.text_cps` or lower the speed in preferences.
@@ -824,8 +854,8 @@ Each click on the panel's **[Language]** button switches the editor's text 한�
 | Tab | Where it opens | What you can change | Ctrl+S saves to |
 | --- | --- | --- | --- |
 | Title menu | title screen, the ESC menu during play (3.1) | item position, rotation, tilt, scale, text size, font, color, selected values. Opened with the ESC menu open, it edits the ESC menu | `ui_kit/title_menu_layout.rpy` (`tmenu.layout`; the ESC menu `tmenu.pause_layout`) |
-| Choice | while choices are shown | position, shape, font and color of one choice, hover values | **that choice's line in the script** |
-| Dialogue | while dialogue is shown | position, text size, font and color of one line, name position, size, font and color, speed and text effects, **screen effects to turn on from this line, cancel, transitions, overlay, cursor position** | **that dialogue line in the script** |
+| Choice | while choices are shown | position, shape, font and color of one choice, hover values, position, scale, rotation and four-corner warp of the back picture with [Edit: Image behind] (5.4) | **that choice's line in the script** |
+| Dialogue | while dialogue is shown | position, text size, font and color of one line, name position, size, font and color, speed and text effects, **screen effects to turn on from this line, cancel, transitions, overlay, cursor position**, position, scale, rotation, tie to text and four-corner warp of the picture/video box with [Edit: Image] (5.4) | **that dialogue line in the script** |
 | Cursor/dialogue sound | anywhere | text speed, dialogue sound and volume, click-to-continue and cursor (on, **choose images for 12 slots**, every 1/2 frames, cursor mode), quick menu | `ui_kit/custom_ui_layout.rpy` |
 | Title shimmer | title screen (when `screen_fx` is present) | on, targets, strength, wave size, speed, swirl, glints, quality | `screen_fx/watermorph_layout.rpy` |
 | Screen effects | anywhere (when `screen_fx` is present) | choose VHS overlay / ASCII / retro terminal / Game Boy / base effect, transitions with the buttons at the top. Per effect: on, overlay on/off, value sliders, presets, **"this effect from this line"**, **"this effect from this script line"**. Base effect, overlay on/off, TV timing, flash, sound volume and preview. (These pages edit setting values, so saving doesn't change the effect of the current scene) | `screen_fx/<effect name>_layout.rpy`, `screen_fx_layout.rpy` |
@@ -1518,6 +1548,10 @@ When the same value is in several places, the one further right wins.
 | "unknown keyword" error on `fx=` in dialogue parentheses | the `screen_fx` folder is missing or old (replace with the 2.8 bundle; `fx_overlay` since 2.5, `fx_exclude` since 2.6) |
 | "image not found" error on `show rain` | whether the video is in `game/movies/`, whether the extension is `.webm`, whether an image with the same name exists in `images/` (images win) |
 | A transparent video shows as two pictures side by side | whether the file name starts with `mask_` (side_mask video) |
+| I added a transparent webm or GIF but the background is black | Ren'Py can't play a webm with alpha. Make a `mask_` video with [Make transparent video] in the pygaki app |
+| A game newly made with Ren'Py 8.6 stops at the first line with "Unknown layer None" | the plugin is old. Use [Update plugins] in the bundle launcher to get 5.4 (`ui_kit` 4.17 / `screen_fx` 5.9 or later) |
+| A shader I wrote gives a syntax error in Ren'Py 8.6 | new 8.6 games use GLSL ES 3.00 for shaders by default. Register shaders written in the old syntax with `glsl=100` (8.5 has no such argument, so only when `hasattr(renpy.config, "glsl_version")`) |
+| "unknown keyword" error for `box="media"` in dialogue parentheses / no picture | `ui_kit` is older than 4.14. Update the plugins |
 | Can't select an image in the image/video tab | only images shown by show or scene lines in the script can be selected. Right after loading a save, choose from the line list |
 | Dialogue unreadable under ASCII | whether `ascii.exclude` has `"say"`, whether `exclude=()` or `fx_exclude=()` was used |
 | Excluded text still gets the effect | whether you forgot the comma when writing just one (`("say",)`, not `("say")`), whether `screen_fx.split_text_layers = False` |
