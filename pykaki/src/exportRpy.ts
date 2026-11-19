@@ -9,7 +9,7 @@ import { voiceCode, voiceFile, voiceIndex } from './voice';
 import { actOf, boxRef, flagAction, hasAct, isDragged, isHud, screenNameProblem } from './screens';
 import { checkTags, shaderTags, splitClear } from './tagEdit';
 import { sceneCode, sceneSupported, uiOfBox, usesSceneUi } from './boxUi';
-import { exprNames, FLAG_SUB, flagNameProblem, inputCode, parseAction, pyValue, subNames } from './flags';
+import { exprNames, FLAG_SUB, flagNameProblem, flagRef, inputCode, parseAction, persistExpr, persistNames, persistSub, pyValue, subNames } from './flags';
 import { flagUi, strOptions } from './flagUi';
 import { enterTransTv, imgTransSupported, isImgTrans, shaderCode, shaderOfBox, usesShaderValues, usesShaders, usesTvValues, valuesSupported } from './shader';
 
@@ -178,10 +178,10 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
   out.push(`# ${p.project.title}`);
   out.push(`# ${opts.newMark ? 'pygaki' : 'PyKaki'}가 만든 파일이에요. 직접 고치면 다음 내보내기 때 덮어써져요.`);
   out.push('');
-  for (const c of p.characters) out.push(`define ${c.id} = Character(${pyStr(c.name)}${c.color ? `, color=${pyStr(c.color)}` : ''}, image=${pyStr(c.id)})`);
+  for (const c of p.characters) out.push(`define ${c.id} = Character(${pyStr(persistSub(p, c.name))}${c.color ? `, color=${pyStr(c.color)}` : ''}, image=${pyStr(c.id)})`);
   if (p.characters.length) out.push('');
   // 플래그의 처음 값. default라 세이브를 불러오면 세이브의 값이 이긴다
-  for (const v of p.variables) out.push(`default ${v.name} = ${pyValue(v)}${v.note ? '  # ' + oneLine(v.note) : ''}`);
+  for (const v of p.variables) out.push(`default ${v.persist ? 'persistent.' : ''}${v.name} = ${pyValue(v)}${v.note ? '  # ' + oneLine(v.note) : ''}`);
   if (p.variables.length) out.push('');
 
   // 시작
@@ -241,7 +241,7 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
   const vIndex = voiceIndex(opts.audio ?? []);
   const I = '    ';
   // 대사·선택지 안 플래그 값 [이름] (3단계에서 게임 밖에도 남는 플래그는 persistent.이름)
-  const subs = new Map(p.variables.map((v) => [v.name, v.name] as [string, string]));
+  const subs = new Map(p.variables.map((v) => [v.name, flagRef(p, v.name)] as [string, string]));
   const q =(t: string) => '"' + escapeText(t, S, subs) + '"';
 
   for (const g of p.labels) {
@@ -305,7 +305,12 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
       };
       const emit = (l: Line) => {
         if (l.type === 'note') return l.text.split('\n').forEach((x) => body.push('# ' + x));
-        if (l.type === 'command') return l.text.split('\n').forEach((x) => x.trim() && body.push(x.trimEnd()));
+        if (l.type === 'command') {
+          // 직접 쓴 명령은 그대로. 게임 밖에도 남는 플래그를 이름만으로 쓰면 알림 (persistent.이름으로 써야 함)
+          const pn = persistNames(p).filter((n) => exprNames(l.text).includes(n));
+          if (pn.length) W.push({ level: 'warn', msg: `명령 줄의 ${pn.join(', ')}: 게임 밖에도 남는 플래그라 명령 줄에서는 persistent.${pn[0]}처럼 써야 해요 (${b.title || b.id})`, nodeId: b.id });
+          return l.text.split('\n').forEach((x) => x.trim() && body.push(x.trimEnd()));
+        }
         if (l.type === 'flag') {
           const a = oneLine(l.text);
           if (!a) {
@@ -313,7 +318,7 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
             return body.push('pass  # 빈 플래그 바꾸기');
           }
           checkAction(a, '플래그 바꾸기', b);
-          return body.push('$ ' + a);
+          return body.push('$ ' + persistExpr(p, a));
         }
         if (l.type === 'input') {
           // 이름 입력 (FEATURE 30): 받은 글을 글 플래그에, 비우면 처음 값
@@ -435,13 +440,13 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
             if (ma.length && !S.renpyLink) W.push({ level: 'warn', msg: `선택지 "${c.text}"의 뒤 그림은 pygaki 플러그인 연결을 켜야 내보내요`, nodeId: b.id });
             const margs = ma.length && S.renpyLink ? ` (${ma.join(', ')})` : '';
             // 뒤 그림이 있는 선택지는 줄 끝에 # @c:선택지id (게임 안 편집 화면이 그림 자리를 돌려보낼 때 찾음, LINK.md 2장)
-            body.push(`${I}${q(c.text)}${margs}${cond ? ' if ' + cond : ''}:${margs && endMarks ? '  # @c:' + c.id : ''}`);
+            body.push(`${I}${q(c.text)}${margs}${cond ? ' if ' + persistExpr(p, cond) : ''}:${margs && endMarks ? '  # @c:' + c.id : ''}`);
             // 고르면 바꾸기: jump 앞에 $ 줄
             for (const a0 of c.actions) {
               const a = oneLine(a0);
               if (!a) continue;
               checkAction(a, `선택지 "${c.text}"의 고르면`, b);
-              body.push(I + I + '$ ' + a);
+              body.push(I + I + '$ ' + persistExpr(p, a));
             }
             if (!c.target) W.push({ level: 'warn', msg: `선택지 "${c.text}"가 연결되지 않았어요`, nodeId: b.id });
             body.push(I + I + (c.target ? `jump ${ref(c.target)}` : todo));
@@ -456,7 +461,7 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
           if (!cond) W.push({ level: 'error', msg: `조건 칸이 비어 있어요 (${name})`, nodeId: b.id });
           else checkExpr(cond, '조건 분기', b);
           if (!c.target) W.push({ level: 'warn', msg: `조건 "${cond || '(빈 조건)'}"의 갈래가 연결되지 않았어요 (${name})`, nodeId: b.id });
-          body.push(`${i === 0 ? 'if' : 'elif'} ${cond || 'False  # TODO: 조건 없음'}:`);
+          body.push(`${i === 0 ? 'if' : 'elif'} ${cond ? persistExpr(p, cond) : 'False  # TODO: 조건 없음'}:`);
           body.push(I + (c.target ? `jump ${ref(c.target)}` : todo));
         });
         if (!e.else) W.push({ level: 'warn', msg: `조건 분기의 "그 밖"이 연결되지 않았어요 (${name})`, nodeId: b.id });

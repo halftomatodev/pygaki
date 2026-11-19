@@ -26,6 +26,20 @@ export const shownValue = (v: unknown) => (v === true ? 'True' : v === false ? '
 // 미리보기: 플래그 [이름]을 값으로 (없는 이름은 그대로)
 export const fillFlags = (t: string, vars: Record<string, unknown>) => t.replace(FLAG_SUB, (m, n) => (n in vars ? shownValue(vars[n]) : m));
 
+// 게임 밖에도 남는 플래그 (FEATURE 30, variables[].persist): 대본에는 이름만 쓰고, 원고에서만 persistent.이름으로
+export const persistNames = (p: Project) => p.variables.filter((v) => v.persist).map((v) => v.name);
+export const flagRef = (p: Project, name: string) => (p.variables.some((v) => v.name === name && v.persist) ? 'persistent.' + name : name);
+// 식 안의 그 플래그 이름을 persistent.이름으로 (글자 안과 점 뒤는 그대로)
+export function persistExpr(p: Project, e: string) {
+  for (const n of persistNames(p)) e = renameIn(e, n, 'persistent.' + n);
+  return e;
+}
+// 글 안 [이름]도 (화면 글·캐릭터 이름처럼 원고에 그대로 쓰는 글)
+export function persistSub(p: Project, t: string) {
+  for (const n of persistNames(p)) t = renameSub(t, n, 'persistent.' + n);
+  return t;
+}
+
 // 글 안 플래그 값 [from]을 [to]로 (플래그 이름을 바꿀 때)
 export const renameSub = (t: string, from: string, to: string) => t.replace(FLAG_SUB, (m, n) => (n === from ? `[${to}]` : m));
 
@@ -186,7 +200,7 @@ export function normalizeFlags(raw: unknown): Flag[] {
   for (const v of raw as any[]) {
     if (!v || typeof v !== 'object' || typeof v.name !== 'string') continue;
     const kind: FlagKind = v.kind === 'bool' || v.kind === 'int' || v.kind === 'str' ? v.kind : typeof v.init === 'boolean' ? 'bool' : typeof v.init === 'number' ? 'int' : 'str';
-    out.push({ id: typeof v.id === 'string' && v.id ? v.id : 'v' + Date.now().toString(36) + seq++, name: v.name, kind, init: fitInit(kind, v.init), ...(typeof v.note === 'string' && v.note ? { note: v.note } : {}), ...(normalizeUi(v.ui) ? { ui: normalizeUi(v.ui) } : {}) });
+    out.push({ id: typeof v.id === 'string' && v.id ? v.id : 'v' + Date.now().toString(36) + seq++, name: v.name, kind, init: fitInit(kind, v.init), ...(typeof v.note === 'string' && v.note ? { note: v.note } : {}), ...(v.persist === true ? { persist: true as const } : {}), ...(normalizeUi(v.ui) ? { ui: normalizeUi(v.ui) } : {}) });
   }
   return out;
 }

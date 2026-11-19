@@ -253,6 +253,7 @@ export interface Flag {
   kind: FlagKind; // 켜짐/꺼짐 | 숫자 | 글자
   init: boolean | number | string; // 처음 값
   note?: string; // 작가 메모 (원고에 주석으로)
+  persist?: true; // 게임 밖에도 남김 (FEATURE 30): 원고에서 persistent.이름 (엔딩 모으기, 회차). 대본에는 이름만
   ui?: FlagUi; // 플래그 카드·견본에서 보이는 꼴 (FEATURE 20). 없으면 종류로 정함 (flagUi.ts)
 }
 

@@ -2,7 +2,7 @@
 import type { BoxNode, Flag, Project, ScreenAnchor, ScreenDef, ScreenItem } from './types';
 import { addFixup } from './store';
 import { IDENT, RESERVED, uid } from './util';
-import { parseAction } from './flags';
+import { flagRef, parseAction, persistExpr, persistSub } from './flags';
 import { cornerOf, flagUi, partColor, partImage, statePart, strOptions, uiMax, uiMin } from './flagUi';
 import { isMaskName, isMovieFile } from './stage';
 
@@ -187,9 +187,11 @@ export function boxRef(p: Project, id: string | null | undefined): string | null
 }
 
 // 플래그 바꾸기 식 하나 → 렌파이 화면 동작. 못 바꾸면 null
-export function flagAction(src: string): string | null {
-  const a = parseAction(src.replace(/^\s*\$\s*/, ''));
-  if (!a || !a.value) return null;
+// p를 주면 게임 밖에도 남는 플래그는 persistent.이름 (FEATURE 30. SetVariable 등은 점 이름을 받음)
+export function flagAction(src: string, p?: Project): string | null {
+  const a0 = parseAction(src.replace(/^\s*\$\s*/, ''));
+  if (!a0 || !a0.value) return null;
+  const a = p ? { ...a0, name: flagRef(p, a0.name), value: a0.value === `not ${a0.name}` ? `not ${flagRef(p, a0.name)}` : persistExpr(p, a0.value) } : a0;
   const n = py(a.name);
   const num = /^-?\d+(\.\d+)?$/.test(a.value) ? Number(a.value) : null;
   if (a.op === '=') return a.value === `not ${a.name}` ? `ToggleVariable(${n})` : `SetVariable(${n}, ${a.value})`;
@@ -209,7 +211,7 @@ export function actionCode(p: Project, s: ScreenDef, it: ScreenItem): string {
     const o = p.screens?.find((x) => x.id === it.screen);
     return o ? `ToggleScreen(${py(o.name)})` : 'NullAction()';
   }
-  const list = (it.acts ?? []).map(flagAction).filter((x): x is string => !!x);
+  const list = (it.acts ?? []).map((a) => flagAction(a, p)).filter((x): x is string => !!x);
   return !list.length ? 'NullAction()' : list.length === 1 ? list[0] : `[${list.join(', ')}]`;
 }
 
@@ -222,12 +224,12 @@ function itemCode(p: Project, s: ScreenDef, it: ScreenItem, I0: string): string[
   let out: string[] = [];
   if (it.kind === 'image') out = it.image?.trim() ? [`add ${dispRef(it.image)}:`, pos] : [];
   else if (it.kind === 'text') {
-    out = [`text ${py(it.text ?? '')}:`, pos];
+    out = [`text ${py(persistSub(p, it.text ?? ''))}:`, pos];
     if (it.size) out.push(`${I}size ${it.size}`);
     if (it.color) out.push(`${I}color ${py(it.color)}`);
   } else if (it.kind === 'bar') {
     if (!it.flag || !IDENT.test(it.flag)) return [];
-    out = ['bar:', `${I}value AnimatedValue(${it.flag}, ${it.max && it.max > 0 ? it.max : 10}, 0.3)`, pos, `${I}xysize (${Math.round(it.w ?? BAR_W)}, ${Math.round(it.h ?? BAR_H)})`];
+    out = ['bar:', `${I}value AnimatedValue(${flagRef(p, it.flag)}, ${it.max && it.max > 0 ? it.max : 10}, 0.3)`, pos, `${I}xysize (${Math.round(it.w ?? BAR_W)}, ${Math.round(it.h ?? BAR_H)})`];
     out.push(`${I}left_bar Solid(${py(isColor(it.color) ? it.color! : '#e0607a')})`, `${I}right_bar Solid(${py(isColor(it.bgColor) ? it.bgColor! : '#00000080')})`, `${I}thumb None`);
   } else if (it.kind === 'look') {
     out = lookCode(p, it);
@@ -239,10 +241,10 @@ function itemCode(p: Project, s: ScreenDef, it: ScreenItem, I0: string): string[
     if (it.hover?.trim()) out.push(`${I}hover ${dispRef(it.hover)}`);
     // 고른 상태 (FEATURE 29): 그림이 있으면 selected_idle·selected_hover, 조건이 있으면 selected
     if (it.selImage?.trim()) out.push(`${I}selected_idle ${dispRef(it.selImage)}`, `${I}selected_hover ${dispRef(it.selImage)}`);
-    if (it.selected?.trim()) out.push(`${I}selected (${it.selected.trim()})`);
+    if (it.selected?.trim()) out.push(`${I}selected (${persistExpr(p, it.selected.trim())})`);
     out.push(pos, act);
   } else {
-    out = [`textbutton ${py(it.text ?? '')}:`, pos];
+    out = [`textbutton ${py(persistSub(p, it.text ?? ''))}:`, pos];
     // 배경 그림 (FEATURE 29): 기본·올렸을 때·고른 상태. 버튼 크기에 늘여 맞춤. 하나라도 있으면 여백을 둠
     const bg = (d: string) => `Frame(${dispRef(d)}, 0, 0)`;
     if (it.image?.trim()) out.push(`${I}background ${bg(it.image)}`);
@@ -253,10 +255,10 @@ function itemCode(p: Project, s: ScreenDef, it: ScreenItem, I0: string): string[
     if (it.color) out.push(`${I}text_color ${py(it.color)}`);
     if (it.hoverColor) out.push(`${I}text_hover_color ${py(it.hoverColor)}`);
     if (it.selColor) out.push(`${I}text_selected_idle_color ${py(it.selColor)}`, `${I}text_selected_hover_color ${py(it.selColor)}`);
-    if (it.selected?.trim()) out.push(`${I}selected (${it.selected.trim()})`);
+    if (it.selected?.trim()) out.push(`${I}selected (${persistExpr(p, it.selected.trim())})`);
     out.push(act);
   }
-  return withCond(it, mark(animAt(it, out), 'i:' + it.id), I0);
+  return withCond(p, it, mark(animAt(it, out), 'i:' + it.id), I0);
 }
 
 // 플래그 꼴 (FEATURE 21): 플래그 카드의 꼴과 꾸미기를 렌파이 화면 언어로. 첫 줄은 맨 바깥 칸(뒤에 pos가 들어감)
@@ -312,7 +314,7 @@ export function lookCode(p: Project, it: ScreenItem): string[] {
   const lit = (d: string, pw: number | string, ph: number | string, r: number) => roundOf(`Fixed(${d}, Solid(${LIT}), xysize=(${pw}, ${ph}))`, r);
   // 누르는 칸: 배경·여백 없는 button (칸 하나에 그림 하나). 올리면 살짝 밝게
   const press = (I1: string, action: string, r = 0) => [`${I1}button:`, `${I1}${I}background None`, `${I1}${I}padding (0, 0)`, `${I1}${I}hover_foreground ${litFg(r)}`, `${I1}${I}action ${action}`];
-  const lo = uiMin(u), hi = uiMax(u), n = f.name;
+  const lo = uiMin(u), hi = uiMax(u), n = flagRef(p, f.name);
   // 칸·별 i를 누르면 그 칸까지 찬 값. 첫 칸이 이미 그 값이면 최솟값으로 (모두 비우기)
   const stepSet = (count: number) => {
     const t = `${lo} + ((i + 1) * ${hi - lo} + ${count - 1}) // ${count}`;
@@ -482,9 +484,9 @@ const ANIM_HELPER = [
   ]),
 ];
 
-function withCond(it: ScreenItem, out: string[], I0: string): string[] {
+function withCond(p: Project, it: ScreenItem, out: string[], I0: string): string[] {
   if (!out.length) return out;
-  if (it.cond?.trim()) return [`${I0}${hasAnim(it) ? 'showif' : 'if'} ${it.cond.trim()}:`, ...out.map((x) => I0 + '    ' + x)];
+  if (it.cond?.trim()) return [`${I0}${hasAnim(it) ? 'showif' : 'if'} ${persistExpr(p, it.cond.trim())}:`, ...out.map((x) => I0 + '    ' + x)];
   return out.map((x) => I0 + x);
 }
 
@@ -512,7 +514,7 @@ function dragCode(p: Project, s: ScreenDef, it: ScreenItem, I0: string): string[
     if (it.kind === 'image') out.push(`${I}add ${imgRef(it.image!)}`);
     else out.push(...textLines(I));
   }
-  return withCond(it, mark(out, 'i:' + it.id), I0);
+  return withCond(p, it, mark(out, 'i:' + it.id), I0);
 }
 
 const isDD = (it: ScreenItem) => isDragged(it) || it.kind === 'drop';

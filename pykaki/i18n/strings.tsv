@@ -2750,3 +2750,6 @@ ${where}의 [${n}]: "${n}"는 플래그가 아니라 글자 그대로 보여요.
 + 이름 입력	+ 名前入力	+ Name input
 지금 쓰는 줄 뒤에서 플레이어가 이름을 쳐요. 친 이름은 글자 플래그에 들어가서 대사에서 [이름]으로 보여요	今の行の後でプレイヤーが名前を入力します。入力した名前は文字フラグに入り、セリフでは [名前] で表示されます	After the current line the player types a name. It is stored in a text flag and shown in dialogue with [name]
 최대	最大	Max
+게임 밖에도 남김	ゲーム外にも残す	Keep across games
+명령 줄의 ${pn.join(', ')}: 게임 밖에도 남는 플래그라 명령 줄에서는 persistent.${pn[0]}처럼 써야 해요 (${b.title || b.id})	コマンド行の {0}: ゲーム外にも残るフラグなので、コマンド行では persistent.{1} のように書いてください ({2})	{0} in a command line: this flag is kept across games, so write it as persistent.{1} in command lines ({2})
+켜면 새 게임을 시작하거나 다른 세이브를 불러와도 값이 남아요 (본 엔딩 모으기, 몇 회차인지, 한 번 본 장면). 대본에는 이름 그대로 쓰고, 원고에서만 persistent.이름이 돼요	オンにすると、新しくゲームを始めても別のセーブをロードしても値が残ります (見たエンディングの記録、何周目か、一度見た場面)。台本では名前のまま書き、スクリプトでだけ persistent.名前 になります	When on, the value stays even after starting a new game or loading another save (endings seen, playthrough count, scenes already viewed). Write the plain name in the script; only the exported .rpy uses persistent.name
