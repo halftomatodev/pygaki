@@ -741,7 +741,7 @@ function ItemCard({ sc, it, upd, remove, dup }: { sc: ScreenDef; it: ScreenItem;
             {num('h', String(lookSize(project, { ...it, w: undefined, h: undefined })[1]), '세로 (px)')}
           </div>
           <LookSkinBtn flag={project.variables.find((f) => f.name === it.flag)} />
-          <label className="check" title="켜면 플레이어가 꼴로 값을 바꿔요. 이어진 막대는 끌기, 칸 막대·별은 칸 누르기, 스위치·체크박스는 누르기, 라디오는 줄 누르기, 풀다운은 펼쳐서 고르기">
+          <label className="check" title="켜면 플레이어가 꼴로 값을 바꿔요. 이어진 막대는 끌기, 칸 막대·별은 칸 누르기, 스위치·체크박스는 누르기, 라디오는 줄 누르기, 풀다운은 펼쳐서 고르기, 입력칸은 눌러서 치고 Enter">
             <input type="checkbox" checked={!!it.edit} onChange={(e) => upd((x) => void (e.target.checked ? (x.edit = true) : delete x.edit))} />
             게임에서 바꿀 수 있음
           </label>

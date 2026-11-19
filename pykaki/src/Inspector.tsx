@@ -166,7 +166,7 @@ function BoxInspector({ b }: { b: BoxNode }) {
         <button onClick={addFlagLine} title="이 자리에서 플래그를 바꿔요 (예: met_alice 켜기, love +1)">+ 플래그 바꾸기</button>
         <button onClick={() => addStageLine('pause')} title="지금 쓰는 줄 뒤에서 잠깐 멈춰요 (초, 또는 클릭할 때까지)">+ 멈춤</button>
         <button onClick={() => addStageLine('shake')} title="지금 쓰는 줄 뒤에서 화면을 흔들거나 번쩍여요">+ 흔들기</button>
-        <button onClick={() => addStageLine('input')} title="지금 쓰는 줄 뒤에서 플레이어가 이름을 쳐요. 친 이름은 글자 플래그에 들어가서 대사에서 [이름]으로 보여요">+ 이름 입력</button>
+        <button onClick={() => addStageLine('input')} title="지금 쓰는 줄 뒤에서 플레이어가 플래그 값(이름, 숫자)을 쳐요. 글자 플래그는 대사에서 [이름]으로 보여요">+ 플래그 입력</button>
         <span className="tip">Ctrl+Enter: 같은 화자로 아래에 새 줄</span>
       </div>
       <GameOffTip what="대사" />

@@ -106,7 +106,7 @@ function FlagRow({ f }: { f: Flag }) {
         {/* 게임 밖에도 남김 (FEATURE 30): 새 게임·다른 세이브에서도 값이 남음 (엔딩 모으기, 회차). 원고에서만 persistent.이름 */}
         <label className={'fpersist' + (f.persist ? ' on' : '')} title="켜면 새 게임을 시작하거나 다른 세이브를 불러와도 값이 남아요 (본 엔딩 모으기, 몇 회차인지, 한 번 본 장면). 대본에는 이름 그대로 쓰고, 원고에서만 persistent.이름이 돼요">
           <input type="checkbox" checked={!!f.persist} onChange={(e) => set((x) => void (e.target.checked ? (x.persist = true) : delete x.persist))} />
-          게임 밖에도 남김
+          엔딩 후에도 남음
         </label>
       </div>
       <FlagLookRow f={f} />

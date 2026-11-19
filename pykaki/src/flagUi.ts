@@ -4,12 +4,12 @@ import type { Flag, FlagCorner, FlagLook, FlagUi, LevelStyle, Project } from './
 import { evalExpr, applyAction, initVars, UNKNOWN, type Val, type Vars } from './trace';
 import { condText, exprNames, parseAction, parseCond, type CmpOp } from './flags';
 
-export const LOOK_LABEL: Record<FlagLook, string> = { level: '레벨 인디케이터', switch: '스위치', checkbox: '체크박스', radio: '라디오', pulldown: '풀다운' };
+export const LOOK_LABEL: Record<FlagLook, string> = { level: '레벨 인디케이터', switch: '스위치', checkbox: '체크박스', radio: '라디오', pulldown: '풀다운', input: '입력칸' };
 export const STYLE_LABEL: Record<LevelStyle, string> = { continuous: '이어진 막대', discrete: '칸 막대', rating: '칸형 (별·하트)' };
 // 모서리 (FEATURE 23): 없으면 둥글게 (앱 꼴의 처음 모양). 렌파이 원고도 같은 모서리로 (그림 부품은 그림 그대로)
 export const CORNER_LABEL: Record<'round' | FlagCorner, string> = { round: '둥글게', square: '각지게', pill: '알약' };
 export const cornerOf = (u: FlagUi): 'round' | FlagCorner => u.corner ?? 'round';
-export const looksFor = (k: Flag['kind']): FlagLook[] => (k === 'int' ? ['level'] : k === 'bool' ? ['switch', 'checkbox'] : ['radio', 'pulldown']);
+export const looksFor = (k: Flag['kind']): FlagLook[] => (k === 'int' ? ['level', 'input'] : k === 'bool' ? ['switch', 'checkbox'] : ['radio', 'pulldown', 'input']);
 
 // 꾸밀 부품: [이름, 한국어 이름, 기본 색, 도움말]. 그림·영상을 넣으면 그 부품을 그것으로 그림. 기본 색이 ''이면 그림만 (비우면 안 그림)
 export type PartDef = [part: string, label: string, color: string, hint?: string];
@@ -28,6 +28,16 @@ export function skinParts(ui: FlagUi): PartDef[] {
   if (ui.look === 'radio') return [['ring', '링', '#94a3b8'], ['on', '고른 링', '#4f46e5'], ['dot', '선택 점', '#4f46e5'], ['text', '글자 (게임)', '#ffffff']];
   return [['box', '바탕', '#ffffff'], ['text', '글자', '#1f2328'], ['border', '테두리', '#80808080']];
 }
+
+// 입력칸 (FEATURE 31): 글자는 최대 글자 수(없으면 렌파이 기본), 숫자는 최솟값·최댓값의 자릿수
+export function inputLen(f: Pick<Flag, 'kind' | 'ui'>): number | undefined {
+  const u = flagUi(f);
+  if (f.kind === 'int') return Math.max(String(uiMin(u)).length, String(uiMax(u)).length);
+  const n = f.ui?.len;
+  return n && n > 0 ? Math.round(n) : undefined;
+}
+// 플레이어가 칠 수 있는 플래그 (글자·숫자)
+export const canInput = (f: Pick<Flag, 'kind'>) => f.kind === 'str' || f.kind === 'int';
 
 // 이 플래그의 꼴 (저장된 것이 종류와 맞지 않으면 종류의 기본 꼴)
 export function flagUi(f: Pick<Flag, 'kind' | 'ui'>): FlagUi {
@@ -62,13 +72,13 @@ export function normalizeUi(raw: unknown): FlagUi | undefined {
   const r = raw as Record<string, unknown>;
   // 예전 꼴: 슬라이더 → 레벨(이어진 막대), 콤보박스 → 풀다운 (FEATURE 29에서 뺌)
   const look = r.look === 'slider' ? 'level' : r.look === 'combo' ? 'pulldown' : r.look;
-  if (!['level', 'switch', 'checkbox', 'radio', 'pulldown'].includes(look as string)) return undefined;
+  if (!['level', 'switch', 'checkbox', 'radio', 'pulldown', 'input'].includes(look as string)) return undefined;
   const u: FlagUi = { look: look as FlagLook };
   if (['continuous', 'discrete', 'rating'].includes(r.style as string)) u.style = r.style as LevelStyle;
   if (typeof r.min === 'number' && Number.isFinite(r.min)) u.min = r.min;
   if (typeof r.max === 'number' && Number.isFinite(r.max)) u.max = r.max;
   if (r.corner === 'square' || r.corner === 'pill') u.corner = r.corner;
-  for (const k of ['warn', 'crit', 'slice', 'pad', 'tip', 'cells', 'gap'] as const) if (typeof r[k] === 'number' && Number.isFinite(r[k])) u[k] = r[k] as number;
+  for (const k of ['warn', 'crit', 'slice', 'pad', 'tip', 'cells', 'gap', 'len'] as const) if (typeof r[k] === 'number' && Number.isFinite(r[k])) u[k] = r[k] as number;
   if (r.dir === 'high') u.dir = 'high';
   if (r.fit === 'stretch' || r.fit === 'tile') u.fit = r.fit;
   if (Array.isArray(r.options)) u.options = r.options.filter((x): x is string => typeof x === 'string');

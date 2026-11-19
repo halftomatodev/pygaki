@@ -2098,3 +2098,6 @@ button.bt-pill:hover { filter: brightness(.96); box-shadow: 0 0 0 1.5px currentC
 .bt-ok { color: #15803d; font-weight: 700; }
 .bt-arm.ok > .bt-cond { box-shadow: 0 0 0 1.5px #22c55e inset; }
 .bt-arm.no > .bt-cond, .bt-arm.no > .bt-to { opacity: .55; }
+/* 입력칸 꼴 (FEATURE 31) */
+.fw-type { cursor: text; font: inherit; font-size: 12px; }
+.fw-type[readonly] { cursor: default; }

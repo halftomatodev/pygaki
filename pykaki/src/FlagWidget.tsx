@@ -41,6 +41,7 @@ interface Props {
   label?: string; // 읽어 주는 이름 (플래그 이름)
   marks?: { value: number; label: string; ok: boolean; n?: number }[]; // 숫자 꼴 위의 조건 눈금 (2단계, Steps 꼴)
   onMark?: (i: number, v: number) => void; // 눈금을 끌면 그 조건의 기준 값
+  len?: number; // 입력칸: 최대 글자 수
   height?: number; // 숫자 꼴 막대 높이 (px). 화면 탭 무대는 항목 높이, 없으면 카드용 작은 높이
 }
 
@@ -50,6 +51,7 @@ export function FlagWidget(props: Props) {
   if (ui.look === 'checkbox') return <CheckLook {...props} />;
   if (ui.look === 'radio') return <RadioLook {...props} />;
   if (ui.look === 'pulldown') return <TextLook {...props} />;
+  if (ui.look === 'input') return <InputLook {...props} />;
   return <NumberLook {...props} />;
 }
 
@@ -282,6 +284,43 @@ function TextLook({ ui, value, onChange, options = [], label }: Props) {
         <option key={o} value={o}>{o === '' ? '(빈 글)' : o}</option>
       ))}
     </select>
+  );
+}
+
+// 입력칸 (FEATURE 31): 플레이어가 치는 칸. 글자는 그대로, 숫자는 범위 안 정수로 (치는 중에는 빈 칸·"-"도 둠)
+function InputLook({ ui, value, onChange, label, len }: Props) {
+  const { paint, color } = useSkin(ui);
+  const num = typeof value === 'number';
+  const [draft, setDraft] = useState(String(value ?? ''));
+  const [typing, setTyping] = useState(false);
+  useEffect(() => {
+    if (!typing) setDraft(String(value ?? ''));
+  }, [value, typing]);
+  const style: CSSProperties = { ...paint('box'), color: color('text'), borderColor: color('border') };
+  return (
+    <input
+      className={'fw-pull fw-type c-' + cornerOf(ui)}
+      style={style}
+      value={draft}
+      readOnly={!onChange}
+      maxLength={len}
+      inputMode={num ? 'numeric' : undefined}
+      placeholder={num ? `${uiMin(ui)}~${uiMax(ui)}` : '(빈 글)'}
+      aria-label={label}
+      spellCheck={false}
+      onFocus={() => setTyping(true)}
+      onBlur={() => (setTyping(false), setDraft(String(value ?? '')))}
+      onChange={(e) => {
+        const t = num ? e.target.value.replace(/[^\d-]/g, '') : e.target.value;
+        setDraft(t);
+        if (!num) return onChange?.(t);
+        if (/^-?\d+$/.test(t)) onChange?.(Math.min(uiMax(ui), Math.max(uiMin(ui), Number(t))));
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+        e.stopPropagation(); // 글 치는 키가 캔버스 단축키로 가지 않게
+      }}
+    />
   );
 }
 

@@ -79,7 +79,7 @@ export interface Line {
   zorder?: number; // show: 앞뒤 (숫자가 클수록 앞)
   screen?: string; // hud: 보이거나 숨길 화면 id (project.screens)
   behind?: string; // show: 이 태그의 그림 뒤에
-  // 이름 입력 (FEATURE 30, input 줄): text는 묻는 글, flag는 받은 글을 넣을 글 플래그 id, length는 최대 글자 수(없으면 렌파이 기본). 비우면 플래그의 처음 값
+  // 플래그 입력 (FEATURE 30, 31, input 줄): text는 묻는 글, flag는 친 값을 넣을 글자·숫자 플래그 id. length는 FEATURE 30의 최대 글자 수(읽을 때 플래그 ui.len으로 옮김). 비우면 플래그의 처음 값
   flag?: string;
   length?: number;
   // 음성 (FEATURE 16, say 줄). vno: label 안 음성 번호 (한 번 매기면 그대로). voice: 직접 고른 파일 (audio 기준), ''이면 이 줄은 음성 없음, 없으면 이름 규칙으로
@@ -259,7 +259,8 @@ export interface Flag {
 
 // 플래그의 꼴 (FEATURE 20, 29): 숫자는 레벨 인디케이터, 켜짐/꺼짐은 스위치·체크박스, 글자는 라디오·풀다운.
 // 예전 슬라이더는 레벨, 콤보박스는 풀다운으로 읽음 (flagUi.ts normalizeUi)
-export type FlagLook = 'level' | 'switch' | 'checkbox' | 'radio' | 'pulldown';
+// 입력칸 (FEATURE 31): 글자·숫자 플래그를 플레이어가 쳐서 정함 (대본의 플래그 입력 줄, HUD에서 게임에서 바꾸기)
+export type FlagLook = 'level' | 'switch' | 'checkbox' | 'radio' | 'pulldown' | 'input';
 export type LevelStyle = 'continuous' | 'discrete' | 'rating';
 export interface FlagSkinPart {
   color?: string; // #rrggbb 또는 #rrggbbaa
@@ -283,6 +284,7 @@ export interface FlagUi {
   tip?: number; // 끝 장식 높이 (px). 없으면 막대 높이
   cells?: number; // 별(칸형) 칸 수. 없으면 범위만큼 (10개까지). 한 칸이 여러 값이면 칸 안쪽을 잘라 보임
   gap?: number; // 칸 간격 (px). 없으면 2
+  len?: number; // 입력칸 (FEATURE 31, 글자): 칠 수 있는 최대 글자 수. 없으면 렌파이 기본. 숫자는 최솟값·최댓값 자릿수
 }
 export type FlagCorner = 'square' | 'pill';
 

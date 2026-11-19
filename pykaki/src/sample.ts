@@ -126,7 +126,15 @@ export function normalizeProject(raw: any): Project {
   for (const n of p.nodes) {
     if (!p.labels.some((l) => l.id === n.group)) n.group = p.labels[0].id;
     n.lines ??= [];
-    for (const l of n.lines) if (typeof l.text !== 'string') l.text = '';
+    for (const l of n.lines) {
+      if (typeof l.text !== 'string') l.text = '';
+      // FEATURE 30의 이름 입력 줄 글자 수(length)는 FEATURE 31부터 플래그의 입력칸(ui.len)에
+      if (l.type === 'input' && l.length !== undefined) {
+        const f = p.variables.find((v) => v.id === l.flag);
+        if (f && f.kind === 'str' && typeof l.length === 'number' && l.length > 0 && !f.ui?.len) f.ui = { ...(f.ui ?? { look: 'input' }), len: Math.round(l.length) };
+        delete l.length;
+      }
+    }
     n.exit ??= { type: 'return' };
     n.pos ??= { x: 0, y: 0 };
     if (n.w !== undefined && !(typeof n.w === 'number' && n.w > 0)) delete n.w;

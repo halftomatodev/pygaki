@@ -126,6 +126,22 @@ const LIST: FlagRecipe[] = [
     code: 'default route = ""\n\nmenu:\n    "바다로 간다":\n        $ route = "sea"\n    "산으로 간다":\n        $ route = "mountain"\n\nif route == "sea":\n    e "바다? 좋겠다."\nelse:\n    e "산? 다리 아프겠다."',
   },
   {
+    id: 'player_name',
+    demo: [
+      { vals: { pname: '주인공' }, code: 'default pname = "주인공"', say: '미나: 저기, 이름이 뭐야?' },
+      { vals: { pname: '하늘' }, code: '✎ 플래그 입력: pname (플레이어가 "하늘"을 침)', say: '하늘: 하늘이야.' },
+      { vals: { pname: '하늘' }, code: '대사의 [pname]', say: '미나: 반가워, 하늘!' },
+    ],
+    icon: '✎',
+    title: '주인공 이름',
+    kindHint: '글자 · 입력칸',
+    desc: '플레이어가 이름을 쳐서 정해요. 대사 속 [pname]과 캐릭터 이름 칸에 친 이름이 보여요. 친구·애완동물 이름도 같은 방법으로 받아요.',
+    flags: [{ name: 'pname', kind: 'str', init: '주인공', note: '주인공 이름 (플레이어가 침)', ui: { look: 'input', len: 12 } }],
+    write: ['상자 편집 [+ 플래그 입력]: 묻는 글 "이름이 뭐야?", 넣을 플래그 pname', 'HUD에 입력칸 꼴을 놓고 [게임에서 바꿀 수 있음]: 아무 때나 고쳐 침'],
+    read: ['대사·선택지 글의 [pname]', '[꼴 ▾] "이름으로 쓰는 캐릭터": 캐릭터 표시 이름이 [pname]'],
+    code: 'default pname = "주인공"\ndefine h = Character("[pname]")\n\n$ pname = renpy.input("이름이 뭐야?", default=pname, length=12).strip() or "주인공"\ne "반가워, [pname]!"',
+  },
+  {
     id: 'ending',
     marks: { love: [2], trust: [2] },
     demo: [

@@ -3,7 +3,7 @@ import type { BoxNode, Flag, Project, ScreenAnchor, ScreenDef, ScreenItem } from
 import { addFixup } from './store';
 import { IDENT, RESERVED, uid } from './util';
 import { flagRef, parseAction, persistExpr, persistSub } from './flags';
-import { cornerOf, flagUi, partColor, partImage, statePart, strOptions, uiMax, uiMin } from './flagUi';
+import { cornerOf, flagUi, inputLen, partColor, partImage, statePart, strOptions, uiMax, uiMin } from './flagUi';
 import { isMaskName, isMovieFile } from './stage';
 
 // HUD (FEATURE 18): 대사가 흐르는 동안 떠 있는 화면. 없으면 전체 화면 (call screen)
@@ -262,7 +262,7 @@ function itemCode(p: Project, s: ScreenDef, it: ScreenItem, I0: string): string[
 }
 
 // 플래그 꼴 (FEATURE 21): 플래그 카드의 꼴과 꾸미기를 렌파이 화면 언어로. 첫 줄은 맨 바깥 칸(뒤에 pos가 들어감)
-export const LOOK_SIZE: Record<string, [number, number]> = { level: [240, 22], rating: [220, 30], switch: [64, 32], checkbox: [32, 32], radio: [200, 32], pulldown: [200, 40] };
+export const LOOK_SIZE: Record<string, [number, number]> = { level: [240, 22], rating: [220, 30], switch: [64, 32], checkbox: [32, 32], radio: [200, 32], pulldown: [200, 40], input: [220, 40] };
 const RADIO_ROW = 32; // 라디오 한 줄 높이 (처음 크기는 고를 값 수만큼)
 export function lookSize(p: Project, it: ScreenItem): [number, number] {
   const f = p.variables.find((v) => v.name === it.flag);
@@ -320,6 +320,20 @@ export function lookCode(p: Project, it: ScreenItem): string[] {
     const t = `${lo} + ((i + 1) * ${hi - lo} + ${count - 1}) // ${count}`;
     return `SetVariable(${py(n)}, (${lo} if i == 0 and ${n} == ${t} else ${t}))`;
   };
+  if (u.look === 'input') {
+    // 입력칸 (FEATURE 31): 값을 글로 보이는 칸. 바꿀 수 있으면 누르면 치기 시작(Toggle), Enter로 끝(action Disable: Enter가 대사로 가지 않음).
+    // 누르기가 대사로 가지 않게 button으로 감쌈 (세션 71). 렌파이는 한 번에 칸 하나만 치게 함. 숫자는 _PkNumInput(범위 안 정수)
+    const ts = Math.max(12, Math.round(h * 0.5)), tc = py(partColor(u, 'text')), r = rad(h);
+    const inner = (I1: string, body: string[]) => [`${I1}frame:`, `${I1}${I}background ${part('box', w - 2, h - 2, Math.max(0, r - 1))}`, `${I1}${I}xfill True`, `${I1}${I}yfill True`, `${I1}${I}padding (10, 0)`, ...body.map((x) => I1 + I + x)];
+    if (!edit) return ['frame:', `${I}background ${part('border', w, h, r)}`, `${I}padding (1, 1)`, `${I}xysize (${w}, ${h})`, ...inner(I, [`text "[${n}]" color ${tc} size ${ts} yalign 0.5`])];
+    const iv = f.kind === 'int' ? `_PkNumInput(${py(n)}, ${lo}, ${hi})` : `VariableInputValue(${py(n)}, default=False, returnable=False)`;
+    const len = inputLen(f);
+    // 글자: 비워 두고 끝내면 처음 값. 숫자: 친 글(초안)을 지움
+    const done = f.kind === 'int' ? `[${iv}.Disable(), Function(_PkNumInput.drafts.clear)]` : `[${iv}.Disable(), If(not (${n} or "").strip(), SetVariable(${py(n)}, ${py(String(f.init ?? ''))}), None)]`;
+    const field = ['input:', `${I}value ${iv}`, ...(len ? [`${I}length ${len}`] : []), ...(f.kind === 'int' ? [`${I}allow "-0123456789"`] : []),
+      `${I}size ${ts}`, `${I}color ${tc}`, `${I}yalign 0.5`, `${I}pixel_width ${Math.max(20, w - 24)}`, `${I}action ${done}`];
+    return ['button:', `${I}background ${part('border', w, h, r)}`, `${I}padding (1, 1)`, `${I}xysize (${w}, ${h})`, `${I}hover_foreground ${litFg(r)}`, `${I}action ${iv}.Toggle()`, ...inner(I, field)];
+  }
   if (f.kind === 'int' && u.look === 'level' && u.style === 'rating') {
     // 칸형 (FEATURE 29): 칸마다 빈칸 위에 채움을 그 칸 몫만큼 잘라 덮음 (한 칸이 여러 값이면 반 칸도). 그림이 없으면 ★ (DejaVuSans)
     const count = Math.max(1, Math.min(u.cells && u.cells > 0 ? Math.round(u.cells) : hi - lo, 20)), per = (hi - lo) / count;
@@ -585,6 +599,37 @@ const ROUND_HELPER = [
   '',
 ];
 
+// 숫자 플래그 입력칸 (FEATURE 31): 치는 동안은 친 글(초안)을 보이고, 숫자가 되면 최솟값~최댓값 안으로 바로 넣음. 잘못 치면 값 그대로
+const NUM_INPUT_HELPER = [
+  '# 숫자 플래그 입력칸 (플래그 꼴 "입력칸")',
+  'init -1 python:',
+  '    class _PkNumInput(VariableInputValue):',
+  '        equality_fields = VariableInputValue.equality_fields + ("lo", "hi")',
+  '        drafts = {}',
+  '',
+  '        def __init__(self, variable, lo, hi):',
+  '            super(_PkNumInput, self).__init__(variable, default=False, returnable=False)',
+  '            self.lo = lo',
+  '            self.hi = hi',
+  '',
+  '        def get_text(self):',
+  '            v = _get_field(self.object, self.field, self.kind)',
+  '            d = _PkNumInput.drafts.get(self.field)',
+  '            cur, on = renpy.get_editable_input_value()',
+  '            # 치는 중이고 초안이 지금 값과 맞으면(또는 아직 숫자가 아니면) 초안 그대로',
+  '            if on and cur == self and d is not None and (not d.strip().lstrip("-").isdigit() or int(d) == v):',
+  '                return d',
+  '            return str(v)',
+  '',
+  '        def set_text(self, s):',
+  '            _PkNumInput.drafts[self.field] = s',
+  '            t = s.strip()',
+  '            if t.lstrip("-").isdigit():',
+  '                _set_field(self.object, self.field, max(self.lo, min(self.hi, int(t))), self.kind)',
+  '            renpy.restart_interaction()',
+  '',
+];
+
 function bgCode(s: ScreenDef, I0: string): string[] {
   const a = s.bgAlpha !== undefined && s.bgAlpha < 100 ? ` alpha ${pct(s.bgAlpha)}` : '';
   if (isColor(s.bg)) return [`${I0}add Solid(${py(s.bg!)})${a}`];
@@ -638,6 +683,7 @@ export function screensCode(p: Project, only?: string): string {
   }
   if (!only && (p.screens ?? []).some((s) => s.items.some(isDD))) out.push(...DRAG_HELPERS);
   if (out.some((x) => x.includes('_pk_round('))) out.push(...ROUND_HELPER);
+  if (out.some((x) => x.includes('_PkNumInput('))) out.push(...NUM_INPUT_HELPER);
   if (!only && out.some((x) => x.includes(' at _pk_anim_'))) out.push(...ANIM_HELPER);
   return out.join('\n') + '\n';
 }

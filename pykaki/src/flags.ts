@@ -43,11 +43,15 @@ export function persistSub(p: Project, t: string) {
 // 글 안 플래그 값 [from]을 [to]로 (플래그 이름을 바꿀 때)
 export const renameSub = (t: string, from: string, to: string) => t.replace(FLAG_SUB, (m, n) => (n === from ? `[${to}]` : m));
 
-// 이름 입력 줄의 원고 (FEATURE 30): $ 이름 = renpy.input("묻는 글", default=이름, length=N).strip() or "처음 값"
-// ref는 원고에 쓰는 플래그 식(게임 밖에도 남는 플래그는 persistent.이름), q는 대사처럼 바꾼 글
-export function inputCode(f: Pick<Flag, 'kind' | 'init'>, ref: string, prompt: string, length?: number) {
+// 플래그 입력 줄의 원고 (FEATURE 30, 31). 원고 줄 목록 ($ 줄)
+// 글자: $ 이름 = renpy.input("묻는 글", default=이름, length=N).strip() or "처음 값"
+// 숫자 (range 최솟값·최댓값): 숫자만 받아 범위 안으로, 잘못 치거나 비우면 값 그대로
+// ref는 원고에 쓰는 플래그 식(엔딩 후에도 남는 플래그는 persistent.이름), prompt는 대사처럼 바꾼 글
+export function inputCode(f: Pick<Flag, 'kind' | 'init'>, ref: string, prompt: string, length?: number, range?: [number, number]): string[] {
   const len = length && length > 0 ? `, length=${Math.round(length)}` : '';
-  return `$ ${ref} = renpy.input(${prompt}, default=${ref}${len}).strip() or ${pyValue({ kind: 'str', init: String(f.init ?? '') })}`;
+  if (f.kind === 'int' && range)
+    return [`$ _pk_typed = renpy.input(${prompt}, default=str(${ref}), allow="-0123456789"${len}).strip()`, `$ ${ref} = max(${range[0]}, min(${range[1]}, int(_pk_typed))) if _pk_typed.lstrip("-").isdigit() else ${ref}`];
+  return [`$ ${ref} = renpy.input(${prompt}, default=${ref}${len}).strip() or ${pyValue({ kind: 'str', init: String(f.init ?? '') })}`];
 }
 
 const pyStr = (s: string) => '"' + s.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\r?\n/g, '\\n') + '"';
@@ -139,7 +143,7 @@ export function flagUses(p: Project, name: string): FlagUse[] {
     for (const l of n.lines) {
       if (l.type === 'flag' && writes(l.text)) out.push({ nodeId: n.id, where: '바꾸기 줄', write: true });
       else if (l.type === 'flag' && has(l.text)) out.push({ nodeId: n.id, where: '바꾸기 줄', write: false });
-      else if (l.type === 'input' && l.flag && p.variables.find((f) => f.id === l.flag)?.name === name) out.push({ nodeId: n.id, where: '이름 입력 줄', write: true });
+      else if (l.type === 'input' && l.flag && p.variables.find((f) => f.id === l.flag)?.name === name) out.push({ nodeId: n.id, where: '플래그 입력 줄', write: true });
       else if ((l.type === 'say' || l.type === 'narration') && subNames(l.text).includes(name)) out.push({ nodeId: n.id, where: '대사 글', write: false });
       else if (l.type === 'command' && new RegExp(`(?<![A-Za-z0-9_.])${name}(?![A-Za-z0-9_])`).test(l.text)) out.push({ nodeId: n.id, where: '명령 줄', write: false });
     }

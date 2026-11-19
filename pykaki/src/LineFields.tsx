@@ -12,6 +12,7 @@ import { TagBar, useTagTarget } from './TagBar';
 import { MediaField, MediaGroupFields, MediaPlace } from './MediaField';
 import { uid } from './util';
 import { freeFlagName } from './flagRecipes';
+import { canInput, flagUi, uiMax, uiMin } from './flagUi';
 
 type SetLine = (fn: (x: Line) => void, key?: string) => void;
 
@@ -36,7 +37,7 @@ export function SpeakerSelect({ l, set, className }: { l: Line; set: SetLine; cl
       </optgroup>
       <optgroup label="기타">
         <option value="flag">⚑ 플래그 바꾸기</option>
-        <option value="input">✎ 이름 입력</option>
+        <option value="input">✎ 플래그 입력</option>
         <option value="command">⚙ 직접 명령</option>
         <option value="note"># 메모</option>
       </optgroup>
@@ -422,33 +423,33 @@ function useSuggest(l: Line) {
   return { bg, attr, etc, audio: media.audio };
 }
 
-// 이름 입력 줄 (FEATURE 30): 묻는 글, 넣을 글 플래그, 최대 글자 수. 이름을 안 치면 플래그의 처음 값
+// 플래그 입력 줄 (FEATURE 30, 31): 묻는 글과 넣을 플래그(글자·숫자). 최대 글자 수·범위는 플래그 카드의 [꼴 ▾] 입력칸에서
 export function InputFields({ l, set, nd = '' }: { l: Line; set: SetLine; nd?: string }) {
   const flags = useStore((s) => s.project.variables);
   const update = useStore((s) => s.update);
-  const strs = flags.filter((f) => f.kind === 'str');
+  const can = flags.filter(canInput);
   const cur = flags.find((f) => f.id === l.flag);
-  // 글 플래그가 없으면 "주인공 이름" 플래그를 만들어 바로 고름
+  // 칠 플래그가 없을 때: "주인공 이름" 플래그(입력칸 꼴)를 만들어 바로 고름
   const make = () => {
     const id = uid('v');
     update((p) => {
-      p.variables.push({ id, name: freeFlagName(p, 'pname'), kind: 'str', init: '주인공', note: '주인공 이름' });
+      p.variables.push({ id, name: freeFlagName(p, 'pname'), kind: 'str', init: '주인공', note: '주인공 이름', ui: { look: 'input', len: 12 } });
       for (const n of p.nodes) for (const x of n.lines) if (x.id === l.id) x.flag = id;
     });
   };
+  const hint = !cur ? '' : cur.kind === 'int' ? `숫자만, ${uiMin(flagUi(cur))}~${uiMax(flagUi(cur))}. 잘못 치면 값 그대로` : `안 치면 "${String(cur.init ?? '')}". 대사에서 [${cur.name}]`;
   return (
     <div className="sf">
       <div className="sf-row">
-        <input className={'sf-in wide ' + nd} value={l.text} placeholder="묻는 글 (예: 이름이 뭐야?)" onChange={(e) => set((x) => void (x.text = e.target.value), 'text' + l.id)} aria-label="묻는 글" />
-        <select className={nd} value={cur ? cur.id : ''} onChange={(e) => (e.target.value === '+' ? make() : set((x) => void (x.flag = e.target.value || undefined)))} aria-label="넣을 플래그" title="친 이름을 이 글자 플래그에 넣어요. 대사에서 [이름]으로 보여요">
+        <select className={nd} value={cur ? cur.id : ''} onChange={(e) => (e.target.value === '+' ? make() : set((x) => void (x.flag = e.target.value || undefined)))} aria-label="넣을 플래그" title="플레이어가 친 값을 이 플래그에 넣어요 (글자·숫자 플래그)">
           <option value="">넣을 플래그</option>
-          {strs.map((f) => <option key={f.id} value={f.id}>{f.name}{f.note ? ` (${f.note})` : ''}</option>)}
-          {cur && cur.kind !== 'str' && <option value={cur.id}>? {cur.name} (글자 플래그가 아님)</option>}
+          {can.map((f) => <option key={f.id} value={f.id}>{f.name}{f.note ? ` (${f.note})` : ''}</option>)}
+          {cur && !canInput(cur) && <option value={cur.id}>? {cur.name} (켜짐/꺼짐은 못 침)</option>}
           <option value="+">+ 새 이름 플래그</option>
         </select>
-        <input className={'sf-num ' + nd} type="number" min={1} max={99} value={l.length ?? ''} placeholder="최대" title="칠 수 있는 최대 글자 수. 비우면 렌파이 기본" onChange={(e) => set((x) => void (e.target.value ? (x.length = Math.max(1, Math.round(+e.target.value))) : delete x.length), 'len' + l.id)} aria-label="최대 글자 수" />
+        <input className={'sf-in wide ' + nd} value={l.text} placeholder="묻는 글 (예: 이름이 뭐야?)" onChange={(e) => set((x) => void (x.text = e.target.value), 'text' + l.id)} aria-label="묻는 글" />
       </div>
-      {cur ? <span className="sf-code">{`이름을 안 치면 "${String(cur.init ?? '')}" (플래그 ${cur.name}의 처음 값). 대사에서 [${cur.name}]으로 보여요`}</span> : <span className="sf-code todo">친 이름을 넣을 글자 플래그를 골라 주세요</span>}
+      {cur ? <span className="sf-code">{hint}</span> : <span className="sf-code todo">친 값을 넣을 플래그를 골라 주세요</span>}
     </div>
   );
 }

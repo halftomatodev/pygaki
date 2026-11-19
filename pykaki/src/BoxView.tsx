@@ -540,7 +540,7 @@ function LineRow({ l, editing, active, cls, grip, onFocus, onKey, onText }: RowP
   let body;
   if (l.type === 'input') {
     const f = project!.variables.find((v) => v.id === l.flag);
-    body = <span className="pl-text">✎ 이름 입력 {f ? <code>{f.name}</code> : <i className="todo">(플래그를 고르세요)</i>}{l.text.trim() && <> · {l.text}</>}</span>;
+    body = <span className="pl-text">✎ 입력 {f ? <code>{f.name}</code> : <i className="todo">(플래그를 고르세요)</i>}{l.text.trim() && <> · {l.text}</>}</span>;
   } else if (l.type === 'flag')
     body = <span className="pl-text">⚑ {l.text.trim() ? <code>{actionWords(project!, l.text)}</code> : <i className="todo">(플래그를 고르세요)</i>}</span>;
   else if (stage) {

@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { useStore } from './store';
 import type { Flag, FlagLook, FlagUi, LevelStyle } from './types';
 import { FlagWidget } from './FlagWidget';
-import { CORNER_LABEL, cornerOf, flagEffects, flagMarks, setMarkValue, flagUi, LOOK_LABEL, looksFor, skinParts, STYLE_LABEL, strOptions, testValue, testVars, uiMax, uiMin, useFlagTest } from './flagUi';
+import { CORNER_LABEL, cornerOf, flagEffects, flagMarks, setMarkValue, flagUi, inputLen, LOOK_LABEL, looksFor, skinParts, STYLE_LABEL, strOptions, testValue, testVars, uiMax, uiMin, useFlagTest } from './flagUi';
 import { useGameFolder } from './gameFolder';
 import { desktop } from './desktop';
 import { pickMediaFile } from './MediaField';
@@ -43,7 +43,7 @@ export function FlagLookRow({ f }: { f: Flag }) {
   return (
     <div className="flag-look">
       <div className="flag-look-row">
-        <FlagWidget ui={ui} value={value} onChange={setTest} options={f.kind === 'str' ? strOptions(project, f) : undefined} label={f.name} marks={marks} onMark={moveMark} />
+        <FlagWidget ui={ui} value={value} onChange={setTest} options={f.kind === 'str' ? strOptions(project, f) : undefined} label={f.name} marks={marks} onMark={moveMark} len={inputLen(f)} />
         <span className="sp" />
         {changed && (
           <button className="linklike" onClick={reset} title="시험 값을 처음 값으로 (시험 값은 저장되지 않아요)">처음 값으로</button>
@@ -199,7 +199,8 @@ export function LookPop({ f, anchor, onClose }: { f: Flag; anchor: HTMLElement; 
         </div>
       )}
       {ui.look === 'level' && <LevelKnobs ui={ui} set={set} k={key} />}
-      {f.kind === 'str' && (
+      {ui.look === 'input' && <InputKnobs f={f} ui={ui} set={set} k={key} />}
+      {f.kind === 'str' && ui.look !== 'input' && (
         <div className="flook-opts">
           <span className="flook-sub">고를 값</span>
           <span className="flook-chips">
@@ -305,6 +306,55 @@ function LevelKnobs({ ui, set, k }: { ui: FlagUi; set: (fn: (u: FlagUi) => void,
           {num('gap', '간격', '칸 사이 간격(px). 비우면 2')}
         </div>
       )}
+    </>
+  );
+}
+
+// 입력칸 세부 (FEATURE 31): 글자는 최대 글자 수와 이 값을 이름으로 쓰는 캐릭터. 어디서 치게 할지 안내
+function InputKnobs({ f, ui, set, k }: { f: Flag; ui: FlagUi; set: (fn: (u: FlagUi) => void, k?: string) => void; k: string }) {
+  const chars = useStore((s) => s.project.characters);
+  const update = useStore((s) => s.update);
+  const tag = `[${f.name}]`;
+  const named = chars.filter((c) => c.name === tag);
+  const others = chars.filter((c) => c.name !== tag);
+  // 이름을 빼면 플래그의 처음 값(없으면 변수 이름)으로 돌려 둠
+  const setName = (id: string, on: boolean) =>
+    update((p) => {
+      const c = p.characters.find((x) => x.id === id);
+      if (c) c.name = on ? tag : String(f.init ?? '').trim() || c.id;
+    });
+  return (
+    <>
+      {f.kind === 'str' && (
+        <div className="flook-row">
+          <label title="플레이어가 칠 수 있는 최대 글자 수. 비우면 렌파이 기본">
+            최대 글자 수 <input type="number" min={1} max={99} value={ui.len ?? ''} placeholder="-" onChange={(e) => set((u) => void (e.target.value.trim() === '' ? delete u.len : (u.len = Math.max(1, Math.min(99, Math.round(Number(e.target.value) || 1))))), k + 'len')} />
+          </label>
+        </div>
+      )}
+      {f.kind === 'str' && chars.length > 0 && (
+        <div className="flook-opts">
+          <span className="flook-sub" title="캐릭터 표시 이름을 이 플래그 값으로 해요. 플레이어가 친 이름이 대사 이름 칸에 보여요">이름으로 쓰는 캐릭터</span>
+          <span className="flook-chips">
+            {named.map((c) => (
+              <span key={c.id} className="chip">
+                {c.id}
+                <button className="x" aria-label={`${c.id} 빼기`} title={`표시 이름을 "${String(f.init ?? '') || c.id}"로 돌려요`} onClick={() => setName(c.id, false)}>✕</button>
+              </span>
+            ))}
+            {others.length > 0 && (
+              <select value="" aria-label="이름으로 쓰는 캐릭터 더하기" onChange={(e) => e.target.value && setName(e.target.value, true)}>
+                <option value="">+ 캐릭터</option>
+                {others.map((c) => <option key={c.id} value={c.id}>{c.id}{c.name ? ` (${c.name})` : ''}</option>)}
+              </select>
+            )}
+          </span>
+        </div>
+      )}
+      <span className="tip">
+        {f.kind === 'int' ? `숫자만 칠 수 있고 ${uiMin(ui)}~${uiMax(ui)} 안으로 맞춰요. 잘못 치면 값이 그대로예요. ` : `비워 두고 끝내면 처음 값 "${String(f.init ?? '')}"이 돼요. 대사에서는 ${tag}로 보여요. `}
+        대본에서는 상자 편집의 [+ 플래그 입력] 줄, 게임 화면에서는 [화면] 탭 HUD에 이 꼴을 놓고 [게임에서 바꿀 수 있음]을 켜요
+      </span>
     </>
   );
 }

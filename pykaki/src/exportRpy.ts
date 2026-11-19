@@ -10,7 +10,7 @@ import { actOf, boxRef, flagAction, hasAct, isDragged, isHud, screenNameProblem 
 import { checkTags, shaderTags, splitClear } from './tagEdit';
 import { sceneCode, sceneSupported, uiOfBox, usesSceneUi } from './boxUi';
 import { exprNames, FLAG_SUB, flagNameProblem, flagRef, inputCode, parseAction, persistExpr, persistNames, persistSub, pyValue, subNames } from './flags';
-import { flagUi, strOptions } from './flagUi';
+import { canInput, flagUi, inputLen, strOptions, uiMax, uiMin } from './flagUi';
 import { enterTransTv, imgTransSupported, isImgTrans, shaderCode, shaderOfBox, usesShaderValues, usesShaders, usesTvValues, valuesSupported } from './shader';
 
 export interface Warn { level: 'error' | 'warn'; msg: string; nodeId?: string }
@@ -276,7 +276,7 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
         if (code) body.push(code);
       }
       const pct =(t: string, where: string) => {
-        if (!S.escapePercent && where !== '이름 입력' && loosePercent(t)) W.push({ level: 'error', msg: `${where}의 %에서 렌파이가 멈춰요. 설정에서 "% 를 글자 그대로"를 켜 주세요 (${b.title || b.id})`, nodeId: b.id });
+        if (!S.escapePercent && where !== '플래그 입력' && loosePercent(t)) W.push({ level: 'error', msg: `${where}의 %에서 렌파이가 멈춰요. 설정에서 "% 를 글자 그대로"를 켜 주세요 (${b.title || b.id})`, nodeId: b.id });
         // 텍스트 태그 짝 (렌파이 check_text_tags와 같은 규칙)
         if (S.allowTextTags) for (const w of checkTags(t)) W.push({ level: w.level, msg: `${where}: ${w.msg} (${b.title || b.id})`, nodeId: b.id });
         // 선택지 글에는 등장 효과가 없어서 {shader=}를 쓰면 렌파이가 멈춘다
@@ -308,7 +308,7 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
         if (l.type === 'command') {
           // 직접 쓴 명령은 그대로. 게임 밖에도 남는 플래그를 이름만으로 쓰면 알림 (persistent.이름으로 써야 함)
           const pn = persistNames(p).filter((n) => exprNames(l.text).includes(n));
-          if (pn.length) W.push({ level: 'warn', msg: `명령 줄의 ${pn.join(', ')}: 게임 밖에도 남는 플래그라 명령 줄에서는 persistent.${pn[0]}처럼 써야 해요 (${b.title || b.id})`, nodeId: b.id });
+          if (pn.length) W.push({ level: 'warn', msg: `명령 줄의 ${pn.join(', ')}: 엔딩 후에도 남는 플래그라 명령 줄에서는 persistent.${pn[0]}처럼 써야 해요 (${b.title || b.id})`, nodeId: b.id });
           return l.text.split('\n').forEach((x) => x.trim() && body.push(x.trimEnd()));
         }
         if (l.type === 'flag') {
@@ -321,17 +321,18 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
           return body.push('$ ' + persistExpr(p, a));
         }
         if (l.type === 'input') {
-          // 이름 입력 (FEATURE 30): 받은 글을 글 플래그에, 비우면 처음 값
+          // 플래그 입력 (FEATURE 30, 31): 받은 글을 글자 플래그에(비우면 처음 값), 숫자 플래그는 범위 안 정수로
           const f = p.variables.find((v) => v.id === l.flag);
           if (!f) {
-            W.push({ level: 'warn', msg: `이름 입력 줄에 넣을 플래그를 골라 주세요 (${b.title || b.id})`, nodeId: b.id });
-            return body.push('pass  # 이름 입력: 플래그를 고르세요');
+            W.push({ level: 'warn', msg: `플래그 입력 줄에 넣을 플래그를 골라 주세요 (${b.title || b.id})`, nodeId: b.id });
+            return body.push('pass  # 플래그 입력: 플래그를 고르세요');
           }
-          if (f.kind !== 'str') W.push({ level: 'error', msg: `이름 입력 줄의 플래그 "${f.name}"는 글자 플래그여야 해요 (${b.title || b.id})`, nodeId: b.id });
-          if (!String(f.init ?? '').trim()) W.push({ level: 'warn', msg: `이름 입력 줄: 플래그 "${f.name}"의 처음 값이 비어 있어서, 이름을 안 치면 빈 이름이 돼요. 처음 값에 기본 이름을 적어 주세요 (${b.title || b.id})`, nodeId: b.id });
-          pct(l.text, '이름 입력');
+          if (!canInput(f)) W.push({ level: 'error', msg: `플래그 입력 줄의 플래그 "${f.name}"는 켜짐/꺼짐이라 칠 수 없어요. 글자나 숫자 플래그를 골라 주세요 (${b.title || b.id})`, nodeId: b.id });
+          if (f.kind === 'str' && !String(f.init ?? '').trim()) W.push({ level: 'warn', msg: `플래그 입력 줄: 플래그 "${f.name}"의 처음 값이 비어 있어서, 안 치고 넘어가면 빈 글이 돼요. 처음 값에 기본 이름을 적어 주세요 (${b.title || b.id})`, nodeId: b.id });
+          pct(l.text, '플래그 입력');
+          const u = flagUi(f);
           // 묻는 글은 렌파이가 %%를 풀지 않아서(대사·선택지와 다름, 8.6.1에서 봄) %는 그대로
-          return body.push(inputCode(f, subs.get(f.name) ?? f.name, '"' + escapeText(l.text, { ...S, escapePercent: false }, subs) + '"', l.length));
+          return body.push(...inputCode(f, subs.get(f.name) ?? f.name, '"' + escapeText(l.text, { ...S, escapePercent: false }, subs) + '"', inputLen(f) ?? l.length, [uiMin(u), uiMax(u)]));
         }
         if (isStage(l.type)) {
           const { code, problem } = stageCode(l, p.screens);

@@ -2633,7 +2633,7 @@ label 이름	label 名	label name
 (이 플래그는 이름이 렌파이 변수로 맞지 않아 원고에 안 들어가요)	(このフラグは名前が Ren'Py の変数名として正しくないため、原稿に入りません)	(This flag's name isn't a valid Ren'Py variable, so it won't be in the script)
 플래그를 고르면 그 플래그의 꼴(레벨 인디케이터·스위치·체크박스·라디오·풀다운)과 꾸미기를 그대로 가져와요	フラグを選ぶと、そのフラグの見た目(レベルインジケーター・スイッチ・チェックボックス・ラジオ・プルダウン)と飾りをそのまま取り込みます	Pick a flag to bring in its look (level indicator, switch, checkbox, radio, pull-down) and styling as is
 꼴과 꾸미기는 그 플래그의 것이라, 여기서 고치면 플래그 카드와 이 플래그를 쓰는 다른 화면도 같이 바뀌어요.	見た目と飾りはそのフラグのものなので、ここで変えるとフラグカードとこのフラグを使うほかの画面も変わります。	The look and styling belong to the flag, so changing them here also changes the flag card and other screens that use this flag.
-켜면 플레이어가 꼴로 값을 바꿔요. 이어진 막대는 끌기, 칸 막대·별은 칸 누르기, 스위치·체크박스는 누르기, 라디오는 줄 누르기, 풀다운은 펼쳐서 고르기	オンにするとプレイヤーが見た目で値を変えます。連続バーはドラッグ、セグメントバー・星はマスをクリック、スイッチ・チェックボックスはクリック、ラジオは行をクリック、プルダウンは開いて選択	When on, the player changes the value with the look: drag a continuous bar, click a cell or star, click a switch or checkbox, click a radio row, or open the pull-down and pick
+켜면 플레이어가 꼴로 값을 바꿔요. 이어진 막대는 끌기, 칸 막대·별은 칸 누르기, 스위치·체크박스는 누르기, 라디오는 줄 누르기, 풀다운은 펼쳐서 고르기, 입력칸은 눌러서 치고 Enter	オンにするとプレイヤーが見た目で値を変えます。連続バーはドラッグ、セグメントバー・星はマスをクリック、スイッチ・チェックボックスはクリック、ラジオは行をクリック、プルダウンは開いて選択、入力欄はクリックして入力し Enter	When on, the player changes the value with the look: drag a continuous bar, click a cell or star, click a switch or checkbox, click a radio row, open the pull-down and pick, or click an input box, type and press Enter
 썸	つまみ	Thumb
 간격	間隔	Gap
 광택	光沢	Gloss
@@ -2750,11 +2750,48 @@ ${where}의 [${n}]: "${n}"는 플래그가 아니라 글자 그대로 보여요.
 + 이름 입력	+ 名前入力	+ Name input
 지금 쓰는 줄 뒤에서 플레이어가 이름을 쳐요. 친 이름은 글자 플래그에 들어가서 대사에서 [이름]으로 보여요	今の行の後でプレイヤーが名前を入力します。入力した名前は文字フラグに入り、セリフでは [名前] で表示されます	After the current line the player types a name. It is stored in a text flag and shown in dialogue with [name]
 최대	最大	Max
-게임 밖에도 남김	ゲーム外にも残す	Keep across games
-명령 줄의 ${pn.join(', ')}: 게임 밖에도 남는 플래그라 명령 줄에서는 persistent.${pn[0]}처럼 써야 해요 (${b.title || b.id})	コマンド行の {0}: ゲーム外にも残るフラグなので、コマンド行では persistent.{1} のように書いてください ({2})	{0} in a command line: this flag is kept across games, so write it as persistent.{1} in command lines ({2})
+엔딩 후에도 남음	エンディング後も残る	Kept after endings
+명령 줄의 ${pn.join(', ')}: 엔딩 후에도 남는 플래그라 명령 줄에서는 persistent.${pn[0]}처럼 써야 해요 (${b.title || b.id})	コマンド行の {0}: エンディング後も残るフラグなので、コマンド行では persistent.{1} のように書いてください ({2})	{0} in a command line: this flag is kept after endings, so write it as persistent.{1} in command lines ({2})
 켜면 새 게임을 시작하거나 다른 세이브를 불러와도 값이 남아요 (본 엔딩 모으기, 몇 회차인지, 한 번 본 장면). 대본에는 이름 그대로 쓰고, 원고에서만 persistent.이름이 돼요	オンにすると、新しくゲームを始めても別のセーブをロードしても値が残ります (見たエンディングの記録、何周目か、一度見た場面)。台本では名前のまま書き、スクリプトでだけ persistent.名前 になります	When on, the value stays even after starting a new game or loading another save (endings seen, playthrough count, scenes already viewed). Write the plain name in the script; only the exported .rpy uses persistent.name
 튕기며 들어오기	弾んで入る	Spring in
 들어오는 각도 (0 오른쪽, 90 위, 180 왼쪽, 270 아래)	入ってくる角度 (0 右、90 上、180 左、270 下)	Entry angle (0 right, 90 top, 180 left, 270 bottom)
 거리 (1이면 화면 밖에서)	距離 (1で画面の外から)	Distance (1 starts off-screen)
 흔들림 횟수	揺れの回数	Wobbles
 새로 생긴 부분만 (1) / 통째로 (0)	新しく出た部分だけ (1) / 画面ごと (0)	Only new parts (1) / whole screen (0)
+입력칸	入力欄	Input box
+주인공	主人公	Hero
+✎ 입력	✎ 入力	✎ Input
+대사 글	セリフの文	Dialogue text
+플래그 입력	フラグ入力	Flag input
++ 플래그 입력	+ フラグ入力	+ Flag input
+✎ 플래그 입력	✎ フラグ入力	✎ Flag input
+글자 · 입력칸	文字 · 入力欄	Text · input box
+플래그 입력 줄	フラグ入力の行	Flag input line
+하늘: 하늘이야.	ハヌル: ハヌルだよ。	Haneul: I'm Haneul.
+${c.id} 빼기	{0} を外す	Remove {0}
+대사의 [pname]	セリフの [pname]	[pname] in dialogue
+이름으로 쓰는 캐릭터	名前に使うキャラクター	Characters using this as their name
+(켜짐/꺼짐은 못 침)	(オン/オフは入力できない)	(on/off can't be typed)
+미나: 반가워, 하늘!	ミナ: よろしくね、ハヌル!	Mina: Nice to meet you, Haneul!
+미나: 저기, 이름이 뭐야?	ミナ: ねえ、名前は?	Mina: Hey, what's your name?
+이름으로 쓰는 캐릭터 더하기	名前に使うキャラクターを追加	Add a character that uses this as its name
+주인공 이름 (플레이어가 침)	主人公の名前 (プレイヤーが入力)	Hero's name (typed by the player)
+대사·선택지 글의 [pname]	セリフ・選択肢の文の [pname]	[pname] in dialogue and choice text
+친 값을 넣을 플래그를 골라 주세요	入力した値を入れるフラグを選んでください	Choose a flag to store the typed value
+✎ 플래그 입력: pname (플레이어가 "하늘"을 침)	✎ フラグ入力: pname (プレイヤーが "ハヌル" と入力)	✎ Flag input: pname (the player types "Haneul")
+플레이어가 칠 수 있는 최대 글자 수. 비우면 렌파이 기본	プレイヤーが入力できる最大文字数。空なら Ren'Py の既定	Maximum characters the player can type. Empty uses the Ren'Py default
+플레이어가 친 값을 이 플래그에 넣어요 (글자·숫자 플래그)	プレイヤーが入力した値をこのフラグに入れます (文字・数値フラグ)	Stores the value the player types in this flag (text or number flags)
+[꼴 ▾] "이름으로 쓰는 캐릭터": 캐릭터 표시 이름이 [pname]	[見た目 ▾] "名前に使うキャラクター": キャラクターの表示名が [pname]	[Look ▾] "Characters using this as their name": the character's display name becomes [pname]
+HUD에 입력칸 꼴을 놓고 [게임에서 바꿀 수 있음]: 아무 때나 고쳐 침	HUD に入力欄を置いて [ゲームで変更できる]: いつでも書き直せる	Put an input box on a HUD with [Changeable in game]: retype any time
+표시 이름을 "${String(f.init ?? '') || c.id}"로 돌려요	表示名を "{0}" に戻します	Sets the display name back to "{0}"
+플래그 입력 줄에 넣을 플래그를 골라 주세요 (${b.title || b.id})	フラグ入力の行に入れるフラグを選んでください ({0})	Choose a flag for the flag input line ({0})
+상자 편집 [+ 플래그 입력]: 묻는 글 "이름이 뭐야?", 넣을 플래그 pname	ボックス編集 [+ フラグ入力]: 質問文 "名前は?"、入れるフラグ pname	Box editing [+ Flag input]: prompt "What's your name?", flag pname
+캐릭터 표시 이름을 이 플래그 값으로 해요. 플레이어가 친 이름이 대사 이름 칸에 보여요	キャラクターの表示名をこのフラグの値にします。プレイヤーが入力した名前がセリフの名前欄に表示されます	Uses this flag's value as the character's display name. The name the player typed shows in the dialogue name box
+지금 쓰는 줄 뒤에서 플레이어가 플래그 값(이름, 숫자)을 쳐요. 글자 플래그는 대사에서 [이름]으로 보여요	今の行の後でプレイヤーがフラグの値 (名前、数値) を入力します。文字フラグはセリフで [名前] で表示されます	After the current line the player types a flag value (a name or a number). Show a text flag in dialogue with [name]
+숫자만 칠 수 있고 ${uiMin(ui)}~${uiMax(ui)} 안으로 맞춰요. 잘못 치면 값이 그대로예요.	数字だけ入力でき、{0}~{1} の範囲に収めます。間違えて入力すると値はそのままです。	Only digits can be typed, kept within {0}–{1}. An invalid entry leaves the value unchanged.
+숫자만, ${uiMin(flagUi(cur))}~${uiMax(flagUi(cur))}. 잘못 치면 값 그대로	数字のみ、{0}~{1}。間違えると値はそのまま	Digits only, {0}–{1}. Invalid entries leave the value unchanged
+비워 두고 끝내면 처음 값 "${String(f.init ?? '')}"이 돼요. 대사에서는 ${tag}로 보여요.	空のまま終えると初期値 "{0}" になります。セリフでは {1} で表示されます。	Finishing with it empty sets the initial value "{0}". Show it in dialogue with {1}.
+대본에서는 상자 편집의 [+ 플래그 입력] 줄, 게임 화면에서는 [화면] 탭 HUD에 이 꼴을 놓고 [게임에서 바꿀 수 있음]을 켜요	台本ではボックス編集の [+ フラグ入力] の行、ゲーム画面では [画面] タブの HUD にこの見た目を置いて [ゲームで変更できる] をオンにします	In the script, use a [+ Flag input] line in box editing. On the game screen, put this look on a HUD in the [Screens] tab and turn on [Changeable in game]
+플레이어가 이름을 쳐서 정해요. 대사 속 [pname]과 캐릭터 이름 칸에 친 이름이 보여요. 친구·애완동물 이름도 같은 방법으로 받아요.	プレイヤーが名前を入力して決めます。セリフの [pname] とキャラクターの名前欄に入力した名前が表示されます。友だちやペットの名前も同じ方法で受け取れます。	The player types a name. It shows in [pname] in dialogue and in the character's name box. Friends' and pets' names work the same way.
+플래그 입력 줄의 플래그 "${f.name}"는 켜짐/꺼짐이라 칠 수 없어요. 글자나 숫자 플래그를 골라 주세요 (${b.title || b.id})	フラグ入力の行のフラグ "{0}" はオン/オフなので入力できません。文字か数値のフラグを選んでください ({1})	The flag input line's flag "{0}" is on/off and can't be typed. Choose a text or number flag ({1})
+플래그 입력 줄: 플래그 "${f.name}"의 처음 값이 비어 있어서, 안 치고 넘어가면 빈 글이 돼요. 처음 값에 기본 이름을 적어 주세요 (${b.title || b.id})	フラグ入力の行: フラグ "{0}" の初期値が空なので、入力せずに進むと空の文字になります。初期値に既定の名前を書いてください ({1})	Flag input line: flag "{0}" has an empty initial value, so skipping it leaves blank text. Put a default name in its initial value ({1})
