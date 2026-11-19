@@ -6,12 +6,16 @@
 import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react';
 import { create } from 'zustand';
 import { LiquidCard } from 'fluidkit';
+import { BorderBeam } from 'border-beam';
 import { Hint } from './Help';
 import { useStore } from './store';
-import { glassOf, usePrefs } from './prefs';
+import { glassOf, useDark, usePrefs } from './prefs';
 
 const KEY = 'pygaki-folded';
 export const FRESH = ['labels', 'chars', 'warn', 'project', 'script', 'settings', 'usage'];
+// "사용 중"이 될 수 있는 카드 (Inspector.tsx `use`). 이 카드들은 늘 border-beam으로 감싸 두고 사용 중일 때만 빛을 켠다.
+// 사용 중이 될 때마다 감싸고 풀면 카드 안이 새로 그려져 입력 칸 초점이 빠지므로 감싼 틀은 그대로 둔다(세션 90)
+const BEAM = new Set(['i-look', 'i-say', 'i-lines', 'i-bg', 'i-pic', 'i-sound']);
 
 function load(): Record<string, boolean> {
   try {
@@ -124,6 +128,7 @@ export function Card({ id, title, extra, defFolded = false, className = '', domI
   }, [scope, id, defFolded]);
   const toggle = () => toggleFold(id, defFolded);
   const glass = glassOf(usePrefs((p) => p.glass));
+  const dark = useDark();
   // 접은 카드는 제목 길이만큼만 넓고, 펼치면 칸 폭으로 (세션 78). 폭이 바뀌면 이전 폭에서 스프링으로 늘고 준다
   const headRef = useRef<HTMLHeadingElement>(null);
   const width = useRef(0);
@@ -165,7 +170,7 @@ export function Card({ id, title, extra, defFolded = false, className = '', domI
     e.preventDefault();
     toggle();
   };
-  return (
+  const card = (
     <LiquidCard
       className={'sec card' + (folded ? ' folded' : '') + (className ? ' ' + className : '')}
       id={domId}
@@ -187,7 +192,18 @@ export function Card({ id, title, extra, defFolded = false, className = '', domI
       </FoldBody>
     </LiquidCard>
   );
+  if (!BEAM.has(id)) return card;
+  // 사용 중 빛 (세션 90, border-beam): 카드 둘레를 도는 빛 띠. 색은 예전처럼 분홍·보라 쪽(candy). light 테마는 밝은 카드에서 더 흐려서 늘 dark 테마로 그린다.
+  // border-beam은 어두운 카드에 맞춰져 있어 밝은 유리 카드 위에서는 거의 안 보인다 → 세기(--beam-strength, 보통 0~1)를 밝은 화면에서 더 올린다
+  const inUse = /(^|\s)in-use(\s|$)/.test(className);
+  return (
+    <BorderBeam className="card-beam" size="md" colorVariant="candy" theme="dark" duration={4} borderRadius={14} active={inUse && !folded} css={beamCss(dark)}>
+      {card}
+    </BorderBeam>
+  );
 }
+
+const beamCss = (dark: boolean) => `[data-beam="{id}"] { --beam-strength: ${dark ? 1.4 : 3} !important; }`;
 
 // 펼친 카드의 내용. 펼칠 때 높이가 스프링으로 늘고, 안의 줄들이 제목 쪽에서 작고 흐리게 시작해 30ms씩 늦게 제자리로(아이폰 폴더 열기).
 // 접을 때는 아래 줄부터 거꾸로 작아지며 제목 안으로 들어간 뒤 빠진다. 애니메이션 줄이기면 짧은 페이드만.

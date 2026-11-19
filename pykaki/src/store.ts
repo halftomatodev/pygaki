@@ -1,3 +1,4 @@
+import type { TypeMenuAt } from './LineTypeMenu';
 import { create } from 'zustand';
 import type { Project } from './types';
 
@@ -30,6 +31,7 @@ interface S {
   showTrace: string | null; // 플래그 따라가 보기 창. 시작 상자 id ('' = 대본 시작)
   showDesign: boolean; // 플래그 설계 창 (캔버스 아래쪽 시트)
   flowMenu: boolean; // 다음 흐름 창을 키보드로 고르는 중
+  typeMenu: TypeMenuAt; // 줄 종류 고르기 창이 열린 줄 (LineTypeMenu.tsx, 세션 90)
   shaderOf: { kind: 'box' | 'label'; id: string } | null; // 오른쪽 칸에서 셰이더를 고르는 중인 상자나 label
   hideLeft: boolean; // 왼쪽 칸 접음
   hideRight: boolean; // 오른쪽 칸 접음
@@ -79,6 +81,7 @@ export const useStore = create<S>((set, get) => ({
   showTrace: null,
   showDesign: false,
   flowMenu: false,
+  typeMenu: null,
   shaderOf: null,
   hudOf: null,
   hideLeft: readFlag('pygaki-hide-left'),

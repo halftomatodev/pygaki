@@ -31,6 +31,7 @@ pygaki 앱의 **[효과]** 화면에서는 효과를 샘플로 돌려 보고, **
 | `pushup.glsl` | 그림 | `pushup` 밀어 올리기 | 새 화면이 아래에서 올라오며 앞 화면을 밀어냄(`dir`로 방향). 경계에 어두운 띠와 빛 |
 | `vibrate.glsl` | 그림 | `vibrate` 진동 | 새 그림이 부르르 떨면서 나타나고 점점 잦아들어 제자리에 멈춤(`amount` 폭, `count` 횟수, `dir` 0 모두·1 가로·2 세로, `decay` 잦아듦). 글 상자의 `media_fx`로도 씀 |
 | `springin.glsl` | 그림 | `springin` 튕기며 들어오기 | 화면 밖에서 들어와 자리를 조금 지나쳤다가 되돌아오며 멈춤(스프링). 들어오는 쪽은 각도 하나(`angle` 0 오른쪽, 90 위, 180 왼쪽, 270 아래, 그 사이는 대각선), `bounce` 튕김, `wobble` 흔들림 횟수, `dist` 거리(1이면 화면 밖에서). `only=1`(기본)이면 앞 화면과 다른 곳(새로 나온 캐릭터 등)만 움직이고 배경은 그대로, `only=0`이면 새 화면을 통째로 밂 |
+| `bendwave.glsl` | 그림 | `bendwave` 물결로 넘기기 | 한 점에서 색 물결이 퍼지며 화면을 렌즈처럼 휘게 하고, 지나간 자리에 새 그림이 나옴. 꼴 셋(`type` 0 고리, 1 아래에서 위로, 2 왼쪽에서 오른쪽으로), 시작 자리(`x`, `y`), 휘는 세기(`amount`), 색 갈라짐(`split`), 테두리 빛(`glow`, `colorful` 무지개/한 색 `color`), 나가기 전 빨려 들기(`wait`) |
 | `meltglitch.glsl` | 글자 | `meltglitch` 녹는 글리치 | 신호가 깨진 듯 밝은 곳이 가는 세로 줄로 천천히 흘러내리고(`u__speed`), 줄 끝이 파랑·하양으로 갈라져 빛남 |
 | `backbox.glsl` | 글자 | `backbox` 뒤에 상자 | 줄마다 글자 뒤에 색 상자가 깔리고, 글자가 나오는 만큼 끊기지 않고 길어짐(자막처럼) |
 | `karaoke.glsl` | 글자 | `karaoke` 노래방 | 줄이 처음부터 다 보이고, 부르는 만큼(대사의 글자/초) 왼쪽부터 노란 글자, 파란 외곽선으로 칠해짐 |
@@ -56,6 +57,8 @@ scene bg hall with img_fx.use("blink", 1.2, count=5, color="#ff0000")
 scene bg hall with img_fx.use("pushup", 0.8, dir=2)
 show mina with img_fx.use("springin")
 show mina with img_fx.use("springin", 0.9, angle=45, bounce=0.7)
+scene bg hall with img_fx.use("bendwave")
+scene bg hall with img_fx.use("bendwave", 1.4, type=1, x=0.5)
 e "신호가 녹는다." (cps=25, effect="meltglitch:u__speed=0.2")
 e "자막처럼." (cps=25, effect="backbox:u__color=#1e6fff")
 e "미안해 솔직하지 못한 내가" (cps=8, effect="karaoke")

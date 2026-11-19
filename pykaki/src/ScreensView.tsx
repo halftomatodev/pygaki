@@ -15,7 +15,8 @@ import { pickMediaFile } from './MediaField';
 import { pickGameFile } from './StageCards';
 import type { Project, ScreenAct, ScreenDef, ScreenItem, ScreenItemKind } from './types';
 import { uid } from './util';
-import { ANIM_LABEL, lookCode, lookSize, actOf, addHudTemplate, ANCHORS, BAR_H, BAR_W, canDrag, DROP_H, DROP_W, hasAct, HUD_H, HUD_TEMPLATES, HUD_W, hudInner, hudPos, hudSize, hudTemplateCode, isDragged, isHud, newScreenName, screenNameProblem, SCREENS_FILE, screensCode, type HudTemplate } from './screens';
+import { VoiceGlowPreview } from './VoiceGlowPreview';
+import { VOICE_PALETTES, VOICE_SHAPES, voiceOpt, voiceSize, ANIM_LABEL, lookCode, lookSize, actOf, addHudTemplate, ANCHORS, BAR_H, BAR_W, canDrag, DROP_H, DROP_W, hasAct, HUD_H, HUD_TEMPLATES, HUD_W, hudInner, hudPos, hudSize, hudTemplateCode, isDragged, isHud, newScreenName, screenNameProblem, SCREENS_FILE, screensCode, type HudTemplate } from './screens';
 import { PickMenu, type PickEntry } from './FlagMenu';
 import { ActionInput, CondInput, firstAction } from './FlagFields';
 import { evalExpr, initVars, UNKNOWN, type Vars } from './trace';
@@ -26,7 +27,7 @@ import type { Flag } from './types';
 
 export const useScreenSel = create<{ id: string | null; item: string | null }>(() => ({ id: null, item: null }));
 
-const KIND: Record<ScreenItemKind, string> = { imagebutton: '그림 버튼', textbutton: '글 버튼', text: '글', image: '그림', bar: '막대', drop: '놓는 곳', look: '플래그 꼴' };
+const KIND: Record<ScreenItemKind, string> = { imagebutton: '그림 버튼', textbutton: '글 버튼', text: '글', image: '그림', bar: '막대', drop: '놓는 곳', look: '플래그 꼴', voice: '음성 빛' };
 
 // HUD 틀 영상: src/hudclips/<틀 id>.webm (렌파이 8.5.3에서 찍음, 빌드에 들어감)
 const HUD_CLIPS = import.meta.glob('./hudclips/*.webm', { query: '?url', import: 'default', eager: true }) as Record<string, string>;
@@ -116,6 +117,7 @@ export function ScreensView() {
     if (kind === 'imagebutton') Object.assign(it, { image: '' }, hud ? { act: 'flag', acts: [firstAction(project.variables)].filter(Boolean) } : { value: 'b' + (n + 1) });
     if (kind === 'text') it.text = '글';
     if (kind === 'look') it.flag = flag ?? project.variables[0]?.name ?? '';
+    if (kind === 'voice') it.voice = {};
     updScreen((s) => void s.items.push(it));
     useScreenSel.setState({ id: sc.id, item: id });
   };
@@ -160,6 +162,7 @@ export function ScreensView() {
               <button onClick={() => addItem('imagebutton')}>+ 그림 버튼</button>
               <button onClick={() => addItem('text')}>+ 글</button>
               <button onClick={() => addItem('image')}>+ 그림</button>
+              <button onClick={() => addItem('voice')} title="음성(더빙)이 나오는 동안 목소리 크기에 맞춰 움직이는 빛. 대사 상자 아래·테두리·둥근 빛">+ 음성 빛</button>
               <button ref={flagBtn} aria-haspopup="menu" aria-expanded={flagOpen} onClick={() => setFlagOpen((v) => !v)} title="플래그를 고르면 그 플래그의 꼴(레벨 인디케이터·스위치·체크박스·라디오·풀다운)과 꾸미기를 그대로 가져와요">
                 + 플래그 가져오기 <span aria-hidden>▾</span>
               </button>
@@ -396,6 +399,14 @@ function StageItem({ sc, it, scale, on, onMove, vars, hidden }: { sc: ScreenDef;
     ) : (
       <span className="scv-noimg">플래그 없음</span>
     );
+  } else if (it.kind === 'voice') {
+    const v = voiceOpt(it);
+    const [w, h] = voiceSize(it);
+    body = (
+      <span className="scv-voice-box" style={{ width: w * scale, height: h * scale }}>
+        <VoiceGlowPreview w={w} h={h} shape={Math.max(0, VOICE_SHAPES.findIndex(([k]) => k === v.shape))} colors={(VOICE_PALETTES[v.palette] ?? VOICE_PALETTES.colorful)[1]} strength={v.strength} gain={v.gain} idle={v.idle} />
+      </span>
+    );
   } else if (it.kind === 'drop')
     body = (
       <span className="scv-drop" style={{ width: (it.w ?? DROP_W) * scale, height: (it.h ?? DROP_H) * scale, background: it.bgColor ?? '#ffffff26', fontSize: size, color: it.color ?? look.textColor }}>
@@ -614,6 +625,53 @@ function ImageList() {
   );
 }
 
+// 음성 빛 (FEATURE 34): 모양, 색 묶음, 크기, 진하기, 소리 키우기, 쉴 때 남는 빛
+function VoiceFields({ it, upd, num }: { it: ScreenItem; upd: (fn: (it: ScreenItem) => void, key?: string) => void; num: (k: 'w' | 'h', ph: string, title?: string) => JSX.Element }) {
+  const v = voiceOpt(it);
+  const [dw, dh] = voiceSize({ ...it, w: undefined, h: undefined });
+  const set = (k: 'strength' | 'gain' | 'idle', n: number) => upd((x) => void (x.voice = { ...x.voice, [k]: n }), 'scr-voice-' + k + it.id);
+  const slider = (k: 'strength' | 'gain' | 'idle', label: string, min: number, max: number, title: string) => (
+    <div className="row" title={title}>
+      <label>{label}</label>
+      <input type="range" className="grow" min={min} max={max} step={0.05} value={v[k]} onChange={(e) => set(k, Number(e.target.value))} />
+      <span className="sf-val">{v[k].toFixed(2)}</span>
+    </div>
+  );
+  return (
+    <>
+      <div className="row">
+        <label>모양</label>
+        <span className="flook-seg" role="radiogroup" aria-label="모양">
+          {VOICE_SHAPES.map(([k, t]) => (
+            <button key={k} role="radio" aria-checked={v.shape === k} className={v.shape === k ? 'on' : ''} onClick={() => upd((x) => ((x.voice = { ...x.voice, shape: k }), delete x.w, delete x.h))}>
+              {t}
+            </button>
+          ))}
+        </span>
+      </div>
+      <div className="row">
+        <label>색</label>
+        <span className="vg-pals" role="radiogroup" aria-label="색 묶음">
+          {Object.entries(VOICE_PALETTES).map(([k, [name, cs]]) => (
+            <button key={k} role="radio" aria-checked={v.palette === k} className={'vg-pal' + (v.palette === k ? ' on' : '')} title={name} onClick={() => upd((x) => void (x.voice = { ...x.voice, palette: k as typeof v.palette }))} style={{ background: `linear-gradient(90deg, ${cs.join(', ')})` }}>
+              <span>{name}</span>
+            </button>
+          ))}
+        </span>
+      </div>
+      <div className="row">
+        <label>크기</label>
+        {num('w', String(dw), '가로 (px)')}
+        {num('h', String(dh), '세로 (px)')}
+      </div>
+      {slider('strength', '진하기', 0.1, 1, '빛의 진하기')}
+      {slider('gain', '소리 키우기', 0.5, 3, '작은 목소리도 크게 움직이게 해요')}
+      {slider('idle', '쉴 때 빛', 0, 0.5, '음성이 없을 때 남는 빛. 0이면 음성이 나올 때만 보여요')}
+      <p className="tip">음성(더빙) 대사가 나오는 동안 그 목소리 크기에 맞춰 빛이 움직여요. 음성 파일의 소리 크기는 렌파이로 내보낼 때 재서 <code>pykaki_voice_levels.json</code>에 적어요. 미리보기는 말하는 듯한 가짜 소리예요.</p>
+    </>
+  );
+}
+
 const ACT_LABEL: [ScreenAct, string][] = [['return', '값 돌려주기'], ['flag', '플래그 바꾸기'], ['jump', '상자로 가기'], ['toggle', 'HUD 열고 닫기']];
 
 function ItemCard({ sc, it, upd, remove, dup }: { sc: ScreenDef; it: ScreenItem; upd: (fn: (it: ScreenItem) => void, key?: string) => void; remove: () => void; dup: () => void }) {
@@ -748,6 +806,7 @@ function ItemCard({ sc, it, upd, remove, dup }: { sc: ScreenDef; it: ScreenItem;
           <p className="tip">꼴과 꾸미기는 그 플래그의 것이라, 여기서 고치면 플래그 카드와 이 플래그를 쓰는 다른 화면도 같이 바뀌어요. {it.edit ? '게임에서 플레이어가 꼴로 값을 바꿔요(최솟값~최댓값, 롤백하면 되돌아감)' : '게임에서는 값을 보여 주기만 해요'}</p>
         </>
       )}
+      {it.kind === 'voice' && <VoiceFields it={it} upd={upd} num={num} />}
       {it.kind === 'bar' && (
         <>
           <div className="row">

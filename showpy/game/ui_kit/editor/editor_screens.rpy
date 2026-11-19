@@ -33,7 +33,7 @@ init -8 python in ui_editor:
         }
     SC_KIND = {
         "text": "글", "textbutton": "글 버튼", "image": "그림", "imagebutton": "그림 버튼",
-        "bar": "막대", "drop": "놓는 곳", "look": "플래그 꼴",
+        "bar": "막대", "drop": "놓는 곳", "look": "플래그 꼴", "voice": "음성 빛",
         }
     SC_TEXT_KINDS = ("text", "textbutton", "drop")
     SC_HUD_W = 420
@@ -586,6 +586,9 @@ init -8 python in ui_editor:
                 return store.Fixed(store.Solid("#ffffff26"), store.Text(esc(v["text"] or ""), size=size, color=tcol, align=(0.5, 0.5)), xysize=(w, h))
             if k == "look":
                 return store.Fixed(store.Solid("#ffffff22"), store.Text(esc(it.get("flag") or ""), size=13, color="#ffffff", align=(0.5, 0.5)), xysize=(w, h))
+            if k == "voice":
+                # 음성 빛 (대본 편집기 FEATURE 34): 편집 중에는 자리만 보임
+                return store.Fixed(store.Solid("#7b6cff33"), store.Text("음성 빛", size=13, color="#ffffff", align=(0.5, 0.5)), xysize=(w or 200, h or 60))
             return store.Solid("#ffffff22", xysize=(w or 40, h or 20))
 
         def render(self, width, height, st, at):

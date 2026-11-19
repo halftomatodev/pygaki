@@ -89,7 +89,7 @@ function trLine(t: string): string | null {
 }
 
 // ── 화면에 그려진 글 바꾸기 ──
-const ATTRS = ['title', 'placeholder', 'aria-label', 'label']; // label: <optgroup label>
+const ATTRS = ['title', 'placeholder', 'aria-label', 'label', 'data-tip']; // label: <optgroup label>
 const textOrig = new WeakMap<Text, { orig: string; shown: string }>();
 const attrOrig = new WeakMap<Element, Record<string, { orig: string; shown: string }>>();
 const SKIP = 'textarea, script, style, pre, [data-no-tr]';

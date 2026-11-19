@@ -10,6 +10,7 @@ import { parseEffectsOff, refreshEffects, setEffectsOff } from './stage';
 import { setShaderList, setShadersOff } from './shader';
 import { codeImages, type ImageBook } from './imageCheck';
 import { SCREENS_FILE, SCREENS_META_FILE } from './screens';
+import { buildLevels, voiceFiles, VOICE_LEVELS_FILE, type LevelsFile } from './voiceLevels';
 
 export const hasDirPicker = isDesktop; // 폴더는 앱에서만 연다 (웹 버전은 2026-11-12에 없앰)
 export const INBOX_FILE = 'showpy_inbox.json';
@@ -396,11 +397,30 @@ export async function pullInbox(ask = false) {
 
 export const readRpyFromFolder = () => readText(dir, RPY_FILE);
 
+// 음성 빛이 읽는 소리 크기 표 (game/pykaki_voice_levels.json, LINK.md 13장). 크기가 같은 파일은 다시 재지 않는다
+async function writeVoiceLevels() {
+  let old: LevelsFile | null = null;
+  try {
+    old = JSON.parse((await readText(dir, VOICE_LEVELS_FILE)) ?? 'null');
+  } catch {
+    old = null;
+  }
+  const files = voiceFiles(useStore.getState().project, useGameFolder.getState().media.audio);
+  const read = async (rel: string) => {
+    const url = await fileUrl(rel);
+    return url ? (await fetch(url)).arrayBuffer() : null;
+  };
+  const next = await buildLevels(files, old, read);
+  if (next) await writeText(dir, VOICE_LEVELS_FILE, JSON.stringify(next) + '\n');
+}
+
 // screens: 화면 만들기 원고 (pykaki_screens.rpy). 화면이 없는 대본이면 null (예전에 쓴 파일이 있을 때만 비운다). 바뀐 것만 쓴다
 // meta: 게임 안 편집 화면의 [화면] 탭이 읽는 화면 자리 (pykaki_screens.json, 개발용). 원고를 쓸 때 같이, 바뀐 것만
 export async function writeScreensToFolder(screens: { code: string; has: boolean; meta?: string }) {
   const old = await readText(dir, SCREENS_FILE);
   if ((screens.has || old !== null) && old !== screens.code) await writeText(dir, SCREENS_FILE, screens.code);
+  // 음성 빛 (FEATURE 34): 화면에 음성 빛이 있으면 음성 파일의 소리 크기 표도 (바뀐 것만)
+  if (screens.code.includes('_PkVoiceGlow(')) await writeVoiceLevels().catch((e) => console.warn('음성 소리 크기 표를 못 썼어요', e));
   if (screens.meta === undefined) return;
   const oldMeta = await readText(dir, SCREENS_META_FILE);
   if ((screens.has || oldMeta !== null) && oldMeta !== screens.meta) await writeText(dir, SCREENS_META_FILE, screens.meta);

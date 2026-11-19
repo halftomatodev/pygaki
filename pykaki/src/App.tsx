@@ -59,6 +59,9 @@ function Keys() {
       if (hit(e, 'focus')) run(toggleFocus);
       else if (s.inlineEdit && hit(e, 'nextBox')) run(() => goNextBox(s.inlineEdit!));
       else if (s.inlineEdit && hit(e, 'flowMenu')) run(() => useStore.setState({ flowMenu: !s.flowMenu }));
+      // 줄 종류 고르기: 상자 안에서 쓰는 중이면 그 줄, 아니면 오른쪽 [대사] 카드에서 쓰는 줄 (닫기는 창이 받음)
+      else if (s.activeLine && !s.typeMenu && hit(e, 'lineType') && (s.inlineEdit || (e.target as HTMLElement).closest?.('.insp')))
+        run(() => useStore.setState({ typeMenu: { line: s.activeLine!, where: s.inlineEdit ? 'box' : 'insp' } }));
       else if (hit(e, 'save')) run(() => saveProject());
       else if (hit(e, 'saveAs')) run(() => saveProject(true));
       // 이미 열려 있으면 찾을 글 칸을 고른다

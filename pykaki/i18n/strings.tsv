@@ -2870,3 +2870,44 @@ ${via} · 기회 ${rt.tries}번을 다 씀	{0} · チャンス {1} 回を使い�
 · 힌트 ${ex.retry.hints.filter((h) => h.trim()).length}	· ヒント {0}	· hints {0}
 틀리면 이 자리에서 다시 물어요. 정한 기회를 다 쓰면 틀림 상자로 가고, 틀릴 때마다 힌트를 보여 줄 수 있어요	間違えるとその場で聞き直します。決めたチャンスを使い切ると不正解のボックスへ進み、間違えるたびにヒントを見せられます	Asks again right there when wrong. When the set tries run out it goes to the Wrong box, and you can show a hint after each miss
 맞혀 보기	答え合わせ	Check
+✓ 완료	✓ 完了	✓ Done
+✕ 취소	✕ キャンセル	✕ Cancel
+완료: 같은 화자로 아래에 새 줄 ({0})	完了: 同じ話者で下に新しい行 ({0})	Done: new line below, same speaker ({0})
+취소: 상자 편집 끝내기 (Esc). 친 글은 그대로 남아요	キャンセル: ボックス編集を終える (Esc)。入力した文はそのまま残ります	Cancel: stop editing the box (Esc). What you typed stays
+줄 종류 고르기	行の種類を選ぶ	Choose line type
+줄 종류 고르기 열기/닫기 (방향키로 고르기)	行の種類選びを開く/閉じる (方向キーで選ぶ)	Open/close line type picker (choose with arrow keys)
+줄 종류 바꾸기 ({0}, 방향키로 고르기)	行の種類を変える ({0}、方向キーで選ぶ)	Change line type ({0}, choose with arrow keys)
+Tab 칸 옮기기 · ↑↓ 고르기 · Enter 정하기 · Esc 글로 돌아가기	Tab 列を移る · ↑↓ 選ぶ · Enter 決定 · Esc 文に戻る	Tab next column · ↑↓ choose · Enter pick · Esc back to text
+끌어서 순서 바꾸기 · 톡 누르면 줄 종류 ({0})	ドラッグで順番を変える · 軽く押すと行の種類 ({0})	Drag to reorder · tap for line type ({0})
+음성 빛	音声の光	Voice glow
++ 음성 빛	+ 音声の光	+ Voice glow
+음성(더빙)이 나오는 동안 목소리 크기에 맞춰 움직이는 빛. 대사 상자 아래·테두리·둥근 빛	音声(ボイス)が流れる間、声の大きさに合わせて動く光。セリフ欄の下・縁・丸い光	A glow that moves with the voice volume while voice-over plays. Under the dialogue box, border, or orb
+아래 띠	下の帯	Bottom band
+둥근 빛	丸い光	Orb
+색 묶음	色セット	Palette
+무지개	虹	Rainbow
+바다	海	Ocean
+노을	夕焼け	Sunset
+사탕	キャンディ	Candy
+숲	森	Forest
+흰빛	白い光	White
+빛의 진하기	光の濃さ	Glow strength
+소리 키우기	音を大きく	Boost
+작은 목소리도 크게 움직이게 해요	小さな声でも大きく動かします	Makes quiet voices move more
+쉴 때 빛	休むときの光	Idle glow
+음성이 없을 때 남는 빛. 0이면 음성이 나올 때만 보여요	音声がないときに残る光。0なら音声が流れるときだけ見えます	Glow left when no voice plays. At 0 it shows only while voice plays
+음성(더빙) 대사가 나오는 동안 그 목소리 크기에 맞춰 빛이 움직여요. 음성 파일의 소리 크기는 렌파이로 내보낼 때 재서	ボイス付きのセリフが流れる間、その声の大きさに合わせて光が動きます。音声ファイルの音の大きさはRen'Pyに書き出すときに測って	While a voiced line plays, the glow moves with its volume. Voice file volumes are measured on export to Ren'Py and written to
+에 적어요. 미리보기는 말하는 듯한 가짜 소리예요.	に書きます。プレビューは話しているような仮の音です。	. The preview uses a fake speaking sound.
+물결로 넘기기	波で切り替え	Bend wave
+꼴 (0 고리, 1 세로, 2 가로)	形 (0 輪、1 縦、2 横)	Type (0 ring, 1 vertical, 2 horizontal)
+시작 가로	開始 横	Start X
+시작 세로	開始 縦	Start Y
+앞머리 솟음	先端の盛り上がり	Front bulge
+물결 두께	波の幅	Wave width
+휘는 세기	曲がる強さ	Bend amount
+테두리 빛	縁の光	Rim glow
+빛 두께	光の幅	Rim width
+색 돌리기	色を回す	Hue shift
+빨려 드는 시간	吸い込む時間	Pull-in time
+완료 · {0}	完了 · {0}	Done · {0}
+취소 · Esc	キャンセル · Esc	Cancel · Esc

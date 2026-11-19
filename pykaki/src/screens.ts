@@ -1,5 +1,6 @@
 // 화면 만들기 (FEATURE 17): 화면 목록(project.screens) → game/pykaki_screens.rpy, 흐름 "화면 부르기"의 갈래 맞추기
-import type { BoxNode, Flag, Project, ScreenAnchor, ScreenDef, ScreenItem } from './types';
+import type { BoxNode, Flag, Project, ScreenAnchor, ScreenDef, ScreenItem, VoicePalette, VoiceShape } from './types';
+import { VOICE_HELPER } from './voiceHelper';
 import { addFixup } from './store';
 import { IDENT, RESERVED, uid } from './util';
 import { flagRef, parseAction, persistExpr, persistSub } from './flags';
@@ -28,6 +29,24 @@ export function hudInner(s: ScreenDef): { cw: number; ch: number } | null {
   const cw = Math.max(w, Math.round(s.cw ?? w)), ch = Math.max(h, Math.round(s.ch ?? h));
   return cw > w || ch > h ? { cw, ch } : null;
 }
+// 음성 빛 (FEATURE 34): 음성이 나오는 동안 소리 크기(pykaki_voice_levels.json)에 맞춰 움직이는 셰이더 빛 (voiceHelper.ts)
+export const VOICE_SIZE: Record<VoiceShape, [number, number]> = { line: [700, 90], ring: [360, 120], orb: [160, 160] };
+export const VOICE_DEF = { shape: 'line' as VoiceShape, palette: 'colorful' as VoicePalette, strength: 0.9, gain: 1.4, idle: 0.1 };
+export const voiceOpt = (it: ScreenItem) => ({ ...VOICE_DEF, ...it.voice });
+export const voiceSize = (it: ScreenItem): [number, number] => {
+  const d = VOICE_SIZE[voiceOpt(it).shape] ?? VOICE_SIZE.line;
+  return [Math.round(it.w ?? d[0]), Math.round(it.h ?? d[1])];
+};
+// 색 묶음: 이름과 네 가지 색 (렌파이 셰이더와 앱 미리보기가 같이 씀)
+export const VOICE_PALETTES: Record<VoicePalette, [string, [string, string, string, string]]> = {
+  colorful: ['무지개', ['#ff5f6d', '#ffc371', '#47e5bc', '#7b6cff']],
+  ocean: ['바다', ['#38bdf8', '#6366f1', '#22d3ee', '#a78bfa']],
+  sunset: ['노을', ['#f97316', '#facc15', '#ef4444', '#fb7185']],
+  candy: ['사탕', ['#f472b6', '#c084fc', '#f9a8d4', '#a78bfa']],
+  forest: ['숲', ['#22c55e', '#14b8a6', '#84cc16', '#2dd4bf']],
+  mono: ['흰빛', ['#ffffff', '#e4e4e7', '#a1a1aa', '#f4f4f5']],
+};
+export const VOICE_SHAPES: [VoiceShape, string][] = [['line', '아래 띠'], ['ring', '테두리'], ['orb', '둥근 빛']];
 export const BAR_W = 300;
 export const BAR_H = 24;
 // 9칸 붙이기: [이름, 가로 0~1, 세로 0~1]
@@ -73,6 +92,7 @@ export function screensMeta(p: Project): string {
         if (it.kind === 'image' || it.kind === 'imagebutton') o.image = it.image ?? '';
         if (it.kind === 'bar') ((o.w = Math.round(it.w ?? BAR_W)), (o.h = Math.round(it.h ?? BAR_H)), (o.flag = it.flag ?? ''));
         if (it.kind === 'drop') ((o.w = Math.round(it.w ?? DROP_W)), (o.h = Math.round(it.h ?? DROP_H)));
+        if (it.kind === 'voice') [o.w, o.h] = voiceSize(it);
         if (it.kind === 'look') {
           const [lw, lh] = lookSize(p, it);
           ((o.w = lw), (o.h = lh), (o.flag = it.flag ?? ''));
@@ -231,6 +251,13 @@ function itemCode(p: Project, s: ScreenDef, it: ScreenItem, I0: string): string[
     if (!it.flag || !IDENT.test(it.flag)) return [];
     out = ['bar:', `${I}value AnimatedValue(${flagRef(p, it.flag)}, ${it.max && it.max > 0 ? it.max : 10}, 0.3)`, pos, `${I}xysize (${Math.round(it.w ?? BAR_W)}, ${Math.round(it.h ?? BAR_H)})`];
     out.push(`${I}left_bar Solid(${py(isColor(it.color) ? it.color! : '#e0607a')})`, `${I}right_bar Solid(${py(isColor(it.bgColor) ? it.bgColor! : '#00000080')})`, `${I}thumb None`);
+  } else if (it.kind === 'voice') {
+    const v = voiceOpt(it);
+    const [w, h] = voiceSize(it);
+    const cols = (VOICE_PALETTES[v.palette] ?? VOICE_PALETTES.colorful)[1];
+    const shape = Math.max(0, VOICE_SHAPES.findIndex(([k]) => k === v.shape));
+    const f = (n: number) => String(+n.toFixed(2));
+    out = [`add _PkVoiceGlow(${w}, ${h}, ${shape}, [${cols.map(py).join(', ')}], ${f(v.strength)}, ${f(v.gain)}, ${f(v.idle)}):`, pos];
   } else if (it.kind === 'look') {
     out = lookCode(p, it);
     if (!out.length) return [];
@@ -684,6 +711,7 @@ export function screensCode(p: Project, only?: string): string {
   if (!only && (p.screens ?? []).some((s) => s.items.some(isDD))) out.push(...DRAG_HELPERS);
   if (out.some((x) => x.includes('_pk_round('))) out.push(...ROUND_HELPER);
   if (out.some((x) => x.includes('_PkNumInput('))) out.push(...NUM_INPUT_HELPER);
+  if (out.some((x) => x.includes('_PkVoiceGlow('))) out.push(...VOICE_HELPER);
   if (!only && out.some((x) => x.includes(' at _pk_anim_'))) out.push(...ANIM_HELPER);
   return out.join('\n') + '\n';
 }

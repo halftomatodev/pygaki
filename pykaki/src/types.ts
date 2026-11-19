@@ -147,7 +147,7 @@ export interface ScreenOut {
 
 // 화면 만들기 탭에서 만든 렌파이 screen (FEATURE 17). game/pykaki_screens.rpy로 내보낸다
 // bar: 플래그 값 막대 (FEATURE 18). HUD의 항목은 x, y가 HUD 왼쪽 위 기준
-export type ScreenItemKind = 'imagebutton' | 'textbutton' | 'text' | 'image' | 'bar' | 'drop' | 'look'; // drop: 놓는 곳 (FEATURE 19). look: 플래그 꼴 (FEATURE 21, 꼴·꾸미기는 플래그 카드의 것)
+export type ScreenItemKind = 'imagebutton' | 'textbutton' | 'text' | 'image' | 'bar' | 'drop' | 'look' | 'voice'; // drop: 놓는 곳 (FEATURE 19). look: 플래그 꼴 (FEATURE 21, 꼴·꾸미기는 플래그 카드의 것). voice: 음성 빛 (FEATURE 34)
 // 버튼을 누르면 (FEATURE 18): return 값 돌려주기 (전체 화면만, 없으면 이것) | flag 플래그 바꾸기 | jump 상자로 가기 | toggle 다른 HUD 열고 닫기
 export type ScreenAct = 'return' | 'flag' | 'jump' | 'toggle';
 export type ScreenAnchor = 'tl' | 't' | 'tr' | 'l' | 'c' | 'r' | 'bl' | 'b' | 'br';
@@ -186,6 +186,17 @@ export interface ScreenItem {
   sfxIn?: string; // 나타날 때 효과음 (game 기준 경로)
   sfxOut?: string; // 사라질 때 효과음
   edit?: boolean; // look (FEATURE 22): 게임에서 꼴로 플래그 값을 바꿀 수 있음 (슬라이더·막대는 끌기, 칸·별은 누르기, 스위치는 누르기, 풀다운·콤보는 펼쳐서 고르기). 없으면 보이기만
+  voice?: VoiceGlow; // voice (FEATURE 34): 음성이 나오는 동안 소리 크기에 맞춰 움직이는 빛. 크기는 w·h
+}
+// 음성 빛 (FEATURE 34). 비운 값은 처음 값 (screens.ts VOICE_DEF)
+export type VoiceShape = 'line' | 'ring' | 'orb'; // 아래 띠(대사 상자 아래) | 테두리 | 둥근 빛
+export type VoicePalette = 'colorful' | 'ocean' | 'sunset' | 'candy' | 'forest' | 'mono';
+export interface VoiceGlow {
+  shape?: VoiceShape;
+  palette?: VoicePalette;
+  strength?: number; // 0~1 진하기
+  gain?: number; // 소리를 키우는 정도 (0.5~3)
+  idle?: number; // 음성이 없을 때 남는 빛 (0이면 숨음, 0~0.5)
 }
 export interface ScreenDef {
   id: string;

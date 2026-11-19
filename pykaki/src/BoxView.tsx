@@ -1,5 +1,5 @@
 import { memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Handle, Position, type NodeProps } from '@xyflow/react';
+import { Handle, Position, useStore as useFlow, type NodeProps } from '@xyflow/react';
 import { useStore } from './store';
 import * as ops from './ops';
 import type { BoxNode, BoxShader, LabelGroup, Line, MenuAsk } from './types';
@@ -7,11 +7,14 @@ import { shaderLabel } from './shader';
 import { isLight, uid } from './util';
 import { changeThenFocus } from './actions';
 import { FlowMenu } from './FlowMenu';
-import { BoxFields, OldAttr, SpeakerSelect, StageFields, InputFields } from './LineFields';
+import { DoneBubble } from './DoneBubble';
+import { LineChip } from './LineChip';
+import { TypeMenuFor } from './LineTypeMenu';
+import { BoxFields, OldAttr, StageFields, InputFields } from './LineFields';
 import { isStage, STAGE_ICON, stageCode } from './stage';
 import { actionWords, condWords } from './flags';
 import { ActionInput, CondInput } from './FlagFields';
-import { hit } from './prefs';
+import { hit, keyOf } from './prefs';
 import { TagBar, useTagTarget } from './TagBar';
 import { TagView } from './textTags';
 import { useFolded } from './Card';
@@ -23,6 +26,8 @@ export const BoxView = memo(function BoxView({ id, selected }: NodeProps) {
   const [active, setActive] = useState<string | null>(null);
   const project = useStore((s) => s.project);
   const editing = useStore((s) => s.inlineEdit === id);
+  // 고치는 상자만 확대 배율을 따라 다시 그린다 (태그 상자의 끈적 덩어리 크기 맞추기)
+  const zoom = useFlow((s) => (editing ? s.transform[2] : 1));
   const update = useStore((s) => s.update);
   const tagTarget = useTagTarget((s) => s.id);
   const b = project.nodes.find((n) => n.id === id);
@@ -42,6 +47,7 @@ export const BoxView = memo(function BoxView({ id, selected }: NodeProps) {
         <TagBar
           targetId={'in-' + tagLine.id}
           className="tagbar-box"
+          zoom={zoom}
           extra={<BoxFields l={tagLine} set={(fn, key) => update((p) => { const x = ops.findBox(p, b.id)?.lines.find((v) => v.id === tagLine.id); if (x) fn(x); }, key)} />}
         />
       )}
@@ -363,11 +369,15 @@ interface ActiveProps {
   setActive: (id: string | null) => void;
 }
 
+// 글을 쓰는 줄 (완료/취소 버블이 붙음)
+const TEXT_LINE = new Set<Line['type']>(['say', 'narration', 'command', 'note']);
+
 function Lines({ b, editing, active, setActive }: { b: BoxNode; editing: boolean } & ActiveProps) {
   const update = useStore((s) => s.update);
   const upd = (fn: (x: BoxNode) => void, key?: string) => update((p) => fn(ops.findBox(p, b.id)!), key);
   const [top, setTop] = useState<number | null>(null);
   const wrap = useRef<HTMLDivElement>(null);
+  const chip = useRef<HTMLDivElement>(null);
   const drag = usePtrDrag(wrap, '[data-line]', (from, to) => upd((x) => ops.moveIn(x.lines, from, to)));
 
   const ai = editing ? b.lines.findIndex((l) => l.id === active) : -1;
@@ -432,13 +442,16 @@ function Lines({ b, editing, active, setActive }: { b: BoxNode; editing: boolean
 
       {editing && al && top !== null && (
         <>
-          <div className="side side-l nodrag" style={{ top }} key="l">
-            <span {...drag.grip(ai)}>⠿</span>
-            <SpeakerSelect className="nodrag" l={al} set={setLine(ai)} />
-            {al.type === 'say' && al.attr && <OldAttr attr={al.attr} clear={() => upd((x) => void delete x.lines[ai].attr)} />}
-            <button className="nodrag" title="아래에 새 줄" onClick={() => addAfter(ai, al)}>＋</button>
-            <button className="nodrag" title="줄 삭제" onClick={() => remove(ai)}>✕</button>
+          {/* 왼쪽: 손잡이와 줄 삭제만 있는 끈적한 방울 (세션 91). 손잡이를 톡 누르거나 Alt+↓면 줄 종류 고르기 */}
+          <div className="side-chip" style={{ top }} key="l" ref={chip}>
+            <LineChip
+              grip={drag.grip(ai, () => useStore.setState({ typeMenu: { line: al.id, where: 'box' } }))}
+              onDelete={() => remove(ai)}
+              extra={al.type === 'say' && al.attr ? <OldAttr attr={al.attr} clear={() => upd((x) => void delete x.lines[ai].attr)} /> : undefined}
+            />
           </div>
+          <TypeMenuFor l={al} set={setLine(ai)} where="box" anchor={chip} />
+          {TEXT_LINE.has(al.type) && <DoneBubble key={al.id} top={top} onDone={() => addAfter(ai, al)} onCancel={() => useStore.setState({ inlineEdit: null })} />}
           {isStage(al.type) && (
             <div className="side side-r nodrag" style={{ top }} onKeyDown={onSideKey}>
               <StageFields l={al} nd="nodrag" set={setLine(ai)} />
@@ -465,9 +478,10 @@ function Lines({ b, editing, active, setActive }: { b: BoxNode; editing: boolean
 // 선택지·조건 갈래도 같은 것으로 끈다 (sel로 고를 줄을 찾는다)
 function usePtrDrag(wrap: React.RefObject<HTMLDivElement>, sel: string, move: (from: number, to: number) => void) {
   const [st, setSt] = useState<{ from: number; to: number | null } | null>(null);
-  const grip = (i: number) => ({
+  // tap: 끌지 않고 톡 누르기만 했을 때 (상자 안 고치는 줄의 손잡이 → 줄 종류 고르기)
+  const grip = (i: number, tap?: () => void) => ({
     className: 'grip nodrag nopan',
-    title: '끌어서 순서 바꾸기',
+    title: tap ? `끌어서 순서 바꾸기 · 톡 누르면 줄 종류 (${keyOf('lineType')})` : '끌어서 순서 바꾸기',
     onPointerDown: (e: React.PointerEvent<HTMLElement>) => {
       if (e.button !== 0) return;
       e.preventDefault();
@@ -475,8 +489,11 @@ function usePtrDrag(wrap: React.RefObject<HTMLDivElement>, sel: string, move: (f
       const el = e.currentTarget;
       el.setPointerCapture(e.pointerId);
       let to: number | null = null;
+      const x0 = e.clientX, y0 = e.clientY;
+      let far = false;
       setSt({ from: i, to });
       const onMove = (ev: PointerEvent) => {
+        if (Math.hypot(ev.clientX - x0, ev.clientY - y0) > 4) far = true;
         const rows = [...(wrap.current?.querySelectorAll<HTMLElement>(sel) ?? [])];
         let k = rows.findIndex((r) => {
           const rc = r.getBoundingClientRect();
@@ -490,6 +507,7 @@ function usePtrDrag(wrap: React.RefObject<HTMLDivElement>, sel: string, move: (f
         el.removeEventListener('pointerup', onUp);
         el.removeEventListener('pointercancel', onUp);
         if (to !== null && to !== i && to !== i + 1) move(i, to);
+        else if (!far && tap) tap();
         setSt(null);
       };
       el.addEventListener('pointermove', onMove);

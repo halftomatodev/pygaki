@@ -11,6 +11,8 @@ import { shaderEffect } from './fx/textShaders';
 import { RUBY_NOTE, insertRuby, insertTag, removeTag, retag, rubyAt, setRubyStyle, setTagValue, stepSize, tagsAt, toggleTag, type Edit } from './tagEdit';
 import { TagDemo, type Tip } from './TagDemo';
 import { motionToken, ms } from './Card';
+import { Liquid } from 'liquid-gooey';
+import { GOO } from './LineTypeMenu';
 
 // 지금 태그를 넣을 글 칸(textarea id). 태그 상자 안으로 포커스가 옮겨 가도 그대로 둔다
 export const useTagTarget = create<{ id: string | null }>(() => ({ id: null }));
@@ -284,7 +286,9 @@ const DEMO_BASE = 14; // 견본 글의 보통 속도 (TagDemo DEMO_CPS와 같음
 // ── 태그 상자 ──
 // 묶음마다 카드 한 장. 카드 안 줄마다 소제목 버블(색은 카드마다 다름)
 // extra: 태그 말고 줄 전체에 거는 칸(상자 안 편집의 글 상자 칸). 접어도 늘 보인다
-export function TagBar({ targetId, className = '', extra }: { targetId: string; className?: string; extra?: React.ReactNode }) {
+// 카드들은 줄 종류 고르기(LineTypeMenu)와 같은 끈적한 덩어리(liquid-gooey)로 붙는다(세션 92).
+// zoom: 캔버스 확대 배율. 끈적 그림 층은 화면 크기로 재므로 캔버스 안에서는 1/zoom으로 되돌려 맞춘다
+export function TagBar({ targetId, className = '', extra, zoom = 1 }: { targetId: string; className?: string; extra?: React.ReactNode; zoom?: number }) {
   const tagsOn = useStore((s) => s.project.settings.allowTextTags);
   const flags = useStore((s) => s.project.variables);
   const update = useStore((s) => s.update);
@@ -349,29 +353,32 @@ export function TagBar({ targetId, className = '', extra }: { targetId: string; 
   };
 
   const cls = 'tagbar nodrag nowheel ' + className;
+  const goo = { '--lg-unscale': 1 / zoom } as React.CSSProperties;
   const extraCard = extra && (
-    <div className="tb-card tb-extra" style={{ '--hue': 45 } as React.CSSProperties}>
+    <TbCard className="tb-extra" hue={45}>
       <div className="tb-row">
         <span className="tb-chip">글 상자</span>
         {extra}
       </div>
-    </div>
+    </TbCard>
   );
   if (!tagsOn)
     return (
       <div className={cls} onMouseDown={keep}>
-        <div className="tb-card tb-off">
+        <Liquid className="tb-liquid" {...GOO} style={goo}>
+        <TbCard className="tb-off">
           텍스트 태그가 꺼져 있어요. <code>{'{'}</code>가 글자 그대로 나가요.
           <button className="primary" onClick={() => update((p) => void (p.settings.allowTextTags = true))}>켜기</button>
-        </div>
+        </TbCard>
         {flags.length > 0 && (
-          <div className="tb-card" style={{ '--hue': 28 } as React.CSSProperties}>
+          <TbCard hue={28}>
             <div className="tb-row">
               <FlagValuePick flags={flags} onPick={(n) => run((x, s, e) => insertTag(x, s, e, `[${n}]`))} />
             </div>
-          </div>
+          </TbCard>
         )}
         {extraCard}
+        </Liquid>
       </div>
     );
 
@@ -483,7 +490,8 @@ export function TagBar({ targetId, className = '', extra }: { targetId: string; 
 
   return (
     <div className={cls} onMouseDown={keep} onKeyDown={(e) => e.key === 'Escape' && (e.stopPropagation(), setPalette(false), el()?.focus())}>
-      <div className="tb-card" style={{ '--hue': 215 } as React.CSSProperties}>
+      <Liquid className="tb-liquid" {...GOO} style={goo}>
+      <TbCard hue={215}>
         <div className="tb-row">
           <span className="tb-chip">글자</span>
           {tog('b', 'B', `굵게 {b}  ${keyOf('tagBold')}`)}
@@ -510,8 +518,8 @@ export function TagBar({ targetId, className = '', extra }: { targetId: string; 
             <span className="tb-dot" style={{ background: color ?? 'conic-gradient(#ef4444, #eab308, #22c55e, #0ea5e9, #8b5cf6, #ef4444)' }} />색
           </button>
         </div>
-      </div>
-      <div className="tb-card" style={{ '--hue': 28 } as React.CSSProperties}>
+      </TbCard>
+      <TbCard hue={28}>
         <div className="tb-row">
           <span className="tb-chip">진행</span>
           {ins('{w}', 'w')}
@@ -527,8 +535,8 @@ export function TagBar({ targetId, className = '', extra }: { targetId: string; 
             </>
           )}
         </div>
-      </div>
-      <div className="tb-card" style={{ '--hue': 150 } as React.CSSProperties}>
+      </TbCard>
+      <TbCard hue={150}>
         <div className="tb-row">
           <span className="tb-chip">속도</span>
           <span className="tb-slide" {...tipOn('cps')}>
@@ -550,9 +558,9 @@ export function TagBar({ targetId, className = '', extra }: { targetId: string; 
           <span className="tb-fill" />
           <button className={'tb-btn tb-more' + (more ? ' on' : '')} title="투명도, 자간, 외곽선 색, 글꼴, 고른 글에만 효과, 띄우기, 루비, 글 속 그림" onClick={toggleMore}>{more ? '접기 ▴' : '더 보기 ▾'}</button>
         </div>
-      </div>
+      </TbCard>
       {ruby && (
-        <div className="tb-card" style={{ '--hue': 330 } as React.CSSProperties}>
+        <TbCard hue={330}>
           <div className="tb-row">
             <span className="tb-chip">루비 글</span>
             <span className="tb-slide">
@@ -577,11 +585,11 @@ export function TagBar({ targetId, className = '', extra }: { targetId: string; 
               })}>기본</button>
             )}
           </div>
-        </div>
+        </TbCard>
       )}
       <MoreReveal open={more}>
         <>
-          <div className="tb-card" style={{ '--hue': 268 } as React.CSSProperties}>
+          <TbCard hue={268}>
             <div className="tb-row" {...tipOn('alpha')}>
               <span className="tb-chip">투명도</span>
               <Slide cur={alphaV} def={1} min={0} max={1} step={0.05} title="고른 글의 투명도 {alpha=}" onLive={live('alpha')} onCommit={(v) => putOrDrop('alpha', '투명도', v >= 1 ? null : fmt(v))} />
@@ -600,8 +608,8 @@ export function TagBar({ targetId, className = '', extra }: { targetId: string; 
                 <span className="tb-dot tb-ring" style={{ borderColor: outline ?? 'var(--muted)' }} />외곽선 색
               </button>
             </div>
-          </div>
-          <div className="tb-card" style={{ '--hue': 330 } as React.CSSProperties}>
+          </TbCard>
+          <TbCard hue={330}>
             <div className="tb-row">
               <span className="tb-chip">글꼴</span>
               {linked && media.fonts.length ? (
@@ -678,8 +686,8 @@ export function TagBar({ targetId, className = '', extra }: { targetId: string; 
                 })}
               </div>
             ))}
-          </div>
-          <div className="tb-card" style={{ '--hue': 188 } as React.CSSProperties}>
+          </TbCard>
+          <TbCard hue={188}>
             <div className="tb-row">
               <span className="tb-chip">넣기</span>
               {ins('{space=30}', 'space', '30')}
@@ -701,12 +709,12 @@ export function TagBar({ targetId, className = '', extra }: { targetId: string; 
                 </select>
               )}
             </div>
-          </div>
+          </TbCard>
         </>
       </MoreReveal>
       {extraCard}
       {palette && (
-        <div className="tb-card" style={{ '--hue': palette === 'color' ? 215 : palette === 'rubycolor' ? 330 : 268 } as React.CSSProperties}>
+        <TbCard hue={palette === 'color' ? 215 : palette === 'rubycolor' ? 330 : 268}>
           <Palette
             key={palette}
             current={palette === 'color' ? color : palette === 'rubycolor' ? ruby?.color : outline}
@@ -719,9 +727,10 @@ export function TagBar({ targetId, className = '', extra }: { targetId: string; 
             }}
             onClose={() => (setPalette(false), el()?.focus())}
           />
-        </div>
+        </TbCard>
       )}
-      {msg && <div className="tb-card tb-msg">{msg}</div>}
+      {msg && <TbCard className="tb-msg">{msg}</TbCard>}
+      </Liquid>
       {tipInfo && (
         <div className="tb-tip">
           <div className="tb-tip-head">
@@ -755,6 +764,18 @@ function FlagValuePick({ flags, onPick }: { flags: Flag[]; onPick: (name: string
   );
 }
 
+// 카드 한 장 = 끈적한 덩어리 하나. 카드 바탕은 비우고 뒤의 덩어리가 바탕이 된다(observe: 카드 크기·움직임을 따라감)
+function TbCard({ hue, className = '', children }: { hue?: number; className?: string; children: React.ReactNode }) {
+  return (
+    <Liquid.Item observe>
+      <div className={'tb-card ' + className} style={hue !== undefined ? ({ '--hue': hue } as React.CSSProperties) : undefined}>{children}</div>
+    </Liquid.Item>
+  );
+}
+
+// [더 보기] 안 카드들: 끈적 덩어리 껍데기(display: contents) 안의 진짜 카드. 크기를 줄이면 덩어리도 따라 줄어 빨려 들듯 보인다
+const cardsIn = (el: HTMLElement) => [...el.children].map((c) => (c.firstElementChild ?? c) as HTMLElement);
+
 function MoreReveal({ open, children }: { open: boolean; children: React.ReactNode }) {
   const [shown, setShown] = useState(open);
   const ref = useRef<HTMLDivElement | null>(null);
@@ -777,10 +798,10 @@ function MoreReveal({ open, children }: { open: boolean; children: React.ReactNo
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const dur = ms(motionToken('--dur-pop', '250ms'));
     const easeIn = motionToken('--ease-in', 'ease-in');
-    const kids = [...el.children] as HTMLElement[];
+    const kids = cardsIn(el);
     if (!reduce)
       kids.forEach((k, i) =>
-        anims.current.push(k.animate([{}, { opacity: 0, translate: '0 -6px', filter: 'blur(4px)' }], { duration: dur * 0.8, delay: (kids.length - 1 - i) * 30, easing: easeIn, fill: 'forwards' })),
+        anims.current.push(k.animate([{}, { opacity: 0, translate: '0 -6px', scale: '0.6', filter: 'blur(4px)' }], { duration: dur * 0.8, delay: (kids.length - 1 - i) * 30, easing: easeIn, fill: 'forwards' })),
       );
     el.style.overflow = 'clip';
     const last = reduce
@@ -801,10 +822,10 @@ function MoreReveal({ open, children }: { open: boolean; children: React.ReactNo
     }
     const dur = ms(motionToken('--dur-view', '400ms'));
     const spring = motionToken('--ease-spring', 'ease-out');
-    const kids = [...el.children] as HTMLElement[];
+    const kids = cardsIn(el);
     kids.forEach((k, i) =>
       anims.current.push(
-        k.animate([{ opacity: 0, translate: '0 14px', filter: 'blur(5px)' }, { opacity: 1, translate: '0 0', filter: 'blur(0px)' }], { duration: dur, delay: 40 + i * 50, easing: spring, fill: 'backwards' }),
+        k.animate([{ opacity: 0, translate: '0 14px', scale: '0.6', filter: 'blur(5px)' }, { opacity: 1, translate: '0 0', scale: '1', filter: 'blur(0px)' }], { duration: dur, delay: 40 + i * 50, easing: spring, fill: 'backwards' }),
       ),
     );
     el.style.overflow = 'clip';

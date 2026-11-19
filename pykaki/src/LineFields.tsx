@@ -16,34 +16,8 @@ import { canInput, flagUi, uiMax, uiMin } from './flagUi';
 
 type SetLine = (fn: (x: Line) => void, key?: string) => void;
 
-// 줄 종류(화자) 고르기
-export function SpeakerSelect({ l, set, className }: { l: Line; set: SetLine; className?: string }) {
-  const chars = useStore((s) => s.project.characters);
-  const val = ops.speakerValue(l);
-  return (
-    <select className={className} value={val} onChange={(e) => set((x) => ops.setSpeaker(x, e.target.value))}>
-      <optgroup label="대사">
-        <option value="narration">내레이션</option>
-        {chars.map((c) => (
-          <option key={c.id} value={'say:' + c.id}>{c.name}</option>
-        ))}
-        {l.type === 'say' && !chars.some((c) => c.id === l.who) && <option value={val}>? {l.who}</option>}
-      </optgroup>
-      <optgroup label="연출">
-        {/* 화면 효과는 렌파이 편집기에서 고친다. 예전에 넣은 줄만 그대로 보여 준다 */}
-        {STAGE_TYPES.filter((t) => (t !== 'fx' && t !== 'hud') || l.type === t).map((t) => (
-          <option key={t} value={t}>{STAGE_LABEL[t]}</option>
-        ))}
-      </optgroup>
-      <optgroup label="기타">
-        <option value="flag">⚑ 플래그 바꾸기</option>
-        <option value="input">✎ 플래그 입력</option>
-        <option value="command">⚙ 직접 명령</option>
-        <option value="note"># 메모</option>
-      </optgroup>
-    </select>
-  );
-}
+// 줄 종류(화자) 고르기는 LineTypeMenu.tsx (세션 90, 끈적하게 펼쳐지는 세 칸)
+export { SpeakerSelect } from './LineTypeMenu';
 
 // 예전 판에서 대사 줄에 넣은 표정(attr). 대사 줄은 글만 고치고, 표정 그림은 [그림, 영상] 카드에서 보이기 줄로 넣는다.
 // 예전 값은 내보내기에 그대로 남고, 여기서 눌러 뺄 수 있다

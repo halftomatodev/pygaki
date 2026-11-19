@@ -439,6 +439,22 @@ pygaki 데스크톱 앱의 [GUI 편집] 화면이 게임 안 편집기를 바깥
 - 저장(Ctrl+S): `pykaki_screens.rpy`를 고치고(앞 것은 `ui_kit_backup/`), `pykaki_screens.json`에도 고친 값을 적고, `showpy_inbox.json`에 `screen`/`screen_item` 기록을 더한 뒤 다시 불러옵니다. 표시를 못 찾으면(예전 대본 편집기로 내보낸 원고) 저장하지 않고 알립니다
 - 대본 편집기는 받아 적은 뒤 같은 값으로 다시 내보내므로 원고가 같아집니다
 
+## 13. 음성 빛의 소리 크기 (`game/pykaki_voice_levels.json`, 대본 편집기 `FEATURE` 34)
+
+[화면] 탭의 HUD·화면 항목 **음성 빛**(`kind: "voice"`)은 음성(더빙) 대사가 나오는 동안 목소리 크기에 맞춰 움직이는 셰이더 빛입니다. 렌파이는 지금 나는 소리의 크기를 알려 주지 않아서, 대본 편집기가 내보낼 때 음성 파일마다 소리 크기를 재서 이 파일에 적고, 게임은 `voice` 채널에서 나오는 파일과 재생 자리(`renpy.music.get_playing("voice")`, `get_pos("voice")`)로 값을 읽습니다. **게임 실행에 쓰는 파일이라 배포판에 들어갑니다**(개발용 파일이 아님).
+
+```json
+{ "format": "pygaki-voice-levels", "version": 1, "fps": 30,
+  "files": { "audio/voice/mina_ward_012.ogg": { "size": 48213, "lv": "AAQRJk..." } } }
+```
+
+- `files`의 이름은 원고의 `voice "…"`에 적는 game 기준 경로 그대로(빗금 `/`). `audio/voice/`의 파일 모두와 줄마다 직접 고른 음성 파일
+- `lv`: 1/`fps`초마다 한 칸, 0~255(그 파일의 가장 큰 소리가 255, 0.6제곱으로 작은 소리도 보이게)를 바이트로 늘어놓고 base64
+- `size`: 잴 때의 파일 크기(바이트). 크기가 같으면 다시 재지 않습니다. 없어진 파일은 뺍니다
+- 화면 원고(`pykaki_screens.rpy`)에 음성 빛이 있을 때만 씁니다. 게임 쪽 코드(`_PkVoiceGlow`, 셰이더 `pygaki.voice`)도 그 원고에 같이 들어가서 pygaki 플러그인이 없어도 됩니다
+- 표에 없는 음성 파일이 나오면(내보낸 뒤 더한 파일 등) 말하는 듯 흔들리는 값을 씁니다. 음성이 없으면 0이고, 항목의 "쉴 때 빛"만큼만 남습니다
+- 원고 항목: `add _PkVoiceGlow(가로, 세로, 모양, [색 넷], 진하기, 소리 키우기, 쉴 때 빛):` + `pos`. 모양은 0 아래 띠, 1 테두리, 2 둥근 빛. `pykaki_screens.json`(12장)에는 `w` `h`만
+
 ## 11. 화면 셰이더 목록 (`screen_fx/shader_list.json`, `shaders_off.txt`, screen_fx 5.4. 세부 값 5.5)
 
 상자와 label에 거는 셰이더(2장)의 이름을 대본 편집기가 게임 폴더에서 읽습니다. 번호는 10장 뒤지만 쓰이는 차례 때문에 여기에 둡니다.

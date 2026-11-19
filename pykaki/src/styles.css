@@ -342,6 +342,29 @@ textarea.pl-text { display: block; width: 100%; resize: none; field-sizing: cont
 input.box-title.ed { flex: 1; min-width: 0; }
 .choice input.ed { width: calc(100% - 2em); }
 .box.editing .pl.active { background: color-mix(in srgb, var(--accent) 7%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 7%, transparent); }
+.pl.active { position: relative; }
+/* 쓰는 대사 줄의 완료/취소 버블 (DoneBubble.tsx, 세션 90): 세션 91부터 대사를 가리지 않게 상자 바깥 오른쪽(.side-r 자리, 글 줄에는 .side-r 없음)에
+   줄 높이에 맞춰 위아래로 쌓고 작게 */
+.done-bubble { position: absolute; left: calc(100% + 12px); z-index: 6; pointer-events: none; transition: top 0.22s ease; }
+.db-liquid { display: flex; gap: 3px; }
+.db-btn { pointer-events: auto; display: inline-grid; place-items: center; width: 20px; height: 20px; padding: 0; border: 0; border-radius: 999px; font-size: 11px; font-weight: 800; line-height: 1; color: #fff; background: transparent; }
+.db-btn:hover { background: rgba(255, 255, 255, 0.2); }
+/* 방울 단추에 마우스를 올리면 곧바로 뜨는 작은 안내 (data-tip, 세션 91). 단축키를 알려 줌 */
+.tip { position: relative; }
+.tip[data-tip]:hover::after {
+  content: attr(data-tip); position: absolute; left: 50%; bottom: calc(100% + 7px); translate: -50% 0; z-index: 20; pointer-events: none;
+  padding: 2px 7px; border-radius: 6px; background: color-mix(in srgb, var(--text) 88%, transparent); color: var(--panel);
+  font: 600 10px/1.5 var(--mono, inherit); white-space: nowrap; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  animation: tip-in var(--dur-pop, 0.15s) var(--ease-out, ease) both;
+}
+@keyframes tip-in { from { opacity: 0; translate: -50% 3px; } }
+/* 고치는 줄 왼쪽의 끈적한 방울 [⠿ ✕] (LineChip.tsx, 세션 91). 켜져 있는 동안 천천히 떠다님 */
+.side-chip { position: absolute; right: calc(100% + 12px); z-index: 5; transition: top 0.22s ease; animation: side-in 0.22s ease; --from: 8px; }
+.line-chip { display: flex; align-items: center; gap: 4px; }
+.lc-liquid { display: flex; gap: 2px; }
+.lc-btn { display: inline-grid; place-items: center; width: 20px; height: 20px; padding: 0; border: 0; border-radius: 999px; background: transparent; color: var(--muted); font-size: 11px; line-height: 1; }
+.lc-btn:hover { color: var(--text); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.lc-btn.grip { cursor: grab; }
 .faint-add { font-size: 11px; padding: 0 6px; margin-top: 3px; opacity: 0.5; }
 .faint-add:hover { opacity: 1; }
 
@@ -357,36 +380,53 @@ input.box-title.ed { flex: 1; min-width: 0; }
 @keyframes side-in { from { opacity: 0; transform: translateX(var(--from)); } }
 .side select, .side input, .side button { font-size: 11px; padding: 1px 4px; }
 .side-l select { flex: 1; min-width: 0; background: transparent; color: var(--muted); }
+/* 줄 종류 고르기 단추와 끈적하게 펼쳐지는 세 칸 (LineTypeMenu.tsx, 세션 90) */
+.lt-btn { display: inline-flex; align-items: center; justify-content: space-between; gap: 4px; min-width: 0; text-align: left; border-radius: 6px; }
+.side-l .lt-btn { flex: 1; background: transparent; color: var(--muted); }
+.lt-btn:hover, .lt-btn.open { background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--text); }
+.lt-cur { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lt-caret { flex: none; font-size: 9px; opacity: 0.7; transition: rotate var(--dur-pop) var(--ease-out); }
+.lt-btn.open .lt-caret { rotate: 180deg; }
+.lt-menu { position: fixed; z-index: 400; font-size: 12px; }
+.lt-menu input.fm-keys { position: absolute; width: 1px; height: 1px; padding: 0; border: 0; opacity: 0; pointer-events: none; }
+.lt-liquid { display: flex; align-items: flex-start; gap: 10px; }
+.lt-col { display: flex; flex-direction: column; gap: 2px; width: 138px; max-height: 280px; overflow: auto; padding: 8px; border-radius: 14px; }
+.lt-title { font-size: 10.5px; font-weight: 700; color: var(--muted); padding: 0 6px 3px; }
+.lt-opt { text-align: left; padding: 4px 8px; border-radius: 8px; border: 1px solid transparent; background: transparent; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lt-opt.on { border-color: color-mix(in srgb, var(--accent) 55%, transparent); font-weight: 700; }
+.lt-opt.cur { background: var(--accent); border-color: var(--accent); color: var(--panel); }
+.lt-menu.lt-side .lt-liquid { flex-direction: column; align-items: flex-end; gap: 8px; }
+.lt-menu.lt-side .lt-col { width: 132px; max-height: 210px; }
+.lt-menu.lt-side .lt-help { margin-left: auto; }
+.lt-help { margin-top: 6px; padding: 2px 8px; width: fit-content; font-size: 10.5px; color: var(--muted); background: color-mix(in srgb, var(--panel) 80%, transparent); border-radius: 6px; opacity: 0; transition: opacity var(--dur-pop) var(--ease-out); }
+.lt-menu.out .lt-help { opacity: 1; transition-delay: 120ms; }
 .old-attr { flex: 1 0 100%; order: 9; font-size: 11px; color: var(--muted); text-align: left; padding: 2px 6px; }
 .side .grip { padding: 0 3px; }
 .side-r .sf { width: 100%; }
 /* 다음 흐름 창: 상자 오른쪽, 다음 흐름 줄 높이. 반투명 유리처럼 보여서 글 상자와 다른 종류의 창이라는 게 드러난다 */
 .box { position: relative; }
 .side-flow {
-  left: calc(100% + 20px); width: 290px; flex-direction: column; align-items: stretch; gap: 2px; padding: 8px;
-  background: color-mix(in srgb, var(--panel) 62%, transparent);
-  -webkit-backdrop-filter: blur(10px) saturate(1.2); backdrop-filter: blur(10px) saturate(1.2);
-  border: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
-  opacity: 0.55; transition: top 0.22s ease, opacity 0.2s, box-shadow 0.2s;
+  left: calc(100% + 20px); width: 260px; flex-direction: column; align-items: stretch; gap: 2px; padding: 8px;
+  background: var(--panel); border: none; border-radius: 14px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16), 0 1px 3px rgba(0, 0, 0, 0.08);
+  opacity: 0.6; transition: top 0.22s ease, opacity 0.2s, box-shadow 0.2s;
 }
+/* 세션 92: 줄 종류 고르기(.lt-col)와 같은 모양. 키로 고르는 중이면 강조색 테두리 대신 또렷해지기만 한다 */
 .side-flow:hover, .side-flow.active { opacity: 1; }
-.side-flow.active { background: color-mix(in srgb, var(--panel) 78%, transparent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 45%, transparent), 0 8px 30px rgba(0, 0, 0, 0.14); }
-.side-flow .side-title { display: flex; justify-content: space-between; font-weight: 700; color: var(--muted); font-size: 11px; }
+.side-flow .side-title { display: flex; justify-content: space-between; font-weight: 700; color: var(--muted); font-size: 10.5px; padding: 0 6px 3px; }
 .fm-key { font-weight: 400; font-family: var(--mono); opacity: 0.8; }
-/* 흐름마다 카드 한 장. 지금 고른 흐름은 테두리를 강조색으로 */
-.fm-list { max-height: 300px; overflow: auto; margin: 3px -4px 2px; padding: 2px 4px; display: flex; flex-direction: column; gap: 5px; }
+/* 흐름마다 한 줄(.lt-opt 꼴). 지금 흐름은 강조색 테두리, 키로 고르는 줄은 강조색 바탕 */
+.fm-list { max-height: 300px; overflow: auto; display: flex; flex-direction: column; gap: 2px; }
 .fm-sec { font-size: 10.5px; color: var(--muted); margin: 6px 0 1px; }
 .fm-item {
-  display: flex; align-items: baseline; gap: 4px; padding: 6px 8px; border-radius: 8px; cursor: pointer; font-size: 12px;
-  background: color-mix(in srgb, var(--panel) 90%, transparent);
-  border: 1px solid color-mix(in srgb, var(--text) 12%, transparent); box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  display: flex; align-items: baseline; gap: 4px; padding: 4px 8px; border-radius: 8px; cursor: pointer; font-size: 12px;
+  background: transparent; border: 1px solid transparent;
 }
-.fm-item:hover { background: var(--hover); }
-.fm-item.on { border-color: color-mix(in srgb, var(--accent) 60%, transparent); }
+.fm-item:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.fm-item.on { border-color: color-mix(in srgb, var(--accent) 55%, transparent); }
 .fm-item.cur { background: var(--accent); border-color: var(--accent); color: var(--panel); }
 .fm-item.on .fm-label { font-weight: 700; }
 /* 이어 쓰기는 흐름을 고르는 것이 아니라 움직이는 일이라 조금 떼어 둔다 */
-.fm-item.fm-act { margin-top: 4px; border-style: dashed; }
+.fm-item.fm-act { margin-top: 4px; border-color: color-mix(in srgb, var(--text) 18%, transparent); border-style: dashed; }
 .fm-item.fm-act.cur { border-style: solid; }
 .fm-dot { width: 9px; flex: none; font-size: 8px; color: var(--accent); }
 .fm-item.cur .fm-dot, .fm-item.cur .fm-hint { color: inherit; }
@@ -982,23 +1022,17 @@ fieldset.plain:disabled { opacity: 0.4; }
 
 /* 태그 상자: 대사 글 칸에 커서가 있을 때. 상자 안 편집에서는 상자 오른쪽 위 바깥, 편집 탭에서는 글자 효과 칸 안 */
 .tagbar { position: relative; display: flex; flex-direction: column; gap: 5px; font-size: 11px; cursor: default; animation: side-in 0.18s ease; --from: 0; }
-/* 묶음마다 카드 한 장, 줄마다 소제목 버블. 색은 카드의 --hue */
-.tb-card {
-  --hue: 215; display: flex; flex-direction: column; gap: 4px; padding: 5px 7px;
-  background: color-mix(in srgb, var(--panel) 90%, transparent);
-  -webkit-backdrop-filter: blur(10px) saturate(1.2); backdrop-filter: blur(10px) saturate(1.2);
-  border: 1px solid color-mix(in srgb, var(--text) 12%, transparent); border-radius: 9px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-}
-.tb-chip {
-  flex: none; min-width: 40px; text-align: center; margin-right: 3px; padding: 1px 7px; border-radius: 999px;
-  font-size: 10.5px; font-weight: 600; line-height: 1.6; color: var(--text);
-  background: hsl(var(--hue) 75% 58% / 0.18); box-shadow: inset 0 0 0 1px hsl(var(--hue) 70% 50% / 0.35);
-}
+/* 묶음마다 카드 한 장. 세션 92부터 줄 종류 고르기(.lt-col)와 같은 모양: 카드 바탕은 비우고 뒤의 끈적 덩어리(liquid-gooey)가 바탕,
+   가까운 카드끼리 끈적하게 이어진다. 소제목은 .lt-title처럼 작은 회색 굵은 글(예전 색 버블은 뺌) */
+.tb-liquid { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
+.tagbar-look .tb-liquid { align-items: stretch; }
+/* 캔버스 안에서는 끈적 그림 층이 화면 크기로 재어지므로 확대 배율만큼 되돌린다 (TagBar zoom) */
+.tb-liquid > svg { transform: scale(var(--lg-unscale, 1)); transform-origin: 0 0; }
+.tb-card { --hue: 215; display: flex; flex-direction: column; gap: 3px; padding: 7px 9px; background: transparent; border-radius: 14px; }
+.tb-chip { flex: none; min-width: 40px; margin-right: 3px; padding: 0 2px; font-size: 10.5px; font-weight: 700; line-height: 1.6; color: var(--muted); }
 .tagbar-box { position: absolute; left: calc(100% + 14px); bottom: calc(100% - 28px); z-index: 6; width: max-content; max-width: 340px; }
 .tagbar-look { margin: 2px 0; }
 .tb-more-wrap { display: flex; flex-direction: column; gap: 5px; }
-.tagbar-look .tb-card { box-shadow: none; }
 .tb-slide { display: inline-flex; align-items: center; gap: 2px; }
 .tagbar input.tb-num { width: 40px; flex: none; font-size: 11px; padding: 1px 3px; text-align: center; font-family: var(--mono); }
 .tb-num.on { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent); }
@@ -1007,7 +1041,7 @@ fieldset.plain:disabled { opacity: 0.4; }
 .tb-tip {
   position: absolute; top: calc(100% + 6px); left: 0; z-index: 20; width: 280px; padding: 7px 9px; pointer-events: none;
   display: flex; flex-direction: column; gap: 5px; background: var(--panel);
-  border: 1px solid color-mix(in srgb, var(--text) 14%, transparent); border-radius: 9px; box-shadow: 0 8px 26px rgba(0, 0, 0, 0.18);
+  border: none; border-radius: 14px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16), 0 1px 3px rgba(0, 0, 0, 0.08);
   animation: side-in 0.14s ease;
 }
 .tb-tip-head { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
@@ -1022,7 +1056,10 @@ fieldset.plain:disabled { opacity: 0.4; }
 .tb-row { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; }
 .tb-sep { width: 1px; align-self: stretch; margin: 0 3px; background: var(--line); }
 .tagbar button { font-size: 11px; padding: 1px 6px; line-height: 1.5; }
-.tb-btn.on { background: color-mix(in srgb, var(--accent) 22%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent); }
+/* 단추는 .lt-opt처럼 바탕 없는 글. 올리면 옅은 강조색, 켜진 것은 강조색 테두리 */
+.tagbar .tb-btn { background: transparent; border: 1px solid transparent; border-radius: 8px; box-shadow: none; }
+.tagbar .tb-btn:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.tb-btn.on { border-color: color-mix(in srgb, var(--accent) 55%, transparent); font-weight: 700; }
 .tb-b { font-weight: 800; min-width: 24px; }
 .tb-i { font-style: italic; font-family: Georgia, serif; min-width: 24px; }
 .tb-u { text-decoration: underline; min-width: 24px; }
@@ -1318,29 +1355,11 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 
 /* 지금 쓰는 줄과 이어진 카드 (대사를 쓰면 대사·글자 효과, 연출 줄이면 그 종류 카드).
    [게임 줄 따라가기: 켬]의 녹색보다 살짝 밝게 */
-/* "사용 중" 카드 (세션 79, 81): 테두리 바깥으로 번지는 흐린 분홍·보라·노랑 빛이 카드 둘레를 천천히 계속 돈다.
-   카드 안쪽은 비워 둔다(유리라 비치지 않게). 올리면 진해진다. 애니메이션 줄이기면 멈춘 채 */
-@property --spin { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
-@keyframes in-use-spin { to { --spin: 360deg; } }
-.card.in-use { isolation: isolate; }
-.card.in-use::before {
-  /* 빛 칸을 넓게(16px) 두고 바깥으로 갈수록 마스크가 옅어져 배경에 녹아든다(세션 83 사용자: 경계가 뚜렷함).
-     예전에는 흐린 빛을 마스크가 칸 끝에서 잘라 바깥 경계가 칼같이 보였다. 안쪽(카드 자리)은 그대로 비움 */
-  content: ''; position: absolute; inset: -16px; padding: 16px; z-index: -1; border-radius: 30px; pointer-events: none;
-  /* 색은 분홍·보라·노랑만(세션 83 사용자), 더 옅게, 바깥으로 길게 사라짐 */
-  background: conic-gradient(from var(--spin), #f472b6, #c084fc, #fde047, #f9a8d4, #a78bfa, #fcd34d, #f472b6);
-  filter: blur(6px); opacity: 0.5;
-  --glow-fade: transparent 0, rgb(0 0 0 / 0.03) 3px, rgb(0 0 0 / 0.1) 6px, rgb(0 0 0 / 0.25) 9px, rgb(0 0 0 / 0.5) 12px, rgb(0 0 0 / 0.8) 15px, #000 16px;
-  --glow-fade-r: #000 calc(100% - 16px), rgb(0 0 0 / 0.8) calc(100% - 15px), rgb(0 0 0 / 0.5) calc(100% - 12px), rgb(0 0 0 / 0.25) calc(100% - 9px), rgb(0 0 0 / 0.1) calc(100% - 6px), rgb(0 0 0 / 0.03) calc(100% - 3px), transparent 100%;
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(to right, var(--glow-fade), var(--glow-fade-r)), linear-gradient(to bottom, var(--glow-fade), var(--glow-fade-r));
-  -webkit-mask-composite: xor, source-in;
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(to right, var(--glow-fade), var(--glow-fade-r)) intersect, linear-gradient(to bottom, var(--glow-fade), var(--glow-fade-r));
-  animation: in-use-spin 6s linear infinite;
-  transition: opacity var(--dur-pop) var(--ease-out);
-}
-.card.in-use:hover::before { opacity: 0.75; }
-@media (prefers-reduced-motion: reduce) { .card.in-use::before { animation: none; } }
-:root[data-dark='1'] .card.in-use::before { opacity: 0.6; }
+/* "사용 중" 카드: 세션 90부터 border-beam이 카드 둘레를 도는 빛을 그린다(Card.tsx BEAM). 예전 conic-gradient 빛(세션 79~83)은 뺐다.
+   감싼 틀은 칸 폭을 그대로 따른다 */
+.card-beam { display: block; }
+.right-scroll .card-beam { align-self: flex-end; width: fit-content; min-width: min(240px, 100%); max-width: 100%; }
+.right-scroll .card-beam > .card { width: 100%; }
 .card.in-use > [data-fluidkit='liquid-card-content'] > h3 .card-title::after { content: var(--t-in-use, '사용 중'); font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 8px; color: #fff; background: #9333ea; box-shadow: 0 1px 4px color-mix(in srgb, #9333ea 45%, transparent); }
 .sc-char { margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed var(--line); }
 .sc-char-h { font-size: 12px; color: var(--muted); margin: 2px 0 6px; }
@@ -1573,6 +1592,11 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .scv-el.off { opacity: .35; }
 .scv-val.act { left: auto; right: 100%; top: 0; margin-right: 2px; }
 .scv-el.still { pointer-events: none; }
+.scv-voice-box { display: block; position: relative; outline: 1px dashed color-mix(in srgb, #fff 35%, transparent); outline-offset: -1px; }
+.scv-voice { display: block; width: 100%; height: 100%; }
+.vg-pals { display: flex; flex-wrap: wrap; gap: 4px; }
+.vg-pal { min-width: 52px; height: 24px; padding: 0 6px; border-radius: 999px; border: 2px solid transparent; font-size: 10.5px; font-weight: 700; color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45); }
+.vg-pal.on { border-color: var(--text); }
 .scv-bar { position: relative; display: block; overflow: hidden; border-radius: 2px; }
 .scv-bar > span { display: block; height: 100%; }
 .scv-bar em { position: absolute; inset: 0; font-size: 11px; font-style: normal; display: flex; align-items: center; padding-left: 6px; color: #fff; }

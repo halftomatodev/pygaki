@@ -3,7 +3,7 @@ import { create } from 'zustand';
 // Pretendard (SIL OFL 1.1, licenses/OFL-Pretendard.txt). 굵기를 고를 수 있는 가변 글꼴 하나를 파일 안에 넣는다
 import pretendardUrl from 'pretendard/dist/web/variable/woff2/PretendardVariable.woff2?url';
 
-export type ActionId = 'focus' | 'nextBox' | 'flowMenu' | 'save' | 'saveAs' | 'export' | 'undo' | 'redo' | 'newBox' | 'duplicate' | 'newLine' | 'tagBold' | 'tagItalic' | 'tagUnderline' | 'gamePanel' | 'find';
+export type ActionId = 'focus' | 'nextBox' | 'flowMenu' | 'save' | 'saveAs' | 'export' | 'undo' | 'redo' | 'newBox' | 'duplicate' | 'newLine' | 'lineType' | 'tagBold' | 'tagItalic' | 'tagUnderline' | 'gamePanel' | 'find';
 
 // 키는 e.code(자판 위치)로 적는다. 한글 입력 상태에서도 같은 키로 동작한다
 export const ACTIONS: { id: ActionId; label: string; def: string }[] = [
@@ -11,6 +11,7 @@ export const ACTIONS: { id: ActionId; label: string; def: string }[] = [
   { id: 'newLine', label: '같은 화자로 새 줄', def: 'Ctrl+Enter' },
   { id: 'nextBox', label: '다음 상자로 이어 쓰기', def: 'Ctrl+Shift+Enter' },
   { id: 'flowMenu', label: '다음 흐름 창 열기/닫기 (키보드로 고르기)', def: 'Alt+Enter' },
+  { id: 'lineType', label: '줄 종류 고르기 열기/닫기 (방향키로 고르기)', def: 'Alt+ArrowDown' },
   { id: 'save', label: '파일 저장', def: 'Ctrl+KeyS' },
   { id: 'saveAs', label: '다른 이름으로 저장', def: 'Ctrl+Shift+KeyS' },
   { id: 'export', label: '.rpy 같은 곳에 다시 내보내기', def: 'Ctrl+KeyE' },
@@ -167,7 +168,7 @@ export function isDark(c: Colors) {
 }
 
 // 카드 유리 색 (fluidkit LiquidCard). 뒤의 캔버스가 비치게 반투명. 접으면 하늘색.
-// 사용 중(in-use)은 바탕색이 아니라 테두리 바깥에서 도는 분홍·보라·노랑 빛으로 보인다 (styles.css `.card.in-use::before`, 세션 79·81)
+// 사용 중(in-use)은 바탕색이 아니라 카드 둘레를 도는 빛(border-beam, Card.tsx BEAM, 세션 90)으로 보인다
 // 투명도는 환경 설정의 [카드 투명도] 하나로 모든 카드가 같이 바뀐다(세션 82, prefs.ts glass).
 // 투명할수록 테두리 빛(intensity)을 세게 하고, 50% 넘으면 가장자리 굴절(refraction, 크롬·Electron만)도 켜서 유리로 읽히게 한다
 export function glassOf(g: number) {
@@ -273,3 +274,6 @@ export function comboLabel(c: string) {
 
 // 단축키 이름 (툴팁용)
 export const keyOf = (id: ActionId) => comboLabel(usePrefs.getState().keys[id]);
+
+// 지금 화면이 어두운지 (색을 바꾸면 다시 그림). border-beam 테마 고르기 등
+export const useDark = () => usePrefs((p) => isDark(colorsOf(p)));
