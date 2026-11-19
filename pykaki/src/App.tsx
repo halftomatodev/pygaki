@@ -6,6 +6,7 @@ import { Canvas } from './Canvas';
 import { RightPanel } from './Panels';
 import { SettingsModal } from './SettingsModal';
 import { MaskVideoDialog } from './MaskVideoDialog';
+import { IconsDialog } from './IconsDialog';
 import { FindPanel } from './FindPanel';
 import { ScreensView } from './ScreensView';
 import { TracePanel } from './TracePanel';
@@ -215,6 +216,7 @@ export function App() {
       {showTrace !== null && view === 'script' && <TracePanel />}
       <HelpModal />
       <MaskVideoDialog />
+      <IconsDialog />
       <HintTip />
       <EditCaret />
     </ReactFlowProvider>

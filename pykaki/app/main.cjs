@@ -430,6 +430,8 @@ const PICK_KINDS = {
   image: { dir: 'images', name: '그림, 영상', ext: ['png', 'jpg', 'jpeg', 'webp', 'avif', 'webm', 'ogv', 'mp4', 'mkv'] },
   sound: { dir: 'audio', name: '소리', ext: ['ogg', 'opus', 'mp3', 'wav', 'flac'] },
   font: { dir: 'fonts', name: '글꼴', ext: ['ttf', 'otf', 'ttc'] },
+  // [아이콘] 창: 창 아이콘·exe 아이콘의 원본. 복사하지 않고 readPicked로 읽기만 한다 (ico는 exe 칸에서 그대로 씀)
+  icon: { dir: 'gui', name: '아이콘 그림', ext: ['png', 'jpg', 'jpeg', 'webp', 'ico'] },
 };
 const picked = new Map(); // token → 고른 파일의 전체 경로
 ipcMain.handle('pygaki:pickFile', async (e, kind) => {
@@ -483,7 +485,7 @@ ipcMain.handle('pygaki:pickMaskSource', async (e) => {
     return { name: path.basename(full), token, size: fs.statSync(full).size };
   });
 });
-// 고른 파일 읽기 (pickMaskSource로 고른 것만)
+// 고른 파일 읽기 (pickMaskSource, pickFile로 고른 것만)
 ipcMain.handle('pygaki:readPicked', (e, token) => {
   const full = picked.get(token);
   if (!full) throw new Error('고른 파일을 찾지 못했어요');

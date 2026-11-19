@@ -2951,3 +2951,46 @@ ${keyOf('flowMenu')} 펼치기/접기 · 방향키 고르기 · Enter 정하기 
 플레이어가 글을 쳐서 답해요. 친 글이 정답과 같으면 그 갈래로, 아니면 "틀림"으로 가요. 틀리면 다시 묻거나 힌트를 보여 줄 수도 있어요.	プレイヤーが文字を入力して答えます。入力が正解と同じならその分岐へ、違えば「不正解」へ進みます。間違えたら聞き直したりヒントを出したりもできます。	The player answers by typing. If the text matches an answer it goes to that branch, otherwise to "Wrong". You can also ask again or show hints after a wrong answer.
 한 점(또는 화면 아래·왼쪽 끝)에서 색 물결이 퍼지며 앞 상자의 마지막 화면을 렌즈처럼 휘게 하고, 물결이 지나간 자리에 이 상자의 첫 화면이 나와요. 시간의 절반쯤에 셰이더가 바뀌어요.	一点(または画面の下端・左端)から色の波が広がって前のボックスの最後の画面をレンズのように曲げ、波が通った所にこのボックスの最初の画面が現れます。時間の半分ほどでシェーダーが切り替わります。	A colored wave spreads from a point (or the bottom/left edge), bending the previous box's last screen like a lens, and this box's first screen appears where the wave has passed. The shader switches about halfway through.
 ${frames ? `그림 ${files.length}장` : files[0].name} · ${o.width}×${o.height} · ${mb(total)}	{0} · {1}×{2} · {3}	{0} · {1}×{2} · {3}
+아이콘	アイコン	Icons
+있음	あり	Present
+새로 고름	新しく選択	New pick
+되돌리기	元に戻す	Revert
+저장했어요	保存しました	Saved
+창 아이콘	ウィンドウアイコン	Window icon
+윈도우 exe 아이콘	Windows exe アイコン	Windows exe icon
+그림 고르기…	画像を選ぶ…	Choose image…
+저장하는 중…	保存中…	Saving…
+저장하지 못했어요:	保存できませんでした:	Could not save:
+프로젝트 폴더 열기	プロジェクトフォルダを開く	Open project folder
+읽지 못하는 파일	読めないファイル	Unreadable file
+(예전 것은 {0})	(以前のものは {0})	(old one at {0})
+.ico 파일이 아니에요	.ico ファイルではありません	Not an .ico file
+PNG로 바꾸지 못했어요	PNG に変換できませんでした	Could not convert to PNG
+고른 파일을 읽지 못했어요	選んだファイルを読めませんでした	Could not read the chosen file
+창 아이콘 → {0}	ウィンドウアイコン → {0}	Window icon → {0}
+.ico 파일이 너무 짧아요	.ico ファイルが短すぎます	The .ico file is too short
+{0}×{1}로 보일 때	{0}×{1} で表示したとき	Shown at {0}×{1}
+그림 하나로 둘 다 고르기…	1枚の画像で両方を選ぶ…	Use one image for both…
+투명 여백으로 정사각형 만들기	透明な余白で正方形にする	Pad to a square with transparency
+.ico 파일 안에 그림이 없어요	.ico ファイルに画像がありません	The .ico file has no images
+고른 것을 버리고 지금 아이콘 그대로	選んだものを捨てて今のアイコンのまま	Discard the pick and keep the current icon
+exe 아이콘 → {0}	exe アイコン → {0}	exe icon → {0}
+렌파이 기본 아이콘이 들어가요	Ren'Py の標準アイコンが入ります	Ren'Py's default icon is used
+렌파이가 창 아이콘 없이 켜요	Ren'Py はウィンドウアイコンなしで起動します	Ren'Py starts without a window icon
+그림을 읽지 못했어요. 깨진 파일인지 봐 주세요	画像を読めませんでした。壊れたファイルでないか確認してください	Could not read the image. Check whether the file is broken
+이 그림에는 투명한 곳이 없어서 아이콘이 네모로 보여요.	この画像には透明な部分がないため、アイコンが四角く見えます。	This image has no transparent areas, so the icon will look square.
+게임 창의 제목줄과 작업 표시줄. 게임을 다시 켜면 바뀌어요	ゲームウィンドウのタイトルバーとタスクバー。ゲームを再起動すると変わります	The game window's title bar and taskbar. Changes after restarting the game
+창 아이콘은 .ico를 쓸 수 없어서 exe 칸에만 넣었어요	ウィンドウアイコンには .ico を使えないため、exe 欄にだけ入れました	The window icon can't use .ico, so it was put in the exe slot only
+게임 창 아이콘과 윈도우 exe 아이콘 (배포할 때 쓰는 아이콘)	ゲームのウィンドウアイコンと Windows exe アイコン(配布時に使うアイコン)	Game window icon and Windows exe icon (used when distributing)
+PNG, JPEG, WebP 그림이나 .ico 파일만 쓸 수 있어요	PNG、JPEG、WebP の画像か .ico ファイルだけ使えます	Only PNG, JPEG, WebP images or .ico files can be used
+같은 그림으로 창 아이콘과 exe 아이콘을 한꺼번에 (끌어 놓아도 돼요)	同じ画像でウィンドウアイコンと exe アイコンを一度に(ドラッグ&ドロップも可)	Set the window icon and exe icon from the same image at once (drag and drop works too)
+options.rpy의 config.window_icon을 "{0}"로	options.rpy の config.window_icon を "{0}" に	Set config.window_icon in options.rpy to "{0}"
+창 아이콘은 .ico를 쓸 수 없어요. PNG, JPEG, WebP 그림을 골라 주세요	ウィンドウアイコンには .ico を使えません。PNG、JPEG、WebP の画像を選んでください	The window icon can't use .ico. Choose a PNG, JPEG or WebP image
+탐색기에서 보이는 게임 exe 파일의 아이콘. 렌파이 런처 [배포판 만들기] 때 exe에 들어가요	エクスプローラーで見えるゲーム exe ファイルのアイコン。Ren'Py ランチャーの[配布物をビルド]で exe に入ります	The icon of the game exe shown in Explorer. Ren'Py launcher's [Build Distributions] puts it into the exe
+JPEG는 투명한 곳이 없어서 아이콘 바탕이 네모로 보여요. 둥근 아이콘이면 투명 PNG를 골라요.	JPEG には透明な部分がないため、アイコンの背景が四角く見えます。丸いアイコンなら透明 PNG を選んでください。	JPEG has no transparency, so the icon background will look square. For a round icon, choose a transparent PNG.
+{0}×{1}라서 작아요. 256×256 이상이 필요해요	{0}×{1} なので小さすぎます。256×256 以上が必要です	{0}×{1} is too small. 256×256 or larger is required
+PNG, JPEG, WebP. 정사각형 256×256 이상 (1024보다 크면 1024로 줄여 PNG로 저장)	PNG、JPEG、WebP。正方形 256×256 以上(1024 より大きければ 1024 に縮小して PNG で保存)	PNG, JPEG, WebP. Square, 256×256 or larger (larger than 1024 is shrunk to 1024 and saved as PNG)
+정사각형이 아니에요 ({0}×{1}). [투명 여백으로 정사각형 만들기]를 켜거나 정사각형 그림을 골라 주세요	正方形ではありません({0}×{1})。[透明な余白で正方形にする]をオンにするか、正方形の画像を選んでください	Not square ({0}×{1}). Turn on [Pad to a square with transparency] or choose a square image
+PNG, JPEG, WebP. 정사각형 256×256 이상 → 16~256 크기를 담은 .ico로. 이미 만든 .ico(256 포함)는 그대로	PNG、JPEG、WebP。正方形 256×256 以上 → 16〜256 のサイズを含む .ico に。作成済みの .ico(256 を含む)はそのまま	PNG, JPEG, WebP. Square, 256×256 or larger → an .ico with sizes 16–256. A ready-made .ico (with 256) is used as is
+이 .ico에는 256×256 그림이 없어요 (든 크기: {0}). 256×256이 든 .ico를 고르거나 PNG 그림을 골라 주세요	この .ico には 256×256 の画像がありません(含まれるサイズ: {0})。256×256 を含む .ico か PNG 画像を選んでください	This .ico has no 256×256 image (sizes: {0}). Choose an .ico with 256×256 or a PNG image
+게임을 배포할 때 쓰는 아이콘이에요. 둘 다 정사각형 256×256 이상인 PNG, JPEG, WebP 그림을 골라요. 투명한 바탕을 쓰려면 PNG나 WebP로. 크기별 그림은 pygaki가 만들어요.	ゲームを配布するときに使うアイコンです。どちらも正方形 256×256 以上の PNG、JPEG、WebP 画像を選びます。透明な背景には PNG か WebP を。サイズ別の画像は pygaki が作ります。	Icons used when distributing the game. Both take a square PNG, JPEG or WebP image of 256×256 or larger. Use PNG or WebP for a transparent background. pygaki makes the sized images.

@@ -5,6 +5,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Liquid } from 'liquid-gooey';
+import { useStore as useFlow } from '@xyflow/react';
 import { GLASS_GOO, arcRow, useArc } from './GooGlass';
 import { useStore } from './store';
 import * as ops from './ops';
@@ -86,8 +87,6 @@ export function TypeMenuFor({ l, set, where, anchor }: { l: Line; set: SetLine; 
 function TypeMenu({ anchor, cols, val, onPick, side = false }: { anchor: HTMLElement; cols: Col[]; val: string; onPick: (v: string) => void; side?: boolean }) {
   const input = useRef<HTMLInputElement>(null);
   const menu = useRef<HTMLDivElement>(null);
-  const [sideTop, setSideTop] = useState<number | null>(null);
-  const [sideRight, setSideRight] = useState<number | null>(null);
   const colRefs = useRef<(HTMLDivElement | null)[]>([]);
   const back = useRef<string | null>(null);
   const backEl = useRef<HTMLElement | null>(null); // 다른 버블의 키 칸(id 없음)에서 들어왔으면 그리로 (세션 94)
@@ -110,31 +109,35 @@ function TypeMenu({ anchor, cols, val, onPick, side = false }: { anchor: HTMLEle
   const left = Math.max(8, Math.min(r.left, window.innerWidth - 470));
   const below = r.bottom + 300 < window.innerHeight;
   const top = below ? r.bottom + 6 : Math.max(8, r.top - 306);
-  // 세로(side): 방울 왼쪽에 오른쪽 끝을 맞추고, 높이를 잰 뒤 화면 안에 들어오게 위아래를 맞춘다
-  const right = window.innerWidth - r.left + 10;
-  const place: React.CSSProperties = side ? { right: sideRight ?? right, top: sideTop ?? r.top - 24 } : { left, top };
+  // 세로(side, 상자 안): 몸은 body에 있지만 글꼴·흐름 버블처럼 캔버스 확대 배율을 따른다 (세션 95 사용자: 휠로 줄이면 대사 버블만 그대로였음).
+  // 캔버스를 움직이거나 확대할 때마다 다시 그리며 자리를 맞춘다. 방울 왼쪽에 오른쪽 끝을 맞추고, 화면 안에 들어오게 위아래를 맞춘다
+  const tf = useFlow((s) => s.transform);
+  const z = side ? tf[2] : 1;
+  const place: React.CSSProperties = side ? { transform: `scale(${z})`, transformOrigin: 'top right' } : { left, top };
+  const placeSide = () => {
+    const m = menu.current;
+    if (!side || !m) return;
+    const a = anchor.getBoundingClientRect();
+    const h = m.offsetHeight * z;
+    const w = m.offsetWidth * z;
+    m.style.top = Math.max(8, Math.min(a.top - 24 * z, window.innerHeight - h - 8)) + 'px';
+    // 창이 좁아 왼쪽에 자리가 모자라면 화면 안으로 밀어 넣는다 (상자를 조금 덮더라도 다 보이게)
+    m.style.right = Math.min(window.innerWidth - a.left + 10 * z, window.innerWidth - w - 16) + 'px';
+  };
+  useLayoutEffect(placeSide);
 
   useLayoutEffect(() => {
     const el = document.activeElement as HTMLElement | null;
     if (el && el.id) back.current = el.id;
     else if (el?.classList.contains('fm-keys')) backEl.current = el;
     input.current?.focus({ preventScroll: true });
-    if (side && menu.current) {
-      const h = menu.current.offsetHeight;
-      const t = Math.max(8, Math.min(r.top - 24, window.innerHeight - h - 8));
-      menu.current.style.top = t + 'px';
-      setSideTop(t);
-      // 창이 좁아 왼쪽에 자리가 모자라면 화면 안으로 밀어 넣는다 (상자를 조금 덮더라도 다 보이게)
-      const w = menu.current.offsetWidth;
-      const rr = Math.min(right, window.innerWidth - w - 16);
-      menu.current.style.right = rr + 'px';
-      setSideRight(rr);
-    }
+    placeSide();
+    // 단추 쪽 거리는 화면 px로 재고 배율로 나눈다 (Liquid.Item의 x·y는 배율을 탄 몸 안의 px)
     const ax = r.left + r.width / 2, ay = r.top + r.height / 2;
     setHome(
       colRefs.current.map((c) => {
         const b = c?.getBoundingClientRect();
-        return b ? { x: ax - (b.left + b.width / 2), y: ay - (b.top + Math.min(b.height, 40) / 2) } : { x: 0, y: 0 };
+        return b ? { x: (ax - (b.left + b.width / 2)) / z, y: (ay - (b.top + Math.min(b.height, 40 * z) / 2)) / z } : { x: 0, y: 0 };
       }),
     );
   }, []);

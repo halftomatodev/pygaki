@@ -13,7 +13,7 @@ contextBridge.exposeInMainWorld('pygaki', {
   openPlace: (id) => ipcRenderer.invoke('pygaki:openPlace', id),
   choose: () => ipcRenderer.invoke('pygaki:choose'),
   runGame: (always) => ipcRenderer.invoke('pygaki:runGame', !!always), // 렌파이에서 실행
-  pickFile: (kind) => ipcRenderer.invoke('pygaki:pickFile', kind), // 탐색기로 그림·영상('image'), 소리('sound'), 글꼴('font') 고르기
+  pickFile: (kind) => ipcRenderer.invoke('pygaki:pickFile', kind), // 탐색기로 그림·영상('image'), 소리('sound'), 글꼴('font'), 아이콘('icon') 고르기
   importFile: (token, dir) => ipcRenderer.invoke('pygaki:importFile', token, dir), // 밖에서 고른 파일을 game/<dir>로 복사
   pickMaskSource: () => ipcRenderer.invoke('pygaki:pickMaskSource'), // 투명 영상으로 바꿀 원본 고르기 (여러 장 가능)
   readPicked: (token) => ipcRenderer.invoke('pygaki:readPicked', token), // 위에서 고른 파일 읽기

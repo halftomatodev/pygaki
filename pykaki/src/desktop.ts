@@ -16,7 +16,7 @@ interface PygakiApi {
   // 렌파이에서 실행. always가 아니면 게임이 이미 켜져 있을 때 'running'만 돌려주고 켜지 않는다
   runGame?(always: boolean): Promise<'started' | 'running' | 'no-sdk' | 'failed'>;
   // 탐색기로 파일 하나 고르기. game 안이면 rel(game 기준), 밖이면 token(importFile로 복사할 때 씀). 취소면 null
-  pickFile?(kind: 'image' | 'sound' | 'font'): Promise<{ name: string; rel?: string; token?: string } | null>;
+  pickFile?(kind: 'image' | 'sound' | 'font' | 'icon'): Promise<{ name: string; rel?: string; token?: string } | null>;
   importFile?(token: string, dir: 'images' | 'movies' | 'audio' | 'fonts'): Promise<string>; // 복사한 자리 (game 기준)
   // 투명 영상 만들기 (maskVideo): 원본을 여러 개 고르고(그림 연속), 읽기만 한다
   pickMaskSource?(): Promise<{ name: string; token: string; size: number }[] | null>;
