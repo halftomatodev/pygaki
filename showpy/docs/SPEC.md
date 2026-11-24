@@ -39,7 +39,7 @@
 |---|---|
 | 스크린 교체 | `choice`, `main_menu`, `navigation`, `game_menu`, `keyboard_help` |
 | 새 스크린 | `tmenu_pause`, `title_menu`, `cmenu_choice`, `splash_page`, `ui_editor_*` (`ui_editor_pk_watch`: pygaki 원고가 바뀌는지 지켜봄) |
-| 층 | `sfx_say`, `sfx_choice` (screens 아래), `ui_editor` (top_layers) |
+| 층 | `sfx_say`, `sfx_choice` (screens 아래), `ui_editor` (top_layers. 게임을 실제 화면에서 키워 그리면 패널·고르기 창·이름표에 `ui_editor.zoom_t()`로 1/배율, 4.20. 렌파이는 비율 기준점과 소수 pos를 줄이기 전 크기·화면 비율로 읽으므로 패널은 왼쪽 위 정수 좌표, 가운데 창은 변환의 `align`. 여백 띠는 `config.gl_clear_color`) |
 | config | `say_arguments_callback`(`screen_fx` → `say_style` 순서로 이어짐), `layer_transforms`, `say_layer`, `choice_layer`, `nvl_layer`, `nvl_choice_layer`, `context_clear_layers`, `mouse`, `mouse_displayable`, `always_shown_screens`, `top_layers`, `label_overrides["splashscreen"]`, `end_splash_transition`, `all_character_callbacks`, `start_callbacks`, `after_load_callbacks`, `after_default_callbacks`, `default_text_cps`, `keymap`, `underlay`, `language_callbacks`, `lint_hooks`, `show`, `hide`, `scene`, `with_callback`, `start_interact_callbacks`, `label_callbacks`, `replace_text`(개발 모드에서만, 편집기 언어. 게임이 둔 것이 있으면 그 앞에서 바꾸고 이어 부름. `Text.update`도 감싸서 편집기 스타일 글만 바꿈, `ui_kit/editor/editor_lang.rpy`) |
 | 그 밖 | `_game_menu_screen`, `gui.main_menu_background` |
 | 세이브 값 | `screen_fx.current`, `cur_overlay`, `cur_target`, `cur_cursor`, `overrides`, `changes`, `stage.cur_box` |

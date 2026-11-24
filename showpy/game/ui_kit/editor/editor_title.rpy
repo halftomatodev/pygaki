@@ -713,6 +713,7 @@ screen ui_editor_title_overlay():
             style "ui_editor_text"
             size 12
             pos (int(_ax) + 6, int(_ay) + 4)
+            at ui_editor.zoom_t()    # 실제 화면 크기 글 (4.20)
 
     ## 제목, 부제 (3.19)
     for it in tmenu.label_items():
@@ -730,6 +731,7 @@ screen ui_editor_title_overlay():
             style "ui_editor_text"
             size 12
             pos (int(_ax) + 6, int(_ay) + 4)
+            at ui_editor.zoom_t()    # 실제 화면 크기 글 (4.20)
 
     ## 회전 손잡이: 고른 것 위의 분홍 네모를 끌면 돌아감 (3.19)
     $ _sel = _tab._item()

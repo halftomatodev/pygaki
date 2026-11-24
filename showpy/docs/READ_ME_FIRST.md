@@ -22,6 +22,14 @@
 - 합친 기능들은 각자 설정 파일의 스위치(`enabled`)로 따로 끌 수 있고, 끄면 렌파이 기본(효과 없음)과 똑같이 보입니다.
 - `screen_fx`는 넣자마자 VHS 덮개가 화면 전체에 켜집니다. 처음에는 깨끗한 화면으로 보고 싶다면 `screen_fx/screen_fx_config.rpy`의 `screen_fx.overlay`를 `False`로(평소엔 깨끗하고 `use()`나 `fx_overlay=True`로 켤 때만 효과), 타이틀 일렁임은 `screen_fx/screen_fx_config.rpy`의 `screen_fx.title_shaders`를 `("none", "none")`으로 바꾸세요(5.5부터. 예전 방식은 `watermorph_config.rpy`).
 
+## 다음 판(만드는 중)에서 바뀐 점
+
+**pygaki 플러그인**
+
+- 레트로 해상도처럼 크게 키운 게임에서 게임 안 편집 화면(Shift+M)의 패널·고르기 창을 실제 화면 크기로 그립니다(`ui_kit` 4.20).
+- 편집 화면이 열려 있는 동안 게임 화면 밖 창의 빈 곳(정수 배율의 검은 띠)을 붉게 칠하는 **여백 띠**. F8이나 pygaki 앱 환경 설정에서 켜고 끕니다.
+- 런처 Pygaki 새 프로젝트의 해상도: 레트로 GBC 160x144·SNES 256x224·PC-98 640x400·Y2K 800x600·Millennial 1024x768(정수 배율, 고른 해상도 격자로 다시 뽑기, `game/pixel_perfect.rpy`) + 고해상도 1280x720·1920x1080.
+
 ## 5.5(pygaki v1.8)에서 바뀐 점
 
 **pygaki 플러그인**

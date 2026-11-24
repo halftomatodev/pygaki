@@ -320,6 +320,7 @@ init -9 python in ui_editor:
         state.popup = None
         state.message = ""
         _set_editing(False)
+        update_bands()
 
         for i in TABS:
             i.on_close()
@@ -796,6 +797,8 @@ init -9 python in ui_editor:
                 state.panel_xy = None
             elif k == pygame.K_F1:
                 state.help = not state.help
+            elif k == pygame.K_F8:
+                toggle_bands()
             elif k == pygame.K_F9 and live_connected():
                 ## pygaki 앱과 이어져 있을 때: 게임 안 패널 보이기/숨기기 (3.23, 앱의 F9와 같음)
                 live_toggle_panel()
@@ -897,6 +900,7 @@ init -9 python in ui_editor:
         rv = [
             "T 다음 탭 | Ctrl+S 저장(대사, 선택지, 이미지 줄은 원고에 바로) | Ctrl+C 복사 | Esc 닫기 | F1 안내 접기",
             "패널: 제목(=)을 끌어 옮기기 | P 구석 바꾸기 | X 접기 | Space 누르는 동안 숨기기 | B 자동 비키기 " + ("켬" if state.dodge else "끔"),
+            "F8 여백 띠 " + ("켬" if bands_on() else "끔") + " (게임 화면 밖 창의 빈 곳을 붉게)",
             ]
         on = fx_preview_on()
         if on is not None:
@@ -957,21 +961,98 @@ init -9 python in ui_editor:
             tab.wheel(sign, bool(pygame.key.get_mods() & pygame.KMOD_SHIFT))
             store.renpy.restart_interaction()
 
+    ## 실제 화면 크기로 (4.20): 게임을 실제 화면에서 몇 배로 키워 그리면(픽셀 퍼펙트 160x144 ×6 같은)
+    ## 패널과 고르기 창은 그 배율만큼 줄여 그려서 화면에서 늘 같은 크기로 보이게 합니다.
+    ## 배율이 1 이하(게임이 창보다 크거나 같음)면 예전처럼 그대로. 게임 좌표에 그리는 표시와 손잡이는 그대로입니다.
+    def view_zoom():
+        try:
+            s = float(store.renpy.display.draw.draw_per_virt)
+        except Exception:
+            s = 1.0
+        return 1.0 / s if s > 1.0 else 1.0
+
+    _zoom_t = { }
+
+    def zoom_t(align=None):
+        """패널·고르기 창에 거는 변환. 렌파이는 비율 기준점(xanchor 1.0, align 0.5)을 줄이기 전 크기로 재서,
+        가운데 둘 창은 align을 여기(변환)에 주고, 패널은 panel_place가 왼쪽 위 좌표로 놓습니다."""
+        z = round(view_zoom(), 4)
+        key = (z, align)
+        t = _zoom_t.get(key)
+        if t is None:
+            kw = dict(zoom=z, nearest=False)
+            if align is not None:
+                kw["align"] = align
+            t = _zoom_t[key] = store.Transform(**kw)
+        return t
+
+    def margin():
+        """화면 가장자리 여백 (게임 좌표). 실제 화면에서 MARGIN 픽셀.
+        렌파이는 pos에 소수를 주면 화면 비율로 읽으므로 늘 정수로"""
+        return max(1, int(round(MARGIN * view_zoom())))
+
+    def panel_max_height():
+        """패널 최대 높이 (패널 안쪽 단위)"""
+        return int(store.config.screen_height / view_zoom()) - 2 * MARGIN
+
+    _zoom_seen = [ None ]
+
+    def check_zoom():
+        """창 크기를 바꿔 배율이 달라지면 패널을 새로 그립니다. 여백 띠도 맞춥니다"""
+        update_bands()
+        z = view_zoom()
+        if _zoom_seen[0] != z:
+            _zoom_seen[0] = z
+            store.renpy.restart_interaction()
+
+    ## 여백 띠 (4.20): 편집 화면을 열었을 때, 게임 화면을 정수 배율로 키우고 남은 창의 빈 곳(검은 띠)을 붉게 칠해
+    ## 게임 화면이 어디까지인지 보이게 합니다. F8 또는 pygaki 앱 환경 설정에서 켜고 끔(persistent에 기억, 처음은 켬).
+    ## 렌파이가 창을 지우는 색(config.gl_clear_color)을 바꾸는 것이라 게임 화면 안은 그대로입니다.
+    BAND_COLOR = "#b0102c"
+    _clear_orig = [ None ]
+
+    def bands_on():
+        return getattr(store.persistent, "_pygaki_bands", None) is not False
+
+    def update_bands():
+        if _clear_orig[0] is None:
+            _clear_orig[0] = store.config.gl_clear_color
+        want = BAND_COLOR if (state.open and bands_on()) else _clear_orig[0]
+        if store.config.gl_clear_color != want:
+            store.config.gl_clear_color = want
+
+    def set_bands(on, tell_app=True):
+        store.persistent._pygaki_bands = bool(on)
+        update_bands()
+        msg("여백 띠 " + ("켬 (게임 화면 밖 창의 빈 곳을 붉게)" if on else "끔"))
+        if tell_app:
+            try:
+                _live_send(dict(type="bands", on=bool(on)))
+            except Exception:
+                pass
+        store.renpy.restart_interaction()
+
+    def toggle_bands():
+        set_bands(not bands_on())
+
     def panel_size():
+        """패널 크기 (게임 좌표)"""
         try:
             d = store.renpy.get_displayable("ui_editor_root", "ui_editor_panel_frame", layer="ui_editor")
         except Exception:
             d = None
         ws = getattr(d, "window_size", None)
+        z = view_zoom()
         if ws and ws[0] > 0 and ws[1] > 0:
-            state.panel_size = (int(ws[0]), int(ws[1]))
-        return state.panel_size or (660, 300)
+            state.panel_size = (int(ws[0] * z), int(ws[1] * z))
+        return state.panel_size or (int(660 * z), int(300 * z))
 
     def _corner_xy(c, w, h):
         W = store.config.screen_width
         H = store.config.screen_height
-        x = W - w - MARGIN if c in (1, 2) else MARGIN
-        y = H - h - MARGIN if c in (2, 3) else MARGIN
+        M = margin()
+        x = W - w - M if c in (1, 2) else M
+        y = H - h - M if c in (2, 3) else M
         return (max(0, x), max(0, y))
 
     def _overlap(a, b):
@@ -983,14 +1064,15 @@ init -9 python in ui_editor:
         """패널 자리 (xpos, ypos, xanchor, yanchor).
         구석에 둘 때는 그 구석을 기준점으로 삼아서, 패널 크기를 몰라도 정확히 붙습니다."""
         x, y = panel_topleft()
-        if state.panel_xy is not None:
+        if state.panel_xy is not None or view_zoom() != 1.0:
             return (x, y, 0.0, 0.0)
         c = state.corner_used
         W = store.config.screen_width
         H = store.config.screen_height
         xr = c in (1, 2)
         yb = c in (2, 3)
-        return (W - MARGIN if xr else MARGIN, H - MARGIN if yb else MARGIN, 1.0 if xr else 0.0, 1.0 if yb else 0.0)
+        M = margin()
+        return (W - M if xr else M, H - M if yb else M, 1.0 if xr else 0.0, 1.0 if yb else 0.0)
 
     def panel_topleft():
         """패널 왼쪽 위의 화면 좌표 (크기는 지난번에 그린 크기)."""
@@ -1304,6 +1386,7 @@ screen ui_editor_root():
             timer 0.05 repeat True action ui_editor.Reopen()
 
         if ui_editor.state.open:
+            timer 0.3 repeat True action Function(ui_editor.check_zoom, _update_screens=False)
             use ui_editor_main
 
 
@@ -1367,6 +1450,7 @@ screen ui_editor_background_popup():
     frame:
         style "ui_editor_frame"
         modal True
+        at ui_editor.zoom_t((0.5, 0.5))    # 실제 화면 크기로 (4.20, 픽셀 퍼펙트처럼 크게 키운 게임)
         align (0.5, 0.5)
         xsize 620
         ysize 560
@@ -1414,11 +1498,12 @@ screen ui_editor_panel():
         id "ui_editor_panel_frame"
         style "ui_editor_frame"
         modal True
+        at ui_editor.zoom_t()    # 실제 화면 크기로 (4.20, 픽셀 퍼펙트처럼 크게 키운 게임)
         pos (_px, _py)
         anchor (_pax, _pay)
         xmaximum 660
         ## 화면 위아래 여백 안에 들어가게. 넘치는 부분은 아래 viewport가 스크롤합니다.
-        ymaximum (config.screen_height - 2 * ui_editor.MARGIN)
+        ymaximum ui_editor.panel_max_height()
 
         if ui_editor.state.mini:
             ## 접은 패널: 제목, 탭 이름, 지금 줄, 펼치기
@@ -1576,6 +1661,7 @@ screen ui_editor_font_popup():
     frame:
         style "ui_editor_frame"
         modal True
+        at ui_editor.zoom_t((0.5, 0.5))    # 실제 화면 크기로 (4.20, 픽셀 퍼펙트처럼 크게 키운 게임)
         align (0.5, 0.5)
         xsize 620
         ysize 560
@@ -1623,6 +1709,7 @@ screen ui_editor_color_popup():
     frame:
         style "ui_editor_frame"
         modal True
+        at ui_editor.zoom_t((0.5, 0.5))    # 실제 화면 크기로 (4.20, 픽셀 퍼펙트처럼 크게 키운 게임)
         align (0.5, 0.5)
         xsize 420
 

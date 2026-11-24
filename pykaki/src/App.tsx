@@ -28,7 +28,7 @@ function appUndo(t: EventTarget | null) {
   return !el.closest('.modal, [data-native-undo]');
 }
 import { isDesktop } from './desktop';
-import { liveSend, startLive, toggleGamePanel, useLive } from './showpyLive';
+import { liveSend, startLive, toggleGameBands, toggleGamePanel, useLive } from './showpyLive';
 import { ShowpyView } from './ShowpyView';
 import { EffectsView } from './EffectsView';
 import { ShadersView } from './ShadersView';
@@ -45,6 +45,8 @@ function Keys() {
       if (e.key === 'F1') return run(() => openHelp());
       // 게임 창의 GUI 편집기 보이기/숨기기는 어느 화면에서나 (데스크톱 앱)
       if (isDesktop && hit(e, 'gamePanel')) return run(() => s.say(toggleGamePanel()));
+      // 게임 창 여백의 붉은 띠 (ui_kit 4.20)
+      if (isDesktop && hit(e, 'gameBands')) return run(() => s.say(toggleGameBands()));
       // showpy 화면에서는 저장 키가 게임 안 편집기의 저장(Ctrl+S)
       if (useLive.getState().view === 'showpy') {
         if (hit(e, 'save')) run(() => liveSend({ cmd: 'save' }));
@@ -61,6 +63,13 @@ function Keys() {
       else if (s.inlineEdit && hit(e, 'nextBox')) run(() => goNextBox(s.inlineEdit!));
       // 세 버블(대사·글꼴·흐름)은 같이 열 수 있다(세션 94). 열린 버블의 키 칸에 커서가 없으면 단축키는 그 버블로 커서를 옮기고,
       // 버블 안에서 다시 누르면 버블이 받아서 닫는다
+      // 세 버블 한 번에 (세션 97): 하나라도 열려 있으면 모두 닫고, 아니면 모두 연다 (대사 버블은 쓰는 줄이 있을 때)
+      else if (s.inlineEdit && hit(e, 'bubbles'))
+        run(() => {
+          const inBox = s.typeMenu?.where === 'box';
+          if (s.flowMenu || s.tagBox || inBox) useStore.setState({ flowMenu: false, tagBox: false, typeMenu: inBox ? null : s.typeMenu });
+          else useStore.setState({ flowMenu: true, tagBox: true, typeMenu: s.activeLine ? { line: s.activeLine, where: 'box' } : s.typeMenu });
+        })
       else if (s.inlineEdit && hit(e, 'flowMenu'))
         run(() => (s.flowMenu ? document.querySelector<HTMLInputElement>('.side-flow .fm-keys')?.focus() : useStore.setState({ flowMenu: true })));
       else if (s.inlineEdit && hit(e, 'tagBox')) run(() => useStore.setState({ tagBox: !s.tagBox }));

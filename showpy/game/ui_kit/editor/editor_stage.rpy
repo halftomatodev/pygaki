@@ -1126,6 +1126,7 @@ screen ui_editor_stage_overlay():
                 style "ui_editor_small"
                 color ("#ff3b8d" if _on else "#ffffff")
                 pos (int(max(0, _b[0])) + 4, int(max(0, _b[1])) + 2)
+                at ui_editor.zoom_t()    # 실제 화면 크기 글 (4.20)
 
 
 screen ui_editor_stage_panel(tab):
@@ -1255,6 +1256,7 @@ screen ui_editor_media_popup():
     frame:
         style "ui_editor_frame"
         modal True
+        at ui_editor.zoom_t((0.5, 0.5))    # 실제 화면 크기로 (4.20, 픽셀 퍼펙트처럼 크게 키운 게임)
         align (0.5, 0.5)
         xsize 720
         ysize 600

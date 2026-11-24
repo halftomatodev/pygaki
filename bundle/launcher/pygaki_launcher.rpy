@@ -9,6 +9,8 @@
 ##   [+ Create New Project]  누르면 "기본 (Vanilla)"과 "Pygaki" 가운데 고릅니다.
 ##                           기본 = 렌파이 원래 새 프로젝트
 ##                           Pygaki = 해상도만 골라 만든 한국어 프로젝트에 pygaki 플러그인을 얹은 것
+##                                    (해상도는 레트로 다섯 GBC·SNES·PC-98·Y2K·Millennial + 고해상도 1280·1920.
+##                                     레트로는 game/pixel_perfect.rpy로 화면에 맞는 가장 큰 정수 배율로 키움)
 ##                                    (강조·배경 색은 고르지 않음. pygaki는 상자를 투명하게 두고 그림을 넣어 쓰므로 렌파이 기본 색으로 둠)
 ##                           (플러그인은 SDK 폴더의 pygaki/template에서 가져옴)
 ##
@@ -223,6 +225,95 @@ init python:
                 pass
             interface.error(wrong, label=None)
 
+    ## Pygaki 새 프로젝트 해상도: 레트로 다섯(픽셀 퍼펙트) + 고해상도 둘. (값, 이름, 레트로인지)
+    PYGAKI_SIZES = (
+        ( (160, 144), "GBC", True ),
+        ( (256, 224), "SNES", True ),
+        ( (640, 400), "PC-98", True ),
+        ( (800, 600), "Y2K", True ),
+        ( (1024, 768), "Millennial", True ),
+        ( (1280, 720), "HD", False ),
+        ( (1920, 1080), "Full HD", False ),
+    )
+    PYGAKI_DEFAULT_SIZE = (640, 400)
+
+    ## 레트로 해상도 프로젝트에 넣는 game/pixel_perfect.rpy. 사용자 파일이라 [플러그인 올리기]가 건드리지 않는다
+    PYGAKI_PIXEL_RPY = (
+        '## 픽셀 퍼펙트 (pygaki가 레트로 해상도 새 프로젝트에 넣은 파일)',
+        '##',
+        '## 작은 해상도(gui.rpy의 gui.init)로 그린 그림을 화면(창)에 들어가는 가장 큰 정수 배율(×2, ×3 ...)로 키웁니다.',
+        '## 창 크기를 바꾸거나 전체 화면으로 바꾸면 그때마다 알아서 다시 맞추고, 남는 곳은 검은 띠로 둡니다.',
+        '## 그림은 흐리게 늘이지 않고 각진 픽셀 그대로 키웁니다 (nearest neighbor).',
+        '## 그림·영상·셰이더·글자, 확대·회전한 것까지 게임 화면 전체를 이 해상도의 픽셀 격자로 다시 뽑습니다(pixel_perfect_snap).',
+        '## 그래서 큰 영상을 넣거나 그림을 1.5배로 키워도 화면에는 이 해상도의 픽셀로만 보입니다.',
+        '## pygaki 편집 화면(Shift+M)은 맨 위 층이라 여기서 빠지고 선명하게 그립니다.',
+        '## 처음 켤 때 창은 모니터에 들어가는 가장 큰 정수 배율 크기로 엽니다 (그 뒤로는 렌파이가 마지막 창 크기를 기억함).',
+        '##',
+        '## 끄려면 pixel_perfect를 False로 바꿉니다. 정수 배율은 두고 격자로 다시 뽑기만 끄려면 pixel_perfect_snap을 False로.',
+        '',
+        'init python:',
+        '',
+        '    pixel_perfect = True',
+        '    pixel_perfect_snap = True',
+        '',
+        '    ## 지금 배율 (창 크기가 바뀔 때마다 새로 정해짐. pygaki 편집 화면도 이 값을 봄)',
+        '    pixel_perfect_scale = 1',
+        '',
+        '    def pixel_perfect_view(width, height):',
+        '        global pixel_perfect_scale',
+        '        sw, sh = config.screen_width, config.screen_height',
+        '        m = int(min(width / sw, height / sh))',
+        '        if m < 1:',
+        '            ## 창이 원래 크기보다 작으면 비율만 맞춰 줄인다',
+        '            pixel_perfect_scale = 1',
+        '            f = min(width / sw, height / sh)',
+        '            return (max(1, int(sw * f)), max(1, int(sh * f)))',
+        '        pixel_perfect_scale = m',
+        '        return (m * sw, m * sh)',
+        '',
+        '    ## 화면이 준비된 뒤 첫 상호작용에서 한 번만',
+        '    def pixel_perfect_first_window():',
+        '        if persistent._pixel_perfect_window or preferences.fullscreen or renpy.display.draw is None:',
+        '            return',
+        '        persistent._pixel_perfect_window = True',
+        '        mw, mh = renpy.get_renderer_info().get("max_window_size", (0, 0))',
+        '        m = int(min(mw / config.screen_width, mh / config.screen_height))',
+        '        if m >= 1:',
+        '            renpy.set_physical_size((config.screen_width * m, config.screen_height * m))',
+        '',
+        '    if pixel_perfect:',
+        '        config.nearest_neighbor = True',
+        '        config.adjust_view_size = pixel_perfect_view',
+        '        config.interact_callbacks.append(pixel_perfect_first_window)',
+        '',
+        '    ## 게임 층 전체(config.layers. 편집 화면 같은 맨 위 층은 빠짐)를 한 장으로 그린 뒤 픽셀 가운데 값만 집는 셰이더',
+        '    _pp_args = { "glsl": 100 } if hasattr(renpy.config, "glsl_version") else { }',
+        '    renpy.register_shader("pygaki.pixel_snap", variables="""',
+        '        uniform sampler2D tex0;',
+        '        uniform vec2 u_pp_grid;',
+        '        uniform float u_lod_bias;',
+        '        attribute vec2 a_tex_coord;',
+        '        varying vec2 v_tex_coord;',
+        '    """, vertex_200="""',
+        '        v_tex_coord = a_tex_coord;',
+        '    """, fragment_300="""',
+        '        gl_FragColor = texture2D(tex0, (floor(v_tex_coord * u_pp_grid) + 0.5) / u_pp_grid, u_lod_bias);',
+        '    """, **_pp_args)',
+        '',
+        '## 화면 효과(screen_fx) 같은 플러그인이 덧씌운 것보다 바깥에 오도록 늦게 붙인다',
+        'init 1500 python:',
+        '    if pixel_perfect and pixel_perfect_snap:',
+        '        config.layer_transforms[None] = list(config.layer_transforms.get(None, [ ])) + [',
+        '            Transform(mesh=True, shader="pygaki.pixel_snap", u_pp_grid=(float(config.screen_width), float(config.screen_height))),',
+        '            ]',
+    )
+
+    def pygaki_add_pixel_perfect(gamedir):
+        path = os.path.join(gamedir, "pixel_perfect.rpy")
+        if not os.path.exists(path):
+            with open(path, "wb") as f:
+                f.write(("\r\n".join(PYGAKI_PIXEL_RPY) + "\r\n").encode("utf-8"))
+
     if "pygaki_buttons" not in config.overlay_screens:
         config.overlay_screens.append("pygaki_buttons")
 
@@ -386,20 +477,20 @@ label pygaki_new_project:
 label pygaki_gui_project:
 
     python:
-        default_size = (1920, 1080)
-
+        ## 레트로(작게 그려 화면에 맞는 가장 큰 정수 배율로 키움) 다섯과 고해상도 둘을 한 목록에서 고른다
+        default_size = PYGAKI_DEFAULT_SIZE
         gui_size = interface.choice(
-            _("What resolution should the project use? Although Ren'Py can scale the window up and down, this is the initial size of the window, the size at which assets should be drawn, and the size at which the assets will be at their sharpest.\n\nThe default of [default_size[0]]x[default_size[1]] is a reasonable compromise."),
-            [
-                ((1280, 720), "1280x720"),
-                ((1920, 1080), "1920x1080"),
-                ((2560, 1440), "2560x1440"),
-                ((3840, 2160), "3840x2160"),
-                ("custom", _("Custom. The GUI is optimized for a 16:9 aspect ratio.")),
-            ],
+            L("레트로 해상도를 선택할 경우 현재 화면 크기에 맞게 정수 배율(픽셀 퍼펙트)로 확대됩니다.",
+              "レトロ解像度を選ぶと、今の画面の大きさに合わせて整数倍(ピクセルパーフェクト)で拡大されます。",
+              "Retro resolutions are scaled up by whole numbers to fit the current screen size (pixel perfect)."),
+            ## 글꼴에 없는 기호(가운뎃점 등)는 네모로 깨지므로 쓰지 않는다 (세션 97 사용자 사진)
+            [ ( s, KO("{0} {1}x{2}{3}".format(n, s[0], s[1], " (retro)" if r else "")) ) for s, n, r in PYGAKI_SIZES ]
+            + [ ( "custom", L("사용자 정의", "カスタム", "Custom") ) ],
             default_size,
             cancel=Jump("front_page"),
         )
+
+        pygaki_pixel = gui_size == "custom" or any(s == gui_size and r for s, n, r in PYGAKI_SIZES)
 
         if gui_size == "custom":
             gui_size = (
@@ -446,5 +537,7 @@ label pygaki_gui_project:
 
         with interface.error_handling(_("creating a new project")):
             pygaki_add_plugins(project.current.gamedir)
+            if pygaki_pixel:
+                pygaki_add_pixel_perfect(project.current.gamedir)
 
     jump front_page

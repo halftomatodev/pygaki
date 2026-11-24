@@ -1345,3 +1345,6 @@ Tab 대사/이름/그림 바꾸기 | 방향키 이동 | A/D 크기 | Q/E 회전 
 마우스: 드래그하면 그림이 움직임 (Shift: 한 방향) | 모서리 점: 분홍 그림, 하늘색 글을 끌면 네 점 변형 | 휠 크기 (Shift: 크게)	マウス: ドラッグで画像が動く (Shift: 一方向) | 角の点: ピンク 画像、水色 文字をドラッグで4点変形 | ホイール サイズ (Shift: 大きく)	Mouse: drag moves the image (Shift: one direction) | Corner dots: drag pink (image) or light blue (text) to warp | Wheel size (Shift: bigger)
 [[고칠 것: 그림]에서 끌기 자리, 휠 크기, Q/E 회전, 모서리 점(분홍 그림, 하늘색 글) 끌기 네 점 변형. 묶으면 글도 그림을 따라 움직임	[[編集: 画像]でドラッグ 位置、ホイール サイズ、Q/E 回転、角の点(ピンク 画像、水色 文字)ドラッグ 4点変形。リンクすると文字も画像についていく	In [[Edit: Image]: drag position, wheel size, Q/E rotate, drag corner dots (pink image, light blue text) to warp. Linked text follows the image
 음성 빛	音声の光	Voice glow
+F8 여백 띠 {} (게임 화면 밖 창의 빈 곳을 붉게)	F8 余白の帯 {0} (ゲーム画面の外のウィンドウの空きを赤く)	F8 Margin bands {0} (paint the empty window area outside the game red)
+여백 띠 켬 (게임 화면 밖 창의 빈 곳을 붉게)	余白の帯 オン (ゲーム画面の外のウィンドウの空きを赤く)	Margin bands on (paint the empty window area outside the game red)
+여백 띠 끔	余白の帯 オフ	Margin bands off

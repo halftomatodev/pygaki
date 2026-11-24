@@ -130,7 +130,7 @@ export interface GameFiles {
 }
 export interface GameState {
   where: { file: string | null; line: number; screens: string[]; main_menu: boolean; menu: boolean };
-  editor: { open: boolean; tab: string | null; hide_panel: boolean; message: string; pending: number; tabs: EditorTab[]; info: string[] };
+  editor: { open: boolean; tab: string | null; hide_panel: boolean; bands?: boolean; message: string; pending: number; tabs: EditorTab[]; info: string[] };
   title: TitleState | null;
   custom_ui?: CustomUIState | null; // ui_kit 3.15부터
   panel?: PanelState | null; // ui_kit 3.16부터. 편집기가 열려 있고 게임 안 패널이 숨어 있을 때만
@@ -184,6 +184,15 @@ export function setGamePanel(show: boolean) {
   keepGamePanel(show);
   liveSend({ cmd: 'panel', hide: !show });
 }
+// 게임 창 여백의 붉은 띠 (ui_kit 4.20). 환경 설정에 두고, 붙을 때와 바뀔 때 게임에 보낸다. 게임 창의 F8도 여기로 돌아옴
+const bandsOn = () => usePrefs.getState().gameBands !== false;
+export function toggleGameBands() {
+  const on = !bandsOn();
+  usePrefs.setState({ gameBands: on });
+  if (!useLive.getState().on) return on ? '게임 창 여백 띠를 켰어요 (게임과 연결되면 보내요)' : '게임 창 여백 띠를 껐어요 (게임과 연결되면 보내요)';
+  return on ? '게임 창 여백에 붉은 띠를 켜요 (게임 안 편집 화면을 열었을 때)' : '게임 창 여백의 붉은 띠를 꺼요';
+}
+
 export function toggleGamePanel() {
   const s = useLive.getState();
   if (!s.on) return '게임이 연결되지 않았어요. 런처에서 게임을 켜 두면 저절로 붙어요.';
@@ -208,6 +217,7 @@ export function startLive() {
     else useLive.setState({ on: false, reloading: false, showpy: s.showpy, st: null, files: null });
     // 새로 붙으면 기억해 둔 보이기/숨기기를 게임에 알려 줌 (게임은 붙을 때마다 숨김으로 시작)
     if (s.on && !was) liveSend({ cmd: 'panel', hide: !useLive.getState().gamePanel });
+    if (s.on && !was) liveSend({ cmd: 'bands', on: bandsOn() });
     // 새로 붙으면(다시 읽은 뒤는 빼고) 설정에 따라 앱 창을 게임 창 옆으로. 게임 창이 뜰 때까지 조금 기다림
     if (s.on && !was && !reloadingBefore && usePrefs.getState().snapGame) setTimeout(() => void desktop?.snapToGame?.(), 1500);
   };
@@ -217,7 +227,24 @@ export function startLive() {
     else if (m?.type === 'error') useLive.setState({ err: String(m.text) });
     // 게임 창에서 F9로 바꿈 (ui_kit 3.23)
     else if (m?.type === 'panel') keepGamePanel(!m.hide);
+    // 게임 창에서 F8로 바꿈 (ui_kit 4.20). 게임이 이미 그 값이라 다시 보내지 않음
+    else if (m?.type === 'bands') {
+      bandsEcho = !!m.on;
+      usePrefs.setState({ gameBands: !!m.on });
+    }
   };
+  // 환경 설정에서 바꾸면 게임에 보냄
+  let bandsEcho: boolean | null = null;
+  usePrefs.subscribe((p, prev) => {
+    const on = p.gameBands !== false;
+    if (on === (prev.gameBands !== false)) return;
+    if (bandsEcho === on) {
+      bandsEcho = null;
+      return;
+    }
+    bandsEcho = null;
+    liveSend({ cmd: 'bands', on });
+  });
   desktop.onLiveStatus(status);
   desktop.onLive(take);
   // 화면이 뜨기 전에 온 상태와 파일 목록 (게임은 바뀔 때만 다시 보냄)

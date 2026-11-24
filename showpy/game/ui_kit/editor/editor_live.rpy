@@ -615,7 +615,7 @@ init -8 python in ui_editor:
             type="state",
             where=dict(file=fn, line=line, screens=_shown_screens(),
                        main_menu=bool(getattr(store, "main_menu", False)), menu=bool(getattr(store, "_menu", False))),
-            editor=dict(open=state.open, tab=state.tab, hide_panel=live.hide_panel, message=str(state.message or ""),
+            editor=dict(open=state.open, tab=state.tab, hide_panel=live.hide_panel, bands=bands_on(), message=str(state.message or ""),
                         pending=sum(t.pending() + t.pending_lines() for t in TABS), tabs=tabs, info=info),
             title=_title_state(),
             custom_ui=_custom_ui_state(),
@@ -871,6 +871,11 @@ init -8 python in ui_editor:
 
         if cmd == "panel":
             live.hide_panel = bool(c.get("hide"))
+            return True
+
+        ## 여백 띠 (4.20): 앱 환경 설정의 [게임 창 여백 띠]와 단축키
+        if cmd == "bands":
+            set_bands(bool(c.get("on")), tell_app=False)
             return True
 
         if cmd == "goto":

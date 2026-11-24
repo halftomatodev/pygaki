@@ -142,6 +142,7 @@ function LookPrefs() {
 function RunPrefs() {
   const skip = usePrefs((p) => p.runSkip);
   const snap = usePrefs((p) => p.snapGame);
+  const bands = usePrefs((p) => p.gameBands !== false);
   return (
     <>
       <h4>렌파이에서 실행<Hint text="켜 두면 게임이 켜져 있을 때 대본만 내보내고 게임은 그대로 둬요" topic="데스크톱 앱" /></h4>
@@ -152,6 +153,10 @@ function RunPrefs() {
       <label className="row">
         <input type="checkbox" checked={!!snap} onChange={(e) => usePrefs.setState({ snapGame: e.target.checked })} />
         게임과 연결되면 이 창을 게임 창 옆으로 옮기기
+      </label>
+      <label className="row" title="레트로 해상도처럼 정수 배율로 키운 게임에서, 게임 화면 밖 창의 빈 곳(검은 띠)을 게임 안 편집 화면이 열려 있을 때 붉게 칠해요. 게임 창에서는 F8">
+        <input type="checkbox" checked={bands} onChange={(e) => usePrefs.setState({ gameBands: e.target.checked })} />
+        게임 창 여백에 붉은 띠 (게임 안 편집 화면을 열었을 때)
       </label>
     </>
   );

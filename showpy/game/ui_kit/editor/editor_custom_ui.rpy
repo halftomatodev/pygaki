@@ -499,6 +499,7 @@ screen ui_editor_frame_popup():
     frame:
         style "ui_editor_frame"
         modal True
+        at ui_editor.zoom_t((0.5, 0.5))    # 실제 화면 크기로 (4.20, 픽셀 퍼펙트처럼 크게 키운 게임)
         align (0.5, 0.5)
         xsize 720
         ysize 600

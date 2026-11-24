@@ -1460,6 +1460,7 @@ screen ui_editor_splash_overlay():
                 color "#ff3b8d"
                 size 13
                 pos (int(_r[0] - _r[2] / 2.0), int(_r[1] - _r[3] / 2.0) - 22)
+                at ui_editor.zoom_t()    # 실제 화면 크기 글 (4.20)
 
     ## 글 고치는 칸 (그 자리에 같은 글꼴·크기·색)
     $ _eb = _tab.edit_box()
