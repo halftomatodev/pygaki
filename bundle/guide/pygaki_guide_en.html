@@ -103,7 +103,7 @@ mark{background:var(--mark);color:inherit;border-radius:2px}
 <div class="wrap">
 <nav id="nav">
   <div class="brand">py<span>gaki</span> guide</div>
-  <div class="ver">pygaki plugins ui_kit 4.19 · screen_fx 5.9 · splash 2.5</div>
+  <div class="ver">pygaki plugins ui_kit 4.20 · screen_fx 5.9 · splash 2.5</div>
   <div class="langs"><a href="pygaki_안내서.html" lang="ko">한국어</a><a href="pygaki_guide_ja.html" lang="ja">日本語</a><a href="pygaki_guide_en.html" class="on" aria-current="page" lang="en">English</a></div>
   <input id="q" type="search" placeholder="Search (e.g. ruby, shader, shortcut)" aria-label="Search this guide">
   <div class="tools"><button id="theme" type="button">Theme</button><button id="fold" type="button">Expand all</button></div>
@@ -114,7 +114,7 @@ mark{background:var(--mark);color:inherit;border-radius:2px}
 <header class="hero">
   <h1>pygaki guide</h1>
   <p>Everything about pygaki (the script editor and the pygaki plugins) for people making games with Ren&#x27;Py, in one file. It opens without the internet; search for words in the field on the left.</p>
-  <p>pygaki plugins ui_kit 4.19 · screen_fx 5.9 · splash 2.5 · Repository <a href="https://github.com/halftomatodev/pygaki" target="_blank" rel="noopener">https://github.com/halftomatodev/pygaki</a></p>
+  <p>pygaki plugins ui_kit 4.20 · screen_fx 5.9 · splash 2.5 · Repository <a href="https://github.com/halftomatodev/pygaki" target="_blank" rel="noopener">https://github.com/halftomatodev/pygaki</a></p>
   <div class="chips"><a href="#start-h"><b>1</b>Getting started</a><a href="#overview-h"><b>2</b>At a glance: where docs and files are</a><a href="#pykaki-h"><b>3</b>Writing scripts with pygaki</a><a href="#custom-h"><b>4</b>Plugin customization guide</a><a href="#effects-h"><b>5</b>Effect samples</a><a href="#develop-h"><b>6</b>Changing it yourself</a><a href="#license-h"><b>7</b>Notes and licenses</a></div>
 </header>
 <section class="chapter" id="start"><h1 id="start-h"><span class="n">1</span>Getting started</h1>
@@ -138,7 +138,7 @@ mark{background:var(--mark);color:inherit;border-radius:2px}
 </li>
 <li>Start the launcher with <code>renpy.exe</code>.
 </li>
-<li>In <b>[+ Create New Project]</b> at the bottom left of the launcher, choose <b>Pygaki</b> and set the name and resolution.
+<li>In <b>[+ Create New Project]</b> at the bottom left of the launcher, choose <b>Pygaki</b> and set the name and resolution. There are five retro resolutions (GBC 160x144, SNES 256x224, PC-98 640x400, Y2K 800x600, Millennial 1024x768), two high resolutions (1280x720, 1920x1080) and a custom one. Retro and custom are scaled up by the largest whole number that fits the window and drawn in the pixels of the chosen resolution (pixel perfect, <code>game/pixel_perfect.rpy</code> in the project). A pixel font is recommended for retro. At small resolutions (GBC, SNES) the text of Ren'Py's default menus may overlap.
 <ul>
 <li>The Pygaki template creates a Korean project (sample script and common text). Change the game's language with Ren'Py's settings (<code>game/options.rpy</code>, <code>game/tl/</code>).
 </li></ul>
@@ -1142,6 +1142,9 @@ label map_cafe:
 <li><b>Font</b>: just Pretendard 500. It's included in the app, so it shows without the internet.
 </li>
 <li><b>Run in Ren'Py</b> (app): with "Ignore if the game is already running" on, pressing [▶ Run in Ren'Py] while the game is running only exports the script and leaves the game as is. Off, each press starts another game. Whether it's running is known from the connection to a game with the pygaki plugins and from games started by this app.
+<ul>
+<li><b>Red band in the game window margins</b> (on at first): a game scaled up by a whole number, like the retro resolutions, leaves the rest of the window as black bands. While the in-game editor (Shift+M) is open, these bands are painted red so you can see where the game screen ends. The shortcut <b>F8</b> (in the app or the game window) also turns it on/off. Nothing inside the game screen changes.
+</li></ul>
 </li>
 <li><b>Focus mode dimming</b>: off, light, normal, strong
 </li>
@@ -1158,7 +1161,7 @@ label map_cafe:
 </li></ul>
 </div>
 <div class="blk"><h2 id="11-shortcuts-defaults">11. Shortcuts (defaults)</h2>
-<div class="tbl"><table><thead><tr><th>Key</th><th>Action</th></tr></thead><tbody><tr><td>Double-click a box</td><td>edit inside the box</td></tr><tr><td>Double-click an empty spot</td><td>new box</td></tr><tr><td>Ctrl+\\</td><td>focus mode on/off</td></tr><tr><td>Ctrl+Enter</td><td>(while editing) new line with the same speaker</td></tr><tr><td>Ctrl+Shift+Enter</td><td>(while editing) continue in the next box (new box if none)</td></tr><tr><td>Alt+←</td><td>(while editing) open/close the dialogue bubble (line type picker) (↑↓ to move, past a column's end to the next column, Tab to jump columns, Enter to confirm, Esc to close)</td></tr><tr><td>Alt+↑</td><td>(in the dialogue field inside a box) unfold/fold the font bubble (text style, tag box)</td></tr><tr><td>Alt+→</td><td>(while editing) unfold/fold the flow bubble (next flow), pick with the keyboard (arrows to choose, Enter to confirm, Esc to fold)</td></tr><tr><td>Ctrl+B / Ctrl+I / Ctrl+U</td><td>(in a dialogue text field) bold / italic / underline tag on selected text</td></tr><tr><td>Esc</td><td>finish editing the box</td></tr><tr><td>Delete</td><td>delete selected boxes/lines</td></tr><tr><td>Shift+drag</td><td>select several boxes</td></tr><tr><td>Ctrl+S / Ctrl+Shift+S</td><td>save / save as</td></tr><tr><td>Ctrl+E</td><td>export <code>.rpy</code> again to the same place</td></tr><tr><td>Ctrl+Z / Ctrl+Y</td><td>undo / redo (inside text fields too; in the settings window and flag name fields, only that field's text)</td></tr><tr><td>Alt+N</td><td>new box</td></tr><tr><td>Ctrl+C / Ctrl+V</td><td>(outside text fields) copy selected boxes / paste at the mouse position</td></tr><tr><td>Ctrl+D</td><td>duplicate selected boxes</td></tr><tr><td>Ctrl+F</td><td>find and replace (if open, to the search field)</td></tr><tr><td>F1</td><td>help</td></tr></tbody></table></div>
+<div class="tbl"><table><thead><tr><th>Key</th><th>Action</th></tr></thead><tbody><tr><td>Double-click a box</td><td>edit inside the box</td></tr><tr><td>Double-click an empty spot</td><td>new box</td></tr><tr><td>Ctrl+\\</td><td>focus mode on/off</td></tr><tr><td>Ctrl+Enter</td><td>(while editing) new line with the same speaker</td></tr><tr><td>Ctrl+Shift+Enter</td><td>(while editing) continue in the next box (new box if none)</td></tr><tr><td>Alt+←</td><td>(while editing) open/close the dialogue bubble (line type picker) (↑↓ to move, past a column's end to the next column, Tab to jump columns, Enter to confirm, Esc to close)</td></tr><tr><td>Alt+↑</td><td>(in the dialogue field inside a box) unfold/fold the font bubble (text style, tag box)</td></tr><tr><td>Alt+→</td><td>(while editing) unfold/fold the flow bubble (next flow), pick with the keyboard (arrows to choose, Enter to confirm, Esc to fold)</td></tr><tr><td>Alt+↓</td><td>(inside a box) unfold/fold all three bubbles (dialogue, font, flow) at once</td></tr><tr><td>F8</td><td>(app, while connected to the game) turn the red band in the game window margins on/off</td></tr><tr><td>Ctrl+B / Ctrl+I / Ctrl+U</td><td>(in a dialogue text field) bold / italic / underline tag on selected text</td></tr><tr><td>Esc</td><td>finish editing the box</td></tr><tr><td>Delete</td><td>delete selected boxes/lines</td></tr><tr><td>Shift+drag</td><td>select several boxes</td></tr><tr><td>Ctrl+S / Ctrl+Shift+S</td><td>save / save as</td></tr><tr><td>Ctrl+E</td><td>export <code>.rpy</code> again to the same place</td></tr><tr><td>Ctrl+Z / Ctrl+Y</td><td>undo / redo (inside text fields too; in the settings window and flag name fields, only that field's text)</td></tr><tr><td>Alt+N</td><td>new box</td></tr><tr><td>Ctrl+C / Ctrl+V</td><td>(outside text fields) copy selected boxes / paste at the mouse position</td></tr><tr><td>Ctrl+D</td><td>duplicate selected boxes</td></tr><tr><td>Ctrl+F</td><td>find and replace (if open, to the search field)</td></tr><tr><td>F1</td><td>help</td></tr></tbody></table></div>
 <p>Everything except Esc, Delete and double-click can be changed in [Settings].</p>
 </div>
 <div class="blk"><h2 id="12-faq">12. FAQ</h2>
@@ -1704,6 +1707,7 @@ e &quot;Shake!&quot; (box=&quot;media&quot;, media=&quot;images/say/boom.png&quo
 </li>
 <li><b>Save with Ctrl+S</b>, close with Esc. If you made a mistake, Backspace (undoes only the current selection).
 </li></ol>
+<p>In a game whose screen is scaled up several times in the window, like the retro resolutions, the editor (panel, picker windows, name tags, handles, flow tree drawer) is drawn at the real screen size so it stays readable at small resolutions (<code>ui_kit</code> 4.20). While the editor is open, the empty part of the window outside the game screen (the black bands of whole-number scaling) is painted red to show where the game screen ends. Turn it on/off with <b>F8</b> (remembered by the game) or in the pygaki app's preferences.</p>
 <p>For choices and dialogue, <b>Ctrl+S saves straight into that line's parentheses in the script (.rpy)</b>, and the game reloads and returns to the same scene. Values that were already written and things after the line like <code>with dissolve</code> are left as they are; only changed values are edited. The original before editing is kept in <code>ui_kit_backup/</code> in the project folder.</p>
 <p>For lines that can't be edited automatically, like dialogue spanning several lines, or when the script was changed in another editor during editing so the line no longer matches, it leaves the script alone and tells you why. Then <b>copy with Ctrl+C and paste it into that line's parentheses.</b> If the script is open in VS Code or similar with unsaved changes, save those first before saving with the editor.</p>
 <p>To move values saved in <code>*_layout.rpy</code> into the settings file, copy the settings code with Ctrl+C, paste it, and delete the <code>*_layout.rpy</code>. Cursor settings and turning the click-to-continue indicator on or off apply after saving, once the game reloads automatically.</p>

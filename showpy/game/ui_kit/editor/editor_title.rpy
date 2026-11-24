@@ -187,7 +187,7 @@ init -8 python in ui_editor:
             return (ax + (0.5 - it.anchor[0]) * w, ay + (0.5 - it.anchor[1]) * h, h * z)
 
         def rot_radius(self, it):
-            return self.rot_center(it)[2] / 2.0 + self.ROT_RADIUS * 0.6
+            return self.rot_center(it)[2] / 2.0 + store.ui_editor.px(self.ROT_RADIUS * 0.6)
 
         def rot_handle(self, it=None):
             """회전 손잡이 자리 (x, y). 글자 가운데에서 회전 방향으로 위쪽."""
@@ -204,7 +204,8 @@ init -8 python in ui_editor:
             h = self.rot_handle(it)
             if h is None:
                 return None
-            if abs(x - h[0]) > self.ROT_GRAB or abs(y - h[1]) > self.ROT_GRAB:
+            g = store.ui_editor.px(self.ROT_GRAB)
+            if abs(x - h[0]) > g or abs(y - h[1]) > g:
                 return None
             self.tm().state.rot_drag = self.tm().state.ed_sel
             return ("rot", self.tm().state.ed_sel)
@@ -677,12 +678,12 @@ init -8 python in ui_editor:
 
 
 ## 회전 손잡이 줄 (기준점 → 손잡이)
-transform ui_editor_rot_line(x, y, r, length):
+transform ui_editor_rot_line(x, y, r, length, width=2):
     pos (x, y)
     anchor (0.5, 1.0)
     transform_anchor True
     rotate r
-    xysize (2, length)
+    xysize (width, length)
 
 
 ## 타이틀 메뉴 항목의 클릭 영역 표시
@@ -707,12 +708,12 @@ screen ui_editor_title_overlay():
             at tmenu_base(it.rotate, it.skew, it.zoom)
             add it.ed_sizer
 
-        add Solid("#ff3b8d" if i == tmenu.state.ed_sel else "#ffffff", xysize=(7, 7)) pos (int(_ax), int(_ay)) anchor (0.5, 0.5)
+        add Solid("#ff3b8d" if i == tmenu.state.ed_sel else "#ffffff", xysize=(ui_editor.px(7), ui_editor.px(7))) pos (int(_ax), int(_ay)) anchor (0.5, 0.5)
 
         text "[it.id]":
             style "ui_editor_text"
             size 12
-            pos (int(_ax) + 6, int(_ay) + 4)
+            pos (int(_ax + ui_editor.px(6)), int(_ay + ui_editor.px(4)))
             at ui_editor.zoom_t()    # 실제 화면 크기 글 (4.20)
 
     ## 제목, 부제 (3.19)
@@ -726,11 +727,11 @@ screen ui_editor_title_overlay():
             padding (it.hit_padding, it.hit_padding)
             at tmenu_base(it.rotate, it.skew, it.zoom)
             add it.ed_sizer
-        add Solid("#ff3b8d" if (_n + it.index) == tmenu.state.ed_sel else "#ffffff", xysize=(7, 7)) pos (int(_ax), int(_ay)) anchor (0.5, 0.5)
+        add Solid("#ff3b8d" if (_n + it.index) == tmenu.state.ed_sel else "#ffffff", xysize=(ui_editor.px(7), ui_editor.px(7))) pos (int(_ax), int(_ay)) anchor (0.5, 0.5)
         text (it.name + (" (비어 있음)" if it.empty else "")):
             style "ui_editor_text"
             size 12
-            pos (int(_ax) + 6, int(_ay) + 4)
+            pos (int(_ax + ui_editor.px(6)), int(_ay + ui_editor.px(4)))
             at ui_editor.zoom_t()    # 실제 화면 크기 글 (4.20)
 
     ## 회전 손잡이: 고른 것 위의 분홍 네모를 끌면 돌아감 (3.19)
@@ -739,9 +740,9 @@ screen ui_editor_title_overlay():
     if _sel is not None and _h is not None:
         $ _sx, _sy, _sh = _tab.rot_center(_sel)
         $ _r = float(_tab._cur(_sel, "rotate", 0.0))
-        add Solid("#ff3b8daa") at ui_editor_rot_line(int(_sx), int(_sy), _r, int(_tab.rot_radius(_sel)))
-        add Solid("#ff3b8d", xysize=(16, 16)) pos (int(_h[0]), int(_h[1])) anchor (0.5, 0.5)
-        add Solid("#ffffff", xysize=(6, 6)) pos (int(_h[0]), int(_h[1])) anchor (0.5, 0.5)
+        add Solid("#ff3b8daa") at ui_editor_rot_line(int(_sx), int(_sy), _r, int(_tab.rot_radius(_sel)), ui_editor.px(2))
+        add Solid("#ff3b8d", xysize=(ui_editor.px(16), ui_editor.px(16))) pos (int(_h[0]), int(_h[1])) anchor (0.5, 0.5)
+        add Solid("#ffffff", xysize=(ui_editor.px(6), ui_editor.px(6))) pos (int(_h[0]), int(_h[1])) anchor (0.5, 0.5)
 
 
 screen ui_editor_title_panel(tab):

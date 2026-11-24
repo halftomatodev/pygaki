@@ -963,13 +963,18 @@ init -9 python in ui_editor:
 
     ## 실제 화면 크기로 (4.20): 게임을 실제 화면에서 몇 배로 키워 그리면(픽셀 퍼펙트 160x144 ×6 같은)
     ## 패널과 고르기 창은 그 배율만큼 줄여 그려서 화면에서 늘 같은 크기로 보이게 합니다.
-    ## 배율이 1 이하(게임이 창보다 크거나 같음)면 예전처럼 그대로. 게임 좌표에 그리는 표시와 손잡이는 그대로입니다.
+    ## 배율이 1 이하(게임이 창보다 크거나 같음)면 예전처럼 그대로. 게임 좌표에 그리는 손잡이·점은 px()로 크기만 실제 화면 픽셀에 맞춥니다.
     def view_zoom():
         try:
             s = float(store.renpy.display.draw.draw_per_virt)
         except Exception:
             s = 1.0
         return 1.0 / s if s > 1.0 else 1.0
+
+    def px(n):
+        """실제 화면 n픽셀을 게임 좌표로 (게임 좌표에 그리는 손잡이·점의 크기와 집는 거리). 배율 1 이하면 n 그대로.
+        렌파이는 xysize·pos의 소수를 화면 비율로 읽으므로 absolute로 돌려줌 (pos에는 int()로 씀)"""
+        return store.renpy.display.core.absolute(n * view_zoom())
 
     _zoom_t = { }
 

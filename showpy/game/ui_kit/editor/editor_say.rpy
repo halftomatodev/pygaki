@@ -673,7 +673,7 @@ init -8 python in ui_editor:
                     ss = self.ss()
                     for k, pts in (("media_text_quad", ss.geom_text_corners(geom)), ("media_quad", ss.geom_media_corners(geom))):
                         for i, p in enumerate(pts):
-                            if abs(o[0] + p[0] - x) <= 10 and abs(o[1] + p[1] - y) <= 10:
+                            if abs(o[0] + p[0] - x) <= px(10) and abs(o[1] + p[1] - y) <= px(10):
                                 return ("corner", k, i, p)
                 return ("media",) + self.media_offset()
             return self._start()
@@ -1249,7 +1249,8 @@ init -8 python in ui_editor:
             dots = getattr(tab, "corner_dots", None)
             if tab is None or dots is None or not tab_available(tab)[0]:
                 return None
-            if not any(abs(dx - x) <= 10 and abs(dy - y) <= 10 for dx, dy, _c in dots()):
+            g = px(10)
+            if not any(abs(dx - x) <= g and abs(dy - y) <= g for dx, dy, _c in dots()):
                 return None
             token = tab.drag_begin(x, y)
             if token is None or not is_corner_token(token):
@@ -1265,9 +1266,9 @@ init -8 python in ui_editor:
             tab = current_tab()
             dots = getattr(tab, "corner_dots", None)
             for x, y, c in (dots() if dots else ( )):
-                for size, col in ((13, "#000000"), (9, c)):
+                for size, col in ((px(13), "#000000"), (px(9), c)):
                     r = store.renpy.render(store.Solid(col), size, size, st, at)
-                    rv.blit(r, (int(x - size / 2), int(y - size / 2)))
+                    rv.blit(r, (x - size / 2.0, y - size / 2.0))
             store.renpy.redraw(self, 0)
             return rv
 

@@ -488,7 +488,7 @@ init -8 python in ui_editor:
                     for k, pts in (("media_text_quad", ss.geom_text_corners(geom)), ("media_quad", ss.geom_media_corners(geom))):
                         for i, p in enumerate(pts):
                             sx, sy = self._scr(pl, p)
-                            if abs(sx - x) <= 10 and abs(sy - y) <= 10:
+                            if abs(sx - x) <= store.ui_editor.px(10) and abs(sy - y) <= store.ui_editor.px(10):
                                 return (c.number, ("corner", k, i, p, pl))
             under = self._under()
             if under is not None:
@@ -507,7 +507,7 @@ init -8 python in ui_editor:
                     for k, pts in (("media_text_quad", ss.geom_text_corners(geom)), ("media_quad", ss.geom_media_corners(geom))):
                         for i, p in enumerate(pts):
                             sx, sy = self._scr(pl, p)
-                            if abs(sx - x) <= 10 and abs(sy - y) <= 10:
+                            if abs(sx - x) <= store.ui_editor.px(10) and abs(sy - y) <= store.ui_editor.px(10):
                                 return (c.number, ("corner", k, i, p, pl))
                 return (c.number, ("media",) + self.media_offset(c))
             st = self._start(c)
@@ -851,7 +851,7 @@ init -8 python in ui_editor:
 screen ui_editor_choice_overlay():
     $ _lp = cmenu.state.list_pos
     if _lp is not None:
-        add Solid("#ffd23b", xysize=(9, 9)) pos (int(_lp[0]), int(_lp[1])) anchor (0.5, 0.5)
+        add Solid("#ffd23b", xysize=(ui_editor.px(9), ui_editor.px(9))) pos (int(_lp[0]), int(_lp[1])) anchor (0.5, 0.5)
     ## 뒤 그림의 모서리 점 (4.18)은 편집 패널 위에 그림 (editor.rpy ui_editor_main)
 
 

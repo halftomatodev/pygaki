@@ -1,4 +1,4 @@
-<!-- 원본: pykaki/docs/GUIDE.md @ 1d8055e551 -->
+<!-- 원본: pykaki/docs/GUIDE.md @ dbf4680c5d -->
 # pygaki user guide
 
 A tool for writing Ren'Py scripts with boxes and lines and exporting them as Ren'Py script files (`.rpy`).
@@ -673,6 +673,7 @@ Change them in **[Settings]** at the right of the toolbar. These settings are sa
 - **Box color (saved in this script)**: paints the selected box. Click a color swatch or type a hex code (#RRGGBB or #RGB). Clear it with [Back to label color]. The color is saved in the script file and can be undone with Ctrl+Z. This is the only screen setting that goes into the script file.
 - **Font**: just Pretendard 500. It's included in the app, so it shows without the internet.
 - **Run in Ren'Py** (app): with "Ignore if the game is already running" on, pressing [▶ Run in Ren'Py] while the game is running only exports the script and leaves the game as is. Off, each press starts another game. Whether it's running is known from the connection to a game with the pygaki plugins and from games started by this app.
+  - **Red band in the game window margins** (on at first): a game scaled up by a whole number, like the retro resolutions, leaves the rest of the window as black bands. While the in-game editor (Shift+M) is open, these bands are painted red so you can see where the game screen ends. The shortcut **F8** (in the app or the game window) also turns it on/off. Nothing inside the game screen changes.
 - **Focus mode dimming**: off, light, normal, strong
 - **Shortcuts**: click the key field of the action to change and press the new key. Esc cancels. Esc (finish editing), Delete (delete) and F1 (help) can't be changed.
   - To avoid clashing with typing, Ctrl or Alt must be held too. F2–F12 can be used alone (F1 is help).
@@ -692,6 +693,8 @@ Change them in **[Settings]** at the right of the toolbar. These settings are sa
 | Alt+← | (while editing) open/close the dialogue bubble (line type picker) (↑↓ to move, past a column's end to the next column, Tab to jump columns, Enter to confirm, Esc to close) |
 | Alt+↑ | (in the dialogue field inside a box) unfold/fold the font bubble (text style, tag box) |
 | Alt+→ | (while editing) unfold/fold the flow bubble (next flow), pick with the keyboard (arrows to choose, Enter to confirm, Esc to fold) |
+| Alt+↓ | (inside a box) unfold/fold all three bubbles (dialogue, font, flow) at once |
+| F8 | (app, while connected to the game) turn the red band in the game window margins on/off |
 | Ctrl+B / Ctrl+I / Ctrl+U | (in a dialogue text field) bold / italic / underline tag on selected text |
 | Esc | finish editing the box |
 | Delete | delete selected boxes/lines |

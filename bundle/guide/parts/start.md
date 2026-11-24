@@ -25,7 +25,7 @@
 
 1. 다운로드 [github.com/halftomatodev/pygaki/releases/latest](https://github.com/halftomatodev/pygaki/releases/latest)에서 pygaki 묶음 zip을 받아 아무 폴더에 풉니다(저장소: [github.com/halftomatodev/pygaki](https://github.com/halftomatodev/pygaki)).
 2. `renpy.exe`로 런처를 켭니다(영어로 나오면 preferences → Language → 한국어).
-3. 런처 왼쪽 아래 **[+ Create New Project]**(새 프로젝트 만들기)에서 **Pygaki**를 고르고 이름과 해상도를 정합니다.
+3. 런처 왼쪽 아래 **[+ Create New Project]**(새 프로젝트 만들기)에서 **Pygaki**를 고르고 이름과 해상도를 정합니다. 해상도는 레트로 다섯(GBC 160x144, SNES 256x224, PC-98 640x400, Y2K 800x600, Millennial 1024x768)과 고해상도 둘(1280x720, 1920x1080), 사용자 정의가 있습니다. 레트로와 사용자 정의는 창에 맞는 가장 큰 정수 배율로 키우고 고른 해상도의 픽셀로 그립니다(픽셀 퍼펙트, 프로젝트의 `game/pixel_perfect.rpy`). 레트로에는 픽셀 글꼴을 권합니다. 작은 해상도(GBC, SNES)는 렌파이 기본 메뉴 글이 겹칠 수 있습니다.
 4. 왼쪽 목록에서 프로젝트를 고르고 **[pygaki로 편집]**을 누르면 pygaki 앱이 그 프로젝트를 엽니다. 대본은 프로젝트 폴더의 `프로젝트이름.flow.json`에 저절로 저장됩니다.
 5. 앱 위쪽 탭 줄 오른쪽의 **[렌파이에서 실행]**으로 게임을 켜서 봅니다. 런처의 [Launch Project]로 켜도 앱이 게임에 붙습니다(탭 옆 단추가 옅은 파란색 "● 게임과 연결됨"으로 바뀜).
 

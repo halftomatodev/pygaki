@@ -103,7 +103,7 @@ mark{background:var(--mark);color:inherit;border-radius:2px}
 <div class="wrap">
 <nav id="nav">
   <div class="brand">py<span>gaki</span> 案内書</div>
-  <div class="ver">pygaki プラグイン ui_kit 4.19 · screen_fx 5.9 · splash 2.5</div>
+  <div class="ver">pygaki プラグイン ui_kit 4.20 · screen_fx 5.9 · splash 2.5</div>
   <div class="langs"><a href="pygaki_안내서.html" lang="ko">한국어</a><a href="pygaki_guide_ja.html" class="on" aria-current="page" lang="ja">日本語</a><a href="pygaki_guide_en.html" lang="en">English</a></div>
   <input id="q" type="search" placeholder="検索 (例:ルビ、シェーダー、ショートカット)" aria-label="案内書を検索">
   <div class="tools"><button id="theme" type="button">テーマ</button><button id="fold" type="button">すべて開く</button></div>
@@ -114,7 +114,7 @@ mark{background:var(--mark);color:inherit;border-radius:2px}
 <header class="hero">
   <h1>pygaki 案内書</h1>
   <p>Ren&#x27;Py でゲームを作る人のための pygaki(スクリプトエディターと pygaki プラグイン)の案内を、すべて 1 つのファイルにまとめました。インターネットなしで開け、左の検索欄で言葉を探せます。</p>
-  <p>pygaki プラグイン ui_kit 4.19 · screen_fx 5.9 · splash 2.5 · リポジトリ <a href="https://github.com/halftomatodev/pygaki" target="_blank" rel="noopener">https://github.com/halftomatodev/pygaki</a></p>
+  <p>pygaki プラグイン ui_kit 4.20 · screen_fx 5.9 · splash 2.5 · リポジトリ <a href="https://github.com/halftomatodev/pygaki" target="_blank" rel="noopener">https://github.com/halftomatodev/pygaki</a></p>
   <div class="chips"><a href="#start-h"><b>1</b>はじめに</a><a href="#overview-h"><b>2</b>ひと目で:文書とファイルの場所</a><a href="#pykaki-h"><b>3</b>pygaki でシナリオを書く</a><a href="#custom-h"><b>4</b>プラグイン カスタムガイド</a><a href="#effects-h"><b>5</b>エフェクト見本</a><a href="#develop-h"><b>6</b>自分で手を入れる</a><a href="#license-h"><b>7</b>注意とライセンス</a></div>
 </header>
 <section class="chapter" id="start"><h1 id="start-h"><span class="n">1</span>はじめに</h1>
@@ -138,7 +138,7 @@ mark{background:var(--mark);color:inherit;border-radius:2px}
 </li>
 <li><code>renpy.exe</code> でランチャーを起動します。
 </li>
-<li>ランチャー左下の <b>[+ Create New Project]</b>(新しいプロジェクトを作成)で <b>Pygaki</b> を選び、名前と解像度を決めます。
+<li>ランチャー左下の <b>[+ Create New Project]</b>(新しいプロジェクトを作成)で <b>Pygaki</b> を選び、名前と解像度を決めます。解像度はレトロ 5 つ(GBC 160x144、SNES 256x224、PC-98 640x400、Y2K 800x600、Millennial 1024x768)と高解像度 2 つ(1280x720、1920x1080)、ユーザー定義があります。レトロとユーザー定義は、ウィンドウに収まるいちばん大きい整数倍で拡大し、選んだ解像度のピクセルで描きます(ピクセルパーフェクト、プロジェクトの <code>game/pixel_perfect.rpy</code>)。レトロにはピクセルフォントをおすすめします。小さい解像度(GBC、SNES)では Ren'Py の標準メニューの文字が重なることがあります。
 <ul>
 <li>Pygaki テンプレートは韓国語のプロジェクトとして作られます(サンプルのスクリプト、共通の文言)。ゲームの言語は Ren'Py の設定(<code>game/options.rpy</code>、<code>game/tl/</code>)で変えます。
 </li></ul>
@@ -1142,6 +1142,9 @@ label map_cafe:
 <li><b>フォント</b>:Pretendard 500 の 1 つです。アプリの中に入っているので、インターネットがなくても見えます(日本語の文字はパソコンのフォントで表示)。
 </li>
 <li><b>Ren'Py で実行</b>(アプリ):「ゲームがすでに起動していれば無視」をオンにしておくと、ゲームが起動しているときに [▶ Ren'Pyで実行] を押しても、シナリオだけを書き出してゲームはそのままにします。オフにすると押すたびにゲームをもう 1 つ起動します。起動しているかどうかは、pygaki プラグインの入ったゲームとの接続と、このアプリで起動したゲームでわかります。
+<ul>
+<li><b>ゲームウィンドウの余白に赤い帯</b>(最初はオン):レトロ解像度のように整数倍で拡大したゲームは、ウィンドウの余った部分が黒い帯になります。ゲーム内編集画面(Shift+M)が開いている間、この帯を赤く塗ってゲーム画面の範囲を示します。ショートカット <b>F8</b>(アプリでもゲームウィンドウでも)でもオン/オフします。ゲーム画面の中はそのままです。
+</li></ul>
 </li>
 <li><b>集中モードのぼかし</b>:オフ、弱め、普通、強め
 </li>
@@ -1158,7 +1161,7 @@ label map_cafe:
 </li></ul>
 </div>
 <div class="blk"><h2 id="11-ショートカット-初期値">11. ショートカット(初期値)</h2>
-<div class="tbl"><table><thead><tr><th>キー</th><th>動作</th></tr></thead><tbody><tr><td>ボックスをダブルクリック</td><td>ボックスの中で編集</td></tr><tr><td>空いたところをダブルクリック</td><td>新しいボックス</td></tr><tr><td>Ctrl+\\</td><td>集中モードのオン/オフ</td></tr><tr><td>Ctrl+Enter</td><td>(編集中)同じ話し手で新しい行</td></tr><tr><td>Ctrl+Shift+Enter</td><td>(編集中)次のボックスへ続けて書く(なければ新しいボックス)</td></tr><tr><td>Alt+←</td><td>(編集中)セリフバブル(行の種類選び)を開く/閉じる(↑↓ で動く・列の端で次の列へ、Tab で列を飛び越える、Enter で決める、Esc で閉じる)</td></tr><tr><td>Alt+↑</td><td>(ボックス内のセリフ欄で)フォントバブル(文字スタイル、タグボックス)を広げる/たたむ</td></tr><tr><td>Alt+→</td><td>(編集中)フローバブル(次の流れ)を広げる/たたむ、キーボードで選ぶ(方向キーで選ぶ、Enter で決める、Esc でたたむ)</td></tr><tr><td>Ctrl+B / Ctrl+I / Ctrl+U</td><td>(セリフのテキスト欄で)選んだ文字を太字 / 斜体 / 下線のタグに</td></tr><tr><td>Esc</td><td>ボックスの編集を終える</td></tr><tr><td>Delete</td><td>選んだボックス/線を削除</td></tr><tr><td>Shift+ドラッグ</td><td>複数のボックスを選択</td></tr><tr><td>Ctrl+S / Ctrl+Shift+S</td><td>保存 / 名前を付けて保存</td></tr><tr><td>Ctrl+E</td><td><code>.rpy</code> を同じ場所に再書き出し</td></tr><tr><td>Ctrl+Z / Ctrl+Y</td><td>元に戻す / やり直す(テキスト欄の中でも。設定画面とフラグ名の欄はその欄の文字だけ)</td></tr><tr><td>Alt+N</td><td>新しいボックス</td></tr><tr><td>Ctrl+C / Ctrl+V</td><td>(テキスト欄の外で)選んだボックスをコピー / マウスの位置に貼り付け</td></tr><tr><td>Ctrl+D</td><td>選んだボックスを複製</td></tr><tr><td>Ctrl+F</td><td>検索・置換(開いていれば検索する文字の欄へ)</td></tr><tr><td>F1</td><td>ヘルプ</td></tr></tbody></table></div>
+<div class="tbl"><table><thead><tr><th>キー</th><th>動作</th></tr></thead><tbody><tr><td>ボックスをダブルクリック</td><td>ボックスの中で編集</td></tr><tr><td>空いたところをダブルクリック</td><td>新しいボックス</td></tr><tr><td>Ctrl+\\</td><td>集中モードのオン/オフ</td></tr><tr><td>Ctrl+Enter</td><td>(編集中)同じ話し手で新しい行</td></tr><tr><td>Ctrl+Shift+Enter</td><td>(編集中)次のボックスへ続けて書く(なければ新しいボックス)</td></tr><tr><td>Alt+←</td><td>(編集中)セリフバブル(行の種類選び)を開く/閉じる(↑↓ で動く・列の端で次の列へ、Tab で列を飛び越える、Enter で決める、Esc で閉じる)</td></tr><tr><td>Alt+↑</td><td>(ボックス内のセリフ欄で)フォントバブル(文字スタイル、タグボックス)を広げる/たたむ</td></tr><tr><td>Alt+→</td><td>(編集中)フローバブル(次の流れ)を広げる/たたむ、キーボードで選ぶ(方向キーで選ぶ、Enter で決める、Esc でたたむ)</td></tr><tr><td>Alt+↓</td><td>(ボックス内で)3 つのバブル(セリフ・フォント・フロー)を一度に広げる/たたむ</td></tr><tr><td>F8</td><td>(アプリ、ゲームと接続中)ゲームウィンドウの余白の赤い帯をオン/オフ</td></tr><tr><td>Ctrl+B / Ctrl+I / Ctrl+U</td><td>(セリフのテキスト欄で)選んだ文字を太字 / 斜体 / 下線のタグに</td></tr><tr><td>Esc</td><td>ボックスの編集を終える</td></tr><tr><td>Delete</td><td>選んだボックス/線を削除</td></tr><tr><td>Shift+ドラッグ</td><td>複数のボックスを選択</td></tr><tr><td>Ctrl+S / Ctrl+Shift+S</td><td>保存 / 名前を付けて保存</td></tr><tr><td>Ctrl+E</td><td><code>.rpy</code> を同じ場所に再書き出し</td></tr><tr><td>Ctrl+Z / Ctrl+Y</td><td>元に戻す / やり直す(テキスト欄の中でも。設定画面とフラグ名の欄はその欄の文字だけ)</td></tr><tr><td>Alt+N</td><td>新しいボックス</td></tr><tr><td>Ctrl+C / Ctrl+V</td><td>(テキスト欄の外で)選んだボックスをコピー / マウスの位置に貼り付け</td></tr><tr><td>Ctrl+D</td><td>選んだボックスを複製</td></tr><tr><td>Ctrl+F</td><td>検索・置換(開いていれば検索する文字の欄へ)</td></tr><tr><td>F1</td><td>ヘルプ</td></tr></tbody></table></div>
 <p>Esc、Delete、ダブルクリック以外は [設定] で変えられます。</p>
 </div>
 <div class="blk"><h2 id="12-よくある質問">12. よくある質問</h2>
@@ -1704,6 +1707,7 @@ e &quot;ブルッ!&quot; (box=&quot;media&quot;, media=&quot;images/say/boom.png
 </li>
 <li><b>Ctrl+S で保存</b>、Esc で閉じる。間違えたら Backspace(今選んでいるものだけを戻す)。
 </li></ol>
+<p>レトロ解像度のようにゲーム画面をウィンドウで何倍にも拡大したゲームでは、編集画面(パネル、選択ウィンドウ、名札、ハンドル、フローツリーの引き出し)を実際の画面の大きさで描くので、小さい解像度でも読めます(<code>ui_kit</code> 4.20)。編集画面が開いている間は、ゲーム画面の外のウィンドウの余白(整数倍の黒い帯)を赤く塗ってゲーム画面の範囲を示します。<b>F8</b> でオン/オフし(ゲームに記憶)、pygaki アプリの環境設定でも変えられます。</p>
 <p>選択肢とセリフは <b>Ctrl+S を押すとスクリプト(.rpy)のその行の括弧にすぐ保存</b> され、ゲームが読み直されて同じ場面に戻ってきます。もともと書いてあった値と、行の後ろの <code>with dissolve</code> などはそのままにして、変えた値だけを直します。直す前の元はプロジェクトフォルダーの <code>ui_kit_backup/</code> に残ります。</p>
 <p>複数行にまたがるセリフのように自動で直せない行や、編集中にほかのエディターでスクリプトを直して行が変わったときは、スクリプトに触れずに理由を知らせます。そのときは <b>Ctrl+C でコピーして、その行の括弧に貼り付けてください。</b> VS Code などでスクリプトを開いたまま保存していない変更があれば、エディターで保存する前にそちらを先に保存してください。</p>
 <p>保存した <code>*_layout.rpy</code> の値を設定ファイルに移したいなら、Ctrl+C で設定のコードをコピーして貼り付け、<code>*_layout.rpy</code> を消せば OK です。カーソルの設定とクリック待ち表示のオン・オフは、保存するとゲームが自動で読み直されたあとに当てはまります。</p>

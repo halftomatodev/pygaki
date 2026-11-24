@@ -58,10 +58,26 @@ init -7 python in screen_fx:
                 pass
             return True
 
+        def tree_zoom(self):
+            """서랍은 실제 화면 크기로 그림 (ui_kit 4.20): 게임 좌표 1 = 서랍 단위 1/zoom. 크게 키운 게임이 아니면 1."""
+            try:
+                return float(_ed.view_zoom())
+            except Exception:
+                return 1.0
+
+        def tree_mouse(self, x=None, y=None):
+            """게임 좌표 (없으면 지금 마우스) → 서랍 단위."""
+            if x is None:
+                x, y = renpy.get_mouse_pos()
+            z = self.tree_zoom()
+            return (x / z, y / z)
+
         def tree_box(self):
-            """서랍 자리 (x, y, 폭, 높이). 편집기 패널의 반대쪽에 둠."""
-            W = store.config.screen_width
-            H = store.config.screen_height
+            """서랍 자리 (x, y, 폭, 높이), 서랍 단위(실제 화면 픽셀). 편집기 패널의 반대쪽에 둠."""
+            z = self.tree_zoom()
+            GW = store.config.screen_width
+            W = int(GW / z)
+            H = int(store.config.screen_height / z)
             M = getattr(_ed, "MARGIN", 10)
             w = int(min(460, max(320, W * 0.36)))
             left = True
@@ -71,7 +87,7 @@ init -7 python in screen_fx:
                     st = _ed.state
                     if st.panel_xy is not None:
                         pw, _ph = _ed.panel_size()
-                        left = (st.panel_xy[0] + pw / 2.0) > W / 2.0
+                        left = (st.panel_xy[0] + pw / 2.0) > GW / 2.0
                     else:
                         left = getattr(st, "corner_used", st.corner) in (1, 2)
             except Exception:
@@ -375,7 +391,7 @@ init -7 python in screen_fx:
         def wheel(self, sign, shift):
             if not self.tree_on():
                 return
-            mx, my = renpy.get_mouse_pos()
+            mx, my = self.tree_mouse()
             x, y, w, h = self.tree_box()
             if x <= mx < x + w and y <= my < y + h:
                 self.tree_scroll_by(sign * (10 if shift else 3))
@@ -393,6 +409,7 @@ init -7 python in screen_fx:
         def drag_begin(self, x, y):
             if not self.tree_on():
                 return None
+            x, y = self.tree_mouse(x, y)
             vx, vy, vw, vh = self.tree_view_rect()
             if not (vx <= x < vx + vw and vy <= y < vy + vh):
                 return None
@@ -409,14 +426,14 @@ init -7 python in screen_fx:
         def drag_move(self, token, dx, dy):
             if token != "tree" or self._tdrag is None:
                 return
-            mx, my = renpy.get_mouse_pos()
+            mx, my = self.tree_mouse()
             vx, vy, vw, vh = self.tree_view_rect()
             if my < vy:
                 self.tree_scroll = max(0, self.tree_scroll - 1)
             elif my >= vy + vh:
                 self.tree_scroll_by(1)
             i = self._tree_row_at(my, clamp=True)
-            if i != self._tdrag[1] or abs(dy) > 4:
+            if i != self._tdrag[1] or abs(dy / self.tree_zoom()) > 4:
                 self._tdrag[2] = True
             self._tdrag[1] = i
             if self._tdrag[2]:
@@ -1060,23 +1077,29 @@ screen ui_editor_fx_tree_overlay():
         $ _vx, _vy, _vw, _vh = tab.tree_view_rect()
         $ _fn = tab.tree_file()
         $ _rows = tab.tree_rows()
+        $ _z = tab.tree_zoom()
 
-        add Solid("#14141cee") pos (_x, _y) xysize (_w, _h)
-        add Solid("#ff3b8d") pos (_x, _y) xysize (_w, 2)
+        ## 서랍 단위(실제 화면 픽셀)로 놓고 통째로 줄여 그림 (ui_kit 4.20, 크게 키운 게임)
+        fixed:
+            xysize (int(config.screen_width / _z), int(config.screen_height / _z))
+            at ui_editor.zoom_t()
 
-        hbox:
-            pos (_x + 8, _y + 4)
-            spacing 6
-            text ("줄기표 - " + (tab.tree_short(_fn) if _fn else "원고 없음")) style "ui_editor_text" size 14 yalign 0.5
-            textbutton "지금 줄" style "ui_editor_button" text_size 12 padding (4, 1) action Function(tab.tree_show_here) yalign 0.5
-            textbutton "G 접기" style "ui_editor_button" text_size 12 padding (4, 1) action Function(tab.tree_toggle) yalign 0.5
+            add Solid("#14141cee") pos (_x, _y) xysize (_w, _h)
+            add Solid("#ff3b8d") pos (_x, _y) xysize (_w, 2)
 
-        if _rows:
-            add screen_fx.flow_view(tab) pos (_vx, _vy)
-        else:
-            text "이 원고 파일에서 label 안의 줄을 찾지 못했습니다. 게임을 진행한 뒤 다시 펴세요." style "ui_editor_small" pos (_vx, _vy) xmaximum _vw
+            hbox:
+                pos (_x + 8, _y + 4)
+                spacing 6
+                text ("줄기표 - " + (tab.tree_short(_fn) if _fn else "원고 없음")) style "ui_editor_text" size 14 yalign 0.5
+                textbutton "지금 줄" style "ui_editor_button" text_size 12 padding (4, 1) action Function(tab.tree_show_here) yalign 0.5
+                textbutton "G 접기" style "ui_editor_button" text_size 12 padding (4, 1) action Function(tab.tree_toggle) yalign 0.5
 
-        text "누르기: 그 줄로 | 끌기: 구간 | 네모 점: 전환 점 | Delete: 셰이더 지우기 | 휠: 스크롤" style "ui_editor_small" size 11 pos (_x + 8, _y + _h - 18)
+            if _rows:
+                add screen_fx.flow_view(tab) pos (_vx, _vy)
+            else:
+                text "이 원고 파일에서 label 안의 줄을 찾지 못했습니다. 게임을 진행한 뒤 다시 펴세요." style "ui_editor_small" pos (_vx, _vy) xmaximum _vw
+
+            text "누르기: 그 줄로 | 끌기: 구간 | 네모 점: 전환 점 | Delete: 셰이더 지우기 | 휠: 스크롤" style "ui_editor_small" size 11 pos (_x + 8, _y + _h - 18)
 
 
 ## 패널 안 줄기표 칸 (앱에도 보임)
