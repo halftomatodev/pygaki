@@ -13,7 +13,7 @@
 | 게임 안 편집 화면에서 저장한 값 | 각 플러그인 폴더의 `*_layout.rpy` (예: `ui_kit/title_menu_layout.rpy`, `screen_fx/screen_fx_layout.rpy`) | 설정 파일(`*_config.rpy`)의 같은 값보다 먼저 쓰입니다. 새 판으로 바꿀 때 따로 두었다가 다시 넣습니다 |
 | 내가 고친 설정 | 각 플러그인 폴더의 `*_config.rpy` | 엔진 파일(`engine/`, `editor/`)은 고치지 않습니다 |
 | 원고를 고치기 전 원본, 올리기 전 플러그인 | 프로젝트 폴더의 `ui_kit_backup/` | 게임 안 편집 화면이 원고 괄호를 바꾸기 전에, 런처 [플러그인 올리기]가 바꾸기 전에(`plugins/`) 남깁니다. 개발용이라 배포판에서 뺍니다 |
-| 게임과 앱이 주고받는 파일 | `game/showpy_inbox.json`, `game/showpy_live.json`, `game/pykaki_preview.json`, `game/pykaki_goto.json` | 개발 중에만 생기는 연결 파일입니다. 게임 배포판에는 넣지 않습니다(지워도 다시 생깁니다) |
+| 게임과 앱이 주고받는 파일 | `game/showpy_inbox.json`, `game/showpy_live.json`, `game/pykaki_preview.json`, `game/pykaki_goto.json`, `game/pykaki_screens.json` | 개발 중에만 생기는 연결 파일입니다. 게임 배포판에는 넣지 않습니다(지워도 다시 생깁니다) |
 
 게임을 배포용으로 빌드할 때는 `*.flow.json`, `ui_kit_backup/`, 위의 연결 파일을 빼 주세요. 각 플러그인의 `README.md`는 빌드할 때 저절로 빠집니다.
 
@@ -68,6 +68,7 @@
 | `showpy/samples/`, `showpy/examples/` | 커서·클릭 대기 샘플 그림, pygaki 원고 예제 |
 | `docs/LINK.md` | 두 프로그램이 서로 맞추는 형식(대본 파일, 원고의 표시, 실시간 연결, 효과 파일) |
 | `bundle/` | 묶음 만들기(`make_bundle.py`), 런처 버튼(`launcher/`), 이 안내서(`guide/`) |
+| `bundle/guide/clips/` | 이 안내서의 사용법 영상(한국어 화면, 일·영 화면은 `ja/`, `en/`). `pykaki/tools/record_guide_clips.cjs`가 앱을 열어 찍습니다 |
 | `.github/workflows/` | 앱 확인·윈도우 빌드, 태그를 올리면 Releases 초안 |
 
 이 안내서의 일본어·영어는 `bundle/guide/ja/`, `bundle/guide/en/`에 있습니다.

@@ -1,4 +1,4 @@
-<!-- 원본: bundle/guide/parts/start.md @ 34c59b7072 -->
+<!-- 원본: bundle/guide/parts/start.md @ f04b09935c -->
 # Getting started
 
 ## What pygaki does
@@ -7,7 +7,7 @@ A set of tools that lets you make Ren'Py games without learning Ren'Py code.
 
 * **pygaki** (the [Script] tab of the pygaki app): an editor where you write your script with boxes and lines. Set dialogue, choices, backgrounds, images, sounds and screen shaders, and it exports a Ren'Py script (`game/script_flow.rpy`).
 * **pygaki plugins**: four plugins (`ui_kit`, `screen_fx`, `hotkeys`, `splash`) you put in the `game/` folder of a Ren'Py game. They change the title menu, choices, dialogue style and text effects, full-screen shaders and the splash screen, and include an **in-game editor** that lets you adjust things with the mouse while the game runs.
-* **pygaki app**: [Script] (write the script) + [GUI] (connects to the running game and drives the in-game editor from the app) + [Effects], [Shaders] (browse effects and hide them).
+* **pygaki app**: split into six tabs at the top. [Script] writes the script, [GUI] connects to the running game and drives the in-game editor from the app, [Screen] makes choice screens and HUDs, [Effects] and [Shaders] let you browse and hide effects, and [Font] manages the game's fonts.
 * **pygaki bundle**: the Ren'Py SDK + the plugin template + launcher buttons + the pygaki app, packed into one folder for Windows.
 
 Language: the language button at the top right of the pygaki app switches the script editor and the app's [Help] to Japanese or English. The in-game editor switches with the [Language] button on its panel, and the pygaki buttons added to the launcher follow the launcher's language setting. This guide gives a translation next to button names as they appear on Korean screens.
@@ -15,7 +15,7 @@ Language: the language button at the top right of the pygaki app switches the sc
 | I want to | Where |
 | --- | --- |
 | Write dialogue, choices and the story flow | pygaki [Script] |
-| Branch the story on flags (variables) and conditions | the flag card at the top of pygaki's right panel, and the box's next flow "Condition" (Alt+Enter) |
+| Branch the story on flags (variables) and conditions | the flag card at the top of pygaki's right panel, and the box's next flow "Condition" (flow bubble, Alt+→) |
 | Set dialogue text size, font, color, speed and text effects | the text effect card of a dialogue line, the tag box of the text field |
 | Set screen shaders, transitions, dialogue sounds, cursor and click-to-continue per box or scene | the ◐ Shader of a box or label |
 | Add images, webm videos, music and sound effects | the box's background / image·video / sound·music cards |
@@ -26,12 +26,12 @@ Language: the language button at the top right of the pygaki app switches the sc
 
 ## Download and your first project
 
-1. GitHub repository [github.com/halftomatodev/pygaki](https://github.com/halftomatodev/pygaki) · Download [github.com/halftomatodev/pygaki/releases/latest](https://github.com/halftomatodev/pygaki/releases/latest)
+1. Download the pygaki bundle zip from [github.com/halftomatodev/pygaki/releases/latest](https://github.com/halftomatodev/pygaki/releases/latest) and unzip it into any folder (repository: [github.com/halftomatodev/pygaki](https://github.com/halftomatodev/pygaki)).
 2. Start the launcher with `renpy.exe`.
 3. In **[+ Create New Project]** at the bottom left of the launcher, choose **Pygaki** and set the name and resolution.
    * The Pygaki template creates a Korean project (sample script and common text). Change the game's language with Ren'Py's settings (`game/options.rpy`, `game/tl/`).
 4. Select the project in the list on the left and press **[pygaki로 편집]** (Edit with pygaki); the pygaki app opens that project. The script is saved automatically to `ProjectName.flow.json` in the project folder.
-5. Press **[▶ Run in Ren'Py]** in the tabs at the top of the app to start the game and see it. If you start it with the launcher's [Launch Project] instead, the app's [GUI] still connects to the game (green dot).
+5. Press **[Run in Ren'Py]** to the right of the tab row at the top of the app to start the game and see it. If you start it with the launcher's [Launch Project] instead, the app still connects to the game (the button next to the tabs turns pale blue: "● Connected to game").
 
 If Windows shows a "Windows protected your PC" window the first time you start the app, press [More info] → [Run anyway] (the app is not signed). You can reopen this guide with the launcher's **[pygaki 안내서]** (pygaki guide) button or from `pygaki/pygaki_guide_en.html` in the bundle.
 

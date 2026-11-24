@@ -5,14 +5,14 @@
 렌파이(Ren'Py) 코드를 배우지 않아도 게임을 만들 수 있게 돕는 도구 묶음입니다.
 
 * **pygaki**(pygaki 앱의 [대본 편집]): 상자와 선으로 대본을 쓰는 편집기입니다. 대사, 선택지, 배경, 그림, 소리, 화면 셰이더를 정하면 렌파이 원고(`game/script_flow.rpy`)로 내보냅니다.
-* **pygaki 플러그인**: 렌파이 게임의 `game/` 폴더에 넣는 플러그인 넷(`ui_kit`, `screen_fx`, `hotkeys`, `splash`)입니다. 타이틀 메뉴, 선택지, 대사 스타일과 등장 효과, 화면 전체 셰이더, 스플래시 화면을 바꾸고, 게임을 켠 채로 마우스로 고치는 **게임 안 편집 화면**가 들어 있습니다.
-* **pygaki 앱**: [대본 편집](대본 쓰기) + [GUI 편집](실행 중인 게임과 이어져서 게임 안 편집 화면을 앱에서 조종) + [효과], [셰이더](효과 구경과 숨기기).
+* **pygaki 플러그인**: 렌파이 게임의 `game/` 폴더에 넣는 플러그인 넷(`ui_kit`, `screen_fx`, `hotkeys`, `splash`)입니다. 타이틀 메뉴, 선택지, 대사 스타일과 등장 효과, 화면 전체 셰이더, 스플래시 화면을 바꾸고, 게임을 켠 채로 마우스로 고치는 **게임 안 편집 화면**이 들어 있습니다.
+* **pygaki 앱**: 위쪽 탭 여섯 개로 나뉩니다. [대본 편집]은 대본 쓰기, [GUI 편집]은 실행 중인 게임과 이어져 게임 안 편집 화면을 앱에서 조종, [화면]은 고르는 화면과 HUD 만들기, [효과]·[셰이더]는 효과 구경과 숨기기, [글꼴]은 게임 글꼴 관리입니다.
 * **pygaki 묶음**: 렌파이 SDK + 플러그인 템플릿 + 런처 버튼 + pygaki 앱을 윈도우용 폴더 하나로 묶은 것입니다.
 
 | 하고 싶은 것 | 어디서 |
 | --- | --- |
 | 대사, 선택지, 이야기 흐름 쓰기 | pygaki [대본 편집] |
-| 플래그(변수)와 조건에 따라 갈라지는 이야기 | pygaki 오른쪽 칸 맨 위 플래그 카드, 상자의 다음 흐름 "조건 분기"(Alt+Enter) |
+| 플래그(변수)와 조건에 따라 갈라지는 이야기 | pygaki 오른쪽 칸 맨 위 플래그 카드, 상자의 다음 흐름 "조건 분기"(흐름 버블, Alt+→) |
 | 대사 글자 크기, 글꼴, 색, 속도, 등장 효과 | pygaki 대사 줄의 글자 효과 카드, 글 칸의 태그 상자 |
 | 상자·장면마다 화면 셰이더, 전환, 대사 소리, 커서·클릭 대기 | pygaki 상자나 label의 ◐ 셰이더 |
 | 그림, webm 영상, 음악, 효과음 넣기 | pygaki 상자의 배경 / 그림·영상 / 효과음·음악 카드 |
@@ -23,11 +23,11 @@
 
 ## 받기와 첫 프로젝트
 
-1. GitHub 저장소 [github.com/halftomatodev/pygaki](https://github.com/halftomatodev/pygaki) · 다운로드 [github.com/halftomatodev/pygaki/releases/latest](https://github.com/halftomatodev/pygaki/releases/latest)
+1. 다운로드 [github.com/halftomatodev/pygaki/releases/latest](https://github.com/halftomatodev/pygaki/releases/latest)에서 pygaki 묶음 zip을 받아 아무 폴더에 풉니다(저장소: [github.com/halftomatodev/pygaki](https://github.com/halftomatodev/pygaki)).
 2. `renpy.exe`로 런처를 켭니다(영어로 나오면 preferences → Language → 한국어).
 3. 런처 왼쪽 아래 **[+ Create New Project]**(새 프로젝트 만들기)에서 **Pygaki**를 고르고 이름과 해상도를 정합니다.
 4. 왼쪽 목록에서 프로젝트를 고르고 **[pygaki로 편집]**을 누르면 pygaki 앱이 그 프로젝트를 엽니다. 대본은 프로젝트 폴더의 `프로젝트이름.flow.json`에 저절로 저장됩니다.
-5. 앱 상단 탭의 **[▶ 렌파이에서 실행]**으로 게임을 켜서 봅니다. 런처의 [Launch Project]로 켜도 앱의 [GUI 편집]이 게임에 붙습니다(초록 점).
+5. 앱 위쪽 탭 줄 오른쪽의 **[렌파이에서 실행]**으로 게임을 켜서 봅니다. 런처의 [Launch Project]로 켜도 앱이 게임에 붙습니다(탭 옆 단추가 옅은 파란색 "● 게임과 연결됨"으로 바뀜).
 
 처음 앱을 켤 때 윈도우가 "PC 보호" 창을 띄우면 [추가 정보] → [실행]을 누릅니다(앱에 서명이 없어서 그렇습니다). 이 안내서는 런처의 **[pygaki 안내서]** 단추나 묶음의 `pygaki/pygaki_안내서.html`로 다시 열 수 있습니다.
 

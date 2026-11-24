@@ -1,4 +1,4 @@
-<!-- 원본: bundle/guide/parts/overview.md @ 76b3d8f4ad -->
+<!-- 원본: bundle/guide/parts/overview.md @ 07c20b2a8c -->
 # ひと目で:文書とファイルの場所
 
 ダウンロードしたパック、作ったゲームのプロジェクト、リポジトリのどこに何があるかをまとめました。「このファイルは消していいか」「自分の作業はどこに保存されるか」が気になったときに見ます。
@@ -14,7 +14,7 @@
 | ゲーム内編集画面で保存した値 | 各プラグインフォルダーの `*_layout.rpy`(例:`ui_kit/title_menu_layout.rpy`、`screen_fx/screen_fx_layout.rpy`) | 設定ファイル(`*_config.rpy`)の同じ値より優先されます。新しい版にするときは別に取っておいて戻します |
 | 自分で直した設定 | 各プラグインフォルダーの `*_config.rpy` | エンジンのファイル(`engine/`、`editor/`)は直しません |
 | スクリプトを直す前の元、更新前のプラグイン | プロジェクトフォルダーの `ui_kit_backup/` | ゲーム内編集画面がスクリプトの括弧を変える前に、ランチャーの [플러그인 올리기](プラグインを更新)が入れ替える前に(`plugins/`)残します。開発用なので配布版から除きます |
-| ゲームとアプリがやり取りするファイル | `game/showpy_inbox.json`、`game/showpy_live.json`、`game/pykaki_preview.json`、`game/pykaki_goto.json` | 開発中だけできる連携ファイルです。ゲームの配布版には入れません(消してもまたできます) |
+| ゲームとアプリがやり取りするファイル | `game/showpy_inbox.json`、`game/showpy_live.json`、`game/pykaki_preview.json`、`game/pykaki_goto.json`、`game/pykaki_screens.json` | 開発中だけできる連携ファイルです。ゲームの配布版には入れません(消してもまたできます) |
 
 ゲームを配布用にビルドするときは、`*.flow.json`、`ui_kit_backup/`、上の連携ファイルを除いてください。各プラグインの `README.md` はビルド時に自動で除かれます。
 
@@ -69,6 +69,7 @@
 | `showpy/samples/`、`showpy/examples/` | カーソル・クリック待ちのサンプル画像、pygaki スクリプトの例 |
 | `docs/LINK.md` | 2 つのプログラムが互いに合わせる形式(シナリオファイル、スクリプトの印、リアルタイム連携、エフェクトファイル) |
 | `bundle/` | パック作り(`make_bundle.py`)、ランチャーのボタン(`launcher/`)、この案内書(`guide/`) |
+| `bundle/guide/clips/` | この案内書の使い方動画(韓国語画面、日・英画面は `ja/`、`en/`)。`pykaki/tools/record_guide_clips.cjs` がアプリを開いて撮ります |
 | `.github/workflows/` | アプリの確認・Windows ビルド、タグを上げると Releases の下書き |
 
 リポジトリの文書は韓国語です。この案内書の日本語・英語は `bundle/guide/ja/`、`bundle/guide/en/` にあります。

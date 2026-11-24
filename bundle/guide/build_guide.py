@@ -440,18 +440,24 @@ def flag_recipes(lang="ko"):
     return "\n".join(out)
 
 
-# ── 안내서 영상 (GUIDE의 <!-- clip 이름 --> 줄 → bundle/guide/clips/이름.webm) ──
+# ── 안내서 영상 (원본의 <!-- clip 이름 --> 줄 → bundle/guide/clips/이름.webm) ──
+# 일·영 안내서는 clips/ja/, clips/en/에 같은 이름의 영상(그 언어 화면으로 찍은 것)이 있으면 그것을 쓴다.
+# 앱 사용법 영상은 pykaki/tools/record_guide_clips.cjs가 세 언어로 찍는다.
 
-CLIP_RE = re.compile(r"<!-- clip ([\w-]+) -->")
+## <!-- clip 이름 | 설명 -->: 설명(마크다운 한 줄)은 영상 아래 글로. 주석이라 앱 [도움말]·옵시디언 보기에는 안 보인다
+CLIP_RE = re.compile(r"<!-- clip ([\w-]+)(?: \| (.*?))? -->")
 
 
-def guide_clip(name):
-    fn = os.path.join(HERE, "clips", name + ".webm")
+def guide_clip(name, lang="ko", cap=None, src=""):
+    fn = os.path.join(HERE, "clips", lang, name + ".webm")
+    if lang == "ko" or not os.path.exists(fn):
+        fn = os.path.join(HERE, "clips", name + ".webm")
     if not os.path.exists(fn):
         raise SystemExit("영상이 없어요: %s" % os.path.relpath(fn, ROOT))
     with open(fn, "rb") as f:
         v = base64.b64encode(f.read()).decode("ascii")
-    return '<figure class="g-clip"><video src="data:video/webm;base64,%s" autoplay loop muted playsinline preload="auto"></video></figure>' % v
+    cap = '<figcaption>%s</figcaption>' % inline(cap, src) if cap else ""
+    return '<figure class="g-clip"><video src="data:video/webm;base64,%s" autoplay loop muted playsinline preload="auto"></video>%s</figure>' % (v, cap)
 
 
 # ── 페이지 ──
@@ -531,6 +537,8 @@ mark{background:var(--mark);color:inherit;border-radius:2px}
 .g-case{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:18px;padding:18px 0;border-top:1px solid var(--line)}
 .g-case:first-child{border-top:0;padding-top:4px}
 .g-case video,.g-clip video{display:block;width:100%;aspect-ratio:16/9;background:#111;border-radius:8px}
+.g-clip video{aspect-ratio:auto}
+.g-clip figcaption{font-size:14px;color:var(--muted);padding:6px 2px 0}
 .g-flag-demos .g-case video{aspect-ratio:auto;background:transparent;border:1px solid var(--line)}
 .g-case-t{min-width:0;font-size:14.5px}
 .g-case-t h4{margin:0 0 4px;font-size:16px}
@@ -540,7 +548,7 @@ mark{background:var(--mark);color:inherit;border-radius:2px}
 .g-case-t li{background:var(--soft);border-radius:6px;padding:3px 8px}
 .g-case-t li.w{background:var(--accent-soft)}
 .g-case-t pre{font-size:12.5px;margin:6px 0 0}
-.g-clip{margin:8px 0 10px;max-width:760px}
+.g-clip{margin:8px 0 14px;max-width:880px}
 @media (max-width:860px){.g-case{grid-template-columns:minmax(0,1fr);gap:10px}}
 .top{position:fixed;right:18px;bottom:18px;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:999px;width:42px;height:42px;font-size:18px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.12)}
 .menu-btn{display:none}
@@ -712,9 +720,10 @@ def build(out_path=OUT, clips_dir=None, lang="ko", files=None):
                 stale_check(lang, cid, src, at)
             ## 원본 맨 위 제목(# …)은 장 제목으로 바꾼다
             text = re.sub(r"\A\s*#\s+[^\n]*\n", "", text)
+            caps = {m.group(1): m.group(2) for m in CLIP_RE.finditer(text)}
             inner = md(CLIP_RE.sub(r"\n\nCLIPHERE \1\n\n", text.replace(FLAG_MARK, "FLAGRECIPESHERE")), src, heads, used)
             inner = inner.replace("<p>FLAGRECIPESHERE</p>", flag_recipes(lang))
-            inner = re.sub(r"<p>CLIPHERE ([\w-]+)</p>", lambda m: guide_clip(m.group(1)), inner)
+            inner = re.sub(r"<p>CLIPHERE ([\w-]+)</p>", lambda m: guide_clip(m.group(1), lang, caps.get(m.group(1)), src), inner)
             note = '<p class="src">%s: <a href="%s/blob/main/%s" target="_blank" rel="noopener"><code>%s</code></a></p>' % (t["src"], REPO_URL, src, src) \
                 if not src.startswith("bundle/guide/") else ""
         else:

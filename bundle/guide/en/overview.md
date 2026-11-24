@@ -1,4 +1,4 @@
-<!-- 원본: bundle/guide/parts/overview.md @ 76b3d8f4ad -->
+<!-- 원본: bundle/guide/parts/overview.md @ 07c20b2a8c -->
 # At a glance: where docs and files are
 
 What is where in the bundle you downloaded, in a game project you made, and in the repository. Look here when you wonder "can I delete this file?" or "where is my work saved?".
@@ -14,7 +14,7 @@ What is where in the bundle you downloaded, in a game project you made, and in t
 | Values saved in the in-game editor | `*_layout.rpy` in each plugin folder (e.g. `ui_kit/title_menu_layout.rpy`, `screen_fx/screen_fx_layout.rpy`) | Take priority over the same value in the settings file (`*_config.rpy`). Set them aside and put them back when updating |
 | Settings you edited | `*_config.rpy` in each plugin folder | Don't edit the engine files (`engine/`, `editor/`) |
 | Originals before script edits, plugins before updates | `ui_kit_backup/` in the project folder | Kept before the in-game editor changes parentheses in the script, and before the launcher's [플러그인 올리기] (Update plugins) replaces files (`plugins/`). For development, so leave it out of releases |
-| Files the game and app exchange | `game/showpy_inbox.json`, `game/showpy_live.json`, `game/pykaki_preview.json`, `game/pykaki_goto.json` | Link files that only appear during development. Don't put them in the game's release (they come back if deleted) |
+| Files the game and app exchange | `game/showpy_inbox.json`, `game/showpy_live.json`, `game/pykaki_preview.json`, `game/pykaki_goto.json`, `game/pykaki_screens.json` | Link files that only appear during development. Don't put them in the game's release (they come back if deleted) |
 
 When you build the game for release, leave out `*.flow.json`, `ui_kit_backup/` and the link files above. Each plugin's `README.md` is left out automatically when building.
 
@@ -69,6 +69,7 @@ To remove the add-on, delete `launcher/game/pygaki_launcher.rpy` (and its `.rpyc
 | `showpy/samples/`, `showpy/examples/` | sample cursor and click-to-continue images, sample pygaki scripts |
 | `docs/LINK.md` | the formats the two programs agree on (script file, marks in the exported script, live link, effect files) |
 | `bundle/` | making the bundle (`make_bundle.py`), launcher buttons (`launcher/`), this guide (`guide/`) |
+| `bundle/guide/clips/` | the how-to videos in this guide (Korean screens; Japanese and English screens in `ja/`, `en/`). `pykaki/tools/record_guide_clips.cjs` opens the app and records them |
 | `.github/workflows/` | app checks and Windows build; pushing a tag makes a Releases draft |
 
 The repository's documents are in Korean. The Japanese and English versions of this guide are in `bundle/guide/ja/` and `bundle/guide/en/`.

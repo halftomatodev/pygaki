@@ -1,4 +1,4 @@
-<!-- 원본: pykaki/docs/GUIDE.md @ 41a8beeabb -->
+<!-- 원본: pykaki/docs/GUIDE.md @ 1d8055e551 -->
 # pygaki user guide
 
 A tool for writing Ren'Py scripts with boxes and lines and exporting them as Ren'Py script files (`.rpy`).
@@ -28,6 +28,8 @@ The first time you open it, a sample script ("A rainy day") is loaded. Press [Ne
 - Hovering a button also shows a short note on what it does.
 
 ### Canvas controls at a glance
+<!-- clip canvas-nav | Zoom with the mouse wheel, drag an empty spot to pan, and press ⛶ at the top left to fit all boxes. -->
+
 The same list is under **Canvas controls ⓘ** at the top left of the canvas.
 - **Double-click** a box to write right inside it. Double-click a dialogue line, title or choice to go to that field. Finish with Esc or a click on an empty spot.
 - Click a box once to change the rest of its settings, like label and next flow, on the right.
@@ -51,6 +53,8 @@ The same list is under **Canvas controls ⓘ** at the top left of the canvas.
 ## 3. Writing the script
 
 ### Registering characters
+<!-- clip char-add | Open the "Scenes and characters" card, press [+ Character], type the name, change the id below to English letters, then Enter. -->
+
 Press **[+ Character]** on the "Characters" row of the **Scenes and characters** tree on the left. Edit a character with ✎ on its row (or double-click, F2) and delete it with ✕.
 - **Color**: name color (exported as `Character(..., color=)`)
 - **id**: the Ren'Py variable name. Use only English letters, digits and `_`. E.g. `a`, `alice`
@@ -59,11 +63,15 @@ Press **[+ Character]** on the "Characters" row of the **Scenes and characters**
 Narration doesn't need to be registered.
 
 ### Making boxes
+<!-- clip box-new | Double-click an empty spot on the canvas to make a new box, then type right away in the dialogue field on the right. -->
+
 - **Double-click an empty spot** on the canvas to make a new box. Double-clicking inside a label's background puts it in that label.
 - You can also use **[+ Box]** in "Boxes and layout" on the left.
 - **Copying boxes**: select boxes (drag to select several), press **Ctrl+C**, then **Ctrl+V** to paste where the mouse is on the canvas. **Ctrl+D** duplicates the selected boxes right beside them. Lines between boxes copied together are reconnected between the new boxes; lines to other boxes still point to the original boxes. New boxes get new names (like n07), so they don't clash in the script. When the cursor is in a text field, Ctrl+C/V copies only text. You can paste between two script windows too (lines to boxes the other script doesn't have are cut). One Ctrl+Z removes everything pasted.
 
 ### Writing inside a box
+<!-- clip box-write | Double-click a box → Ctrl+Enter at the end of a line for a new line → type → Esc to finish. -->
+
 - **Double-click** a box and the view glides and zooms in on it, with the cursor on the line you double-clicked. The box looks the same as when viewing; just edit the text in place.
 - A small set of buttons sits **outside to the left** of the line with the cursor.
   - **⠿** drag to reorder lines
@@ -80,7 +88,13 @@ Narration doesn't need to be registered.
 - Outside the left of the line you're editing, a small drop with just the handle (⠿) and delete (✕) floats and slowly wobbles. Add new lines with Ctrl+Enter.
 - At the height of a line you're typing in, two small blue drops **✓ ✕** pop out outside the right of the box and slowly wobble (they don't cover the dialogue). **✓** (done) is the same as Ctrl+Enter (new line below with the same speaker) and **✕** (cancel) the same as Esc (finish editing), so you can click them too. Hover a drop to see its shortcut. Text is saved as you type, so cancelling keeps it.
 
+<!-- clip line-kind | On a new line press Alt+←, pick the character with ↓ (in the sample "앨리스" = Alice) and press Enter: the line becomes her dialogue. -->
+
+<!-- clip flow-choice | Press Alt+→ to open the next flow, pick "Choice" with ↓ and Enter, then type the first choice. -->
+
 ### Text styling and pacing (tag box)
+<!-- clip tag-style | Select the line (Home, Shift+End), open the font bubble with Alt+↑, then press **B** (bold) and a color. The selected text is wrapped in tags. -->
+
 - When the cursor is in a dialogue or narration text field, the **tag box** (text style) appears. When writing inside a box it sits **outside the top right** of the box, folded into one small purple drop **⋯** (the font bubble); click the drop or press **Alt+↑** to unfold it (Alt+↑ or Esc again folds it). The dialogue bubble, font bubble and flow bubble can all be open together, and all fold when you finish editing the box. When writing in the right panel it always appears unfolded above the text effect field.
 - Unfolded, it shows all the rows: Text, Font, Opacity, Spacing and Outline, Effect, Progress, Speed, Insert, (Ruby text) and Text box (there is no fold button). The background is one almost transparent piece of glass, and the rows inside it are staggered so that, together with the line type picker and the next flow, they wrap around the box. Each row has a bold grey name on the left.
 - Hover the progress, speed, opacity, letter spacing or insert buttons for a moment and a **tooltip** shows the tag it inserts, a description, and a sample sentence playing one character at a time with that tag (click-to-continue shows ▼ and moves on by itself). While you drag a slider, the sample plays with that value.
@@ -106,6 +120,8 @@ Narration doesn't need to be registered.
 - If text tags are turned off in the left settings, the tag box shows only [Turn on].
 
 ### Staging (background, characters, music, sound effects, pause, shake)
+<!-- clip stage-bg | On a new line press Alt+←, pick "Background", then type the background name (`room`) in the field outside on the right. -->
+
 You don't need to know Ren'Py commands: choose **Staging** as the line type and fill in the fields. Below the fields, the Ren'Py command that will actually be exported is shown in green.
 
 | Line type | Fields | Exported command |
@@ -230,6 +246,8 @@ Use it where the player must type the answer, like the culprit's name or a passw
 - The script uses Ren'Py's `renpy.input`, so it works without the pygaki plugin.
 
 ### Connecting with lines
+<!-- clip link-drag | Drag the dot (●) under a box and drop it on an empty spot: a new box appears, already connected. -->
+
 - **Drag the dot (●)** under a box (for choices and conditions, on the right of each row) and drop it on another box to connect them.
 - **Drop it on an empty spot** to make a new connected box. The fastest way to keep writing.
 - Click a line and press **Delete** to disconnect.
@@ -535,6 +553,7 @@ Set the two icons used when distributing the game. Press **[Icons] next to [Fold
 - Mac (`icon.icns`), Android, iOS and web icons aren't supported yet.
 
 ## 8. Checking and exporting
+<!-- clip script-view | Click the [Script] card on the left to see the Ren'Py script that will be exported. -->
 
 - **Check** tab: shows things that would be problems in Ren'Py, like unconnected lines, empty dialogue and bad names. Click an item to go to that box.
 - **Image name check**: with a Ren'Py project connected, it checks whether the images of background and show lines exist in the game. Image names are "tag attributes" (e.g. `mina smile`), so it warns when none of that tag's images, among file names in the `images` folder (`movies` for videos) and `image` definitions in the game's code, has all the attributes written on the line (and shows that tag's image names). It only warns and doesn't block export. Tags made with `layeredimage` aren't checked for attributes.
