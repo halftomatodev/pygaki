@@ -1046,6 +1046,11 @@ init -8 python in ui_editor:
                 rv.append("등록 못 한 영상: {} ({}){}".format(f, r, more))
             return rv
 
+        def place_lines(self):
+            """짧은 판 패널(4.20): 고른 줄과 위치 줄만."""
+            rv = self.info_lines()
+            return rv[:1] + [ l for l in rv[1:] if l.startswith("위치") ][:1]
+
         def help_lines(self):
             return [
                 "마우스: 그림을 누르면 그 줄 고르기, 끌면 위치 (Shift: 한 방향) | 방향키 이동 (Shift: 10배)",

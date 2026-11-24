@@ -178,12 +178,17 @@ init -8 python in ui_editor:
         """게임 안 패널 보이기/숨기기를 바꾸고 앱에 알립니다(앱이 기억해 둠). (3.23)"""
         live.hide_panel = not live.hide_panel
         _live_send(dict(type="panel", hide=live.hide_panel))
-        msg("게임 안 편집 화면 " + ("숨김 (pygaki 앱에서 고침)" if live.hide_panel else "보임"))
+        msg("게임 안 편집 화면 " + ("숨김 (pygaki 앱에서 고침)" if live.hide_panel else "보임 (자리 옮기기만, 값은 pygaki 앱에서)"))
         store.renpy.restart_interaction()
 
     def live_panel_hidden():
         """앱이 붙어 있고 패널 숨기기가 켜져 있으면 게임 안 패널을 그리지 않습니다."""
         return live.client is not None and live.hide_panel
+
+    def live_compact():
+        """앱이 붙어 있고 게임 창 패널도 보이게 했으면 게임 안 패널은 짧은 판 (4.20).
+        게임 창에는 자리 옮기기에 필요한 것만, 글꼴, 색 같은 값 칸은 앱(패널 통째로)에서."""
+        return live.client is not None and not live.hide_panel
 
     def _live_send(obj):
         c = live.client
@@ -532,7 +537,7 @@ init -8 python in ui_editor:
         return dict(k=kind, c=out)
 
     def _panel_state():
-        if not (state.open and live_panel_hidden()):
+        if not (state.open and live_connected()):
             live.widgets = { }
             return None
         reg = { }
@@ -1052,19 +1057,21 @@ screen ui_editor_live():
 screen ui_editor_live_mirror():
     layer "ui_editor"
 
-    if config.developer and ui_editor.state.open and ui_editor.live_panel_hidden():
+    ## 4.20: 게임 창 패널을 보이게 해도(짧은 판, live_compact) 값 칸은 앱에서 고치므로 늘 보냅니다.
+    if config.developer and ui_editor.state.open and ui_editor.live_connected():
 
         ## 게임 창에 보이는 표시 (3.18): 편집기가 열려 있으면 클릭과 키가 게임으로 가지 않아서,
         ## 패널이 앱에 있을 때도 지금 편집 중인 것을 알 수 있게. 글자만 있어서 입력을 막지 않습니다.
         ## 4.6: 화면을 덜 가리게 오른쪽 위 구석에 작게 (고치는 칸은 모두 pygaki 앱에 있음)
-        frame:
-            style "empty"
-            background "#00000080"
-            padding (8, 2)
-            xalign 1.0
-            xoffset -6
-            ypos 6
-            text ui_editor.live_badge() style "ui_editor_small" color "#ffd23b" size 12
+        if ui_editor.live_panel_hidden():
+            frame:
+                style "empty"
+                background "#00000080"
+                padding (8, 2)
+                xalign 1.0
+                xoffset -6
+                ypos 6
+                text ui_editor.live_badge() style "ui_editor_small" color "#ffd23b" size 12
 
         fixed:
             pos (-40000, 0)

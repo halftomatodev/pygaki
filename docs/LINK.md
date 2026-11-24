@@ -360,7 +360,7 @@ pygaki 데스크톱 앱의 [GUI 편집] 화면이 게임 안 편집기를 바깥
 - `where.file`은 프로젝트 폴더 기준 경로입니다(렌파이 `get_filename_line`). 앱이 그 파일을 읽어 `line` 앞뒤 줄을 보여줍니다.
 - `custom_ui`(3.15)는 편집기 "커서/대사 소리" 탭입니다. `values`는 편집 중인 값 → `custom_ui_layout.rpy` → 설정 파일 순서로 지금 쓰는 값이고, 이름은 `custom_ui.EDIT_KEYS`와 같습니다. `cps`는 `text_cps`가 `null`일 때 환경설정의 지금 값. `edited`는 저장 안 한 값 이름, `reload_keys`는 저장한 뒤 게임을 다시 불러와야 적용되는 값(저장할 때 게임이 저절로 다시 불러옴). 플러그인이 없으면 `null`, 꺼져 있으면 `{"ok": false, "why": "..."}`. 3.14 게임은 이 값이 없습니다.
 - `custom_ui.cursor_lines`(3.21, Screen FX 4.5가 있을 때)는 커서와 셰이더 '여기에서부터': `choices`([자리, 이름] `effect` 1번·2번 다 받음 / `overlay` 2번만 / `top` 안 받음), `now`(칸에 보일 자리), `picked`, `file`, `line`(고른 줄), `follow`, `here`([파일, 줄] 게임의 지금 줄), `rows`(고른 줄 주변 `{line, text, sel, here, dirty}`), `have`(고른 줄 위에 이미 있는 커서 줄), `pending`, `changes`(이 파일에서 커서가 바뀌는 줄 `{line, target, label, kind, pending}`). 셰이더 칸과 같은 줄 고르기를 씁니다.
-- `panel`(3.16)은 게임 안 편집기 패널을 통째로 옮긴 것입니다. 편집기가 열려 있고 게임 안 패널이 숨어 있을 때(`panel` 명령 `hide: true`)만 있고, 아니면 `null`. 게임이 패널(`ui_editor_panel_body`)과 고르기 창(글꼴, 색, 그림/영상, 프레임 그림)을 화면 밖에 그려 두고(`ui_editor_live_mirror` 스크린) 그 위젯을 나무 모양으로 보냅니다.
+- `panel`(3.16)은 게임 안 편집기 패널을 통째로 옮긴 것입니다. 편집기가 열려 있으면 있고, 아니면 `null`. ui_kit 4.20 전에는 게임 안 패널이 숨어 있을 때(`panel` 명령 `hide: true`)만 있었습니다. 4.20부터는 게임 창 패널을 보이게 해도(`hide: false`) 게임 창에는 짧은 판(탭 줄에서 값만 고르는 탭을 빼고, 자리 줄과 조작 안내만)이 나오고 값 칸은 이 `panel`로 앱에 계속 옵니다. 고르기 창도 연결된 동안은 늘 앱에서 엽니다. 게임이 패널(`ui_editor_panel_body`)과 고르기 창(글꼴, 색, 그림/영상, 프레임 그림)을 화면 밖에 그려 두고(`ui_editor_live_mirror` 스크린) 그 위젯을 나무 모양으로 보냅니다.
   ```json
   "panel": { "tab": "screen_fx", "popup_kind": null, "popup": null,
              "body": { "k": "v", "c": [ { "k": "t", "t": "효과:" },
@@ -401,7 +401,7 @@ pygaki 데스크톱 앱의 [GUI 편집] 화면이 게임 안 편집기를 바깥
 |---|---|---|
 | `editor` | `open`(참/거짓), `tab`(선택), `line` `file`(선택, ui_kit 4.8) | 편집기 열기/닫기. 열 때 그 탭으로. `tab`이 `stage`이고 `line`(원고 줄 번호)이 있으면 게임이 `file`(이름만 맞춤, 없으면 `script_flow.rpy`)에 있을 때 그 줄(아니면 그 뒤 가장 가까운 show/scene 줄)을 고름. 게임이 다시 시작해도(warp) 열 때 다시 고름. 예전 판은 `line`을 모르고 그냥 엶 |
 | `tab` | `id` | 탭 바꾸기 (그 화면에서 쓸 수 있을 때) |
-| `panel` | `hide`(참/거짓) | 게임 안 편집기 패널 숨기기. 숨겨도 끌기와 단축키는 그대로 |
+| `panel` | `hide`(참/거짓) | 게임 안 편집기 패널 숨기기. 숨겨도 끌기와 단축키는 그대로. 보이게 하면(4.20) 게임 창에는 짧은 판 |
 | `bands` | `on`(참/거짓) | 여백 띠 켜기/끄기 (ui_kit 4.20). 앱은 붙을 때마다, 그리고 환경 설정 [게임 창 여백에 붉은 띠]나 단축키(기본 F8 `gameBands`)로 바꿀 때 보냄. 예전 판 게임은 모르는 명령이라 무시 |
 | `goto` | `where`: `"pause"`, `"title"`, `"start"`, `"line"` (+ `file`: `"game/…rpy"`, `line`: 줄 번호) | ESC 메뉴 열기 / 타이틀로 가기(진행 중인 게임은 끝남) / 타이틀에서 게임 시작(3.16) / 원고의 그 줄로(3.20): 이번에 지나온 줄이면 되감기, 아니면 렌파이 warp(게임을 다시 시작해서 그 줄까지 scene/show만 따라 함, 변수는 빠질 수 있음). 빈 줄, 주석 줄은 그 뒤 첫 문장, 아니면 그 줄이나 그 앞 문장 |
 | `panel.do` | `id`, 버튼은 `t`, 막대와 입력칸은 `value`, 입력칸은 `enter`(참이면 Enter까지) | `panel`의 그 자리 위젯을 누름 / 막대 값 바꿈 / 입력칸 글 넣기 (3.16) |

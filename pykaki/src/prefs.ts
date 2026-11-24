@@ -183,7 +183,7 @@ export function isDark(c: Colors) {
 }
 
 // 카드 유리 색 (fluidkit LiquidCard). 뒤의 캔버스가 비치게 반투명. 접으면 하늘색.
-// 사용 중(in-use)은 바탕색이 아니라 카드 둘레를 도는 빛(border-beam, Card.tsx BEAM, 세션 90)으로 보인다
+// 사용 중(in-use)은 유리 바탕 없이 투명하고 둘레가 흰 점선이다(Card.tsx, styles.css `.card.in-use`, 세션 100)
 // 투명도는 환경 설정의 [카드 투명도] 하나로 모든 카드가 같이 바뀐다(세션 82, prefs.ts glass).
 // 투명할수록 테두리 빛(intensity)을 세게 하고, 50% 넘으면 가장자리 굴절(refraction, 크롬·Electron만)도 켜서 유리로 읽히게 한다
 export function glassOf(g: number) {
@@ -290,5 +290,3 @@ export function comboLabel(c: string) {
 // 단축키 이름 (툴팁용)
 export const keyOf = (id: ActionId) => comboLabel(usePrefs.getState().keys[id]);
 
-// 지금 화면이 어두운지 (색을 바꾸면 다시 그림). border-beam 테마 고르기 등
-export const useDark = () => usePrefs((p) => isDark(colorsOf(p)));

@@ -467,7 +467,7 @@ mark{background:var(--mark);color:inherit;border-radius:2px}
 <h3 id="background-image-and-sound-cards">Background, image and sound cards</h3>
 <p>Click a box and below the dialogue card are the <b>Background (image, video)</b>, <b>Image, video</b> and <b>Sound, music</b> cards. With a Ren'Py project connected, click images and sounds to add them right away (listen to sounds with ▶). <b>[📂 Pick file]</b> at the top of a card opens an Explorer window in game/images (game/audio for sounds). If you choose a file outside the game folder, it asks whether to copy it to game/images (movies for webm videos, audio for sounds), then copies and adds it (adding _2 if the name exists). Background card file names must start with bg (e.g. "bg room.png"). Without a connection, type the name. It goes <b>right before the line you're writing</b> (at the end of the box if there's none). Change its place by dragging the line in the dialogue card. The top of each card lists those lines already in this box; click one to go to it.</p>
 <p><b>Dialogue lines only hold text.</b> Character images (expressions) aren't attached to dialogue lines; choose them in the <b>[Image, video] card</b>. While writing a character's line, the top of this card shows that character's images (e.g. <code>a smile.png</code>, <code>a angry.png</code>); click one to put a show line (<code>show a smile</code>) right before that line. Without images, type the expression name. Expressions put on dialogue lines in older versions show as "expression smile ✕" next to the line and are exported as is (click to remove).</p>
-<p><b>In-use cards</b>: cards related to the line you're writing get a pink and purple band of light running around them and a purple "In use" mark next to the title. Writing dialogue: the dialogue and text effect cards; a background line: the background card; show and hide lines: the image card; sound lines: the sound card. Cards without the mark have nothing to do with the current line.</p>
+<p><b>In-use cards</b>: cards related to the line you're writing turn see-through with a dotted white outline and a purple "In use" mark next to the title. Writing dialogue: the dialogue and text effect cards; a background line: the background card; show and hide lines: the image card; sound lines: the sound card. Cards without the mark have nothing to do with the current line.</p>
 <h3 id="go-here-in-ren-py-move-position-app">Go here in Ren'Py, Move position (app)</h3>
 <p>When the game was started with [▶ Run in Ren'Py] and is connected to the app:</p>
 <ul>
@@ -1096,7 +1096,7 @@ label map_cafe:
 </li>
 <li><b>[Save]</b> (or Ctrl+S) is the same as saving in the in-game editor. Values are saved to <code>*_layout.rpy</code> in the game folder or to the script.
 </li>
-<li>While connected to the app, the editor panel in the game window is hidden. To show it in the game window too, press the [Editor in game window: hidden] button at the top or <b>F9</b> (anywhere in the app, and also in the game window while the editor is open). Press again to hide it. The app remembers this for the next time it attaches to the game. While it's visible in the game window, the editing section moves to the game window. Change shortcuts in Settings → Shortcuts.
+<li>While connected to the app, the editor panel in the game window is hidden. To show it in the game window too, press the [Editor in game window: hidden] button at the top or <b>F9</b> (anywhere in the app, and also in the game window while the editor is open). Press again to hide it. The app remembers this for the next time it attaches to the game. While it's visible in the game window, the game-window panel gets short: it only shows where the selected thing sits and how to move it, and tabs that only pick values (cursor, UI text, shaders, shortcuts) drop out of its tab row. Value fields like font, color, and size stay in the app, so you drag things in the game window and change values in the app. Change shortcuts in Settings → Shortcuts.
 <ul>
 <li><b>Text fields</b>: long text fields (splash text, UI text, etc.) appear three lines tall across the panel. Change each with [Wide]/[Narrow] beside it; the app remembers. Enter finishes, Esc cancels, line break is <code>\n</code>.
 </li>
@@ -1157,7 +1157,7 @@ label map_cafe:
 <li><b>[Reset to default]</b> returns to the original keys.
 </li></ul>
 </li>
-<li><b>[Reset all settings]</b> (bottom of the settings window): resets the screen theme, font, focus mode dimming and shortcuts to defaults. The script and box colors stay.
+<li><b>[Reset all settings]</b> (bottom of the settings window): resets settings such as card transparency, label borders, focus mode dimming and shortcuts to defaults. The script and box colors stay.
 </li></ul>
 </div>
 <div class="blk"><h2 id="11-shortcuts-defaults">11. Shortcuts (defaults)</h2>

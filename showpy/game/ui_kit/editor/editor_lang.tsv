@@ -1348,3 +1348,6 @@ Tab 대사/이름/그림 바꾸기 | 방향키 이동 | A/D 크기 | Q/E 회전 
 F8 여백 띠 {} (게임 화면 밖 창의 빈 곳을 붉게)	F8 余白の帯 {0} (ゲーム画面の外のウィンドウの空きを赤く)	F8 Margin bands {0} (paint the empty window area outside the game red)
 여백 띠 켬 (게임 화면 밖 창의 빈 곳을 붉게)	余白の帯 オン (ゲーム画面の外のウィンドウの空きを赤く)	Margin bands on (paint the empty window area outside the game red)
 여백 띠 끔	余白の帯 オフ	Margin bands off
+pygaki 앱에 고르기 창이 열려 있어요.	pygaki アプリで選択ウィンドウが開いています。	A picker is open in the pygaki app.
+글꼴, 색, 크기 같은 값은 pygaki 앱의 [[GUI 편집]에서 고쳐요. F9 게임 창 패널 숨기기	フォント、色、サイズなどの値は pygaki アプリの [GUI 編集] で直します。F9 でゲームウィンドウのパネルを隠す	Change values like font, color, and size in the pygaki app's [GUI Edit]. F9 hides the game-window panel
+보임 (자리 옮기기만, 값은 pygaki 앱에서)	表示(位置の移動だけ、値は pygaki アプリで)	Shown (moving only, values in the pygaki app)

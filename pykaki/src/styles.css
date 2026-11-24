@@ -1374,11 +1374,9 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 
 /* 지금 쓰는 줄과 이어진 카드 (대사를 쓰면 대사·글자 효과, 연출 줄이면 그 종류 카드).
    [게임 줄 따라가기: 켬]의 녹색보다 살짝 밝게 */
-/* "사용 중" 카드: 세션 90부터 border-beam이 카드 둘레를 도는 빛을 그린다(Card.tsx BEAM). 예전 conic-gradient 빛(세션 79~83)은 뺐다.
-   감싼 틀은 칸 폭을 그대로 따른다 */
-.card-beam { display: block; }
-.right-scroll .card-beam { align-self: flex-end; width: fit-content; min-width: min(240px, 100%); max-width: 100%; }
-.right-scroll .card-beam > .card { width: 100%; }
+/* "사용 중" 카드 (세션 100, 사용자): 유리 바탕 없이 투명하게(Card.tsx가 tint·흐림·그림자를 뺌), 둘레는 흰 점선(사용자가 고름).
+   세션 90~99의 border-beam 빛 띠와 그 전 conic-gradient 빛(세션 79~83)은 뺐다. */
+.card.in-use:not(.folded) { outline: 2px dotted #fff; outline-offset: -2px; }
 .card.in-use > [data-fluidkit='liquid-card-content'] > h3 .card-title::after { content: var(--t-in-use, '사용 중'); font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 8px; color: #fff; background: #9333ea; box-shadow: 0 1px 4px color-mix(in srgb, #9333ea 45%, transparent); }
 .sc-char { margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed var(--line); }
 .sc-char-h { font-size: 12px; color: var(--muted); margin: 2px 0 6px; }

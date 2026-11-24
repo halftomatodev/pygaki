@@ -1,4 +1,4 @@
-<!-- 원본: pykaki/docs/GUIDE.md @ dbf4680c5d -->
+<!-- 원본: pykaki/docs/GUIDE.md @ a4b12d5e7d -->
 # pygaki user guide
 
 A tool for writing Ren'Py scripts with boxes and lines and exporting them as Ren'Py script files (`.rpy`).
@@ -192,7 +192,7 @@ Click a box and below the dialogue card are the **Background (image, video)**, *
 
 **Dialogue lines only hold text.** Character images (expressions) aren't attached to dialogue lines; choose them in the **[Image, video] card**. While writing a character's line, the top of this card shows that character's images (e.g. `a smile.png`, `a angry.png`); click one to put a show line (`show a smile`) right before that line. Without images, type the expression name. Expressions put on dialogue lines in older versions show as "expression smile ✕" next to the line and are exported as is (click to remove).
 
-**In-use cards**: cards related to the line you're writing get a pink and purple band of light running around them and a purple "In use" mark next to the title. Writing dialogue: the dialogue and text effect cards; a background line: the background card; show and hide lines: the image card; sound lines: the sound card. Cards without the mark have nothing to do with the current line.
+**In-use cards**: cards related to the line you're writing turn see-through with a dotted white outline and a purple "In use" mark next to the title. Writing dialogue: the dialogue and text effect cards; a background line: the background card; show and hide lines: the image card; sound lines: the sound card. Cards without the mark have nothing to do with the current line.
 
 ### Go here in Ren'Py, Move position (app)
 When the game was started with [▶ Run in Ren'Py] and is connected to the app:
@@ -641,7 +641,7 @@ Press **GUI** in **[Script | GUI | Effects | Shaders]** at the left of the toolb
   - **Splash**: choose a page and change background color, background and logo images, title and body text, position, when to advance and duration. [View this page] shows that page in the game window (click to close). Saving writes it to `splash/splash_layout.rpy`. Title and body sentences are edited in `splash/splash_config.rpy`. (pygaki plugin 4.18, splash 1.2 or later) Add or remove pages with [Show] [Don't show] under "On game start" at the top, and the row below tells you whether it shows when the game starts now and, if not, why. [Show again] clears "don't show next time" and the viewed record. (splash 2.1 or later)
   - **Edit shortcuts** (below the splash controls guide): each line has a function name and a key button. Ren'Py's default functions (advance dialogue, skip, screenshot …) and the preset actions (quick save, open preferences …) are there from the start. Press the key button, then press the new key in the game window (Esc cancels; pressing and releasing Ctrl alone gives Ctrl). [+] adds one more key. Clicking a function name shows [키 단추로] (pick with key buttons, for the app), [키 빼기] (remove keys), [처음 키로] (back to the first keys) and a description cell. If another function already uses the key, a warning and guidance appear, and it only changes when you press [그쪽에서 빼고 바꾸기] (remove it there and change). Press **[안내 화면으로 내보내기] (export to the guide screen)** and the splash controls guide table follows these settings; pick which functions to show by clicking them in the list in the controls guide section. Changed keys also go into the ESC controls screen list automatically. Changes apply to the game right away, and saving writes `hotkeys/hotkeys_layout.rpy`. (pygaki plugin hotkeys 1.2, splash 2.5 or later)
 - **[Save]** (or Ctrl+S) is the same as saving in the in-game editor. Values are saved to `*_layout.rpy` in the game folder or to the script.
-- While connected to the app, the editor panel in the game window is hidden. To show it in the game window too, press the [Editor in game window: hidden] button at the top or **F9** (anywhere in the app, and also in the game window while the editor is open). Press again to hide it. The app remembers this for the next time it attaches to the game. While it's visible in the game window, the editing section moves to the game window. Change shortcuts in Settings → Shortcuts.
+- While connected to the app, the editor panel in the game window is hidden. To show it in the game window too, press the [Editor in game window: hidden] button at the top or **F9** (anywhere in the app, and also in the game window while the editor is open). Press again to hide it. The app remembers this for the next time it attaches to the game. While it's visible in the game window, the game-window panel gets short: it only shows where the selected thing sits and how to move it, and tabs that only pick values (cursor, UI text, shaders, shortcuts) drop out of its tab row. Value fields like font, color, and size stay in the app, so you drag things in the game window and change values in the app. Change shortcuts in Settings → Shortcuts.
   - **Text fields**: long text fields (splash text, UI text, etc.) appear three lines tall across the panel. Change each with [Wide]/[Narrow] beside it; the app remembers. Enter finishes, Esc cancels, line break is `\n`.
   - **Confirm dialogs, UI text**: change the quit confirmation ("Are you sure you want to quit?"), [Yes] [No], and the text of quick menu and menu buttons. See the dialog right away with [View this dialog]; button text changes after saving, once the game reloads. (pygaki plugin ui_kit 3.23 or later)
   - **Image and video placement**: open Explorer with [Open images folder] or the open-folder button in the image picker to add files.
@@ -679,7 +679,7 @@ Change them in **[Settings]** at the right of the toolbar. These settings are sa
   - To avoid clashing with typing, Ctrl or Alt must be held too. F2–F12 can be used alone (F1 is help).
   - Choosing a key used by another action clears that action's shortcut.
   - **[Reset to default]** returns to the original keys.
-- **[Reset all settings]** (bottom of the settings window): resets the screen theme, font, focus mode dimming and shortcuts to defaults. The script and box colors stay.
+- **[Reset all settings]** (bottom of the settings window): resets settings such as card transparency, label borders, focus mode dimming and shortcuts to defaults. The script and box colors stay.
 
 ## 11. Shortcuts (defaults)
 

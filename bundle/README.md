@@ -46,7 +46,10 @@ Actions 화면에서 손으로 돌리면(Run workflow) Releases에는 안 올리
 | `pygaki/template/` | Pygaki 새 프로젝트에 얹을 플러그인을 담은 템플릿. 런처의 [새 프로젝트 만들기]와 같은 방법으로 만든 1280x720 한국어 기본 프로젝트(그림까지 다 만듦) + 플러그인(`ui_kit`, `screen_fx`, `hotkeys`, `splash`), `project.json`의 `"type": "template"`. 새 프로젝트는 고른 해상도로 새로 만들고 여기서는 플러그인, 커서·CTC 샘플, 한국어 공통 문구만 가져가요 |
 | `pygaki/app/pygaki.exe` | pygaki 데스크톱 앱 |
 | `pygaki/pygaki_안내서.html` | 모든 안내를 모은 HTML 한 파일(목차, 찾기, 효과 견본 영상). 묶을 때 `bundle/guide/build_guide.py`가 저장소 문서로 다시 만들어 넣음 |
+| `pygaki/pygaki_guide_ja.html`, `pygaki_guide_en.html` | 그 안내서의 일본어판, 영어판 |
 | `pygaki/읽어주세요.txt` | 쓰는 법 |
+| `pygaki/LICENSE-pygaki.txt` | pygaki 라이선스 |
+| `pygaki/fonts/` | 레트로 해상도(높이 600 미만) 새 프로젝트에 넣는 한글 픽셀 글꼴 갈무리와 그 라이선스(OFL). 저장소 `bundle/fonts/` |
 | `pygaki_넣는법.txt` | (덧붙임에만) SDK 폴더에 넣는 법, 빼는 법 |
 
 템플릿에 넣는 플러그인은 `make_bundle.py`의 `PLUGINS`에서 고쳐요. 템플릿에서만 다르게 두는 설정은 `TEMPLATE_SETTINGS`에 있어요. 지금은 **VHS 덮개가 처음에는 꺼져 있어요**(`screen_fx.overlay = False`). 켜려면 새 프로젝트의 `game/screen_fx/screen_fx_config.rpy`에서 `True`로 바꿔요.

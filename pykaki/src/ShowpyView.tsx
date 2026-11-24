@@ -428,7 +428,7 @@ function EditorBar({ st }: { st: GameState }) {
         <button
           className={e.hide_panel ? '' : 'on'}
           onClick={() => setGamePanel(e.hide_panel)}
-          title={`게임 창에도 편집 화면 패널을 보일지 바꿔요. 보이게 하면 고치는 칸이 게임 창으로 가요. 단축키 ${keyOf('gamePanel')} (게임 창에서도 됨)`}
+          title={`게임 창에도 편집 화면 패널을 보일지 바꿔요. 보이게 하면 게임 창에는 자리 옮기기에 쓰는 짧은 패널만 나오고, 글꼴, 색 같은 값 칸은 여기 그대로 있어요. 단축키 ${keyOf('gamePanel')} (게임 창에서도 됨)`}
         >
           게임 창의 편집 화면: {e.hide_panel ? '숨김' : '보임'} ({keyOf('gamePanel')})
         </button>
@@ -483,6 +483,7 @@ function MirrorSection({ st, sec }: { st: GameState; sec: Section }) {
       <button className="primary" onClick={open}>
         편집 시작
       </button>
+      {/* 예전 플러그인(ui_kit 4.20 전)은 게임 창 패널이 보이면 앱에 패널을 안 보냄 */}
       {st.editor.open && !st.editor.hide_panel && st.editor.tab === sec.tab && <p className="tip">게임 창 패널에 열려 있어요 ({keyOf('gamePanel')}로 숨기면 여기로)</p>}
     </div>
   );

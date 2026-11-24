@@ -202,6 +202,10 @@ init -9 python in ui_editor:
         def help_lines(self):
             return [ ]
 
+        def place_lines(self):
+            """짧은 판 패널(4.20, pygaki 앱이 붙어 있을 때)에 보일 자리 줄. 처음은 정보 앞 두 줄."""
+            return self.info_lines()[:2]
+
         def session(self):
             return { }
 
@@ -210,6 +214,14 @@ init -9 python in ui_editor:
 
     ## 탭 버튼 순서
     ORDER = ("title", "choice", "say", "stage", "custom_ui")
+
+    ## pygaki 앱이 붙어 있을 때 게임 안 탭 줄에서 빼는 탭 (4.20): 값만 고르는 탭이라 앱에서 고침.
+    ## 앱에서 그 탭을 열면 그때는 보입니다(지금 탭은 늘 보임).
+    APP_TABS = ("custom_ui", "ui_text", "watermorph", "screen_fx", "title_fx", "pause_fx", "hotkeys")
+
+    def in_game_tab(t):
+        """게임 안 탭 줄과 T 키에 넣을 탭인지."""
+        return not (live_compact() and t.id in APP_TABS and t.id != state.tab)
 
     ## 탭의 layout_file()이 파일 여러 개(목록)를 돌려줘도 저장할 수 있음 (2.3부터)
     LAYOUT_LISTS = True
@@ -263,7 +275,7 @@ init -9 python in ui_editor:
         store.renpy.restart_interaction()
 
     def next_tab(step=1):
-        ids = [ t.id for t in TABS if tab_available(t)[0] ]
+        ids = [ t.id for t in TABS if tab_available(t)[0] and (t.id == state.tab or in_game_tab(t)) ]
         if not ids:
             return
         if state.tab in ids:
@@ -892,6 +904,8 @@ init -9 python in ui_editor:
     def tab_buttons():
         rv = [ ]
         for t in TABS:
+            if not in_game_tab(t):
+                continue
             ok, why = tab_available(t)
             rv.append((t, ok, why))
         return rv
@@ -1418,8 +1432,8 @@ screen ui_editor_main():
     if _ok and hasattr(_tab, "corner_dots"):
         add ui_editor.CORNER_DOTS
 
-    ## 앱이 붙어 있으면 고르기 창도 앱에서 봅니다
-    if not ui_editor.live_panel_hidden():
+    ## 앱이 붙어 있으면 고르기 창도 앱에서 봅니다 (4.20: 게임 창 패널이 짧은 판일 때도)
+    if not ui_editor.live_connected():
         use ui_editor_popup
 
 
@@ -1547,7 +1561,8 @@ screen ui_editor_panel():
                 hbox:
                     spacing 6
                     textbutton "저장 (Ctrl+S)" style "ui_editor_button" action Function(ui_editor.save_all)
-                    textbutton "복사 (Ctrl+C)" style "ui_editor_button" action Function(ui_editor.copy_current)
+                    if not ui_editor.live_compact():    # 짧은 판(4.20)에서는 앱에서
+                        textbutton "복사 (Ctrl+C)" style "ui_editor_button" action Function(ui_editor.copy_current)
                     textbutton "닫기 (Esc)" style "ui_editor_button" action ui_editor.ToggleEditor()
                     textbutton "X 접기" style "ui_editor_button" action ToggleField(ui_editor.state, "mini")
                     ## 편집 화면 언어 (editor_lang.rpy). 누를 때마다 한국어 → 日本語 → English
@@ -1572,7 +1587,10 @@ screen ui_editor_panel():
                         yfill False     # 렌파이 기본값은 True(남은 높이를 다 채움)라서 꺼야 내용 높이만큼만 그려집니다
                         child_size (None, 10000)    # 안쪽 내용에 넉넉한 높이를 줘야 넘치는 줄까지 다 재서 끝까지 스크롤됩니다
 
-                        use ui_editor_panel_body
+                        if ui_editor.live_compact():
+                            use ui_editor_panel_compact
+                        else:
+                            use ui_editor_panel_body
 
                     vbar:
                         adjustment ui_editor.panel_yadj
@@ -1601,14 +1619,7 @@ screen ui_editor_panel_body():
         elif not _ok:
             text (_why or "지금은 이 탭을 쓸 수 없습니다.") style "ui_editor_text" color "#ffd23b"
         else:
-            if _tab.uses_mode or _tab.uses_scope:
-                hbox:
-                    spacing 6
-                    if _tab.uses_mode:
-                        textbutton ("1 " + _tab.mode_labels[0]) style "ui_editor_button" action Function(_tab.set_mode, "base") selected (_tab.mode() == "base")
-                        textbutton ("2 " + _tab.mode_labels[1]) style "ui_editor_button" action Function(_tab.set_mode, "hover") selected (_tab.mode() == "hover")
-                    if _tab.uses_scope:
-                        textbutton ("3 " + (_tab.scope_labels[0] if _tab.scope() == "item" else _tab.scope_labels[1])) style "ui_editor_button" action Function(_tab.toggle_scope) selected True
+            use ui_editor_mode_row(_tab)
 
             for _line in _tab.info_lines():
                 text _line style "ui_editor_text"
@@ -1626,6 +1637,51 @@ screen ui_editor_panel_body():
                     text _line style "ui_editor_small"
             for _line in ui_editor.common_help():
                 text _line style "ui_editor_small"
+
+
+## 1/2 평소/선택됐을 때, 3 이 항목만/공통 (패널과 짧은 판이 같이 씀)
+screen ui_editor_mode_row(tab):
+    if tab.uses_mode or tab.uses_scope:
+        hbox:
+            spacing 6
+            if tab.uses_mode:
+                textbutton ("1 " + tab.mode_labels[0]) style "ui_editor_button" action Function(tab.set_mode, "base") selected (tab.mode() == "base")
+                textbutton ("2 " + tab.mode_labels[1]) style "ui_editor_button" action Function(tab.set_mode, "hover") selected (tab.mode() == "hover")
+            if tab.uses_scope:
+                textbutton ("3 " + (tab.scope_labels[0] if tab.scope() == "item" else tab.scope_labels[1])) style "ui_editor_button" action Function(tab.toggle_scope) selected True
+
+
+## 짧은 판 패널 안쪽 (4.20): pygaki 앱이 붙어 있고 게임 창 패널도 보이게 했을 때.
+## 게임 창에서는 자리 옮기기만 하고, 글꼴, 색, 크기 같은 값 칸은 앱에서 고칩니다
+## (앱에는 ui_editor_panel_body가 그대로 갑니다, editor_live.rpy).
+screen ui_editor_panel_compact():
+
+    $ _tab = ui_editor.current_tab()
+    $ _ok, _why = ui_editor.tab_available(_tab) if _tab is not None else (False, "")
+
+    vbox:
+        spacing 4
+        xmaximum 620
+
+        if _tab is None:
+            text "편집할 탭이 없습니다." style "ui_editor_text"
+        elif not _ok:
+            text (_why or "지금은 이 탭을 쓸 수 없습니다.") style "ui_editor_text" color "#ffd23b"
+        else:
+            use ui_editor_mode_row(_tab)
+            for _line in _tab.place_lines():
+                text _line style "ui_editor_text"
+
+        if ui_editor.state.popup is not None:
+            text "pygaki 앱에 고르기 창이 열려 있어요." style "ui_editor_text" color "#ffd23b"
+        if ui_editor.state.message:
+            text ui_editor.state.message style "ui_editor_text" color "#ffd23b"
+
+        null height 2
+        if _tab is not None and _ok:
+            for _line in _tab.help_lines():
+                text _line style "ui_editor_small"
+        text "글꼴, 색, 크기 같은 값은 pygaki 앱의 [[GUI 편집]에서 고쳐요. F9 게임 창 패널 숨기기" style "ui_editor_small" color "#9fd8ff"
 
 
 ## 글꼴·색 줄 (탭 화면에서 씁니다)
