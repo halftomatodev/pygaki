@@ -7,6 +7,7 @@ showpy의 코드는 [MIT 라이선스](LICENSE)입니다. 아래는 그 밖의 �
 | 파일 | 출처 | 라이선스 |
 |---|---|---|
 | `game/screen_fx/fonts/neodgm.ttf` | [Neo둥근모](https://neodgm.dalgona.dev/), Copyright (c) 2017-2021, Eunbin Jeong (Dalgona.) | SIL Open Font License 1.1 (`game/screen_fx/fonts/neodgm_OFL.txt`). MIT가 아니며, 글꼴과 라이선스 파일을 함께 배포해야 합니다 |
+| 묶음 `pygaki/fonts/Galmuri11.ttf`, `Galmuri14.ttf` (저장소 `bundle/fonts/`) | [갈무리](https://github.com/quiple/galmuri) v2.40.4, Copyright (c) 2019-2025 Lee Minseo | SIL Open Font License 1.1 (`Galmuri-OFL.txt`). 런처가 레트로 해상도(높이 600 미만) 새 프로젝트의 `game/fonts/`에 넣음. 글꼴과 라이선스 파일을 함께 배포해야 합니다 |
 
 ## 참고한 셰이더
 

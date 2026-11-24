@@ -121,6 +121,7 @@ README = """pygaki ({version})
 새 버전: https://github.com/halftomatodev/pygaki/releases
 
 라이선스: 렌파이는 MIT (renpy\\LICENSE.txt 등 SDK 안의 파일), pygaki 플러그인과 앱은 MIT.
+레트로 해상도(높이 600 미만) 새 프로젝트에 넣는 한글 픽셀 글꼴 갈무리(Galmuri, pygaki\\fonts)는 SIL Open Font License 1.1 (pygaki\\fonts\\Galmuri-OFL.txt).
 """
 
 ADDON_README = """pygaki 덧붙임 ({version}) 넣는 법
@@ -297,6 +298,8 @@ def main():
             f.write(text.replace(old, new))
     with open(os.path.join(tdir, "project.json"), "w", encoding="utf-8") as f:
         json.dump({"type": "template"}, f)
+    ## 레트로 해상도 새 프로젝트에 런처가 넣는 픽셀 글꼴 (갈무리, OFL. 런처 pygaki_fit_small)
+    shutil.copytree(os.path.join(HERE, "fonts"), os.path.join(out, "pygaki", "fonts"))
 
     print("4/6 pygaki 앱 넣기 ...")
     shutil.copytree(app, os.path.join(out, "pygaki", "app"))

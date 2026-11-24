@@ -961,7 +961,7 @@ init -9 python in ui_editor:
             tab.wheel(sign, bool(pygame.key.get_mods() & pygame.KMOD_SHIFT))
             store.renpy.restart_interaction()
 
-    ## 실제 화면 크기로 (4.20): 게임을 실제 화면에서 몇 배로 키워 그리면(픽셀 퍼펙트 160x144 ×6 같은)
+    ## 실제 화면 크기로 (4.20): 게임을 실제 화면에서 몇 배로 키워 그리면(픽셀 퍼펙트 640x400 ×2 같은)
     ## 패널과 고르기 창은 그 배율만큼 줄여 그려서 화면에서 늘 같은 크기로 보이게 합니다.
     ## 배율이 1 이하(게임이 창보다 크거나 같음)면 예전처럼 그대로. 게임 좌표에 그리는 손잡이·점은 px()로 크기만 실제 화면 픽셀에 맞춥니다.
     def view_zoom():

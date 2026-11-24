@@ -138,7 +138,7 @@ mark{background:var(--mark);color:inherit;border-radius:2px}
 </li>
 <li>Start the launcher with <code>renpy.exe</code>.
 </li>
-<li>In <b>[+ Create New Project]</b> at the bottom left of the launcher, choose <b>Pygaki</b> and set the name and resolution. There are five retro resolutions (GBC 160x144, SNES 256x224, PC-98 640x400, Y2K 800x600, Millennial 1024x768), two high resolutions (1280x720, 1920x1080) and a custom one. Retro and custom are scaled up by the largest whole number that fits the window and drawn in the pixels of the chosen resolution (pixel perfect, <code>game/pixel_perfect.rpy</code> in the project). A pixel font is recommended for retro. At small resolutions (GBC, SNES) the text of Ren'Py's default menus may overlap.
+<li>In <b>[+ Create New Project]</b> at the bottom left of the launcher, choose <b>Pygaki</b> and set the name and resolution. There are three retro resolutions (PC-98 640x400, Y2K 800x600, Millennial 1024x768), two high resolutions (1280x720, 1920x1080) and a custom one. Retro and custom are scaled up by the largest whole number that fits the window and drawn in the pixels of the chosen resolution (pixel perfect, <code>game/pixel_perfect.rpy</code> in the project). Below a height of 720, text sizes and pygaki settings are made to fit that resolution, and below 600 (PC-98 and so on) the Korean pixel font Galmuri is added.
 <ul>
 <li>The Pygaki template creates a Korean project (sample script and common text). Change the game's language with Ren'Py's settings (<code>game/options.rpy</code>, <code>game/tl/</code>).
 </li></ul>
@@ -2510,6 +2510,8 @@ cd pykaki/app &amp;&amp; npm run dist  # Windows app folder (pykaki/app/out/win-
 <li>The original VHS shader is CC0 (credit optional). The code was written anew, taking the idea of an MIT-licensed shader for the ASCII shader, the look of cool-retro-term (GPL) for the retro terminal, and the dither pattern of Retro dither (CC0) and the LCD look of Gameboy Classic Shader (GPL) for the Game Boy shader (credits in chapter 15 of <code>screen_fx/README.md</code>).
 </li>
 <li><code>screen_fx/fonts/neodgm.ttf</code> (NeoDunggeunmo) is SIL OFL 1.1. You may include it in a game and distribute or sell it; when you distribute, put <code>neodgm_OFL.txt</code> alongside.
+</li>
+<li><code>game/fonts/Galmuri11.ttf</code> and <code>Galmuri14.ttf</code> (Galmuri) in new retro-resolution projects (height under 600) are also SIL OFL 1.1; when you distribute, put <code>Galmuri-OFL.txt</code> alongside.
 </li>
 <li>The pygaki plugins are MIT-licensed. For files with other licenses, like fonts, see <code>THIRD_PARTY.md</code> in the repository.
 </li>

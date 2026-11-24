@@ -226,9 +226,8 @@ init python:
             interface.error(wrong, label=None)
 
     ## Pygaki 새 프로젝트 해상도: 레트로 다섯(픽셀 퍼펙트) + 고해상도 둘. (값, 이름, 레트로인지)
+    ## GBC 160x144, SNES 256x224는 뺌(세션 99): 렌파이 기본 화면과 플러그인 글이 들어가지 않음
     PYGAKI_SIZES = (
-        ( (160, 144), "GBC", True ),
-        ( (256, 224), "SNES", True ),
         ( (640, 400), "PC-98", True ),
         ( (800, 600), "Y2K", True ),
         ( (1024, 768), "Millennial", True ),
@@ -334,6 +333,106 @@ init python:
         if not os.path.exists(path):
             with open(path, "wb") as f:
                 f.write(("\r\n".join(PYGAKI_PIXEL_RPY) + "\r\n").encode("utf-8"))
+
+    ## ── 작은 해상도(높이 720 미만) 새 프로젝트 맞추기 (세션 99) ──
+    ## 렌파이가 만든 gui.rpy는 글 크기를 해상도에 비례해 줄여 퀵메뉴·저장 칸 글이 7~9px로 못 읽힌다.
+    ## pygaki 플러그인 설정은 1280x720 기준 픽셀이다. 둘 다 새 프로젝트를 만들 때 한 번 맞춘다(사용자 파일, 나중에 고쳐도 됨).
+    ## 높이 600 미만이면 한글 픽셀 글꼴 갈무리(Galmuri, OFL)를 넣는다: 대사·이름 14px, 메뉴 작은 글 11px, 큰 글은 그 배수.
+    PYGAKI_FONTS = os.path.join(config.renpy_base, "pygaki", "fonts")
+    PYGAKI_FONT_FILES = ( "Galmuri11.ttf", "Galmuri14.ttf", "Galmuri-OFL.txt" )
+    PYGAKI_PIXEL_STEPS = ( 11, 14, 22, 28, 33, 42, 44, 56 )
+    PYGAKI_MIN_TEXT = 12
+
+    def pygaki_pixel_font_ok(height):
+        return height < 600 and all(os.path.exists(os.path.join(PYGAKI_FONTS, n)) for n in PYGAKI_FONT_FILES)
+
+    def pygaki_small_size(v, height, pixel):
+        """1280x720 기준 글 크기 v를 이 높이에 맞게. 픽셀 글꼴이면 갈무리 원래 크기(11, 14)의 배수 가운데 가장 가까운 것"""
+        k = height / 720.0
+        if pixel:
+            s = v * k * (14.0 / 22.0) / (400.0 / 720.0)
+            return min(PYGAKI_PIXEL_STEPS, key=lambda p: (abs(p - s), p))
+        return max(PYGAKI_MIN_TEXT, int(round(v * k)))
+
+    def pygaki_small_len(v, height):
+        return max(1, int(round(v * height / 720.0)))
+
+    def pygaki_edit(path, fn):
+        if not os.path.exists(path):
+            return
+        with open(path, "rb") as f:
+            text = f.read().decode("utf-8")
+        new = fn(text)
+        if new != text:
+            with open(path, "wb") as f:
+                f.write(new.encode("utf-8"))
+
+    def pygaki_fit_small(gamedir, width, height):
+        import re
+        if height == 720:
+            return
+        ## 대사를 어디에나 놓는 캐릭터 t의 창 높이는 화면 높이 (1280x720 기준 720)
+        pygaki_edit(os.path.join(gamedir, "ui_kit", "say_style_config.rpy"),
+            lambda text: re.sub(r"\bwindow_ysize=720\b", "window_ysize={}".format(height), text))
+        if height > 720:
+            return
+        pixel = pygaki_pixel_font_ok(height)
+
+        ## 1. 픽셀 글꼴 복사
+        if pixel:
+            fd = os.path.join(gamedir, "fonts")
+            if not os.path.isdir(fd):
+                os.makedirs(fd)
+            for n in PYGAKI_FONT_FILES:
+                shutil.copy(os.path.join(PYGAKI_FONTS, n), os.path.join(fd, n))
+
+        ## 2. gui.rpy: 글꼴, 글 크기 (렌파이가 줄인 값이 너무 작으면 올림)
+        def gui(text):
+            def put(text, name, value):
+                return re.sub(r"(?m)^(define gui\." + name + r" = ).*$", lambda m: m.group(1) + value, text, count=1)
+            if pixel:
+                big, small = '"fonts/Galmuri14.ttf"', '"fonts/Galmuri11.ttf"'
+                for name, value in (("text_font", big), ("name_text_font", big), ("interface_text_font", small),
+                        ("text_size", "14"), ("name_text_size", "14"), ("interface_text_size", "11"), ("label_text_size", "14"),
+                        ("notify_text_size", "11"), ("title_text_size", "28"), ("quick_button_text_size", "11"), ("slot_button_text_size", "11")):
+                    text = put(text, name, value)
+            else:
+                for name in ("text_size", "name_text_size", "interface_text_size", "label_text_size", "notify_text_size",
+                        "quick_button_text_size", "slot_button_text_size"):
+                    m = re.search(r"(?m)^define gui\." + name + r" = (\d+)\s*$", text)
+                    if m and int(m.group(1)) < PYGAKI_MIN_TEXT:
+                        text = put(text, name, str(PYGAKI_MIN_TEXT))
+            return text
+        pygaki_edit(os.path.join(gamedir, "gui.rpy"), gui)
+
+        ## 3. 플러그인 설정의 1280x720 기준 숫자 (자리는 화면 비율이라 그대로)
+        def sizes(text, keys):
+            text = re.sub(r'("(?:' + "|".join(keys) + r')"\s*:\s*)(\d+)', lambda m: m.group(1) + str(pygaki_small_size(int(m.group(2)), height, pixel)), text)
+            return re.sub(r'\b((?:' + "|".join(keys) + r')=)(\d+)', lambda m: m.group(1) + str(pygaki_small_size(int(m.group(2)), height, pixel)), text)
+
+        def lens(text, keys):
+            text = re.sub(r'("(?:' + "|".join(keys) + r')"\s*:\s*)(\d+)', lambda m: m.group(1) + str(pygaki_small_len(int(m.group(2)), height)), text)
+            return re.sub(r'\b((?:' + "|".join(keys) + r')=)(\d+)', lambda m: m.group(1) + str(pygaki_small_len(int(m.group(2)), height)), text)
+
+        def title(text):
+            text = sizes(text, ("size",))
+            if pixel:
+                ## 픽셀 글꼴을 조금 돌리면 격자에 걸려 글자가 삐뚤빼뚤해진다
+                text = re.sub(r'("(?:rotate|hover_rotate)"\s*:\s*)-?\d+(?:\.\d+)?', lambda m: m.group(1) + "0", text)
+            text = re.sub(r"(?m)^(define tmenu\.game_menu_gap = )(\d+)", lambda m: m.group(1) + str(pygaki_small_len(int(m.group(2)), height)), text)
+            return re.sub(r"(?m)^(define tmenu\.intro_offset = \()(-?\d+)", lambda m: m.group(1) + str(-pygaki_small_len(abs(int(m.group(2))), height)), text)
+
+        def splash(text):
+            text = sizes(text, ("title_size", "body_size", "key_size", "desc_size", "prompt_size", "option_size"))
+            return lens(text, ("width", "spacing", "key_width", "keys_spacing", "body_line_spacing"))
+
+        def say(text):
+            text = sizes(text, ("what_size",))
+            return lens(text, ("what_xpos", "what_ypos", "tail_size", "tail_width"))
+
+        pygaki_edit(os.path.join(gamedir, "ui_kit", "title_menu_config.rpy"), title)
+        pygaki_edit(os.path.join(gamedir, "splash", "splash_config.rpy"), splash)
+        pygaki_edit(os.path.join(gamedir, "ui_kit", "say_style_config.rpy"), say)
 
     if "pygaki_buttons" not in config.overlay_screens:
         config.overlay_screens.append("pygaki_buttons")
@@ -560,5 +659,6 @@ label pygaki_gui_project:
             pygaki_add_plugins(project.current.gamedir)
             if pygaki_pixel:
                 pygaki_add_pixel_perfect(project.current.gamedir)
+            pygaki_fit_small(project.current.gamedir, width, height)
 
     jump front_page

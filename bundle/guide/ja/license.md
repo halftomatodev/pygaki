@@ -15,5 +15,6 @@
 
 - VHS シェーダーの元は CC0 です(クレジットは任意)。ASCII シェーダーは MIT ライセンスのシェーダーのアイデアを、レトロターミナルは cool-retro-term(GPL)の見た目を、ゲームボーイは Retro dither(CC0)のディザ模様と Gameboy Classic Shader(GPL)の LCD の見た目を参考に、コードを新しく書きました(クレジットは `screen_fx/README.md` 15 章)。
 - `screen_fx/fonts/neodgm.ttf`(Neo둥근모)は SIL OFL 1.1 です。ゲームに入れて配布・販売でき、配布するときは `neodgm_OFL.txt` も一緒に置いてください。
+- レトロ解像度(高さ 600 未満)の新しいプロジェクトの `game/fonts/Galmuri11.ttf`、`Galmuri14.ttf`(Galmuri)も SIL OFL 1.1 です。配布するときは `Galmuri-OFL.txt` も一緒に置いてください。
 - pygaki プラグインは MIT ライセンスです。フォントのようにライセンスが違うファイルは、リポジトリの `THIRD_PARTY.md` を見てください。
 - pygaki アプリは MIT ライセンスです。同梱のフォントとライブラリのライセンスはリポジトリの `pykaki/licenses/` フォルダーにあります。

@@ -15,5 +15,6 @@
 
 - The original VHS shader is CC0 (credit optional). The code was written anew, taking the idea of an MIT-licensed shader for the ASCII shader, the look of cool-retro-term (GPL) for the retro terminal, and the dither pattern of Retro dither (CC0) and the LCD look of Gameboy Classic Shader (GPL) for the Game Boy shader (credits in chapter 15 of `screen_fx/README.md`).
 - `screen_fx/fonts/neodgm.ttf` (NeoDunggeunmo) is SIL OFL 1.1. You may include it in a game and distribute or sell it; when you distribute, put `neodgm_OFL.txt` alongside.
+- `game/fonts/Galmuri11.ttf` and `Galmuri14.ttf` (Galmuri) in new retro-resolution projects (height under 600) are also SIL OFL 1.1; when you distribute, put `Galmuri-OFL.txt` alongside.
 - The pygaki plugins are MIT-licensed. For files with other licenses, like fonts, see `THIRD_PARTY.md` in the repository.
 - The pygaki app is MIT-licensed. Licenses of the bundled fonts and libraries are in the `pykaki/licenses/` folder of the repository.

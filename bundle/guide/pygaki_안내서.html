@@ -137,7 +137,7 @@ mark{background:var(--mark);color:inherit;border-radius:2px}
 </li>
 <li><code>renpy.exe</code>로 런처를 켭니다(영어로 나오면 preferences → Language → 한국어).
 </li>
-<li>런처 왼쪽 아래 <b>[+ Create New Project]</b>(새 프로젝트 만들기)에서 <b>Pygaki</b>를 고르고 이름과 해상도를 정합니다. 해상도는 레트로 다섯(GBC 160x144, SNES 256x224, PC-98 640x400, Y2K 800x600, Millennial 1024x768)과 고해상도 둘(1280x720, 1920x1080), 사용자 정의가 있습니다. 레트로와 사용자 정의는 창에 맞는 가장 큰 정수 배율로 키우고 고른 해상도의 픽셀로 그립니다(픽셀 퍼펙트, 프로젝트의 <code>game/pixel_perfect.rpy</code>). 레트로에는 픽셀 글꼴을 권합니다. 작은 해상도(GBC, SNES)는 렌파이 기본 메뉴 글이 겹칠 수 있습니다.
+<li>런처 왼쪽 아래 <b>[+ Create New Project]</b>(새 프로젝트 만들기)에서 <b>Pygaki</b>를 고르고 이름과 해상도를 정합니다. 해상도는 레트로 셋(PC-98 640x400, Y2K 800x600, Millennial 1024x768)과 고해상도 둘(1280x720, 1920x1080), 사용자 정의가 있습니다. 레트로와 사용자 정의는 창에 맞는 가장 큰 정수 배율로 키우고 고른 해상도의 픽셀로 그립니다(픽셀 퍼펙트, 프로젝트의 <code>game/pixel_perfect.rpy</code>). 높이가 720보다 작으면 글 크기와 pygaki 설정 값을 그 해상도에 맞춰 만들고, 높이 600 미만(PC-98 등)에는 한글 픽셀 글꼴 갈무리를 넣습니다.
 </li>
 <li>왼쪽 목록에서 프로젝트를 고르고 <b>[pygaki로 편집]</b>을 누르면 pygaki 앱이 그 프로젝트를 엽니다. 대본은 프로젝트 폴더의 <code>프로젝트이름.flow.json</code>에 저절로 저장됩니다.
 </li>
@@ -2504,6 +2504,8 @@ cd pykaki/app &amp;&amp; npm run dist  # 윈도우 앱 폴더 (pykaki/app/out/wi
 <li>VHS 셰이더 원본은 CC0입니다(크레딧은 선택). ASCII 셰이더는 MIT 라이선스 셰이더의 아이디어를, 레트로 터미널은 cool-retro-term(GPL)의 모습을, 게임보이는 Retro dither(CC0)의 디더링 무늬와 Gameboy Classic Shader(GPL)의 LCD 모습을 참고해 코드를 새로 썼습니다(크레딧은 <code>screen_fx/README.md</code> 15장).
 </li>
 <li><code>screen_fx/fonts/neodgm.ttf</code>(Neo둥근모)는 SIL OFL 1.1입니다. 게임에 넣어 배포·판매할 수 있고, 배포할 때 <code>neodgm_OFL.txt</code>를 같이 두세요.
+</li>
+<li>레트로 해상도(높이 600 미만) 새 프로젝트의 <code>game/fonts/Galmuri11.ttf</code>, <code>Galmuri14.ttf</code>(갈무리)도 SIL OFL 1.1입니다. 배포할 때 <code>Galmuri-OFL.txt</code>를 같이 두세요.
 </li>
 <li>pygaki 플러그인은 MIT 라이선스입니다. 글꼴처럼 라이선스가 다른 파일은 저장소의 <code>THIRD_PARTY.md</code>를 보세요.
 </li>
