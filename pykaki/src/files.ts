@@ -245,6 +245,7 @@ export async function openProject() {
     }
     await snapAdd('열기 전 자동 백업', s.project).catch(() => {});
     jsonHandle = handle;
+    resetAuto();
     s.load(p, { fileName: file.name, dirty: false });
     warnNewer(p);
   } catch (e: any) {
@@ -260,6 +261,7 @@ export async function newProject() {
   await snapAdd('새로 만들기 전 자동 백업', s.project).catch(() => {});
   if (bound) return s.load(createEmpty(), { fileName: boundName, dirty: true });
   jsonHandle = null;
+  resetAuto();
   s.load(createEmpty(), { fileName: null, dirty: false });
 }
 
@@ -395,6 +397,13 @@ let lastScreens: string | null = null;
 let autoBusy = false;
 let autoWarned = false;
 let autoHeld = false;
+// 다른 대본 파일을 열거나 새로 만들 때: 처음 쓰는 것처럼 원고가 이 대본 것인지 다시 본다 (프로젝트 대본으로 가져오기는 물어봤으니 그대로)
+function resetAuto() {
+  lastAuto = null;
+  lastScreens = null;
+  autoWarned = false;
+  autoHeld = false;
+}
 
 // 원고에 적힌 상자(# @node:id) 가운데 지금 대본에 없는 것의 수. 절반 넘게 없으면 다른 대본으로 만든 원고로 본다 (아니면 0)
 export function foreignBoxes(old: string | null, project: { nodes: { id: string }[] }): number {
@@ -419,18 +428,20 @@ export async function autoExport() {
       return;
     }
     autoWarned = false;
-    // 화면만 고쳤을 때: 화면 원고만 쓴다
+    // 화면만 고쳤을 때: 화면 원고만 쓴다. 원고가 이 대본 것일 때만 (세션 106: 원고가 다른 대본 것이라 자동 내보내기를
+    // 멈춰도 화면 원고는 먼저 써서, 게임 원고의 show screen이 없어진 화면을 불러 "Screen ... is not known"으로 멈췄다)
     const sc = screensOut();
-    if (sc.code !== lastScreens) {
+    const screensOnly = async () => {
+      if (sc.code === lastScreens) return;
       await writeScreensToFolder(sc);
       lastScreens = sc.code;
-    }
-    if (code === lastAuto) return;
+    };
+    if (code === lastAuto) return screensOnly();
     if (lastAuto === null) {
       const old = await readRpyFromFolder();
       if (code === old) {
         lastAuto = code;
-        return;
+        return screensOnly();
       }
       // 이 창에서 처음 쓰는데 원고가 다른 대본 것이면 덮어쓰지 않는다 (Ctrl+E로 물어보고 내보내면 그때부터 다시 자동)
       const lost = foreignBoxes(old, useStore.getState().project);
@@ -441,7 +452,8 @@ export async function autoExport() {
       }
       if (old) await backupRpy(old);
     }
-    await writeRpyToFolder(code, { line: followLine() ? codeLineOf(code, editingLineId()) : null }, screensOut());
+    await writeRpyToFolder(code, { line: followLine() ? codeLineOf(code, editingLineId()) : null }, sc);
+    lastScreens = sc.code;
     lastAuto = code;
   } catch (e) {
     console.warn('자동 내보내기 실패', e);
