@@ -1,4 +1,4 @@
-<!-- 원본: bundle/guide/parts/start.md @ f2f64f6748 -->
+<!-- 원본: bundle/guide/parts/start.md @ d10bb448ea -->
 # はじめに
 
 ## pygaki でできること
@@ -28,7 +28,7 @@ Ren'Py のコードを覚えなくてもゲームを作れるようにする、�
 
 1. ダウンロード [github.com/halftomatodev/pygaki/releases/latest](https://github.com/halftomatodev/pygaki/releases/latest) から pygaki パックの zip を受け取り、好きなフォルダーに展開します(リポジトリ:[github.com/halftomatodev/pygaki](https://github.com/halftomatodev/pygaki))。
 2. `renpy.exe` でランチャーを起動します。
-3. ランチャー左下の **[+ Create New Project]**(新しいプロジェクトを作成)で **Pygaki** を選び、名前と解像度を決めます。解像度はレトロ 3 つ(PC-98 640x400、Y2K 800x600、Millennial 1024x768)と高解像度 2 つ(1280x720、1920x1080)、ユーザー定義があります。レトロとユーザー定義は、ウィンドウに収まるいちばん大きい整数倍で拡大し、選んだ解像度のピクセルで描きます(ピクセルパーフェクト、プロジェクトの `game/pixel_perfect.rpy`)。高さが 720 より小さいと、文字の大きさと pygaki の設定値をその解像度に合わせて作り、高さ 600 未満(PC-98 など)には韓国語ピクセルフォント Galmuri を入れます。
+3. ランチャー左下の **[+ Create New Project]**(新しいプロジェクトを作成)で **Pygaki** を選び、名前と解像度を決めます。解像度はレトロ 3 つ(PC-98 640x400、Y2K 800x600、Millennial 1024x768)と高解像度 2 つ(1280x720、1920x1080)、ユーザー定義があります。レトロとユーザー定義は、ウィンドウに収まるいちばん大きい整数倍で拡大し、選んだ解像度のピクセルで描きます(ピクセルパーフェクト、プロジェクトの `game/pixel_perfect.rpy`)。高さが 720 より小さいと、文字の大きさと pygaki の設定値をその解像度に合わせて作り、新しいプロジェクトには毎回、韓国語ピクセルフォント Galmuri のセットが `game/fonts` に入り、レトロ解像度は Galmuri9 を基本フォントに使います(文字サイズは 10px の倍数。ほかの大きさではピクセルが崩れます)。
    * Pygaki テンプレートは韓国語のプロジェクトとして作られます(サンプルのスクリプト、共通の文言)。ゲームの言語は Ren'Py の設定(`game/options.rpy`、`game/tl/`)で変えます。
 4. 左の一覧でプロジェクトを選んで **[pygaki로 편집]**(pygaki で編集)を押すと、pygaki アプリがそのプロジェクトを開きます。シナリオはプロジェクトフォルダーの `プロジェクト名.flow.json` に自動で保存されます。
 5. アプリ上のタブ列の右にある **[Ren'Pyで実行]** でゲームを起動して確認します。ランチャーの [Launch Project] で起動しても、アプリがゲームにつながります(タブの横のボタンが薄い青の「● ゲームと接続中」に変わります)。

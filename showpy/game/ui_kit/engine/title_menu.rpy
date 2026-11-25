@@ -211,13 +211,15 @@ init -10 python in tmenu:
             ]
         rv = [ ]
         n = len(rows)
+        ## 픽셀 퍼펙트(레트로 해상도) 게임은 돌리지 않는다: 픽셀 글꼴을 조금 돌리면 격자에 걸려 삐뚤빼뚤해진다
+        tilt = 0.0 if renpy.config.nearest_neighbor else 8.0
         for i, (iid, text, action, cond) in enumerate(rows):
             d = dict(common)
             d.update({
                 "id": iid, "text": text, "action": action,
                 "xalign": 0.06 + 0.01 * i,
                 "yalign": round(0.26 + 0.085 * i, 3),
-                "rotate": round(-4.0 + 8.0 * i / max(1, n - 1), 1),
+                "rotate": round(tilt * (i / float(max(1, n - 1)) - 0.5), 1),
                 })
             if cond:
                 d["show_if"] = cond

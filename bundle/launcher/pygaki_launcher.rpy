@@ -334,24 +334,48 @@ init python:
             with open(path, "wb") as f:
                 f.write(("\r\n".join(PYGAKI_PIXEL_RPY) + "\r\n").encode("utf-8"))
 
-    ## ── 작은 해상도(높이 720 미만) 새 프로젝트 맞추기 (세션 99) ──
+    ## ── 새 프로젝트의 글꼴과 작은 해상도 맞추기 (세션 99, 101) ──
+    ## 모든 Pygaki 새 프로젝트에 한글 픽셀 글꼴 갈무리(Galmuri, OFL) 세트를 game/fonts에 넣는다.
+    ## 레트로(픽셀 퍼펙트) 해상도는 갈무리9를 기본 글꼴로 쓴다. 갈무리는 글꼴 단위 100이 1픽셀이라
+    ## 원래 크기(갈무리7 8px, 9 10px, 11 12px, 14 15px)의 정수배가 아니면 픽셀이 격자에서 어긋나 깨진다 → 10px의 배수만 쓴다.
     ## 렌파이가 만든 gui.rpy는 글 크기를 해상도에 비례해 줄여 퀵메뉴·저장 칸 글이 7~9px로 못 읽힌다.
     ## pygaki 플러그인 설정은 1280x720 기준 픽셀이다. 둘 다 새 프로젝트를 만들 때 한 번 맞춘다(사용자 파일, 나중에 고쳐도 됨).
-    ## 높이 600 미만이면 한글 픽셀 글꼴 갈무리(Galmuri, OFL)를 넣는다: 대사·이름 14px, 메뉴 작은 글 11px, 큰 글은 그 배수.
     PYGAKI_FONTS = os.path.join(config.renpy_base, "pygaki", "fonts")
-    PYGAKI_FONT_FILES = ( "Galmuri11.ttf", "Galmuri14.ttf", "Galmuri-OFL.txt" )
-    PYGAKI_PIXEL_STEPS = ( 11, 14, 22, 28, 33, 42, 44, 56 )
+    PYGAKI_FONT_FILES = (
+        "Galmuri7.ttf", "Galmuri9.ttf", "Galmuri11.ttf", "Galmuri11-Bold.ttf", "Galmuri11-Condensed.ttf", "Galmuri14.ttf",
+        "GalmuriMono7.ttf", "GalmuriMono9.ttf", "GalmuriMono11.ttf", "Galmuri-OFL.txt",
+    )
+    PYGAKI_PIXEL_FONT = "fonts/Galmuri9.ttf"
+    PYGAKI_PIXEL_UNIT = 10
     PYGAKI_MIN_TEXT = 12
+    ## 렌파이가 1280x720으로 만든 gui.rpy의 글 크기
+    PYGAKI_GUI_720 = { "text_size": 22, "name_text_size": 30, "interface_text_size": 22, "label_text_size": 24,
+        "notify_text_size": 16, "title_text_size": 50, "quick_button_text_size": 14, "slot_button_text_size": 14 }
 
-    def pygaki_pixel_font_ok(height):
-        return height < 600 and all(os.path.exists(os.path.join(PYGAKI_FONTS, n)) for n in PYGAKI_FONT_FILES)
+    def pygaki_fonts_ok():
+        return all(os.path.exists(os.path.join(PYGAKI_FONTS, n)) for n in PYGAKI_FONT_FILES)
+
+    def pygaki_add_fonts(gamedir):
+        """갈무리 세트를 game/fonts에 (있는 파일은 그대로)"""
+        if not pygaki_fonts_ok():
+            return False
+        fd = os.path.join(gamedir, "fonts")
+        if not os.path.isdir(fd):
+            os.makedirs(fd)
+        for n in PYGAKI_FONT_FILES:
+            if not os.path.exists(os.path.join(fd, n)):
+                shutil.copy(os.path.join(PYGAKI_FONTS, n), os.path.join(fd, n))
+        return True
+
+    def pygaki_pixel_snap(s):
+        """픽셀 글꼴 크기: 갈무리9 원래 크기(10px)의 배수 가운데 가장 가까운 것"""
+        return max(1, int(s / float(PYGAKI_PIXEL_UNIT) + 0.5)) * PYGAKI_PIXEL_UNIT
 
     def pygaki_small_size(v, height, pixel):
-        """1280x720 기준 글 크기 v를 이 높이에 맞게. 픽셀 글꼴이면 갈무리 원래 크기(11, 14)의 배수 가운데 가장 가까운 것"""
+        """1280x720 기준 글 크기 v를 이 높이에 맞게. 픽셀 글꼴이면 10px의 배수"""
         k = height / 720.0
         if pixel:
-            s = v * k * (14.0 / 22.0) / (400.0 / 720.0)
-            return min(PYGAKI_PIXEL_STEPS, key=lambda p: (abs(p - s), p))
+            return pygaki_pixel_snap(v * k)
         return max(PYGAKI_MIN_TEXT, int(round(v * k)))
 
     def pygaki_small_len(v, height):
@@ -367,35 +391,32 @@ init python:
             with open(path, "wb") as f:
                 f.write(new.encode("utf-8"))
 
-    def pygaki_fit_small(gamedir, width, height):
+    def pygaki_fit_small(gamedir, width, height, retro=False):
         import re
-        if height == 720:
+        ## 1. 갈무리 세트 복사 (모든 새 프로젝트). 레트로면 갈무리9를 기본 글꼴로
+        pixel = pygaki_add_fonts(gamedir) and retro
+        if height == 720 and not pixel:
             return
         ## 대사를 어디에나 놓는 캐릭터 t의 창 높이는 화면 높이 (1280x720 기준 720)
-        pygaki_edit(os.path.join(gamedir, "ui_kit", "say_style_config.rpy"),
-            lambda text: re.sub(r"\bwindow_ysize=720\b", "window_ysize={}".format(height), text))
-        if height > 720:
+        if height != 720:
+            pygaki_edit(os.path.join(gamedir, "ui_kit", "say_style_config.rpy"),
+                lambda text: re.sub(r"\bwindow_ysize=720\b", "window_ysize={}".format(height), text))
+        if height > 720 and not pixel:
             return
-        pixel = pygaki_pixel_font_ok(height)
 
-        ## 1. 픽셀 글꼴 복사
-        if pixel:
-            fd = os.path.join(gamedir, "fonts")
-            if not os.path.isdir(fd):
-                os.makedirs(fd)
-            for n in PYGAKI_FONT_FILES:
-                shutil.copy(os.path.join(PYGAKI_FONTS, n), os.path.join(fd, n))
-
-        ## 2. gui.rpy: 글꼴, 글 크기 (렌파이가 줄인 값이 너무 작으면 올림)
+        ## 2. gui.rpy: 글꼴, 글 크기 (픽셀 글꼴은 10px 배수로, 아니면 렌파이가 줄인 값이 너무 작을 때 올림)
         def gui(text):
             def put(text, name, value):
                 return re.sub(r"(?m)^(define gui\." + name + r" = ).*$", lambda m: m.group(1) + value, text, count=1)
             if pixel:
-                big, small = '"fonts/Galmuri14.ttf"', '"fonts/Galmuri11.ttf"'
-                for name, value in (("text_font", big), ("name_text_font", big), ("interface_text_font", small),
-                        ("text_size", "14"), ("name_text_size", "14"), ("interface_text_size", "11"), ("label_text_size", "14"),
-                        ("notify_text_size", "11"), ("title_text_size", "28"), ("quick_button_text_size", "11"), ("slot_button_text_size", "11")):
-                    text = put(text, name, value)
+                for name in ("text_font", "name_text_font", "interface_text_font"):
+                    text = put(text, name, repr(PYGAKI_PIXEL_FONT).replace("'", '"'))
+                ## 글 크기를 10px 배수로. 렌파이는 폭 비율로 줄여서(800x600 대사 14px) 1280x720 값을 높이 비율로 줄인 것을 쓴다
+                def size(m):
+                    v = PYGAKI_GUI_720.get(m.group(2))
+                    s = v * height / 720.0 if v else int(m.group(3))
+                    return m.group(1) + str(pygaki_pixel_snap(s))
+                text = re.sub(r"(?m)^(define gui\.(\w*text_size) = )(\d+)\s*$", size, text)
             else:
                 for name in ("text_size", "name_text_size", "interface_text_size", "label_text_size", "notify_text_size",
                         "quick_button_text_size", "slot_button_text_size"):
@@ -659,6 +680,6 @@ label pygaki_gui_project:
             pygaki_add_plugins(project.current.gamedir)
             if pygaki_pixel:
                 pygaki_add_pixel_perfect(project.current.gamedir)
-            pygaki_fit_small(project.current.gamedir, width, height)
+            pygaki_fit_small(project.current.gamedir, width, height, pygaki_pixel)
 
     jump front_page

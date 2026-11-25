@@ -14,6 +14,6 @@
 
 - VHS 셰이더 원본은 CC0입니다(크레딧은 선택). ASCII 셰이더는 MIT 라이선스 셰이더의 아이디어를, 레트로 터미널은 cool-retro-term(GPL)의 모습을, 게임보이는 Retro dither(CC0)의 디더링 무늬와 Gameboy Classic Shader(GPL)의 LCD 모습을 참고해 코드를 새로 썼습니다(크레딧은 `screen_fx/README.md` 15장).
 - `screen_fx/fonts/neodgm.ttf`(Neo둥근모)는 SIL OFL 1.1입니다. 게임에 넣어 배포·판매할 수 있고, 배포할 때 `neodgm_OFL.txt`를 같이 두세요.
-- 레트로 해상도(높이 600 미만) 새 프로젝트의 `game/fonts/Galmuri11.ttf`, `Galmuri14.ttf`(갈무리)도 SIL OFL 1.1입니다. 배포할 때 `Galmuri-OFL.txt`를 같이 두세요.
+- 새 프로젝트의 `game/fonts/` 안 `Galmuri*.ttf`, `GalmuriMono*.ttf`(갈무리)도 SIL OFL 1.1입니다. 배포할 때 `Galmuri-OFL.txt`를 같이 두세요.
 - pygaki 플러그인은 MIT 라이선스입니다. 글꼴처럼 라이선스가 다른 파일은 저장소의 `THIRD_PARTY.md`를 보세요.
 - pygaki 앱은 MIT 라이선스입니다. 함께 넣은 글꼴과 라이브러리의 라이선스는 저장소의 `pykaki/licenses/` 폴더에 있습니다.
