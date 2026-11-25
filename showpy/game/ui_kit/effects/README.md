@@ -88,7 +88,7 @@ e "그림 말풍선." (effect="bubble:u__image=gui/bubble.png:u__image_on=1:u__s
 TV 지직 소리는 전환에 들어 있지 않습니다. `play sound "static.ogg"`처럼 같은 자리에 적습니다.
 
 `pixelsort`, `datamosh`, `static`, `calibrate`, `tapestretch`, `blink`, `bendwave`는 셰이더가 바뀔 때의 전환으로도 씁니다. 대본 편집기 상자의 ◐ 셰이더 → 전환의 "시작할 때", "끝날 때"에서 고르면,
-앞 상자의 마지막 화면이 깨진 채 멈췄다가 다음 상자의 첫 화면으로 끊어 넘어가고, 셰이더도 끊기는 순간에 바뀝니다(화면 효과 `screen_fx` 5.6부터).
+앞 상자의 마지막 화면이 깨진 채 멈췄다가 다음 상자의 첫 화면으로 끊어 넘어가고, 셰이더도 끊기는 순간에 바뀝니다(화면 효과).
 원고로 직접 쓸 때는 이렇게 적습니다.
 
 ```renpy
@@ -121,7 +121,7 @@ with screen_fx.pending_with()
 | `@set u__이름 값` | 값의 기본값. 대사에서 `effect="이름:u__이름=값"`으로 바꿈. 색은 `#rrggbb` |
 | `@param u__이름 최소 최대 한글이름` | 그 값을 막대로 고칠 때의 범위와 이름 |
 | `@variables` | uniform, attribute, varying 줄 |
-| `@vertex_30`, `@fragment_350` ... | 렌파이 셰이더 조각. 숫자가 작은 것부터 이어 붙음 |
+| `@vertex_30`, `@fragment_350`... | 렌파이 셰이더 조각. 숫자가 작은 것부터 이어 붙음 |
 | `@use T`, `@use ROTATE` | 기본 효과 파일의 공용 조각 넣기 |
 
 - `@use T`는 `l__t`(이 글자가 나온 정도 0→1)를 만듭니다.

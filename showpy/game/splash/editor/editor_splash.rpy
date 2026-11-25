@@ -1,9 +1,9 @@
 ################################################################################
-## Splash — UI Kit 편집기 탭 "스플래시" (splash 2.0, 조작 안내 화면과 단축키 수정 2.5)
+## Splash — pygaki 게임 안 편집 화면 탭 "스플래시" (조작 안내 화면과 단축키 수정 2.5)
 ##
-## UI Kit 플러그인이 있으면 그 편집기(개발 모드에서 Shift+M)에 탭을 더합니다.
-## UI Kit이 없으면 이 파일은 아무것도 하지 않고, 페이지는 splash_config.rpy대로 나옵니다.
-## PyKaki(pygaki) 앱의 [GUI 편집] 화면에도 이 탭의 패널이 그대로 나옵니다 (ui_kit 3.16 공통 틀).
+## pygaki 플러그인이 있으면 그 편집기(개발 모드에서 Shift+M)에 탭을 더합니다.
+## pygaki이 없으면 이 파일은 아무것도 하지 않고, 페이지는 splash_config.rpy대로 나옵니다.
+## PyKaki(pygaki) 앱의 [GUI 편집] 화면에도 이 탭의 패널이 그대로 나옵니다 (공통 틀).
 ##
 ##   가운데 화면에 고른 페이지를 다 나타난 모습 그대로 그립니다 (2.0).
 ##     누르면 고르고, 끌면 옮깁니다. 빈 곳을 끌면 그림·제목·본문·표 묶음 전체가 움직입니다.
@@ -13,7 +13,7 @@
 ##   패널에서 바탕색, 바탕·로고 그림, 글꼴·색, 시간, 넘어가는 때를 바꾸고
 ##   페이지를 더하고, 복제하고, 지우고, 순서를 바꿉니다.
 ##   [이 페이지 보기]로 지금 값으로 그 페이지를 진짜 시간대로 띄워 봅니다 (클릭하면 닫힘).
-##   조작 안내 화면(표가 있는 페이지) 바로 뒤에 [단축키 수정] 버튼이 있습니다(hotkeys 1.2가 있을 때).
+##   조작 안내 화면(표가 있는 페이지) 바로 뒤에 [단축키 수정] 버튼이 있습니다.
 ##   표를 "hotkeys"로 두면 단축키 수정 표를 따라가고, 보여 줄 기능을 패널에서 고릅니다 (2.5).
 ##
 ##   저장하면 이 폴더의 splash_layout.rpy에 페이지마다 바꾼 값만 적습니다.
@@ -23,7 +23,7 @@
 
 init offset = 1
 
-## UI Kit 편집기(init -9, -8)를 읽은 뒤에 실행됩니다.
+## pygaki 게임 안 편집 화면(init -9, -8)를 읽은 뒤에 실행됩니다.
 init -6 python in splash:
 
     import json
@@ -129,7 +129,7 @@ init -6 python in splash:
                 _ed.get_tab("splash").commit_edit()
                 raise store.renpy.IgnoreEvent()
 
-            ## 편집기 공통 틀(EditorInput)이 Esc, Ctrl+S에 부름 (ui_kit 4.0)
+            ## 편집기 공통 틀(EditorInput)이 Esc, Ctrl+S에 부름 
             def cancel(self):
                 _ed.get_tab("splash").cancel_edit()
 
@@ -145,7 +145,7 @@ init -6 python in splash:
             returnable = False
 
             def __init__(self, key, index=None, part=None):
-                self.key = key          # "title" ... 또는 "keys"
+                self.key = key          # "title"... 또는 "keys"
                 self.index = index      # 표의 줄 번호
                 self.part = part        # 0 키, 1 설명
                 self.text = None
@@ -367,7 +367,7 @@ init -6 python in splash:
                 self.page = None        # 고른 페이지 id
                 self.pick = None        # 그림 고르는 중: "background" 또는 "image"
                 self.pick_folder = None
-                self.sel = None         # 가운데 화면에서 고른 것 ("group", "title" ...)
+                self.sel = None         # 가운데 화면에서 고른 것 ("group", "title"...)
                 self.editing = None     # 고치는 글: ("title",) / ("key", 줄) / ("desc", 줄)
                 self.edit_text = ""
                 self.last_click = (0.0, None)
@@ -407,7 +407,7 @@ init -6 python in splash:
                 store.renpy.restart_interaction()
 
             def live_pages(self):
-                """PyKaki 앱의 GUI 편집 왼쪽 목록에 보일 페이지 (splash 2.2, LINK.md 9장)."""
+                """PyKaki 앱의 GUI 편집 왼쪽 목록에 보일 페이지 (LINK.md 9장)."""
                 rv = [ ]
                 for r in self.raws():
                     pid = r.get("id")
@@ -655,7 +655,7 @@ init -6 python in splash:
 
             ## 단축키 수정 표 따라가기 "hotkeys" (2.5)
             def hk(self):
-                """hotkeys 1.2 (단축키 수정 표)가 있으면 그 이름 공간."""
+                """pygaki 플러그인 (단축키 수정 표)가 있으면 그 이름 공간."""
                 h = getattr(store, "hotkeys", None)
                 return h if (h is not None and hasattr(h, "guide_rows") and _ed.get_tab("hotkeys") is not None) else None
 
@@ -822,7 +822,7 @@ init -6 python in splash:
                 else:
                     self.put("duration", kind)
 
-            ## 색·글꼴 고르기 창 (UI Kit)
+            ## 색·글꼴 고르기 창 (pygaki)
             def get_value(self, key):
                 v = self.val(key)
                 return v if isinstance(v, str) else None
@@ -913,7 +913,7 @@ init -6 python in splash:
                 d = merged(raw)
                 key = (raw.get("id"), repr(sorted((k, repr(v)) for k, v in d.items())))
                 if d.get("keys") == "auto":
-                    ## 단축키 탭에서 고친 조작방법 목록도 바로 보이게 (splash 2.4)
+                    ## 단축키 탭에서 고친 조작방법 목록도 바로 보이게 
                     key = key + (repr(_keys_auto()),)
                 elif d.get("keys") == "hotkeys":
                     key = key + (repr(_keys_hotkeys(d.get("keys_show"))),)
@@ -1431,7 +1431,7 @@ init -6 python in splash:
 
         _ed.register(SplashTab())
 
-        ## hotkeys 1.2의 [단축키 수정] 탭을 스플래시 바로 뒤로 (그 파일이 먼저 등록됨)
+        ## pygaki 플러그인의 [단축키 수정] 탭을 스플래시 바로 뒤로 (그 파일이 먼저 등록됨)
         _hk = getattr(store, "hotkeys", None)
         if _hk is not None and hasattr(_hk, "place_tab"):
             _hk.place_tab()
@@ -1483,7 +1483,7 @@ screen ui_editor_splash_overlay():
         add Solid("#ff3b8d", xysize=(int(_w) + 16, 2)) pos (int(_cx), int(_cy + _h / 2.0) + 8) anchor (0.5, 0.0)
 
 
-## 스플래시 탭 패널 (UI Kit 편집기 안)
+## 스플래시 탭 패널 (pygaki 게임 안 편집 화면 안)
 screen ui_editor_splash_panel(tab):
 
     $ _ids = tab.ids()

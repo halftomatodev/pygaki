@@ -1,8 +1,8 @@
 ################################################################################
-## Screen FX — UI Kit 편집기 탭 (타이틀 일렁임, 화면 효과)
+## 화면 효과 — pygaki 게임 안 편집 화면 탭 (타이틀 일렁임, 화면 효과)
 ##
-## UI Kit 플러그인이 있으면 그 편집기(개발 모드에서 Shift+M)에 탭 두 개를
-## 더합니다. UI Kit이 없으면 이 파일은 아무것도 하지 않고, 효과는 설정 파일로
+## pygaki 플러그인이 있으면 그 편집기(개발 모드에서 Shift+M)에 탭 두 개를
+## 더합니다. pygaki이 없으면 이 파일은 아무것도 하지 않고, 효과는 설정 파일로
 ## 그대로 동작합니다.
 ##
 ##   타이틀 일렁임  → 저장하면 watermorph_layout.rpy
@@ -14,7 +14,7 @@
 
 init offset = 1
 
-## UI Kit 편집기(init -9, -8)를 읽은 뒤에 실행됩니다.
+## pygaki 게임 안 편집 화면(init -9, -8)를 읽은 뒤에 실행됩니다.
 init -6 python in screen_fx:
 
     _ed = getattr(store, "ui_editor", None)
@@ -84,7 +84,7 @@ init -6 python in screen_fx:
             def file_path(self, filename):
                 return root_path(filename)
 
-            ## 그림 고르기 창(UI Kit의 "background" 창)에서 쓰는 것 (5.1, 나이트비전 화면 이미지)
+            ## 그림 고르기 창(pygaki의 "background" 창)에서 쓰는 것 (5.1, 나이트비전 화면 이미지)
             background_title = "그림 고르기 - game 폴더의 그림"
             background_none_label = "없음"
 
@@ -550,7 +550,7 @@ init -6 python in screen_fx:
                 w = int(round(lines * store.config.screen_width / float(store.config.screen_height)))
                 self.put("resolution", (w, lines))
 
-            ## 색 (UI Kit 색 고르기 창이 씀)
+            ## 색 (pygaki 색 고르기 창이 씀)
 
             def get_value(self, key):
                 ## 색 고르기 창: "효과:값" (4.4, 1번/2번 아래 세부 속성)
@@ -792,7 +792,7 @@ init -6 python in screen_fx:
                         continue
                     if not t.strip().startswith(self.OUR_LINES):
                         break
-                    ## 줄 끝에 붙은 PyKaki 표시(# @l:)는 떼고 봄 (ui_kit 4.5)
+                    ## 줄 끝에 붙은 PyKaki 표시(# @l:)는 떼고 봄 
                     rv.insert(0, getattr(se, "_pk_strip", lambda x: x)(t).strip())
                     n -= 1
                 return rv
@@ -915,7 +915,7 @@ init -6 python in screen_fx:
             def _say_kw(self, text):
                 """대사 줄 끝 괄호의 fx=, fx_overlay=, fx_transition= (없으면 None)."""
                 import ast, re
-                ## 줄 끝에 붙은 PyKaki 표시(# @l:)는 떼고 읽음 (ui_kit 4.5)
+                ## 줄 끝에 붙은 PyKaki 표시(# @l:)는 떼고 읽음 
                 text = getattr(self.se(), "_pk_strip", lambda x: x)(text)
                 m = re.search(r"\(([^()]*)\)\s*$", text)
                 if not m or not re.search(r"\bfx(_overlay)?\s*=", m.group(1)):
@@ -1527,7 +1527,7 @@ init -6 python in screen_fx:
                 if not files:
                     return None
                 if not getattr(_ed, "LAYOUT_LISTS", False):
-                    ## 예전 UI Kit: 한 번에 파일 하나만 저장 (Ctrl+S를 다시 누르면 다음 파일)
+                    ## 예전 pygaki: 한 번에 파일 하나만 저장 (Ctrl+S를 다시 누르면 다음 파일)
                     return files[0]
                 return files
 
@@ -1806,13 +1806,13 @@ init -6 python in screen_fx:
         _ed.register(MenuFxTab("title_fx", "타이틀 셰이더", "title"))
         _ed.register(MenuFxTab("pause_fx", "게임 내 메뉴 셰이더", "pause"))
 
-        ## "줄에 넣기" 페이지의 줄 번호 입력 칸 (UI Kit 3.0 이상)
+        ## "줄에 넣기" 페이지의 줄 번호 입력 칸 
         fx_line_input = _ed.LineInputValue(TAB_ID) if hasattr(_ed, "LineInputValue") else None
 
 
 ## ── 패널 ─────────────────────────────────────────────────────────────────────
 
-## (UI Kit이 없어도 오류가 나지 않도록 UI Kit 스타일을 이어받지 않고 따로 정의)
+## (pygaki이 없어도 오류가 나지 않도록 pygaki 스타일을 이어받지 않고 따로 정의)
 
 style ui_editor_fx_label is default:
     font gui.interface_text_font
@@ -2163,7 +2163,7 @@ screen ui_editor_menu_fx_panel(tab):
         use ui_editor_fx_slots(tab, _a, _b, tab.set_slot, tab.clear, True)
 
 
-## 커서 칸 (UI Kit "커서/대사 소리" 탭 아래, 4.5): 커서가 셰이더를 받을지 '여기에서부터'
+## 커서 칸 (pygaki "커서/대사 소리" 탭 아래, 4.5): 커서가 셰이더를 받을지 '여기에서부터'
 screen ui_editor_fx_cursor_panel(tab):
 
     vbox:

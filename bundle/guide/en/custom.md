@@ -1,7 +1,7 @@
-<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ 6ebc45eec0 -->
-# pygaki plugin customization guide (5.5)
+<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ 535599d5ea -->
+# pygaki plugin customization guide
 
-2026-11-19 · version 5.5 (changed in 5.5: the picture effect `bendwave` (bend wave, also as a shader transition), a placeholder for the voice glow in the in-game editor's [Screens] tab. Changed in 5.4: pictures and videos behind dialogue and choices (picture/video boxes), moving, scaling and rotating that picture in the game, transparent videos for names starting with `mask_`, tying the text to the picture, four-corner warp and a picture effect on appearing, the picture effects `vibrate` and `springin`, Ren'Py 8.6.1 support. Changed in 5.3: the in-game editor's "Edit shortcuts" tab. 5.2 changed only the script editor. Changed in 5.1: the effects folder and image transitions, files to turn off effects and shaders, photo collage (instead of shifting shards), the shimmer shader `ripple`, detail values on shader lines and per-scene dialogue sound and cursor, pixel sort and datamosh as shader transitions, the tree diagram, pygaki as a desktop app only. Changed in 5.0: seven new screen effects (glitch, jitter, halftone, hologram, night vision, shifting shards, flying shards), effects on a single image, eleven text effects, text boxes (speech bubble, rounded frame), editing the splash on screen, the in-game editor's "UI text" tab. Changed in 4.22: lines where shaders change and per-line transitions, "from here" for cursor and shaders, a tidier dialogue tab, cursor and CTC image folders. Changed in 4.21: shader section details moved under slots 1 and 2, clicking a line moves the game there too. Changed in 4.20: two shader slots and "Apply from here", title and in-game menu shaders, title background and title, subtitle, text effects, rotation handle)
+2026-11-25 · pygaki v1.9 (changes per version are in `READ_ME_FIRST.md` and `CHANGELOG.md`)
 
 ## How to read this document
 
@@ -30,21 +30,21 @@ Find what you want to change and edit the value in the file on the right. Items 
 
 | What to change | File | Value | Editor |
 | --- | --- | --- | --- |
-| Logo, warning and controls pages before the title | `splash/splash_config.rpy` | `splash.pages` |  |
-| Common font, color and timing of those pages | `splash/splash_config.rpy` | `splash.default` |  |
-| Viewing the controls again from the title | `ui_kit/title_menu_config.rpy` | an item's `"action": splash.ShowPage("controls")` |  |
-| Title menu item text and actions | `ui_kit/title_menu_config.rpy` | `"text"`, `"action"` in `tmenu.items` |  |
+| Logo, warning and controls pages before the title | `splash/splash_config.rpy` | `splash.pages` | |
+| Common font, color and timing of those pages | `splash/splash_config.rpy` | `splash.default` | |
+| Viewing the controls again from the title | `ui_kit/title_menu_config.rpy` | an item's `"action": splash.ShowPage("controls")` | |
+| Title menu item text and actions | `ui_kit/title_menu_config.rpy` | `"text"`, `"action"` in `tmenu.items` | |
 | Title menu item position, rotation and size | `ui_kit/title_menu_config.rpy` | an item's `"x"`, `"y"`, `"rotate"`, `"skew"`, `"zoom"`, `"size"` | title menu tab |
 | Font and color of the whole title menu | `ui_kit/title_menu_config.rpy` | `"font"`, `"color"`, `"hover_color"` in `tmenu.default` | title menu tab, 3 "all items" |
-| How far and fast items are pushed aside when the selection moves | `ui_kit/title_menu_config.rpy` | `tmenu.push_before`, `push_after`, `move_time`, `move_warper` |  |
-| Title background video | `ui_kit/title_menu_config.rpy` | `tmenu.background_movie` |  |
-| Position and color of the game title on the title screen, version display | `ui_kit/title_menu_config.rpy` | `style main_menu_vbox`, `style main_menu_title`, `tmenu.show_version` |  |
-| Look of the game menu (save and load screens), the list on the left | `ui_kit/title_menu_config.rpy` | `tmenu.game_menu_side`, `tmenu.game_menu_content_x`, `tmenu.game_menu`, `style navigation_button_text` |  |
+| How far and fast items are pushed aside when the selection moves | `ui_kit/title_menu_config.rpy` | `tmenu.push_before`, `push_after`, `move_time`, `move_warper` | |
+| Title background video | `ui_kit/title_menu_config.rpy` | `tmenu.background_movie` | |
+| Position and color of the game title on the title screen, version display | `ui_kit/title_menu_config.rpy` | `style main_menu_vbox`, `style main_menu_title`, `tmenu.show_version` | |
+| Look of the game menu (save and load screens), the list on the left | `ui_kit/title_menu_config.rpy` | `tmenu.game_menu_side`, `tmenu.game_menu_content_x`, `tmenu.game_menu`, `style navigation_button_text` | |
 | ESC menu during play (title menu look) | `ui_kit/title_menu_config.rpy` | `tmenu.pause` (on), `tmenu.pause_dim` (dim the screen behind), `tmenu.pause_background`, `tmenu.pause_items` (3.1) | title menu tab with the ESC menu open → Ctrl+S |
 | Position, font and color of one choice | the script (`script.rpy`, etc.) | parentheses after the choice `(x=…, y=…, font=…, color=…)` | choice tab → Ctrl+S (straight into the script) |
-| Font, size, color and background of all choices | `ui_kit/choice_menu_config.rpy` | `cmenu.default` |  |
-| Position of vertical list choices | `ui_kit/choice_menu_config.rpy` | `cmenu.list_pos` |  |
-| How choices appear | `ui_kit/choice_menu_config.rpy` | `cmenu.appear`, `appear_time`, `appear_stagger` |  |
+| Font, size, color and background of all choices | `ui_kit/choice_menu_config.rpy` | `cmenu.default` | |
+| Position of vertical list choices | `ui_kit/choice_menu_config.rpy` | `cmenu.list_pos` | |
+| How choices appear | `ui_kit/choice_menu_config.rpy` | `cmenu.appear`, `appear_time`, `appear_stagger` | |
 | Mouse cursor | `ui_kit/custom_ui_config.rpy` | `custom_ui.cursor`, `cursor_frames`, `cursor_hold` (every 1/2 frames), `cursor_mode`, `cursor_hotspot` (3.0) | cursor/dialogue sound tab (12 slots) |
 | Click-to-continue indicator (ctc) | `ui_kit/custom_ui_config.rpy` | `custom_ui.ctc`, `ctc_frames`, `ctc_hold` (every 1/2 frames), `ctc_position` (3.0) | cursor/dialogue sound tab (12 slots) |
 | Sound while dialogue appears | `ui_kit/custom_ui_config.rpy` | `custom_ui.typing_sound`, `typing_volume` | cursor/dialogue sound tab |
@@ -58,38 +58,38 @@ Find what you want to change and edit the value in the file on the right. Items 
 | Speed and text effect of one dialogue line | the script | parentheses after the line `(cps=20, effect="jitter")` (`cps` is characters per second), or a ratio `(speed=0.5)` | dialogue tab, speed and effect buttons → Ctrl+S |
 | Position and enter/exit transitions of images and videos (show / hide / scene lines) | the script | `show eileen at stage.pos(420, 720) with dissolve`, `hide eileen with moveoutright` | image/video tab → Ctrl+S (straight into the script) |
 | Change the image of a show / scene line to another file, add new show / scene lines | the script | `scene fx_bg` → `scene room`, `show hand` below (3.0) | image/video tab "choose image/video" → Ctrl+S |
-| Using videos by name only, transparent videos | the `game/movies/` folder + `ui_kit/stage_config.rpy` | `movies/rain.webm` → `show rain`, `movies/mask_ghost.webm` → `show ghost` (transparent), `stage.movie_once` |  |
-| Always keep bg images at the very back | `ui_kit/stage_config.rpy` | `stage.bg_tag`, `stage.bg_zorder` |  |
-| Add tags treated as backgrounds (at the back + fixed position in the editor) | `ui_kit/stage_config.rpy` | `stage.bg_tag = [ "bg", "fx_bg" ]` (3.0) |  |
+| Using videos by name only, transparent videos | the `game/movies/` folder + `ui_kit/stage_config.rpy` | `movies/rain.webm` → `show rain`, `movies/mask_ghost.webm` → `show ghost` (transparent), `stage.movie_once` | |
+| Always keep bg images at the very back | `ui_kit/stage_config.rpy` | `stage.bg_tag`, `stage.bg_zorder` | |
+| Add tags treated as backgrounds (at the back + fixed position in the editor) | `ui_kit/stage_config.rpy` | `stage.bg_tag = [ "bg", "fx_bg" ]` (3.0) | |
 | See / turn off screen effects while editing | `screen_fx/screen_fx_config.rpy` | `screen_fx.editor_preview = True` / `False` (3.0) | V key while editing |
-| When the editor panel covers the screen | (keys) | drag the title, X to fold, hold Space to hide, B to move aside automatically, P to change corner |  |
-| When the bottom of the editor panel is cut off | (mouse) | wheel over the panel, or drag the pink scrollbar on the right (2.9) |  |
+| When the editor panel covers the screen | (keys) | drag the title, X to fold, hold Space to hide, B to move aside automatically, P to change corner | |
+| When the bottom of the editor panel is cut off | (mouse) | wheel over the panel, or drag the pink scrollbar on the right (2.9) | |
 | Change the screen effect from this line (until cancelled) | the script | parentheses after the line `(fx="ascii")`, cancel `(fx="default")`, transition `(fx_transition="fade")` | the "screen effect" row in the dialogue tab, or "this effect from this line" in the screen effects tab → Ctrl+S (straight into the script) |
 | Change the screen effect from a non-dialogue line (scene, show, with, $ lines) | the script | right above that line `$ screen_fx.use("ascii", overlay=False, transition="fade")`, `$ screen_fx.clear()`, `$ screen_fx.set_overlay(True)`, `$ screen_fx.set_warp(3)` (4.1) | "insert into line" in the screen effects tab, or "this effect from this line" → Ctrl+S (straight into the script) |
 | Turn the VHS overlay on/off and set its curvature from this line | the script | parentheses after the line `(fx_overlay=False)`, `(fx_overlay=True)`, `(fx_warp=3.0)`, `(fx_warp="default")` (4.0) | the "overlay (VHS)" and "overlay curvature" rows in the dialogue tab → Ctrl+S |
 | Whether the mouse cursor receives screen effects (per section) | `screen_fx/screen_fx_config.rpy` + the script | `screen_fx.cursor = "effect"` / `"overlay"` / `"top"`, `$ screen_fx.set_cursor("top")`, dialogue parentheses `(fx_cursor="overlay")` (4.2) | the "cursor" row in the dialogue tab, the "cursor" row in insert into line → Ctrl+S |
 | Exclude text from this line | the script | parentheses after the line `(fx="gameboy", fx_exclude=("say",))` | the "text exclusion" row in the dialogue tab → Ctrl+S |
-| Default dialogue position and font of a character | `ui_kit/say_style_config.rpy` | `define t = Character(what_xpos=…, what_font=…)` |  |
-| Change or cancel screen effects in a scene | the script | `$ screen_fx.use("ascii")`, `$ screen_fx.use("ascii", overlay=False)`, `$ screen_fx.clear()` |  |
+| Default dialogue position and font of a character | `ui_kit/say_style_config.rpy` | `define t = Character(what_xpos=…, what_font=…)` | |
+| Change or cancel screen effects in a scene | the script | `$ screen_fx.use("ascii")`, `$ screen_fx.use("ascii", overlay=False)`, `$ screen_fx.clear()` | |
 | The usual screen effect (base effect) | `screen_fx/screen_fx_config.rpy` | `screen_fx.base` (`"none"`, `"ascii"`, `"retro_term"`, `"gameboy"`) | screen effects tab → base effect, transition |
 | Transition when changing effects (TV off/on / dissolve / instant) | `screen_fx/screen_fx_config.rpy` | `screen_fx.transition`, `screen_fx.tv`, `screen_fx.fade_time` | screen effects tab → base effect, transition, "preview" |
 | ASCII cell size, ratio, crispness, character list, colors | `screen_fx/ascii_config.rpy` | `"cell"`, `"aspect"`, `"crisp"`, `"chars"`, `"color_mode"` in `ascii.settings`, `ascii.presets` | screen effects tab → ASCII |
-| ASCII font | `screen_fx/ascii_config.rpy` | `ascii.font` (`None` = the included NeoDunggeunmo) |  |
+| ASCII font | `screen_fx/ascii_config.rpy` | `ascii.font` (`None` = the included NeoDunggeunmo) | |
 | Turn the VHS overlay on/off (on by default) | `screen_fx/screen_fx_config.rpy` | `screen_fx.overlay` (`True` / `False`) | screen effects tab → base effect, transition "overlay (VHS)" |
 | Whether each effect turns on the overlay (off by default for retro terminal) | each effect's settings file | `ascii.overlay`, `retro_term.overlay`, `gameboy.overlay` (`True` / `False`) | screen effects tab → effect button → "overlay (VHS)" |
 | Amount of overlay distortion (curvature, shift, color bleed) | `screen_fx/vhs_crt_config.rpy` | `warp_amount`, `distort_intensity`, `aberration` in `vhs_crt.settings`. During play `$ screen_fx.set_warp(3.0)`, `$ vhs_crt.set(…)` | screen effects tab → VHS overlay sliders, "overlay curvature" in the dialogue tab |
 | Leave dialogue, choices and menus out of effects (text exclusion) | each effect's settings file | `vhs_crt.exclude`, `ascii.exclude`, `retro_term.exclude`, `gameboy.exclude` (choose from `"say"`, `"choice"`, `"screens"`) | screen effects tab → effect button → "text exclusion" |
 | Retro terminal colors (phosphor, background), curved CRT, built-in VHS | `screen_fx/retro_term_config.rpy` | `"phosphor"`, `"background"`, `"crt"`, `"vhs"` in `retro_term.settings`, `retro_term.presets` | screen effects tab → retro terminal |
 | Game Boy dithering/pixelation, dot size, four colors, LCD feel | `screen_fx/gameboy_config.rpy` | `"mode"`, `"pixel_size"`, `"color1"`–`"color4"`, `"grid"`, `"shadow"` in `gameboy.settings`, `gameboy.presets` | screen effects tab → Game Boy |
-| Scene effects on images added to a screen too | that screen | `add "map.png" at screen_fx.scene` |  |
+| Scene effects on images added to a screen too | that screen | `add "map.png" at screen_fx.scene` | |
 | Strength of the title shimmer (a shader since 5.5) | `screen_fx/ripple_config.rpy` | `"amount"`, `"scale"`, `"speed"`, `"shine"` in `ripple.settings`, `ripple.presets`. Whether the title gets it: `screen_fx.title_shaders` in `screen_fx_config.rpy` | GUI → title shader, shader defaults |
 | Hide effects and shaders from pickers (5.1) | `ui_kit/effects/effects_off.txt`, `screen_fx/shaders_off.txt` | one name per line (text after `#` is a note). Scripts already using them keep working | [Hide] in the app's [Effects] and [Shaders] (hidden ones gather at the bottom with [Hidden to bottom]) |
 | Add or remove text effects and image transitions (5.1) | the `ui_kit/effects/` folder | one `.glsl` file per effect. See "Effects folder" below | the app's [Effects] |
 | VHS overlay strength and scope | `screen_fx/vhs_crt_config.rpy` | `vhs_crt.settings`, `vhs_crt.scope` | screen effects tab → VHS overlay |
 | VHS presets (sets to switch during play) | `screen_fx/vhs_crt_config.rpy` | `vhs_crt.presets` | screen effects tab → VHS overlay, choose a preset in "editing target" |
-| Add and remove hotkeys | `hotkeys/hotkeys_config.rpy` | `hotkeys.bindings`, `hotkeys.unbind` |  |
-| Descriptions in the controls screen | `hotkeys/hotkeys_config.rpy` | `hotkeys.keyboard_help` |  |
-| Turn off a whole feature | top of each settings file | `tmenu.enabled`, `cmenu.enabled`, `custom_ui.enabled`, `say_style.enabled`, `watermorph.enabled`, `vhs_crt.enabled`, `ascii.enabled`, `retro_term.enabled`, `gameboy.enabled`, `splash.enabled` |  |
+| Add and remove hotkeys | `hotkeys/hotkeys_config.rpy` | `hotkeys.bindings`, `hotkeys.unbind` | |
+| Descriptions in the controls screen | `hotkeys/hotkeys_config.rpy` | `hotkeys.keyboard_help` | |
+| Turn off a whole feature | top of each settings file | `tmenu.enabled`, `cmenu.enabled`, `custom_ui.enabled`, `say_style.enabled`, `watermorph.enabled`, `vhs_crt.enabled`, `ascii.enabled`, `retro_term.enabled`, `gameboy.enabled`, `splash.enabled` | |
 
 ## Using it with pygaki
 
@@ -200,10 +200,10 @@ Put a file anywhere under the `game` folder and write its path in the values bel
 
 | Asset | Default path | Format and conditions | Value to change |
 | --- | --- | --- | --- |
-| Font | any name in `game/fonts/` | .ttf / .otf / .ttc, a font that has the characters of your language. Match the file name's case exactly to the code (Mac, Android and web are case-sensitive) | title: `tmenu.default["font"]` · choices: `cmenu.default["font"]` · dialogue: `Character(what_font=…)` · whole game: `gui.text_font` in `gui.rpy`, etc. |
+| Font | any name in `game/fonts/` |.ttf /.otf /.ttc, a font that has the characters of your language. Match the file name's case exactly to the code (Mac, Android and web are case-sensitive) | title: `tmenu.default["font"]` · choices: `cmenu.default["font"]` · dialogue: `Character(what_font=…)` · whole game: `gui.text_font` in `gui.rpy`, etc. |
 | Cursor frames | `gui/cursor/cursor1.png` – `cursor6.png` | PNG, the editor has 12 slots (played in order). E.g. 64×64 | `custom_ui.cursor_frames`, `cursor_hold` (every 1/2 frames, 24fps), `cursor_hotspot` (click hotspot) |
 | Click-to-continue frames | `gui/ctc/ctc1.png` – `ctc6.png` | PNG, the editor has 12 slots | `custom_ui.ctc_frames`, `ctc_hold` (every 1/2 frames, 24fps) |
-| Dialogue sound | none (`None`) | .ogg recommended. A short sound repeats while text appears | `custom_ui.typing_sound` · per character: `Character(cb_typing_sound=…)` |
+| Dialogue sound | none (`None`) |.ogg recommended. A short sound repeats while text appears | `custom_ui.typing_sound` · per character: `Character(cb_typing_sound=…)` |
 | Choice hover video | none (`None`) | WebM (VP9); for transparency, side_mask format (file width = display width × 2) | `cmenu.default["hover_movie"]`, `hover_movie_size`, `hover_movie_zoom` · one choice only: parentheses `hover_movie=…` |
 | Title menu hover video | none | WebM (VP9), side_mask. Laid behind the text | an item's `"hover_movie"`, `"hover_movie_pos"`, `"hover_movie_size"` |
 | Video instead of title menu text | none | WebM (VP9), side_mask | an item's `"hover_label_movie"` |
@@ -211,12 +211,12 @@ Put a file anywhere under the `game` folder and write its path in the values bel
 | Title background image | `gui/main_menu.png` | PNG at the game's resolution | overwrite the file (or `gui.main_menu_background` in `gui.rpy`) |
 | Translucent panel behind menus | `gui/overlay/main_menu.png` | PNG. Make it fully transparent and the panel disappears | overwrite the file, or `tmenu.main_menu_frame = False` |
 | Choice button backgrounds | `gui/button/choice_idle_background.png`, `choice_hover_background.png` | PNG (9-slice borders `gui.choice_button_borders`) | overwrite the files, or `cmenu.default["button_background"]`, `["button_hover_background"]` |
-| Sound effects (menu move and select) | none | .ogg | `tmenu.hover_sound`, `activate_sound` · `cmenu.hover_sound`, `activate_sound` |
+| Sound effects (menu move and select) | none |.ogg | `tmenu.hover_sound`, `activate_sound` · `cmenu.hover_sound`, `activate_sound` |
 | Name background | `gui/namebox.png` | PNG (9-slice borders `gui.namebox_borders`). Follows along when moved with `name_x`, `name_y` in dialogue parentheses | overwrite the file |
 | Splash background video or image | none (recommended: `movies/`, `gui/splash/`) | WebM (VP9) or PNG at the game's resolution. Videos play fitted to the screen | the page's `"background"`. Advance when the video ends: `"duration": "movie"` |
 | Splash logo video or image | none | transparent videos in side_mask format (if not transparent, `"image_side_mask": False`) | the page's `"image"`, `"image_pos"`, `"image_zoom"` |
-| Splash sound effect or music | none | .ogg. To carry music on to the title, use the same file as `config.main_menu_music` | the page's `"sound"`, `"music"` |
-| TV off/on sounds | none (`None`) | .ogg. Once when it starts turning off and once when it starts turning on. Follows the sound effect volume | `"off_sound"`, `"on_sound"`, `"volume"` in `screen_fx.tv` |
+| Splash sound effect or music | none |.ogg. To carry music on to the title, use the same file as `config.main_menu_music` | the page's `"sound"`, `"music"` |
+| TV off/on sounds | none (`None`) |.ogg. Once when it starts turning off and once when it starts turning on. Follows the sound effect volume | `"off_sound"`, `"on_sound"`, `"volume"` in `screen_fx.tv` |
 
 Making transparent videos (side_mask): export a ProRes 4444 `.mov` with a transparent background from After Effects or similar, then convert it with ffmpeg. The command is in "Preparing videos" in `ui_kit/README.md`.
 
@@ -303,7 +303,7 @@ define splash.pages = [
         ##   "image_loop": False,                   once only
         # "image_loop": True,
 
-        ## Title ─ wrap text shown on screen in _( ).
+        ## Title ─ wrap text shown on screen in _().
         "title": _("만든 사람 이름"),
         "title_size": 56,                          # a bigger title on this page only (the rest use 44 from splash.default)
 
@@ -373,8 +373,8 @@ define splash.pages = [
         "title": _("조작 방법"),
 
         ## Controls table ─ one (key, description) pair is one row.
-        ##   To add rows, copy a ( _("key"), _("description") ), line, paste it and change only the text.
-        ##   If the key is a single English letter, you can write it without _( ), like "H".
+        ##   To add rows, copy a ( _("key"), _("description")), line, paste it and change only the text.
+        ##   If the key is a single English letter, you can write it without _(), like "H".
         ## Instead of this, write "keys": "auto", and
         ##   it shows the same list as the controls screen of the game menu.
         ##   (with the hotkeys plugin, hotkeys.keyboard_help in hotkeys_config.rpy; otherwise Ren'Py's default descriptions)
@@ -581,7 +581,7 @@ Copy one as is and paste it into the `splash.pages` list at the position you wan
 | --- | --- |
 | Background | `"background"`: a color `"#202020"`, an image `"gui/splash/bg.png"`, a video `"movies/bg.webm"` (looped). The color underneath is `"color"` |
 | Logo in the center | `"image"` (an image or a side_mask video); to place it separately `"image_pos": (640, 200)`, size `"image_zoom"` |
-| Text | `"title"`, `"body"` (line breaks with `\n`), controls table `"keys": [ (key, description), … ]` or `"auto"` (the same list as the controls screen), `"hotkeys"` (follows the edit shortcuts table; functions to show in `"keys_show": [ "screenshot", … ]`, splash 2.5) |
+| Text | `"title"`, `"body"` (line breaks with `\n`), controls table `"keys": [ (key, description), … ]` or `"auto"` (the same list as the controls screen), `"hotkeys"` (follows the edit shortcuts table; functions to show in `"keys_show": [ "screenshot", … ]`) |
 | When to advance | `"duration"`: seconds / `None` (until a click) / `"movie"` (until the video ends) |
 | Avoid skipping by accident | `"min_time"` (clicks ignored for this long after fully appearing); to prevent skipping, `"skippable": False` together with `"duration"` |
 | Fade in and out times | `"fade_in"`, `"fade_out"` (a black screen between pages) |
@@ -697,13 +697,13 @@ menu (font="fonts/KBLJump_c.ttf", size=28, appear="slide"):
 | Wrap width | `width=400` (`None`: no wrapping) | `"width"` |
 | Rotation, tilt, scale | `rotate=`, `skew=`, `zoom=`, on hover `hover_rotate=`, `hover_zoom=`, `hover_offset=(8, 0)` | the same names |
 | Intro animation | `appear="pop"` / `"fade"` / `"slide"` / `None`, `delay=0.5` | `cmenu.appear`, `appear_time`, `appear_stagger`, `appear_offset` |
-| Picture or video behind the text (5.4) | `idle_media=`, `hover_media=`, `select_media=`, `select_time=0.8`. See "Picture/video box" below |  |
+| Picture or video behind the text (5.4) | `idle_media=`, `hover_media=`, `select_media=`, `select_time=0.8`. See "Picture/video box" below | |
 | Video behind on hover | `hover_movie="movies/red.webm"` (`None`: off) | `"hover_movie"`, `"hover_movie_size"`, `"hover_movie_zoom"`, `"hover_movie_offset"` |
 | Button background, padding, width | `button_background=…`, `button_padding=(30, 8)`, `button_xsize=500` | `"button_background"`, `"button_hover_background"`, `"button_padding"`, `"button_xsize"` |
 | Color of choices that can't be picked | `insensitive_color="#555"` | `"insensitive_color"` |
 | Sound effects | `hover_sound=`, `activate_sound=` | `cmenu.hover_sound`, `cmenu.activate_sound` |
-| Hover response speed |  | `cmenu.hover_time`, `cmenu.hover_warper` |
-| Vertical list spacing |  | `style choice_vbox:` `spacing 30` |
+| Hover response speed | | `cmenu.hover_time`, `cmenu.hover_warper` |
+| Vertical list spacing | | `style choice_vbox:` `spacing 30` |
 
 Choices with positions don't avoid each other, so place them so they don't overlap.
 
@@ -713,13 +713,13 @@ In the default release settings everything is off, so it's the same as Ren'Py's 
 
 | I want to | Value | Notes |
 | --- | --- | --- |
-| Turn on the cursor animation | `custom_ui.cursor = True` |  |
+| Turn on the cursor animation | `custom_ui.cursor = True` | |
 | Change cursor images | `custom_ui.cursor_frames = [ "gui/cursor/cursor1.png", … ]` | played in order. The editor has 12 slots |
 | Cursor speed | `custom_ui.cursor_hold = 2` | fixed at 24 frames per second (3.0). `1` holds each image 1 frame (24 per second), `2` holds 2 frames (12 per second) |
 | Cursor mode | `custom_ui.cursor_mode = "software"` | `"software"` drawn by Ren'Py (accurate 24fps, default) / `"hardware"` the OS cursor (fastest response, up to 20fps) |
 | Whether the cursor receives screen effects (ASCII, VHS, etc.) | `screen_fx.cursor = "effect"` (screen_fx_config.rpy) | `"effect"` including effects (default) / `"overlay"` under the overlay / `"top"` no effects. Software cursor only. See "Cursor position" below |
 | Cursor click hotspot | `custom_ui.cursor_hotspot = (0, 0)` | x, y pixels from the image's top left. If the arrow tip is in the center, use that coordinate |
-| Turn on the click-to-continue indicator | `custom_ui.ctc = True` |  |
+| Turn on the click-to-continue indicator | `custom_ui.ctc = True` | |
 | Click-to-continue images and speed | `custom_ui.ctc_frames = [ … ]`, `custom_ui.ctc_hold = 2` | 24fps like the cursor, every `1` / `2` frames (3.0) |
 | Click-to-continue position | `custom_ui.ctc_position = "nestled"` | `"nestled"` right after the text, `"fixed"` at the position set in the say screen |
 | A different indicator for one character | `Character("name", ctc="other_image")` | that value takes priority |
@@ -790,7 +790,7 @@ define n2 = Character(kind=t, what_xpos=400, what_ypos=210)   # a position prese
 | `name_x`, `name_y` | `namebox_xpos`, `namebox_ypos` | name box position (from the dialogue window's top left; moves together with the name background) |
 | `name_font`, `name_size`, `name_color` | `who_font`, `who_size`, `who_color` | name font, size, color |
 
-**Text boxes** (ui_kit 4.0): write `box` in the parentheses and a box surrounds the dialogue text. Default shapes are in `say_style.box_styles` in the settings file.
+**Text boxes**: write `box` in the parentheses and a box surrounds the dialogue text. Default shapes are in `say_style.box_styles` in the settings file.
 
 ```py
 e "안녕!" (box="bubble")                                    # white speech bubble, black line, tail down, pops in
@@ -813,7 +813,7 @@ e "속까지." (box="pill", pill_fill="#ffd23b", pill_line=None, color="#000000"
 - The tail doesn't find the speaker by itself. Set a direction or `(x, y)`.
 - You can also choose it in the "box" field of the editor's dialogue tab and in [Box] of pygaki's text effect field.
 
-**Picture/video box** (5.4, `ui_kit` 4.14–4.18): write `box="media"` to lay a picture or video behind the dialogue text. It is centered on the text, and the default dialogue window and name box backgrounds become transparent so only the picture shows. Use it for a cloud-shaped thought bubble, a bursting sound-effect word, text on a note paper picture and so on.
+**Picture/video box** (5.4, –4.18): write `box="media"` to lay a picture or video behind the dialogue text. It is centered on the text, and the default dialogue window and name box backgrounds become transparent so only the picture shows. Use it for a cloud-shaped thought bubble, a bursting sound-effect word, text on a note paper picture and so on.
 
 ```py
 e "It was a dream." (box="media", media="images/say/cloud.png")                    # stretched to the text size + padding
@@ -870,7 +870,9 @@ Just go in order.
 5. Choose fonts and colors with the panel's buttons. The font list shows every font file in the `game` folder; colors are chosen with sliders, color codes or frequent colors.
 6. **Save with Ctrl+S**, close with Esc. If you made a mistake, Backspace (undoes only the current selection).
 
-In a game whose screen is scaled up several times in the window, like the retro resolutions, the editor (panel, picker windows, name tags, handles, flow tree drawer) is drawn at the real screen size so it stays readable at small resolutions (`ui_kit` 4.20). While the editor is open, the empty part of the window outside the game screen (the black bands of whole-number scaling) is painted red to show where the game screen ends. Turn it on/off with **F8** (remembered by the game) or in the pygaki app's preferences.
+In a game whose screen is scaled up several times in the window, like the retro resolutions, the editor (panel, picker windows, name tags, handles) is drawn at the real screen size so it stays readable at small resolutions. While the editor is open it uses the whole window: the game screen stays at its own size (a whole-number scale with pixel perfect) in the middle of the window, and panels and pickers can use the empty space outside it (for example, a 640x400 game in an 800x800 window gives the editor the whole 800x800). When the window is larger than the game screen, a thin red border is drawn around the game screen to show where it ends. Turn the border on/off with **F8** (remembered by the game) or in the pygaki app's preferences. Closing the editor returns to the normal screen (black bands around it).
+
+Lists with many choices, such as text effects, shaders (slots 1 and 2), and image effects, show only the current value and **[Choose in the pygaki app]** on the game-window panel. Pressing it opens that section in the app's [GUI Edit] when the app is connected, or starts the pygaki app from the Ren'Py SDK otherwise. The shortcut help on the game-window panel starts folded; press **F1** to show it. All shortcuts are listed in the pygaki app's preferences under [Shortcuts].
 
 For choices and dialogue, **Ctrl+S saves straight into that line's parentheses in the script (.rpy)**, and the game reloads and returns to the same scene. Values that were already written and things after the line like `with dissolve` are left as they are; only changed values are edited. The original before editing is kept in `ui_kit_backup/` in the project folder.
 
@@ -930,7 +932,7 @@ show ghost with Dissolve(1.0)                     # dissolve over 1 s
 
 **When the panel covers the screen** (all tabs): drag the title (= UI editor) to move it, **X** folds it to one line, hold **Space** to hide it, **B** moves it aside automatically (to another corner if the selection is under the panel), **P** changes the corner, **L** folds the line list (image/video tab), **F1** folds the help. If the panel is taller than the screen, see the bottom with the **wheel** over the panel or the **scrollbar** on the right (2.9).
 
-**Screen effects while editing** (all tabs, `screen_fx` 3.4 or later): screen effects stay on while the editor is open, and the panel is drawn cleanly over them. Toggle with **V**. With warping effects (VHS, CRT, etc.), the visible position and the clicked position differ slightly near the edges, so turn them off briefly with V when dragging precisely. To start with them off, `define screen_fx.editor_preview = False`.
+**Screen effects while editing** (all tabs): screen effects stay on while the editor is open, and the panel is drawn cleanly over them. Toggle with **V**. With warping effects (VHS, CRT, etc.), the visible position and the clicked position differ slightly near the edges, so turn them off briefly with V when dragging precisely. To start with them off, `define screen_fx.editor_preview = False`.
 
 Details in chapters 4-6, 4-7 and 13 of `ui_kit/README.md`.
 
@@ -960,10 +962,10 @@ define hotkeys.keyboard_help = [
 | Default hotkey names often removed | `screenshot` (S), `toggle_fullscreen` (F), `hide_windows` (H), `self_voicing` (V), `accessibility` (Shift+A), `skip` (Ctrl), `toggle_skip` (Tab), `rollback` (Page Up) |
 | When they overlap | if a new key overlaps a default hotkey, both run, so remove it from the default side with `unbind` |
 | The help screen | if `keyboard_help` is `None`, Ren'Py's default descriptions. Keys removed with `unbind` are updated in that default list automatically (1.3: removing V turns the "V" line into "Alt+V", and a line with no keys left is dropped). If you wrote the list yourself, update the descriptions too |
-| Overlap with the editor key | the UI Kit editor uses Shift+M. To change it, `define ui_kit.editor_key = "shift_K_e"` |
+| Overlap with the editor key | the pygaki editor uses Shift+M. To change it, `define ui_kit.editor_key = "shift_K_e"` |
 | Preset actions (1.1) | instead of `"action"`, a name like `"do": "quick_save"`. Writing `"help": _("Quick save")` puts it in the controls screen list (if a line with the same key exists, its description is replaced). The list of names is in `hotkeys/README.md` |
 
-**Changing them in the editor** (`hotkeys` 1.2, with `ui_kit`): the "Edit shortcuts" tab (단축키 수정) of the Shift+M editor (right after the splash tab; also next to the controls guide in the splash tab's page buttons, and under "Controls guide" in the pygaki app's [GUI edit]) has a function name and a key button on each line. Press the key button, then press the new key in the game window (Esc cancels). [+] adds one more key; clicking a function name shows [Key buttons] (키 단추로), [Remove keys] (키 빼기), [First keys] (처음 키로) and a description cell. If another function uses the key, a warning and guidance appear, and it only changes when you press [Remove it there and change] (그쪽에서 빼고 바꾸기). Press [Export to the guide screen] (안내 화면으로 내보내기) and the splash controls guide table becomes `"keys": "hotkeys"` and follows this table; pick which functions to show by clicking them in the controls guide list of the splash tab (`"keys_show"`). Changed keys also go into the ESC controls screen list automatically. Changes apply right away while you edit; saving writes `"keys"` (keys per function) and `"desc"` (descriptions) in `hotkeys/hotkeys_layout.rpy`, which are added to the settings file's values.
+**Changing them in the editor** (with `ui_kit`): the "Edit shortcuts" tab (단축키 수정) of the Shift+M editor (right after the splash tab; also next to the controls guide in the splash tab's page buttons, and under "Controls guide" in the pygaki app's [GUI edit]) has a function name and a key button on each line. Press the key button, then press the new key in the game window (Esc cancels). [+] adds one more key; clicking a function name shows [Key buttons] (키 단추로), [Remove keys] (키 빼기), [First keys] (처음 키로) and a description cell. If another function uses the key, a warning and guidance appear, and it only changes when you press [Remove it there and change] (그쪽에서 빼고 바꾸기). Press [Export to the guide screen] (안내 화면으로 내보내기) and the splash controls guide table becomes `"keys": "hotkeys"` and follows this table; pick which functions to show by clicking them in the controls guide list of the splash tab (`"keys_show"`). Changed keys also go into the ESC controls screen list automatically. Changes apply right away while you edit; saving writes `"keys"` (keys per function) and `"desc"` (descriptions) in `hotkeys/hotkeys_layout.rpy`, which are added to the settings file's values.
 
 ## Changing screen effects — `screen_fx/screen_fx_config.rpy`
 
@@ -977,7 +979,7 @@ Normally it's **no base effect + VHS overlay on** (= VHS over the whole screen).
 
 | Base effect name | Meaning | Settings file |
 | --- | --- | --- |
-| `"none"` | no effect (the base effect of the release settings; the overlay follows the settings) |  |
+| `"none"` | no effect (the base effect of the release settings; the overlay follows the settings) | |
 | `"ascii"` | redraws the screen as characters. One character = one pixel (by default only the scene; dialogue stays readable) | `ascii_config.rpy` |
 | `"retro_term"` | retro terminal: a single-color phosphor monitor with its own curved CRT and VHS. **The overlay is off by default while it's used** | `retro_term_config.rpy` |
 | `"gameboy"` | Game Boy: big dots and a 4-color LCD screen, dithering / pixelation | `gameboy_config.rpy` |
@@ -1003,27 +1005,6 @@ Normally it's **no base effect + VHS overlay on** (= VHS over the whole screen).
 | (overlay) | VHS. Only on / off is chosen; its look is `vhs_crt.settings` | `vhs_crt_config.rpy` |
 
 > Monochrome (`mono`) was removed in 4.0. Using the old name `"vhs_crt"` as a base effect is read as "none + overlay on".
-
-### Putting shaders on a section with the tree diagram (screen_fx 5.2)
-
-A way to add them with the mouse while the game runs, without writing script.
-
-1. Start the game in developer mode, then Shift+M → "screen effects" tab → **G** (or [G open tree diagram]). The tree diagram appears beside the game screen. Numbers on the left are script line numbers, yellow squares are `label`s, yellow branches splitting sideways are choices and `if`s, and `-> name` is a `jump`. Color bands on the right are the shaders covering that line (left slot 1, right slot 2).
-2. Press the node of the first line where you want the shader and drag to the last line. The section is painted pink.
-3. Choose slot 1 and slot 2 shaders in the panel, **[Apply to this section]** → **Ctrl+S**. The script changes like this.
-   ```renpy
-       $ screen_fx.shaders("glitch", "vhs_crt")   # above the section's first line
-       e "세 번째 대사."
-       ...
-       $ screen_fx.shaders("ascii", "none")       # above the line after the section: back to the original two slots
-       e "가지가 합쳐진 대사."
-   ```
-4. Changing transitions: click a square dot at the right end of the tree diagram (where shaders change) to select it, then choose as settings / TV / dissolve / instant in the panel's "selected transition points". You can change several points at once. Saving adds values like `transition="fade"`.
-
-- If the end of the section is inside a choice branch, players who took another branch don't pass the line after the end. In the panel you can choose to restore at **where the branches join** (the line after the menu ends).
-- Deleting: drag to select a section or select a square dot, then **Delete** → Ctrl+S. That shader line is removed from the script and the dot disappears. If a shader was turned on earlier, the section continues with that shader (a message tells you).
-- Pressing a node without dragging moves the game to that line. Press G again to put the tree diagram away.
-- The pygaki app doesn't open the tree diagram (the section in the app's [GUI] is called "Shaders"). For pygaki scripts, set shaders with the ◐ Shader at the top right of boxes and labels in [Script].
 
 ### In the script
 
@@ -1185,7 +1166,7 @@ define screen_fx.tv = {
 
 ### Cursor position — `screen_fx/screen_fx_config.rpy` + script (4.2)
 
-Choose where in the screen effects UI Kit's software cursor (`custom_ui.cursor = True`) is drawn, per section of the script like shaders. It stays until changed again and is saved with saves and rollback.
+Choose where in the screen effects pygaki's software cursor (`custom_ui.cursor = True`) is drawn, per section of the script like shaders. It stays until changed again and is saved with saves and rollback.
 
 ```renpy
 ## screen_fx_config.rpy: the usual value
@@ -1289,7 +1270,7 @@ define ascii.settings = {
     "cell": 16,             # character cell height (pixels). 8 very dense, 16 default, 32 large, 48+ breaks up the picture
     "aspect": 0.5,          # cell width ÷ height. 0.5 = half-width characters (8×16), 1.0 = square tiles
     "crisp": True,          # True: cell height in multiples of 8. Sharpest at 16, 32, 48
-    "chars": " .:-=+*#%@",  # character list (dark cell → bright cell). Dungeon style " .,:;ox%#@", blocks " ░▒▓█", "01"
+    "chars": ".:-=+*#%@",  # character list (dark cell → bright cell). Dungeon style ".,:;ox%#@", blocks " ░▒▓█", "01"
     "color_mode": "color",  # "mono" one color (fg) / "color" original colors / "palette16" old PC 16 colors
     "fg": "#c8c8c8",        # character color in "mono". "#33ff66" green terminal, "#ffb000" amber
     "bg": "#000000",        # background color (empty space between characters)
@@ -1317,7 +1298,7 @@ $ ascii.reset(duration=1.0)                  # back to the settings file values
 | A green monochrome monitor | `ascii.preset("terminal")` |
 | ASCII + VHS overlay too dark | `ascii.preset("glow")` or `"bg_tint": 0.2`, `"color_boost": 1.6` |
 | Even the dialogue window as characters (for effect) | `$ screen_fx.use("ascii", exclude=())` |
-| A character list with other characters and symbols | `"chars": " .·:∴※#"` (only characters the font has; others show as boxes) |
+| A character list with other characters and symbols | `"chars": ".·:∴※#"` (only characters the font has; others show as boxes) |
 
 In the editor's "screen effects" tab → "ASCII" button, set cell size, ratio and crispness with sliders and buttons, and the character list and coloring with buttons. Detailed descriptions of values are in chapter 6 of `screen_fx/README.md`.
 
@@ -1541,7 +1522,7 @@ When the same value is in several places, the one further right wins.
 | The editor doesn't open | whether you ran it from the launcher (it only opens in developer mode) |
 | Deleted files still apply / screens defined twice | whether you deleted the `.rpyc` too, whether old folders like `title_menu` remain |
 | Editor save fails | if the project is inside Dropbox, pause syncing briefly and save again |
-| Changed the splash but don't see it | it doesn't show with Shift+R. Restart or use `splash.preview()`. Whether it was dropped by `developer_skip`, `once` or "don't show" is shown in the "Not showing now: …" row of the editor's splash tab; clear the record with [Show again] (splash 2.1) |
+| Changed the splash but don't see it | it doesn't show with Shift+R. Restart or use `splash.preview()`. Whether it was dropped by `developer_skip`, `once` or "don't show" is shown in the "Not showing now: …" row of the editor's splash tab; clear the record with [Show again] |
 | Only my own `splashscreen` label shows | `call splash_play` inside that label |
 | The splash controls table overlaps the prompt below | lower the page's `"yalign"` or reduce `"key_size"` and `"keys_spacing"` |
 | A middle dot (·) between characters shows as a box | a character missing from the Korean font of new Ren'Py projects. Use `/` or `,`, or change the font |
@@ -1551,7 +1532,7 @@ When the same value is in several places, the one further right wins.
 | "image not found" error on `show rain` | whether the video is in `game/movies/`, whether the extension is `.webm`, whether an image with the same name exists in `images/` (images win) |
 | A transparent video shows as two pictures side by side | whether the file name starts with `mask_` (side_mask video) |
 | I added a transparent webm or GIF but the background is black | Ren'Py can't play a webm with alpha. Make a `mask_` video with [Make transparent video] in the pygaki app |
-| A game newly made with Ren'Py 8.6 stops at the first line with "Unknown layer None" | the plugin is old. Use [Update plugins] in the bundle launcher to get 5.4 (`ui_kit` 4.17 / `screen_fx` 5.9 or later) |
+| A game newly made with Ren'Py 8.6 stops at the first line with "Unknown layer None" | the plugin is old. Use [Update plugins] in the bundle launcher to get 5.4 |
 | A shader I wrote gives a syntax error in Ren'Py 8.6 | new 8.6 games use GLSL ES 3.00 for shaders by default. Register shaders written in the old syntax with `glsl=100` (8.5 has no such argument, so only when `hasattr(renpy.config, "glsl_version")`) |
 | "unknown keyword" error for `box="media"` in dialogue parentheses / no picture | `ui_kit` is older than 4.14. Update the plugins |
 | Can't select an image in the image/video tab | only images shown by show or scene lines in the script can be selected. Right after loading a save, choose from the line list |

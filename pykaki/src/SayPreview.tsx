@@ -114,7 +114,7 @@ export function useGameFileUrl(path?: string) {
   }, [path, seq]);
   return url;
 }
-// 자리·크기·회전(게임 안 편집 화면에서 받아 적은 값, ui_kit 4.15)은 글 가운데 기준으로 옮기고 돌린다
+// 자리·크기·회전(게임 안 편집 화면에서 받아 적은 값)은 글 가운데 기준으로 옮기고 돌린다
 // 네 점 변형 (FEATURE 28): 가운데 기준 w×h 사각형의 네 모서리를 q(크기에 대한 비율)만큼 옮기는 CSS matrix3d. 플러그인 text_box.rpy quad_homography와 같은 식
 export function quadMatrix(q: number[] | undefined, w: number, h: number): string {
   if (!q || q.length !== 8 || !q.some((n) => Math.abs(n) > 1e-4) || w < 1 || h < 1) return '';

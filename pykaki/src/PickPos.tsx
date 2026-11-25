@@ -43,7 +43,7 @@ export async function pickInGame(w: Where, tab: PickTab) {
   usePicked.setState({ key: keyOf(w) });
   liveSend({ cmd: 'panel', hide: !useLive.getState().gamePanel });
   // 게임이 그 줄로 간 뒤에 탭을 연다 (그 화면에서만 쓸 수 있는 탭이라).
-  // 이미지/영상 탭은 그 줄을 골라 달라고 줄 번호도 보낸다 (ui_kit 4.8. 예전 판은 line을 모르고 그냥 연다)
+  // 이미지/영상 탭은 그 줄을 골라 달라고 줄 번호도 보낸다 (. 예전 판은 line을 모르고 그냥 연다)
   const extra = tab === 'stage' ? { file: RPY_FILE, line } : {};
   setTimeout(() => liveSend({ cmd: 'editor', open: true, tab, ...extra }), 700);
 }

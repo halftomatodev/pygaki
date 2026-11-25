@@ -1,12 +1,12 @@
 // showpy가 남긴 그림/영상/소리 줄을 대본에 받아 적는다. 문서: 저장소 맨 위 docs/LINK.md
-// .rpy를 되읽지 않는다. showpy_inbox.json에 적힌 줄만 받는다. 대사 글자와 선택지는 받지 않고, 대사는 위치(그림/영상 상자의 자리·크기·회전 포함)만, 선택지는 뒤 그림의 자리·크기·회전만 받는다.
+//.rpy를 되읽지 않는다. showpy_inbox.json에 적힌 줄만 받는다. 대사 글자와 선택지는 받지 않고, 대사는 위치(그림/영상 상자의 자리·크기·회전 포함)만, 선택지는 뒤 그림의 자리·크기·회전만 받는다.
 import type { BoxNode, ChoiceMedia, Line, LineFx, Project, SayStyle } from './types';
 import { DEFAULT_FADEOUT, FLASH_CODE } from './stage';
 import { applyScreenOp } from './screens';
 
 const POS_KEYS = ['x', 'y', 'name_x', 'name_y', 'media_x', 'media_y', 'media_zoom', 'media_angle'] as const;
 const CHOICE_MEDIA_KEYS = ['x', 'y', 'zoom', 'angle'] as const;
-// 글 상자 묶기·네 점 변형 (FEATURE 28, ui_kit 4.18): 숫자 목록. null이면 지움
+// 글 상자 묶기·네 점 변형 (FEATURE 28): 숫자 목록. null이면 지움
 const SAY_LIST_KEYS = ['media_link', 'media_quad', 'media_text_quad'] as const;
 const CHOICE_LIST_KEYS = ['link', 'quad', 'text_quad'] as const;
 const numList = (v: unknown, n: number) => (Array.isArray(v) && v.length === n && v.every((x) => typeof x === 'number' && Number.isFinite(x)) ? (v as number[]) : null);
@@ -186,7 +186,7 @@ export function applyInbox(p: Project, ops: InboxOp[]): { applied: number; moved
       continue;
     }
     if (op.op === 'choice_media') {
-      // 선택지 뒤 그림의 자리·크기·회전 (게임 안 편집 화면 선택지 탭, ui_kit 4.15)
+      // 선택지 뒤 그림의 자리·크기·회전 (게임 안 편집 화면 선택지 탭)
       const c = op.choice ? p.nodes.flatMap((b) => (b.exit.type === 'menu' ? b.exit.choices : [])).find((x) => x.id === op.choice) : undefined;
       if (!c || !c.media || !op.media) {
         dropped.push('선택지 뒤 그림');

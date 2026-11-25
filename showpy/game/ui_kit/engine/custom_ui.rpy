@@ -1,5 +1,5 @@
 ################################################################################
-## UI Kit — 커스텀 UI 엔진 (커서·클릭 대기 표시·대사 소리·텍스트 속도·퀵메뉴)
+## pygaki — 커스텀 UI 엔진 (커서·클릭 대기 표시·대사 소리·텍스트 속도·퀵메뉴)
 ##
 ## 이 파일은 고칠 필요가 없습니다. 설정은 custom_ui_config.rpy에서 하세요.
 ## custom_ui.enabled = False면 이 파일은 아무것도 바꾸지 않습니다 (렌파이 기본).
@@ -98,7 +98,7 @@ init -10 python in custom_ui:
         n = int(st / delay) % len(frames)
         return store.renpy.displayable(frames[n]), delay
 
-    ## ── 상자·장면마다 바꾸는 값 (ui_kit 4.7, PyKaki가 상자 첫 줄에 적음. docs/LINK.md 2장) ──
+    ## ── 상자·장면마다 바꾸는 값 (PyKaki가 상자 첫 줄에 적음. docs/LINK.md 2장) ──
     ##   $ custom_ui.scene(typing_sound="audio/soft.ogg", ctc="gui/ctc/heart", cursor="gui/cursor/hand")
     ##   $ custom_ui.scene()     # 모두 게임 처음 값으로
     ## typing_sound=None이면 그 장면에서 대사 소리를 끔. ctc, cursor는 그림이 든 폴더(game 기준)이고
@@ -196,13 +196,13 @@ init -10 python in custom_ui:
         d = store.DynamicDisplayable(_cursor_frame)
         store.config.mouse_displayable = _Mouse(d, hx, hy)
 
-        ## Screen FX가 있으면 화면 효과 안에도 그릴 수 있게 넘겨줌 (screen_fx.cursor, 4.2)
+        ## 화면 효과가 있으면 화면 효과 안에도 그릴 수 있게 넘겨줌 (screen_fx.cursor, 4.2)
         sfx = getattr(store, "screen_fx", None)
         if sfx is not None and hasattr(sfx, "set_cursor_source"):
             sfx.set_cursor_source(d, hx, hy)
 
     def _inside_fx():
-        """커서를 Screen FX가 화면 효과 안에 그리는 중인지."""
+        """커서를 screen_fx가 화면 효과 안에 그리는 중인지."""
         sfx = getattr(store, "screen_fx", None)
         try:
             return sfx is not None and sfx.cursor_inside()
@@ -311,5 +311,5 @@ init 990 python in custom_ui:
     if apply_text_cps not in store.config.after_default_callbacks:
         store.config.after_default_callbacks.append(apply_text_cps)
 
-## 상자·장면마다 바꾼 값 (custom_ui.scene, ui_kit 4.7). 세이브와 되감기에 남음
+## 상자·장면마다 바꾼 값 (custom_ui.scene). 세이브와 되감기에 남음
 default custom_ui_scene = { }

@@ -1,5 +1,5 @@
 ################################################################################
-## UI Kit — 편집기: PyKaki 원고 지켜보기
+## pygaki — 편집기: PyKaki 원고 지켜보기
 ##
 ## 개발 모드에서 게임을 켜 두면, PyKaki가 내보낸 원고(script_flow.rpy)가 바뀔 때
 ## 다시 불러오고, PyKaki가 적어 둔 줄(pykaki_goto.json)로 옮겨 갑니다.
@@ -20,7 +20,7 @@ init -8 python in ui_editor:
     ## 예전 실시간 미리보기 파일. 이제 읽지 않고, 배포판에서 빼려고 이름만 둡니다.
     PREVIEW_FILE = "pykaki_preview.json"
 
-    ## ── PyKaki가 내보낸 원고가 바뀌면 다시 불러오기 (ui_kit 4.2) ──
+    ## ── PyKaki가 내보낸 원고가 바뀌면 다시 불러오기  ──
     ## 게임을 켠 채 PyKaki에서 Ctrl+E로 내보내면 game 폴더의 원고가 바뀝니다.
     ## 렌파이는 저절로 다시 읽지 않아서, 바뀐 것(새로 생긴 것 포함)을 보면 Shift+R처럼 다시 불러옵니다.
     ## 편집기에 저장 안 한 값이 있으면 그 값이 사라지지 않게 다시 불러오지 않고 알리기만 합니다.
@@ -131,7 +131,7 @@ init -8 python in ui_editor:
 
     def _row_mark(row):
         """그 줄의 PyKaki 표시 ("@l:id" 또는 "@node:id")와, 줄 끝에 붙은 것인지. 없으면 (None, False).
-        표시는 줄 전체이거나(예전 형식) 문장 끝에 붙습니다(ui_kit 4.5)."""
+        표시는 줄 전체이거나(예전 형식) 문장 끝에 붙습니다."""
         t = row.strip()
         if t.startswith("# @l:") or t.startswith("# @node:"):
             w = t.split()

@@ -26,7 +26,7 @@ async function until(what, fn, ms = 10000) {
   fs.mkdirSync(path.join(proj, 'game', 'ui_kit'), { recursive: true });
   fs.writeFileSync(path.join(proj, 'game', 'gui.rpy'), 'init python:\n    gui.init(1280, 720)\n');
   fs.writeFileSync(path.join(proj, 'game', 'options.rpy'), '');
-  // 줄 끝 표시를 읽는 플러그인(ui_kit 4.5)인 것처럼: 이 이름이 있으면 표시를 줄 끝에 붙여 내보낸다 (LINK.md 2장)
+  // 줄 끝 표시를 읽는 플러그인인 것처럼: 이 이름이 있으면 표시를 줄 끝에 붙여 내보낸다 (LINK.md 2장)
   fs.mkdirSync(path.join(proj, 'game', 'ui_kit', 'engine'), { recursive: true });
   fs.writeFileSync(path.join(proj, 'game', 'ui_kit', 'engine', 'script_edit.rpy'), 'init -19 python in script_edit:\n    PK_END_MARKS = True\n');
 
@@ -282,7 +282,7 @@ async function until(what, fn, ms = 10000) {
     console.log('태그 상자 더 보기: 됨');
   }
 
-  // 화면 셰이더 목록 (screen_fx 5.4, LINK.md 11장): 게임 폴더에 목록 파일이 없으면 앱에 든 목록,
+  // 화면 셰이더 목록 (LINK.md 11장): 게임 폴더에 목록 파일이 없으면 앱에 든 목록,
   // 있으면 그 파일의 것. 끈 셰이더(shaders_off.txt)는 고르는 목록에서 빠지고, 지금 고른 것이면 남는지
   {
     const names = (keep) => page.evaluate((k) => window.pykakiShaders.names(k).map((x) => x[0]), keep ?? []);
@@ -359,7 +359,7 @@ async function until(what, fn, ms = 10000) {
       values: { text_cps: null, typing_sound: null, typing_volume: 1, ctc: false, ctc_frames: ['gui/ctc/ctc1.png'], ctc_hold: 2,
                 cursor: false, cursor_frames: [], cursor_hold: 2, cursor_mode: 'software', cursor_hotspot: [0, 0], quick_menu: true },
     },
-    // 게임 안 패널을 통째로 (ui_kit 3.16)
+    // 게임 안 패널을 통째로 
     panel: {
       tab: 'screen_fx', popup: null, popup_kind: null,
       body: { k: 'v', c: [{ k: 't', t: '시험 패널' }, { k: 'h', c: [{ k: 't', t: '효과:' }, { k: 'b', id: 'p.1', t: 'ASCII', on: false, ok: true }] }, { k: 'bar', id: 'p.2', r: 1, v: 0.5, s: 0.01 }, { k: 'in', id: 'p.3', t: 'long text', w: 1 }] },
@@ -396,15 +396,15 @@ async function until(what, fn, ms = 10000) {
   await page.evaluate(() => localStorage.removeItem('pygaki-gui-script'));
   await page.click('.sp-nav-item >> text=/^셰이더/');
   await until('편집기 명령을 보내지 않음', () => got.some((m) => m.cmd === 'editor' && m.tab === 'screen_fx'));
-  // 게임 안 패널을 통째로 그린 칸 (ui_kit 3.16): 버튼을 누르면 그 자리 번호를 보내는지
+  // 게임 안 패널을 통째로 그린 칸: 버튼을 누르면 그 자리 번호를 보내는지
   await page.waitForSelector('.sp-mirror .sp-m-b', { timeout: 10000 });
   await page.locator('.sp-mirror .sp-m-b', { hasText: 'ASCII' }).click();
   await until('패널 버튼 명령을 보내지 않음', () => got.some((m) => m.cmd === 'panel.do' && m.id === 'p.1' && m.t === 'ASCII'));
-  // 넓은 글 칸 (ui_kit 3.23): 세 줄 칸으로 그리는지
+  // 넓은 글 칸: 세 줄 칸으로 그리는지
   const rows = await page.locator('.sp-mirror textarea.sp-m-in.wide').getAttribute('rows', { timeout: 10000 });
   if (rows !== '3') fail('넓은 글 칸이 세 줄 칸이 아님: ' + rows);
   console.log('패널 통째로: 됨');
-  // 게임 창의 GUI 편집기 보이기/숨기기 (ui_kit 3.23): 버튼과 F9가 panel 명령을 보내고, 게임 쪽 알림을 기억하는지
+  // 게임 창의 GUI 편집기 보이기/숨기기: 버튼과 F9가 panel 명령을 보내고, 게임 쪽 알림을 기억하는지
   const nPanel = () => got.filter((m) => m.cmd === 'panel' && m.hide === false).length;
   const p0 = nPanel();
   await page.locator('.sp-bar button', { hasText: '게임 창의 편집 화면' }).click();
@@ -417,7 +417,7 @@ async function until(what, fn, ms = 10000) {
   if (srv._conns?.length) await page.waitForFunction(() => localStorage.getItem('pygaki-game-panel') === 'show', null, { timeout: 5000 });
   await page.evaluate(() => localStorage.setItem('pygaki-game-panel', 'hide'));
   console.log('게임 창 편집기 토글: 됨');
-  // 커서, 클릭 대기, 대사 소리 칸 (ui_kit 3.15): 앱 칸이 나오고 값을 보내는지
+  // 커서, 클릭 대기, 대사 소리 칸: 앱 칸이 나오고 값을 보내는지
   await page.click('.sp-nav-item:has-text("커서, 클릭 대기")');
   await page.waitForSelector('.sp-cu select', { timeout: 10000 });
   await page.selectOption('.sp-cu select', 'audio/type.ogg');

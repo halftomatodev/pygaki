@@ -2,7 +2,7 @@
 // 상자마다 첫 줄에 그 상자의 셰이더를 적는다. 같은 값이면 showpy가 전환 없이 넘어가서, 어느 길로 들어와도 맞다.
 import type { BoxNode, BoxShader, Project } from './types';
 
-// 1번, 2번에 고를 수 있는 셰이더: pygaki 플러그인이 내놓는 목록 파일(screen_fx/shader_list.json, screen_fx 5.4, LINK.md 11장).
+// 1번, 2번에 고를 수 있는 셰이더: pygaki 플러그인이 내놓는 목록 파일(screen_fx/shader_list.json, LINK.md 11장).
 // 연결한 게임 폴더에 있으면 그것을, 없으면(연결 안 함, 예전 플러그인) 빌드할 때 가져온 저장소의 목록을 쓴다.
 import builtinList from '../../showpy/game/screen_fx/shader_list.json';
 
@@ -96,7 +96,7 @@ export const SHADER_TRANS: [string, string][] = [
   ['tv', 'TV 꺼짐·켜짐'], ['pixelsort', '픽셀소트'], ['datamosh', '데이터모싱'],
   ['static', 'TV 지직'], ['calibrate', '조정 화면'], ['tapestretch', '테이프 늘어짐'], ['blink', '점멸'], ['bendwave', '물결로 넘기기'], ['none', '없음'],
 ];
-// 그림 전환으로 셰이더를 바꾸기 (screen_fx 5.6, LINK.md 2장): 효과 폴더(ui_kit/effects)의 @transition을 써서
+// 그림 전환으로 셰이더를 바꾸기 (LINK.md 2장): 효과 폴더(ui_kit/effects)의 @transition을 써서
 // 앞 상자 마지막 화면 → 이 상자 첫 화면을 잇고, 셰이더는 그 시간의 절반에 바뀐다. 원고에는 셰이더 줄 + 첫 그림 줄들 + with screen_fx.pending_with()
 // 세션 94: 물결로 넘기기(bendwave)도. 효과 파일에 u__cut이 없어 셰이더는 시간의 절반에 바뀐다
 export const IMG_SHADER_TRANS = ['pixelsort', 'datamosh', 'static', 'calibrate', 'tapestretch', 'blink', 'bendwave'];
@@ -158,7 +158,7 @@ const transArg = (t?: string) => (!t ? '' : t === 'none' ? 'transition=None' : `
 
 // 원고 한 줄. 셰이더가 없는 상자는 게임 설정대로 돌린다.
 // tv: 이 전환의 TV 세부 값. time: 그림 전환의 초. iv: 그림 전환의 값. values: 세부 값을 적을지 (대본 어딘가에 값을 정했고 게임이 받을 때)
-// 그림 전환의 값도 플러그인의 tv=로 적는다 (screen_fx 5.6: 그림 전환이면 tv=가 그 효과의 값)
+// 그림 전환의 값도 플러그인의 tv=로 적는다 (그림 전환이면 tv=가 그 효과의 값)
 export function shaderCode(s: BoxShader | null, trans?: string, opt: { tv?: Record<string, number>; time?: number; iv?: Record<string, number | string>; values?: boolean } = {}) {
   const t = transArg(trans);
   const tv = opt.tv && hasKeys(opt.tv) && trans === 'tv' ? `tv=${pyDict(opt.tv)}` : isImgTrans(trans) && hasKeys(opt.iv) ? `tv=${pyDict(opt.iv!)}` : '';

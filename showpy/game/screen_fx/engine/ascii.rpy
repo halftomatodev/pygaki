@@ -1,4 +1,4 @@
-## Screen FX — ASCII 효과 엔진
+## 화면 효과 — ASCII 효과 엔진
 ##
 ## 이 파일은 엔진입니다. 고치지 말고 ascii_config.rpy에서 설정하세요.
 ##

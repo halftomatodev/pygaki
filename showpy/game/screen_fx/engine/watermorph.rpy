@@ -1,5 +1,5 @@
 ################################################################################
-## Screen FX — 타이틀 일렁임(watermorph) 엔진
+## 화면 효과 — 타이틀 일렁임(watermorph) 엔진
 ##
 ## 이 파일은 고칠 필요가 없습니다. 설정은 watermorph_config.rpy에서 하세요.
 ##
@@ -185,7 +185,7 @@ init -10 python in watermorph:
         if not cfg("enabled"):
             return False
 
-        ## UI Kit 편집기에서 다른 탭을 쓰는 동안에는 끔 (편집 화면이 일그러지지 않도록)
+        ## pygaki 게임 안 편집 화면에서 다른 탭을 쓰는 동안에는 끔 (편집 화면이 일그러지지 않도록)
         if store.screen_fx.editor_pauses("watermorph"):
             return False
 
@@ -228,7 +228,7 @@ init -10 python in watermorph:
         store.gui.main_menu_background = _wrapped_background[1]
 
 
-## UI Kit 타이틀 메뉴의 배경 영상 설정(init 990)보다 뒤에 실행됩니다.
+## pygaki 타이틀 메뉴의 배경 영상 설정(init 990)보다 뒤에 실행됩니다.
 init 995 python in watermorph:
 
     if cfg("target") == "background":

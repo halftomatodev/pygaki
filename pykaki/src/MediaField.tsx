@@ -26,7 +26,7 @@ export async function pickMediaFile(): Promise<string | null> {
   }
 }
 
-// 게임 안 편집 화면에서 정한 그림의 자리·크기·회전 (ui_kit 4.15). 보여 주고 지우기만 한다
+// 게임 안 편집 화면에서 정한 그림의 자리·크기·회전. 보여 주고 지우기만 한다
 export function MediaPlace({ m, onClear }: { m: { x?: number; y?: number; zoom?: number; angle?: number }; onClear: () => void }) {
   // 화면 글 사전이 글 조각마다 바꾸므로 조각을 따로 둔다
   const parts: string[] = [];
@@ -67,7 +67,7 @@ export function MediaField({ value, onChange, placeholder, title }: { value?: st
   );
 }
 
-// 글 상자 묶기·네 점 변형·그림 효과 (FEATURE 28, ui_kit 4.18). 대사·선택지가 같이 씀.
+// 글 상자 묶기·네 점 변형·그림 효과 (FEATURE 28). 대사·선택지가 같이 씀.
 // 🔗 단추로 글을 그림에 묶고(묶을 때의 그림 크기·회전·옮김을 적어 둠), 네 점 변형은 게임 안 편집 화면에서 정해 받아 적은 것을 보여 주고 지우기만,
 // 그림 효과는 나타나는 방식과 같은 고르기 창(렌파이 기본 전환은 빼고)과 [세부 값] 막대
 export interface MediaGroup { link?: number[]; quad?: number[]; text_quad?: number[]; fx?: string }

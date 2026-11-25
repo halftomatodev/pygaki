@@ -32,7 +32,7 @@
 
 /* 처음 나타날 때를 transition으로: 중간에 닫아도 자연스럽게 되돌아간다 */
 .sheet { transition: opacity var(--dur-pop) var(--ease-out), scale var(--dur-pop) var(--ease-out); }
-@starting-style { .sheet { opacity: 0; scale: var(--pop-scale); } }
+@starting-style {.sheet { opacity: 0; scale: var(--pop-scale); } }
 ```
 
 - `transform` 하나에 여러 값을 넣기보다 `scale`, `translate`, `rotate` 속성을 따로 쓴다(서로 덮어쓰지 않음).

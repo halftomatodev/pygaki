@@ -937,7 +937,7 @@ fieldset.plain:disabled { opacity: 0.4; }
 .sp-color > span { width: 100%; }
 .sp-color input[type='color'] { width: 36px; height: 28px; padding: 1px; }
 .sp-color .sp-field { flex: 1; }
-/* showpy 화면: 커서, 클릭 대기, 대사 소리 칸 (ui_kit 3.15) */
+/* showpy 화면: 커서, 클릭 대기, 대사 소리 칸  */
 .sp-cu { display: flex; flex-direction: column; gap: 10px; }
 .sp-cu > section { background: var(--panel); border-radius: 14px; padding: 10px 10px 8px; }
 .sp-cu-head { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; font-size: 13px; }
@@ -975,7 +975,7 @@ fieldset.plain:disabled { opacity: 0.4; }
 .sp-preview-text { min-height: 44px; font-size: 14px; line-height: 1.5; margin-bottom: 6px; }
 .sp-anim { display: inline-flex; width: 28px; height: 28px; vertical-align: bottom; align-items: center; justify-content: center; }
 
-/* showpy 화면: 게임 안 패널을 통째로 (ui_kit 3.16) */
+/* showpy 화면: 게임 안 패널을 통째로  */
 .sp-mirror { font-size: 12.5px; display: flex; flex-direction: column; gap: 6px; }
 .sp-m-v { display: flex; flex-direction: column; gap: 4px; }
 .sp-m-h { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
@@ -1001,7 +1001,7 @@ fieldset.plain:disabled { opacity: 0.4; }
 .sp-editing { display: flex; gap: 8px; align-items: center; margin-top: 6px; padding: 6px 8px; border-radius: 8px; background: color-mix(in srgb, var(--play) 14%, var(--panel)); font-size: 12px; }
 .sp-editing span { flex: 1; }
 
-/* 커서 칸의 줄 목록 (screen_fx 4.5) */
+/* 커서 칸의 줄 목록  */
 .sp-lines { display: flex; flex-direction: column; gap: 1px; margin: 4px 0 6px; max-height: 220px; overflow: auto; border: 1px solid var(--line); border-radius: 6px; padding: 2px; }
 .sp-line { display: flex; gap: 6px; text-align: left; font-family: var(--mono); font-size: 12px; padding: 1px 6px; border-radius: 4px; white-space: pre; overflow: hidden; text-overflow: ellipsis; }
 .sp-line.on { background: var(--accent-soft); }
@@ -1100,7 +1100,7 @@ fieldset.plain:disabled { opacity: 0.4; }
 /* 대사 안 플래그 값 [이름]: 플래그 표시처럼 초록 칩 */
 .pl-text .tg-var { padding: 0 4px; border-radius: 4px; background: color-mix(in srgb, #16a34a 16%, transparent); color: color-mix(in srgb, #047857 70%, var(--text)); font-family: var(--mono); font-size: 0.92em; }
 
-/* 글 상자 (showpy ui_kit 4.0 text_box.rpy 흉내). 렌파이처럼 글 자리는 그대로 두고 둘레에 상자를 깐다 */
+/* 글 상자 (showpy  text_box.rpy 흉내). 렌파이처럼 글 자리는 그대로 두고 둘레에 상자를 깐다 */
 .sbox { box-sizing: content-box; }
 .preview-text.sbox { width: fit-content; max-width: calc(100% - 60px); margin: 0 auto; position: relative; }
 .sbox-bubble { background: #fff; border: 3px solid #000; border-radius: 18px; padding: 14px 22px; }
@@ -1610,7 +1610,7 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .tr-hud { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 4px; background: color-mix(in srgb, var(--text) 8%, var(--panel)); margin: 6px 0; }
 .linklike { border: none; background: none; color: var(--accent); padding: 0 4px; cursor: pointer; }
 
-/* 게임 패널 미러의 빈 칸 (ui_kit 4.11) */
+/* 게임 패널 미러의 빈 칸  */
 .sp-m-sp { display: inline-block; flex: none; }
 
 /* 플래그 새로 만들기 메뉴 (Command Palette 꼴)와 옆 설명 카드 (Hover Card 꼴) */

@@ -1,9 +1,9 @@
 ################################################################################
-## UI Kit — 대사 등장 효과 (텍스트 셰이더)
+## pygaki — 대사 등장 효과 (텍스트 셰이더)
 ##
 ## 이 파일은 고칠 필요가 없습니다.
 ##
-## 렌파이에 들어 있는 효과(dissolve, typewriter, wave ...)에 더해, 글자마다
+## 렌파이에 들어 있는 효과(dissolve, typewriter, wave...)에 더해, 글자마다
 ## 움직이는 등장 효과를 등록합니다. 대사 괄호의 effect에 이름을 적습니다.
 ##
 ##     e "흩어졌다가 모인다." (cps=30, effect="scatter")
@@ -49,7 +49,7 @@
 ## PyKaki의 미리보기도 같은 파일로 그려서, 새 효과는 text_effects.glsl에 한 번만 쓰면 됩니다.
 ## 적는 법은 text_effects.glsl 맨 위에 있습니다.
 ##
-## 효과 폴더 (ui_kit 4.3): ui_kit/effects/ 폴더에 .glsl 파일을 넣으면 그 안의 효과도 같이 등록합니다.
+## 효과 폴더: ui_kit/effects/ 폴더에.glsl 파일을 넣으면 그 안의 효과도 같이 등록합니다.
 ## 효과 하나에 파일 하나. 파일을 넣거나 빼면 그 효과가 생기거나 없어집니다(게임을 껐다 켜기).
 ## 적는 법과 샘플은 ui_kit/effects/README.md에 있습니다. 파일을 읽다가 틀린 곳을 만나면
 ## 그 파일만 건너뛰고 say_style.TFX_ERRORS에 이유를 적습니다(개발 모드에서는 화면에도 알림).
@@ -180,7 +180,7 @@ init -10 python in say_style:
         base = main.rsplit("/", 2)[0] + "/effects/" if main.count("/") >= 2 else "effects/"
         return sorted(fn for fn in store.renpy.list_files() if fn.startswith(base) and fn.endswith(".glsl"))
 
-    ## ── 끈 효과 (ui_kit 4.4) ──
+    ## ── 끈 효과  ──
     ## ui_kit/effects/effects_off.txt에 이름을 적은 효과는 "고르는 목록"에서만 빠집니다.
     ## 셰이더는 그대로 등록하므로, 이미 그 효과를 쓴 대사와 원고는 전과 똑같이 돕니다.
     ## 한 줄에 이름 하나, #으로 시작하는 줄은 설명, 파일이 없으면 다 켠 것입니다.
@@ -261,7 +261,7 @@ init -10 python in say_style:
 
     _tfx_register()
 
-    ## 지운 효과 (ui_kit 4.2, 4.9, 효과 폴더의 drip). 예전 원고의 effect="melt", "led:u__cell=6" 같은 줄이 오류 없이 돌게
+    ## 지운 효과 (4.9, 효과 폴더의 drip). 예전 원고의 effect="melt", "led:u__cell=6" 같은 줄이 오류 없이 돌게
     ## 한 글자씩 나오기(렌파이 typewriter와 같음)로 등록합니다. 예전 값 이름도 받기만 합니다
     REMOVED_EFFECTS = {
         "melt": (("u__duration", 14.0), ("u__length", 28.0), ("u__width", 3.0), ("u__hold", 0.0)),
@@ -269,14 +269,14 @@ init -10 python in say_style:
         "flipin": (("u__duration", 6.0), ("u__axis", 0.0)),
         "led": (("u__duration", 2.0), ("u__cell", 5.0), ("u__dot", 0.8), ("u__off", 0.35), ("u__offcolor", "#3a1408"), ("u__glow", 1.3)),
         "split": (("u__duration", 6.0), ("u__distance", 24.0), ("u__gap", 0.0)),
-        ## ui_kit 4.9에서 지움
+        ## pygaki 플러그인에서 지움
         "spin": (("u__duration", 8.0), ("u__angle", -90.0)),
         "glow": (("u__duration", 10.0), ("u__radius", 8.0), ("u__strength", 1.6), ("u__color", "#ffffff")),
         "wipe": (("u__duration", 8.0), ("u__span", 40.0)),
         "inkfill": (("u__duration", 6.0), ("u__mode", 1.0), ("u__line", 2.0)),
         "punch": (("u__duration", 5.0), ("u__zoom", 1.3), ("u__trail", 0.6)),
         "popin": (("u__duration", 6.0), ("u__overshoot", 0.35), ("u__from", 0.0)),
-        ## 효과 폴더 샘플에서 뺌 (screen_fx 5.7과 같은 판)
+        ## 효과 폴더 샘플에서 뺌 (과 같은 판)
         "drip": (("u__fade", 3.0), ("u__melt", 40.0), ("u__length", 1.0), ("u__width", 8.0), ("u__keep", 0.35), ("u__color", "#c00018"), ("u__tint", 0.0), ("u__flow", 0.0)),
         }
 

@@ -2,8 +2,8 @@
 
 코드를 고치는 사람과 AI가 읽는 문서입니다. 사용법은 [CUSTOM_GUIDE.md](CUSTOM_GUIDE.md)에 있습니다.
 
-- 묶음 버전 5.0 (`ui_kit` 4.0, `screen_fx` 5.1, `hotkeys` 1.0, `splash` 2.0) = pygaki v1.3 (2026-11-09)
-- 5.0에 들어간 것: `screen_fx` 5.1 (새 화면 효과 일곱), `ui_kit` 3.23 (게임 안 편집 화면 이름, UI 글 탭, 폴더 열기, F9), `ui_kit` 4.0 (글자 효과 11개, 글 상자 `bubble` `pill`)
+- 묶음 버전 5.0  = pygaki v1.3 (2026-11-09)
+- 5.0에 들어간 것: pygaki 플러그인 (새 화면 효과 일곱), pygaki 플러그인 (게임 안 편집 화면 이름, UI 글 탭, 폴더 열기, F9), pygaki 플러그인 (글자 효과 11개, 글 상자 `bubble` `pill`)
 - 렌파이 8.6.1 기준 (8.5.3에서도 동작. 셰이더는 예전 문법 GLSL ES 1.00으로 쓰고 8.6에서는 `glsl=100`을 붙여 등록)
 - 작업 규칙: [DEV_RULES.md](DEV_RULES.md)
 - 대본 편집기 연결 형식: [LINK.md](../../docs/LINK.md)
@@ -65,10 +65,10 @@
 | `size` `font` `color` `outline` `spacing` `bold` `italic` `kerning` `width` `align` | | 글자 모양 |
 | `cps` | 숫자 | 나오는 속도, 1초에 몇 글자 (플레이어 설정과 상관없이). 게임 안 편집 화면 [대사]의 속도 단추도 이것 |
 | `speed` | 배율 | 예전 원고용. 플레이어 설정에 곱함 (편집기는 더 쓰지 않고, 속도를 고르면 지움) |
-| `effect` | `"dissolve"` `"flip"` `"zoom"` `"jitter"` `"wave"`, pygaki 플러그인이 등록한 `"scatter"` `"drop"` `"shuffle"` `"flash"` `"slam"` `"typecursor"` `"echo"` `"glitch"` `"blurin"` `"blockglitch"` `"liquid"` `"vhs"` `"rise"` `"lean"` `"stretch"` `"slidein"` `"shake"` `"glyphbox"` `"stamp"` `"squash"` `"extrude"` (셰이더는 `ui_kit/engine/text_effects.glsl`, `text_effects.rpy`가 init에서 읽어 등록. 대본 편집기도 같은 파일의 사본으로 미리보기를 그림. `echo`는 `outlines`가 없으면 `say_style`이 파일의 `@outline` 겹을 넣음. ui_kit 4.9에서 `spin` `glow` `wipe` `inkfill` `punch`와 효과 폴더 샘플 `popin`을 뺌: 예전 원고의 그 이름은 `REMOVED_EFFECTS`로 한 글자씩 나옴) | 등장 효과 |
+| `effect` | `"dissolve"` `"flip"` `"zoom"` `"jitter"` `"wave"`, pygaki 플러그인이 등록한 `"scatter"` `"drop"` `"shuffle"` `"flash"` `"slam"` `"typecursor"` `"echo"` `"glitch"` `"blurin"` `"blockglitch"` `"liquid"` `"vhs"` `"rise"` `"lean"` `"stretch"` `"slidein"` `"shake"` `"glyphbox"` `"stamp"` `"squash"` `"extrude"` (셰이더는 `ui_kit/engine/text_effects.glsl`, `text_effects.rpy`가 init에서 읽어 등록. 대본 편집기도 같은 파일의 사본으로 미리보기를 그림. `echo`는 `outlines`가 없으면 `say_style`이 파일의 `@outline` 겹을 넣음. pygaki 플러그인에서 `spin` `glow` `wipe` `inkfill` `punch`와 효과 폴더 샘플 `popin`을 뺌: 예전 원고의 그 이름은 `REMOVED_EFFECTS`로 한 글자씩 나옴) | 등장 효과 |
 | `name_x` `name_y` `name_font` `name_size` `name_color` | | 이름 |
 
-**루비** (ui_kit 4.9, `say_style._ruby_style`): 대사 글에 `{rt}`/`{art}`가 있으면 그 줄의 `what_ruby_style`/`what_altruby_style`을 만들어 넣습니다. 루비 스타일에 그 줄의 글자 효과(없으면 None)를 넣어 "The ruby style removes a textshader" 오류를 막고, 게임에서 `style ruby_text`의 `yoffset`을 정하지 않았으면 본문 크기의 절반 크기로 본문 바로 위(yoffset = -0.85 × 본문 크기)에 두고 `ruby_line_leading`을 줍니다. 루비 글의 크기·색은 대본 편집기가 `{rt}` 안에 `{size=}` `{color=}`로 그 자리에서 적습니다.
+**루비** (`say_style._ruby_style`): 대사 글에 `{rt}`/`{art}`가 있으면 그 줄의 `what_ruby_style`/`what_altruby_style`을 만들어 넣습니다. 루비 스타일에 그 줄의 글자 효과(없으면 None)를 넣어 "The ruby style removes a textshader" 오류를 막고, 게임에서 `style ruby_text`의 `yoffset`을 정하지 않았으면 본문 크기의 절반 크기로 본문 바로 위(yoffset = -0.85 × 본문 크기)에 두고 `ruby_line_leading`을 줍니다. 루비 글의 크기·색은 대본 편집기가 `{rt}` 안에 `{size=}` `{color=}`로 그 자리에서 적습니다.
 
 `screen_fx` 값은 다시 바꿀 때까지 유지되고 세이브에 저장됩니다. 플러그인을 빼면 이 괄호에서 오류가 납니다.
 
@@ -152,10 +152,10 @@ renpy.exe <프로젝트> lint
 | `hotkeys` | 1.0 | 1.0 |
 
 - 2026-11-09 사용자와 정해서 이 장의 것을 다 모아 **v1.3**(pygaki 플러그인 5.0)으로 냄(이름만 v2.0 대신 v1.3).
-- 2026-11-09 사용자가 확인하려고 중간 판 **v1.2**(pygaki 플러그인 4.23)를 냄: 태그 상자, 웹에서 쓰고 앱에서 이어 쓰기, splash 2.0, screen_fx 5.0 바탕. 새 화면 효과·글자 효과는 v2.0에.
+- 2026-11-09 사용자가 확인하려고 중간 판 **v1.2**(pygaki 플러그인 4.23)를 냄: 태그 상자, 웹에서 쓰고 앱에서 이어 쓰기, pygaki 플러그인, pygaki 플러그인 바탕. 새 화면 효과·글자 효과는 v2.0에.
 - 한 번에 다 만들지 않고 8-7의 순서대로 나눠 커밋합니다. 단계마다 Lint, 시험 프로젝트 복사, `.rpyc` 지우기, 대본 편집기 빌드를 지킵니다.
 
-### 8-2. 스플래시를 화면에서 고치기 (`splash` 2.0) — 만듦 (2026-11-09)
+### 8-2. 스플래시를 화면에서 고치기  — 만듦 (2026-11-09)
 
 만든 방법: 엔진의 vbox 대신 `splash.SplashLayout`(그림·제목·본문·표를 직접 쌓고 `*_offset`, `*_rotate`를 적용, 그린 자리를 `rects`/`cells`에 남김)이 그립니다. 편집기의 `SplashEditView`가 이것을 이어받아 테두리와 손잡이를 그리고, 끌기·글 입력은 그 자리 값을 씁니다. 편집기 공통 틀(`EditorInput`)은 글 입력 칸이 켜져 있으면 Esc(입력 취소)와 Ctrl+S(입력 끝내고 저장)만 하고 다른 단축키를 끕니다. 예전에 말한 묶음 가운데에 붙기는 화면 가운데 줄과 묶음 가운데 줄 둘 다에 붙습니다. 앱 패널 글 칸은 줄바꿈을 `
 ` 두 글자로 보여 주고 고칩니다(LINK.md는 안 바뀜). 설정 파일에 있는 페이지 이름은 바꾸지 않고, 새 페이지도 저장한 뒤에는 이름을 바꾸지 못합니다(복제로 새 이름).
@@ -239,7 +239,7 @@ renpy.exe <프로젝트> lint
 
 **앱**: 끌기·회전·늘리기·화면에서 고치기는 게임 창에서. 앱 패널에는 글 칸(제목, 본문, 안내, 보지 않기, 표 줄마다)과 페이지 단추. 본문 같은 여러 줄 글을 앱 `in` 칸이 못 받으면 `in`에 여러 줄 표시(`m`)를 더하고 `docs/LINK.md` 9장과 앱 코드를 같은 커밋에서 고칩니다.
 
-### 8-3. 새 화면 효과 (`screen_fx` 5.0)
+### 8-3. 새 화면 효과 
 
 참고한 모양 (참고 그림·영상은 저장소에 두지 않음): 트레이싱지(흐림 + 우윳빛 막 + 종이 결), 색 망점 포스터, 홀로그램(가로줄 가림막 + 옆으로 번진 복사본 두 장 + 한 색으로 통일 + 빛 번짐), 나이트비전, 크기가 다른 네모 칸으로 갈라져 칸마다 조금 어긋나거나 다른 그림이 보이는 화면, 어두운 화면에 붉은 작은 파편이 흩날리는 화면, 손그림 애니메이션의 보일링(그림 테두리가 1/12초마다 1~2픽셀씩 떨리고 인쇄물 같은 고운 알갱이가 매번 바뀜).
 
@@ -256,7 +256,7 @@ renpy.exe <프로젝트> lint
 | `boil` | 지글거림 | 화면 전체가 손그림 애니메이션처럼 계속 지글거림: 테두리가 조금씩 떨리고 고운 알갱이가 매번 바뀜. 떨림은 뚝뚝 끊겨서(초당 `fps`번) 손그림 느낌 | `amount`(떨림 픽셀, 기본 1.5), `fps`(기본 12), `scale`(떨림 무늬 크기), `grain`, `grain_size`, `soft`(살짝 번짐) | 됨. 시간을 `fps`로 끊은 노이즈만큼 화면을 밀고, 알갱이를 덧씌우는 셰이더 한 번 |
 | `tiles` (5.3에서 `collage`로 바꿈, 아래) | 조각 어긋남 | 화면을 크기가 다른 네모 칸(격자에 맞춘 1×1~3×2 칸)으로 나누고, 칸마다 조금 밀리거나 확대되거나 색이 바뀜. 칸 나눔은 `shuffle`초마다 새로. 칸 테두리에 가는 선 | `grid`(기본 칸 크기), `offset`(최대 밀림), `zoom`(칸 안 확대), `tint`, `tint_amount`, `lines`, `shuffle`(초, 0이면 고정) | 됨. 칸 나눔은 격자 칸마다 해시로 정해서 셰이더 한 번에 그림 |
 
-- **`collage` 포토 콜라주 (screen_fx 5.3, 2026-11-10)**: `tiles`(격자 칸으로 나눠 서로 붙은 칸이 어긋남)를 없애고 바꿈. 화면 가운데 `area` 비율 안에 네모 조각 `count`장(1~10)을 해시로 놓고, 셰이더가 0~9번을 차례로 그려 마지막에 덮은 조각이 보임(겹침). 조각 크기는 가운데 범위에 대한 비율(`size_min`~`size_max`), `strips` 확률로 가는 띠. 자리는 해시 둘의 평균이라 가운데에 몰림. 조각 안은 조각 가운데를 기준으로 `zoom` 확대, `offset` 밀림(같은 장면을 다시 찍은 사진처럼), `shade` 밝기 차이, `tint_amount` 확률로 `tint` 물들이기. 조각 안쪽 가장자리에 `line_width` 선(`line_color`, 기본 하양), 조각 밖 오른쪽 아래로 `shadow` 그림자. 조각마다 바꾸기 간격(`shuffle`×0.7~1.6)과 시작 때가 달라 몇 장씩 바뀜. 예전 이름은 `screen_fx.ALIASES`(`"tiles"` → `"collage"`)와 `screen_fx.alias()`로 `shaders`, `use`, `set_overlay`, `set_values`, `image_fx`, `norm_slots`, `resolve`, 지금 덮개에서 바꿔 읽음. `TileSwap` 전환은 `collage.rpy`에 그대로(셰이더 이름 `collage.swap`, 유니폼 `u_collage_swap_*`).
+- **`collage` 포토 콜라주 (2026-11-10)**: `tiles`(격자 칸으로 나눠 서로 붙은 칸이 어긋남)를 없애고 바꿈. 화면 가운데 `area` 비율 안에 네모 조각 `count`장(1~10)을 해시로 놓고, 셰이더가 0~9번을 차례로 그려 마지막에 덮은 조각이 보임(겹침). 조각 크기는 가운데 범위에 대한 비율(`size_min`~`size_max`), `strips` 확률로 가는 띠. 자리는 해시 둘의 평균이라 가운데에 몰림. 조각 안은 조각 가운데를 기준으로 `zoom` 확대, `offset` 밀림(같은 장면을 다시 찍은 사진처럼), `shade` 밝기 차이, `tint_amount` 확률로 `tint` 물들이기. 조각 안쪽 가장자리에 `line_width` 선(`line_color`, 기본 하양), 조각 밖 오른쪽 아래로 `shadow` 그림자. 조각마다 바꾸기 간격(`shuffle`×0.7~1.6)과 시작 때가 달라 몇 장씩 바뀜. 예전 이름은 `screen_fx.ALIASES`(`"tiles"` → `"collage"`)와 `screen_fx.alias()`로 `shaders`, `use`, `set_overlay`, `set_values`, `image_fx`, `norm_slots`, `resolve`, 지금 덮개에서 바꿔 읽음. `TileSwap` 전환은 `collage.rpy`에 그대로(셰이더 이름 `collage.swap`, 유니폼 `u_collage_swap_*`).
 - `tiles`는 장면 전환으로도 씁니다: `scene bg2 with screen_fx.TileSwap(1.0)` → 칸마다 다른 때에 옛 장면에서 새 장면으로 바뀜(영상의 앞부분). 렌파이 `Dissolve`처럼 옛 장면·새 장면 두 장을 받아 셰이더로 그리는 전환이라 됩니다.
 - 이미지 하나에 거는 효과: `hologram`, `halftone`, `tiles`(지금 `collage`), `nightvision`은 이미지 `at`로도 씁니다(`screen_fx.image_fx(이름, **값)`). 편집기 이미지/영상 탭에 [효과] 칸을 더해 고른 이미지에 겁니다(원고에 `at` 적기, pygaki 원고는 `stage_layout.rpy`).
 
@@ -264,7 +264,7 @@ renpy.exe <프로젝트> lint
 
 2단계에서 만든 것 (2026-11-09): `screen_fx.image_fx()`, `screen_fx.set_values()`, `screen_fx.ShaderSwap` 전환 틀(`TileSwap`은 `tiles` 효과와 같이 3단계에서).
 
-3단계에서 만든 것 (2026-11-09, `screen_fx` 5.1): `glitch`, `boil`, `halftone`, `hologram`, `nightvision`(+화면 글 스크린 `nightvision_hud`), `tiles`(+`screen_fx.TileSwap`). **`tracepaper`(트레이싱지)는 만들었다가 2026-11-09 사용자와 정해서 뺌** (위 표의 줄은 기록으로 남김). 위 표와 다른 점:
+3단계에서 만든 것 (2026-11-09): `glitch`, `boil`, `halftone`, `hologram`, `nightvision`(+화면 글 스크린 `nightvision_hud`), `tiles`(+`screen_fx.TileSwap`). **`tracepaper`(트레이싱지)는 만들었다가 2026-11-09 사용자와 정해서 뺌** (위 표의 줄은 기록으로 남김). 위 표와 다른 점:
 - `glitch`의 세기 값 이름은 `amount`(`strength`는 모든 효과의 전체 세기라서). 편집기에서 모양을 보며 고르게 `always`(늘 망가짐)를 더함. 코드는 VHS·글자 효과와 나누지 않고 `glitch.rpy` 안에 따로 씀(플러그인을 따로 넣어도 돌게)
 - `hologram`의 번짐 거리는 `smear`, `smear2` 두 값. 이미지에 걸 때 쓰는 `opacity`를 더함
 - `nightvision`의 화면 글은 `hud_text`(줄바꿈 `
@@ -287,7 +287,7 @@ $ screen_fx.set_values("shards", count=80, colors=2, color="#d22", color2="#811"
 
 **대본 편집기**: 대사 줄 화면 효과 고르기(`pykaki/src/stage.ts`의 `FX_BASE`)에 새 이름 여덟 개를 더합니다. 플레이 미리보기는 지금처럼 이름만 보여 주고 효과는 그리지 않습니다. 효과 이름만 늘어서 내보내는 줄 모양(`fx=`, `screen_fx.shaders(…)`)은 그대로입니다.
 
-### 8-4. 새 글자 효과 (`text_effects.glsl`, `ui_kit` 4.0)
+### 8-4. 새 글자 효과 (`text_effects.glsl`)
 
 **되는지 확인한 것**: 렌파이 글자 셰이더는 글자 하나를 "글자 폭 × 줄 높이" 네모 하나로 그리고(`renpy/text/text.py`, 줄의 글자 네모가 빈틈없이 이어짐), 외곽선 겹은 `u_text_main`(본 글자 1, 외곽선 0), `u_text_depth`로 가릴 수 있습니다. 그래서 글자마다 움직이기, 글자마다 네모 칠하기, 외곽선만 먼저 보이고 속은 나중에 채우기가 셰이더 하나로 됩니다. 모두 `text_effects.glsl`에 적으면 대본 편집기 미리보기에도 그대로 나옵니다.
 
@@ -295,19 +295,19 @@ $ screen_fx.set_values("shards", count=80, colors=2, color="#d22", color2="#811"
 |---|---|---|---|
 | `slidein` | 미끄러져 들어와 멈춤 | 한쪽에서 빠르게 미끄러져 들어와 관성으로 살짝 지나쳤다가 돌아와 멈춤. 글자마다 조금씩 늦게(`u__stagger`) 또는 줄 통째로(`u__stagger=0`) | `u__dir`(도, 기본 0 = 오른쪽에서), `u__distance`, `u__overshoot`, `u__duration`, `u__stagger` |
 | `shake` | 살짝 흔들림 | 다 나온 뒤에도 글자마다 조금씩 떨림. 다른 효과와 같이 쓰기 좋음(`effect="slidein,shake"`) | `u__amount`(픽셀), `u__speed`, `u__rotate`(도) |
-| `inkfill` (ui_kit 4.9에서 뺌) | 외곽선에 색 채우기 | 처음에는 외곽선만 다 보이고, 속은 글자가 나오는 차례(cps)대로 색이 차오름. 아래에서 위로 차오르기 / 한 번에 켜지기 | `u__mode`(0 한 번에, 1 아래에서 위로), `u__duration`. 외곽선이 없으면 `@outline 2 #ffffff 0 0` |
+| `inkfill` (에서 뺌) | 외곽선에 색 채우기 | 처음에는 외곽선만 다 보이고, 속은 글자가 나오는 차례(cps)대로 색이 차오름. 아래에서 위로 차오르기 / 한 번에 켜지기 | `u__mode`(0 한 번에, 1 아래에서 위로), `u__duration`. 외곽선이 없으면 `@outline 2 #ffffff 0 0` |
 | `glyphbox` | 글자마다 상자 | 글자 하나하나 뒤에 네모 상자. 상자가 먼저 나오고 글자가 찍힘, 상자마다 살짝 다른 크기·기울기 가능 | `u__box`(색), `u__ink`(글자 색, 비우면 원래 색), `u__pad`, `u__round`(모서리), `u__jitter`, `u__pop` |
 | `stamp` | 도장 | 크게·살짝 기운 채 찍히며 줄어들고, 잉크 번진 결이 남음 | `u__color`, `u__rotate`, `u__grain` |
-| `punch` (ui_kit 4.9에서 뺌) | 튀어나오는 줌 | 화면 깊은 곳에서 커지며 튀어나오고 뒤로 잔상이 끌림 | `u__zoom`, `u__trail` |
+| `punch` (에서 뺌) | 튀어나오는 줌 | 화면 깊은 곳에서 커지며 튀어나오고 뒤로 잔상이 끌림 | `u__zoom`, `u__trail` |
 | `squash` | 찌그러졌다 튕김 | 납작하게 눌렸다가 고무처럼 튕기며 원래 모양 | `u__amount`, `u__bounce` |
 | `extrude` | 입체 글자 | 같은 글자를 비스듬히 여러 겹 깔아 두께를 만듦, 나올 때 두께가 자라남 | `u__depth`, `u__angle`, `u__shade` |
 
 - 5단계 1차에서 만든 것 (2026-11-09): `slidein`, `shake`, `inkfill`, `glyphbox`. 겹치기 문법은 쉼표가 아니라 `|`(`effect="slidein|shake"`, 렌파이 `parse_textshader`). `glyphbox`는 줄 끝 빈 칸(가짜 글자 `a_text_pseudo_glyph`)은 빼고, 띄어쓰기에는 상자가 생김. `inkfill`의 외곽선 겹은 굵어진 글자에서 원래 모양을 빼서(8방향 erode, `u__line`) 테두리만 남김. 글자 자리는 `a_text_pos_rect`(x, y, 폭, 높이). 렌파이에 같은 이름 `flip` 효과가 있어서 뒤집기는 `flipin`으로.
-- 5단계 2차에서 만든 것 (2026-11-09): `stamp`, `punch`, `squash`, `extrude`, `flipin`, `led`, `split`(`flipin`, `led`, `split`은 ui_kit 4.2에서 뺌). 공용 조각 `ROTATE`가 `l__p`를 쓰므로 효과 안에서 같은 이름을 쓰지 않음.
-- ui_kit 4.5 (2026-11-12) **pygaki 원고의 줄 끝 표시**: 표시(`# @l:` `# @node:` `# @end:`)가 문장 끝에 붙은 원고도 읽음(LINK.md 2장). `script_edit`의 `_pk_end`(줄 끝 표시), `_pk_above`(윗줄 표시), `_pk_mark`(둘 중 있는 것), `_pk_strip`(표시를 뗀 글), `_pk_tail_style`(그 원고가 줄 끝 형식인지)을 쓰고, `_pk_prepare`는 고른 줄의 표시가 윗줄에 있을 때만 넣을 자리를 한 줄 올림. 새 줄은 원고의 형식대로 씀(줄 끝 형식이면 `줄  # @l:새id`). 받아 적기 기록의 `code`에는 표시를 떼고 적음. `PK_END_MARKS = True`는 대본 편집기가 이 판인지 알아보는 이름이라 지우지 않음. `ui_editor._row_mark`(게임 줄 되돌리기), 화면 셰이더 칸의 `_tree_can_insert`, `existing_lines`, `_say_kw`도 두 형식을 읽음.
-- ui_kit 4.4 (2026-11-11) **끈 효과**: `text_effects.rpy`의 `_tfx_read_off`가 `ui_kit/effects/effects_off.txt`(한 줄에 이름 하나, `#` 뒤는 설명, 없으면 다 켬)를 읽어 `say_style.TFX_OFF`에 둠. 등록(`register_textshader`, `ui_kit.imgfx.*`)은 그대로 다 하고 고르는 목록에서만 뺌: `say_style.tfx_off(이름)`, `say_style.tfx_listed(목록, keep)`, `tmenu.effect_names(keep, all)`(타이틀 글자 효과 버튼, 앱에 보내는 `state.title.effects`), `img_fx.listed(keep)`, 대사 탭 `effect_choices()`. 지금 쓰는 효과는 꺼져 있어도 목록에 남김. 형식은 LINK.md 8-2.
-- ui_kit 4.3 (2026-11-10) **효과 폴더**: `text_effects.rpy`의 `_tfx_register`가 기본 파일 다음에 `ui_kit/effects/*.glsl`을 파일 이름 순서로 읽음(기본 파일의 `@part`를 물려받음). 파일마다 따로 읽어서 틀리면 그 파일만 건너뛰고 `TFX_ERRORS`에 (파일, 이유). 이름은 `[a-z][a-z0-9_]*`, 이미 있는 이름은 못 씀. `@effect`는 `TFX_EFFECTS`에 더해져 편집기 목록에도 나오고, `@transition`은 `TFX_TRANSITIONS`에 모여 `image_effects.rpy`(`init -9 python in img_fx`)가 셰이더 `ui_kit.imgfx.<이름>`으로 등록함(`u__`, `l__` 이름은 `u_imgfx_<이름>_`로 바꿈, 앞 그림 `tex0`, 새 그림 `tex1`, 진행 `u_imgfx_t`, 크기 `u_imgfx_size`). `img_fx.use(이름, 시간, 값=…)`이 전환 객체를 돌려줌. 없는 이름은 개발 모드에서 오류, 배포판에서 `dissolve`. GLSL이 틀리면 처음 그릴 때 렌파이 오류 화면(등록할 때는 못 잡음).
-- ui_kit 4.2 (2026-11-10)에서 뺀 효과: `melt`, `mosh`, `flipin`, `led`, `split`(셰이더를 지움), 렌파이 기본 `typewriter`, `slowalpha`(목록에서만). 예전 원고의 지운 이름은 `text_effects.rpy`의 `REMOVED_EFFECTS`가 한 글자씩 나오기로 등록해서 오류가 나지 않음(예전 `u__` 값도 받기만 함).
+- 5단계 2차에서 만든 것 (2026-11-09): `stamp`, `punch`, `squash`, `extrude`, `flipin`, `led`, `split`(`flipin`, `led`, `split`은 에서 뺌). 공용 조각 `ROTATE`가 `l__p`를 쓰므로 효과 안에서 같은 이름을 쓰지 않음.
+- pygaki 플러그인 (2026-11-12) **pygaki 원고의 줄 끝 표시**: 표시(`# @l:` `# @node:` `# @end:`)가 문장 끝에 붙은 원고도 읽음(LINK.md 2장). `script_edit`의 `_pk_end`(줄 끝 표시), `_pk_above`(윗줄 표시), `_pk_mark`(둘 중 있는 것), `_pk_strip`(표시를 뗀 글), `_pk_tail_style`(그 원고가 줄 끝 형식인지)을 쓰고, `_pk_prepare`는 고른 줄의 표시가 윗줄에 있을 때만 넣을 자리를 한 줄 올림. 새 줄은 원고의 형식대로 씀(줄 끝 형식이면 `줄  # @l:새id`). 받아 적기 기록의 `code`에는 표시를 떼고 적음. `PK_END_MARKS = True`는 대본 편집기가 이 판인지 알아보는 이름이라 지우지 않음. `ui_editor._row_mark`(게임 줄 되돌리기), 화면 셰이더 칸의 `_tree_can_insert`, `existing_lines`, `_say_kw`도 두 형식을 읽음.
+- pygaki 플러그인 (2026-11-11) **끈 효과**: `text_effects.rpy`의 `_tfx_read_off`가 `ui_kit/effects/effects_off.txt`(한 줄에 이름 하나, `#` 뒤는 설명, 없으면 다 켬)를 읽어 `say_style.TFX_OFF`에 둠. 등록(`register_textshader`, `ui_kit.imgfx.*`)은 그대로 다 하고 고르는 목록에서만 뺌: `say_style.tfx_off(이름)`, `say_style.tfx_listed(목록, keep)`, `tmenu.effect_names(keep, all)`(타이틀 글자 효과 버튼, 앱에 보내는 `state.title.effects`), `img_fx.listed(keep)`, 대사 탭 `effect_choices()`. 지금 쓰는 효과는 꺼져 있어도 목록에 남김. 형식은 LINK.md 8-2.
+- pygaki 플러그인 (2026-11-10) **효과 폴더**: `text_effects.rpy`의 `_tfx_register`가 기본 파일 다음에 `ui_kit/effects/*.glsl`을 파일 이름 순서로 읽음(기본 파일의 `@part`를 물려받음). 파일마다 따로 읽어서 틀리면 그 파일만 건너뛰고 `TFX_ERRORS`에 (파일, 이유). 이름은 `[a-z][a-z0-9_]*`, 이미 있는 이름은 못 씀. `@effect`는 `TFX_EFFECTS`에 더해져 편집기 목록에도 나오고, `@transition`은 `TFX_TRANSITIONS`에 모여 `image_effects.rpy`(`init -9 python in img_fx`)가 셰이더 `ui_kit.imgfx.<이름>`으로 등록함(`u__`, `l__` 이름은 `u_imgfx_<이름>_`로 바꿈, 앞 그림 `tex0`, 새 그림 `tex1`, 진행 `u_imgfx_t`, 크기 `u_imgfx_size`). `img_fx.use(이름, 시간, 값=…)`이 전환 객체를 돌려줌. 없는 이름은 개발 모드에서 오류, 배포판에서 `dissolve`. GLSL이 틀리면 처음 그릴 때 렌파이 오류 화면(등록할 때는 못 잡음).
+- pygaki 플러그인 (2026-11-10)에서 뺀 효과: `melt`, `mosh`, `flipin`, `led`, `split`(셰이더를 지움), 렌파이 기본 `typewriter`, `slowalpha`(목록에서만). 예전 원고의 지운 이름은 `text_effects.rpy`의 `REMOVED_EFFECTS`가 한 글자씩 나오기로 등록해서 오류가 나지 않음(예전 `u__` 값도 받기만 함).
 - 여러 효과 겹치기(`effect="slidein|shake"`)는 렌파이 글자 셰이더가 원래 됩니다. 대본 편집기 미리보기도 이미 겹친 효과를 그립니다.
 - `glyphbox`는 띄어쓰기에도 상자가 생깁니다(글자 네모가 띄어쓰기 폭만큼 있음). 만들 때 확인해서, 띄어쓰기 칸을 알아낼 수 없으면 "띄어쓰기에도 상자" 그대로 두고 안내에 적습니다.
 - 대본 편집기 미리보기(`pykaki/src/fx/`)가 `u_text_main`, `u_text_depth`, 외곽선 겹(`@outline`)을 렌파이와 같게 그리는지 확인합니다. `inkfill`, `glyphbox`, `extrude`가 이것에 기댑니다.
@@ -325,7 +325,7 @@ $ screen_fx.set_values("shards", count=80, colors=2, color="#d22", color2="#811"
 - 참고 영상처럼 낱말마다 다른 자리의 상자는 대사 여러 줄을 각자 자리에 띄우는 것으로 합니다(대사 탭 위치 + `box`). 낱말마다 자동으로 나누기는 이번에는 안 합니다.
 - 대본 편집기 미리보기: 상자는 CSS로 비슷하게 그립니다. 형식이 바뀌므로(`box=` 괄호 값) `docs/LINK.md` 2장과 `pykaki/src/types.ts`를 같은 커밋에서 고칩니다.
 - 6단계에서 만든 것 (2026-11-09, `ui_kit/engine/text_box.rpy`): 렌파이 글(`Text`)은 background 스타일을 쓰지 않아서, 대사 괄호의 상자 값을 `what_background`의 `TextBox`로 넣고 `Text.render`를 감싸 그 값이 있을 때만 글 둘레에 상자를 깝니다(글 크기는 그대로라 배치가 안 바뀜). 상자는 `ui_kit.textbox` 셰이더(둥근 네모와 꼬리 세모의 거리 함수). 기울기는 상자와 글을 같이 돌림. 꼬리는 말하는 사람을 저절로 찾지 않고 방향이나 `(x, y)`로(글 그림은 화면 자리를 모름). 글자마다 움직이는 효과는 상자가 따라가지 않음. 값 이름은 `bubble_color`, `bubble_border`, `pill_line`, `pill_fill` 등 위 표 그대로, 더해서 `tail`, `box_rotate`, `*_tail_pos`, `*_tail_size`, `*_tail_width`, `*_text_color`. 기본 모양은 `say_style.box_styles`. 편집기 대사 탭 "상자" 칸(없음/말풍선/둥근 테두리, 꼬리, 기울기). pygaki 원고 줄에서는 칸을 숨김(7단계에서 대본 편집기와 같이).
-- 글 상자 묶기·네 점 변형·그림 효과 (`ui_kit` 4.18, `text_box.rpy` `_wrap_media`): 그림을 배율만 걸어 그린 뒤, 묶었으면(`media_link`) 그림 기준 좌표(돌리기 전)에 글을 `-a0`만큼 돌리고 `media_zoom / z0`배로 놓아 한 장으로 모음. 그 판에 `media_quad`(그림 사각형 네 모서리 → 옮긴 네 점의 원근 행렬, `quad_homography`)를 `ui_kit.quadwarp` 셰이더로 씌우고(`warp_render`: 판 전체를 덮는 크기로 넓혀 그 안에서 역행렬로 원래 자리를 찾음, 너무 휘어 뒤로 넘어가면 그대로), `media_fx`면 효과 폴더의 그림 전환 셰이더(`ui_kit.imgfx.이름`)로 빈 그림 → 판을 돌린 뒤 `media_angle`만큼 돌려 휘기 전 그림 가운데가 글 가운데 + `media_offset`에 오게 놓음. 글만의 변형(`media_text_quad`)은 글 그림에 먼저 씌움. 그린 자리는 `say_style.GEOM`(글 그림 id → 숫자, init 뒤에 다시 넣지 않아 세이브에 안 들어감)에 남겨, 게임 안 편집 화면이 모서리 점을 그리고(`geom_media_corners`, `geom_text_corners`) 끈 자리를 값으로 바꿈(`geom_media_q`, 글은 묶였으면 뉴턴법 `geom_text_q`). 선택지는 이 값이 하나라도 있으면 버튼 배경 대신 글의 `background`/`hover_background`에 그림/영상 상자를 넣어 같은 길로 그림(`choice_menu.rpy` `GROUP_KEYS`, `_media_box`). 글의 화면 자리는 편집 화면이 열렸을 때만 그 글 그림에 보이지 않는 포커스 표시(`mark_geom`, 빈 마스크라 마우스가 안 잡고 `keyboard_focus` 꺼짐)를 끼워 렌파이가 계산한 자리를 받음(`screen_origin`, 대사 탭. 없으면 스타일 값으로 짐작). 선택지는 버튼 포커스 영역이 모양(회전·기울기·확대·옮김)을 건 뒤의 자리이고 폭이 잘릴 때가 있어서, 가운데만 쓰고 크기는 글을 재서(+ `media_padding`) 구한 뒤 `cmenu_shape`과 같은 행렬(마우스가 위면 hover 값)을 걸어 점을 찍고, 끈 양은 그 역행렬로 되돌림(`editor_choice.rpy` `_place`). 점은 그릴 때마다 자리를 읽는 그림(`CornerDots`)이라 값을 바꿔 글 그림이 새로 생겨도 바로 따라옴. 점은 편집 패널 위에 그려서(`ui_editor_main`) 패널 밑의 점도 보이고 패널보다 먼저 집히며, 끄는 동안은 패널을 숨김(`state.corner_peek`). 자동 비키기는 [그림]일 때 점 전체를 감싸는 사각형을 피함(`dots_rect`). 끌기는 손을 뗄 때의 자리로 한 번 더 맞춤(빠르게 끌면 렌파이가 움직임 신호를 흘릴 때가 있음, `editor.rpy`)
+- 글 상자 묶기·네 점 변형·그림 효과 (`text_box.rpy` `_wrap_media`): 그림을 배율만 걸어 그린 뒤, 묶었으면(`media_link`) 그림 기준 좌표(돌리기 전)에 글을 `-a0`만큼 돌리고 `media_zoom / z0`배로 놓아 한 장으로 모음. 그 판에 `media_quad`(그림 사각형 네 모서리 → 옮긴 네 점의 원근 행렬, `quad_homography`)를 `ui_kit.quadwarp` 셰이더로 씌우고(`warp_render`: 판 전체를 덮는 크기로 넓혀 그 안에서 역행렬로 원래 자리를 찾음, 너무 휘어 뒤로 넘어가면 그대로), `media_fx`면 효과 폴더의 그림 전환 셰이더(`ui_kit.imgfx.이름`)로 빈 그림 → 판을 돌린 뒤 `media_angle`만큼 돌려 휘기 전 그림 가운데가 글 가운데 + `media_offset`에 오게 놓음. 글만의 변형(`media_text_quad`)은 글 그림에 먼저 씌움. 그린 자리는 `say_style.GEOM`(글 그림 id → 숫자, init 뒤에 다시 넣지 않아 세이브에 안 들어감)에 남겨, 게임 안 편집 화면이 모서리 점을 그리고(`geom_media_corners`, `geom_text_corners`) 끈 자리를 값으로 바꿈(`geom_media_q`, 글은 묶였으면 뉴턴법 `geom_text_q`). 선택지는 이 값이 하나라도 있으면 버튼 배경 대신 글의 `background`/`hover_background`에 그림/영상 상자를 넣어 같은 길로 그림(`choice_menu.rpy` `GROUP_KEYS`, `_media_box`). 글의 화면 자리는 편집 화면이 열렸을 때만 그 글 그림에 보이지 않는 포커스 표시(`mark_geom`, 빈 마스크라 마우스가 안 잡고 `keyboard_focus` 꺼짐)를 끼워 렌파이가 계산한 자리를 받음(`screen_origin`, 대사 탭. 없으면 스타일 값으로 짐작). 선택지는 버튼 포커스 영역이 모양(회전·기울기·확대·옮김)을 건 뒤의 자리이고 폭이 잘릴 때가 있어서, 가운데만 쓰고 크기는 글을 재서(+ `media_padding`) 구한 뒤 `cmenu_shape`과 같은 행렬(마우스가 위면 hover 값)을 걸어 점을 찍고, 끈 양은 그 역행렬로 되돌림(`editor_choice.rpy` `_place`). 점은 그릴 때마다 자리를 읽는 그림(`CornerDots`)이라 값을 바꿔 글 그림이 새로 생겨도 바로 따라옴. 점은 편집 패널 위에 그려서(`ui_editor_main`) 패널 밑의 점도 보이고 패널보다 먼저 집히며, 끄는 동안은 패널을 숨김(`state.corner_peek`). 자동 비키기는 [그림]일 때 점 전체를 감싸는 사각형을 피함(`dots_rect`). 끌기는 손을 뗄 때의 자리로 한 번 더 맞춤(빠르게 끌면 렌파이가 움직임 신호를 흘릴 때가 있음, `editor.rpy`)
 
 ### 8-5. 편집기와 앱
 
@@ -342,12 +342,12 @@ $ screen_fx.set_values("shards", count=80, colors=2, color="#d22", color2="#811"
 
 ### 8-7. 만드는 순서
 
-1. `splash` 2.0: 가운데 화면, 끌기·회전·늘리기, 화면에서 글 고치기, 페이지 더하기·지우기·순서, 저장.
-2. `screen_fx` 5.0 바탕: 이미지에 거는 효과, 값 바꾸기, 셰이더 전환 틀 (만듦).
-3. 화면 효과: `glitch`, `boil`, `halftone`, `hologram`, `nightvision`(+화면 글), `tiles` (만듦, `screen_fx` 5.1). `tracepaper`는 뺌.
+1. pygaki 플러그인: 가운데 화면, 끌기·회전·늘리기, 화면에서 글 고치기, 페이지 더하기·지우기·순서, 저장.
+2. pygaki 플러그인 바탕: 이미지에 거는 효과, 값 바꾸기, 셰이더 전환 틀 (만듦).
+3. 화면 효과: `glitch`, `boil`, `halftone`, `hologram`, `nightvision`(+화면 글), `tiles` (만듦). `tracepaper`는 뺌.
 4. 파편 흩날림(`shards`) (만듦, 2026-11-09).
 5. 글자 효과: `slidein`, `shake`, `inkfill`, `glyphbox`, 그다음 `stamp`, `punch`, `squash`, `extrude`, `flip`, `led`, `split`.
-6. 글 상자 `bubble`, `pill` (만듦, `ui_kit` 4.0).
+6. 글 상자 `bubble`, `pill` (만듦).
 7. 대본 편집기 목록·미리보기·LINK.md, 편집기 칸, README, `CUSTOM_GUIDE.md`, 공개용 구글 문서 수정안. (2026-11-09: 대본 편집기 상자 칸·효과 겹치기·`FX_BASE`·LINK.md 2장·`FEATURE` 3, 이미지 탭 [효과] 칸 만듦)
 8. 묶음 태그: 사용자와 정해서 **v1.3**으로 (2026-11-09).
 
@@ -355,7 +355,7 @@ $ screen_fx.set_values("shards", count=80, colors=2, color="#d22", color2="#811"
 
 한글 입력기로 스플래시 제목 고치기, 회전한 글 고치기, 새 페이지가 게임을 껐다 켜도 순서대로 나오는지, 번역 만들기에 고친 글이 잡히는지, 효과마다 참고 그림과 비슷한지(특히 망점 CMYK, 홀로그램, 조각 어긋남), 두 자리와 이미지 효과를 다 켠 속도, 지글거림이 참고 영상처럼 손그림 느낌인지, 말풍선 꼬리 방향, 대본 편집기 미리보기와 게임이 같은지.
 
-## 10. 효과 더하기 (`screen_fx` 5.7, 효과 폴더, 2026-11-13)
+## 10. 효과 더하기 (효과 폴더, 2026-11-13)
 
 참고한 모양(참고 영상·사이트는 저장소에 두지 않음, 코드는 가져오지 않고 모양만 보고 새로 씀): TV 노이즈, 방송 조정 화면, 늘어진 비디오테이프, 색 점멸, 오래된 게임 메뉴의 밀어 올리는 화면 전환, 물결 굴절, SVG 노이즈 변위 일렁임, 셰이더 모음 사이트의 효과 목록, 옛날 필름 영상, 유체로 녹는 그림, 유리 렌즈.
 

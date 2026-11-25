@@ -1,4 +1,4 @@
-// showpy 화면: 게임 안 편집기 패널을 통째로 옮겨 그리는 칸 (ui_kit 3.16).
+// showpy 화면: 게임 안 편집기 패널을 통째로 옮겨 그리는 칸.
 // 게임이 화면 밖에 그려 둔 패널의 위젯(버튼, 글, 막대, 입력칸, 그림, 색 견본)을 나무 모양으로 보내 주면
 // 그대로 그리고, 누르면 그 자리 번호를 panel.do로 돌려보낸다. 형식은 docs/LINK.md 9장.
 // 탭마다 화면을 따로 만들지 않아서, 게임 쪽 탭을 고치면 여기도 저절로 바뀐다.
@@ -27,7 +27,7 @@ export function MirrorPanel({ panel }: { panel: PanelState }) {
 const PX = 0.75;
 
 function Node({ n }: { n: MirrorNode }) {
-  // 들여쓰기 (ui_kit 4.11): 세부 속성처럼 게임에서 안쪽으로 들어간 묶음
+  // 들여쓰기: 세부 속성처럼 게임에서 안쪽으로 들어간 묶음
   if (n.i) return <div style={{ paddingLeft: Math.min(n.i * PX, 80) }}><Node n={{ ...n, i: undefined }} /></div>;
   switch (n.k) {
     case 'sp':

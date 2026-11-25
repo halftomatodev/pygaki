@@ -59,7 +59,7 @@ init python:
         if not pygaki_open_in_browser(guide):
             os.startfile(guide)
 
-    ## .html을 VS Code 같은 편집기가 맡고 있어도 브라우저로 열리게, 윈도우에 정해 둔 기본 브라우저
+    ##.html을 VS Code 같은 편집기가 맡고 있어도 브라우저로 열리게, 윈도우에 정해 둔 기본 브라우저
     ## (https 주소를 여는 프로그램)를 찾아 file 주소를 넘긴다. 못 찾으면 False (그때는 파일에 붙은 프로그램으로)
     def pygaki_open_in_browser(path):
         try:
@@ -211,7 +211,7 @@ init python:
             shutil.copy(a, b)
         for r in retire:
             os.remove(r)
-        ## 지난 판의 .rpyc가 남으면 렌파이가 지운 .rpy도 읽으므로 플러그인 폴더의 .rpyc는 모두 지운다 (켤 때 다시 생김)
+        ## 지난 판의.rpyc가 남으면 렌파이가 지운.rpy도 읽으므로 플러그인 폴더의.rpyc는 모두 지운다 (켤 때 다시 생김)
         for plugin in PYGAKI_PLUGINS:
             for root, dirs, files in os.walk(os.path.join(gamedir, plugin)):
                 for name in files:
@@ -477,7 +477,7 @@ screen pygaki_buttons():
 
     if renpy.get_screen("front_page"):
 
-        ## 아래 링크 줄([매뉴얼] ...)과 같은 왼쪽에서 시작. 가운데 정렬이면 일본어에서 오른쪽 [프로젝트 실행]과 겹침 (세션 104)
+        ## 아래 링크 줄([매뉴얼]...)과 같은 왼쪽에서 시작. 가운데 정렬이면 일본어에서 오른쪽 [프로젝트 실행]과 겹침 (세션 104)
         hbox:
             xpos 30
             ypos 506

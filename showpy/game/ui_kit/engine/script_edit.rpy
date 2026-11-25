@@ -1,5 +1,5 @@
 ################################################################################
-## UI Kit — 원고 쓰기 도구
+## pygaki — 원고 쓰기 도구
 ##
 ## 이 파일은 고칠 필요가 없습니다.
 ##
@@ -231,7 +231,7 @@ init -19 python in script_edit:
                 raise LineError("대사 줄이 아닙니다.")
             if _ends_with_colon(code):
                 raise LineError("대사 줄이 아닙니다. (끝이 ':')")
-            ## 문자열 바로 뒤에 오는 첫 ( … ) 가 괄호. 없으면 마지막 문자열 뒤에 붙입니다.
+            ## 문자열 바로 뒤에 오는 첫 ( …) 가 괄호. 없으면 마지막 문자열 뒤에 붙입니다.
             for k in strs:
                 j = _next_code(toks, k)
                 if j is not None and _is_args(toks[j]):
@@ -305,7 +305,7 @@ init -19 python in script_edit:
     SCENE = "scene"
     IMAGE_KINDS = (SHOW, HIDE, SCENE)
 
-    ## 새 줄 넣기 (ui_kit 3.0)
+    ## 새 줄 넣기 
     ##   INSERT        고른 줄 바로 위에 넣음
     ##   INSERT_AFTER  고른 줄 바로 아래에 넣음 (줄 끝이 ':'이면 그 아래 들여쓴 묶음 다음)
     ## args = {"lines": [새 줄, …] (앞 공백 없이), "replace": (머리 글자, …)}
@@ -536,7 +536,7 @@ init -19 python in script_edit:
 
     def label_lines(filename):
         """그 원고 파일에서 label 안에 있는 문장의 줄 [(줄 번호, 문장)] (줄 순서).
-        이 줄들 위·아래에는 새 줄을 넣어도 됩니다. (ui_kit 3.0)"""
+        이 줄들 위·아래에는 새 줄을 넣어도 됩니다. """
         import renpy
         script = renpy.game.script
         found = { }
@@ -707,7 +707,7 @@ init -19 python in script_edit:
         except Exception:
             return False
 
-    ## 표시는 두 가지 자리에 올 수 있습니다. (ui_kit 4.5, LINK.md 2장)
+    ## 표시는 두 가지 자리에 올 수 있습니다. (LINK.md 2장)
     ##   줄 끝:   e "대사"  # @l:l1        (PyKaki가 새 플러그인에 맞춰 내보낸 원고)
     ##   윗줄:    # @l:l1  /  e "대사"     (예전 원고, 줄 끝에 붙일 수 없는 줄)
     PK_END_MARKS = True     # PyKaki가 이 이름을 보고 줄 끝 표시로 내보냅니다

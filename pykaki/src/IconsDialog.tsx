@@ -2,7 +2,7 @@
 // 렌파이 게임을 배포할 때 쓰는 두 아이콘을 고른다 (계산은 icons/iconFiles.ts):
 // - 창 아이콘: game/gui/window_icon.png (options.rpy config.window_icon이 가리키는 PNG). 게임 창 제목줄·작업 표시줄
 // - exe 아이콘: 프로젝트 폴더의 icon.ico. 렌파이 런처 [배포판 만들기]가 윈도우 exe에 넣음
-// 둘 다 정사각형 256×256 이상 (정사각형이 아니면 투명 여백으로 채울 수 있음). PNG·JPEG·WebP, exe 칸은 .ico도 그대로.
+// 둘 다 정사각형 256×256 이상 (정사각형이 아니면 투명 여백으로 채울 수 있음). PNG·JPEG·WebP, exe 칸은.ico도 그대로.
 // 칸마다 따로 고르거나 [그림 하나로 둘 다]. [저장]하면 예전 파일을 ui_kit_backup/icons/에 남기고 덮어씀
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { create } from 'zustand';

@@ -1,4 +1,4 @@
-// showpy 화면의 "커서, 클릭 대기(CTC), 대사 소리" 칸 (게임 안 편집기의 custom_ui 탭, ui_kit 3.15).
+// showpy 화면의 "커서, 클릭 대기(CTC), 대사 소리" 칸 (게임 안 편집기의 custom_ui 탭).
 // 값은 게임이 갖고 있고 여기서는 custom_ui.set으로 보내기만 한다. 저장은 게임이 custom_ui_layout.rpy에.
 // 그림 미리보기는 앱이 프로젝트의 game 폴더에서 그림을 직접 읽어 24fps로 돌린다.
 import { Hint } from './Help';
@@ -376,7 +376,7 @@ function Picker(props: {
   );
 }
 
-// ── 커서와 셰이더 '여기에서부터' (screen_fx 4.5): 셰이더 칸처럼 줄을 골라 그 줄부터 ──
+// ── 커서와 셰이더 '여기에서부터': 셰이더 칸처럼 줄을 골라 그 줄부터 ──
 
 function CursorLinesPanel({ cl }: { cl: CursorLines }) {
   const send = (c: Record<string, unknown>) => liveSend({ cmd: 'custom_ui.cursor', ...c });

@@ -1,4 +1,4 @@
-// 글꼴 파일(.ttf, .otf, .ttc) 읽기: 이름 표(name)와 글자 표(cmap)만 본다. 그리지는 않는다.
+// 글꼴 파일(.ttf,.otf,.ttc) 읽기: 이름 표(name)와 글자 표(cmap)만 본다. 그리지는 않는다.
 // [글꼴] 화면(FontsView.tsx)이 글꼴 이름, 라이선스 글, 한글·가나·한자·영문이 들어 있는지, 대본 글자 중 없는 글자를 알려 줄 때 쓴다.
 // 렌파이(FreeType)가 읽는 파일과 같은 파일을 읽는다. 모르는 꼴이면 null
 
@@ -8,7 +8,7 @@ export interface FontInfo {
   license: string; // 글꼴에 적힌 라이선스 글 (name 13). 없으면 ''
   licenseUrl: string; // name 14
   copyright: string; // name 0
-  faces: number; // .ttc 안의 글꼴 수 (보통 1). 렌파이는 첫 글꼴을 쓴다
+  faces: number; //.ttc 안의 글꼴 수 (보통 1). 렌파이는 첫 글꼴을 쓴다
   has(code: number): boolean; // 이 글자가 있는지
   count: number; // 들어 있는 글자 수
 }

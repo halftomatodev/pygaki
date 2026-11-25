@@ -1,7 +1,7 @@
-// [아이콘] 창의 계산: 그림 읽기, 크기 확인, 줄이기, PNG와 윈도우 .ico 만들기 (밖과 통신하지 않음, 라이브러리 없음)
+// [아이콘] 창의 계산: 그림 읽기, 크기 확인, 줄이기, PNG와 윈도우.ico 만들기 (밖과 통신하지 않음, 라이브러리 없음)
 // - 창 아이콘: PNG 한 장 (렌파이 config.window_icon, 1024보다 크면 렌파이가 줄이므로 1024까지만)
-// - exe 아이콘: .ico 한 파일에 16·24·32·48·64·128·256. 256은 PNG로, 나머지는 32비트 BMP로 넣는다
-//   (렌파이 런처 change_icon.py가 .ico 칸을 그대로 exe에 옮김. 작은 크기 BMP는 예전 윈도우 탐색기에서도 보임)
+// - exe 아이콘:.ico 한 파일에 16·24·32·48·64·128·256. 256은 PNG로, 나머지는 32비트 BMP로 넣는다
+//   (렌파이 런처 change_icon.py가.ico 칸을 그대로 exe에 옮김. 작은 크기 BMP는 예전 윈도우 탐색기에서도 보임)
 
 export const MIN_SIDE = 256; // 두 아이콘 모두 정사각형 256×256 이상
 export const WINDOW_MAX = 1024;
@@ -32,7 +32,7 @@ export function kindOf(name: string, bytes: Uint8Array): SrcKind | null {
   return ext === 'jpg' ? 'jpeg' : ext === 'png' || ext === 'jpeg' || ext === 'webp' || ext === 'ico' ? ext : null;
 }
 
-// .ico 머리 읽기: 안에 든 크기들 (너비 칸 0 = 256)
+//.ico 머리 읽기: 안에 든 크기들 (너비 칸 0 = 256)
 export function icoSizes(b: Uint8Array): number[] {
   if (b.length < 6) throw new IconError('.ico 파일이 너무 짧아요');
   const v = new DataView(b.buffer, b.byteOffset, b.byteLength);

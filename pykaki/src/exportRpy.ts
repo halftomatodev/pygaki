@@ -1,4 +1,4 @@
-// 프로젝트 → .rpy 변환과 검사. 설계 문서 6장 참고.
+// 프로젝트 →.rpy 변환과 검사. 설계 문서 6장 참고.
 import type { BoxNode, ChoiceMedia, LabelGroup, Line, Project, Settings } from './types';
 import { exitLinks, fallTarget } from './ops';
 import { IDENT, PLUGIN_NAMES, RESERVED } from './util';
@@ -69,7 +69,7 @@ export function orderGroup(p: Project, g: LabelGroup, byId: Map<string, BoxNode>
 const loosePercent = (t: string) => /%/.test(t.replace(/%%/g, ''));
 
 // 줄 끝에 표시를 붙여도 되는 줄인지: 다음 줄로 이어지는 줄(끝의 \, 닫지 않은 따옴표)에는 붙이지 않는다
-// 선택지 뒤 그림/영상의 괄호 값 (pygaki 플러그인 ui_kit 4.14 choice_menu)
+// 선택지 뒤 그림/영상의 괄호 값 (pygaki 플러그인  choice_menu)
 export function choiceMediaArgs(m?: ChoiceMedia, oldGroup = false): string[] {
   if (!m || !(m.idle || m.hover || m.select)) return [];
   const a: string[] = [];
@@ -84,7 +84,7 @@ export function choiceMediaArgs(m?: ChoiceMedia, oldGroup = false): string[] {
   // 투명 영상(mask_ 이름, FEATURE 26): 예전 플러그인(4.14~4.15)도 알게, 영상이 다 투명 영상이면 적는다 (4.16은 파일마다 이름으로 앎)
   const movies = [m.idle, m.hover, m.select].filter(isMovieFile);
   if (movies.length && movies.every(isMaskName)) a.push('media_mask=True');
-  // 묶기·네 점 변형·그림 효과 (FEATURE 28, ui_kit 4.18). 예전 플러그인은 모르는 값이라 적지 않음
+  // 묶기·네 점 변형·그림 효과 (FEATURE 28). 예전 플러그인은 모르는 값이라 적지 않음
   if (!oldGroup) a.push(...mediaGroupArgs(m.link, m.quad, m.text_quad, m.fx));
   return a;
 }
@@ -105,11 +105,11 @@ function tailSafe(row: string) {
 }
 
 // endMarks: 줄 표시(# @l:, # @node:, # @end:)를 윗줄이 아니라 줄 끝에 붙인다 (docs/LINK.md 2장).
-// 연결한 게임의 pygaki 플러그인이 ui_kit 4.5 이상일 때만 켠다 (그 전 판은 윗줄 표시만 읽는다)
-// newMark: 머리말을 새 문구(pygaki)로. 게임의 플러그인이 새 문구를 알아볼 때만 (ui_kit 4.10, script_edit.rpy의 PK_NEW_MARK). 아니면 예전 문구
+// 연결한 게임의 pygaki 플러그인이 pygaki 플러그인일 때만 켠다 (그 전 판은 윗줄 표시만 읽는다)
+// newMark: 머리말을 새 문구(pygaki)로. 게임의 플러그인이 새 문구를 알아볼 때만 (script_edit.rpy의 PK_NEW_MARK). 아니면 예전 문구
 // images: 연결한 게임의 그림 목록. 있으면 배경·보이기 줄의 없는 그림을 경고한다 (내보내기는 막지 않음)
-// oldMedia: 게임의 플러그인이 대사·선택지 뒤 그림/영상을 모름 (ui_kit 4.14 전). 쓰면 게임이 그 줄에서 멈춰서 알린다
-// oldGroup: 글 상자 묶기·네 점 변형·그림 효과를 모름 (ui_kit 4.18 전). 그 값은 적지 않고 알린다
+// oldMedia: 게임의 플러그인이 대사·선택지 뒤 그림/영상을 모름 (전). 쓰면 게임이 그 줄에서 멈춰서 알린다
+// oldGroup: 글 상자 묶기·네 점 변형·그림 효과를 모름 (전). 그 값은 적지 않고 알린다
 export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: boolean; oldMedia?: boolean; oldGroup?: boolean; images?: ImageBook | null; audio?: string[] } = {}): { code: string; warnings: Warn[] } {
   const endMarks = !!opts.endMarks && p.settings.renpyLink;
   const W: Warn[] = [];
@@ -205,7 +205,7 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
   // 상자·label 셰이더: 상자마다 첫 줄에 그 상자의 셰이더를 적는다 (shader.ts). showpy가 있어야 한다
   const shaders = usesShaders(p);
   if (shaders && !S.renpyLink) W.push({ level: 'warn', msg: '상자와 label의 셰이더는 pygaki 플러그인 연결을 켜야 내보내요' });
-  // 세부 값(셰이더 values=, TV tv=)은 게임의 screen_fx 5.5부터. 예전 판이면 값 없이 내보내고 알린다
+  // 세부 값(셰이더 values=, TV tv=)은 게임의 pygaki 플러그인. 예전 판이면 값 없이 내보내고 알린다
   const canValues = valuesSupported();
   const values = shaders && canValues && usesShaderValues(p);
   if (shaders && S.renpyLink && !canValues && (usesShaderValues(p) || usesTvValues(p)))
@@ -231,7 +231,7 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
     return { code: shaderCode(mine, t, { tv: canValues ? tr.tv : undefined, time: tr.time, iv, values }), img: isImgTrans(t) };
   };
 
-  // 상자의 커서, 클릭 대기: 상자마다 첫 줄에 $ custom_ui.scene(...) (boxUi.ts, ui_kit 4.7). 대사 소리는 대사 줄 괄호에
+  // 상자의 커서, 클릭 대기: 상자마다 첫 줄에 $ custom_ui.scene(...) (boxUi.ts). 대사 소리는 대사 줄 괄호에
   const sceneWanted = usesSceneUi(p);
   if (sceneWanted && !S.renpyLink) W.push({ level: 'warn', msg: '상자의 커서, 클릭 대기는 pygaki 플러그인 연결을 켜야 내보내요' });
   if (sceneWanted && S.renpyLink && !sceneSupported())

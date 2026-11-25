@@ -11,7 +11,7 @@ export const uiOfBox = (b: BoxNode): BoxUi => ({ ...(b.ui ?? {}) });
 export const usesSceneUi = (p: Project) => p.nodes.some((x) => x.ui && UI_KEYS.some((k) => k in x.ui!));
 export const uiCount = (p: Project, k: UiKey) => p.nodes.filter((x) => x.ui && k in x.ui).length;
 
-// 게임의 pygaki 플러그인이 custom_ui.scene을 아는지 (ui_kit 4.7부터. 폴더를 연결하지 않았으면 안다고 본다)
+// 게임의 pygaki 플러그인이 custom_ui.scene을 아는지 (. 폴더를 연결하지 않았으면 안다고 본다)
 export const sceneSupported = () => useGameFolder.getState().sceneUi !== false;
 
 const py = (s: string) => JSON.stringify(s);

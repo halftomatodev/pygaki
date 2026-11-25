@@ -1,4 +1,4 @@
-## Screen FX — 블록 깨짐(macroblock) 효과 엔진 (5.8)
+## 화면 효과 — 블록 깨짐(macroblock) 효과 엔진 (5.8)
 ##
 ## 이 파일은 엔진입니다. 고치지 말고 macroblock_config.rpy에서 설정하세요.
 ##

@@ -1,6 +1,6 @@
-# pygaki 플러그인 커스텀 가이드 (5.5)
+# pygaki 플러그인 커스텀 가이드
 
-2026-11-19 · 버전 5.5 (5.5에서 바뀐 것: 그림 효과 `bendwave` 물결로 넘기기(셰이더 전환으로도), 게임 안 편집 화면 [화면] 탭에 음성 빛 자리. 5.4에서 바뀐 것: 대사·선택지 뒤 그림/영상(그림/영상 상자), 그 그림을 게임 안에서 옮기고 키우고 돌리기, `mask_` 이름이면 투명 영상, 글을 그림에 묶기·네 점 변형·나타날 때 그림 효과, 그림 효과 `vibrate` 진동·`springin` 튕기며 들어오기, 렌파이 8.6.1 맞춤. 5.3에서 바뀐 것: 게임 안 편집 화면 "단축키 수정" 탭. 5.2는 대본 편집기만 바뀜. 5.1에서 바뀐 것: 효과 폴더와 그림 전환, 효과·셰이더 끄기 파일, 포토 콜라주(조각 어긋남 대신), 일렁임 셰이더 `ripple`, 셰이더 줄의 세부 값과 장면마다 대사 소리·커서, 셰이더 전환에 픽셀소트·데이터모싱, pygaki는 데스크톱 앱만. 5.0에서 바뀐 것: 새 화면 효과 일곱(글리치, 지글거림, 망점, 홀로그램, 나이트비전, 조각 어긋남, 파편 흩날림), 이미지 하나에 거는 효과, 글자 등장 효과 열하나, 글 상자(말풍선, 둥근 테두리), 스플래시를 화면에서 고치기, 게임 안 편집 화면 "UI 글" 탭. 4.22에서 바뀐 것: 셰이더가 바뀌는 줄과 줄마다 전환, 커서와 셰이더 '여기에서부터', 대사 탭 정리, 커서·CTC 그림 폴더. 4.21에서 바뀐 것: 셰이더 칸의 세부 속성을 1번, 2번 아래로, 줄을 누르면 게임도 그 줄로. 4.20에서 바뀐 것: 셰이더 두 자리와 '여기에서부터 적용', 타이틀/게임 내 메뉴 셰이더, 타이틀 배경과 제목, 부제, 글자 효과, 회전 손잡이)
+2026-11-25 · pygaki v1.9 (판마다 바뀐 것은 `READ_ME_FIRST.md`와 `CHANGELOG.md`)
 
 ## 이 문서 보는 법
 
@@ -27,21 +27,21 @@ pygaki 플러그인 5.5를 받은 사람이 **어떤 파일의 어떤 값을 고
 
 | 바꾸고 싶은 것 | 파일 | 값 | 편집기 |
 | --- | --- | --- | --- |
-| 타이틀 전 로고·경고·조작 방법 페이지 | `splash/splash_config.rpy` | `splash.pages` |  |
-| 그 페이지들의 공통 글꼴·색·나타나는 시간 | `splash/splash_config.rpy` | `splash.default` |  |
-| 타이틀에서 조작 방법 다시 보기 | `ui_kit/title_menu_config.rpy` | 항목의 `"action": splash.ShowPage("controls")` |  |
-| 타이틀 메뉴 항목 글자·동작 | `ui_kit/title_menu_config.rpy` | `tmenu.items`의 `"text"`, `"action"` |  |
+| 타이틀 전 로고·경고·조작 방법 페이지 | `splash/splash_config.rpy` | `splash.pages` | |
+| 그 페이지들의 공통 글꼴·색·나타나는 시간 | `splash/splash_config.rpy` | `splash.default` | |
+| 타이틀에서 조작 방법 다시 보기 | `ui_kit/title_menu_config.rpy` | 항목의 `"action": splash.ShowPage("controls")` | |
+| 타이틀 메뉴 항목 글자·동작 | `ui_kit/title_menu_config.rpy` | `tmenu.items`의 `"text"`, `"action"` | |
 | 타이틀 메뉴 항목 위치·회전·크기 | `ui_kit/title_menu_config.rpy` | 항목의 `"x"`, `"y"`, `"rotate"`, `"skew"`, `"zoom"`, `"size"` | 타이틀 메뉴 탭 |
 | 타이틀 메뉴 전체 글꼴·색 | `ui_kit/title_menu_config.rpy` | `tmenu.default`의 `"font"`, `"color"`, `"hover_color"` | 타이틀 메뉴 탭, 3번 "모든 항목 공통" |
-| 선택을 옮길 때 밀려나는 거리·속도 | `ui_kit/title_menu_config.rpy` | `tmenu.push_before`, `push_after`, `move_time`, `move_warper` |  |
-| 타이틀 배경 영상 | `ui_kit/title_menu_config.rpy` | `tmenu.background_movie` |  |
-| 타이틀 게임 제목 위치·색, 버전 표시 | `ui_kit/title_menu_config.rpy` | `style main_menu_vbox`, `style main_menu_title`, `tmenu.show_version` |  |
-| 게임 메뉴(저장·불러오기 화면) 모양, 왼쪽 목록 | `ui_kit/title_menu_config.rpy` | `tmenu.game_menu_side`, `tmenu.game_menu_content_x`, `tmenu.game_menu`, `style navigation_button_text` |  |
+| 선택을 옮길 때 밀려나는 거리·속도 | `ui_kit/title_menu_config.rpy` | `tmenu.push_before`, `push_after`, `move_time`, `move_warper` | |
+| 타이틀 배경 영상 | `ui_kit/title_menu_config.rpy` | `tmenu.background_movie` | |
+| 타이틀 게임 제목 위치·색, 버전 표시 | `ui_kit/title_menu_config.rpy` | `style main_menu_vbox`, `style main_menu_title`, `tmenu.show_version` | |
+| 게임 메뉴(저장·불러오기 화면) 모양, 왼쪽 목록 | `ui_kit/title_menu_config.rpy` | `tmenu.game_menu_side`, `tmenu.game_menu_content_x`, `tmenu.game_menu`, `style navigation_button_text` | |
 | 게임 중 ESC 메뉴 (타이틀 메뉴 모양) | `ui_kit/title_menu_config.rpy` | `tmenu.pause`(켜기), `tmenu.pause_dim`(뒤 화면 어둡게), `tmenu.pause_background`, `tmenu.pause_items` (3.1) | ESC 메뉴를 연 채로 타이틀 메뉴 탭 → Ctrl+S |
 | 선택지 하나의 위치·글꼴·색 | 스크립트 (`script.rpy` 등) | 선택지 뒤 괄호 `(x=…, y=…, font=…, color=…)` | 선택지 탭 → Ctrl+S (원고에 바로) |
-| 모든 선택지의 글꼴·크기·색·배경 | `ui_kit/choice_menu_config.rpy` | `cmenu.default` |  |
-| 세로 목록 선택지 위치 | `ui_kit/choice_menu_config.rpy` | `cmenu.list_pos` |  |
-| 선택지 등장 연출 | `ui_kit/choice_menu_config.rpy` | `cmenu.appear`, `appear_time`, `appear_stagger` |  |
+| 모든 선택지의 글꼴·크기·색·배경 | `ui_kit/choice_menu_config.rpy` | `cmenu.default` | |
+| 세로 목록 선택지 위치 | `ui_kit/choice_menu_config.rpy` | `cmenu.list_pos` | |
+| 선택지 등장 연출 | `ui_kit/choice_menu_config.rpy` | `cmenu.appear`, `appear_time`, `appear_stagger` | |
 | 마우스 커서 | `ui_kit/custom_ui_config.rpy` | `custom_ui.cursor`, `cursor_frames`, `cursor_hold`(1/2프레임마다), `cursor_mode`, `cursor_hotspot` (3.0) | 커서/대사 소리 탭 (칸 12개) |
 | 클릭 대기 표시(ctc) | `ui_kit/custom_ui_config.rpy` | `custom_ui.ctc`, `ctc_frames`, `ctc_hold`(1/2프레임마다), `ctc_position` (3.0) | 커서/대사 소리 탭 (칸 12개) |
 | 대사 나올 때 소리 | `ui_kit/custom_ui_config.rpy` | `custom_ui.typing_sound`, `typing_volume` | 커서/대사 소리 탭 |
@@ -55,38 +55,38 @@ pygaki 플러그인 5.5를 받은 사람이 **어떤 파일의 어떤 값을 고
 | 대사 한 줄의 나오는 속도·등장 효과 | 스크립트 | 대사 뒤 괄호 `(cps=20, effect="jitter")` (`cps`는 1초에 나오는 글자 수), 또는 배율 `(speed=0.5)` | 대사 탭, 속도·효과 버튼 → Ctrl+S |
 | 그림·영상의 위치와 등장·퇴장 전환 (show / hide / scene 줄) | 스크립트 | `show eileen at stage.pos(420, 720) with dissolve`, `hide eileen with moveoutright` | 이미지/영상 탭 → Ctrl+S (원고에 바로) |
 | show / scene 줄의 그림을 다른 파일로, 새 show / scene 줄 넣기 | 스크립트 | `scene fx_bg` → `scene room`, 아래에 `show hand` (3.0) | 이미지/영상 탭 "그림/영상 고르기" → Ctrl+S |
-| 영상을 이름만으로 쓰기, 투명 영상 | `game/movies/` 폴더 + `ui_kit/stage_config.rpy` | `movies/rain.webm` → `show rain`, `movies/mask_ghost.webm` → `show ghost`(투명), `stage.movie_once` |  |
-| bg 그림을 늘 맨 뒤에 | `ui_kit/stage_config.rpy` | `stage.bg_tag`, `stage.bg_zorder` |  |
-| 배경으로 볼 태그 더하기 (맨 뒤 + 편집기에서 위치 고정) | `ui_kit/stage_config.rpy` | `stage.bg_tag = [ "bg", "fx_bg" ]` (3.0) |  |
+| 영상을 이름만으로 쓰기, 투명 영상 | `game/movies/` 폴더 + `ui_kit/stage_config.rpy` | `movies/rain.webm` → `show rain`, `movies/mask_ghost.webm` → `show ghost`(투명), `stage.movie_once` | |
+| bg 그림을 늘 맨 뒤에 | `ui_kit/stage_config.rpy` | `stage.bg_tag`, `stage.bg_zorder` | |
+| 배경으로 볼 태그 더하기 (맨 뒤 + 편집기에서 위치 고정) | `ui_kit/stage_config.rpy` | `stage.bg_tag = [ "bg", "fx_bg" ]` (3.0) | |
 | 편집 중에도 화면 효과 보기 / 끄기 | `screen_fx/screen_fx_config.rpy` | `screen_fx.editor_preview = True` / `False` (3.0) | 편집 중 V 키 |
-| 편집기 패널이 화면을 가릴 때 | (키) | 제목 끌기, X 접기, Space 누르는 동안 숨기기, B 자동 비키기, P 구석 바꾸기 |  |
-| 편집기 패널 아래쪽이 잘릴 때 | (마우스) | 패널 위에서 휠, 또는 오른쪽 분홍 스크롤바 끌기 (2.9) |  |
+| 편집기 패널이 화면을 가릴 때 | (키) | 제목 끌기, X 접기, Space 누르는 동안 숨기기, B 자동 비키기, P 구석 바꾸기 | |
+| 편집기 패널 아래쪽이 잘릴 때 | (마우스) | 패널 위에서 휠, 또는 오른쪽 분홍 스크롤바 끌기 (2.9) | |
 | 이 대사부터 화면 효과 바꾸기 (선택취소할 때까지 유지) | 스크립트 | 대사 뒤 괄호 `(fx="ascii")`, 선택취소 `(fx="default")`, 전환 `(fx_transition="fade")` | 대사 탭 "화면 효과" 줄, 또는 화면 효과 탭 "이 대사부터 이 효과" → Ctrl+S (원고에 바로) |
 | 대사가 아닌 줄(scene, show, with, $ 줄)부터 화면 효과 바꾸기 | 스크립트 | 그 줄 바로 위에 `$ screen_fx.use("ascii", overlay=False, transition="fade")`, `$ screen_fx.clear()`, `$ screen_fx.set_overlay(True)`, `$ screen_fx.set_warp(3)` (4.1) | 화면 효과 탭 "줄에 넣기", 또는 "이 줄부터 이 효과" → Ctrl+S (원고에 바로) |
 | 이 대사부터 VHS 덮개 켜기/끄기, 휘어짐 | 스크립트 | 대사 뒤 괄호 `(fx_overlay=False)`, `(fx_overlay=True)`, `(fx_warp=3.0)`, `(fx_warp="default")` (4.0) | 대사 탭 "덮개(VHS)", "덮개 휘어짐" 줄 → Ctrl+S |
 | 마우스 커서가 화면 효과를 받을지 (구간마다) | `screen_fx/screen_fx_config.rpy` + 스크립트 | `screen_fx.cursor = "effect"` / `"overlay"` / `"top"`, `$ screen_fx.set_cursor("top")`, 대사 괄호 `(fx_cursor="overlay")` (4.2) | 대사 탭 "커서" 줄, 줄에 넣기 "커서" 줄 → Ctrl+S |
 | 이 대사부터 글자 빼기 | 스크립트 | 대사 뒤 괄호 `(fx="gameboy", fx_exclude=("say",))` | 대사 탭 "글자 빼기" 줄 → Ctrl+S |
-| 캐릭터의 대사 기본 위치·글꼴 | `ui_kit/say_style_config.rpy` | `define t = Character(what_xpos=…, what_font=…)` |  |
-| 장면에서 화면 효과 바꾸기·선택취소 | 스크립트 | `$ screen_fx.use("ascii")`, `$ screen_fx.use("ascii", overlay=False)`, `$ screen_fx.clear()` |  |
+| 캐릭터의 대사 기본 위치·글꼴 | `ui_kit/say_style_config.rpy` | `define t = Character(what_xpos=…, what_font=…)` | |
+| 장면에서 화면 효과 바꾸기·선택취소 | 스크립트 | `$ screen_fx.use("ascii")`, `$ screen_fx.use("ascii", overlay=False)`, `$ screen_fx.clear()` | |
 | 평소 화면 효과 (기본 효과) | `screen_fx/screen_fx_config.rpy` | `screen_fx.base` (`"none"`, `"ascii"`, `"retro_term"`, `"gameboy"`) | 화면 효과 탭 → 기본 효과, 전환 |
 | 효과를 바꿀 때 전환 (TV 꺼짐·켜짐 / 서서히 / 바로) | `screen_fx/screen_fx_config.rpy` | `screen_fx.transition`, `screen_fx.tv`, `screen_fx.fade_time` | 화면 효과 탭 → 기본 효과, 전환, "미리 보기" |
 | ASCII 글자 칸 크기·비율·선명하게, 글자 목록, 색 | `screen_fx/ascii_config.rpy` | `ascii.settings`의 `"cell"`, `"aspect"`, `"crisp"`, `"chars"`, `"color_mode"`, `ascii.presets` | 화면 효과 탭 → ASCII |
-| ASCII 글꼴 | `screen_fx/ascii_config.rpy` | `ascii.font` (`None` = 들어 있는 Neo둥근모) |  |
+| ASCII 글꼴 | `screen_fx/ascii_config.rpy` | `ascii.font` (`None` = 들어 있는 Neo둥근모) | |
 | VHS 덮개 켜기/끄기 (기본은 켬) | `screen_fx/screen_fx_config.rpy` | `screen_fx.overlay` (`True` / `False`) | 화면 효과 탭 → 기본 효과, 전환 "덮개(VHS)" |
 | 효과마다 덮개 켤지 (레트로 터미널은 기본 끔) | 각 효과 설정 파일 | `ascii.overlay`, `retro_term.overlay`, `gameboy.overlay` (`True` / `False`) | 화면 효과 탭 → 효과 버튼 → "덮개(VHS)" |
 | 덮개 왜곡 정도 (휘어짐, 밀림, 색 번짐) | `screen_fx/vhs_crt_config.rpy` | `vhs_crt.settings`의 `warp_amount`, `distort_intensity`, `aberration`. 게임 중 `$ screen_fx.set_warp(3.0)`, `$ vhs_crt.set(…)` | 화면 효과 탭 → VHS 덮개 막대, 대사 탭 "덮개 휘어짐" |
 | 효과에서 대사·선택지·메뉴 빼기 (글자 빼기) | 각 효과 설정 파일 | `vhs_crt.exclude`, `ascii.exclude`, `retro_term.exclude`, `gameboy.exclude` (`"say"`, `"choice"`, `"screens"` 중 고르기) | 화면 효과 탭 → 효과 버튼 → "글자 빼기" |
 | 레트로 터미널 색(형광체·바탕), 곡면 CRT, 자체 VHS | `screen_fx/retro_term_config.rpy` | `retro_term.settings`의 `"phosphor"`, `"background"`, `"crt"`, `"vhs"`, `retro_term.presets` | 화면 효과 탭 → 레트로 터미널 |
 | 게임보이 디더링/픽셀화, 점 크기, 4가지 색, LCD 느낌 | `screen_fx/gameboy_config.rpy` | `gameboy.settings`의 `"mode"`, `"pixel_size"`, `"color1"`~`"color4"`, `"grid"`, `"shadow"`, `gameboy.presets` | 화면 효과 탭 → 게임보이 |
-| 스크린에 넣은 그림에도 장면 효과 | 그 스크린 | `add "map.png" at screen_fx.scene` |  |
+| 스크린에 넣은 그림에도 장면 효과 | 그 스크린 | `add "map.png" at screen_fx.scene` | |
 | 타이틀 일렁임 세기 (5.5부터 셰이더) | `screen_fx/ripple_config.rpy` | `ripple.settings`의 `"amount"`, `"scale"`, `"speed"`, `"shine"`, `ripple.presets`. 타이틀에 걸지는 `screen_fx_config.rpy`의 `screen_fx.title_shaders` | GUI 편집 → 타이틀 셰이더, 셰이더 기본 값 |
 | 고르는 목록에서 효과·셰이더 감추기 (5.1) | `ui_kit/effects/effects_off.txt`, `screen_fx/shaders_off.txt` | 한 줄에 이름 하나 (`#` 뒤는 설명). 이미 쓴 원고는 그대로 돎 | 앱 [효과], [셰이더]의 [숨김] (숨긴 것은 [숨김 아래로]로 목록 아래에 모음) |
 | 글자 등장 효과, 그림 전환 더하기·빼기 (5.1) | `ui_kit/effects/` 폴더 | `.glsl` 파일 하나가 효과 하나. 아래 "효과 폴더" | 앱 [효과] |
 | VHS 덮개 세기·범위 | `screen_fx/vhs_crt_config.rpy` | `vhs_crt.settings`, `vhs_crt.scope` | 화면 효과 탭 → VHS 덮개 |
 | VHS 프리셋 (게임 중 바꿀 묶음) | `screen_fx/vhs_crt_config.rpy` | `vhs_crt.presets` | 화면 효과 탭 → VHS 덮개, "고칠 대상"에서 프리셋 고르기 |
-| 단축키 추가·해제 | `hotkeys/hotkeys_config.rpy` | `hotkeys.bindings`, `hotkeys.unbind` |  |
-| 조작방법 화면 설명 | `hotkeys/hotkeys_config.rpy` | `hotkeys.keyboard_help` |  |
-| 기능 하나를 통째로 끄기 | 각 설정 파일 맨 위 | `tmenu.enabled`, `cmenu.enabled`, `custom_ui.enabled`, `say_style.enabled`, `watermorph.enabled`, `vhs_crt.enabled`, `ascii.enabled`, `retro_term.enabled`, `gameboy.enabled`, `splash.enabled` |  |
+| 단축키 추가·해제 | `hotkeys/hotkeys_config.rpy` | `hotkeys.bindings`, `hotkeys.unbind` | |
+| 조작방법 화면 설명 | `hotkeys/hotkeys_config.rpy` | `hotkeys.keyboard_help` | |
+| 기능 하나를 통째로 끄기 | 각 설정 파일 맨 위 | `tmenu.enabled`, `cmenu.enabled`, `custom_ui.enabled`, `say_style.enabled`, `watermorph.enabled`, `vhs_crt.enabled`, `ascii.enabled`, `retro_term.enabled`, `gameboy.enabled`, `splash.enabled` | |
 
 ## pygaki와 함께 쓰기
 
@@ -197,10 +197,10 @@ pygaki의 **[버전 목록]**에서 되돌린 뒤 **Ctrl+E**를 누르면 렌파
 
 | 에셋 | 기본 경로 | 형식·조건 | 고칠 값 |
 | --- | --- | --- | --- |
-| 글꼴 | `game/fonts/` 아무 이름 | .ttf / .otf / .ttc, 한글이 들어 있는 글꼴. 파일 이름 대소문자를 코드와 똑같이 (맥·안드로이드·웹은 구분함) | 타이틀: `tmenu.default["font"]` · 선택지: `cmenu.default["font"]` · 대사: `Character(what_font=…)` · 게임 전체: `gui.rpy`의 `gui.text_font` 등 |
+| 글꼴 | `game/fonts/` 아무 이름 |.ttf /.otf /.ttc, 한글이 들어 있는 글꼴. 파일 이름 대소문자를 코드와 똑같이 (맥·안드로이드·웹은 구분함) | 타이틀: `tmenu.default["font"]` · 선택지: `cmenu.default["font"]` · 대사: `Character(what_font=…)` · 게임 전체: `gui.rpy`의 `gui.text_font` 등 |
 | 커서 프레임 | `gui/cursor/cursor1.png` ~ `cursor6.png` | PNG, 편집기 칸은 12장 (순서대로 재생). 예: 64×64 | `custom_ui.cursor_frames`, `cursor_hold`(1/2프레임마다, 24fps), `cursor_hotspot`(클릭 기준점) |
 | 클릭 대기 표시 프레임 | `gui/ctc/ctc1.png` ~ `ctc6.png` | PNG, 편집기 칸은 12장 | `custom_ui.ctc_frames`, `ctc_hold`(1/2프레임마다, 24fps) |
-| 대사 소리 | 없음 (`None`) | .ogg 권장. 짧은 소리면 글자가 나오는 동안 반복됨 | `custom_ui.typing_sound` · 캐릭터마다: `Character(cb_typing_sound=…)` |
+| 대사 소리 | 없음 (`None`) |.ogg 권장. 짧은 소리면 글자가 나오는 동안 반복됨 | `custom_ui.typing_sound` · 캐릭터마다: `Character(cb_typing_sound=…)` |
 | 선택지 hover 영상 | 없음 (`None`) | WebM(VP9), 투명하게 하려면 side_mask 형식 (파일 가로 = 표시 가로 × 2) | `cmenu.default["hover_movie"]`, `hover_movie_size`, `hover_movie_zoom` · 선택지 하나만: 괄호 `hover_movie=…` |
 | 타이틀 메뉴 hover 영상 | 없음 | WebM(VP9), side_mask. 글자 뒤에 깔림 | 항목의 `"hover_movie"`, `"hover_movie_pos"`, `"hover_movie_size"` |
 | 타이틀 메뉴 글자 대신 영상 | 없음 | WebM(VP9), side_mask | 항목의 `"hover_label_movie"` |
@@ -208,12 +208,12 @@ pygaki의 **[버전 목록]**에서 되돌린 뒤 **Ctrl+E**를 누르면 렌파
 | 타이틀 배경 그림 | `gui/main_menu.png` | 게임 해상도 크기 PNG | 파일 덮어쓰기 (또는 `gui.rpy`의 `gui.main_menu_background`) |
 | 메뉴 뒤 반투명 판 | `gui/overlay/main_menu.png` | PNG. 완전 투명으로 바꾸면 판이 사라짐 | 파일 덮어쓰기, 또는 `tmenu.main_menu_frame = False` |
 | 선택지 버튼 배경 | `gui/button/choice_idle_background.png`, `choice_hover_background.png` | PNG (9분할 테두리 `gui.choice_button_borders`) | 파일 덮어쓰기, 또는 `cmenu.default["button_background"]`, `["button_hover_background"]` |
-| 효과음 (메뉴 이동·결정) | 없음 | .ogg | `tmenu.hover_sound`, `activate_sound` · `cmenu.hover_sound`, `activate_sound` |
+| 효과음 (메뉴 이동·결정) | 없음 |.ogg | `tmenu.hover_sound`, `activate_sound` · `cmenu.hover_sound`, `activate_sound` |
 | 이름 배경 | `gui/namebox.png` | PNG (9분할 테두리 `gui.namebox_borders`). 대사 괄호의 `name_x`, `name_y`로 옮기면 같이 따라감 | 파일 덮어쓰기 |
 | 스플래시 바탕 영상·그림 | 없음 (권장: `movies/`, `gui/splash/`) | WebM(VP9) 또는 PNG, 게임 해상도 크기. 영상은 화면 크기에 맞춰 재생 | 페이지의 `"background"`. 영상이 끝나면 넘기기: `"duration": "movie"` |
 | 스플래시 로고 영상·그림 | 없음 | 투명 영상은 side_mask 형식 (투명하지 않으면 `"image_side_mask": False`) | 페이지의 `"image"`, `"image_pos"`, `"image_zoom"` |
-| 스플래시 효과음·음악 | 없음 | .ogg. 음악을 타이틀까지 이으려면 `config.main_menu_music`과 같은 파일 | 페이지의 `"sound"`, `"music"` |
-| TV 꺼짐·켜짐 소리 | 없음 (`None`) | .ogg. 꺼지기 시작할 때, 켜지기 시작할 때 한 번씩. 효과음 음량을 따름 | `screen_fx.tv`의 `"off_sound"`, `"on_sound"`, `"volume"` |
+| 스플래시 효과음·음악 | 없음 |.ogg. 음악을 타이틀까지 이으려면 `config.main_menu_music`과 같은 파일 | 페이지의 `"sound"`, `"music"` |
+| TV 꺼짐·켜짐 소리 | 없음 (`None`) |.ogg. 꺼지기 시작할 때, 켜지기 시작할 때 한 번씩. 효과음 음량을 따름 | `screen_fx.tv`의 `"off_sound"`, `"on_sound"`, `"volume"` |
 
 투명 영상(side_mask) 만드는 법: 애프터 이펙트 등에서 투명 배경 ProRes 4444 `.mov`로 뽑은 뒤 ffmpeg로 바꿉니다. 명령은 `ui_kit/README.md`의 "영상 준비"에 있습니다.
 
@@ -300,7 +300,7 @@ define splash.pages = [
         ##   "image_loop": False,                   한 번만
         # "image_loop": True,
 
-        ## 제목 ─ 화면에 보이는 글자는 _( ) 로 감쌉니다.
+        ## 제목 ─ 화면에 보이는 글자는 _() 로 감쌉니다.
         "title": _("만든 사람 이름"),
         "title_size": 56,                          # 이 페이지만 제목을 크게 (나머지는 splash.default의 44)
 
@@ -370,8 +370,8 @@ define splash.pages = [
         "title": _("조작 방법"),
 
         ## 조작 방법 표 ─ (키, 설명) 한 쌍이 한 줄입니다.
-        ##   줄을 늘리려면 ( _("키"), _("설명") ), 한 줄을 복사해 붙이고 글자만 바꾸세요.
-        ##   키가 영어 한 글자뿐이면 _( ) 없이 "H"처럼 적어도 됩니다.
+        ##   줄을 늘리려면 ( _("키"), _("설명")), 한 줄을 복사해 붙이고 글자만 바꾸세요.
+        ##   키가 영어 한 글자뿐이면 _() 없이 "H"처럼 적어도 됩니다.
         ## 이렇게 적는 대신 "keys": "auto", 로 적으면
         ##   게임 메뉴의 조작방법 화면과 같은 목록이 나옵니다.
         ##   (hotkeys 플러그인이 있으면 hotkeys_config.rpy의 hotkeys.keyboard_help, 없으면 렌파이 기본 설명)
@@ -578,7 +578,7 @@ define splash.pages = [
 | --- | --- |
 | 바탕 | `"background"`: 색 `"#202020"`, 그림 `"gui/splash/bg.png"`, 영상 `"movies/bg.webm"` (반복 재생). 그 아래 색은 `"color"` |
 | 가운데 로고 | `"image"` (그림이나 side_mask 영상), 따로 놓으려면 `"image_pos": (640, 200)`, 크기 `"image_zoom"` |
-| 글자 | `"title"`, `"body"`(`\n`으로 줄바꿈), 조작 방법 표 `"keys": [ (키, 설명), … ]` 또는 `"auto"`(조작방법 화면과 같은 목록), `"hotkeys"`(단축키 수정 표를 따라감, 보일 기능은 `"keys_show": [ "screenshot", … ]`, splash 2.5) |
+| 글자 | `"title"`, `"body"`(`\n`으로 줄바꿈), 조작 방법 표 `"keys": [ (키, 설명), … ]` 또는 `"auto"`(조작방법 화면과 같은 목록), `"hotkeys"`(단축키 수정 표를 따라감, 보일 기능은 `"keys_show": [ "screenshot", … ]`) |
 | 넘어가는 때 | `"duration"`: 초 / `None`(클릭할 때까지) / `"movie"`(영상이 끝날 때까지) |
 | 실수로 넘기지 않게 | `"min_time"`(다 나타난 뒤 이 시간은 클릭 무시), 못 넘기게 `"skippable": False`와 `"duration"`을 함께 |
 | 나타나고 사라지는 시간 | `"fade_in"`, `"fade_out"` (페이지 사이는 검은 화면) |
@@ -694,13 +694,13 @@ menu (font="fonts/KBLJump_c.ttf", size=28, appear="slide"):
 | 줄바꿈 폭 | `width=400` (`None`이면 줄바꿈 안 함) | `"width"` |
 | 회전·기울기·확대 | `rotate=`, `skew=`, `zoom=`, 올렸을 때 `hover_rotate=`, `hover_zoom=`, `hover_offset=(8, 0)` | 같은 이름 |
 | 등장 연출 | `appear="pop"` / `"fade"` / `"slide"` / `None`, `delay=0.5` | `cmenu.appear`, `appear_time`, `appear_stagger`, `appear_offset` |
-| 글 뒤에 그림·영상 (5.4) | `idle_media=`, `hover_media=`, `select_media=`, `select_time=0.8`. 아래 "그림/영상 상자" |  |
+| 글 뒤에 그림·영상 (5.4) | `idle_media=`, `hover_media=`, `select_media=`, `select_time=0.8`. 아래 "그림/영상 상자" | |
 | 올렸을 때 뒤에 영상 | `hover_movie="movies/red.webm"` (`None`이면 끔) | `"hover_movie"`, `"hover_movie_size"`, `"hover_movie_zoom"`, `"hover_movie_offset"` |
 | 버튼 배경·여백·폭 | `button_background=…`, `button_padding=(30, 8)`, `button_xsize=500` | `"button_background"`, `"button_hover_background"`, `"button_padding"`, `"button_xsize"` |
 | 고를 수 없는 선택지 색 | `insensitive_color="#555"` | `"insensitive_color"` |
 | 효과음 | `hover_sound=`, `activate_sound=` | `cmenu.hover_sound`, `cmenu.activate_sound` |
-| 올렸을 때 반응 속도 |  | `cmenu.hover_time`, `cmenu.hover_warper` |
-| 세로 목록 간격 |  | `style choice_vbox:` `spacing 30` |
+| 올렸을 때 반응 속도 | | `cmenu.hover_time`, `cmenu.hover_warper` |
+| 세로 목록 간격 | | `style choice_vbox:` `spacing 30` |
 
 위치를 적은 선택지끼리는 서로 피하지 않으니 겹치지 않게 배치하세요.
 
@@ -710,13 +710,13 @@ menu (font="fonts/KBLJump_c.ttf", size=28, appear="slide"):
 
 | 하고 싶은 일 | 값 | 참고 |
 | --- | --- | --- |
-| 커서 애니메이션 켜기 | `custom_ui.cursor = True` |  |
+| 커서 애니메이션 켜기 | `custom_ui.cursor = True` | |
 | 커서 그림 바꾸기 | `custom_ui.cursor_frames = [ "gui/cursor/cursor1.png", … ]` | 순서대로 재생. 편집기 칸은 12개 |
 | 커서 속도 | `custom_ui.cursor_hold = 2` | 초당 24프레임 고정(3.0). `1` 한 장을 1프레임(초당 24장), `2` 2프레임(초당 12장) |
 | 커서 방식 | `custom_ui.cursor_mode = "software"` | `"software"` 렌파이가 그림(24fps 정확, 기본) / `"hardware"` 운영체제 커서(반응이 가장 빠름, 최대 20fps) |
 | 커서가 화면 효과(ASCII, VHS 등)를 받을지 | `screen_fx.cursor = "effect"` (screen_fx_config.rpy) | `"effect"` 효과까지(기본) / `"overlay"` 덮개 밑 / `"top"` 효과 안 받음. 소프트웨어 커서일 때만. 아래 "커서 자리" |
 | 커서 클릭 기준점 | `custom_ui.cursor_hotspot = (0, 0)` | 그림 왼쪽 위에서 x, y 픽셀. 화살표 끝이 가운데면 그 좌표 |
-| 클릭 대기 표시 켜기 | `custom_ui.ctc = True` |  |
+| 클릭 대기 표시 켜기 | `custom_ui.ctc = True` | |
 | 클릭 대기 표시 그림·속도 | `custom_ui.ctc_frames = [ … ]`, `custom_ui.ctc_hold = 2` | 커서와 같이 24fps, `1` / `2` 프레임마다 (3.0) |
 | 클릭 대기 표시 자리 | `custom_ui.ctc_position = "nestled"` | `"nestled"` 글자 바로 뒤, `"fixed"` say 스크린에서 정한 자리 |
 | 특정 캐릭터만 다른 표시 | `Character("이름", ctc="다른이미지")` | 그 값이 우선 |
@@ -787,7 +787,7 @@ define n2 = Character(kind=t, what_xpos=400, what_ypos=210)   # 위치 프리셋
 | `name_x`, `name_y` | `namebox_xpos`, `namebox_ypos` | 이름 상자 위치 (대사 창 왼쪽 위 기준, 이름 배경째 움직임) |
 | `name_font`, `name_size`, `name_color` | `who_font`, `who_size`, `who_color` | 이름 글꼴, 크기, 색 |
 
-**글 상자** (ui_kit 4.0): 괄호에 `box`를 적으면 대사 글을 상자가 둘러쌉니다. 기본 모양은 설정 파일의 `say_style.box_styles`.
+**글 상자**: 괄호에 `box`를 적으면 대사 글을 상자가 둘러쌉니다. 기본 모양은 설정 파일의 `say_style.box_styles`.
 
 ```py
 e "안녕!" (box="bubble")                                    # 흰 말풍선, 검은 선, 꼬리 아래, 튀어나오며 나타남
@@ -810,7 +810,7 @@ e "속까지." (box="pill", pill_fill="#ffd23b", pill_line=None, color="#000000"
 - 꼬리는 말하는 사람을 저절로 찾지 않습니다. 방향이나 `(x, y)`로 정합니다.
 - 편집기 대사 탭의 "상자" 칸, pygaki 글자 효과 칸의 [상자]에서도 고릅니다.
 
-**그림/영상 상자** (5.4, `ui_kit` 4.14~4.18): `box="media"`를 적으면 대사 글 뒤에 그림이나 영상을 깝니다. 글 가운데가 기준이고, 기본 대사창과 이름 칸 배경은 투명해져서 그림만 보입니다. 구름 모양 생각 풍선, 쾅 터지는 효과 글, 쪽지 그림 위의 글 같은 데 씁니다.
+**그림/영상 상자** (5.4, ~4.18): `box="media"`를 적으면 대사 글 뒤에 그림이나 영상을 깝니다. 글 가운데가 기준이고, 기본 대사창과 이름 칸 배경은 투명해져서 그림만 보입니다. 구름 모양 생각 풍선, 쾅 터지는 효과 글, 쪽지 그림 위의 글 같은 데 씁니다.
 
 ```py
 e "꿈이었어." (box="media", media="images/say/cloud.png")                         # 글 크기 + 여백에 맞춰 늘림
@@ -867,7 +867,9 @@ e "흔들!" (box="media", media="images/say/boom.png", media_link=True, media_fx
 5. 글꼴과 색은 패널의 버튼으로 고릅니다. 글꼴 목록은 `game` 폴더의 글꼴 파일을 모두 보여주고, 색은 막대·색 코드·자주 쓰는 색으로 고릅니다.
 6. **Ctrl+S로 저장**, Esc로 닫기. 실수했으면 Backspace(지금 고르는 것만 되돌리기).
 
-레트로 해상도처럼 게임 화면을 창에서 몇 배로 키운 게임에서는 편집 화면(패널, 고르기 창, 이름표, 손잡이)을 실제 화면 크기로 그려서 작은 해상도에서도 읽힙니다(`ui_kit` 4.20). 편집 화면이 열려 있는 동안에는 게임 화면 밖 창의 빈 곳(정수 배율의 검은 띠)을 붉게 칠해 게임 화면이 어디까지인지 보여 줍니다. **F8**로 켜고 끄고(게임에 기억), pygaki 앱 환경 설정에서도 바꿉니다.
+레트로 해상도처럼 게임 화면을 창에서 몇 배로 키운 게임에서는 편집 화면(패널, 고르기 창, 이름표, 손잡이)을 실제 화면 크기로 그려서 작은 해상도에서도 읽힙니다. 편집 화면을 여는 동안에는 창 전체를 씁니다. 게임 화면은 원래 크기(픽셀 퍼펙트면 정수 배율)로 창 가운데에 두고, 패널과 고르기 창은 게임 화면 밖 창의 빈 곳까지 갑니다(예: 640x400 게임을 800x800 창에 띄우면 편집 화면은 800x800 전체). 창이 게임 화면보다 크면 게임 화면 둘레에 얇은 붉은 경계선을 그어 어디까지인지 보여 줍니다. 경계선은 **F8**로 켜고 끄고(게임에 기억), pygaki 앱 환경 설정에서도 바꿉니다. 편집 화면을 닫으면 원래 화면(남는 곳은 검은 띠)으로 돌아갑니다.
+
+글자 효과, 셰이더(1번·2번), 그림 효과처럼 고를 것이 많은 목록은 게임 창 패널에는 지금 값과 **[pygaki 앱에서 고르기]**만 나옵니다. 누르면 pygaki 앱이 붙어 있을 때는 앱의 [GUI 편집] 그 칸이 열리고, 아니면 렌파이 SDK의 pygaki 앱을 켭니다. 게임 창 패널의 단축키 안내는 처음엔 접혀 있고 **F1**로 폅니다. 전체 단축키는 pygaki 앱 환경 설정의 [단축키]에 모여 있습니다.
 
 선택지와 대사는 **Ctrl+S를 누르면 원고(.rpy)의 그 줄 괄호에 바로 저장**되고, 게임이 다시 불러와져 같은 장면으로 돌아옵니다. 원래 적혀 있던 값과 줄 뒤의 `with dissolve` 등은 그대로 두고 바꾼 값만 고칩니다. 고치기 전 원본은 프로젝트 폴더의 `ui_kit_backup/`에 남습니다.
 
@@ -927,7 +929,7 @@ show ghost with Dissolve(1.0)                     # 서서히 1초
 
 **패널이 화면을 가릴 때** (모든 탭): 제목(= UI 편집기)을 끌어서 옮기기, **X** 한 줄로 접기, **Space** 누르는 동안 숨기기, **B** 자동 비키기(고른 것이 패널 아래에 있으면 다른 구석으로), **P** 구석 바꾸기, **L** 줄 목록 접기(이미지/영상 탭), **F1** 안내 접기. 패널이 화면보다 길면 패널 위에서 **휠**이나 오른쪽 **스크롤바**로 아래쪽을 봅니다(2.9).
 
-**편집 중 화면 효과** (모든 탭, `screen_fx` 3.4 이상): 편집기를 열어도 화면 효과가 켜진 채로 보이고, 패널은 그 위에 깨끗하게 보입니다. **V**로 켜고 끕니다. 휘는 효과(VHS·CRT 등)는 가장자리에서 보이는 자리와 눌리는 자리가 조금 어긋나니, 정확히 끌어 놓을 때는 V로 잠깐 끄세요. 처음부터 끄려면 `define screen_fx.editor_preview = False`.
+**편집 중 화면 효과** (모든 탭): 편집기를 열어도 화면 효과가 켜진 채로 보이고, 패널은 그 위에 깨끗하게 보입니다. **V**로 켜고 끕니다. 휘는 효과(VHS·CRT 등)는 가장자리에서 보이는 자리와 눌리는 자리가 조금 어긋나니, 정확히 끌어 놓을 때는 V로 잠깐 끄세요. 처음부터 끄려면 `define screen_fx.editor_preview = False`.
 
 자세한 설명은 `ui_kit/README.md` 4-6, 4-7, 13장.
 
@@ -957,10 +959,10 @@ define hotkeys.keyboard_help = [
 | 자주 빼는 기본 단축키 이름 | `screenshot`(S), `toggle_fullscreen`(F), `hide_windows`(H), `self_voicing`(V), `accessibility`(Shift+A), `skip`(Ctrl), `toggle_skip`(Tab), `rollback`(Page Up) |
 | 겹칠 때 | 새 키가 기본 단축키와 겹치면 둘 다 실행되므로 `unbind`로 기본 쪽에서 뺍니다 |
 | 설명 화면 | `keyboard_help`가 `None`이면 렌파이 기본 설명. `unbind`로 뺀 키는 기본 설명의 그 줄에 저절로 맞춰짐(1.3. V를 빼면 "V" 줄이 "Alt+V"로, 키가 안 남으면 줄을 뺌). 목록을 직접 적었다면 설명도 같이 고칩니다 |
-| 편집기 키와 겹침 | UI Kit 편집기는 Shift+M을 씁니다. 바꾸려면 `define ui_kit.editor_key = "shift_K_e"` |
+| 편집기 키와 겹침 | pygaki 게임 안 편집 화면는 Shift+M을 씁니다. 바꾸려면 `define ui_kit.editor_key = "shift_K_e"` |
 | 정해 둔 동작 (1.1) | `"action"` 대신 `"do": "quick_save"`처럼 이름으로. `"help": _("퀵세이브")`를 적으면 조작방법 화면 목록에 들어감(같은 키 줄이 있으면 그 설명을 바꿈). 이름 목록은 `hotkeys/README.md` |
 
-**편집 화면에서 고치기** (`hotkeys` 1.2, `ui_kit`이 있을 때): Shift+M 편집 화면의 "단축키 수정" 탭(스플래시 탭 바로 뒤. 스플래시 탭의 페이지 단추에서도 조작 안내 화면 옆, pygaki 앱 [GUI 편집]에서는 "조작 안내 화면" 아래)에 줄마다 기능 이름과 키 단추가 있습니다. 키 단추를 누르고 게임 창에서 바꿀 키를 누르면 바뀝니다(Esc 그만두기). [+]는 키 하나 더, 기능 이름을 누르면 [키 단추로], [키 빼기], [처음 키로], 설명 칸. 다른 기능이 쓰는 키면 경고와 안내가 나오고 [그쪽에서 빼고 바꾸기]를 눌러야 바뀝니다. [안내 화면으로 내보내기]를 누르면 스플래시 조작 안내 화면의 표가 `"keys": "hotkeys"`가 되어 이 표를 따라가고, 보여 줄 기능은 스플래시 탭의 조작 안내 표 목록에서 눌러 고릅니다(`"keys_show"`). 바꾼 키는 ESC 조작방법 화면 목록에도 저절로 들어갑니다. 고치는 동안 바로 적용되고, 저장하면 `hotkeys/hotkeys_layout.rpy`의 `"keys"`(기능마다 키), `"desc"`(설명)에 적혀 설정 파일 값에 더해집니다.
+**편집 화면에서 고치기** (`ui_kit`이 있을 때): Shift+M 편집 화면의 "단축키 수정" 탭(스플래시 탭 바로 뒤. 스플래시 탭의 페이지 단추에서도 조작 안내 화면 옆, pygaki 앱 [GUI 편집]에서는 "조작 안내 화면" 아래)에 줄마다 기능 이름과 키 단추가 있습니다. 키 단추를 누르고 게임 창에서 바꿀 키를 누르면 바뀝니다(Esc 그만두기). [+]는 키 하나 더, 기능 이름을 누르면 [키 단추로], [키 빼기], [처음 키로], 설명 칸. 다른 기능이 쓰는 키면 경고와 안내가 나오고 [그쪽에서 빼고 바꾸기]를 눌러야 바뀝니다. [안내 화면으로 내보내기]를 누르면 스플래시 조작 안내 화면의 표가 `"keys": "hotkeys"`가 되어 이 표를 따라가고, 보여 줄 기능은 스플래시 탭의 조작 안내 표 목록에서 눌러 고릅니다(`"keys_show"`). 바꾼 키는 ESC 조작방법 화면 목록에도 저절로 들어갑니다. 고치는 동안 바로 적용되고, 저장하면 `hotkeys/hotkeys_layout.rpy`의 `"keys"`(기능마다 키), `"desc"`(설명)에 적혀 설정 파일 값에 더해집니다.
 
 ## 화면 효과 바꾸기 — `screen_fx/screen_fx_config.rpy`
 
@@ -974,7 +976,7 @@ define hotkeys.keyboard_help = [
 
 | 기본 효과 이름 | 뜻 | 설정 파일 |
 | --- | --- | --- |
-| `"none"` | 효과 없음 (배포 설정의 기본 효과. 덮개는 설정대로) |  |
+| `"none"` | 효과 없음 (배포 설정의 기본 효과. 덮개는 설정대로) | |
 | `"ascii"` | 화면을 글자로 다시 그림. 글자 하나 = 픽셀 하나 (기본은 장면에만. 대사는 그대로 읽힘) | `ascii_config.rpy` |
 | `"retro_term"` | 레트로 터미널: 형광체 단색 모니터, 자체 곡면 CRT·VHS. **쓰는 동안 덮개는 기본으로 꺼짐** | `retro_term_config.rpy` |
 | `"gameboy"` | 게임보이: 큰 점과 4색 LCD 화면, 디더링 / 픽셀화 | `gameboy_config.rpy` |
@@ -1161,7 +1163,7 @@ define screen_fx.tv = {
 
 ### 커서 자리 — `screen_fx/screen_fx_config.rpy` + 스크립트 (4.2)
 
-UI Kit의 소프트웨어 커서(`custom_ui.cursor = True`)를 화면 효과의 어디에 그릴지, 셰이더처럼 원고의 구간마다 고릅니다. 다시 바꿀 때까지 유지되고 세이브·되감기에 저장됩니다.
+pygaki의 소프트웨어 커서(`custom_ui.cursor = True`)를 화면 효과의 어디에 그릴지, 셰이더처럼 원고의 구간마다 고릅니다. 다시 바꿀 때까지 유지되고 세이브·되감기에 저장됩니다.
 
 ```renpy
 ## screen_fx_config.rpy: 평소 값
@@ -1265,7 +1267,7 @@ define ascii.settings = {
     "cell": 16,             # 글자 칸 높이(픽셀). 8 아주 촘촘, 16 기본, 32 큼직, 48 이상은 그림이 무너짐
     "aspect": 0.5,          # 칸 가로 ÷ 세로. 0.5 = 반각 글자(8×16), 1.0 = 정사각 타일
     "crisp": True,          # True: 칸 높이를 8의 배수로. 16·32·48에서 가장 또렷
-    "chars": " .:-=+*#%@",  # 글자 목록 (어두운 칸 → 밝은 칸). 던전풍 " .,:;ox%#@", 블록 " ░▒▓█", "01"
+    "chars": ".:-=+*#%@",  # 글자 목록 (어두운 칸 → 밝은 칸). 던전풍 ".,:;ox%#@", 블록 " ░▒▓█", "01"
     "color_mode": "color",  # "mono" 한 가지 색(fg) / "color" 원래 색 / "palette16" 옛날 PC 16색
     "fg": "#c8c8c8",        # "mono"일 때 글자 색. "#33ff66" 녹색 단말기, "#ffb000" 호박색
     "bg": "#000000",        # 바탕색 (글자 사이 빈 곳)
@@ -1293,7 +1295,7 @@ $ ascii.reset(duration=1.0)                  # 설정 파일 값으로
 | 녹색 단색 모니터 | `ascii.preset("terminal")` |
 | ASCII + VHS 덮개가 너무 어두움 | `ascii.preset("glow")` 또는 `"bg_tint": 0.2`, `"color_boost": 1.6` |
 | 대사창까지 전부 글자로 (연출) | `$ screen_fx.use("ascii", exclude=())` |
-| 한글·기호로 글자 목록 | `"chars": " .·:∴※#"` (글꼴에 있는 글자만. 없으면 네모) |
+| 한글·기호로 글자 목록 | `"chars": ".·:∴※#"` (글꼴에 있는 글자만. 없으면 네모) |
 
 편집기 "화면 효과" 탭 → "ASCII" 버튼에서 칸 크기·비율·선명하게는 막대와 버튼으로, 글자 목록·색 입히기는 버튼으로 고릅니다. 자세한 값 설명은 `screen_fx/README.md` 6장.
 
@@ -1517,7 +1519,7 @@ $ vhs_crt.off(duration=2.0)                   # 서서히 끄기
 | 편집기가 안 열림 | 런처에서 실행했는지 (개발 모드에서만 열림) |
 | 지운 파일이 계속 적용됨 / 스크린이 두 번 정의됨 | `.rpyc`도 같이 지웠는지, 예전 `title_menu` 등 폴더가 남았는지 |
 | 편집기 저장 실패 | 프로젝트가 Dropbox 안이면 동기화를 잠시 멈추고 다시 저장 |
-| 스플래시를 고쳤는데 안 보임 | Shift+R로는 안 나옴. 껐다 켜거나 `splash.preview()`. `developer_skip`, `once`·보지 않기로 빠진 것은 아닌지는 편집기 스플래시 탭의 "지금은 안 나옴: …" 줄에서 보고, [다시 보이게]로 기록을 지움(splash 2.1) |
+| 스플래시를 고쳤는데 안 보임 | Shift+R로는 안 나옴. 껐다 켜거나 `splash.preview()`. `developer_skip`, `once`·보지 않기로 빠진 것은 아닌지는 편집기 스플래시 탭의 "지금은 안 나옴: …" 줄에서 보고, [다시 보이게]로 기록을 지움 |
 | 내가 쓴 `splashscreen` 레이블만 나옴 | 그 레이블 안에 `call splash_play` |
 | 스플래시 조작 방법 표가 아래 안내와 겹침 | 페이지의 `"yalign"`을 줄이거나 `"key_size"`, `"keys_spacing"`을 줄이기 |
 | 글자 사이 가운뎃점(·)이 네모 | 렌파이 새 프로젝트의 한글 글꼴에 없는 글자. `/`나 `,`를 쓰거나 글꼴 바꾸기 |
@@ -1527,7 +1529,7 @@ $ vhs_crt.off(duration=2.0)                   # 서서히 끄기
 | `show rain`에서 "image not found" 오류 | 영상이 `game/movies/`에 있는지, 확장자가 `.webm`인지, 같은 이름의 그림이 `images/`에 있지 않은지 (그림이 우선) |
 | 투명 영상이 두 그림이 옆으로 붙은 채 나옴 | 파일 이름 앞에 `mask_`가 있는지 (side_mask 영상) |
 | 투명 webm·GIF를 넣었는데 바탕이 검게 나옴 | 렌파이는 알파가 든 webm을 못 틈. pygaki 앱 [투명 영상 만들기]로 `mask_` 영상을 만들기 |
-| 렌파이 8.6으로 새로 만든 게임이 첫 대사에서 "Unknown layer None"으로 멈춤 | 플러그인이 예전 판. 묶음 런처 [플러그인 올리기]로 5.4(`ui_kit` 4.17·`screen_fx` 5.9부터)로 |
+| 렌파이 8.6으로 새로 만든 게임이 첫 대사에서 "Unknown layer None"으로 멈춤 | 플러그인이 예전 판. 묶음 런처 [플러그인 올리기]로 5.4로 |
 | 렌파이 8.6에서 내가 쓴 셰이더가 문법 오류 | 8.6 새 게임은 셰이더 기본 문법이 GLSL ES 3.00. 예전 문법으로 쓴 셰이더는 등록할 때 `glsl=100`을 붙이기(8.5에는 그 인자가 없으니 `hasattr(renpy.config, "glsl_version")`일 때만) |
 | 대사 괄호 `box="media"`에서 "unknown keyword" 오류 / 그림이 안 나옴 | `ui_kit`이 4.14보다 예전 판. 플러그인 올리기 |
 | 이미지/영상 탭에서 그림을 못 고름 | 원고의 show·scene 줄로 띄운 그림만 고를 수 있음. 세이브를 불러온 직후라면 줄 목록에서 고르기 |

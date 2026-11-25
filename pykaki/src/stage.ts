@@ -54,17 +54,17 @@ export const POSITIONS: [string, string][] = [['', '가운데'], ['left', '왼�
 // showpy 화면 효과 칸의 값들
 export const FX_BASE: [string, string][] = [
   ['', '그대로'], ['ascii', 'ASCII'], ['retro_term', '레트로 터미널'], ['gameboy', '게임보이'],
-  // showpy screen_fx 5.1
+  // showpy pygaki 플러그인
   ['glitch', '글리치'], ['boil', '지글거림'], ['halftone', '망점'], ['hologram', '홀로그램'], ['nightvision', '나이트비전'], ['collage', '포토 콜라주'], ['shards', '파편 흩날림'],
-  // showpy screen_fx 5.5, 5.7
+  // showpy pygaki 플러그인, 5.7
   ['ripple', '일렁임'], ['waves', '물결'], ['wobble', '일렁거림'], ['filmgrain', '옛날 필름'], ['fisheye', '어안렌즈'],
   ['photocopy', '복사기'], ['relief', '양각'], ['gradmap', '그라데이션 맵'], ['rings', '동심원 어긋남'], ['camcorder', '옛 캠코더'],
-  // showpy screen_fx 5.8
+  // showpy pygaki 플러그인
   ['macroblock', '블록 깨짐'],
   ['none', '효과 없음'], ['default', '기본으로'],
 ];
 
-// 글 상자 (showpy ui_kit 4.0, engine/text_box.rpy)
+// 글 상자 (showpy, engine/text_box.rpy)
 export const BOXES: [string, string][] = [['', '상자 없음'], ['bubble', '말풍선'], ['pill', '둥근 테두리'], ['media', '그림/영상']];
 export const isMovieFile = (p?: string) => !!p && /\.(webm|ogv|mp4|mkv|avi|mpe?g)$/i.test(p);
 // 투명 영상(왼쪽 색 + 오른쪽 투명도, 렌파이 side_mask): 이름이 mask_로 시작하는 영상 (pygaki 플러그인 stage·글 상자·선택지와 같은 규칙)
@@ -81,7 +81,7 @@ export const FX_CURSOR: [string, string][] = [['', '커서 그대로'], ['effect
 
 const warpVal = (v: string) => (v === 'default' ? '"default"' : v);
 
-// 그림/영상의 자리·크기·회전 (게임 안 편집 화면에서 받아 적은 값, ui_kit 4.15). 대사와 선택지가 같이 씀
+// 그림/영상의 자리·크기·회전 (게임 안 편집 화면에서 받아 적은 값). 대사와 선택지가 같이 씀
 export function mediaPlace(x?: number, y?: number, zoom?: number, angle?: number): string[] {
   const a: string[] = [];
   if (x || y) a.push(`media_offset=(${x ?? 0}, ${y ?? 0})`);
@@ -90,7 +90,7 @@ export function mediaPlace(x?: number, y?: number, zoom?: number, angle?: number
   return a;
 }
 
-// 글 상자 묶기·네 점 변형·그림 효과 (FEATURE 28, ui_kit 4.18). 대사와 선택지가 같이 씀
+// 글 상자 묶기·네 점 변형·그림 효과 (FEATURE 28). 대사와 선택지가 같이 씀
 const pyNum = (n: number) => String(Math.round(n * 10000) / 10000);
 const pyTuple = (a: number[]) => `(${a.map(pyNum).join(', ')})`;
 export const hasQuad = (q?: number[]) => !!q && q.length === 8 && q.some((n) => Math.abs(n) > 1e-4);
@@ -110,7 +110,7 @@ export function mediaGroupArgs(link?: number[], quad?: number[], textQuad?: numb
 // 대사·선택지에 묶기·변형·그림 효과 값이 있는지 (예전 플러그인 알림용)
 export const sayHasGroup = (s?: SayStyle) => !!s && s.box === 'media' && !!(s.media_link || hasQuad(s.media_quad) || hasQuad(s.media_text_quad) || s.media_fx);
 
-// 대사 줄의 괄호 안 값: fx="ascii", fx_warp=3 ...
+// 대사 줄의 괄호 안 값: fx="ascii", fx_warp=3...
 export function fxArgs(f?: LineFx): string[] {
   if (!f) return [];
   const a: string[] = [];
@@ -144,9 +144,9 @@ export function refreshEffects() {
   TRANSITIONS.splice(0, TRANSITIONS.length, ...BASE_TRANSITIONS, ...IMAGE_FX.filter(on).map((e): [string, string] => [imageFxCode(e.name), e.label || e.name]));
 }
 refreshEffects();
-// 목록에서 뺀 효과 (ui_kit 4.2). 예전 대본에 남은 값은 그대로 두고 내보낸다
+// 목록에서 뺀 효과. 예전 대본에 남은 값은 그대로 두고 내보낸다
 // - typewriter, slowalpha: 렌파이에 그대로 있어서 showpy 없이도 돎
-// - melt, mosh, flipin, led, split, (ui_kit 4.9) spin, glow, wipe, inkfill, punch, popin, (효과 폴더 샘플) drip: showpy가 한 글자씩 나오기로 받아 줌 (text_effects.rpy REMOVED_EFFECTS)
+// - melt, mosh, flipin, led, split,  spin, glow, wipe, inkfill, punch, popin, (효과 폴더 샘플) drip: showpy가 한 글자씩 나오기로 받아 줌 (text_effects.rpy REMOVED_EFFECTS)
 const REMOVED_RENPY = ['typewriter', 'slowalpha'];
 export const REMOVED_EFFECTS = [...REMOVED_RENPY, 'melt', 'mosh', 'flipin', 'led', 'split', 'spin', 'glow', 'wipe', 'inkfill', 'punch', 'popin', 'drip'];
 // 렌파이에 들어 있는 효과. 나머지는 showpy가 있어야 한다
@@ -243,7 +243,7 @@ const NATIVE: Record<keyof SayStyle, string> = {
   x: 'what_xpos', y: 'what_ypos', name_x: 'namebox_xpos', name_y: 'namebox_ypos',
 };
 
-// 대사 줄의 괄호 안 값: size=30, cps=20 ... 위치는 showpy가 뒤에 덧붙이는 순서와 맞춰 맨 뒤에 둔다
+// 대사 줄의 괄호 안 값: size=30, cps=20... 위치는 showpy가 뒤에 덧붙이는 순서와 맞춰 맨 뒤에 둔다
 export function sayArgs(s0?: SayStyle, native = false, text?: string, oldGroup = false): string[] {
   const tagged = tagEffectNames(text).length > 0;
   if (!s0 && !tagged) return [];

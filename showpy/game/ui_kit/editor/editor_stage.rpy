@@ -1,5 +1,5 @@
 ################################################################################
-## UI Kit — 편집기: 이미지/영상 탭
+## pygaki — 편집기: 이미지/영상 탭
 ##
 ## 원고의 show / hide / scene 줄 하나를 골라 위치와 전환 효과를 고칩니다.
 ##   - 화면의 그림·영상을 누르면 그것을 띄운 줄이 골라지고, 끌면 위치가 바뀝니다.
@@ -550,7 +550,7 @@ init -8 python in ui_editor:
                 self.live_show()
             store.renpy.restart_interaction()
 
-        ## 이미지 효과 (screen_fx 5.0 image_fx, ui_kit 4.0): show … at screen_fx.image_fx("hologram")
+        ## 이미지 효과 (image_fx): show … at screen_fx.image_fx("hologram")
 
         import re as _re
         IMG_FX_RE = _re.compile(r'^\s*screen_fx\.image_fx\(\s*["\']([A-Za-z0-9_]+)["\']')

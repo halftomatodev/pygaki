@@ -116,12 +116,12 @@ export function pairTags(toks: Tok[]): { pairs: Pair[]; problems: TagProblem[] }
   return { pairs, problems };
 }
 
-// 글 안의 {shader=} 태그에 적힌 효과 값들 ("jitter", "slidein:u__dir=90|shake" ...)
+// 글 안의 {shader=} 태그에 적힌 효과 값들 ("jitter", "slidein:u__dir=90|shake"...)
 export const shaderTags = (text: string) => (text.includes('{shader') ? tokenize(text).filter((t) => t.k === 'open' && t.name === 'shader' && t.val.trim()).map((t) => t.val.trim()) : []);
 // 내보내기 검사용
 export const checkTags = (text: string) => pairTags(tokenize(text)).problems;
 // 렌파이 기본 루비 스타일(ruby_text)은 본문 기준선에 붙어 글에 겹치고, 글자 효과가 있는 대사에서는 오류로 멈춘다.
-// pygaki 플러그인(ui_kit 4.9, say_style.rpy)이 루비가 있는 대사 줄마다 루비 스타일을 그 줄에 맞게 만들어 준다.
+// pygaki 플러그인(say_style.rpy)이 루비가 있는 대사 줄마다 루비 스타일을 그 줄에 맞게 만들어 준다.
 // 루비 글의 크기·색은 그 자리에서 {rt} 안에 {size=}, {color=}로 적는다 (rubyAt, setRubyStyle)
 export const RUBY_NOTE = '루비를 넣었어요. 루비 글에 커서가 있으면 [루비 글] 줄에서 크기와 색을 그 자리에서 바꿔요';
 

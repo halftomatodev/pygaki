@@ -28,7 +28,7 @@ export const ACTIONS: { id: ActionId; label: string; def: string }[] = [
   { id: 'tagUnderline', label: '대사 밑줄 {u} (글 칸에서)', def: 'Ctrl+KeyU' },
   { id: 'find', label: '찾기·바꾸기 (대사, 선택지, 상자 제목)', def: 'Ctrl+KeyF' },
   { id: 'gamePanel', label: '게임 창의 편집 화면 보이기/숨기기 (앱, 게임과 연결됐을 때)', def: 'F9' },
-  // 레트로 해상도(정수 배율)로 키운 게임 창의 남는 곳을 게임 안 편집 화면이 열려 있을 때 붉게 (ui_kit 4.20, LINK.md 9장 bands)
+  // 레트로 해상도(정수 배율)로 키운 게임 창의 남는 곳을 게임 안 편집 화면이 열려 있을 때 붉게 (LINK.md 9장 bands)
   { id: 'gameBands', label: '게임 화면 경계선 켜기/끄기 (앱, 게임과 연결됐을 때)', def: 'F8' },
 ];
 
@@ -101,7 +101,7 @@ interface Prefs {
   textColor: string | null; // 텍스트 색. null이면 테마가 정한 색
   runSkip: boolean; // [렌파이에서 실행]: 게임이 이미 켜져 있으면 무시 (앱)
   snapGame?: boolean; // 게임이 연결되면 앱 창을 게임 창 옆으로 (앱)
-  gameBands?: boolean; // 게임 안 편집 화면을 열었을 때 게임 창 여백(정수 배율 밖)을 붉게. 없으면 켬 (앱, ui_kit 4.20)
+  gameBands?: boolean; // 게임 안 편집 화면을 열었을 때 게임 창 여백(정수 배율 밖)을 붉게. 없으면 켬 (앱)
   leftW: number; // 왼쪽 칸 너비 (px)
   rightW: number; // 오른쪽 칸 너비 (px)
   guiLeftW: number; // [GUI 편집] 왼쪽 칸 너비 (px)

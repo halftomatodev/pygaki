@@ -1,5 +1,5 @@
 ################################################################################
-## Screen FX — 공통 엔진
+## 화면 효과 — 공통 엔진
 ##
 ## 이 파일은 고칠 필요가 없습니다. 설정은 플러그인 폴더의 *_config.rpy에서 하세요.
 ##
@@ -25,7 +25,7 @@
 ##      그래서 대사창과 선택지를 각자 층(sfx_say, sfx_choice)에 띄웁니다. (screen_fx.split_text_layers)
 ##      글자 층만 다르게 그리는 효과(게임보이: 글자는 색만 입힘)는 하나도 안 빼도 층마다 씌웁니다.
 ##   5. 대사 줄 괄호의 fx="…", fx_overlay=True/False, fx_warp=2.0 (그 대사가 나오기 전에 바꿈)
-##   6. UI Kit 편집기와 연결 (editor/editor_fx.rpy)
+##   6. pygaki 게임 안 편집 화면와 연결 (editor/editor_fx.rpy)
 ##
 ## 타이틀 일렁임(watermorph)은 이 전환과 상관없이 타이틀에서만 따로 켜집니다.
 ##
@@ -69,13 +69,13 @@ init -110 python in screen_fx:
             kwargs.setdefault("glsl", 100)
         renpy.register_shader(name, **kwargs)
 
-    ## ── UI Kit 편집기와 연결 ──
+    ## ── pygaki 게임 안 편집 화면와 연결 ──
 
     ## 편집기의 "화면 효과" 탭 이름
     TAB_ID = "screen_fx"
 
     def editor_state():
-        """UI Kit 편집기의 상태. 편집기가 없으면 None."""
+        """게임 안 편집 화면의 상태. 편집기가 없으면 None."""
         ed = getattr(store, "ui_editor", None)
         return getattr(ed, "state", None)
 
@@ -1449,7 +1449,7 @@ init -110 python in screen_fx:
             fx.reset(duration=duration)
 
     ## ── 커서 자리 (4.2) ──
-    ## UI Kit의 소프트웨어 커서를 화면 효과의 어디에 그릴지:
+    ## pygaki의 소프트웨어 커서를 화면 효과의 어디에 그릴지:
     ##   "effect"   기본 효과(ASCII 등)와 덮개(VHS)를 다 받음
     ##   "overlay"  덮개(VHS)만 받음
     ##   "top"      효과를 안 받음 (맨 위에 깨끗하게)
@@ -1472,7 +1472,7 @@ init -110 python in screen_fx:
             $ screen_fx.set_cursor("overlay")    # 덮개(VHS)만 받음
             $ screen_fx.set_cursor("top")        # 효과 안 받음 (맨 위에 깨끗하게)
             $ screen_fx.set_cursor("default")    # 설정(screen_fx.cursor)대로
-        (UI Kit의 소프트웨어 커서일 때만. 운영체제 커서는 늘 맨 위)
+        (ui_kit의 소프트웨어 커서일 때만. 운영체제 커서는 늘 맨 위)
         """
         store.screen_fx.cur_cursor = _cursor_flag(mode)
         if restart:
@@ -1511,13 +1511,13 @@ init -110 python in screen_fx:
     cursor_source = _CursorSource()
 
     def set_cursor_source(d, hx=0, hy=0):
-        """UI Kit이 부름: 효과 안에 그릴 커서 그림(d)과 클릭 기준점. None이면 효과 안에 그리지 않음."""
+        """ui_kit이 부름: 효과 안에 그릴 커서 그림(d)과 클릭 기준점. None이면 효과 안에 그리지 않음."""
         cursor_source.d = d
         cursor_source.hx = hx
         cursor_source.hy = hy
 
     def cursor_inside():
-        """지금 커서를 화면 효과 안에 그리는지. (그러면 UI Kit은 맨 위 커서를 그리지 않음)"""
+        """지금 커서를 화면 효과 안에 그리는지. (그러면 ui_kit은 맨 위 커서를 그리지 않음)"""
         if cursor_source.d is None:
             return False
         if current_cursor() == "top":
@@ -2181,7 +2181,7 @@ default screen_fx.overrides = { }            # 효과별 set()·preset() 값
 default screen_fx.changes = { }              # 효과별 바뀐 횟수와 전환 시간 (부드럽게 바꾸기용)
 
 
-## 대사 줄 괄호의 fx="…"를 받습니다. UI Kit 대사 스타일(init 990)보다 먼저 걸어서,
+## 대사 줄 괄호의 fx="…"를 받습니다. pygaki 대사 스타일(init 990)보다 먼저 걸어서,
 ## 대사 스타일이 이 함수에 이어서 넘겨주게 합니다.
 init 980 python in screen_fx:
 

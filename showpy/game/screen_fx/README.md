@@ -1,4 +1,4 @@
-# Screen FX 플러그인 (기본 효과 + VHS 덮개 + ASCII + 레트로 터미널 + 게임보이 + 셰이더 열일곱 + 타이틀 일렁임)
+# 화면 효과 플러그인 (기본 효과 + VHS 덮개 + ASCII + 레트로 터미널 + 게임보이 + 셰이더 열일곱 + 타이틀 일렁임)
 
 화면 전체에 씌우는 렌파이 셰이더 플러그인입니다. 화면은 **셰이더 두 개를 겹쳐** 그립니다.
 
@@ -48,209 +48,6 @@ VHS 셰이더 원본: [VHS and CRT monitor effect](https://godotshaders.com/shad
 게임보이는 [Retro dither](https://godotshaders.com/shader/retro-dither/) (tcmug, CC0)의 4×4 디더링 무늬와 [Gameboy Classic Shader](https://github.com/HarlequinVG/shaders/tree/master/gameboy_shader) (Harlequin, GPL v3)의 LCD 모습(점 격자·점 그림자)을 참고해 새로 썼습니다(코드는 가져오지 않음).
 ASCII 효과는 [ASCII shader](https://godotshaders.com/shader/ascii-shader/) (Daniel Bologna, Acerola의 아이디어, MIT)를 참고해 렌파이용으로 새로 썼습니다. 글꼴은 [Neo둥근모](https://neodgm.dalgona.dev/) (SIL OFL 1.1)입니다.
 
-### 5.9에서 바뀐 점
-
-- **렌파이 8.6 맞춤**: 렌파이 8.6으로 새로 만든 게임은 `config.say_layer`·`config.choice_layer`가 `None`이 기본이라, 대사창·선택지를 따로 층(`sfx_say`, `sfx_choice`)에 띄울 때 첫 대사에서 "Unknown layer None"으로 멈췄습니다. `None`도 기본 층으로 보고 옮깁니다. 물 모핑(`watermorph`) 셰이더도 다른 셰이더처럼 예전 문법(GLSL ES 1.00)이라고 알립니다.
-
-### 5.7에서 바뀐 점
-
-- **새 셰이더 아홉**: 물결(`waves`), 일렁거림(`wobble`), 옛날 필름(`filmgrain`), 어안렌즈(`fisheye`), 복사기(`photocopy`), 양각(`relief`), 그라데이션 맵(`gradmap`), 동심원 어긋남(`rings`), 옛 캠코더(`camcorder`). 셰이더마다 `<이름>_config.rpy`와 `engine/<이름>.rpy`가 하나씩입니다(위 표).
-- **없는 셰이더는 "없음"으로**: 설정 파일과 엔진을 지운 셰이더를 원고·세이브가 가리켜도 멈추지 않고 "none"으로 읽습니다(개발 모드에서는 이름마다 한 번 알림). 그 셰이더의 값은 건너뜁니다. 그래서 안 쓰는 셰이더는 두 파일을 지워도 되지만, 목록에서만 감추려면 `shaders_off.txt`(pygaki 앱 [셰이더] 화면의 [숨김])를 씁니다.
-- 셰이더 전환에 효과 폴더의 그림 전환이 더 생겼습니다(TV 지직 `static`, 조정 화면 `calibrate`, 테이프 늘어짐 `tapestretch`, 점멸 `blink`, 밀어 올리기 `pushup`. `ui_kit/effects/README.md`).
-
-### 5.6에서 바뀐 점
-
-- **전환을 적으면 셰이더가 같아도 돎**: `shaders()`, `clear()`에 `transition=`을 직접 적으면 셰이더가 지금과 같아도 그 전환(TV, 그림 전환)을 돌립니다. 그대로 이어지게 하려면 `transition=None`. 전환을 적지 않은 줄과 `use()`, 대사 괄호 `fx=`는 예전처럼 같은 값이면 전환 없이 넘어갑니다. 대본 편집기는 상자의 "시작할 때"와 앞 상자의 "끝날 때"가 둘 다 "없음"일 때만 `transition=None`을 적습니다. [렌파이에서 여기로 이동]으로 상자 첫 줄(셰이더 줄)로 갈 때 셰이더가 그 앞 줄의 것으로 덮이던 것도 고쳤습니다.
-- **그림 전환으로 셰이더 바꾸기**: `transition=`에 효과 폴더(`ui_kit/effects/`)의 그림 전환 이름(`"pixelsort"`, `"datamosh"` 등)을 적으면, 바로 다음 `with screen_fx.pending_with()`가 앞 화면(그때까지 적힌 줄을 다 그린 화면. 대사 뒤에 `show`만 하고 아직 화면에 안 나온 그림도 들어감) → 새 화면을 그 전환으로 잇고 셰이더는 그 시간의 절반에 바뀝니다(효과 파일에 `@set u__cut 값`이 있으면 그때. 샘플 `pixelsort`, `datamosh`는 끝에서 끊기는 크래시라 1.0). pygaki 앱에서는 상자의 ◐ 셰이더 → 전환 "시작할 때", "끝날 때"에서 "픽셀소트", "데이터모싱"을 고르면 이렇게 적힙니다(`ui_kit`이 같이 있어야 함).
-  ```renpy
-  $ screen_fx.shaders("glitch", "none", transition="pixelsort", duration=1.2)   # 1.2초 (안 적으면 효과 파일의 시간)
-  scene bg room
-  with screen_fx.pending_with()            # 셰이더가 그대로면 아무 전환 없이
-  with screen_fx.pending_with(dissolve)    # 셰이더가 그대로면 dissolve로
-  ```
-  `scene`, `show`를 먼저 다 적고 그 뒤에 `with`를 적어야 새 화면까지 이어집니다. 효과 파일을 빼면 `screen_fx.transition` 설정의 전환으로 바뀝니다.
-
-### 5.5에서 바뀐 점
-
-- **일렁임 셰이더 (`ripple`)**: 예전 "타이틀 일렁임"(watermorph)을 셰이더 하나로 옮겼습니다. 타이틀 셰이더, 게임 내 메뉴 셰이더, 게임 중 셰이더 어디에나 고를 수 있습니다. 설정은 `ripple_config.rpy`.
-  ```renpy
-  define screen_fx.title_shaders = ("ripple", "none")   # 타이틀에 일렁임 (새 프로젝트의 처음 값)
-  $ screen_fx.shaders("ripple", "vhs_crt")              # 게임 중에 일렁임 + VHS
-  ```
-  예전 방식(`watermorph_config.rpy`)도 그대로 돕니다. 새 프로젝트에서는 `watermorph.enabled = False`가 처음 값입니다. 둘을 같이 켜면 두 번 일렁이니 하나만 켜세요.
-- **이 자리에서만 쓰는 세부 값**: `screen_fx.shaders()`에 `values=`와 `tv=`를 적을 수 있습니다. pygaki 앱이 상자마다 정한 값을 이렇게 적습니다.
-  ```renpy
-  $ screen_fx.shaders("vhs_crt", "none", values={"vhs_crt": {"warp_amount": 2.0}})   # 이 장면만 더 휘게
-  $ screen_fx.shaders("glitch", "none", transition="tv", tv={"off_time": 0.6})       # 이번 TV 전환만 천천히 꺼짐
-  $ screen_fx.shaders("vhs_crt", "none", values={})                                    # 바꾼 값을 설정대로
-  ```
-  `values`를 적으면 고른 셰이더의 바꾼 값을 그 값으로 바꿉니다(적지 않은 값은 설정대로). 아예 안 적으면 전처럼 그대로 둡니다. `tv`는 `screen_fx.tv`와 같은 이름을 씁니다. `screen_fx.use()`, `screen_fx.clear()`에도 `tv=`를 적을 수 있습니다.
-
-### 5.4에서 바뀐 점
-
-- **셰이더 끄기 (`shaders_off.txt`)**: 이 폴더에 `shaders_off.txt`를 만들고 안 쓸 셰이더 이름을 한 줄에 하나씩 적으면, 편집기의 1번, 2번 고르는 줄에서 빠집니다. 효과는 그대로 등록되어 있어서 이미 그 셰이더를 쓴 원고는 전과 똑같이 돕니다. 파일이 없으면 다 켠 것입니다.
-  ```
-  # 끈 셰이더. 한 줄에 이름 하나 (# 뒤는 설명)
-  gameboy
-  shards     # 파편 흩날림은 이 게임에서 안 씀
-  ```
-- **셰이더 목록 파일 (`shader_list.json`)**: 개발 모드에서 게임을 켜면 이 폴더의 `shader_list.json`에 셰이더 목록(이름, 값, 막대 묶음)을 적어 둡니다. pygaki 앱이 이 파일을 읽어 [대본 편집]의 셰이더 고르는 목록을 만들고, 같이 적힌 셰이더 코드로 [효과] 화면에서 샘플을 그립니다. 직접 고치지 않습니다(게임을 켤 때 다시 씀). 새 효과를 `engine/`에 넣었으면 게임을 한 번 켜야 앱의 목록에 나옵니다.
-
-### 5.1에서 바뀐 점
-
-- **새 화면 효과 일곱 가지**: 글리치(`glitch`), 지글거림(`boil`), 망점(`halftone`), 홀로그램(`hologram`), 나이트비전(`nightvision`), 조각 어긋남(`tiles`, 5.3에서 포토 콜라주 `collage`로 바뀜), 파편 흩날림(`shards`). 다른 효과처럼 1번, 2번 자리 어디에나 고르고, 대사 괄호 `fx=`, `image_fx`, `set_values`, 프리셋, 편집기 막대가 다 됩니다. 효과마다 설정 파일(`<이름>_config.rpy`)에 쓰는 법과 예시가 있습니다.
-  ```renpy
-  $ screen_fx.shaders("glitch")                        # 1번 글리치
-  $ screen_fx.shaders("halftone", "boil")              # 망점 + 지글거림 겹치기
-  show eileen at screen_fx.image_fx("hologram")        # 인물 하나만 홀로그램
-  $ nightvision.set(hud_text="CAM 03")                 # 나이트비전 화면 글 바꾸기
-  scene bg room with screen_fx.TileSwap(1.0)           # 칸마다 바뀌는 장면 전환
-  $ screen_fx.shaders("shards")                        # 붉은 파편이 흩날림
-  $ shards.preset("embers")                            # 위로 올라가는 불티
-  ```
-- 파편 흩날림(`shards`)은 그림 파일 없이 셰이더로 조각을 그립니다. 깊이 세 겹(먼 조각은 작고 흐리고 느림), 조각마다 돌고 뒤집히고 깜빡입니다. 양 `count`, 색 수 `colors`(1~3)와 `color`·`color2`·`color3`, 크기 `size_min`·`size_max`, 속도 `speed`, 방향 `direction`(도, 0 오른쪽 90 아래), 바탕 어둡게 `dim`. 프리셋 `embers`(불티), `ash`(재), `storm`(폭풍), `dread`(어두운 화면에 붉은 파편). 다른 효과에 얹으려면 2번 자리에(`screen_fx.shaders("boil", "shards")`).
-- 새 효과는 쓰는 동안 덮개(VHS)를 기본으로 켜지 않습니다(`<이름>.overlay = False`). 같이 쓰려면 2번 자리에 `"vhs_crt"`.
-- 나이트비전 화면 글은 `hud_label`(왼쪽 위 글), `rec`(REC 글자), `timer`(숫자 시간), `zoom`([ZOOM] 글)로 하나씩 켜고 끕니다. 글 내용(`hud_text`, `zoom_text`)과 화면 이미지(`hud_image`)는 편집기 세부 속성 "화면 글"에서 고치고 고를 수 있습니다(글 칸, [그림 고르기] 창). `hud_image`에 그림 파일(예: `"gui/nv_frame.png"`)을 적으면 화면에 얹습니다(`hud_image_fit` `"full"` 화면 가득 / `"center"` 가운데, `hud_image_alpha` 진하기, `hud_image_zoom` 크기, `hud_image_rotate` 회전, `hud_image_x`·`hud_image_y` 가운데 기준 자리).
-- 나이트비전 화면 글은 셰이더가 아니라 이 효과가 보일 때만 뜨는 스크린(`nightvision_hud`, `config.overlay_screens`에 저절로 들어감)입니다. 1번이든 2번이든 나이트비전이 보이면 뜹니다.
-
-옮기기: `screen_fx/engine/`을 `.rpyc`까지 지우고 새것을 넣고, 새 설정 파일 일곱 개(`glitch_config.rpy` … `shards_config.rpy`)를 넣습니다. 있던 설정 파일은 그대로 둬도 됩니다.
-
-### 5.0에서 바뀐 점
-
-- **이미지 하나에 거는 효과**: 화면 효과 두 자리와 상관없이 그 이미지에만 씌웁니다. 값을 안 적으면 그 효과의 설정 파일 값. 화면 전체 효과와 겹쳐 쓸 수 있습니다.
-  ```renpy
-  show ghost at screen_fx.image_fx("gameboy")
-  show ghost at screen_fx.image_fx("ascii", strength=0.6)
-  ```
-- **게임 중에 효과 값 바꾸기**: `$ screen_fx.set_values("vhs_crt", warp_amount=2.0)` (`vhs_crt.set(...)`과 같음. 값 없이 부르면 설정대로). 세이브·되감기에 저장됩니다.
-- **셰이더 장면 전환 틀**: `screen_fx.ShaderSwap("셰이더 이름", 시간, u_값=…)`. 셰이더는 `tex0`(옛 장면), `tex1`(새 장면), `u_sfx_swap`(0 → 1), `u_sfx_swap_size`를 받습니다. 이 틀로 만든 전환은 새 효과와 함께 들어옵니다.
-
-### 4.5에서 바뀐 점
-
-- **두 자리는 늘 같이**: 편집기는 `$ screen_fx.shaders("1번", "2번")`만 씁니다. 스크립트도 이렇게 쓰는 걸 권합니다. 예전 줄(`use()`, `clear()`, `set_overlay()`, 대사 괄호 `fx=`, `fx_overlay=`)도 그대로 됩니다.
-  ```renpy
-  $ screen_fx.shaders("ascii", "vhs_crt", transition="fade")   # 전환: "tv", "fade", None(바로), 안 적으면 설정대로
-  $ screen_fx.set_cursor("top")      # 커서: "effect" 1번·2번 다 받음 / "overlay" 2번만 / "top" 안 받음
-  ```
-- 화면 효과 탭 **셰이더가 바뀌는 줄**: 이 원고 파일에서 셰이더가 바뀌는 줄마다 두 자리와 전환을 보여주고 전환을 고릅니다. 한 자리만 바꾸는 예전 줄은 [두 자리로 바꾸기]. 두 자리 값은 파일을 위에서부터 읽어 센 대강의 값입니다(분기, jump는 따지지 않음).
-- [여기에서부터 적용]에 "적용할 때 전환".
-- "처음 상태": 처음 1번, 2번, '설정대로' 전환만. TV 시간 막대, 기다림, 건너뛰기, 미리 보기는 칸에서 뺐습니다(`screen_fx_config.rpy`의 `screen_fx.tv`, `wait`, `skippable`).
-- **커서와 셰이더 '여기에서부터'**: UI Kit 커서/대사 소리 탭 아래. 셰이더 줄과 커서 줄은 같은 줄 위에 있어도 서로 지우지 않습니다.
-- pygaki 원고에서도 저장됩니다(4.20~4.21에서는 막혀 있었음).
-- warp 뒤 셰이더, 커서 상태를 원고대로 맞춤. 고른 줄이 다른 파일에 남아 있으면 지금 줄을 따라감.
-
-### 4.4에서 바뀐 점
-
-- 편집기 "화면 효과" 탭(앱 "인게임 화면 셰이더")의 페이지 고르기 줄(셰이더 고르기 / 아스키 / VHS / 단말기 / 게임보이 / 처음 상태, 전환)을 없앴습니다. 탭을 열면 바로 1번, 2번이고, **고른 효과의 세부 속성(글자 빼기, 기본 설정/프리셋, 막대)이 그 줄 바로 아래**에 나옵니다. 줄 끝 "세부 속성 접기/펴기".
-- "처음 상태, 전환"은 맨 아래 [처음 상태, 전환 펴기]로.
-- **줄 목록에서 줄을 누르면 게임도 그 줄로** 갑니다(지나온 줄이면 되감기, 아니면 게임을 다시 시작해서 그 줄까지 건너뜀. `ui_kit` 3.20의 `goto_line`). 줄 번호 칸도 같음. [ ] 키는 고르기만 합니다.
-- "타이틀 셰이더", "게임 내 메뉴 셰이더" 탭에도 1번, 2번 아래 세부 속성(글자 빼기 없음, 화면 전체라서). 효과 값은 인게임과 같이 씁니다(효과마다 하나). 저장은 그대로 `*_layout.rpy`.
-- 편집 중 효과 값: 화면 효과, 타이틀/메뉴 셰이더 탭을 쓰는 동안은 모든 효과가 편집한 값과 고른 프리셋으로 보입니다.
-
-### 4.3에서 바뀐 점
-
-- **셰이더 두 자리**: 1번(예전 기본 효과 자리)과 2번(예전 덮개 자리) 모두 기본(`"none"`, 아무것도 안 함) / 아스키(`"ascii"`) / VHS(`"vhs_crt"`) / 단말기(`"retro_term"`) / 게임보이(`"gameboy"`) 중 하나. 같은 효과를 두 자리에 고르면 한 번만 씌웁니다.
-  ```renpy
-  $ screen_fx.shaders("ascii", "vhs_crt")     # 1번 아스키 + 2번 VHS
-  $ screen_fx.shaders("gameboy")              # 1번 게임보이, 2번 없음
-  $ screen_fx.shaders("none", "none")         # 전부 셰이더 적용 취소
-  $ screen_fx.use("vhs_crt", overlay="gameboy")   # use()로도 (overlay에 효과 이름)
-  ```
-  예전 줄은 그대로 됩니다: `use("vhs_crt")`(2번을 안 적으면 예전처럼 "없음 + VHS"), `fx=`, `fx_overlay=True/False`.
-- **타이틀 셰이더, 게임 내 메뉴 셰이더**: `screen_fx_config.rpy`의 `screen_fx.title_shaders`, `screen_fx.menu_shaders` (기본 `("none", "none")`). 타이틀과 타이틀에서 연 화면, 게임 중 ESC 메뉴와 거기서 연 화면에서는 인게임 셰이더 대신 이 두 자리를 화면 전체(글자 포함)에 씌웁니다. 메뉴가 열려 있는 동안 뒤 게임 화면도 메뉴 셰이더로 보입니다. VHS의 `vhs_crt.scope`, `vhs_crt.auto`는 더 쓰지 않습니다.
-- 편집기 "화면 효과" 탭 (9-1, 9-4):
-  - 첫 페이지 **"셰이더 고르기"**: 1번, 2번 줄에서 고르면 화면에 바로 보입니다. 두 줄 끝의 "전부 셰이더 적용 취소"는 둘 다 "기본"으로.
-  - 줄 목록 왼쪽 **세모(▶)**는 게임의 지금 줄입니다. 고른 줄(분홍)은 세모를 따라갑니다. 다른 줄을 누르면 거기서 멈추고, 세모를 두 번 누르면 다시 지금 줄로 가서 따라갑니다.
-  - **[여기에서부터 적용]**: 고른 줄 바로 위에 `$ screen_fx.shaders("…", "…")`를 넣습니다(Ctrl+S로 원고에). 같은 줄에 다시 적용하면 바꿔 씁니다. [이 줄 위의 셰이더 줄 지우기].
-  - 효과 페이지(아스키, VHS, 단말기, 게임보이): "고칠 대상" → **"세부 속성"**. 켜기/범위, 덮개 줄, "이 대사부터/이 줄부터 이 효과", "덮개 켜기", "이 대상 되돌리기", "모두 버리기" 버튼은 뺐습니다.
-  - "기본 효과, 전환" → **"처음 상태, 전환"**: 게임을 시작할 때 1번, 2번(`screen_fx.base`, `screen_fx.overlay`)과 전환.
-- 편집기 탭 **"타이틀 셰이더"**(타이틀에서), **"게임 내 메뉴 셰이더"**(ESC 메뉴를 연 채로): 1번, 2번. 저장하면 `screen_fx_layout.rpy`의 `title_shaders`, `menu_shaders`.
-- 같이 쓰는 `ui_kit`은 3.19여야 pygaki 앱 목록에 "└ 타이틀 셰이더", "└ 게임 내 메뉴 셰이더"가 나옵니다(게임 안 편집기에서는 3.x 어느 판이든 됨).
-
-### 4.2에서 바뀐 점
-
-- **마우스 커서를 화면 효과 안에 그립니다.** (5-3) UI Kit(3.1 이상)의 소프트웨어 커서를 쓸 때.
-  - 기본은 **효과까지**(`"effect"`): 커서도 기본 효과와 VHS 덮개를 같이 받습니다. ASCII면 커서도 글자로, 게임보이면 4색 점으로, 덮개의 색 번짐과 휘어짐도 같이.
-  - **덮개 밑**(`"overlay"`): 덮개(VHS)만 받고 기본 효과는 안 받음. **효과 안 받음**(`"top"`): 4.1까지처럼 맨 위에 깨끗하게.
-  - 셰이더처럼 **원고의 구간마다** 고릅니다: 설정 `screen_fx.cursor`, 스크립트 `$ screen_fx.set_cursor("top")`, `use(…, cursor="overlay")`, 대사 괄호 `fx_cursor="top"`. 다시 바꿀 때까지 유지되고 세이브·되감기에 저장됩니다.
-  - 편집기: 대사 탭과 "줄에 넣기" 페이지에 **"커서:" 줄**이 생겼습니다. (9-2, 9-4)
-  - 커서가 화면과 같이 휘어서, 가장자리에서 보이는 자리와 눌리는 자리가 거의 맞습니다.
-- 고친 파일: `engine/screen_fx.rpy`, `editor/editor_fx.rpy`, `screen_fx_config.rpy`(`screen_fx.cursor`), `README.md`.
-- 같이 쓰는 `ui_kit`은 **3.1**이어야 커서가 효과 안으로 들어갑니다. (3.0 이하와 같이 쓰면 커서는 4.1처럼 맨 위)
-
-### 4.1에서 바뀐 점
-
-- **"화면 효과" 탭에 "줄에 넣기" 페이지가 생겼습니다.** (9-4)
-  - 대사가 아닌 줄도 고를 수 있습니다: `scene`, `show`, `with`, `$ …`, `play` 등. 고른 줄 **바로 위에** `$ screen_fx.use("ascii")` 같은 줄을 넣어서, 그 줄부터 효과가 바뀌게 합니다.
-  - 줄 고르기: [< []] [[] >] (한 줄씩), 줄 번호 입력, [지금 줄로], [L 목록 펴기] (근처 줄 목록에서 누르기).
-  - 고르는 것: 화면 효과, 덮개(VHS) 그대로/켬/끔, 덮개 휘어짐, 전환. Ctrl+S로 원고에 들어갑니다.
-  - 같은 줄에 다시 저장하면 앞에 넣은 효과 줄을 **바꿔 씁니다**(쌓이지 않음). [이 줄 위의 효과 줄 지우기]로 넣은 줄을 지웁니다.
-  - 효과 페이지에 **"이 줄부터 이 효과"** 버튼이 더해졌습니다(VHS 덮개 페이지는 "이 줄부터 덮개 켜기"). 대사가 떠 있지 않아도 되고, 누르면 지금 줄과 그 효과가 골라진 채로 "줄에 넣기" 페이지로 넘어갑니다. 예전 "이 대사부터 이 효과"(대사 괄호에 넣기)도 그대로 있습니다.
-- 대사 괄호 `fx=`(대사 탭)는 그대로 씁니다. 대사 줄이면 괄호, 다른 줄이면 "줄에 넣기"를 쓰세요.
-- 고친 파일: `engine/screen_fx.rpy`(버전), `editor/editor_fx.rpy`, `README.md`.
-- 같이 쓰는 `ui_kit`은 **3.0**이어야 "줄에 넣기"가 동작합니다(원고에 줄을 넣는 기능이 3.0에 생김). 2.9 이하와 같이 쓰면 줄 목록이 비고, 저장해도 원고에 들어가지 않습니다.
-
-### 4.0에서 바뀐 점
-
-예전 버전과 쓰는 법이 달라진 곳이 있어서 4.0입니다. (옮기는 방법은 2장 "3.4에서 4.0으로 옮기기")
-
-- **화면 = 기본 효과 + VHS 덮개.** (3장, 5장)
-  - 기본 효과 목록: 없음 / ASCII / 레트로 터미널 / 게임보이. **VHS는 기본 효과 목록에서 빠지고 덮개 전용**이 됐습니다.
-  - 덮개는 VHS 하나라 **켬 / 끔만** 고릅니다. `use(…, overlay=True / False)`, `set_overlay(True / False)`, 대사 괄호 `fx_overlay=True / False`, 설정 `screen_fx.overlay = True / False`.
-  - 배포 설정이 "기본 효과 VHS, 덮개 끔"에서 **"기본 효과 없음, 덮개 켬"**으로 바뀌었습니다. 보이는 모습은 같습니다.
-  - 효과마다 덮개를 기본으로 켤지 정합니다: `<이름>.overlay`. **레트로 터미널은 기본으로 끔**(자체 곡면 CRT가 있어서 두 번 휘지 않게). ASCII, 게임보이는 켬.
-- **덮개 왜곡 정도**: VHS 설정의 휘어짐(`warp_amount`), 화면 밀림(`distort_intensity`), 색 번짐(`aberration`) 등. 설정 파일, 편집기 막대, `vhs_crt.set()`에 더해 **`screen_fx.set_warp()`와 대사 괄호 `fx_warp=`** 가 생겼습니다. (5장)
-- **흑백(`mono`) 효과를 지웠습니다.** 새 효과를 만들 때 복사하던 견본은 12장에 코드로 들어 있습니다.
-- 편집기 "화면 효과" 탭: 효과 페이지에 **"이 대사부터 이 효과"** 버튼(대사 탭에 넘겨줌, Ctrl+S로 원고에 저장), "게임의 지금 장면" 안내, 효과마다 덮개 켬/끔 줄. "기본 효과, 전환" 페이지의 덮개 줄은 켬/끔. (9-1)
-- 편집기 대사 탭: 덮개 줄이 **그대로 / 켬 / 끔**, **덮개 휘어짐** 줄이 새로 생겼습니다. 두 줄은 효과를 바꾸지 않는 대사에서도 고를 수 있습니다. (9-2)
-- **예전 원고도 동작합니다**: `use("vhs_crt")`, `fx="vhs_crt"`, `screen_fx.base = "vhs_crt"`는 "효과 없음 + 덮개 켬"으로, `overlay="vhs_crt"`는 `True`, `overlay=None`은 `False`로 읽습니다. 다만 `use("mono")`, `fx="mono"`는 효과가 없어서 오류가 납니다(지우거나 다른 효과로 바꾸기). 흑백을 쓰던 세이브는 불러올 때 기본 효과로 돌아갑니다.
-- 같이 쓰는 `ui_kit`은 2.9여야 대사 탭의 덮개/휘어짐 줄과 "이 대사부터 이 효과" 버튼이 동작합니다.
-
-### 3.4에서 바뀐 점
-
-- **편집기를 연 동안에도 화면 효과가 보입니다.** 3.3까지는 "화면 효과" 탭이 아닌 탭(타이틀 메뉴, 선택지, 대사, 이미지/영상 …)을 쓰는 동안 효과를 잠시 껐습니다. 이제는 효과를 켠 채로 편집하고, 편집기 패널은 그 위에 깨끗하게 보입니다. (9-3)
-  - 편집 중에 **V** 키로 켜고 끕니다. 대사 탭의 "화면 효과 보기(V)" 버튼도 같은 값입니다.
-  - 기본값은 `screen_fx_config.rpy`의 `define screen_fx.editor_preview = True`. 3.3처럼 끄고 편집하려면 `False`.
-  - 타이틀 일렁임도 같은 값을 따릅니다.
-- 고친 파일: `engine/screen_fx.rpy`, `screen_fx_config.rpy`(값 하나 추가), `README.md`. 같이 쓰는 `ui_kit`은 2.8이어야 V 키와 안내 줄이 생깁니다. (`ui_kit` 2.7 이하와 같이 써도 오류는 나지 않고, 기본값대로 효과가 켜진 채 편집됩니다)
-
-### 3.3에서 바뀐 점
-
-- **게임보이(`gameboy`) 효과 추가**: 화면을 큰 점으로 나누고 4색(또는 2색)으로만 칠합니다. 표현 방식은 **디더링**(`"dither"`, 색 사이 밝기를 점 무늬로 섞음, 4×4 / 8×8 무늬)과 **픽셀화**(`"pixel"`, 무늬 없이 딱 끊음) 중에 고릅니다. 점 크기, 4가지 색, 밝기·대비·감마, 점 사이 틈, 점 그림자, LCD 얼룩. 프리셋 `dmg`, `green`, `pocket`, `light`, `bw`, `blood`, `1bit`, `clean`. (8장)
-- **글자는 색만 입히기**: 게임보이는 빼지 않은 글자 층(대사·선택지·메뉴)에 4색만 입히고 점으로 쪼개지 않아서, 작은 대사도 읽힙니다(`text_pixel = False`, 기본). 글자까지 점으로 쪼개려면 `True`.
-  - 그래서 글자를 하나도 안 빼도 층마다 씌우는 효과를 만들 수 있게 됐습니다(`ShaderEffect.layered()`, 유니폼 `u_sfx_text`). 다른 효과는 지금과 똑같이 동작합니다. (12장)
-
-### 3.2에서 바뀐 점
-
-- **글자 빼기(exclude)**: 효과마다 `"say"`(대사·이름), `"choice"`(선택지), `"screens"`(메뉴·화면) 중 효과를 씌우지 않을 글자를 골라서 뺍니다. 기본은 아무것도 안 뺌(글자까지 전부). ASCII만 글자 전부 빼기가 기본. (3-8)
-  - 그래서 대사창은 `sfx_say` 층, 선택지는 `sfx_choice` 층에 띄웁니다. 렌파이 기본처럼 두려면 `screen_fx.split_text_layers = False`. (3-8)
-  - 3.1의 `target = "screen"`/`"scene"`, `use(…, target=…)`, 대사 괄호 `fx_target=`도 그대로 됩니다. `"scene"`은 글자 전부 빼기와 같습니다.
-- **레트로 터미널(`retro_term`) 효과 추가**: 형광체 색·바탕색, 빛 번짐, 주사선/픽셀 격자/RGB 서브픽셀, 정적 노이즈, 깜빡임, 지나가는 밝은 줄, RGB 어긋남, 떨림. **자체 곡면 CRT**(휘어짐·가장자리 어둡게·둥근 화면 테두리)와 **자체 VHS**(흐르는 띠·수평 흔들림)를 따로 켜고 끕니다. 프리셋 `green`, `blue`, `amber`, `white`, `flat`, `broken`. (7장)
-- VHS 셰이더가 반투명한 그림(대사창 등)에 씌워질 때 두 번 어두워지지 않게 고쳤습니다. 화면 전체에 씌울 때 모습은 그대로입니다.
-- 편집기: "화면 효과" 탭의 **적용 대상** 줄이 **글자 빼기** 버튼(대사와 이름 / 선택지 / 메뉴와 화면 / 안 뺌 / 전부 뺌)으로, 대사 탭의 **대상** 줄도 **글자 빼기** 줄로 바뀌었습니다.
-
-### 3.1에서 바뀐 점
-
-- **ASCII 효과(`ascii`) 추가**: 글자 하나가 픽셀 하나. 칸 크기·가로세로 비율·선명하게(8의 배수), 글자 목록, 색 입히기(한 가지 색 / 원래 색 / 16색), 바탕에 원래 그림 비치기. 프리셋 `terminal`, `amber`, `dungeon`, `blocks`, `big`, `glow`. (6장)
-- **덮개(overlay)**: 고른 효과 위에 VHS를 한 번 더 씌웁니다. 기본은 꺼짐. `use("ascii", overlay="vhs_crt")`, 대사 괄호 `fx_overlay="vhs_crt"`, `screen_fx.set_overlay()`, 설정 `screen_fx.overlay`. (3-7)
-- **적용 대상(target)**: 효과마다 `"screen"`(화면 전체) 또는 `"scene"`(장면만: 대사·이름·선택지는 원래대로)을 고릅니다. ASCII는 기본이 장면만, VHS·흑백은 기본이 화면 전체. (3-8)
-- **스크린 안의 그림**: `add "map.png" at screen_fx.scene`으로 스크린에 넣은 그림에도 "장면만" 효과가 씌워집니다. UI Kit 타이틀 배경과 Splash의 배경·로고에는 자동으로 씌워집니다. (3-9)
-- 편집기: "화면 효과" 탭에 **적용 대상** 줄, "전환 설정"에 **기본 덮개** 줄, 대사 탭에 **덮개·대상** 줄이 생겼습니다.
-- 3.0의 설정 파일·세이브는 그대로 쓸 수 있습니다. 새 파일은 `ascii_config.rpy`, `engine/ascii.rpy`, `fonts/` 폴더입니다.
-
-### 3.0에서 바뀐 점
-
-- **효과 바꾸기**: `$ screen_fx.use("mono")`로 바꾸면 `$ screen_fx.clear()`까지 유지됩니다. 지금 켜진 효과는 세이브·되감기에 같이 저장됩니다. (3장)
-- **대사 줄 괄호**: `e "…" (fx="mono")` 처럼 그 대사부터 효과를 바꿀 수 있습니다. 편집기 대사 탭에서 고르면 원고에 바로 저장됩니다. (3-2, 9-2)
-- **전환**: TV 꺼짐·켜짐(기본), 서서히, 바로. 시간·섬광·지직거림·소리를 설정 파일과 편집기에서 고칩니다. (4장)
-- **흑백(`mono`) 효과 추가**. 새 셰이더를 넣을 때 이 파일을 복사해서 씁니다. (12장)
-- 편집기의 "VHS 효과" 탭은 **"화면 효과" 탭**으로 바뀌었습니다. 위쪽 버튼으로 VHS / 흑백 / 전환 설정을 고릅니다.
-- `vhs_crt_config.rpy`, `vhs_crt_layout.rpy`, `watermorph_config.rpy`는 **그대로 쓸 수 있습니다.** `vhs_crt.set()`, `preset()`, `reset()`, `off()`, `on()`, `Toggle()`, `camera at vhs_crt.effect`도 그대로입니다.
-- 편집기 탭은 `ui_kit` 2.3 이상이 필요합니다. (2.2 이하에서는 Ctrl+S 한 번에 파일 하나씩 저장됩니다)
-- 2.x에서 만든 세이브도 그대로 불러올 수 있습니다. 세이브에 든 `vhs_crt.set()` 값은 불러올 때 새 저장 위치로 옮겨지고, `camera at vhs_crt.effect`를 쓴 세이브도 열립니다.
-
----
-
 ## 1. 파일 구성
 
 ```
@@ -291,7 +88,7 @@ game/screen_fx/
 │       relief.rpy, gradmap.rpy, rings.rpy, camcorder.rpy   5.7에 더한 셰이더
 │       macroblock.rpy                                     5.8에 더한 셰이더 (블록 깨짐)
 ├── editor/
-│   └── editor_fx.rpy            UI Kit 편집기 탭 (UI Kit이 없으면 아무것도 안 함)
+│   └── editor_fx.rpy            pygaki 게임 안 편집 화면 탭 (pygaki이 없으면 아무것도 안 함)
 ├── fonts/
 │   ├── neodgm.ttf               ASCII 효과의 기본 글꼴 (Neo둥근모, SIL OFL 1.1)
 │   └── neodgm_OFL.txt           글꼴 라이선스 (글꼴과 함께 배포해야 함)
@@ -305,7 +102,7 @@ game/screen_fx/
 `screen_fx` 폴더를 프로젝트의 `game` 폴더 안에 넣으면 끝입니다. **원본 파일(`screens.rpy`, `options.rpy`, `script.rpy`)은 고치지 않아도 됩니다.** 게임을 실행하면 바로 VHS 효과가 씌워집니다.
 
 - 효과마다 설정 파일의 `enabled`로 따로 끌 수 있고, 끄면 효과가 없는 화면과 똑같습니다.
-- 렌파이 기본 스크린을 대신하지 않고, 화면에 씌우는 방식도 렌파이의 `config.layer_transforms`에 **추가만** 합니다. 게임에서 쓰는 `camera at ...`, `show layer ... at ...`, 다른 플러그인과 같이 써도 서로 지우지 않습니다.
+- 렌파이 기본 스크린을 대신하지 않고, 화면에 씌우는 방식도 렌파이의 `config.layer_transforms`에 **추가만** 합니다. 게임에서 쓰는 `camera at...`, `show layer... at...`, 다른 플러그인과 같이 써도 서로 지우지 않습니다.
 - 대사 줄 괄호의 `fx=`를 받기 위해 `config.say_arguments_callback`에 함수를 겁니다. 이미 다른 함수가 걸려 있으면 그 함수에 이어서 넘겨줍니다. (`ui_kit` 대사 스타일과 같이 써도 됩니다)
 - 다른 CRT 셰이더를 이미 쓰고 있다면 효과가 두 번 겹칩니다. 하나만 남기세요.
 
@@ -624,8 +421,8 @@ screen cg_view(img):
 
 | 어디 | 무엇 | 필요한 것 |
 |---|---|---|
-| 타이틀 화면 | 배경 그림(`gui.main_menu_background`) | `ui_kit` 2.4 이상 |
-| Splash 페이지 | 배경과 로고 그림 | `splash` 1.1 이상 |
+| 타이틀 화면 | 배경 그림(`gui.main_menu_background`) | pygaki 플러그인 |
+| Splash 페이지 | 배경과 로고 그림 | pygaki 플러그인 |
 
 - 타이틀은 게임이 시작되기 전이라 보통 설정대로(배포 설정은 효과 없음 + VHS 덮개, 아무것도 안 뺌) 보입니다. 덮개에서 `"screens"`를 빼면(`define vhs_crt.exclude = ("screens",)`) 타이틀 메뉴 글자는 선명하고 배경에만 VHS가 걸립니다.
 
@@ -767,7 +564,7 @@ e "다시 원래대로." (fx_warp="default")
 
 ### 5-3. 마우스 커서 자리 (4.2)
 
-UI Kit의 소프트웨어 커서(`custom_ui.cursor = True`, `cursor_mode = "software"`)를 화면 효과의 어디에 그릴지 고릅니다.
+pygaki의 소프트웨어 커서(`custom_ui.cursor = True`, `cursor_mode = "software"`)를 화면 효과의 어디에 그릴지 고릅니다.
 
 ```
 [게임 화면] → [커서 "effect"] → 기본 효과(ASCII 등) → [커서 "overlay"] → 덮개(VHS) → 화면   [커서 "top"]
@@ -804,7 +601,7 @@ if screen_fx.current_cursor() == "top":
 - **편집기(Shift+M)를 연 동안에는 늘 맨 위**에 그립니다. (효과 안에 그리면 편집기 패널 뒤로 숨어서)
 - 커서도 화면과 같이 휘어서, 가장자리에서 보이는 자리와 눌리는 자리가 거의 맞습니다.
 - 글자 빼기(3-8)를 켠 효과에서도 똑같이 동작합니다. (커서는 뺀 글자와 상관없이 고른 자리대로)
-- 운영체제 커서(`custom_ui.cursor_mode = "hardware"`), 환경설정의 "시스템 커서", UI Kit이 없거나 커서를 안 쓸 때는 이 값과 상관없이 운영체제 커서가 맨 위에 보입니다.
+- 운영체제 커서(`custom_ui.cursor_mode = "hardware"`), 환경설정의 "시스템 커서", pygaki이 없거나 커서를 안 쓸 때는 이 값과 상관없이 운영체제 커서가 맨 위에 보입니다.
 
 ---
 
@@ -854,7 +651,7 @@ label dungeon:
 | `cell` | `16` | **글자 칸 높이(픽셀)**. 작을수록 촘촘해서 그림이 잘 보이고, 클수록 글자가 크게 보임. `8` 아주 촘촘, `16` 기본, `32` 큼직, `48` 이상은 그림이 무너짐 |
 | `aspect` | `0.5` | **칸 가로 ÷ 세로**. `0.5` 반각 글자 모양(8×16, 텍스트 화면), `1.0` 정사각형 칸(타일 느낌) |
 | `crisp` | `True` | **선명하게**: 칸 높이를 8의 배수로 맞춤. 16·32·48처럼 16의 배수에서 Neo둥근모가 계단 모양 그대로 가장 또렷함. `False`면 적은 크기 그대로(어중간한 크기에서는 조금 흐려짐) |
-| `chars` | `" .:-=+*#%@"` | 글자 목록. **어두운 칸 → 밝은 칸 순서**(맨 앞이 가장 어두운 곳). 글자 수는 자유 |
+| `chars` | `".:-=+*#%@"` | 글자 목록. **어두운 칸 → 밝은 칸 순서**(맨 앞이 가장 어두운 곳). 글자 수는 자유 |
 | `color_mode` | `"color"` | `"mono"` 한 가지 색(`fg`), `"color"` 칸의 원래 색, `"palette16"` 옛날 PC 16색 중 가까운 색 |
 | `fg` | `"#c8c8c8"` | `"mono"`일 때 글자 색. `"#33ff66"` 녹색 단말기, `"#ffb000"` 호박색 |
 | `bg` | `"#000000"` | 바탕색 (글자 사이 빈 곳) |
@@ -867,13 +664,13 @@ label dungeon:
 글자 목록 예 (편집기에서 버튼으로 고를 수 있는 것):
 
 ```renpy
-"chars": " .:-=+*#%@",       # 기본
-"chars": " .,:;ox%#@",       # 던전풍
-"chars": " .'^\":;!|/7xX#",  # 가는 선 (따옴표 "는 \"로 적음)
-"chars": " .oO0@",           # 동그라미
+"chars": ".:-=+*#%@",       # 기본
+"chars": ".,:;ox%#@",       # 던전풍
+"chars": ".'^\":;!|/7xX#",  # 가는 선 (따옴표 "는 \"로 적음)
+"chars": ".oO0@",           # 동그라미
 "chars": " ░▒▓█",            # 블록 (점이 아니라 면으로 채워짐)
 "chars": "01",               # 0과 1 (두 단계)
-"chars": " .·:∴※#",          # 직접 만들기: 글꼴에 있는 글자면 한글·기호도 됨
+"chars": ".·:∴※#",          # 직접 만들기: 글꼴에 있는 글자면 한글·기호도 됨
 ```
 
 칸 크기 예:
@@ -1205,7 +1002,7 @@ e "삐빅." (fx="gameboy", font="screen_fx/fonts/neodgm.ttf", size=32)    # 이 
 
 ---
 
-## 9. 편집기로 고치기 (UI Kit이 있을 때)
+## 9. 편집기로 고치기 (pygaki이 있을 때)
 
 개발 모드에서 Shift+M으로 편집기를 열고 **T**로 탭을 넘깁니다.
 
@@ -1270,7 +1067,7 @@ e "어? 화면이…" (fx_cursor="overlay")
 
 `*_layout.rpy`의 값은 설정 파일의 같은 값보다 **우선**합니다. 설정 파일로 옮기고 싶으면 Ctrl+C로 복사해 붙여넣고 `*_layout.rpy`를 지우세요.
 
-> 편집기 탭은 `ui_kit` 2.3 이상에서 동작합니다. 글자 빼기 줄은 2.5 이상, 덮개 켬/끔과 휘어짐 줄은 2.9 이상, "줄에 넣기"와 "이 줄부터 이 효과" 버튼은 3.0 이상.
+> 편집기 탭은 pygaki 플러그인에서 동작합니다. 글자 빼기 줄은 2.5 이상, 덮개 켬/끔과 휘어짐 줄은 2.9 이상, "줄에 넣기"와 "이 줄부터 이 효과" 버튼은 3.0 이상.
 
 ### 9-3. 편집 중에도 효과 보기 (3.4)
 
@@ -1370,7 +1167,7 @@ label start:
 - 렌파이는 고친 줄을 같은 줄로 알아보지 못해서, 저장하면 **그 앞의 대사(저장 지점)부터** 다시 나옵니다.
 - 원고 저장 전에 원래 파일은 `game/ui_kit_backup/`에 복사됩니다. 잘못 넣었으면 거기서 되돌리세요.
 - `menu`, `if` 안쪽 줄에도 넣을 수 있습니다(그 줄과 같은 들여쓰기로 들어감). 선택지 줄(`"도망친다":`)은 목록에 없습니다. 선택지를 고른 뒤에 바꾸려면 그 안쪽 첫 줄을 고르세요.
-- 이 기능은 `ui_kit` 3.0의 원고 쓰기 도구(`script_edit`)를 씁니다. 2.9 이하와 같이 쓰면 줄 목록이 비고, "이 줄부터 이 효과"를 누르면 "원고 쓰기 도구(UI Kit 3.0 이상)가 없습니다."가 나옵니다.
+- 이 기능은 pygaki 플러그인의 원고 쓰기 도구(`script_edit`)를 씁니다. 2.9 이하와 같이 쓰면 줄 목록이 비고, "이 줄부터 이 효과"를 누르면 "원고 쓰기 도구가 없습니다."가 나옵니다.
 
 ---
 
@@ -1537,7 +1334,7 @@ vbox:
 `game/screen_fx/engine/mono.rpy` 로 저장 (엔진):
 
 ```renpy
-## Screen FX — 흑백(mono) 효과 엔진 · 새 효과를 만들 때 복사해서 쓰는 견본
+## 화면 효과 — 흑백(mono) 효과 엔진 · 새 효과를 만들 때 복사해서 쓰는 견본
 ##
 ## 이 파일은 엔진입니다. 고치지 말고 mono_config.rpy에서 설정하세요.
 ##
@@ -1583,14 +1380,14 @@ init -100 python in mono:
             ("tint", "색 입히기", "color"),
             ("brightness", "밝기", 0.2, 2.0, 0.05, 2),
             ("contrast", "대비", 0.2, 3.0, 0.05, 2),
-            )),
+)),
         ("필름", (
             ("grain", "입자(노이즈)", 0.0, 0.5, 0.01, 2),
             ("grain_size", "입자 크기 (픽셀)", 1.0, 6.0, 0.5, 1),
             ("flicker", "밝기 깜빡임", 0.0, 0.3, 0.01, 2),
             ("vignette", "가장자리 어둡게", 0.0, 1.0, 0.01, 2),
-            )),
-        )
+)),
+)
 
     SHADER = "mono.effect"
 
@@ -1626,7 +1423,7 @@ init -100 python in mono:
     _FRAGMENT = """
         vec4 mono_orig = texture2D(tex0, v_tex_coord, u_lod_bias);
         float mono_a = mono_orig.a;
-        vec3 mono_col = (mono_a > 0.0) ? mono_orig.rgb / mono_a : vec3(0.0);
+        vec3 mono_col = (mono_a > 0.0) ? mono_orig.rgb / mono_a: vec3(0.0);
 
         // 밝기만 남기기 (사람 눈 기준 무게)
         float mono_g = dot(mono_col, vec3(0.299, 0.587, 0.114));
@@ -1672,7 +1469,7 @@ init -100 python in mono:
 
 ```renpy
 ################################################################################
-## Screen FX — 흑백(mono) 효과 설정
+## 화면 효과 — 흑백(mono) 효과 설정
 ##
 ## 여기만 고치면 됩니다. 적지 않은 값은 엔진의 기본값을 따릅니다.
 ##
@@ -1682,7 +1479,7 @@ init -100 python in mono:
 ##     e "그날의 기억." (fx="mono")   # 대사 줄 괄호로
 ##     $ screen_fx.use("mono", overlay=False)   # 흑백만 (덮개 끔)
 ##
-## UI Kit 편집기(Shift+M → T로 "화면 효과" 탭 → "흑백" 버튼)로 바꿔 저장하면
+## pygaki 게임 안 편집 화면(Shift+M → T로 "화면 효과" 탭 → "흑백" 버튼)로 바꿔 저장하면
 ## mono_layout.rpy가 만들어지고, 그 파일의 값이 여기 값보다 우선합니다.
 ################################################################################
 
@@ -1775,7 +1572,7 @@ glitch_config.rpy       ← 12-1의 설정 코드
 |---|---|
 | 이름공간 | `init -100 python in glitch:`, `define glitch.settings` … |
 | 셰이더 이름 | `SHADER = "glitch.effect"` |
-| 유니폼 | `uniform float u_glitch_strength;` … , `uniform_prefix="u_glitch_"` |
+| 유니폼 | `uniform float u_glitch_strength;` …, `uniform_prefix="u_glitch_"` |
 | 효과 등록 | `ShaderEffect("glitch", "글리치", SHADER, PARAMS, GROUPS, uniform_prefix="u_glitch_")` |
 | 버튼 순서 | `_fx.order = 50` (VHS 0, ASCII 20, 레트로 터미널 30, 게임보이 40. 작을수록 편집기 버튼이 앞) |
 | 덮개 | `define glitch.overlay = True` (이 효과를 쓰는 동안 VHS 덮개를 기본으로 켤지) |
@@ -1794,15 +1591,15 @@ glitch_config.rpy       ← 12-1의 설정 코드
         "color_split": ("bool", True),
     }
 
-    ## 편집기 막대: (묶음 이름, ( (값 이름, 표시, 최소, 최대, 간격, 소수 자리) 또는 (값 이름, 표시, "bool"/"color") ))
+    ## 편집기 막대: (묶음 이름, ( (값 이름, 표시, 최소, 최대, 간격, 소수 자리) 또는 (값 이름, 표시, "bool"/"color")))
     GROUPS = (
         ("기본", (
             ("strength", "전체 세기", 0.0, 1.0, 0.01, 2),
             ("amount", "찢어짐 세기", 0.0, 1.0, 0.01, 2),
             ("speed", "속도", 0.0, 10.0, 0.1, 1),
             ("color_split", "색 갈라짐", "bool"),
-            )),
-        )
+)),
+)
 ```
 
 셰이더(`_VARIABLES`, `_FUNCTIONS`, `_FRAGMENT`) 규칙:
@@ -1886,8 +1683,8 @@ $ glitch.preset("heavy", duration=0.3)    # 값 바꾸기
 | 글자가 읽기 어려움 | `pixelate = False`, `aberration`·`distort_intensity`를 낮추기, 또는 `camera at vhs_crt.effect`로 대사창 제외 |
 | 이미지에 씌웠더니 검은 테두리 | `clip_warp = True` |
 | 설정을 고쳤는데 그대로 | `*_layout.rpy`가 있는지 (편집기 값이 우선) |
-| 편집기에 "화면 효과" 탭이 없음 | `ui_kit` 2.3 이상이 있는지, T로 탭을 넘겼는지 |
-| 대사 탭에 "화면 효과" 줄이 없음 | `ui_kit` 2.3 이상과 `screen_fx` 3.0 이상이 같이 있는지 (덮개·대상 줄은 2.4·3.1 이상) |
+| 편집기에 "화면 효과" 탭이 없음 | pygaki 플러그인이 있는지, T로 탭을 넘겼는지 |
+| 대사 탭에 "화면 효과" 줄이 없음 | pygaki 플러그인과 pygaki 플러그인이 같이 있는지 (덮개·대상 줄은 2.4·3.1 이상) |
 | ASCII에서 대사가 안 읽힘 | `ascii.exclude`에 `"say"`가 있는지, `use(…, exclude=())`나 `fx_exclude=()`를 쓰지 않았는지 |
 | 글자를 뺐는데 그대로 효과가 걸림 | `split_text_layers = False`인지(그러면 전부 빼기만 됨), 다른 코드가 `config.say_layer`를 바꿨는지, 하나만 적을 때 쉼표를 빠뜨리지 않았는지(`("say")`가 아니라 `("say",)`) |
 | 플러그인을 넣은 뒤 다른 코드가 대사창을 못 찾음 | 그 코드가 `layer="screens"`로 대사창을 찾고 있음. `define screen_fx.split_text_layers = False` |

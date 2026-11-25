@@ -1,4 +1,4 @@
-<!-- 원본: bundle/guide/parts/overview.md @ 07c20b2a8c -->
+<!-- 원본: bundle/guide/parts/overview.md @ e65e7a54a9 -->
 # At a glance: where docs and files are
 
 What is where in the bundle you downloaded, in a game project you made, and in the repository. Look here when you wonder "can I delete this file?" or "where is my work saved?".
@@ -6,7 +6,7 @@ What is where in the bundle you downloaded, in a game project you made, and in t
 ## Where your work is saved
 
 | What | Where | Good to know |
-| --- | --- | --- |
+| --- | --- |
 | Script (the source) | `ProjectName.flow.json` at the top of the project folder | Saved automatically on every change. **This is the source**, so always include it in backups. It is not included in the game's release build |
 | Exported script | `game/script_flow.rpy` | The result made from the script. Exporting again overwrites it, so don't edit this file directly |
 | Snapshots (version list) | inside the pygaki app on this computer | Kept automatically every 5 minutes when something changed, on export, and before importing (the latest 30 automatic snapshots). They don't move to other computers |
@@ -87,16 +87,16 @@ The repository's documents are in Korean. The Japanese and English versions of t
 
 ## Versions so far
 
-| Version | Plugins | Highlights |
-| --- | --- | --- |
-| v1.0 | 4.13 | first bundle: Ren'Py SDK + plugins + launcher [pygaki로 편집] + pygaki app |
-| v1.1 | 4.22 | app renamed to pygaki, app [Script]·[GUI], two shader slots (1 + 2) and [Apply from here], lines that change shaders and per-line transitions, cursor and click-to-continue image folders, title and ESC menu decoration, splash editing |
-| v1.2 | 4.23 | edit the splash on screen (drag, edit text in place, add pages), effects on a single image, tag box (bold, color, pause, speed), development files left out of the bundle |
-| v1.3 | 5.0 | seven new screen shaders (glitch, jitter, halftone, hologram, night vision, etc.), eleven text effects, text boxes (speech bubble, rounded frame), the in-game editor's "UI text" tab, Korean common text |
-| v1.4 | 5.1 | conditions and flags in scripts, copy, paste and duplicate boxes, handles on choice and condition branches (drag to reorder, delete), the effects folder and twelve image transitions, shader transitions (pixel sort, datamosh, TV static, etc.), nine more screen shaders (ripple, old film, fisheye, old camcorder, etc.), more text effects (speech bubble, karaoke, box behind, droplets, etc.), missing effects fall back to defaults instead of stopping, tag box (cards, sliders, sample tooltips), ruby, `{clear}`, speed as "characters per second", app [Effects]·[Shaders] galleries and hiding (hidden ones go to the bottom), pygaki as a desktop app only, this HTML guide |
-| v1.5 | 5.2 | language button (Japanese, English), [Screen] tab and calling screens, voice card, find and replace, following flags, music and sound details, pause and shake lines, front/behind for shown images, choice questions, image name checks, [⇔ Beside game], shader block corruption, VHS worn tape |
-| v1.6 | 5.3 | Edit shortcuts (change each function's key by pressing it in the game window, a warning on overlaps, added to the controls help list automatically), the splash controls guide follows the shortcut table, Japanese and English guides, removed the [⇔ Beside game] button (the automatic move in settings stays) |
-| v1.7 | 5.4 | Ren'Py 8.6.1 support, flag looks (checkbox, radio, input box, part customization), flag input and answer input (free answer), flag values in dialogue, flags kept after endings, linked text boxes and corner warp, image effects vibrate and spring in, per-label HUDs, the scenes and characters tree, the condition panel, transparent video maker, [Fonts] screen |
-| v1.8 | 5.5 | three bubbles around the box being edited (dialogue, font, flow) and done/cancel drops, HUD voice glow, retries and hints for answer input, icons (window, Windows exe), the bend wave image effect |
+| Version | Highlights |
+| --- | --- |
+| v1.0 | first bundle: Ren'Py SDK + plugins + launcher [pygaki로 편집] + pygaki app |
+| v1.1 | app renamed to pygaki, app [Script]·[GUI], two shader slots (1 + 2) and [Apply from here], lines that change shaders and per-line transitions, cursor and click-to-continue image folders, title and ESC menu decoration, splash editing |
+| v1.2 | edit the splash on screen (drag, edit text in place, add pages), effects on a single image, tag box (bold, color, pause, speed), development files left out of the bundle |
+| v1.3 | seven new screen shaders (glitch, jitter, halftone, hologram, night vision, etc.), eleven text effects, text boxes (speech bubble, rounded frame), the in-game editor's "UI text" tab, Korean common text |
+| v1.4 | conditions and flags in scripts, copy, paste and duplicate boxes, handles on choice and condition branches (drag to reorder, delete), the effects folder and twelve image transitions, shader transitions (pixel sort, datamosh, TV static, etc.), nine more screen shaders (ripple, old film, fisheye, old camcorder, etc.), more text effects (speech bubble, karaoke, box behind, droplets, etc.), missing effects fall back to defaults instead of stopping, tag box (cards, sliders, sample tooltips), ruby, `{clear}`, speed as "characters per second", app [Effects]·[Shaders] galleries and hiding (hidden ones go to the bottom), pygaki as a desktop app only, this HTML guide |
+| v1.5 | language button (Japanese, English), [Screen] tab and calling screens, voice card, find and replace, following flags, music and sound details, pause and shake lines, front/behind for shown images, choice questions, image name checks, [⇔ Beside game], shader block corruption, VHS worn tape |
+| v1.6 | Edit shortcuts (change each function's key by pressing it in the game window, a warning on overlaps, added to the controls help list automatically), the splash controls guide follows the shortcut table, Japanese and English guides, removed the [⇔ Beside game] button (the automatic move in settings stays) |
+| v1.7 | Ren'Py 8.6.1 support, flag looks (checkbox, radio, input box, part customization), flag input and answer input (free answer), flag values in dialogue, flags kept after endings, linked text boxes and corner warp, image effects vibrate and spring in, per-label HUDs, the scenes and characters tree, the condition panel, transparent video maker, [Fonts] screen |
+| v1.8 | three bubbles around the box being edited (dialogue, font, flow) and done/cancel drops, HUD voice glow, retries and hints for answer input, icons (window, Windows exe), the bend wave image effect |
 
 Details for each version are in `showpy/CHANGELOG.md`.

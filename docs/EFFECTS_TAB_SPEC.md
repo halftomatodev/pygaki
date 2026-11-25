@@ -51,7 +51,7 @@
   - 게임(`text_effects.rpy`, `image_effects.rpy`)은 등록은 다 하고, 게임 안 편집 화면에 내놓는 목록에서만 뺀다.
   - 앱은 `scanFolder` 때 읽어 `EFFECTS`, `TRANSITIONS`에서 뺀다. 이미 그 효과를 쓴 줄은 칸에 이름이 그대로 보인다(지운 효과와 같은 처리).
 - 효과 모음: 저장소 `showpy/effects_library/*.glsl`(새 폴더). 앱은 빌드할 때 가져가서 앱 안에 들어간다(사본 없음. 처음 계획의 묶음 `pygaki/effects/` 폴더는 읽는 곳이 없어 두지 않음, 5단계). 프로젝트마다 들어가는 샘플 여섯은 그대로.
-- 대본(`.flow.json`)에 새 값이 생기지 않으므로 `FEATURE`는 그대로. 플러그인은 `ui_kit` 4.4.
+- 대본(`.flow.json`)에 새 값이 생기지 않으므로 `FEATURE`는 그대로. 플러그인은 pygaki 플러그인.
 - 앱에 파일 지우기 길이 없다(`main.cjs`에 `list` `stat` `read` `write`뿐) → `pygaki:remove`를 더한다(프로젝트 폴더 안, `ui_kit/effects/*.glsl`만). 웹은 폴더 손잡이의 `removeEntry`.
 
 ## 5. 단계
@@ -61,7 +61,7 @@
 | 단계 | 내용 | 고칠 곳 | 확인 | 어림 |
 |---|---|---|---|---|
 | 0 | **[렌파이에서 보기] 없애기** | 대본 편집기 `LineFields.tsx`(버튼), `gameFolder.ts`(`PREVIEW_FILE` 쓰기). 플러그인 `editor_preview.rpy`에서 `preview_*`와 `ui_editor_pk_preview` 화면만(같은 파일의 원고 다시 불러오기·줄 따라가기는 남김). LINK.md, `ui_kit/README.md`, GUIDE. 배포판에서 빼는 파일 목록의 `pykaki_preview.json`은 예전 프로젝트 때문에 남김 | `tsc`, 빌드, smoke, Lint, 시험 프로젝트 | 짧음 |
-| 1 | **끈 효과 목록(게임 쪽)** `effects_off.txt` 읽기, 게임 안 편집 화면 대사 탭·타이틀 글자 효과 목록에서 빼기. `ui_kit` 4.4 | `text_effects.rpy`, `image_effects.rpy`, `editor_say.rpy`, `editor_title.rpy`, LINK.md 8장, CHANGELOG 등 | Lint, 시험 프로젝트에서 끈 효과가 목록에 없고 그 효과를 쓴 대사는 도는지 | 짧음 |
+| 1 | **끈 효과 목록(게임 쪽)** `effects_off.txt` 읽기, 게임 안 편집 화면 대사 탭·타이틀 글자 효과 목록에서 빼기. pygaki 플러그인 | `text_effects.rpy`, `image_effects.rpy`, `editor_say.rpy`, `editor_title.rpy`, LINK.md 8장, CHANGELOG 등 | Lint, 시험 프로젝트에서 끈 효과가 목록에 없고 그 효과를 쓴 대사는 도는지 | 짧음 |
 | 2 | **효과 목록과 파일 다루기(앱 쪽, 화면 없이)** 기본/프로젝트/모음을 하나로 모은 목록, 켬/끔, 쓰인 줄 세기, 넣기·빼기(백업)·파일 넣기 검사, 대본에서 이름 바꾸기 | 새 `effectsLib.ts`, `fx/textShaders.ts`, `stage.ts`, `gameFolder.ts`, `desktop.ts`, `app/main.cjs`(`pygaki:remove`), `vite.config.ts`(모음 가져오기), 새 `showpy/effects_library/` | `tsc`, 빌드, smoke에 넣기·빼기 한 바퀴 | 보통 |
 | 3 | **[효과] 화면** 툴바 버튼, 카드 목록, 글자 효과 샘플과 막대, 쓰인 곳 [보기](그 상자로 감), 요청문 복사 | 새 `EffectsView.tsx`, `Toolbar.tsx`, `App.tsx`, `showpyLive.ts`의 `view`, `styles.css` | 웹 개발 서버에서 눌러 보기, 앱 빌드해 묶음에 넣기 | 김 |
 | 4 | **그림 효과 샘플** `@transition`의 `@fragment`를 앱에서 WebGL로 그리기(쓰는 값이 `l__t` `l__uv` `l__size` `l__old` `l__new`뿐이라 그대로 옮길 수 있음). 같은 그리기를 플레이 화면에도 써서 "서서히 바뀌기" 대역을 없앰 | 새 `fx/TransitionCanvas.tsx`, `PlayStage.tsx` | 샘플 둘(원으로 열리기, 띠)이 게임과 같은 모양인지 눈으로 | 보통 |
@@ -69,7 +69,7 @@
 
 ### 한 것
 
-- 0, 1단계: 플러그인 쪽 (`ui_kit` 4.4)
+- 0, 1단계: 플러그인 쪽 
 - 2단계: `pykaki/src/effectsLib.ts`(목록, 켬/끔, 쓰인 줄, 넣기, 빼기, 바꾸기), 앱 `pygaki:remove`, `showpy/effects_library/`(아직 비어 있음). 플러그인이 있는 게임을 연결하면 그 게임의 효과 폴더에 있는 파일만 목록에 나온다(게임에서 뺀 샘플은 모음으로). 화면이 없어서 `window.pykakiEffects`와 `app/smoke.cjs`로 확인. 파일 검사는 표시와 이름까지이고 GLSL 코드가 맞는지는 3단계 샘플 화면에서 본다
 
 - 3단계: `pykaki/src/EffectsView.tsx`([효과] 화면), 툴바의 [효과](웹에도 나옴), `showpyLive.ts`의 `view`에 `effects`. 카드 목록, 켜기/끄기, 넣기, 빼기 창(바꾸고 빼기 / 그냥 빼기), 파일 넣기, 요청문 복사, 글자 효과 샘플과 막대, 쓰인 곳 [보기]. 아직 넣지 않은 모음의 효과도 샘플로 돌린다(`previewPack`). 그림 효과 칸은 안내 글만(4단계). 확인은 웹 개발 서버(연결 없이 구경)와 `app/smoke.cjs`(진짜 앱에서 눌러서 한 바퀴)

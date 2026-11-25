@@ -1,5 +1,5 @@
 ################################################################################
-## UI Kit — 선택지 엔진
+## pygaki — 선택지 엔진
 ##
 ## 이 파일은 고칠 필요가 없습니다. 설정은 choice_menu_config.rpy에서 하세요.
 ##
@@ -56,7 +56,7 @@ init -10 python in cmenu:
     ## 이 값이 하나라도 있으면 뒤 그림을 글의 상자(say_style 그림/영상 상자)로 그려서 글과 같이 휘고 돌게 함 (4.18)
     GROUP_KEYS = ("media_link", "media_quad", "media_text_quad", "media_fx")
 
-    ## 선택지 뒤 그림/영상 (ui_kit 4.14). 하나라도 있으면 기본 버튼 배경을 없앱니다 (media_button=True면 그대로)
+    ## 선택지 뒤 그림/영상. 하나라도 있으면 기본 버튼 배경을 없앱니다 (media_button=True면 그대로)
     MEDIA_KEYS = ("idle_media", "hover_media", "select_media")
 
     POSITION_KEYS = ("x", "y", "xalign", "yalign")

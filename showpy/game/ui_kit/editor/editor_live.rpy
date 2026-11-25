@@ -1,5 +1,5 @@
 ################################################################################
-## UI Kit — 편집기: PyKaki 앱과 실시간 연결 (3.14, 커서/대사 소리 3.15, 패널 통째로 3.16)
+## pygaki — 편집기: PyKaki 앱과 실시간 연결 (3.14, 커서/대사 소리 3.15, 패널 통째로 3.16)
 ##
 ## PyKaki 데스크톱 앱의 showpy 화면이 이 편집기를 바깥에서 조종합니다.
 ## 게임 창에는 끌어서 옮기는 표시만 남고, 숫자, 목록, 대본은 앱에서 봅니다.
@@ -272,7 +272,7 @@ init -8 python in ui_editor:
         except Exception:
             return None
         edits = tm.edits_for(menu)
-        ## 제목, 부제 (ui_kit 3.19): 항목 다음 번호로, kind="label"
+        ## 제목, 부제: 항목 다음 번호로, kind="label"
         has_labels = hasattr(tm, "label_items")
         labels = tm.label_items(menu) if has_labels else [ ]
         ledits = tm.state.label_edits.get(menu, { }) if has_labels else { }
@@ -331,7 +331,7 @@ init -8 python in ui_editor:
             )
 
     def _splash_state():
-        """스플래시 페이지 목록 (splash 2.2). 없거나 예전 판이면 None."""
+        """스플래시 페이지 목록. 없거나 예전 판이면 None."""
         t = get_tab("splash")
         f = getattr(t, "live_pages", None)
         if f is None:
@@ -342,7 +342,7 @@ init -8 python in ui_editor:
             return None
 
     def _cursor_lines():
-        """커서와 셰이더 '여기에서부터' (Screen FX 4.5가 있을 때, 3.21)."""
+        """커서와 셰이더 '여기에서부터' (3.21)."""
         fx = get_tab("screen_fx")
         f = getattr(fx, "cursor_state", None)
         if f is None:
@@ -656,7 +656,7 @@ init -8 python in ui_editor:
             value = tuple(value)
         t = get_tab("title")
         if t is not None and hasattr(t, "set_key"):
-            ## ui_kit 3.19: 제목, 부제까지 탭이 알아서
+            ## 제목, 부제까지 탭이 알아서
             t.set_key(key, value)
             return
         items = tm.all_items()
@@ -858,7 +858,7 @@ init -8 python in ui_editor:
             state.popup = None
             _set_editing(False)
             state.reopen = r
-        ## 다시 시작한 뒤 셰이더, 커서 상태를 원고대로 맞춤 (live_tick에서, Screen FX 4.5)
+        ## 다시 시작한 뒤 셰이더, 커서 상태를 원고대로 맞춤 (live_tick에서)
         live.after_warp = (fn, n.linenumber)
         store.renpy.warp_to_line("{}:{}".format(fn, n.linenumber))
         return True
@@ -869,7 +869,7 @@ init -8 python in ui_editor:
         tm = getattr(store, "tmenu", None)
 
         if cmd == "editor":
-            ## line: 이미지/영상 탭에서 고를 원고 줄 (PyKaki [위치 옮기기], ui_kit 4.8, LINK.md 9장)
+            ## line: 이미지/영상 탭에서 고를 원고 줄 (PyKaki [위치 옮기기], LINK.md 9장)
             st_tab = get_tab("stage") if (c.get("tab") == "stage" and c.get("line")) else None
             if st_tab is not None:
                 try:
@@ -950,7 +950,7 @@ init -8 python in ui_editor:
             return _panel_do(c)
 
         if cmd == "splash.page":
-            ## 스플래시 페이지 고르기 (splash 2.2): {"cmd": "splash.page", "id": "warning"}. 편집기도 스플래시 탭으로
+            ## 스플래시 페이지 고르기: {"cmd": "splash.page", "id": "warning"}. 편집기도 스플래시 탭으로
             t = get_tab("splash")
             if t is None or not hasattr(t, "set_page"):
                 return False

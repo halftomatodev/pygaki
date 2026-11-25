@@ -1,5 +1,5 @@
 ################################################################################
-## UI Kit — 타이틀 메뉴 설정
+## pygaki — 타이틀 메뉴 설정
 ##
 ## 이 파일만 고치면 됩니다. 저장 후 게임 실행 중 Shift+R을 누르면 바로 반영돼요.
 ## 설정 이름 전체 목록과 설명은 README.md를 보세요.
@@ -26,7 +26,7 @@ define tmenu.enabled = True
 
 ## ── 모든 항목에 공통으로 쓰는 기본값 ──────────────────────────────────────────
 ## 글자 스타일 속성은 렌파이 텍스트 스타일 속성을 그대로 씁니다.
-## (font, size, color, outlines, kerning, bold, italic, strikethrough ...)
+## (font, size, color, outlines, kerning, bold, italic, strikethrough...)
 
 define tmenu.default = {
     "font": gui.interface_text_font,
@@ -132,8 +132,8 @@ define tmenu.intro_time = 0.35       # 나타나는 데 걸리는 시간(초)
 define tmenu.intro_offset = (-30, 0) # 어디서부터 미끄러져 들어올지 (픽셀)
 
 
-## ── 배경 (그림이나 영상) ──────────────────────────────────────── (UI Kit 3.19) ──
-## None이면 검은 화면입니다. 그림(.png, .jpg, .webp)이나 영상(.webm)의 경로를 적으세요.
+## ── 배경 (그림이나 영상) ────────────────────────────────────────  ──
+## None이면 검은 화면입니다. 그림(.png,.jpg,.webp)이나 영상(.webm)의 경로를 적으세요.
 ## 그림은 화면에 꽉 차게 늘어납니다. 영상은 계속 반복합니다.
 ##   define tmenu.background = "images/title_bg.png"
 ##   define tmenu.background = "movies/title_bg.webm"
@@ -143,7 +143,7 @@ define tmenu.intro_offset = (-30, 0) # 어디서부터 미끄러져 들어올지
 define tmenu.background = None
 
 
-## ── 제목, 부제 글자 ───────────────────────────────────────────── (UI Kit 3.19) ──
+## ── 제목, 부제 글자 ─────────────────────────────────────────────  ──
 ## 타이틀 화면에 보일 제목과 부제. 메뉴 항목처럼 위치, 회전, 크기, 글꼴, 색, 글자 효과를 적습니다.
 ##   "text": None    제목은 게임 이름(config.name). 부제는 "" (안 보임)
 ##   "effect": "glitch"   글자 효과 (대사 등장 효과와 같은 이름: scatter, drop, glitch, stamp, vhs, liquid …)
@@ -179,7 +179,7 @@ define tmenu.main_menu_frame = False
 ## (3.18까지의 gui.show_name 제목은 tmenu.enabled = False일 때만 나옵니다. 지금은 위 tmenu.labels를 씁니다)
 
 
-## ── 게임 중 ESC 메뉴 (일시정지 메뉴) ─────────────────────────── (UI Kit 3.1) ──
+## ── 게임 중 ESC 메뉴 (일시정지 메뉴) ───────────────────────────  ──
 ## 게임 중에 ESC나 오른쪽 클릭을 누르면 나오는 메뉴를 타이틀 메뉴와 같은 모양으로 그립니다.
 ## 글꼴, 크기, 색, 선택됐을 때 모양(tmenu.default), 등장 연출, 소리는 타이틀 메뉴 설정을 같이 씁니다.
 ## 항목 자리는 편집기에서 따로 옮길 수 있습니다: ESC 메뉴를 연 채로 Shift+M → "타이틀 메뉴" 탭.

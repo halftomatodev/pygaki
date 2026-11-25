@@ -1,4 +1,4 @@
-// UI Kit — 대사 등장 효과의 셰이더 (showpy와 PyKaki가 같이 씀)
+// ui_kit — 대사 등장 효과의 셰이더 (showpy와 PyKaki가 같이 씀)
 //
 // 이 파일 하나에 효과의 셰이더 코드를 적으면, 렌파이(ui_kit/engine/text_effects.rpy가
 // init에서 읽어 renpy.register_textshader로 등록)와 PyKaki(효과 미리보기를 WebGL로 그림)가
@@ -15,11 +15,11 @@
 //   @redraw u__hold         u__hold가 0보다 크면 계속 다시 그림
 //   @outline 굵기 색 x y     글자 뒤에 깔 외곽선 겹 (echo의 복사본). 대사에 외곽선을 따로 안 적었을 때만
 //   @set u__이름 값          값의 기본값. 대사에서 effect="이름:u__이름=값"으로 바꿈
-//   @param u__이름 최소 최대 한글이름   그 값을 막대로 고칠 때의 범위와 이름 (ui_kit 4.3)
+//   @param u__이름 최소 최대 한글이름   그 값을 막대로 고칠 때의 범위와 이름 
 //   @variables              uniform, attribute, varying 줄
 //   @vertex_30, @fragment_350 ...   렌파이 셰이더 조각. 숫자가 작은 것부터 이어 붙음
 //
-// 효과를 더할 때는 이 파일을 고치는 대신 ui_kit/effects/ 폴더에 파일을 하나 넣어도 됩니다 (ui_kit 4.3).
+// 효과를 더할 때는 이 파일을 고치는 대신 ui_kit/effects/ 폴더에 파일을 하나 넣어도 됩니다.
 // 그 파일들은 이 파일의 @part 조각을 @use로 쓸 수 있습니다. 적는 법은 ui_kit/effects/README.md.
 //
 // 코드 안의 RAND(1.0)은 글자마다 다른 0~1 값입니다 (글자 번호로 정해져서 볼 때마다 같음).

@@ -1,5 +1,5 @@
 ################################################################################
-## UI Kit — 편집기: 대사 탭
+## pygaki — 편집기: 대사 탭
 ##
 ## 화면에 떠 있는 대사 한 줄을 고칩니다.
 ##   - 대사 글자: 끌어서 옮기기, 글자 크기·글꼴·색
@@ -11,7 +11,7 @@
 ##       e "천천히." (fx="gameboy", fx_transition="fade")      # 전환을 따로
 ##       e "덮개 없이." (fx="ascii", fx_overlay=False)          # 덮개(VHS) 끔. True면 켬
 ##       e "화면이 휜다." (fx_warp=3.0)                          # 덮개 휘어짐. "default"면 설정값으로
-##       e "커서는 깨끗하게." (fx_cursor="top")                   # 커서 자리 (Screen FX 4.2)
+##       e "커서는 깨끗하게." (fx_cursor="top")                   # 커서 자리 
 ##       e "대사창까지." (fx="ascii", fx_exclude=())             # 글자 빼기: () 안 뺌 / ("say", "choice") 대사·선택지 빼기
 ##
 ## Ctrl+S로 저장하면 원고(.rpy)의 그 대사 줄 괄호에 바로 적힙니다.
@@ -72,7 +72,7 @@ init -8 python in ui_editor:
         def __init__(self):
             self.target = "what"        # "what" 대사 글자, "name" 이름
             self.orig_screen = None
-            self.orig_props = None      # 편집 전 say 스크린 부분별 속성 { "what": {...}, ... }
+            self.orig_props = None      # 편집 전 say 스크린 부분별 속성 { "what": {...},... }
 
             ## (파일, 줄) -> 그 줄의 Say 문장. 원고에 쓸 때 원래 괄호와 대사를 확인합니다.
             self.nodes = { }
@@ -891,7 +891,7 @@ init -8 python in ui_editor:
             w = m.warp_value() if (m is not None and hasattr(m, "warp_value")) else None
             return None if w is None else "{:g}".format(float(w))
 
-        ## 커서 자리 (fx_cursor, Screen FX 4.2): FOLLOW = 괄호에 안 적음(앞에서 이어짐), "default" = 설정대로,
+        ## 커서 자리 (fx_cursor): FOLLOW = 괄호에 안 적음(앞에서 이어짐), "default" = 설정대로,
         ##   "effect" 효과까지 / "overlay" 덮개 밑 / "top" 효과 안 받음
         def has_cursor(self):
             m = self.sfx()

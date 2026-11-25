@@ -1,5 +1,5 @@
 ################################################################################
-## UI Kit — 글 상자 (말풍선, 둥근 테두리)
+## pygaki — 글 상자 (말풍선, 둥근 테두리)
 ##
 ## 이 파일은 고칠 필요가 없습니다. 기본 모양은 say_style_config.rpy의
 ## say_style.box_styles에서 고칩니다.
@@ -25,12 +25,12 @@
 ##   pill_fill       속 색. None이면 속이 빔
 ##   pill_padding    글과 테두리 사이
 ##   pill_rotate     기울기 (도). 짧게 box_rotate=
-##   ..._text_color  상자를 쓸 때 글 색 (괄호에 color를 적으면 그것)
+##..._text_color  상자를 쓸 때 글 색 (괄호에 color를 적으면 그것)
 ##
-## 그림/영상 상자 (box="media", ui_kit 4.14): 글 뒤에 그림이나 영상을 깝니다. 글 가운데가 기준이고, 기본 대사창·이름 칸 배경은 늘 투명합니다.
+## 그림/영상 상자 (box="media"): 글 뒤에 그림이나 영상을 깝니다. 글 가운데가 기준이고, 기본 대사창·이름 칸 배경은 늘 투명합니다.
 ##     e "꿈이었어." (box="media", media="images/say/cloud.png")                    # 글 크기에 맞춰 늘림
 ##     e "쾅!" (box="media", media="movies/boom.webm", media_fit="image", media_zoom=0.6)  # 그림 크기 그대로
-##   media           그림이나 영상 파일 (game 폴더 기준). .webm .ogv .mp4 .mkv는 영상
+##   media           그림이나 영상 파일 (game 폴더 기준)..webm.ogv.mp4.mkv는 영상
 ##   media_fit       "text": 글 크기 + padding에 맞춰 늘림 (기본), "image": 그림 크기 그대로 (media_zoom으로 키우기)
 ##   media_zoom      크기 배율 (기본 1.0). media_fit="text"면 글에 맞춘 크기에 곱함 (4.15)
 ##   media_angle     그림만 돌리기 (도, 글은 그대로. 글과 같이 돌리려면 box_rotate) (4.15)
@@ -598,7 +598,7 @@ init -10 python in say_style:
         _box_kwargs["glsl"] = 100
     store.renpy.register_shader(BOX_SHADER, **_box_kwargs)
 
-    ## ── 묶기, 네 점 변형, 나타날 때 그림 효과 (ui_kit 4.18) ──
+    ## ── 묶기, 네 점 변형, 나타날 때 그림 효과  ──
 
     def link_base(v):
         """media_link 값 → 묶을 때의 그림 값 (zoom, angle, x, y). True면 (1, 0, 0, 0), None/False면 안 묶음."""

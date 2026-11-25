@@ -63,11 +63,11 @@ interface F {
   startClash: string | null; // label start가 있는 다른 파일
   hasShowpy: boolean; // game 폴더에 ui_kit이 있는지
   fxErrors: [string, string][]; // 효과 폴더(ui_kit/effects)에서 못 읽은 파일과 이유
-  endMarks: boolean; // 이 게임의 플러그인이 줄 끝 표시를 읽는지 (ui_kit 4.5, script_edit.rpy의 PK_END_MARKS)
-  newMark: boolean; // 이 게임의 플러그인이 새 머리말 문구(pygaki가 만든 파일)를 알아보는지 (ui_kit 4.10, PK_NEW_MARK)
-  mediaBox: boolean | null; // 대사·선택지 뒤 그림/영상을 아는지 (ui_kit 4.14, text_box.rpy BOX_KINDS의 "media"). 플러그인이 없거나 폴더를 안 열었으면 null
-  mediaGroup: boolean | null; // 글 상자 묶기·네 점 변형·그림 효과를 아는지 (ui_kit 4.18, text_box.rpy의 def link_base). 모르면 null
-  sceneUi: boolean | null; // custom_ui.scene이 있는지 (ui_kit 4.7). 플러그인이 없거나 폴더를 안 열었으면 null
+  endMarks: boolean; // 이 게임의 플러그인이 줄 끝 표시를 읽는지 (script_edit.rpy의 PK_END_MARKS)
+  newMark: boolean; // 이 게임의 플러그인이 새 머리말 문구(pygaki가 만든 파일)를 알아보는지 (PK_NEW_MARK)
+  mediaBox: boolean | null; // 대사·선택지 뒤 그림/영상을 아는지 (text_box.rpy BOX_KINDS의 "media"). 플러그인이 없거나 폴더를 안 열었으면 null
+  mediaGroup: boolean | null; // 글 상자 묶기·네 점 변형·그림 효과를 아는지 (text_box.rpy의 def link_base). 모르면 null
+  sceneUi: boolean | null; // custom_ui.scene이 있는지. 플러그인이 없거나 폴더를 안 열었으면 null
   imageBook: ImageBook | null; // 그림 이름 검사에 쓰는 그림 목록 (FEATURE 15). 폴더를 안 열었으면 null
   fxSeq: number; // 효과 목록이 바뀔 때마다 오른다 (목록을 쓰는 화면이 다시 그리게)
   fxFiles: string[]; // 효과 폴더에 있는 효과 파일 이름
@@ -122,7 +122,7 @@ async function walk(d: any, prefix = ''): Promise<string[]> {
   return out;
 }
 
-// game 폴더의 .rpy 파일 (pygaki가 쓰는 원고와 그림·소리·저장 폴더는 뺌)
+// game 폴더의.rpy 파일 (pygaki가 쓰는 원고와 그림·소리·저장 폴더는 뺌)
 // 그림 정의를 읽을 때 pygaki가 쓴 화면 원고도 뺀다
 const SKIP_FILES = new Set([RPY_FILE, SCREENS_FILE]);
 const SKIP_DIRS = new Set(['images', 'movies', 'audio', 'cache', 'saves', 'gui', 'fonts', 'tl', 'ui_kit_backup']);
@@ -432,7 +432,7 @@ export async function writeRpyToFolder(code: string, goto?: { line: number | nul
   await writeText(dir, RPY_FILE, code);
 }
 
-// 덮어쓰기 전 원고를 남긴다. 렌파이는 .bak을 읽지 않고 배포판에도 넣지 않는다
+// 덮어쓰기 전 원고를 남긴다. 렌파이는.bak을 읽지 않고 배포판에도 넣지 않는다
 export const backupRpy = (old: string) => writeText(dir, RPY_FILE + '.bak', old).catch((e) => console.warn('원고 백업 실패', e));
 
 export { allowed as folderAllowed };

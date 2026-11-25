@@ -115,7 +115,7 @@ function argProject(argv) {
   return i >= 0 && argv[i + 1] ? path.resolve(argv[i + 1]) : null;
 }
 
-// 게임 안 편집 화면의 [pygaki 앱에서 고르기]가 앱을 켤 때: --tab <게임 탭 id>. [GUI 편집]의 그 칸을 연다 (ui_kit 4.20)
+// 게임 안 편집 화면의 [pygaki 앱에서 고르기]가 앱을 켤 때: --tab <게임 탭 id>. [GUI 편집]의 그 칸을 연다 
 function argTab(argv) {
   const i = argv.indexOf('--tab');
   return i >= 0 && argv[i + 1] && /^[a-z_]+$/.test(argv[i + 1]) ? argv[i + 1] : null;

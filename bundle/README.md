@@ -41,7 +41,7 @@ Actions 화면에서 손으로 돌리면(Run workflow) Releases에는 안 올리
 
 | 자리 | 무엇 |
 |---|---|
-| `renpy.exe`, `launcher/`, `renpy/` ... | 렌파이 SDK 그대로 (덧붙임에는 없음) |
+| `renpy.exe`, `launcher/`, `renpy/`... | 렌파이 SDK 그대로 (덧붙임에는 없음) |
 | `launcher/game/pygaki_launcher.rpy` | 런처 첫 화면 아래쪽 버튼 [pygaki로 편집], [pygaki 안내서], [플러그인 올리기], [+ Create New Project](새 프로젝트 만들기)의 "기본 (Vanilla)" / "Pygaki" 고르기 ([launcher/pygaki_launcher.rpy](launcher/pygaki_launcher.rpy)) |
 | `pygaki/template/` | Pygaki 새 프로젝트에 얹을 플러그인을 담은 템플릿. 런처의 [새 프로젝트 만들기]와 같은 방법으로 만든 1280x720 한국어 기본 프로젝트(그림까지 다 만듦) + 플러그인(`ui_kit`, `screen_fx`, `hotkeys`, `splash`), `project.json`의 `"type": "template"`. 새 프로젝트는 고른 해상도로 새로 만들고 여기서는 플러그인, 커서·CTC 샘플, 한국어 공통 문구만 가져가요 |
 | `pygaki/app/pygaki.exe` | pygaki 데스크톱 앱 |

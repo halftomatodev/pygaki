@@ -9,7 +9,7 @@
 ## - 조작방법 화면의 키보드 설명을 설정 파일의 목록으로 보여줍니다.
 ##   (렌파이 기본 screens.rpy의 keyboard_help 스크린을 대신 정의합니다)
 ## - 게임 안 편집 화면(Shift+M)의 [단축키 수정] 탭이 저장한 hotkeys_layout.rpy를 읽습니다 (1.1).
-##   그 탭은 editor/editor_hotkeys.rpy에 있고, UI Kit 플러그인이 있을 때만 생깁니다.
+##   그 탭은 editor/editor_hotkeys.rpy에 있고, pygaki 플러그인이 있을 때만 생깁니다.
 ## - 1.2: 기능마다 키를 바꿉니다(렌파이 기본 기능도). hotkeys_layout.rpy의 "keys"와 "desc".
 ##   스플래시 조작 안내 화면이 "keys": "hotkeys"면 이 표에서 고른 기능을 보여 줍니다(guide_rows).
 ################################################################################
@@ -126,7 +126,7 @@ init -10 python in hotkeys:
     QUIET_KEYS = ("K_KP_ENTER", "K_SELECT", "K_MENU", "K_PAUSE", "K_AC_BACK")
 
     ## ── 키 이름 ──
-    ## 렌파이 키 이름: "K_v", "shift_K_s", "ctrl_K_l", "noshift_K_v"(Shift 없이만) ...
+    ## 렌파이 키 이름: "K_v", "shift_K_s", "ctrl_K_l", "noshift_K_v"(Shift 없이만)...
 
     MODS = ("shift", "noshift", "ctrl", "alt", "meta")
 

@@ -1,7 +1,7 @@
-<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ 6ebc45eec0 -->
-# pygaki プラグイン カスタムガイド (5.5)
+<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ 535599d5ea -->
+# pygaki プラグイン カスタムガイド
 
-2026-11-19 · バージョン 5.5(5.5 での変更:画像エフェクト `bendwave` 波で切り替え(シェーダートランジションにも)、ゲーム内編集画面の [画面] タブに音声の光の場所。5.4 での変更:セリフ・選択肢の後ろの画像/動画(画像/動画ボックス)、その画像をゲーム内で動かす・拡大する・回す、`mask_` で始まる名前なら透明な動画、文字を画像に結びつける・4 点変形・出るときの画像エフェクト、画像エフェクト `vibrate` 振動・`springin` 弾んで入る、Ren'Py 8.6.1 対応。5.3 での変更:ゲーム内編集画面の「ショートカット編集」タブ。5.2 は台本エディターだけの変更。5.1 での変更:エフェクトフォルダーと画像トランジション、エフェクト・シェーダーの非表示ファイル、フォトコラージュ(ずれる破片の代わり)、ゆらぎシェーダー `ripple`、シェーダー行の詳細値と場面ごとのセリフ音・カーソル、シェーダートランジションにピクセルソート・データモッシュ、系統図、pygaki はデスクトップアプリのみ。5.0 での変更:新しい画面エフェクト 7 つ(グリッチ、ジリジリ、網点、ホログラム、暗視スコープ、ずれる破片、破片の飛散)、画像 1 枚にかけるエフェクト、文字の登場エフェクト 11 個、テキストボックス(吹き出し、丸い枠)、スプラッシュを画面で直す、ゲーム内編集画面の「UI テキスト」タブ。4.22 での変更:シェーダーが変わる行と行ごとのトランジション、カーソルとシェーダーの「ここから」、セリフタブの整理、カーソル・CTC 画像のフォルダー。4.21 での変更:シェーダー欄の詳細属性を 1 番、2 番の下へ、行を押すとゲームもその行へ。4.20 での変更:シェーダーの 2 枠と「ここから適用」、タイトル/ゲーム内メニューのシェーダー、タイトルの背景とタイトル、サブタイトル、文字エフェクト、回転ハンドル)
+2026-11-25 · pygaki v1.9(バージョンごとの変更は `READ_ME_FIRST.md` と `CHANGELOG.md`)
 
 ## この文書の見方
 
@@ -30,21 +30,21 @@ pygaki プラグイン 5.5 を入れた人が、**どのファイルのどの値
 
 | 変えたいもの | ファイル | 値 | エディター |
 | --- | --- | --- | --- |
-| タイトル前のロゴ・注意・操作方法のページ | `splash/splash_config.rpy` | `splash.pages` |  |
-| それらのページの共通フォント・色・現れる時間 | `splash/splash_config.rpy` | `splash.default` |  |
-| タイトルで操作方法をもう一度見る | `ui_kit/title_menu_config.rpy` | 項目の `"action": splash.ShowPage("controls")` |  |
-| タイトルメニューの項目の文字・動作 | `ui_kit/title_menu_config.rpy` | `tmenu.items` の `"text"`、`"action"` |  |
+| タイトル前のロゴ・注意・操作方法のページ | `splash/splash_config.rpy` | `splash.pages` | |
+| それらのページの共通フォント・色・現れる時間 | `splash/splash_config.rpy` | `splash.default` | |
+| タイトルで操作方法をもう一度見る | `ui_kit/title_menu_config.rpy` | 項目の `"action": splash.ShowPage("controls")` | |
+| タイトルメニューの項目の文字・動作 | `ui_kit/title_menu_config.rpy` | `tmenu.items` の `"text"`、`"action"` | |
 | タイトルメニューの項目の位置・回転・大きさ | `ui_kit/title_menu_config.rpy` | 項目の `"x"`、`"y"`、`"rotate"`、`"skew"`、`"zoom"`、`"size"` | タイトルメニュータブ |
 | タイトルメニュー全体のフォント・色 | `ui_kit/title_menu_config.rpy` | `tmenu.default` の `"font"`、`"color"`、`"hover_color"` | タイトルメニュータブ、3 番「すべての項目共通」 |
-| 選択を動かすときに押しのけられる距離・速度 | `ui_kit/title_menu_config.rpy` | `tmenu.push_before`、`push_after`、`move_time`、`move_warper` |  |
-| タイトルの背景動画 | `ui_kit/title_menu_config.rpy` | `tmenu.background_movie` |  |
-| タイトルのゲーム名の位置・色、バージョン表示 | `ui_kit/title_menu_config.rpy` | `style main_menu_vbox`、`style main_menu_title`、`tmenu.show_version` |  |
-| ゲームメニュー(セーブ・ロード画面)の形、左の一覧 | `ui_kit/title_menu_config.rpy` | `tmenu.game_menu_side`、`tmenu.game_menu_content_x`、`tmenu.game_menu`、`style navigation_button_text` |  |
+| 選択を動かすときに押しのけられる距離・速度 | `ui_kit/title_menu_config.rpy` | `tmenu.push_before`、`push_after`、`move_time`、`move_warper` | |
+| タイトルの背景動画 | `ui_kit/title_menu_config.rpy` | `tmenu.background_movie` | |
+| タイトルのゲーム名の位置・色、バージョン表示 | `ui_kit/title_menu_config.rpy` | `style main_menu_vbox`、`style main_menu_title`、`tmenu.show_version` | |
+| ゲームメニュー(セーブ・ロード画面)の形、左の一覧 | `ui_kit/title_menu_config.rpy` | `tmenu.game_menu_side`、`tmenu.game_menu_content_x`、`tmenu.game_menu`、`style navigation_button_text` | |
 | ゲーム中の ESC メニュー(タイトルメニューの形) | `ui_kit/title_menu_config.rpy` | `tmenu.pause`(オン)、`tmenu.pause_dim`(後ろの画面を暗く)、`tmenu.pause_background`、`tmenu.pause_items`(3.1) | ESC メニューを開いたままタイトルメニュータブ → Ctrl+S |
 | 選択肢 1 つの位置・フォント・色 | スクリプト(`script.rpy` など) | 選択肢の後ろの括弧 `(x=…, y=…, font=…, color=…)` | 選択肢タブ → Ctrl+S(スクリプトにすぐ) |
-| すべての選択肢のフォント・サイズ・色・背景 | `ui_kit/choice_menu_config.rpy` | `cmenu.default` |  |
-| 縦の一覧の選択肢の位置 | `ui_kit/choice_menu_config.rpy` | `cmenu.list_pos` |  |
-| 選択肢の登場演出 | `ui_kit/choice_menu_config.rpy` | `cmenu.appear`、`appear_time`、`appear_stagger` |  |
+| すべての選択肢のフォント・サイズ・色・背景 | `ui_kit/choice_menu_config.rpy` | `cmenu.default` | |
+| 縦の一覧の選択肢の位置 | `ui_kit/choice_menu_config.rpy` | `cmenu.list_pos` | |
+| 選択肢の登場演出 | `ui_kit/choice_menu_config.rpy` | `cmenu.appear`、`appear_time`、`appear_stagger` | |
 | マウスカーソル | `ui_kit/custom_ui_config.rpy` | `custom_ui.cursor`、`cursor_frames`、`cursor_hold`(1/2 フレームごと)、`cursor_mode`、`cursor_hotspot`(3.0) | カーソル/セリフ音タブ(マス 12 個) |
 | クリック待ち表示(ctc) | `ui_kit/custom_ui_config.rpy` | `custom_ui.ctc`、`ctc_frames`、`ctc_hold`(1/2 フレームごと)、`ctc_position`(3.0) | カーソル/セリフ音タブ(マス 12 個) |
 | セリフが出るときの音 | `ui_kit/custom_ui_config.rpy` | `custom_ui.typing_sound`、`typing_volume` | カーソル/セリフ音タブ |
@@ -58,38 +58,38 @@ pygaki プラグイン 5.5 を入れた人が、**どのファイルのどの値
 | セリフ 1 行の出る速度・登場エフェクト | スクリプト | セリフの後ろの括弧 `(cps=20, effect="jitter")`(`cps` は 1 秒に出る文字数)、または倍率 `(speed=0.5)` | セリフタブ、速度・エフェクトのボタン → Ctrl+S |
 | 画像・動画の位置と登場・退場のトランジション(show / hide / scene の行) | スクリプト | `show eileen at stage.pos(420, 720) with dissolve`、`hide eileen with moveoutright` | 画像/動画タブ → Ctrl+S(スクリプトにすぐ) |
 | show / scene の行の画像をほかのファイルに、新しい show / scene の行を入れる | スクリプト | `scene fx_bg` → `scene room`、下に `show hand`(3.0) | 画像/動画タブ「画像/動画を選ぶ」→ Ctrl+S |
-| 動画を名前だけで使う、透明な動画 | `game/movies/` フォルダー + `ui_kit/stage_config.rpy` | `movies/rain.webm` → `show rain`、`movies/mask_ghost.webm` → `show ghost`(透明)、`stage.movie_once` |  |
-| bg の画像をいつもいちばん後ろに | `ui_kit/stage_config.rpy` | `stage.bg_tag`、`stage.bg_zorder` |  |
-| 背景として扱うタグを足す(いちばん後ろ + エディターで位置固定) | `ui_kit/stage_config.rpy` | `stage.bg_tag = [ "bg", "fx_bg" ]`(3.0) |  |
+| 動画を名前だけで使う、透明な動画 | `game/movies/` フォルダー + `ui_kit/stage_config.rpy` | `movies/rain.webm` → `show rain`、`movies/mask_ghost.webm` → `show ghost`(透明)、`stage.movie_once` | |
+| bg の画像をいつもいちばん後ろに | `ui_kit/stage_config.rpy` | `stage.bg_tag`、`stage.bg_zorder` | |
+| 背景として扱うタグを足す(いちばん後ろ + エディターで位置固定) | `ui_kit/stage_config.rpy` | `stage.bg_tag = [ "bg", "fx_bg" ]`(3.0) | |
 | 編集中も画面エフェクトを見る / 切る | `screen_fx/screen_fx_config.rpy` | `screen_fx.editor_preview = True` / `False`(3.0) | 編集中に V キー |
-| エディターのパネルが画面を隠すとき | (キー) | タイトルをドラッグ、X でたたむ、Space を押している間隠す、B で自動でよける、P で隅を変える |  |
-| エディターのパネルの下が切れるとき | (マウス) | パネルの上でホイール、または右のピンクのスクロールバーをドラッグ(2.9) |  |
+| エディターのパネルが画面を隠すとき | (キー) | タイトルをドラッグ、X でたたむ、Space を押している間隠す、B で自動でよける、P で隅を変える | |
+| エディターのパネルの下が切れるとき | (マウス) | パネルの上でホイール、または右のピンクのスクロールバーをドラッグ(2.9) | |
 | このセリフから画面エフェクトを変える(取り消すまで続く) | スクリプト | セリフの後ろの括弧 `(fx="ascii")`、取り消し `(fx="default")`、トランジション `(fx_transition="fade")` | セリフタブの「画面エフェクト」の行、または画面エフェクトタブ「このセリフからこのエフェクト」→ Ctrl+S(スクリプトにすぐ) |
 | セリフでない行(scene、show、with、$ の行)から画面エフェクトを変える | スクリプト | その行のすぐ上に `$ screen_fx.use("ascii", overlay=False, transition="fade")`、`$ screen_fx.clear()`、`$ screen_fx.set_overlay(True)`、`$ screen_fx.set_warp(3)`(4.1) | 画面エフェクトタブ「行に入れる」、または「この行からこのエフェクト」→ Ctrl+S(スクリプトにすぐ) |
 | このセリフから VHS オーバーレイのオン/オフ、曲がり | スクリプト | セリフの後ろの括弧 `(fx_overlay=False)`、`(fx_overlay=True)`、`(fx_warp=3.0)`、`(fx_warp="default")`(4.0) | セリフタブ「オーバーレイ(VHS)」、「オーバーレイの曲がり」の行 → Ctrl+S |
 | マウスカーソルが画面エフェクトを受けるか(区間ごと) | `screen_fx/screen_fx_config.rpy` + スクリプト | `screen_fx.cursor = "effect"` / `"overlay"` / `"top"`、`$ screen_fx.set_cursor("top")`、セリフの括弧 `(fx_cursor="overlay")`(4.2) | セリフタブ「カーソル」の行、行に入れるの「カーソル」の行 → Ctrl+S |
 | このセリフから文字を除く | スクリプト | セリフの後ろの括弧 `(fx="gameboy", fx_exclude=("say",))` | セリフタブ「文字の除外」の行 → Ctrl+S |
-| キャラクターのセリフの基本の位置・フォント | `ui_kit/say_style_config.rpy` | `define t = Character(what_xpos=…, what_font=…)` |  |
-| 場面で画面エフェクトを変える・取り消す | スクリプト | `$ screen_fx.use("ascii")`、`$ screen_fx.use("ascii", overlay=False)`、`$ screen_fx.clear()` |  |
+| キャラクターのセリフの基本の位置・フォント | `ui_kit/say_style_config.rpy` | `define t = Character(what_xpos=…, what_font=…)` | |
+| 場面で画面エフェクトを変える・取り消す | スクリプト | `$ screen_fx.use("ascii")`、`$ screen_fx.use("ascii", overlay=False)`、`$ screen_fx.clear()` | |
 | ふだんの画面エフェクト(基本エフェクト) | `screen_fx/screen_fx_config.rpy` | `screen_fx.base`(`"none"`、`"ascii"`、`"retro_term"`、`"gameboy"`) | 画面エフェクトタブ → 基本エフェクト、トランジション |
 | エフェクトを変えるときのトランジション(TV オフ・オン / ふわっと / すぐ) | `screen_fx/screen_fx_config.rpy` | `screen_fx.transition`、`screen_fx.tv`、`screen_fx.fade_time` | 画面エフェクトタブ → 基本エフェクト、トランジション、「プレビュー」 |
 | ASCII の文字マスの大きさ・比率・くっきり、文字の一覧、色 | `screen_fx/ascii_config.rpy` | `ascii.settings` の `"cell"`、`"aspect"`、`"crisp"`、`"chars"`、`"color_mode"`、`ascii.presets` | 画面エフェクトタブ → ASCII |
-| ASCII のフォント | `screen_fx/ascii_config.rpy` | `ascii.font`(`None` = 同梱の Neo둥근모) |  |
+| ASCII のフォント | `screen_fx/ascii_config.rpy` | `ascii.font`(`None` = 同梱の Neo둥근모) | |
 | VHS オーバーレイのオン/オフ(基本はオン) | `screen_fx/screen_fx_config.rpy` | `screen_fx.overlay`(`True` / `False`) | 画面エフェクトタブ → 基本エフェクト、トランジション「オーバーレイ(VHS)」 |
 | エフェクトごとにオーバーレイをオンにするか(レトロターミナルは基本オフ) | 各エフェクトの設定ファイル | `ascii.overlay`、`retro_term.overlay`、`gameboy.overlay`(`True` / `False`) | 画面エフェクトタブ → エフェクトのボタン →「オーバーレイ(VHS)」 |
 | オーバーレイのゆがみの度合い(曲がり、ずれ、色のにじみ) | `screen_fx/vhs_crt_config.rpy` | `vhs_crt.settings` の `warp_amount`、`distort_intensity`、`aberration`。ゲーム中は `$ screen_fx.set_warp(3.0)`、`$ vhs_crt.set(…)` | 画面エフェクトタブ → VHS オーバーレイのスライダー、セリフタブ「オーバーレイの曲がり」 |
 | エフェクトからセリフ・選択肢・メニューを外す(文字の除外) | 各エフェクトの設定ファイル | `vhs_crt.exclude`、`ascii.exclude`、`retro_term.exclude`、`gameboy.exclude`(`"say"`、`"choice"`、`"screens"` から選ぶ) | 画面エフェクトタブ → エフェクトのボタン →「文字の除外」 |
 | レトロターミナルの色(蛍光体・背景)、曲面 CRT、内蔵 VHS | `screen_fx/retro_term_config.rpy` | `retro_term.settings` の `"phosphor"`、`"background"`、`"crt"`、`"vhs"`、`retro_term.presets` | 画面エフェクトタブ → レトロターミナル |
 | ゲームボーイのディザリング/ピクセル化、点の大きさ、4 つの色、LCD っぽさ | `screen_fx/gameboy_config.rpy` | `gameboy.settings` の `"mode"`、`"pixel_size"`、`"color1"`〜`"color4"`、`"grid"`、`"shadow"`、`gameboy.presets` | 画面エフェクトタブ → ゲームボーイ |
-| スクリーンに入れた画像にも場面のエフェクト | そのスクリーン | `add "map.png" at screen_fx.scene` |  |
+| スクリーンに入れた画像にも場面のエフェクト | そのスクリーン | `add "map.png" at screen_fx.scene` | |
 | タイトルのゆらぎの強さ(5.5 からシェーダー) | `screen_fx/ripple_config.rpy` | `ripple.settings` の `"amount"`、`"scale"`、`"speed"`、`"shine"`、`ripple.presets`。タイトルにかけるかは `screen_fx_config.rpy` の `screen_fx.title_shaders` | GUI編集 → タイトルシェーダー、シェーダーの初期値 |
 | 選択の一覧からエフェクト・シェーダーを隠す(5.1) | `ui_kit/effects/effects_off.txt`、`screen_fx/shaders_off.txt` | 1 行に名前 1 つ(`#` の後ろは説明)。すでに使ったスクリプトはそのまま動く | アプリ [エフェクト]、[シェーダー] の [非表示](隠したものは [非表示は下へ] で一覧の下に集める) |
 | 文字の登場エフェクト、画像トランジションの追加・削除(5.1) | `ui_kit/effects/` フォルダー | `.glsl` ファイル 1 つがエフェクト 1 つ。下の「エフェクトフォルダー」 | アプリ [エフェクト] |
 | VHS オーバーレイの強さ・範囲 | `screen_fx/vhs_crt_config.rpy` | `vhs_crt.settings`、`vhs_crt.scope` | 画面エフェクトタブ → VHS オーバーレイ |
 | VHS のプリセット(ゲーム中に切り替えるセット) | `screen_fx/vhs_crt_config.rpy` | `vhs_crt.presets` | 画面エフェクトタブ → VHS オーバーレイ、「直す対象」でプリセットを選ぶ |
-| ショートカットキーの追加・解除 | `hotkeys/hotkeys_config.rpy` | `hotkeys.bindings`、`hotkeys.unbind` |  |
-| 操作方法画面の説明 | `hotkeys/hotkeys_config.rpy` | `hotkeys.keyboard_help` |  |
-| 機能 1 つを丸ごとオフにする | 各設定ファイルのいちばん上 | `tmenu.enabled`、`cmenu.enabled`、`custom_ui.enabled`、`say_style.enabled`、`watermorph.enabled`、`vhs_crt.enabled`、`ascii.enabled`、`retro_term.enabled`、`gameboy.enabled`、`splash.enabled` |  |
+| ショートカットキーの追加・解除 | `hotkeys/hotkeys_config.rpy` | `hotkeys.bindings`、`hotkeys.unbind` | |
+| 操作方法画面の説明 | `hotkeys/hotkeys_config.rpy` | `hotkeys.keyboard_help` | |
+| 機能 1 つを丸ごとオフにする | 各設定ファイルのいちばん上 | `tmenu.enabled`、`cmenu.enabled`、`custom_ui.enabled`、`say_style.enabled`、`watermorph.enabled`、`vhs_crt.enabled`、`ascii.enabled`、`retro_term.enabled`、`gameboy.enabled`、`splash.enabled` | |
 
 ## pygaki と一緒に使う
 
@@ -200,10 +200,10 @@ pygaki の **[バージョン一覧]** で戻してから **Ctrl+E** を押す�
 
 | アセット | 初期のパス | 形式・条件 | 直す値 |
 | --- | --- | --- | --- |
-| フォント | `game/fonts/` に好きな名前 | .ttf / .otf / .ttc、使う言語の文字が入ったフォント。ファイル名の大文字小文字をコードとまったく同じに(Mac・Android・Web は区別する) | タイトル:`tmenu.default["font"]` · 選択肢:`cmenu.default["font"]` · セリフ:`Character(what_font=…)` · ゲーム全体:`gui.rpy` の `gui.text_font` など |
+| フォント | `game/fonts/` に好きな名前 |.ttf /.otf /.ttc、使う言語の文字が入ったフォント。ファイル名の大文字小文字をコードとまったく同じに(Mac・Android・Web は区別する) | タイトル:`tmenu.default["font"]` · 選択肢:`cmenu.default["font"]` · セリフ:`Character(what_font=…)` · ゲーム全体:`gui.rpy` の `gui.text_font` など |
 | カーソルのフレーム | `gui/cursor/cursor1.png` 〜 `cursor6.png` | PNG、エディターのマスは 12 枚(順に再生)。例:64×64 | `custom_ui.cursor_frames`、`cursor_hold`(1/2 フレームごと、24fps)、`cursor_hotspot`(クリックの基準点) |
 | クリック待ち表示のフレーム | `gui/ctc/ctc1.png` 〜 `ctc6.png` | PNG、エディターのマスは 12 枚 | `custom_ui.ctc_frames`、`ctc_hold`(1/2 フレームごと、24fps) |
-| セリフ音 | なし(`None`) | .ogg 推奨。短い音なら文字が出ている間くり返す | `custom_ui.typing_sound` · キャラクターごと:`Character(cb_typing_sound=…)` |
+| セリフ音 | なし(`None`) |.ogg 推奨。短い音なら文字が出ている間くり返す | `custom_ui.typing_sound` · キャラクターごと:`Character(cb_typing_sound=…)` |
 | 選択肢の hover 動画 | なし(`None`) | WebM(VP9)、透明にするなら side_mask 形式(ファイルの横幅 = 表示の横幅 × 2) | `cmenu.default["hover_movie"]`、`hover_movie_size`、`hover_movie_zoom` · 選択肢 1 つだけ:括弧の `hover_movie=…` |
 | タイトルメニューの hover 動画 | なし | WebM(VP9)、side_mask。文字の後ろに敷かれる | 項目の `"hover_movie"`、`"hover_movie_pos"`、`"hover_movie_size"` |
 | タイトルメニューの文字の代わりの動画 | なし | WebM(VP9)、side_mask | 項目の `"hover_label_movie"` |
@@ -211,12 +211,12 @@ pygaki の **[バージョン一覧]** で戻してから **Ctrl+E** を押す�
 | タイトルの背景画像 | `gui/main_menu.png` | ゲームの解像度の大きさの PNG | ファイルを上書き(または `gui.rpy` の `gui.main_menu_background`) |
 | メニューの後ろの半透明の板 | `gui/overlay/main_menu.png` | PNG。完全に透明にすると板が消える | ファイルを上書き、または `tmenu.main_menu_frame = False` |
 | 選択肢のボタンの背景 | `gui/button/choice_idle_background.png`、`choice_hover_background.png` | PNG(9 分割の枠 `gui.choice_button_borders`) | ファイルを上書き、または `cmenu.default["button_background"]`、`["button_hover_background"]` |
-| 効果音(メニューの移動・決定) | なし | .ogg | `tmenu.hover_sound`、`activate_sound` · `cmenu.hover_sound`、`activate_sound` |
+| 効果音(メニューの移動・決定) | なし |.ogg | `tmenu.hover_sound`、`activate_sound` · `cmenu.hover_sound`、`activate_sound` |
 | 名前の背景 | `gui/namebox.png` | PNG(9 分割の枠 `gui.namebox_borders`)。セリフの括弧の `name_x`、`name_y` で動かすと一緒についてくる | ファイルを上書き |
 | スプラッシュの背景の動画・画像 | なし(推奨:`movies/`、`gui/splash/`) | WebM(VP9)または PNG、ゲームの解像度の大きさ。動画は画面の大きさに合わせて再生 | ページの `"background"`。動画が終わったら進む:`"duration": "movie"` |
 | スプラッシュのロゴの動画・画像 | なし | 透明な動画は side_mask 形式(透明でなければ `"image_side_mask": False`) | ページの `"image"`、`"image_pos"`、`"image_zoom"` |
-| スプラッシュの効果音・BGM | なし | .ogg。BGM をタイトルまでつなぐなら `config.main_menu_music` と同じファイル | ページの `"sound"`、`"music"` |
-| TV オフ・オンの音 | なし(`None`) | .ogg。消え始めるとき、点き始めるときに 1 回ずつ。効果音の音量に従う | `screen_fx.tv` の `"off_sound"`、`"on_sound"`、`"volume"` |
+| スプラッシュの効果音・BGM | なし |.ogg。BGM をタイトルまでつなぐなら `config.main_menu_music` と同じファイル | ページの `"sound"`、`"music"` |
+| TV オフ・オンの音 | なし(`None`) |.ogg。消え始めるとき、点き始めるときに 1 回ずつ。効果音の音量に従う | `screen_fx.tv` の `"off_sound"`、`"on_sound"`、`"volume"` |
 
 透明な動画(side_mask)の作り方:After Effects などで透明背景の ProRes 4444 `.mov` に書き出してから、ffmpeg で変換します。コマンドは `ui_kit/README.md` の「動画の準備」にあります。
 
@@ -303,7 +303,7 @@ define splash.pages = [
         ##   "image_loop": False,                   1 回だけ
         # "image_loop": True,
 
-        ## タイトル ─ 画面に出る文字は _( ) で囲みます。
+        ## タイトル ─ 画面に出る文字は _() で囲みます。
         "title": _("만든 사람 이름"),
         "title_size": 56,                          # このページだけタイトルを大きく (ほかは splash.default の 44)
 
@@ -373,8 +373,8 @@ define splash.pages = [
         "title": _("조작 방법"),
 
         ## 操作方法の表 ─ (キー, 説明) の 1 組が 1 行です。
-        ##   行を増やすには ( _("キー"), _("説明") ), の 1 行をコピーして貼り、文字だけを変えてください。
-        ##   キーが英字 1 文字だけなら _( ) なしで "H" のように書いてもかまいません。
+        ##   行を増やすには ( _("キー"), _("説明")), の 1 行をコピーして貼り、文字だけを変えてください。
+        ##   キーが英字 1 文字だけなら _() なしで "H" のように書いてもかまいません。
         ## こう書く代わりに "keys": "auto", と書くと、
         ##   ゲームメニューの操作方法画面と同じ一覧が出ます。
         ##   (hotkeys プラグインがあれば hotkeys_config.rpy の hotkeys.keyboard_help、なければ Ren'Py 標準の説明)
@@ -581,7 +581,7 @@ define splash.pages = [
 | --- | --- |
 | 背景 | `"background"`:色 `"#202020"`、画像 `"gui/splash/bg.png"`、動画 `"movies/bg.webm"`(くり返し再生)。その下の色は `"color"` |
 | 中央のロゴ | `"image"`(画像か side_mask の動画)、別に置くなら `"image_pos": (640, 200)`、大きさ `"image_zoom"` |
-| 文字 | `"title"`、`"body"`(`\n` で改行)、操作方法の表 `"keys": [ (キー, 説明), … ]` または `"auto"`(操作方法画面と同じ一覧)、`"hotkeys"`(ショートカット編集の表に従う。表示する機能は `"keys_show": [ "screenshot", … ]`、splash 2.5) |
+| 文字 | `"title"`、`"body"`(`\n` で改行)、操作方法の表 `"keys": [ (キー, 説明), … ]` または `"auto"`(操作方法画面と同じ一覧)、`"hotkeys"`(ショートカット編集の表に従う。表示する機能は `"keys_show": [ "screenshot", … ]`) |
 | 進むとき | `"duration"`:秒 / `None`(クリックするまで)/ `"movie"`(動画が終わるまで) |
 | うっかり進まないように | `"min_time"`(すべて現れてからこの時間はクリックを無視)、進めないようにするなら `"skippable": False` と `"duration"` を一緒に |
 | 現れて消える時間 | `"fade_in"`、`"fade_out"`(ページの間は黒い画面) |
@@ -697,13 +697,13 @@ menu (font="fonts/KBLJump_c.ttf", size=28, appear="slide"):
 | 折り返しの幅 | `width=400`(`None` なら折り返さない) | `"width"` |
 | 回転・傾き・拡大 | `rotate=`、`skew=`、`zoom=`、ホバー時 `hover_rotate=`、`hover_zoom=`、`hover_offset=(8, 0)` | 同じ名前 |
 | 登場演出 | `appear="pop"` / `"fade"` / `"slide"` / `None`、`delay=0.5` | `cmenu.appear`、`appear_time`、`appear_stagger`、`appear_offset` |
-| 文字の後ろに画像・動画(5.4) | `idle_media=`、`hover_media=`、`select_media=`、`select_time=0.8`。下の「画像/動画ボックス」 |  |
+| 文字の後ろに画像・動画(5.4) | `idle_media=`、`hover_media=`、`select_media=`、`select_time=0.8`。下の「画像/動画ボックス」 | |
 | ホバー時に後ろに動画 | `hover_movie="movies/red.webm"`(`None` ならオフ) | `"hover_movie"`、`"hover_movie_size"`、`"hover_movie_zoom"`、`"hover_movie_offset"` |
 | ボタンの背景・余白・幅 | `button_background=…`、`button_padding=(30, 8)`、`button_xsize=500` | `"button_background"`、`"button_hover_background"`、`"button_padding"`、`"button_xsize"` |
 | 選べない選択肢の色 | `insensitive_color="#555"` | `"insensitive_color"` |
 | 効果音 | `hover_sound=`、`activate_sound=` | `cmenu.hover_sound`、`cmenu.activate_sound` |
-| ホバー時の反応の速さ |  | `cmenu.hover_time`、`cmenu.hover_warper` |
-| 縦の一覧の間隔 |  | `style choice_vbox:` `spacing 30` |
+| ホバー時の反応の速さ | | `cmenu.hover_time`、`cmenu.hover_warper` |
+| 縦の一覧の間隔 | | `style choice_vbox:` `spacing 30` |
 
 位置を書いた選択肢どうしは互いによけないので、重ならないように配置してください。
 
@@ -713,13 +713,13 @@ menu (font="fonts/KBLJump_c.ttf", size=28, appear="slide"):
 
 | やりたいこと | 値 | 参考 |
 | --- | --- | --- |
-| カーソルのアニメーションをオン | `custom_ui.cursor = True` |  |
+| カーソルのアニメーションをオン | `custom_ui.cursor = True` | |
 | カーソルの画像を変える | `custom_ui.cursor_frames = [ "gui/cursor/cursor1.png", … ]` | 順に再生。エディターのマスは 12 個 |
 | カーソルの速さ | `custom_ui.cursor_hold = 2` | 毎秒 24 フレーム固定(3.0)。`1` は 1 枚を 1 フレーム(毎秒 24 枚)、`2` は 2 フレーム(毎秒 12 枚) |
 | カーソルの方式 | `custom_ui.cursor_mode = "software"` | `"software"` Ren'Py が描く(24fps 正確、基本)/ `"hardware"` OS のカーソル(反応がいちばん速い、最大 20fps) |
 | カーソルが画面エフェクト(ASCII、VHS など)を受けるか | `screen_fx.cursor = "effect"`(screen_fx_config.rpy) | `"effect"` エフェクトまで(基本)/ `"overlay"` オーバーレイの下 / `"top"` エフェクトを受けない。ソフトウェアカーソルのときだけ。下の「カーソルの位置」 |
 | カーソルのクリックの基準点 | `custom_ui.cursor_hotspot = (0, 0)` | 画像の左上から x、y ピクセル。矢印の先が真ん中ならその座標 |
-| クリック待ち表示をオン | `custom_ui.ctc = True` |  |
+| クリック待ち表示をオン | `custom_ui.ctc = True` | |
 | クリック待ち表示の画像・速さ | `custom_ui.ctc_frames = [ … ]`、`custom_ui.ctc_hold = 2` | カーソルと同じく 24fps、`1` / `2` フレームごと(3.0) |
 | クリック待ち表示の位置 | `custom_ui.ctc_position = "nestled"` | `"nestled"` 文字のすぐ後ろ、`"fixed"` say スクリーンで決めた位置 |
 | 特定のキャラクターだけ違う表示 | `Character("名前", ctc="別の画像")` | その値が優先 |
@@ -790,7 +790,7 @@ define n2 = Character(kind=t, what_xpos=400, what_ypos=210)   # 位置のプリ�
 | `name_x`、`name_y` | `namebox_xpos`、`namebox_ypos` | 名前のボックスの位置(セリフ窓の左上基準、名前の背景ごと動く) |
 | `name_font`、`name_size`、`name_color` | `who_font`、`who_size`、`who_color` | 名前のフォント、サイズ、色 |
 
-**テキストボックス**(ui_kit 4.0):括弧に `box` を書くと、セリフの文字をボックスが囲みます。基本の形は設定ファイルの `say_style.box_styles`。
+**テキストボックス**:括弧に `box` を書くと、セリフの文字をボックスが囲みます。基本の形は設定ファイルの `say_style.box_styles`。
 
 ```py
 e "안녕!" (box="bubble")                                    # 白い吹き出し、黒い線、しっぽは下、飛び出して現れる
@@ -813,7 +813,7 @@ e "속까지." (box="pill", pill_fill="#ffd23b", pill_line=None, color="#000000"
 - しっぽは話している人を自動では探しません。向きか `(x, y)` で決めます。
 - エディターのセリフタブの「ボックス」欄、pygaki の文字エフェクト欄の [ボックス] でも選べます。
 
-**画像/動画ボックス**(5.4、`ui_kit` 4.14~4.18):`box="media"` を書くと、セリフの文字の後ろに画像や動画を敷きます。文字の中央が基準で、標準のセリフウィンドウと名前欄の背景は透明になり、画像だけが見えます。雲の形の考えごと吹き出し、ドカンと弾ける効果文字、メモ用紙の画像の上の文字などに使います。
+**画像/動画ボックス**(5.4、~4.18):`box="media"` を書くと、セリフの文字の後ろに画像や動画を敷きます。文字の中央が基準で、標準のセリフウィンドウと名前欄の背景は透明になり、画像だけが見えます。雲の形の考えごと吹き出し、ドカンと弾ける効果文字、メモ用紙の画像の上の文字などに使います。
 
 ```py
 e "夢だった。" (box="media", media="images/say/cloud.png")                         # 文字の大きさ + 余白に合わせて伸ばす
@@ -870,7 +870,9 @@ e "ブルッ!" (box="media", media="images/say/boom.png", media_link=True, media
 5. フォントと色はパネルのボタンで選びます。フォントの一覧は `game` フォルダーのフォントファイルをすべて見せ、色はスライダー・色コード・よく使う色で選びます。
 6. **Ctrl+S で保存**、Esc で閉じる。間違えたら Backspace(今選んでいるものだけを戻す)。
 
-レトロ解像度のようにゲーム画面をウィンドウで何倍にも拡大したゲームでは、編集画面(パネル、選択ウィンドウ、名札、ハンドル、フローツリーの引き出し)を実際の画面の大きさで描くので、小さい解像度でも読めます(`ui_kit` 4.20)。編集画面が開いている間は、ゲーム画面の外のウィンドウの余白(整数倍の黒い帯)を赤く塗ってゲーム画面の範囲を示します。**F8** でオン/オフし(ゲームに記憶)、pygaki アプリの環境設定でも変えられます。
+レトロ解像度のようにゲーム画面をウィンドウで何倍にも拡大したゲームでは、編集画面(パネル、選択ウィンドウ、名札、ハンドル)を実際の画面の大きさで描くので、小さい解像度でも読めます。編集画面を開いている間はウィンドウ全体を使います。ゲーム画面は元の大きさ(ピクセルパーフェクトなら整数倍)でウィンドウの中央に置き、パネルと選択ウィンドウはゲーム画面の外のウィンドウの空きまで使えます(例:640x400 のゲームを 800x800 のウィンドウで開くと編集画面は 800x800 全体)。ウィンドウがゲーム画面より大きいときは、ゲーム画面の周りに細い赤い境界線を引いて範囲を示します。境界線は **F8** でオン/オフし(ゲームに記憶)、pygaki アプリの環境設定でも変えられます。編集画面を閉じると元の画面(余りは黒い帯)に戻ります。
+
+文字エフェクト、シェーダー(1番・2番)、画像エフェクトのように選ぶものが多いリストは、ゲームウィンドウのパネルには今の値と **[pygaki アプリで選ぶ]** だけが出ます。押すと pygaki アプリが接続中ならアプリの[GUI 編集]のその欄が開き、そうでなければ Ren'Py SDK の pygaki アプリを起動します。ゲームウィンドウのパネルのショートカット案内は最初は畳まれていて **F1** で開きます。すべてのショートカットは pygaki アプリの環境設定の[ショートカット]にまとまっています。
 
 選択肢とセリフは **Ctrl+S を押すとスクリプト(.rpy)のその行の括弧にすぐ保存** され、ゲームが読み直されて同じ場面に戻ってきます。もともと書いてあった値と、行の後ろの `with dissolve` などはそのままにして、変えた値だけを直します。直す前の元はプロジェクトフォルダーの `ui_kit_backup/` に残ります。
 
@@ -930,7 +932,7 @@ show ghost with Dissolve(1.0)                     # ふわっと 1 秒
 
 **パネルが画面を隠すとき**(すべてのタブ):タイトル(= UI エディター)をドラッグして動かす、**X** で 1 行にたたむ、**Space** を押している間隠す、**B** で自動でよける(選んだものがパネルの下にあればほかの隅へ)、**P** で隅を変える、**L** で行の一覧をたたむ(画像/動画タブ)、**F1** で案内をたたむ。パネルが画面より長ければ、パネルの上で **ホイール** か右の **スクロールバー** で下の方を見ます(2.9)。
 
-**編集中の画面エフェクト**(すべてのタブ、`screen_fx` 3.4 以上):エディターを開いても画面エフェクトはオンのまま見え、パネルはその上にきれいに見えます。**V** でオン・オフします。曲がるエフェクト(VHS・CRT など)は、端で見える位置と押される位置が少しずれるので、正確にドラッグして置くときは V で少しの間オフにしてください。最初からオフにするなら `define screen_fx.editor_preview = False`。
+**編集中の画面エフェクト**(すべてのタブ):エディターを開いても画面エフェクトはオンのまま見え、パネルはその上にきれいに見えます。**V** でオン・オフします。曲がるエフェクト(VHS・CRT など)は、端で見える位置と押される位置が少しずれるので、正確にドラッグして置くときは V で少しの間オフにしてください。最初からオフにするなら `define screen_fx.editor_preview = False`。
 
 詳しい説明は `ui_kit/README.md` 4-6、4-7、13 章。
 
@@ -960,10 +962,10 @@ define hotkeys.keyboard_help = [
 | よく外す標準のショートカットキーの名前 | `screenshot`(S)、`toggle_fullscreen`(F)、`hide_windows`(H)、`self_voicing`(V)、`accessibility`(Shift+A)、`skip`(Ctrl)、`toggle_skip`(Tab)、`rollback`(Page Up) |
 | 重なるとき | 新しいキーが標準のショートカットキーと重なると両方が実行されるので、`unbind` で標準の方から外します |
 | 説明の画面 | `keyboard_help` が `None` なら Ren'Py 標準の説明。`unbind` で外したキーは標準の説明のその行に自動で合わせます(1.3。V を外すと「V」の行が「Alt+V」に、キーが残らなければ行を消す)。一覧を自分で書いたなら、説明も一緒に直します |
-| エディターのキーと重なる | UI Kit のエディターは Shift+M を使います。変えるなら `define ui_kit.editor_key = "shift_K_e"` |
+| エディターのキーと重なる | pygaki のエディターは Shift+M を使います。変えるなら `define ui_kit.editor_key = "shift_K_e"` |
 | 決まった動作 (1.1) | `"action"` の代わりに `"do": "quick_save"` のように名前で。`"help": _("クイックセーブ")` を書くと操作方法画面の一覧に入ります(同じキーの行があればその説明を置き換え)。名前の一覧は `hotkeys/README.md` |
 
-**編集画面で直す**(`hotkeys` 1.2、`ui_kit` があるとき):Shift+M の編集画面の「ショートカット編集」タブ(단축키 수정。スプラッシュタブのすぐ後ろ。スプラッシュタブのページボタンでも操作案内画面の横、pygaki アプリの [GUI 編集] では「操作案内画面」の下)に、行ごとに機能名とキーボタンがあります。キーボタンを押してゲームウィンドウで新しいキーを押すと変わります(Esc でやめる)。[+] はキーをもう 1 つ、機能名を押すと [キーボタンで](키 단추로)、[キーを外す](키 빼기)、[最初のキーに](처음 키로)、説明欄。ほかの機能が使っているキーなら警告と案内が出て、[あちらから外して変える](그쪽에서 빼고 바꾸기)を押すと変わります。[案内画面へ書き出す](안내 화면으로 내보내기)を押すとスプラッシュの操作案内画面の表が `"keys": "hotkeys"` になってこの表に従い、表示する機能はスプラッシュタブの操作案内表の一覧で押して選びます(`"keys_show"`)。変えたキーは ESC の操作方法画面の一覧にも自動で入ります。直している間すぐ反映され、保存すると `hotkeys/hotkeys_layout.rpy` の `"keys"`(機能ごとのキー)、`"desc"`(説明)に書かれて設定ファイルの値に足されます。
+**編集画面で直す**(`ui_kit` があるとき):Shift+M の編集画面の「ショートカット編集」タブ(단축키 수정。スプラッシュタブのすぐ後ろ。スプラッシュタブのページボタンでも操作案内画面の横、pygaki アプリの [GUI 編集] では「操作案内画面」の下)に、行ごとに機能名とキーボタンがあります。キーボタンを押してゲームウィンドウで新しいキーを押すと変わります(Esc でやめる)。[+] はキーをもう 1 つ、機能名を押すと [キーボタンで](키 단추로)、[キーを外す](키 빼기)、[最初のキーに](처음 키로)、説明欄。ほかの機能が使っているキーなら警告と案内が出て、[あちらから外して変える](그쪽에서 빼고 바꾸기)を押すと変わります。[案内画面へ書き出す](안내 화면으로 내보내기)を押すとスプラッシュの操作案内画面の表が `"keys": "hotkeys"` になってこの表に従い、表示する機能はスプラッシュタブの操作案内表の一覧で押して選びます(`"keys_show"`)。変えたキーは ESC の操作方法画面の一覧にも自動で入ります。直している間すぐ反映され、保存すると `hotkeys/hotkeys_layout.rpy` の `"keys"`(機能ごとのキー)、`"desc"`(説明)に書かれて設定ファイルの値に足されます。
 
 ## 画面エフェクトを変える — `screen_fx/screen_fx_config.rpy`
 
@@ -977,7 +979,7 @@ define hotkeys.keyboard_help = [
 
 | 基本エフェクトの名前 | 意味 | 設定ファイル |
 | --- | --- | --- |
-| `"none"` | エフェクトなし(配布設定の基本エフェクト。オーバーレイは設定どおり) |  |
+| `"none"` | エフェクトなし(配布設定の基本エフェクト。オーバーレイは設定どおり) | |
 | `"ascii"` | 画面を文字で描き直す。文字 1 つ = ピクセル 1 つ(基本は場面だけ。セリフはそのまま読める) | `ascii_config.rpy` |
 | `"retro_term"` | レトロターミナル:蛍光体の単色モニター、内蔵の曲面 CRT・VHS。**使っている間、オーバーレイは基本でオフ** | `retro_term_config.rpy` |
 | `"gameboy"` | ゲームボーイ:大きな点と 4 色の LCD 画面、ディザリング / ピクセル化 | `gameboy_config.rpy` |
@@ -1003,27 +1005,6 @@ define hotkeys.keyboard_help = [
 | (オーバーレイ) | VHS。オン / オフだけを選び、見た目は `vhs_crt.settings` | `vhs_crt_config.rpy` |
 
 > 4.0 でモノクロ(`mono`)は消しました。以前の名前 `"vhs_crt"` を基本エフェクトに使うと、「なし + オーバーレイがオン」として読みます。
-
-### 系統図で区間にシェーダーを入れる (screen_fx 5.2)
-
-スクリプトを直接書かず、ゲームを動かしたままマウスで入れる方法です。
-
-1. ゲームを開発モードで起動して Shift+M →「画面エフェクト」タブ → **G**(または [G 系統図を開く])。ゲーム画面の横に系統図が出ます。左の数字がスクリプトの行番号、黄色い四角が `label`、横に分かれる黄色い枝が選択肢と `if`、`-> 名前` が `jump` です。右の色の帯は、その行にかかっているシェーダー(左が 1 番、右が 2 番)です。
-2. シェーダーを入れたい最初の行の節を押したまま、終わりの行までドラッグします。区間がピンクに塗られます。
-3. パネルで 1 番、2 番のシェーダーを選び **[この区間に適用]** → **Ctrl+S**。スクリプトがこう変わります。
-   ```renpy
-       $ screen_fx.shaders("glitch", "vhs_crt")   # 区間の最初の行の上
-       e "세 번째 대사."
-       ...
-       $ screen_fx.shaders("ascii", "none")       # 区間の終わりの次の行の上: 元の 2 枠に
-       e "가지가 합쳐진 대사."
-   ```
-4. トランジションを変える:系統図の右端の四角い点(シェーダーが変わるところ)を押して選び、パネルの「選んだトランジションの点」で 設定どおり / TV / ふわっと / すぐ。複数の点を一度に変えられます。保存すると `transition="fade"` のような値が入ります。
-
-- 区間の終わりが選択肢の枝の中なら、ほかの枝へ行った人は終わりの次の行を通りません。パネルで、戻すところを **枝が合流するところ**(メニューが終わった次の行)に選べます。
-- 消す:区間をドラッグして選ぶか四角い点を選んでから **Delete** → Ctrl+S。そのシェーダーの行がスクリプトから抜け、点もなくなります。前でオンにしたシェーダーがあれば、その区間はそのシェーダーで続いて見えます(メッセージで知らせる)。
-- 節をドラッグせず押すだけなら、ゲームがその行へ移ります。もう一度 G を押すと系統図がしまわれます。
-- pygaki アプリでは系統図を開きません(アプリ [GUI編集] の欄の名前は「シェーダー」)。pygaki のシナリオなら、[スクリプト編集] でボックスや label の右上の ◐ シェーダーでかけます。
 
 ### スクリプトで
 
@@ -1185,7 +1166,7 @@ define screen_fx.tv = {
 
 ### カーソルの位置 — `screen_fx/screen_fx_config.rpy` + スクリプト (4.2)
 
-UI Kit のソフトウェアカーソル(`custom_ui.cursor = True`)を画面エフェクトのどこに描くかを、シェーダーと同じくスクリプトの区間ごとに選びます。また変えるまで続き、セーブ・巻き戻しに保存されます。
+pygaki のソフトウェアカーソル(`custom_ui.cursor = True`)を画面エフェクトのどこに描くかを、シェーダーと同じくスクリプトの区間ごとに選びます。また変えるまで続き、セーブ・巻き戻しに保存されます。
 
 ```renpy
 ## screen_fx_config.rpy: ふだんの値
@@ -1289,7 +1270,7 @@ define ascii.settings = {
     "cell": 16,             # 文字のマスの高さ (ピクセル)。8 とても細かい、16 基本、32 大きめ、48 以上は絵が崩れる
     "aspect": 0.5,          # マスの横 ÷ 縦。0.5 = 半角文字 (8×16)、1.0 = 正方形のタイル
     "crisp": True,          # True: マスの高さを 8 の倍数に。16・32・48 でいちばんくっきり
-    "chars": " .:-=+*#%@",  # 文字の一覧 (暗いマス → 明るいマス)。ダンジョン風 " .,:;ox%#@"、ブロック " ░▒▓█"、"01"
+    "chars": ".:-=+*#%@",  # 文字の一覧 (暗いマス → 明るいマス)。ダンジョン風 ".,:;ox%#@"、ブロック " ░▒▓█"、"01"
     "color_mode": "color",  # "mono" 1 色 (fg) / "color" 元の色 / "palette16" 昔の PC の 16 色
     "fg": "#c8c8c8",        # "mono" のときの文字の色。"#33ff66" 緑の端末、"#ffb000" 琥珀色
     "bg": "#000000",        # 背景色 (文字の間の空いたところ)
@@ -1317,7 +1298,7 @@ $ ascii.reset(duration=1.0)                  # 設定ファイルの値に
 | 緑の単色モニター | `ascii.preset("terminal")` |
 | ASCII + VHS オーバーレイが暗すぎる | `ascii.preset("glow")` または `"bg_tint": 0.2`、`"color_boost": 1.6` |
 | セリフ窓まですべて文字に(演出) | `$ screen_fx.use("ascii", exclude=())` |
-| ほかの文字・記号で文字の一覧 | `"chars": " .·:∴※#"`(フォントにある文字だけ。なければ四角) |
+| ほかの文字・記号で文字の一覧 | `"chars": ".·:∴※#"`(フォントにある文字だけ。なければ四角) |
 
 エディターの「画面エフェクト」タブ →「ASCII」ボタンで、マスの大きさ・比率・くっきりはスライダーとボタンで、文字の一覧・色付けはボタンで選びます。詳しい値の説明は `screen_fx/README.md` 6 章。
 
@@ -1541,7 +1522,7 @@ $ vhs_crt.off(duration=2.0)                   # ゆっくりオフ
 | エディターが開かない | ランチャーから実行したか(開発モードでだけ開く) |
 | 消したファイルが当てはまり続ける / スクリーンが 2 回定義される | `.rpyc` も一緒に消したか、以前の `title_menu` などのフォルダーが残っていないか |
 | エディターの保存に失敗 | プロジェクトが Dropbox の中なら、同期を少し止めてから保存し直す |
-| スプラッシュを直したのに見えない | Shift+R では出ない。再起動するか `splash.preview()`。`developer_skip`、`once`・表示しないで抜けていないかは、エディターのスプラッシュタブの「今は出ない: …」の行で見て、[また表示する] で記録を消す(splash 2.1) |
+| スプラッシュを直したのに見えない | Shift+R では出ない。再起動するか `splash.preview()`。`developer_skip`、`once`・表示しないで抜けていないかは、エディターのスプラッシュタブの「今は出ない: …」の行で見て、[また表示する] で記録を消す |
 | 自分で書いた `splashscreen` ラベルだけが出る | そのラベルの中に `call splash_play` |
 | スプラッシュの操作方法の表が下の案内と重なる | ページの `"yalign"` を小さくするか、`"key_size"`、`"keys_spacing"` を小さく |
 | 文字の間の中黒(·)が四角 | Ren'Py の新しいプロジェクトの韓国語フォントにない文字。`/` や `,` を使うかフォントを変える |
@@ -1551,7 +1532,7 @@ $ vhs_crt.off(duration=2.0)                   # ゆっくりオフ
 | `show rain` で "image not found" エラー | 動画が `game/movies/` にあるか、拡張子が `.webm` か、同じ名前の画像が `images/` にないか(画像が優先) |
 | 透明な動画が 2 枚の絵が横に並んだまま出る | ファイル名の前に `mask_` があるか(side_mask の動画) |
 | 透明 webm・GIF を入れたのに背景が黒く出る | Ren'Py はアルファ入りの webm を再生できない。pygaki アプリの [透過動画を作る] で `mask_` 動画を作る |
-| Ren'Py 8.6 で新しく作ったゲームが最初のセリフで "Unknown layer None" で止まる | プラグインが古い版。バンドルのランチャーの [プラグインを更新] で 5.4(`ui_kit` 4.17・`screen_fx` 5.9 以降)に |
+| Ren'Py 8.6 で新しく作ったゲームが最初のセリフで "Unknown layer None" で止まる | プラグインが古い版。バンドルのランチャーの [プラグインを更新] で 5.4(・ 以降)に |
 | Ren'Py 8.6 で自分で書いたシェーダーが文法エラー | 8.6 の新しいゲームはシェーダーの標準の文法が GLSL ES 3.00。古い文法で書いたシェーダーは登録するときに `glsl=100` を付ける(8.5 にはその引数がないので `hasattr(renpy.config, "glsl_version")` のときだけ) |
 | セリフの括弧 `box="media"` で "unknown keyword" エラー / 画像が出ない | `ui_kit` が 4.14 より古い版。プラグインを更新 |
 | 画像/動画タブで画像を選べない | スクリプトの show・scene の行で出した画像だけを選べる。セーブをロードした直後なら、行の一覧から選ぶ |

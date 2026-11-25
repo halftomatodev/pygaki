@@ -1,5 +1,5 @@
 ################################################################################
-## UI Kit — 편집기 (본체)
+## pygaki — 편집기 (본체)
 ##
 ## 개발 모드(런처에서 실행)일 때 Shift+M으로 켜고 끕니다.
 ## 배포판(개발 모드 꺼짐)에서는 열리지 않으므로 그대로 둬도 괜찮습니다.
@@ -683,7 +683,7 @@ init -9 python in ui_editor:
 
             tab = current_tab()
 
-            ## 글 입력 칸이 켜져 있으면 (ui_kit 4.0): 글자 키는 입력 칸이 먼저 받았고,
+            ## 글 입력 칸이 켜져 있으면: 글자 키는 입력 칸이 먼저 받았고,
             ## 여기서는 Esc(입력 취소), Ctrl+S(입력 끝내고 저장)만 하고 나머지 단축키는 끔
             if ev.type in (pygame.KEYDOWN, pygame.KEYUP) and state.popup is None:
                 try:
@@ -923,7 +923,7 @@ init -9 python in ui_editor:
             rv.append("V 화면 효과 보기 " + ("켬" if on else "끔") + " (휘는 효과는 가장자리에서 누르는 자리가 조금 어긋남)")
         return rv
 
-    ## ── 편집 중 화면 효과 보기 (Screen FX 플러그인이 있을 때) ──
+    ## ── 편집 중 화면 효과 보기 (화면 효과 플러그인이 있을 때) ──
 
     def _sfx_preview_api():
         sfx = getattr(store, "screen_fx", None)
@@ -934,7 +934,7 @@ init -9 python in ui_editor:
         return (f, t)
 
     def fx_preview_on():
-        """편집 중에 화면 효과가 보이면 True, 꺼 두면 False, Screen FX(3.4 이상)가 없으면 None."""
+        """편집 중에 화면 효과가 보이면 True, 꺼 두면 False, screen_fx가 없으면 None."""
         api = _sfx_preview_api()
         return api[0]() if api else None
 

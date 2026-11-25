@@ -1,5 +1,5 @@
 ################################################################################
-## UI Kit — 편집기: 커서·대사 소리 탭 (커스텀 UI)
+## pygaki — 편집기: 커서·대사 소리 탭 (커스텀 UI)
 ##
 ## 텍스트 속도, 대사 소리, 클릭 대기 표시, 커서, 퀵메뉴를 바꿉니다.
 ## 패널 안에서 미리 보고, 저장하면 custom_ui_layout.rpy가 만들어집니다.
@@ -34,7 +34,7 @@ init -8 python in ui_editor:
             return getattr(store, "custom_ui", None)
 
         def on_close(self):
-            ## 커서와 셰이더 미리 보기를 끝냄 (Screen FX 4.5)
+            ## 커서와 셰이더 미리 보기를 끝냄 
             fx = get_tab("screen_fx")
             if fx is not None and hasattr(fx, "cursor_leave"):
                 fx.cursor_leave()
@@ -458,7 +458,7 @@ screen ui_editor_custom_ui_panel(tab):
                     else:
                         text "(끔)" style "ui_editor_small"
 
-        ## 커서와 셰이더 '여기에서부터' (Screen FX 4.5가 있을 때, 3.21)
+        ## 커서와 셰이더 '여기에서부터' (3.21)
         if renpy.has_screen("ui_editor_fx_cursor_panel") and ui_editor.get_tab("screen_fx") is not None:
             use expression "ui_editor_fx_cursor_panel" pass (ui_editor.get_tab("screen_fx"))
 

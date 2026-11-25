@@ -70,7 +70,7 @@ export function ShowpyView() {
     liveSend({ cmd: 'editor', open: true, tab: s.tab });
   };
 
-  // 게임 안 편집 화면의 [pygaki 앱에서 고르기] (ui_kit 4.20): 그 탭의 칸을 고름. 게임과 아직 안 붙었으면 칸만 골라 둠
+  // 게임 안 편집 화면의 [pygaki 앱에서 고르기]: 그 탭의 칸을 고름. 게임과 아직 안 붙었으면 칸만 골라 둠
   const want = useLive((s) => s.want);
   useEffect(() => {
     if (!want) return;
@@ -125,10 +125,10 @@ export function ShowpyView() {
                   {!inApp(s) && <span className="sp-badge">게임 안</span>}
                 </button>
               );
-              // 단축키 수정: 게임에 그 탭이 있을 때만, 조작 안내 화면 바로 아래 (hotkeys 1.2, splash 2.5)
+              // 단축키 수정: 게임에 그 탭이 있을 때만, 조작 안내 화면 바로 아래 
               const keysPage = st?.splash?.pages.some((p) => p.keys);
               if (s.id === 'hotkeys') return !st || t ? (keysPage ? null : item()) : null;
-              // 스플래시는 페이지마다 항목 (splash 2.2. 예전 판이면 항목 하나)
+              // 스플래시는 페이지마다 항목 (. 예전 판이면 항목 하나)
               if (s.id === 'splash' && st?.splash?.pages.length) {
                 const hk = SECTIONS.find((x) => x.id === 'hotkeys')!;
                 const hkTab = st.editor.tabs.find((x) => x.id === 'hotkeys');
@@ -420,7 +420,7 @@ function EditorBar({ st }: { st: GameState }) {
   );
 }
 
-// ── 게임 안 패널을 통째로 옮겨 그리는 것 (ui_kit 3.16) ──
+// ── 게임 안 패널을 통째로 옮겨 그리는 것  ──
 
 function MirrorSection({ st, sec }: { st: GameState; sec: Section }) {
   const t = sec.tab ? st.editor.tabs.find((x) => x.id === sec.tab) : null;
@@ -460,7 +460,7 @@ function MirrorSection({ st, sec }: { st: GameState; sec: Section }) {
       <button className="primary" onClick={open}>
         편집 시작
       </button>
-      {/* 예전 플러그인(ui_kit 4.20 전)은 게임 창 패널이 보이면 앱에 패널을 안 보냄 */}
+      {/* 예전 pygaki 플러그인은 게임 창 패널이 보이면 앱에 패널을 안 보냄 */}
       {st.editor.open && !st.editor.hide_panel && st.editor.tab === sec.tab && <p className="tip">게임 창 패널에 열려 있어요 ({keyOf('gamePanel')}로 숨기면 여기로)</p>}
     </div>
   );
@@ -577,7 +577,7 @@ function TitlePanel({ st, want }: { st: GameState; want: 'title' | 'pause' }) {
   );
 }
 
-// 배경: 그림이나 영상(webm). 없으면 타이틀은 검은 화면, ESC 메뉴는 투명 (ui_kit 3.19)
+// 배경: 그림이나 영상(webm). 없으면 타이틀은 검은 화면, ESC 메뉴는 투명 
 function BackgroundField({ t }: { t: TitleState }) {
   const files = useLive((s) => s.files);
   useEffect(() => {

@@ -45,7 +45,7 @@ function Keys() {
       if (e.key === 'F1') return run(() => openHelp());
       // 게임 창의 GUI 편집기 보이기/숨기기는 어느 화면에서나 (데스크톱 앱)
       if (isDesktop && hit(e, 'gamePanel')) return run(() => s.say(toggleGamePanel()));
-      // 게임 화면 가장자리의 붉은 경계선 (ui_kit 4.20)
+      // 게임 화면 가장자리의 붉은 경계선 
       if (isDesktop && hit(e, 'gameBands')) return run(() => s.say(toggleGameBands()));
       // showpy 화면에서는 저장 키가 게임 안 편집기의 저장(Ctrl+S)
       if (useLive.getState().view === 'showpy') {

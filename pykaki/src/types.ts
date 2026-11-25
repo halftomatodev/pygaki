@@ -25,21 +25,21 @@ export interface SayStyle {
   cps?: number; // 1초에 나오는 글자 수
   sound?: string; // 대사 소리 (game 기준 경로, 예: audio/type.ogg). ''이면 이 줄은 끔, 없으면 캐릭터 → 게임 처음 값 (FEATURE 10, cb_typing_sound=)
   effect?: string; // 등장 효과 (EFFECTS). 두 개를 겹치면 "slidein|shake"
-  box?: string; // 글 상자 (BOXES): bubble 말풍선 | pill 둥근 테두리 (showpy ui_kit 4.0) | media 그림/영상 (ui_kit 4.14)
+  box?: string; // 글 상자 (BOXES): bubble 말풍선 | pill 둥근 테두리 (showpy) | media 그림/영상 
   tail?: string; // 말풍선 꼬리 (TAILS): bottom | top | left | right | none. 비우면 상자 기본
   box_rotate?: number; // 상자와 글 기울기 (도)
   // 그림/영상 상자 (box media, FEATURE 24): 글 뒤에 까는 그림이나 영상 (game 기준 경로). 기본 대사창은 투명해짐
   media?: string;
   media_fit?: 'image'; // 그림 크기 그대로 (없으면 글 크기에 맞춤)
-  // 그림의 자리·크기·회전은 게임 안 편집 화면에서 정해서 받아 적는다 (ui_kit 4.15). 글 가운데 기준
+  // 그림의 자리·크기·회전은 게임 안 편집 화면에서 정해서 받아 적는다. 글 가운데 기준
   media_x?: number; // 옮김 (픽셀)
   media_y?: number;
   media_zoom?: number; // 배율 (글에 맞춤이면 맞춘 크기에 곱함)
   media_angle?: number; // 그림만 돌리기 (도)
-  // 투명 영상 (FEATURE 26, ui_kit 4.16): 왼쪽 색 + 오른쪽 투명도 영상인지. 없으면 파일 이름이 mask_로 시작할 때 투명 영상
+  // 투명 영상 (FEATURE 26): 왼쪽 색 + 오른쪽 투명도 영상인지. 없으면 파일 이름이 mask_로 시작할 때 투명 영상
   media_mask?: boolean;
   media_alpha?: number; // 그림 투명도 0~1 (없으면 1)
-  // 글 상자 묶기·네 점 변형·그림 효과 (FEATURE 28, ui_kit 4.18). 묶기·변형은 게임 안 편집 화면에서 정해서 받아 적는다
+  // 글 상자 묶기·네 점 변형·그림 효과 (FEATURE 28). 묶기·변형은 게임 안 편집 화면에서 정해서 받아 적는다
   media_link?: number[]; // 글을 그림에 묶음: 묶을 때의 그림 [크기, 회전, 가로 옮김, 세로 옮김]. 그 뒤로 달라진 만큼 글이 따라감
   media_quad?: number[]; // 그림 네 모서리 옮김 8개 (왼위, 오른위, 오른아래, 왼아래의 가로, 세로. 그림 크기에 대한 비율)
   media_text_quad?: number[]; // 글 네 모서리 옮김 8개 (글 크기에 대한 비율)
@@ -96,7 +96,7 @@ export interface Choice {
   mode: 'jump';
   condition: string | null; // 보이는 조건 (렌파이 조건식, 예: love >= 5). 비우면 늘 보임 (FEATURE 14)
   actions: string[]; // 고르면 바꾸는 식 (예: love += 1, met_alice = True). 선택지 아래 $ 줄로 (FEATURE 14)
-  media?: ChoiceMedia; // 글 뒤 그림/영상 (FEATURE 24, pygaki 플러그인 ui_kit 4.14)
+  media?: ChoiceMedia; // 글 뒤 그림/영상 (FEATURE 24, pygaki 플러그인)
 }
 
 // 선택지 글 뒤 그림/영상 (game 기준 경로). 하나라도 있으면 기본 버튼 배경이 없어짐
@@ -106,7 +106,7 @@ export interface ChoiceMedia {
   select?: string; // 고르고 확정할 때 잠깐
   time?: number; // select를 보여 주는 초 (없으면 0.5)
   fit?: 'image'; // 그림 크기 그대로 (없으면 글 크기에 맞춤)
-  // 자리·크기·회전은 게임 안 편집 화면에서 정해서 받아 적는다 (ui_kit 4.15). 선택지 가운데 기준, 세 그림에 같이
+  // 자리·크기·회전은 게임 안 편집 화면에서 정해서 받아 적는다. 선택지 가운데 기준, 세 그림에 같이
   x?: number;
   y?: number;
   zoom?: number; // 배율
@@ -242,7 +242,7 @@ export type ExitType = Exit['type'];
 
 // 상자나 label에 거는 셰이더 두 자리 (showpy screen_fx.shaders). 상자에 없으면 label 것을, label에도 없으면 게임 설정대로
 export interface BoxShader {
-  a: string; // 1번: none | ascii | vhs_crt | retro_term | gameboy | ...
+  a: string; // 1번: none | ascii | vhs_crt | retro_term | gameboy |...
   b: string; // 2번
   in?: string; // 이 셰이더가 시작할 때 전환: tv | pixelsort | datamosh | none. 예전 대본에는 fade나 빈 값(게임 설정대로)도 있다
   out?: string; // 이 셰이더가 끝날 때 전환
@@ -253,7 +253,7 @@ export interface BoxShader {
   iv?: Record<string, Record<string, number | string>>; // 그림 전환의 값 {효과 이름: {값 이름: 값}}. 예: {datamosh: {mode: 1}} (방향), {blink: {count: 5, color: "#ff0000"}} (FEATURE 12, 색은 글자)
 }
 
-// 상자에 거는 커서·클릭 대기 그림 (pygaki 플러그인 ui_kit 4.7 custom_ui.scene, LINK.md 2장).
+// 상자에 거는 커서·클릭 대기 그림 (pygaki 플러그인  custom_ui.scene, LINK.md 2장).
 // 값마다 따로: 상자에 없으면 게임 처음 값(GUI 편집 → 게임 처음 값). 앞 상자 것을 이어받지 않는다.
 // 대사 소리와 속도는 대사 줄마다(SayStyle.sound, cps). FEATURE 9까지의 상자·label cps, sound와 label ui는
 // 열 때 normalizeProject가 줄과 상자로 옮겨 적는다 (sample.ts moveUi)

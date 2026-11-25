@@ -39,7 +39,7 @@ export function summary(p: Project, time?: number) {
 }
 
 // ── 프로젝트 대본 파일 (SPEC 9-3) ──
-// 앱은 늘, 웹은 렌파이 프로젝트 폴더를 연결했을 때, 대본을 프로젝트 폴더 맨 위의 .flow.json 하나에 둔다.
+// 앱은 늘, 웹은 렌파이 프로젝트 폴더를 연결했을 때, 대본을 프로젝트 폴더 맨 위의.flow.json 하나에 둔다.
 // seen: 이 창이 마지막으로 읽거나 쓴 파일 글의 지문. 파일이 이것과 다르면 다른 곳(웹, 앱, 다른 창)이 고친 것
 let bound = false;
 let boundName: string | null = null;
@@ -63,7 +63,7 @@ async function setSeen(text: string | null) {
   seen = text === null ? null : hash(text);
 }
 
-// 데스크톱 앱: 대본은 프로젝트 폴더의 .flow.json 하나에 저장한다 (main.tsx가 열 때 정함). text는 연 파일의 글(새 파일이면 null)
+// 데스크톱 앱: 대본은 프로젝트 폴더의.flow.json 하나에 저장한다 (main.tsx가 열 때 정함). text는 연 파일의 글(새 파일이면 null)
 export function setProjectFile(handle: any, text: string | null) {
   jsonHandle = handle;
   bound = true;
@@ -342,7 +342,7 @@ export async function runInRenpy() {
 }
 
 // ── 자동 내보내기 (앱에서 대본을 고치고 멈추면) ──
-// 렌파이 연결을 켜고 폴더가 연결돼 있으면 script_flow.rpy를 다시 쓴다. 켜 둔 게임(showpy ui_kit 4.2+)이 저절로 다시 불러오고,
+// 렌파이 연결을 켜고 폴더가 연결돼 있으면 script_flow.rpy를 다시 쓴다. 켜 둔 게임(showpy)이 저절로 다시 불러오고,
 // "게임 줄 따라가기"가 켜져 있으면 지금 쓰는 줄로 게임을 옮긴다(pykaki_goto.json).
 const FOLLOW_KEY = 'pykaki-follow-line';
 export function followLine() {
@@ -429,7 +429,7 @@ export async function autoExport() {
     }
     autoWarned = false;
     // 화면만 고쳤을 때: 화면 원고만 쓴다. 원고가 이 대본 것일 때만 (세션 106: 원고가 다른 대본 것이라 자동 내보내기를
-    // 멈춰도 화면 원고는 먼저 써서, 게임 원고의 show screen이 없어진 화면을 불러 "Screen ... is not known"으로 멈췄다)
+    // 멈춰도 화면 원고는 먼저 써서, 게임 원고의 show screen이 없어진 화면을 불러 "Screen... is not known"으로 멈췄다)
     const sc = screensOut();
     const screensOnly = async () => {
       if (sc.code === lastScreens) return;

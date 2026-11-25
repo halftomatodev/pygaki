@@ -658,10 +658,8 @@ def version(lang="ko"):
             return m.group(1) if m else "?"
         except OSError:
             return "?"
-    return "%s ui_kit %s · screen_fx %s · splash %s" % (T[lang]["ver"],
-        v("showpy/game/ui_kit/engine/ui_kit.rpy", r'VERSION = "([\d.]+)"'),
-        v("showpy/game/screen_fx/engine/screen_fx.rpy", r'VERSION = "([\d.]+)"'),
-        v("showpy/game/splash/engine/splash.rpy", r'VERSION = "([\d.]+)"'))
+    # pygaki 판 하나 (플러그인 폴더마다 따로 매기지 않음)
+    return "pygaki v%s" % v("showpy/game/ui_kit/engine/ui_kit.rpy", r'VERSION = "([\d.]+)"')
 
 
 def head_src(text):

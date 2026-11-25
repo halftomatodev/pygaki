@@ -1,6 +1,6 @@
 // 등장 효과 셰이더: showpy와 같은 셰이더 파일을 읽고, 렌파이가 셰이더 조각을 합치는 방식 그대로 합친다.
 // - text_effects.glsl: showpy의 셰이더 파일을 그대로 가져옴 (저장소의 showpy/game/ui_kit/engine/text_effects.glsl)
-// - renpy_textshaders.glsl: 렌파이에 들어 있는 효과 (dissolve, flip ...)
+// - renpy_textshaders.glsl: 렌파이에 들어 있는 효과 (dissolve, flip...)
 // 합치는 방식은 렌파이 8.5.3 renpy/gl2/gl2shadercache.py와 renpy/text/shader.py를 따른다.
 import showpySource from '../../../showpy/game/ui_kit/engine/text_effects.glsl?raw';
 import renpySource from './renpy_textshaders.glsl?raw';
@@ -106,7 +106,7 @@ const BY_NAME = new Map([...HIDDEN_SHADERS, ...RENPY_SHADERS, ...SHOWPY_SHADERS]
 const PREVIEW = new Map<string, ShaderEffect>();
 export const shaderEffect = (name: string, preview = false) => BY_NAME.get(name) ?? (preview ? PREVIEW.get(name) : undefined);
 
-// ── 효과 폴더 (showpy ui_kit/effects/*.glsl, ui_kit 4.3) ──
+// ── 효과 폴더 (showpy ui_kit/effects/*.glsl) ──
 // 플러그인이 있는 게임 폴더를 연결했으면 그 폴더의 파일만 쓴다 (게임에서 도는 것과 같은 목록).
 // 연결하지 않았으면 showpy에 든 샘플(빌드할 때 같이 가져옴)을 쓴다.
 // 읽는 규칙은 showpy text_effects.rpy의 _tfx_register와 같다: 틀린 파일은 그 파일만 건너뛰고, 이미 있는 이름은 쓰지 않는다

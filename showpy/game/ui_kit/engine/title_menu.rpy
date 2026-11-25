@@ -1,5 +1,5 @@
 ################################################################################
-## UI Kit — 타이틀 메뉴 엔진
+## pygaki — 타이틀 메뉴 엔진
 ##
 ## 이 파일은 고칠 필요가 없습니다. 설정은 title_menu_config.rpy에서 하세요.
 ##
@@ -75,7 +75,7 @@ init -10 python in tmenu:
         )
 
     ## 엔진이 직접 처리하는 항목 설정. 여기 없는 이름은 글자 스타일 속성으로
-    ## 취급합니다. (font, size, color, outlines, kerning, bold ... 렌파이의
+    ## 취급합니다. (font, size, color, outlines, kerning, bold... 렌파이의
     ## 모든 텍스트 스타일 속성. 앞에 hover_를 붙이면 선택됐을 때의 값.)
     RESERVED = {
         "id", "text", "hover_text", "action", "show_if", "keyboard",

@@ -1,4 +1,4 @@
-## Screen FX — VHS·CRT 효과(vhs_crt) 엔진
+## 화면 효과 — VHS·CRT 효과(vhs_crt) 엔진
 ##
 ## 이 파일은 엔진입니다. 고치지 말고 vhs_crt_config.rpy에서 설정하세요.
 ##

@@ -1,9 +1,9 @@
 ################################################################################
-## Screen FX — 효과 바꾸기·전환 설정
+## 화면 효과 — 효과 바꾸기·전환 설정
 ##
 ## 여기만 고치면 됩니다. 적지 않은 값은 엔진의 기본값을 따릅니다.
 ##
-## UI Kit 편집기(개발 모드에서 Shift+M → T로 "화면 효과" 탭 → "전환" 버튼)로 바꿔
+## pygaki 게임 안 편집 화면(개발 모드에서 Shift+M → T로 "화면 효과" 탭 → "전환" 버튼)로 바꿔
 ## 저장하면 screen_fx_layout.rpy가 만들어지고, 그 파일의 값이 여기 값보다 우선합니다.
 ##
 ## ── 화면은 셰이더 두 개를 겹쳐 그립니다 (4.0) ──────────────────────────────
@@ -123,7 +123,7 @@ define screen_fx.wait = True
 define screen_fx.skippable = True
 
 ## 마우스 커서를 화면 효과의 어디에 그릴지 (4.2)
-## UI Kit의 커서(custom_ui.cursor = True, cursor_mode = "software")를 쓸 때만 해당됩니다.
+## pygaki의 커서(custom_ui.cursor = True, cursor_mode = "software")를 쓸 때만 해당됩니다.
 ##   "effect"   기본 효과와 덮개를 다 받음. ASCII면 커서도 글자로, 게임보이면 4색 점으로 (기본)
 ##   "overlay"  덮개(VHS)만 받음. 주사선, 색 번짐, 휘어짐은 받고 ASCII 등은 안 받음
 ##   "top"      효과를 안 받음. 늘 맨 위에 깨끗하게 (4.1까지와 같음)
@@ -152,7 +152,7 @@ define screen_fx.cursor = "effect"
 define screen_fx.title_shaders = ("ripple", "none")   # 타이틀에 일렁임 (5.5. 예전 "타이틀 일렁임")
 define screen_fx.menu_shaders = ("none", "none")
 
-## UI Kit 편집기(Shift+M)를 연 동안에도 화면 효과를 보여줄지 (3.4)
+## pygaki 게임 안 편집 화면(Shift+M)를 연 동안에도 화면 효과를 보여줄지 (3.4)
 ##   True   효과를 켠 채로 편집. 편집기 패널은 효과 위에 깨끗하게 보임 (기본)
 ##   False  "화면 효과" 탭이 아닌 탭에서는 효과를 잠시 끔 (3.3까지의 방식)
 ## 편집 중에 V 키로 언제든 켜고 끌 수 있습니다. (게임을 다시 켜면 이 값으로 돌아감)

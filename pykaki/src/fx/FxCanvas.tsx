@@ -1,5 +1,5 @@
 // 등장 효과를 WebGL로 그린다. 렌파이처럼 글자를 그림으로 만들고, 글자마다 조각(줄 높이 × 글자 폭, 중심은 글자 밑줄 자리)을
-// 나눠 렌파이와 같은 값(a_text_*, u_text_*, u_time, tex0, res0 ...)을 넘긴다. 셰이더는 showpy와 같은 파일에서 온다.
+// 나눠 렌파이와 같은 값(a_text_*, u_text_*, u_time, tex0, res0...)을 넘긴다. 셰이더는 showpy와 같은 파일에서 온다.
 // 글자 자리는 화면에 깔린 글자(span.ch, 보이지 않게 둠)에서 잰다. WebGL이 안 되면 onFail을 불러 CSS 흉내로 돌아간다.
 import { useEffect, useLayoutEffect, useRef, type RefObject } from 'react';
 import type { Tagged } from '../textTags';
