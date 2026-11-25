@@ -91,6 +91,8 @@ function liveConnect(entry) {
       try {
         const m = JSON.parse(line);
         if (m?.type === 'state' || m?.type === 'files') l.last[m.type] = m;
+        // 게임 안 편집 화면에서 [pygaki 앱에서 고르기]: 앱 창을 앞으로 (화면은 [GUI 편집]의 그 칸으로)
+        if (m?.type === 'open') showWin(entry.win);
         if (m?.type === 'reloading') {
           entry.reloading = { pid: info.pid, at: Date.now() };
           continue;
@@ -111,6 +113,19 @@ function liveConnect(entry) {
 function argProject(argv) {
   const i = argv.indexOf('--project');
   return i >= 0 && argv[i + 1] ? path.resolve(argv[i + 1]) : null;
+}
+
+// 게임 안 편집 화면의 [pygaki 앱에서 고르기]가 앱을 켤 때: --tab <게임 탭 id>. [GUI 편집]의 그 칸을 연다 (ui_kit 4.20)
+function argTab(argv) {
+  const i = argv.indexOf('--tab');
+  return i >= 0 && argv[i + 1] && /^[a-z_]+$/.test(argv[i + 1]) ? argv[i + 1] : null;
+}
+
+function showWin(win) {
+  if (win.isDestroyed()) return;
+  if (win.isMinimized()) win.restore();
+  win.show();
+  win.focus();
 }
 
 const isGame = (dir) => {
@@ -139,7 +154,7 @@ function inside(project, rel) {
   return full;
 }
 
-function open(project) {
+function open(project, tab = null) {
   const win = new BrowserWindow({
     width: 1440,
     height: 900,
@@ -149,7 +164,7 @@ function open(project) {
     webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, sandbox: true },
   });
   const id = win.webContents.id;
-  const entry = { win, project, watcher: null, rootWatcher: null, live: null, liveTimer: null, game: null, reloading: null };
+  const entry = { win, project, watcher: null, rootWatcher: null, live: null, liveTimer: null, game: null, reloading: null, openTab: tab };
   windows.set(id, entry);
   // showpy가 남기는 받아 적기 파일과 미리보기 파일을 지켜본다
   try {
@@ -300,6 +315,14 @@ ipcMain.handle('pygaki:liveStatus', (e) => {
   const entry = windows.get(e.sender.id);
   const on = !!(l && l.ready);
   return { on, reloading: !on && !!entry?.reloading, showpy: l?.info?.showpy ?? null, last: l ? Object.values(l.last) : [] };
+});
+
+// 앱을 켤 때 받은 --tab (한 번만 넘겨줌)
+ipcMain.handle('pygaki:openTab', (e) => {
+  const entry = windows.get(e.sender.id);
+  const t = entry?.openTab ?? null;
+  if (entry) entry.openTab = null;
+  return t;
 });
 
 // 폴더를 탐색기로 연다. make면 없는 폴더를 만들고 연다 (game 안만). 폴더 관리 메뉴(FolderMenu.tsx)가 씀
@@ -510,21 +533,21 @@ ipcMain.handle('pygaki:choose', async (e) => {
 });
 
 // 같은 프로젝트를 두 번 열면 있던 창을 앞으로
-function openOrFocus(project) {
+function openOrFocus(project, tab = null) {
   for (const w of windows.values())
     if (w.project.toLowerCase() === project.toLowerCase()) {
-      if (w.win.isMinimized()) w.win.restore();
-      w.win.focus();
+      showWin(w.win);
+      if (tab) w.win.webContents.send('pygaki:live', { type: 'open', tab });
       return;
     }
-  open(project);
+  open(project, tab);
 }
 
 if (!app.requestSingleInstanceLock()) app.quit();
 else {
   app.on('second-instance', async (_e, argv) => {
     const p = argProject(argv);
-    if (p && isGame(p)) openOrFocus(p);
+    if (p && isGame(p)) openOrFocus(p, argTab(argv));
     else {
       const dir = await pickProject();
       if (dir) openOrFocus(dir);
@@ -534,7 +557,7 @@ else {
     let p = argProject(process.argv);
     if (!p || !isGame(p)) p = await pickProject();
     if (!p) return app.quit();
-    open(p);
+    open(p, argTab(process.argv));
   });
   app.on('window-all-closed', () => app.quit());
 }

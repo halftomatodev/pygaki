@@ -25,7 +25,7 @@ export function CustomUIPanel({ cu }: { cu: CustomUIState | null | undefined }) 
 
   if (!cu) return <p className="sp-warn">이 게임에는 커서/대사 소리 기능(custom_ui)이 없어요.</p>;
   if (!cu.ok) return <p className="sp-warn">{cu.why || '지금은 쓸 수 없어요.'}</p>;
-  if (!cu.values) return <p className="tip">예전 플러그인이라 여기서 못 고쳐요 (ui_kit 3.15부터).</p>;
+  if (!cu.values) return <p className="tip">예전 플러그인이라 여기서 못 고쳐요.</p>;
 
   const v = cu.values;
   const edited = new Set(cu.edited ?? []);

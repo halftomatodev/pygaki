@@ -181,7 +181,6 @@
 일렁임	ゆらめき	Ripple
 저장됨	保存済み	Saved
 주사선	走査線	Scanlines
-줄기표	フロー表	Flow chart
 지우기	削除	Delete
 칠하기	塗り	Fill
 캐릭터	キャラクター	Characters
@@ -468,8 +467,6 @@ VHS 덮개	VHSオーバーレイ	VHS overlay
 이미지/영상	画像/動画	Image/video
 저장과 백업	保存とバックアップ	Saving and backups
 정하지 않음	未設定	Not set
-줄기표 접기	フロー表を閉じる	Hide flow chart
-줄기표 펴기	フロー表を開く	Show flow chart
 직접 고르기	自分で選ぶ	Custom
 찾기·바꾸기	検索・置換	Find & replace
 캐릭터 등록	キャラクター登録	Adding characters
@@ -1122,7 +1119,6 @@ images 폴더에 bg로 시작하는 그림·영상이 없어요.	imagesフォル
 밑줄 {u}  ${keyOf('tagUnderline')}	下線 {u}  {0}	Underline {u}  {0}
 선택지가 비어 있어요 (${b.title || b.id})	選択肢が空です ({0})	No choices ({0})
 여기서 줄을 바꾸고 세로로 빈 자리를 넣어요. 숫자는 픽셀	ここで改行し縦の空白を入れます。数値はピクセル	Line break with vertical space here. Pixels
-원고를 마디와 가지로 그린 줄기표를 원고 옆에 펴고 접어요	スクリプトを節と枝で描いたフロー表を横に開閉します	Show/hide the flow chart beside the script
 [대본 편집]에서 그 상자(label)의 셰이더 칸을 열어요	[スクリプト編集]でそのボックス(label)のシェーダー欄を開きます	Open that box (label)'s shader panel in [Script]
 call 대상이 없어요 (${b.title || b.id})	call先がありません ({0})	No call target ({0})
 pygaki 플러그인 연결이 꺼져 있어요 (왼쪽 [설정]).	pygakiプラグイン連携がオフです (左の[設定])。	The pygaki plugin link is off (left [Settings]).
@@ -1169,11 +1165,10 @@ ${e.name}의 값을 읽지 못했어요: ${short}=${v}	{0}の値を読めませ�
 상자나 label의 ◐ 셰이더 → 시작할 때, 끝날 때에서 골라요	ボックスかlabelの◐ シェーダー → 始まるとき・終わるときで選びます	Pick in ◐ Shader → At start / At end on a box or label
 숨김: 고르는 목록에서만 빠져요. 이미 정한 상자는 그대로 돌아요	非表示: 選択リストから外れるだけ。設定済みのボックスはそのまま動きます	Hidden: only removed from pickers. Boxes using it still work
 알 수 없는 조건이 있어서 갈래를 정하지 못했어요. 골라 주세요.	不明な条件があるため分岐を決められません。選んでください。	An unknown condition blocks the decision. Please pick.
-예전 플러그인이라 상자마다 못 바꿔요 (ui_kit 4.7부터).	古いプラグインのためボックスごとに変えられません (ui_kit 4.7から)。	Old plugin: per-box settings need ui_kit 4.7.
-예전 플러그인이라 여기서 못 고쳐요 (ui_kit 3.15부터).	古いプラグインのためここでは編集できません (ui_kit 3.15から)。	Old plugin: editing here needs ui_kit 3.15.
+예전 플러그인이라 상자마다 못 바꿔요.	古いプラグインのためボックスごとに変えられません。	Old plugin: per-box settings are not available.
+예전 플러그인이라 여기서 못 고쳐요.	古いプラグインのためここでは編集できません。	Old plugin: cannot be edited here.
 이 브라우저는 WebGL이 안 돼서 셰이더 샘플을 볼 수 없어요.	このブラウザはWebGLが使えないのでシェーダーのサンプルを見られません。	No WebGL here, so shader samples can't be shown.
 이름 규칙으로 잇기, 이 줄은 음성 없음, 또는 파일 직접 고르기	名前規則でつなぐ、この行はボイスなし、またはファイルを直接選ぶ	Link by name rule, no voice, or pick a file
-줄기표는 pygaki 플러그인 screen_fx 5.2부터 있어요	フロー表はpygakiプラグインscreen_fx 5.2からあります	The flow chart needs pygaki plugin screen_fx 5.2
 칸 크기를 잠갔어요 ([대본 편집] 왼쪽 칸 [설정]에서 풀어요)	パネルサイズをロックしました ([スクリプト編集]左の[設定]で解除)	Panel sizes locked (unlock in [Script] left [Settings])
 켜 두면 게임이 켜져 있을 때 대본만 내보내고 게임은 그대로 둬요	オンだとゲーム起動中はスクリプトだけ書き出し、ゲームはそのまま	When on, only exports the script if the game is running
 플래그 카드에 없는 이름: ${unknown.join(', ')}	フラグカードにない名前: {0}	Names not in the flags card: {0}
@@ -1203,7 +1198,7 @@ images, movies 폴더에 배경 말고 다른 그림·영상이 없어요.	image
 상자와 label의 셰이더는 pygaki 플러그인 연결을 켜야 내보내요	ボックスとlabelのシェーダーはpygakiプラグイン連携をオンにすると書き出します	Box and label shaders need the pygaki plugin link
 시작에서 도달할 수 없는 상자예요 (${b.title || b.id})	開始から到達できないボックスです ({0})	Box unreachable from start ({0})
 여기서 0.5초 쉬었다가 저절로 이어서 나와요. 숫자는 바꿀 수 있어요	ここで0.5秒休んで自動で続きます。数値は変えられます	Pauses 0.5s then continues. You can change the number
-예전 플러그인이라 세부 값은 안 돼요 (screen_fx 5.5부터).	古いプラグインのため詳細値は使えません (screen_fx 5.5から)。	Old plugin: details need screen_fx 5.5.
+예전 플러그인이라 세부 값은 안 돼요.	古いプラグインのため詳細値は使えません。	Old plugin: details are not available.
 이 판의 앱에서는 게임을 켤 수 없어요. 렌파이 런처에서 실행해 주세요	このバージョンのアプリではゲームを起動できません。Ren'Pyランチャーから実行してください	This app version can't launch games. Use the Ren'Py launcher
 지금: label의 ${shaderLabel(group.shader)}	現在: labelの{0}	Now: label's {0}
 커서가 셰이더를 받을지 줄마다 정해요. 소프트웨어 커서일 때만 보여요.	カーソルにシェーダーをかけるか行ごとに決めます。ソフトウェアカーソルのときだけ表示。	Per line, whether the cursor is under shaders. Software cursor only.
@@ -1239,7 +1234,7 @@ game 폴더나 game/fonts에 글꼴 파일(.ttf, .otf)이 없어요	gameフォ�
 이 태그 효과의 세부 값을 막대로 고쳐요 ({shader=이름:u__값=3})	このタグエフェクトの詳細値をスライダーで調整 ({shader=名前:u__値=3})	Adjust this tag effect with sliders ({shader=name:u__value=3})
 ). 표정은 [그림, 영상] 카드에서 그림 줄로 넣어요. 누르면 이 줄에서 빼요	)。表情は[画像・動画]カードで画像行として入れます。押すとこの行から外します	). Add expressions as image lines in the [Images, video] card. Click to remove
 보통 글 {alpha=${alphaNow}}흐리게 한 글{/alpha} 보통 글	普通の文字 {alpha={0}}薄くした文字{/alpha} 普通の文字	Normal {alpha={0}}faded text{/alpha} normal
-예전 플러그인이라 TV 꺼짐·켜짐으로 내보내요 (screen_fx 5.6부터).	古いプラグインのためTVオフ・オンで書き出します (screen_fx 5.6から)。	Old plugin: exported as TV off/on (needs screen_fx 5.6).
+예전 플러그인이라 TV 꺼짐·켜짐으로 내보내요.	古いプラグインのためTVオフ・オンで書き出します。	Old plugin: exported as TV off/on.
 음성 쓰기를 끌까요? 번호와 고른 파일은 남고, 원고의 voice 줄만 빠져요.	ボイスをオフにしますか? 番号と選んだファイルは残り、スクリプトのvoice行だけ外れます。	Turn voice off? Numbers and picks stay; only voice lines are removed.
 하나씩: 새 효과음이 앞 효과음을 끊어요 / 겹쳐 나옴: 여러 소리가 같이 나요	1つずつ: 新しい効果音が前の音を止めます / 重ねて鳴る: 複数の音が同時に鳴ります	One at a time: new sound stops the previous / Overlapping: sounds play together
 call한 장면이 return으로 끝나면 이 상자로. 비우면 여기서도 return	callしたシーンがreturnで終わったらこのボックスへ。空ならここでもreturn	After the called scene returns, go here. Empty = return here too
@@ -1318,7 +1313,7 @@ ${c.name}의 대사가 남아 있어요. 그래도 지울까요? (대사는 "등
 화면 테마, 집중 모드 흐림, 단축키를 모두 처음 값으로 되돌릴까요?\n대본과 상자 색은 그대로예요.	画面テーマ、集中モードのぼかし、ショートカットをすべて初期値に戻しますか?\nスクリプトとボックスの色はそのままです。	Reset theme, focus dimming and shortcuts?\nScript and box colors stay.
 어둡게 테마에서는 상자가 그라데이션 색을 따라서 칠할 수 없어요. 칠해 둔 색은 다른 테마에서 보여요.	ダークテーマではボックスがグラデーション色に従うので塗れません。塗った色は他のテーマで表示されます。	In the dark theme boxes follow the gradient, so they can't be colored. Colors show in other themes.
 이 대사의 속도와 소리를 이 상자의 다른 대사·내레이션 줄에도 똑같이 걸어요 (↶ 되돌리기로 돌아와요)	このセリフの速度と音をこのボックスの他のセリフ・ナレーション行にも同じくかけます (↶ で戻せます)	Apply this line's speed and sound to other lines in the box (↶ to undo)
-종료 확인 창, 퀵메뉴 버튼 같은 글을 바꿔요. pygaki 플러그인 ui_kit 3.23부터 있어요.	終了確認やクイックメニューのボタンなどの文字を変えます。pygakiプラグイン ui_kit 3.23から。	Change texts like quit confirm and quick menu buttons. Needs pygaki plugin ui_kit 3.23.
+종료 확인 창, 퀵메뉴 버튼 같은 글을 바꿔요. 예전 pygaki 플러그인에는 없어요.	終了確認やクイックメニューのボタンなどの文字を変えます。古いpygakiプラグインにはありません。	Change texts like quit confirm and quick menu buttons. Not in older pygaki plugins.
 캐릭터 id "${c.id}"는 pygaki 플러그인이 쓰는 이름과 겹쳐요. 다른 이름으로 바꿔 주세요	キャラクターid「{0}」はpygakiプラグインが使う名前と重なっています。別の名前にしてください	Character id "{0}" clashes with a pygaki plugin name. Please rename it
 images 폴더에 "${who}"로 시작하는 그림이 없어요 (예: "${who} smile.png").	imagesフォルダに「{0}」で始まる画像がありません (例: 「{1} smile.png」)。	No images starting with "{0}" in images (e.g. "{1} smile.png").
 고른 구간(끝 다음의 '원래대로' 줄까지)과 고른 전환 점의 셰이더 줄을 지워요. 저장하면 원고에서 빠져요	選んだ区間(終わりの次の「元に戻す」行まで)と選んだトランジション点のシェーダー行を消します。保存でスクリプトから外れます	Delete shader lines in the range (through the "restore" line) and at the selected point. Removed from the script on save
@@ -1337,10 +1332,10 @@ images 폴더에 "${who}"로 시작하는 그림이 없어요 (예: "${who} smil
 그림 효과 파일이 없어요. pygaki 플러그인의 효과 폴더(ui_kit/effects)를 새 판으로 바꾸면 생겨요.	画像エフェクトファイルがありません。pygakiプラグインのエフェクトフォルダ(ui_kit/effects)を新しい版にすると入ります。	No image effect files. Update the pygaki plugin's effects folder (ui_kit/effects).
 그림을 넣는 것은 [대본 편집] 상자의 배경, 그림·영상 카드에서 해요. 여기서는 게임 화면에서 자리를 끌어 정해요.	画像の追加は[スクリプト編集]のボックスの背景、画像・動画カードで。ここではゲーム画面で位置をドラッグして決めます。	Add images in the background and image cards of a box in [Script]. Here you drag positions in the game.
 렌파이 명령 (예: show alice smile / scene bg room / play music "a.ogg")	Ren'Pyコマンド (例: show alice smile / scene bg room / play music "a.ogg")	Ren'Py command (e.g. show alice smile / scene bg room / play music "a.ogg")
-상자의 커서, 클릭 대기는 pygaki 플러그인 ui_kit 4.7부터 돼요. 이 게임은 예전 판이라 내보내지 않아요	ボックスのカーソル・クリック待ちはpygakiプラグイン ui_kit 4.7からです。このゲームは古い版なので書き出しません	Box cursor and click-to-continue need ui_kit 4.7. This game is older, so skipped
+상자의 커서, 클릭 대기는 새 pygaki 플러그인부터 돼요. 이 게임은 예전 판이라 내보내지 않아요	ボックスのカーソル・クリック待ちは新しいpygakiプラグインからです。このゲームは古い版なので書き出しません	Box cursor and click-to-continue need a newer pygaki plugin. This game is older, so skipped
 크기 {size=}: 30은 그 크기, +10은 더 크게, -10은 더 작게, *1.5는 1.5배. Enter로 적용	サイズ {size=}: 30はそのサイズ、+10は大きく、-10は小さく、*1.5は1.5倍。Enterで適用	Size {size=}: 30 exact, +10 larger, -10 smaller, *1.5 scale. Enter to apply
 "${f.name}"를 ${uses.length}곳에서 쓰고 있어요. 그래도 지울까요? (쓴 곳의 식은 그대로 남아요)	「{0}」を{1}か所で使っています。それでも削除しますか? (使用箇所の式は残ります)	"{0}" is used in {1} places. Delete anyway? (Expressions stay)
-pygaki 플러그인(ui_kit 3.14 이상)이 든 게임을 개발 모드로 켜면 저절로 붙어요. 배포판에서는 안 붙어요	pygakiプラグイン(ui_kit 3.14以上)入りのゲームを開発モードで起動すると自動で接続します。配布版では接続しません	Games with the pygaki plugin (ui_kit 3.14+) connect automatically in developer mode. Not in release builds
+pygaki 플러그인이 든 게임을 개발 모드로 켜면 저절로 붙어요. 배포판에서는 안 붙어요	pygakiプラグイン入りのゲームを開発モードで起動すると自動で接続します。配布版では接続しません	Games with the pygaki plugin connect automatically in developer mode. Not in release builds
 이 창을 게임 창 옆 빈 곳으로 옮겨요 (게임이 켜져 있을 때). [설정]에서 연결될 때마다 저절로 하게 할 수 있어요	このウィンドウをゲームの横の空きへ移します (ゲーム起動中)。[設定]で接続のたびに自動にできます	Move this window beside the game (while running). Can be automatic in [Settings]
 화면이 위아래로 눌려 가로선이 되고 점으로 꺼졌다가, 검은 화면 뒤에 다시 켜져요. 검은 화면일 때 셰이더가 바뀌어요.	画面が上下に潰れて横線になり点で消え、黒い画面の後で再びつきます。黒い画面のときシェーダーが変わります。	The screen squashes to a line and a dot, goes black, then turns on. Shaders switch while black.
 ESC 메뉴와 거기서 연 화면에만 걸리는 셰이더 두 자리예요. 메뉴가 열려 있는 동안 뒤 게임 화면도 이 셰이더로 보여요.	ESCメニューとそこから開いた画面だけにかかる2つのシェーダーです。メニューが開いている間、後ろのゲーム画面もこのシェーダーで見えます。	Two shader slots for the ESC menu and its screens. The game behind uses them while the menu is open.
@@ -1369,7 +1364,7 @@ ${inf.name} 폴더에 대본 파일이 ${rows.length}개 있어요. 고른 파�
 비디오테이프가 늘어나듯 앞 상자의 마지막 화면이 출렁이며 늘어지고 색이 번지다가, 가장 심할 때 이 상자의 첫 화면과 셰이더로 바뀌어요.	ビデオテープが伸びるように前の画面が波打ち伸びて色がにじみ、最もひどいときこのボックスの最初の画面とシェーダーに変わります。	Like stretched tape, the last screen wobbles and bleeds, switching at its worst.
 캐릭터 대사마다 음성 파일을 이어요. 켜면 대사마다 번호를 매기고, game/audio/voice에 이름대로 넣은 파일이 저절로 이어져요	キャラクターのセリフごとにボイスファイルをつなぎます。オンにするとセリフに番号を振り、game/audio/voiceに名前どおり入れたファイルが自動でつながります	Link voice files to character lines. Lines get numbers; files named that way in game/audio/voice link automatically
 이 상자에서만 걸려요. 정하지 않은 상자는 게임 처음 값. game/gui/ctc, gui/cursor 안의 그림 폴더를 이름 차례로 돌려요	このボックスだけにかかります。未設定のボックスはゲームの初期値。game/gui/ctc、gui/cursor内の画像フォルダを名前順に再生します	Applies to this box only; others use the game default. Plays image folders in game/gui/ctc, gui/cursor in name order
-셰이더와 TV 전환의 세부 값은 pygaki 플러그인의 화면 효과(screen_fx) 5.5부터 돼요. 이 게임은 예전 판이라 값 없이 내보내요	シェーダーとTVトランジションの詳細値はpygakiプラグイン screen_fx 5.5からです。このゲームは古い版なので値なしで書き出します	Shader and TV details need screen_fx 5.5. This game is older, so exported without values
+셰이더와 TV 전환의 세부 값은 새 pygaki 플러그인부터 돼요. 이 게임은 예전 판이라 값 없이 내보내요	シェーダーとTVトランジションの詳細値は新しいpygakiプラグインからです。このゲームは古い版なので値なしで書き出します	Shader and TV details need a newer pygaki plugin. This game is older, so exported without values
 이 게임의 셰이더 목록에 셰이더 코드가 없어요. 게임을 한 번 켠 뒤 [다시 읽기]를 눌러 주세요 (pygaki 플러그인이 예전 판이면 새 판으로)	このゲームのシェーダー一覧にコードがありません。ゲームを一度起動して[再読み込み]を押してください (プラグインが古ければ更新を)	No shader code in this game's list. Run the game once and click [Reload] (update an old plugin)
 ${where}: "${a}"는 바꾸는 식이 아니에요 (예: love += 1, met_alice = True) (${b.title || b.id})	{0}: 「{1}」は変更式ではありません (例: love += 1, met_alice = True) ({2})	{0}: "{1}" is not a change expression (e.g. love += 1, met_alice = True) ({2})
 ${r.rel}은(는) images, movies 폴더 밖이라 렌파이가 그림 이름으로 못 찾아요. game/${dir} 폴더 안의 파일을 골라 주세요.	{0}はimages・moviesフォルダの外なのでRen'Pyが画像名で見つけられません。game/{1}フォルダ内のファイルを選んでください。	{0} is outside images/movies, so Ren'Py can't find it by name. Pick a file in game/{1}.
@@ -1386,8 +1381,8 @@ ${SHADER_TRANS.find(([n]) => n === fxName)?.[1] ?? fxName}이 깨지는 방향. 
 ${key === 'cursor' ? 'cursor1.png' : 'ctc1.png'}부터 순서대로, 12장까지, 64×64 권장. 같은 이름으로 덮어쓰면 바로 바뀌어요	{0}から順に12枚まで、64×64推奨。同じ名前で上書きするとすぐ変わります	From {0} in order, up to 12, 64×64 recommended. Overwrite with the same name to update
 누르기: 그 줄로 · 끌기: 구간 고르기 → [이 구간에 적용] · 네모 점: 전환 점 · Delete: 고른 구간·점의 셰이더 지우기 · 색 띠: 왼쪽 1번, 오른쪽 2번	クリック: その行へ · ドラッグ: 区間選択 → [この区間に適用] · 四角い点: トランジション点 · Delete: 選んだ区間・点のシェーダー削除 · 色帯: 左1番、右2番	Click: go to line · Drag: select range → [Apply to range] · square dot: transition point · Delete: clear shaders · color bands: left slot 1, right slot 2
 [확인] 파일을 다시 읽어요${s.dirty ? ' (여기서 고친 것은 버전 목록에 백업돼요)' : ''}\n[취소] 지금 화면의 대본을 쓰고, 다음 저장 때 파일을 덮어써요	[OK] ファイルを再読み込みします{0}\n[キャンセル] 今の画面のスクリプトを使い、次の保存でファイルを上書きします	[OK] reload the file{0}\n[Cancel] keep this script and overwrite the file on next save
-셰이더 전환 "${t}"는 pygaki 플러그인의 화면 효과(screen_fx) 5.6부터 돼요. 이 게임은 예전 판이라 TV 꺼짐·켜짐으로 내보내요 (${b.title || b.id})	シェーダートランジション「{0}」はscreen_fx 5.6からです。このゲームは古い版なのでTVオフ・オンで書き出します ({1})	Shader transition "{0}" needs screen_fx 5.6. This game is older, so exported as TV off/on ({1})
-게임을 켰을 때 타이틀 전에 나오는 페이지예요. pygaki 플러그인 4.18(splash 1.2)부터 여기서 고쳐요. 예전 판이면 splash/splash_config.rpy에서 고쳐요.	ゲーム起動時にタイトルの前に出るページです。pygakiプラグイン4.18(splash 1.2)からここで編集。古い版はsplash/splash_config.rpyで。	Pages shown before the title. Editable here from pygaki plugin 4.18 (splash 1.2); older: splash/splash_config.rpy.
+셰이더 전환 "${t}"는 새 pygaki 플러그인부터 돼요. 이 게임은 예전 판이라 TV 꺼짐·켜짐으로 내보내요 (${b.title || b.id})	シェーダートランジション「{0}」は新しいpygakiプラグインからです。このゲームは古い版なのでTVオフ・オンで書き出します ({1})	Shader transition "{0}" need a newer pygaki plugin. This game is older, so exported as TV off/on ({1})
+게임을 켰을 때 타이틀 전에 나오는 페이지예요. 여기서 고쳐요. 예전 판이면 splash/splash_config.rpy에서 고쳐요.	ゲーム起動時にタイトルの前に出るページです。ここで編集。古い版はsplash/splash_config.rpyで。	Pages shown before the title. Editable here; older: splash/splash_config.rpy.
 빈 곳 더블클릭: 새 상자 · 상자 더블클릭: 글 쓰기 · 선을 빈 곳에 놓기: 새 상자로 연결 · 선 더블클릭: jump↔call · Shift+드래그: 여러 개 선택 · Delete: 삭제	空き所ダブルクリック: 新しいボックス · ボックスダブルクリック: 書く · 線を空き所に落とす: 新しいボックスへ接続 · 線ダブルクリック: jump↔call · Shift+ドラッグ: 複数選択 · Delete: 削除	Double-click empty: new box · double-click box: write · drop a line on empty: new linked box · double-click line: jump↔call · Shift+drag: multi-select · Delete: delete
 파일 이름 규칙: 캐릭터_label_번호 (예: mina_ward_012.ogg). game/audio/voice에 넣으면 저절로 이어져요. 번호는 한 번 매기면 줄을 넣거나 옮겨도 그대로예요	ファイル名の規則: キャラクター_label_番号 (例: mina_ward_012.ogg)。game/audio/voiceに入れると自動でつながります。番号は一度振ると行を追加・移動しても変わりません	File name rule: character_label_number (e.g. mina_ward_012.ogg). Put in game/audio/voice to link. Numbers never change once assigned
 셰이더 전환 "${t}"의 효과 파일이 게임의 효과 폴더(ui_kit/effects)에 없어서 TV 꺼짐·켜짐으로 내보내요. [효과] 화면에서 넣을 수 있어요 (${b.title || b.id})	シェーダートランジション「{0}」のファイルがゲームのエフェクトフォルダにないのでTVオフ・オンで書き出します。[エフェクト]画面で追加できます ({1})	Transition "{0}" has no file in the game's effects folder, so exported as TV off/on. Add it in [Effects] ({1})
@@ -1893,10 +1888,10 @@ label 이름 "${g.name}"은 쓸 수 없어요 (영문·숫자·_만, 숫자로 �
 누르면 그 상자로	押すとそのボックスへ	click to go to box
 조건 알 수 없음	条件不明	condition unknown
 단축키, 조작 방법	ショートカット、操作方法	Shortcuts, controls
-새 단축키를 만들고 렌파이 기본 단축키에서 키를 빼요. 설명을 적으면 조작방법 화면 목록에 붙고, 스플래시 조작 방법 페이지의 표가 "auto"면 거기도 같이 바뀌어요. 키는 아래 키 단추로 고르거나 게임 창에서 눌러요. pygaki 플러그인 hotkeys 1.1부터 있어요.	新しいショートカットを作り、Ren'Pyの標準ショートカットからキーを外します。説明を書くと操作方法画面の一覧に加わり、スプラッシュの操作方法ページの表が"auto"ならそこも一緒に変わります。キーは下のキーボタンで選ぶか、ゲームウィンドウで押します。pygakiプラグイン hotkeys 1.1から使えます。	Make new shortcuts and remove keys from Ren'Py's default shortcuts. A description you write is added to the controls screen list, and if the splash controls page's table is "auto" it changes there too. Pick keys with the key buttons below or press them in the game window. Available from pygaki plugin hotkeys 1.1.
+새 단축키를 만들고 렌파이 기본 단축키에서 키를 빼요. 설명을 적으면 조작방법 화면 목록에 붙고, 스플래시 조작 방법 페이지의 표가 "auto"면 거기도 같이 바뀌어요. 키는 아래 키 단추로 고르거나 게임 창에서 눌러요. 예전 pygaki 플러그인에는 없어요.	新しいショートカットを作り、Ren'Pyの標準ショートカットからキーを外します。説明を書くと操作方法画面の一覧に加わり、スプラッシュの操作方法ページの表が"auto"ならそこも一緒に変わります。キーは下のキーボタンで選ぶか、ゲームウィンドウで押します。古いpygakiプラグインにはありません。	Make new shortcuts and remove keys from Ren'Py's default shortcuts. A description you write is added to the controls screen list, and if the splash controls page's table is "auto" it changes there too. Pick keys with the key buttons below or press them in the game window. Not in older pygaki plugins.
 단축키 수정	ショートカット編集	Edit shortcuts
 조작 안내 화면	操作案内画面	Controls guide
-기능 옆 키 단추를 누르고 게임 창에서 바꿀 키를 눌러요. 다른 기능이 쓰는 키면 경고와 안내가 나와요. [안내 화면으로 내보내기]를 누르면 조작 안내 화면의 표가 이 설정을 따라가고, 보여 줄 기능은 조작 안내 화면에서 골라요. pygaki 플러그인 hotkeys 1.2부터 있어요.	機能の横のキーボタンを押し、ゲームウィンドウで新しいキーを押します。ほかの機能が使っているキーなら警告と案内が出ます。[案内画面へ書き出す]を押すと操作案内画面の表がこの設定に従い、表示する機能は操作案内画面で選びます。pygakiプラグイン hotkeys 1.2から使えます。	Press the key button next to a function, then press the new key in the game window. If another function already uses that key, you get a warning and guidance. Press [Export to guide screen] and the controls guide table follows these settings; pick which functions to show on the controls guide screen. Available from pygaki plugin hotkeys 1.2.
+기능 옆 키 단추를 누르고 게임 창에서 바꿀 키를 눌러요. 다른 기능이 쓰는 키면 경고와 안내가 나와요. [안내 화면으로 내보내기]를 누르면 조작 안내 화면의 표가 이 설정을 따라가고, 보여 줄 기능은 조작 안내 화면에서 골라요. 예전 pygaki 플러그인에는 없어요.	機能の横のキーボタンを押し、ゲームウィンドウで新しいキーを押します。ほかの機能が使っているキーなら警告と案内が出ます。[案内画面へ書き出す]を押すと操作案内画面の表がこの設定に従い、表示する機能は操作案内画面で選びます。古いpygakiプラグインにはありません。	Press the key button next to a function, then press the new key in the game window. If another function already uses that key, you get a warning and guidance. Press [Export to guide screen] and the controls guide table follows these settings; pick which functions to show on the controls guide screen. Not in older pygaki plugins.
 만들기	作成	Create
 호감도	好感度	Affection
 숫자 둘	数値ふたつ	Two numbers
@@ -2321,7 +2316,7 @@ ${label} 값	{0} の値	{0} value
 안쪽 세로 (px, HUD 세로보다 크면 세로로 넘겨 봄)	内側の高さ (px、HUDの高さより大きければ縦にスクロール)	Inner height (px; scrolls up and down if taller than the HUD)
 게임 화면(HUD)의 꼴도 같은 모서리로 그려요. 그림을 넣은 부품은 그림 그대로예요	ゲーム画面(HUD)の形も同じ角で描きます。画像を入れた部品は画像のままです	The in-game (HUD) widget uses the same corners. Parts with an image keep the image
 안쪽 칸을 HUD보다 크게 잡고, 게임에서 끌거나 마우스 휠로 넘겨 봐요 (렌파이 viewport). 넓은 미니맵 등에 써요	内側をHUDより大きくして、ゲームでドラッグやマウスホイールでスクロールします (Ren'Py viewport)。広いミニマップなどに使います	Make the inside larger than the HUD and scroll it in game by dragging or with the mouse wheel (Ren'Py viewport). Good for a wide minimap
-[대본 편집]의 [화면] 탭에서 만든 화면과 HUD를 게임 화면 위에서 고쳐요. 항목을 끌어 옮기고, HUD는 붙일 곳과 크기를 정하고, 글을 고쳐요. 저장하면 대본에도 받아 적어요. 항목을 더하거나 지우는 것과 버튼이 할 일은 [화면] 탭에서 해요. pygaki 플러그인 ui_kit 4.13부터 있어요.	[台本編集]の[画面]タブで作った画面とHUDをゲーム画面の上で直します。項目をドラッグで移動し、HUDは固定位置と大きさを決め、テキストを直します。保存すると台本にも取り込みます。項目の追加・削除とボタンの動作は[画面]タブで行います。pygakiプラグイン ui_kit 4.13から使えます。	Edit the screens and HUDs made in the [Screens] tab of [Script] right on the game screen: drag items, set the HUD anchor and size, and edit text. Saving also updates the script. Add or remove items and set button actions in the [Screens] tab. Available from pygaki plugin ui_kit 4.13.
+[대본 편집]의 [화면] 탭에서 만든 화면과 HUD를 게임 화면 위에서 고쳐요. 항목을 끌어 옮기고, HUD는 붙일 곳과 크기를 정하고, 글을 고쳐요. 저장하면 대본에도 받아 적어요. 항목을 더하거나 지우는 것과 버튼이 할 일은 [화면] 탭에서 해요. 예전 pygaki 플러그인에는 없어요.	[台本編集]の[画面]タブで作った画面とHUDをゲーム画面の上で直します。項目をドラッグで移動し、HUDは固定位置と大きさを決め、テキストを直します。保存すると台本にも取り込みます。項目の追加・削除とボタンの動作は[画面]タブで行います。古いpygakiプラグインにはありません。	Edit the screens and HUDs made in the [Screens] tab of [Script] right on the game screen: drag items, set the HUD anchor and size, and edit text. Saving also updates the script. Add or remove items and set button actions in the [Screens] tab. Not in older pygaki plugins.
 영상	動画	Video
 배율	倍率	Scale
 0.5초	0.5秒	0.5 s
@@ -2994,3 +2989,49 @@ PNG, JPEG, WebP. 정사각형 256×256 이상 (1024보다 크면 1024로 줄여 
 PNG, JPEG, WebP. 정사각형 256×256 이상 → 16~256 크기를 담은 .ico로. 이미 만든 .ico(256 포함)는 그대로	PNG、JPEG、WebP。正方形 256×256 以上 → 16〜256 のサイズを含む .ico に。作成済みの .ico(256 を含む)はそのまま	PNG, JPEG, WebP. Square, 256×256 or larger → an .ico with sizes 16–256. A ready-made .ico (with 256) is used as is
 이 .ico에는 256×256 그림이 없어요 (든 크기: {0}). 256×256이 든 .ico를 고르거나 PNG 그림을 골라 주세요	この .ico には 256×256 の画像がありません(含まれるサイズ: {0})。256×256 を含む .ico か PNG 画像を選んでください	This .ico has no 256×256 image (sizes: {0}). Choose an .ico with 256×256 or a PNG image
 게임을 배포할 때 쓰는 아이콘이에요. 둘 다 정사각형 256×256 이상인 PNG, JPEG, WebP 그림을 골라요. 투명한 바탕을 쓰려면 PNG나 WebP로. 크기별 그림은 pygaki가 만들어요.	ゲームを配布するときに使うアイコンです。どちらも正方形 256×256 以上の PNG、JPEG、WebP 画像を選びます。透明な背景には PNG か WebP を。サイズ別の画像は pygaki が作ります。	Icons used when distributing the game. Both take a square PNG, JPEG or WebP image of 256×256 or larger. Use PNG or WebP for a transparent background. pygaki makes the sized images.
+게임 화면 경계선을 꺼요	ゲーム画面の境界線をオフにします	Turning off the game screen border
+게임 화면 경계선을 껐어요 (게임과 연결되면 보내요)	ゲーム画面の境界線をオフにしました(ゲームと接続したら送ります)	Game screen border off (sent when connected to the game)
+게임 화면 경계선을 켰어요 (게임과 연결되면 보내요)	ゲーム画面の境界線をオンにしました(ゲームと接続したら送ります)	Game screen border on (sent when connected to the game)
+게임 화면 경계선 켜기/끄기 (앱, 게임과 연결됐을 때)	ゲーム画面の境界線をオン/オフ(アプリ、ゲームと接続中)	Toggle the game screen border (app, while connected to the game)
+게임 화면 가장자리에 붉은 경계선 (게임 안 편집 화면을 열었을 때)	ゲーム画面の端に赤い境界線(ゲーム内編集画面を開いたとき)	Red border at the game screen edge (while the in-game editor is open)
+게임 화면 가장자리에 붉은 경계선을 켜요 (게임 안 편집 화면을 열었을 때)	ゲーム画面の端に赤い境界線を引きます(ゲーム内編集画面を開いたとき)	Turning on the red border at the game screen edge (while the in-game editor is open)
+창이 게임 화면보다 커서 둘레에 검은 띠가 남을 때(레트로 해상도처럼 정수 배율로 키운 게임 등), 게임 안 편집 화면이 열려 있으면 게임 화면 가장자리에 붉은 선을 그어요. 띠는 칠하지 않아요. 게임 창에서는 F8	ウィンドウがゲーム画面より大きく周りに黒い帯が残るとき(レトロ解像度のように整数倍で拡大したゲームなど)、ゲーム内編集画面が開いていればゲーム画面の端に赤い線を引きます。帯は塗りません。ゲームウィンドウでは F8	When the window is larger than the game screen and black bands remain around it (e.g. games scaled up by a whole number like the retro resolutions), a red line is drawn at the game screen edge while the in-game editor is open. The bands are not painted. F8 in the game window
+게임 안 편집 화면 단축키	ゲーム内編集画面のショートカット	In-game editor shortcuts
+게임 창에서 Shift+M으로 연 편집 화면의 키예요. 여기서는 보기만 해요	ゲームウィンドウで Shift+M で開く編集画面のキーです。ここでは表示のみです	Keys for the editor opened with Shift+M in the game window. View only here
+모든 탭	すべてのタブ	All tabs
+패널	パネル	Panel
+자리 옮기기 (타이틀, 대사, 선택지, 그림, 스플래시)	位置の移動(タイトル、セリフ、選択肢、画像、スプラッシュ)	Moving things (title, dialogue, choices, images, splash)
+원고 줄 고르기 (그림·영상 배치, 화면 효과)	スクリプト行の選択(画像・動画の配置、画面効果)	Picking script lines (image/video placement, screen FX)
+게임 안 편집 화면 열기/닫기 (개발 모드)	ゲーム内編集画面を開く/閉じる(開発モード)	Open/close the in-game editor (developer mode)
+다음 탭 / 앞 탭	次のタブ / 前のタブ	Next tab / previous tab
+저장 (대사, 선택지, 이미지 줄은 원고에 바로)	保存(セリフ、選択肢、画像の行はスクリプトに直接)	Save (dialogue, choice, and image lines go straight to the script)
+지금 값을 원고 글로 복사	今の値をスクリプトの文としてコピー	Copy the current values as script text
+편집 화면 닫기 (고르기 창이면 창만)	編集画面を閉じる(選択ウィンドウならそれだけ)	Close the editor (only the picker if one is open)
+게임 패널의 단축키 안내 펴기/접기	ゲームパネルのショートカット案内を開く/閉じる	Show/hide the shortcut help on the game panel
+게임 화면 경계선 켜기/끄기	ゲーム画面の境界線をオン/オフ	Toggle the game screen border
+게임 창 패널 보이기/숨기기 (앱과 연결됐을 때)	ゲームウィンドウのパネルを表示/非表示(アプリと接続中)	Show/hide the game-window panel (while connected to the app)
+화면 효과 보기 켜기/끄기	画面効果の表示をオン/オフ	Toggle showing screen FX
+제목(=) 끌기	タイトル(=)をドラッグ	Drag the title (=)
+패널 옮기기	パネルを移動	Move the panel
+패널을 다른 구석으로	パネルを別の隅へ	Move the panel to another corner
+패널 접기	パネルを畳む	Fold the panel
+Space (누르는 동안)	Space(押している間)	Space (while held)
+패널 숨기기	パネルを隠す	Hide the panel
+고른 것이 패널 아래면 비키기 켜기/끄기	選んだものがパネルの下ならよける、をオン/オフ	Toggle moving the panel away from the selection
+마우스 끌기	マウスでドラッグ	Mouse drag
+고른 것 옮기기 (Shift: 한 방향)	選んだものを移動(Shift:一方向)	Move the selection (Shift: one axis)
+방향키	方向キー	Arrow keys
+옮기기 (Shift: 10배)	移動(Shift:10倍)	Move (Shift: x10)
+다음 항목 (대사·이름·그림 바꾸기)	次の項目(セリフ・名前・画像の切り替え)	Next item (switch dialogue/name/image)
+휠 / Shift+휠	ホイール / Shift+ホイール	Wheel / Shift+wheel
+회전 / 글자 크기 (그림은 크기)	回転 / 文字サイズ(画像はサイズ)	Rotate / text size (size for images)
+분홍 네모 끌기	ピンクの四角をドラッグ	Drag the pink square
+회전 (Shift: 15도씩)	回転(Shift:15度ずつ)	Rotate (Shift: 15° steps)
+평소 / 선택됐을 때 모습	通常 / 選択時の見た目	Idle / selected look
+이 항목만 / 모든 항목 공통	この項目のみ / すべての項目共通	This item only / all items
+미리보기 켜기/끄기	プレビューをオン/オフ	Toggle preview
+이 항목(이 줄) 되돌리기	この項目(この行)を元に戻す	Revert this item (this line)
+앞 줄 / 다음 줄	前の行 / 次の行	Previous line / next line
+7줄씩	7行ずつ	7 lines at a time
+줄 목록 펴기/접기	行リストを開く/閉じる	Show/hide the line list
+화면에 있는 그림 차례로	画面上の画像を順に	Cycle through images on screen

@@ -1207,8 +1207,14 @@ screen ui_editor_stage_panel(tab):
             box_wrap_spacing 4
             xmaximum 632
             text "효과:" style "ui_editor_text" yalign 0.5
-            for _n, _l in tab.img_fx_choices():
-                textbutton _l style "ui_editor_button" text_size 13 action Function(tab.set_img_fx, _n) selected (_fxn == _n)
+            $ _fxs = tab.img_fx_choices()
+            if ui_editor.in_game_panel():
+                ## 게임 창에는 지금 값만, 효과 목록은 pygaki 앱에서 (4.20)
+                textbutton dict(_fxs).get(_fxn, _fxn or "-") style "ui_editor_button" text_size 13 action Function(ui_editor.open_in_app) selected True
+                textbutton "pygaki 앱에서 고르기" style "ui_editor_button" text_size 13 action Function(ui_editor.open_in_app)
+            else:
+                for _n, _l in _fxs:
+                    textbutton _l style "ui_editor_button" text_size 13 action Function(tab.set_img_fx, _n) selected (_fxn == _n)
 
     if _kind is not None:
         $ _spec = tab.with_spec()

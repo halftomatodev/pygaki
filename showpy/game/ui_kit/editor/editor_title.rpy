@@ -215,7 +215,7 @@ init -8 python in ui_editor:
             if it is None:
                 return
             ax, ay, _h = self.rot_center(it)
-            mx, my = store.renpy.get_mouse_pos()
+            mx, my = store.ui_editor.game_mouse()
             if abs(mx - ax) + abs(my - ay) < 4:
                 return
             deg = math.degrees(math.atan2(mx - ax, -(my - ay)))
@@ -518,7 +518,7 @@ init -8 python in ui_editor:
             layout, common = self._merged()
             uk = store.ui_kit
 
-            lines = uk.file_header("UI Kit 편집기가 저장한 타이틀 메뉴 배치입니다.", [
+            lines = uk.file_header("pygaki 게임 안 편집 화면이 저장한 타이틀 메뉴 배치입니다.", [
                 "여기 적힌 값은 title_menu_config.rpy의 같은 값보다 우선합니다.",
                 "직접 고쳐도 되지만, 편집기에서 다시 저장하면 덮어써집니다.",
                 "이 파일을 지우면 설정 파일 값으로 돌아갑니다.",
@@ -757,8 +757,14 @@ screen ui_editor_title_panel(tab):
         xmaximum 632
         text "글자 효과:" style "ui_editor_text" yalign 0.5
         $ _ef = tab.effect()
-        for _n, _nl in tmenu.effect_names(keep=_ef):
-            textbutton _nl style "ui_editor_button" text_size 13 action Function(tab.set_effect, _n) selected (_ef == _n)
+        $ _efs = tmenu.effect_names(keep=_ef)
+        if ui_editor.in_game_panel():
+            ## 게임 창에는 지금 값만, 목록은 pygaki 앱에서 (4.20)
+            textbutton dict(_efs).get(_ef, _ef or "-") style "ui_editor_button" text_size 13 action Function(ui_editor.open_in_app) selected True
+            textbutton "pygaki 앱에서 고르기" style "ui_editor_button" text_size 13 action Function(ui_editor.open_in_app)
+        else:
+            for _n, _nl in _efs:
+                textbutton _nl style "ui_editor_button" text_size 13 action Function(tab.set_effect, _n) selected (_ef == _n)
 
     ## 배경 (3.19): 그림이나 webm 영상. 없으면 타이틀은 검은 화면, ESC 메뉴는 투명
     hbox:

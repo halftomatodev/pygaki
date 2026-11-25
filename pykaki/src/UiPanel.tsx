@@ -94,7 +94,7 @@ export function CursorCard({ b }: { b: BoxNode }) {
     <Card id="i-cursor" title="커서와 클릭 대기 (CTC)" hint="이 상자에서만 걸려요. 정하지 않은 상자는 게임 처음 값. game/gui/ctc, gui/cursor 안의 그림 폴더를 이름 차례로 돌려요" topic="대사 소리와 속도">
       {row('ctc', '클릭 대기')}
       {row('cursor', '커서')}
-      {old && <p className="tip warn-text">예전 플러그인이라 상자마다 못 바꿔요 (ui_kit 4.7부터).</p>}
+      {old && <p className="tip warn-text">예전 플러그인이라 상자마다 못 바꿔요.</p>}
       {!linked && b.ui && <p className="tip warn-text">pygaki 플러그인 연결을 켜야 내보내요.</p>}
       <AllRow what="커서와 클릭 대기" keys={['ctc', 'cursor']} so={{ kind: 'box', id: b.id }} />
     </Card>

@@ -33,7 +33,7 @@ init -9 python in ui_editor:
             self.open = False
             self.tab = None         # 지금 탭의 id
             self.corner = 1         # 안내 패널 위치: 0 왼쪽 위, 1 오른쪽 위, 2 오른쪽 아래, 3 왼쪽 아래
-            self.help = True        # 단축키 안내 보이기
+            self.help = False       # 단축키 안내 보이기 (4.20부터 처음은 접음, 전체 목록은 pygaki 앱 환경 설정)
             self.message = ""
             self.popup = None       # None, "font", "color"
             self.popup_key = None   # 팝업이 고치는 값 ("font", "color")
@@ -315,6 +315,7 @@ init -9 python in ui_editor:
         state.tab = t.id
         state.popup = None
         _set_editing(True)
+        set_full_view(True)
 
         for i in TABS:
             i.on_open()
@@ -332,6 +333,7 @@ init -9 python in ui_editor:
         state.popup = None
         state.message = ""
         _set_editing(False)
+        set_full_view(False)
         update_bands()
 
         for i in TABS:
@@ -381,7 +383,7 @@ init -9 python in ui_editor:
             state.reopen = None
             state.reopen_tries = 0
             state.corner = r.get("corner", 1)
-            state.help = r.get("help", True)
+            state.help = r.get("help", False)
             state.mini = r.get("mini", False)
             state.dodge = r.get("dodge", True)
             state.panel_xy = r.get("panel_xy", None)
@@ -914,7 +916,7 @@ init -9 python in ui_editor:
         rv = [
             "T 다음 탭 | Ctrl+S 저장(대사, 선택지, 이미지 줄은 원고에 바로) | Ctrl+C 복사 | Esc 닫기 | F1 안내 접기",
             "패널: 제목(=)을 끌어 옮기기 | P 구석 바꾸기 | X 접기 | Space 누르는 동안 숨기기 | B 자동 비키기 " + ("켬" if state.dodge else "끔"),
-            "F8 여백 띠 " + ("켬" if bands_on() else "끔") + " (게임 화면 밖 창의 빈 곳을 붉게)",
+            "F8 경계선 " + ("켬" if bands_on() else "끔") + " (창이 게임 화면보다 크면 게임 화면 가장자리에 붉은 선)",
             ]
         on = fx_preview_on()
         if on is not None:
@@ -940,7 +942,7 @@ init -9 python in ui_editor:
         """V 키: 편집 중 화면 효과 보기를 켜고 끕니다."""
         api = _sfx_preview_api()
         if api is None:
-            msg("화면 효과 플러그인(Screen FX 3.4 이상)이 없습니다.")
+            msg("pygaki 화면 효과가 없습니다.")
             return
         on = api[1]()
         msg("편집 중 화면 효과 보기 " + ("켬" if on else "끔") + " (V)")
@@ -962,7 +964,7 @@ init -9 python in ui_editor:
         """마우스 휠. 패널 위에서는 패널을 스크롤하고, 밖에서는 탭의 휠 기능(글자 크기, 회전 …)."""
         if state.popup is not None:
             return
-        mx, my = store.renpy.get_mouse_pos()
+        mx, my = game_mouse()
         x, y = state.panel_now
         w, h = panel_size()
         if not state.peek and not live_panel_hidden() and x <= mx < x + w and y <= my < y + h:
@@ -980,15 +982,97 @@ init -9 python in ui_editor:
     ## 배율이 1 이하(게임이 창보다 크거나 같음)면 예전처럼 그대로. 게임 좌표에 그리는 손잡이·점은 px()로 크기만 실제 화면 픽셀에 맞춥니다.
     def view_zoom():
         try:
-            s = float(store.renpy.display.draw.draw_per_virt)
+            s = float(store.renpy.display.draw.draw_per_virt) * game_geom()[0]
         except Exception:
             s = 1.0
         return 1.0 / s if s > 1.0 else 1.0
+
+    ## 창 전체 편집 화면 (4.20): 렌파이는 게임 화면(drawable_viewport) 밖에는 그리지 못합니다. 그래서 편집 화면을 여는 동안은
+    ## 렌파이 화면을 창 전체로 쓰고(config.adjust_view_size), 게임 층(config.layers)만 원래 크기(픽셀 퍼펙트면 정수 배율)로
+    ## 줄여 창 가운데에 둡니다(config.layer_transforms[None] 맨 바깥). 편집 화면도 같은 변환 안에 그려서 좌표는 게임 좌표 그대로이고,
+    ## 패널·고르기 창은 게임 화면 밖(창의 빈 곳)까지 씁니다. 예: 640x400 게임을 800x800 창에 띄우면 편집 화면은 800x800 전체.
+    ## 닫으면 렌파이 화면은 예전 그대로(게임 크기, 남는 곳은 검은 띠). 개발 모드에서만.
+    VIEW = dict(full=False, W=0, H=0, gw=0, gh=0, installed=False)
+
+    def _game_view(W, H, orig):
+        """편집 화면이 없을 때의 게임 화면 크기 (실제 화면 픽셀). 게임이 정한 adjust_view_size(픽셀 퍼펙트 등)를 따름"""
+        sw, sh = store.config.screen_width, store.config.screen_height
+        if orig is not None:
+            return orig(W, H)
+        r = min(W / float(sw), H / float(sh))
+        return (max(1, int(sw * r)), max(1, int(sh * r)))
+
+    def install_full_view():
+        """편집 화면을 처음 열 때 한 번. 게임 파일(pixel_perfect.rpy의 init 1500 등)이 정한 adjust_view_size·layer_transforms 뒤에 붙도록"""
+        if VIEW["installed"]:
+            return
+        VIEW["installed"] = True
+        orig = store.config.adjust_view_size
+
+        def adjust(W, H):
+            gw, gh = _game_view(W, H, orig)
+            VIEW.update(W=W, H=H, gw=gw, gh=gh)
+            if VIEW["full"]:
+                return (W, H)
+            return (gw, gh)
+
+        store.config.adjust_view_size = adjust
+        store.config.layer_transforms[None] = list(store.config.layer_transforms.get(None, [ ])) + [ _wrap_game ]
+
+    def _wrap_game(d):
+        """게임 층 전체를 게임 크기로 줄여 가운데에 두고, 그 밖(창의 빈 곳)은 검게 (config.underlay는 메뉴 화면에서 꺼짐)"""
+        return store.Fixed(store.Solid("#000"), store.Transform(d, function=_game_tf))
+
+    def set_full_view(on):
+        on = bool(on)
+        if VIEW["full"] == on:
+            return
+        if on:
+            install_full_view()
+        VIEW["full"] = on
+        try:
+            store.renpy.display.draw.update(force=True)
+        except Exception:
+            pass
+
+    def game_geom():
+        """게임 좌표 → 렌파이 화면 좌표: (xzoom, yzoom, xoffset, yoffset). 창 전체 편집 화면이 아니면 그대로"""
+        W, H, gw, gh = VIEW["W"], VIEW["H"], VIEW["gw"], VIEW["gh"]
+        if not VIEW["full"] or not (W and H and gw and gh):
+            return (1.0, 1.0, 0.0, 0.0)
+        sw, sh = store.config.screen_width, store.config.screen_height
+        return (gw / float(W), gh / float(H), (W - gw) / 2.0 * sw / float(W), (H - gh) / 2.0 * sh / float(H))
+
+    def _game_tf(trans, st, at):
+        zx, zy, ox, oy = game_geom()
+        trans.xzoom = zx
+        trans.yzoom = zy
+        trans.xoffset = ox
+        trans.yoffset = oy
+        return 0
+
+    game_t = store.Transform(function=_game_tf)
+
+    def win_rect():
+        """창 전체를 게임 좌표로 (x, y, w, h). 창 전체 편집 화면이 아니면 게임 화면"""
+        zx, zy, ox, oy = game_geom()
+        sw, sh = store.config.screen_width, store.config.screen_height
+        return (-ox / zx, -oy / zy, sw / zx, sh / zy)
+
+    def game_mouse():
+        """마우스 자리 (게임 좌표). 편집기는 renpy.get_mouse_pos() 대신 이것을 씀"""
+        mx, my = store.renpy.get_mouse_pos()
+        zx, zy, ox, oy = game_geom()
+        return ((mx - ox) / zx, (my - oy) / zy)
 
     def px(n):
         """실제 화면 n픽셀을 게임 좌표로 (게임 좌표에 그리는 손잡이·점의 크기와 집는 거리). 배율 1 이하면 n 그대로.
         렌파이는 xysize·pos의 소수를 화면 비율로 읽으므로 absolute로 돌려줌 (pos에는 int()로 씀)"""
         return store.renpy.display.core.absolute(n * view_zoom())
+
+    def ab(n):
+        """게임 좌표 n (소수도 화면 비율이 아니라 픽셀로)"""
+        return store.renpy.display.core.absolute(n)
 
     _zoom_t = { }
 
@@ -1012,38 +1096,52 @@ init -9 python in ui_editor:
 
     def panel_max_height():
         """패널 최대 높이 (패널 안쪽 단위)"""
-        return int(store.config.screen_height / view_zoom()) - 2 * MARGIN
+        return int(win_rect()[3] / view_zoom()) - 2 * MARGIN
 
     _zoom_seen = [ None ]
 
     def check_zoom():
-        """창 크기를 바꿔 배율이 달라지면 패널을 새로 그립니다. 여백 띠도 맞춥니다"""
+        """창 크기를 바꿔 배율이 달라지면 패널을 새로 그립니다. 경계선도 맞춥니다"""
         update_bands()
         z = view_zoom()
         if _zoom_seen[0] != z:
             _zoom_seen[0] = z
             store.renpy.restart_interaction()
 
-    ## 여백 띠 (4.20): 편집 화면을 열었을 때, 게임 화면을 정수 배율로 키우고 남은 창의 빈 곳(검은 띠)을 붉게 칠해
-    ## 게임 화면이 어디까지인지 보이게 합니다. F8 또는 pygaki 앱 환경 설정에서 켜고 끔(persistent에 기억, 처음은 켬).
-    ## 렌파이가 창을 지우는 색(config.gl_clear_color)을 바꾸는 것이라 게임 화면 안은 그대로입니다.
-    BAND_COLOR = "#b0102c"
-    _clear_orig = [ None ]
+    ## 경계선 (4.20. 처음엔 띠를 칠했다가 선으로): 편집 화면을 열었을 때, 게임 화면이 창보다 작아 둘레에 빈 곳이 남으면
+    ## 게임 화면 바로 바깥에 실제 화면 BAND_WIDTH 픽셀의 붉은 선을 그어 게임 화면이 어디까지인지 보이게 합니다(창 전체 편집 화면).
+    ## 빈 곳은 칠하지 않습니다.
+    ## F8 또는 pygaki 앱 환경 설정에서 켜고 끔(persistent에 기억, 처음은 켬). 이름(bands)은 예전 그대로.
+    BAND_COLOR = "#e0103c"
+    BAND_WIDTH = 2
+    _bands_seen = [ None ]
 
     def bands_on():
         return getattr(store.persistent, "_pygaki_bands", None) is not False
 
+    def has_margin():
+        """창에 게임 화면 밖 빈 곳이 있는지"""
+        if VIEW["full"]:
+            return VIEW["gw"] < VIEW["W"] or VIEW["gh"] < VIEW["H"]
+        try:
+            vp = store.renpy.display.draw.drawable_viewport
+            return vp[0] >= 1 or vp[1] >= 1
+        except Exception:
+            return False
+
+    def bands_shown():
+        return bool(state.open and bands_on() and has_margin())
+
     def update_bands():
-        if _clear_orig[0] is None:
-            _clear_orig[0] = store.config.gl_clear_color
-        want = BAND_COLOR if (state.open and bands_on()) else _clear_orig[0]
-        if store.config.gl_clear_color != want:
-            store.config.gl_clear_color = want
+        b = bands_shown()
+        if _bands_seen[0] != b:
+            _bands_seen[0] = b
+            store.renpy.restart_interaction()
 
     def set_bands(on, tell_app=True):
         store.persistent._pygaki_bands = bool(on)
         update_bands()
-        msg("여백 띠 " + ("켬 (게임 화면 밖 창의 빈 곳을 붉게)" if on else "끔"))
+        msg("경계선 " + ("켬 (창이 게임 화면보다 크면 게임 화면 가장자리에 붉은 선)" if on else "끔"))
         if tell_app:
             try:
                 _live_send(dict(type="bands", on=bool(on)))
@@ -1067,12 +1165,12 @@ init -9 python in ui_editor:
         return state.panel_size or (int(660 * z), int(300 * z))
 
     def _corner_xy(c, w, h):
-        W = store.config.screen_width
-        H = store.config.screen_height
+        """구석 자리 (창 전체 편집 화면이면 창의 구석, 게임 좌표 정수)"""
+        X, Y, W, H = win_rect()
         M = margin()
-        x = W - w - M if c in (1, 2) else M
-        y = H - h - M if c in (2, 3) else M
-        return (max(0, x), max(0, y))
+        x = X + W - w - M if c in (1, 2) else X + M
+        y = Y + H - h - M if c in (2, 3) else Y + M
+        return (int(max(X, x)), int(max(Y, y)))
 
     def _overlap(a, b):
         w = min(a[0] + a[2], b[0] + b[2]) - max(a[0], b[0])
@@ -1086,24 +1184,22 @@ init -9 python in ui_editor:
         if state.panel_xy is not None or view_zoom() != 1.0:
             return (x, y, 0.0, 0.0)
         c = state.corner_used
-        W = store.config.screen_width
-        H = store.config.screen_height
+        X, Y, W, H = win_rect()
         xr = c in (1, 2)
         yb = c in (2, 3)
         M = margin()
-        return (W - M if xr else M, H - M if yb else M, 1.0 if xr else 0.0, 1.0 if yb else 0.0)
+        return (int(X + W - M) if xr else int(X + M), int(Y + H - M) if yb else int(Y + M), 1.0 if xr else 0.0, 1.0 if yb else 0.0)
 
     def panel_topleft():
         """패널 왼쪽 위의 화면 좌표 (크기는 지난번에 그린 크기)."""
         w, h = panel_size()
-        W = store.config.screen_width
-        H = store.config.screen_height
+        X, Y, W, H = win_rect()
         state.dodged = False
 
         if state.panel_xy is not None:
             x, y = state.panel_xy
-            x = int(max(0, min(W - min(w, W), x)))
-            y = int(max(0, min(H - min(h, H), y)))
+            x = int(max(X, min(X + W - min(w, W), x)))
+            y = int(max(Y, min(Y + H - min(h, H), y)))
             state.panel_now = (x, y)
             return (x, y)
 
@@ -1159,7 +1255,7 @@ init -9 python in ui_editor:
         def event(self, ev, x, y, st):
             if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
                 if 0 <= x < self.size[0] and 0 <= y < self.size[1]:
-                    mx, my = store.renpy.get_mouse_pos()
+                    mx, my = game_mouse()
                     px, py = state.panel_now
                     state.panel_drag = (mx, my, px, py)
                     raise store.renpy.IgnoreEvent()
@@ -1167,7 +1263,7 @@ init -9 python in ui_editor:
             if state.panel_drag is not None:
                 if ev.type == pygame.MOUSEMOTION:
                     mx0, my0, px, py = state.panel_drag
-                    mx, my = store.renpy.get_mouse_pos()
+                    mx, my = game_mouse()
                     state.panel_xy = (px + mx - mx0, py + my - my0)
                     store.renpy.restart_interaction()
                     raise store.renpy.IgnoreEvent()
@@ -1406,7 +1502,25 @@ screen ui_editor_root():
 
         if ui_editor.state.open:
             timer 0.3 repeat True action Function(ui_editor.check_zoom, _update_screens=False)
-            use ui_editor_main
+            ## 창 전체 편집 화면 (4.20): 게임 층과 같은 변환 안에 그려서 좌표는 게임 좌표, 패널은 창의 빈 곳까지
+            fixed:
+                at ui_editor.game_t
+                if ui_editor.bands_shown():
+                    use ui_editor_border
+                use ui_editor_main
+
+
+## 경계선 (4.20): 게임 화면 바로 바깥에 실제 화면 BAND_WIDTH 픽셀의 붉은 선 (창 전체 편집 화면일 때 창의 빈 곳에).
+## 창 전체가 아니면(예전 판 렌파이 등) 게임 화면 안쪽 끝에. 누르기는 그대로 아래로 지나감
+screen ui_editor_border():
+    $ _w = ui_editor.px(ui_editor.BAND_WIDTH)
+    $ _o = _w if ui_editor.VIEW["full"] else 0
+    $ _c = ui_editor.BAND_COLOR
+    $ _W, _H = config.screen_width, config.screen_height
+    add Solid(_c) pos (ui_editor.ab(-_o), ui_editor.ab(-_o)) xysize (ui_editor.ab(_W + 2 * _o), _w)
+    add Solid(_c) pos (ui_editor.ab(-_o), ui_editor.ab(_H + _o - _w)) xysize (ui_editor.ab(_W + 2 * _o), _w)
+    add Solid(_c) pos (ui_editor.ab(-_o), ui_editor.ab(-_o)) xysize (_w, ui_editor.ab(_H + 2 * _o))
+    add Solid(_c) pos (ui_editor.ab(_W + _o - _w), ui_editor.ab(-_o)) xysize (_w, ui_editor.ab(_H + 2 * _o))
 
 
 screen ui_editor_main():
@@ -1637,6 +1751,8 @@ screen ui_editor_panel_body():
                     text _line style "ui_editor_small"
             for _line in ui_editor.common_help():
                 text _line style "ui_editor_small"
+        else:
+            text "F1 단축키 안내 펴기 · 전체 목록은 pygaki 앱 환경 설정의 [[단축키]" style "ui_editor_small"
 
 
 ## 1/2 평소/선택됐을 때, 3 이 항목만/공통 (패널과 짧은 판이 같이 씀)
@@ -1678,7 +1794,7 @@ screen ui_editor_panel_compact():
             text ui_editor.state.message style "ui_editor_text" color "#ffd23b"
 
         null height 2
-        if _tab is not None and _ok:
+        if _tab is not None and _ok and ui_editor.state.help:
             for _line in _tab.help_lines():
                 text _line style "ui_editor_small"
         text "글꼴, 색, 크기 같은 값은 pygaki 앱의 [[GUI 편집]에서 고쳐요. F9 게임 창 패널 숨기기" style "ui_editor_small" color "#9fd8ff"

@@ -33,7 +33,7 @@ init -10 python in splash:
     import store
     from store import Action, DictEquality, Movie, Solid, Text, Transform, python_object
 
-    VERSION = "2.5"
+    VERSION = "1.9"     # pygaki 판 (예전 판은 2.5 같은 번호)
 
     def scene_fx():
         """screen_fx 플러그인의 '장면만' 효과를 페이지의 바탕·로고 그림에도 씌우는 트랜스폼.

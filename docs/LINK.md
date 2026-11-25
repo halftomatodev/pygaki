@@ -333,7 +333,7 @@ pygaki 데스크톱 앱의 [GUI 편집] 화면이 게임 안 편집기를 바깥
 | `files` | 붙자마자 한 번, 앱이 `files`를 보낼 때 (3.15) | `{"type": "files", "audio": ["audio/type.ogg"], "images": ["gui/ctc/ctc1.png", ...], "movies": ["movies/title.webm"]}` 게임 폴더 기준(`movies`는 3.19부터). 렌파이 `list_files`라 `.rpa` 안 파일도 들어감 |
 | `error` | 명령 처리가 실패했을 때 | `{"type": "error", "text": "..."}` |
 | `reloading` | 원고를 다시 읽기 직전(Shift+R, 자동 다시 읽기. 렌파이 `renpy.session["_reload"]`), 연결을 닫기 바로 전 (ui_kit 4.9) | `{"type": "reloading"}`. 앱은 다시 붙을 때까지 연결 단추를 "◐ 게임 수정 중"으로 |
-| `bands` | 게임 창에서 F8로 여백 띠를 켜거나 껐을 때 (ui_kit 4.20) | `{"type": "bands", "on": true}`. 앱은 환경 설정 `gameBands`를 이 값으로 바꾸고 다시 보내지 않음 |
+| `bands` | 게임 창에서 F8로 경계선을 켜거나 껐을 때 (ui_kit 4.20) | `{"type": "bands", "on": true}`. 앱은 환경 설정 `gameBands`를 이 값으로 바꾸고 다시 보내지 않음 |
 | `panel` | 게임 창에서 F9로 게임 안 편집기 패널을 보이게/숨기게 했을 때 (ui_kit 3.23) | `{"type": "panel", "hide": true}`. 앱은 이 값을 기억했다가(`localStorage` `pygaki-game-panel`) 다음에 붙을 때 `panel` 명령으로 보냄. 앱의 F9(단축키 `gamePanel`)도 같은 명령 |
 
 ```json
@@ -383,7 +383,6 @@ pygaki 데스크톱 앱의 [GUI 편집] 화면이 게임 안 편집기를 바깥
   `id`는 위젯 자리 번호라 화면이 바뀌면 다른 것을 가리킬 수 있습니다. 버튼은 `t`를 같이 보내서 글이 다르면 게임이 누르지 않습니다. 창 바탕, 세로 스크롤바, 거의 투명한 색, 무지개 띠 같은 꾸밈은 보내지 않습니다.
 - `title`은 `tmenu`가 없거나 꺼져 있으면 `null`입니다. `menu`는 지금 보이는 메뉴(`"title"` 타이틀 / `"pause"` ESC 메뉴), `x`, `y`는 화면 픽셀입니다.
   - 3.19부터: `items`의 메뉴 항목 뒤에 제목, 부제가 `"kind": "label"`, `"name": "제목"`으로 붙습니다(`sel` 번호도 이어짐). 항목마다 `"kind": "item"`, `"effect"`(글자 효과 이름 또는 `null`). `title`에 `"background"`(이 메뉴의 배경 그림/영상 경로, 없으면 `null` = 타이틀 검은 화면 / ESC 메뉴 투명), `"effects"`(고를 수 있는 글자 효과 `[[이름, 표시], ...]`, 첫째는 `[null, "없음"]`).
-- `flow`(ui_kit 4.1 + screen_fx 5.2)는 화면 효과 탭의 **줄기표**입니다. Screen FX가 없거나 예전 판이면 `null`(또는 없음), 접혀 있으면 `{"open": false}`.
   ```json
   "flow": { "open": true, "file": "game/script.rpy", "range": [5, 9], "sel": 15, "here": 10,
             "points": [ ["game/script.rpy", 16] ],
@@ -392,7 +391,7 @@ pygaki 데스크톱 앱의 [GUI 편집] 화면이 게임 안 편집기를 바깥
   ```
   행(`rows`)은 원고 줄 순서이고 가지(선택지, `if`)는 그 블록이 이어서 나옵니다. `l` 원고 줄, `k` 종류(`label`, `branch` 선택지/조건 머리, `say`, `stmt`, `fx` 셰이더 줄, `jump`(return 포함), `call`, `show`(scene/show/hide/with), `menu`(menu/if/while)), `d` 깊이, `g` 이 행을 지나는 세로선 깊이, `t` 보일 글, `c` 글자색(어두운 바탕용), `a`/`b` 그 줄에 덮인 1번/2번 셰이더 색(없으면 `null`), `s` 두 자리 이름, `p` 전환 점이면 그 대상 [파일, 줄](전환을 바꾸면 이 줄 위의 셰이더 줄이 바뀜), `i` 고를 수 있는 줄. `range`는 고른 구간(행 번호), `sel` 고른 줄, `here` 게임의 지금 줄, `points` 고른 전환 점. [이 구간에 적용], 되돌리는 곳, 전환 고르기는 `panel`의 버튼입니다.
 - `splash`(splash 2.2 + ui_kit 4.7)는 스플래시 페이지 목록입니다. `{"pages": [{"id": "logo", "title": "…", "new": false}], "cur": "logo"}`. 차례는 편집기의 페이지 차례, `new`는 `splash_config.rpy`에 없고 편집기에서 만든 페이지, `cur`는 편집기에서 고른 페이지. 스플래시가 없거나 예전 판이면 `null`(또는 없음). 앱은 GUI 편집 왼쪽 "스플래시" 카드에 페이지마다 항목을 보여 줍니다(`logo` 로고, `warning` 경고, `controls` 조작 안내 화면, 나머지는 제목). splash 2.5부터 페이지에 `"keys": true`가 붙으면 조작 안내 화면(표가 있는 첫 페이지)이고, 게임 편집기에 `hotkeys` 탭(hotkeys 1.2 "단축키 수정")이 있으면 앱은 그 항목 바로 아래에 [단축키 수정]을 둡니다. 그 페이지의 표가 `"keys": "hotkeys"`면 단축키 수정 표에서 `"keys_show"`(기능 id 목록)에 든 기능을 보여 줍니다(플러그인 안의 일이라 앱은 몰라도 됨).
-- `editor.bands`(ui_kit 4.20)는 여백 띠가 켜져 있는지입니다. 게임 안 편집기가 열려 있는 동안, 게임 화면을 정수 배율로 키우고 남은 창의 빈 곳을 붉게 칠합니다(렌파이 `config.gl_clear_color`). 게임의 `persistent._pygaki_bands`에 기억하고 처음은 켬. 예전 판은 이 값이 없습니다.
+- `editor.bands`(ui_kit 4.20)는 경계선이 켜져 있는지입니다(이름은 처음 "여백 띠" 그대로). 게임 안 편집기가 열려 있는 동안, 창이 게임 화면보다 커서 둘레에 검은 띠가 남으면 게임 화면 가장자리 안쪽에 붉은 선을 긋습니다(렌파이는 게임 화면 밖에 그리지 못해서 띠는 칠하지 않음). 게임의 `persistent._pygaki_bands`에 기억하고 처음은 켬. 예전 판은 이 값이 없습니다.
 - `editor.pending`은 저장할 것의 수입니다. 3.19부터 원고에 넣을 줄(화면 효과 "여기에서부터 적용" 등)도 셉니다.
 
 앱 → 게임 (`cmd`):
@@ -402,7 +401,7 @@ pygaki 데스크톱 앱의 [GUI 편집] 화면이 게임 안 편집기를 바깥
 | `editor` | `open`(참/거짓), `tab`(선택), `line` `file`(선택, ui_kit 4.8) | 편집기 열기/닫기. 열 때 그 탭으로. `tab`이 `stage`이고 `line`(원고 줄 번호)이 있으면 게임이 `file`(이름만 맞춤, 없으면 `script_flow.rpy`)에 있을 때 그 줄(아니면 그 뒤 가장 가까운 show/scene 줄)을 고름. 게임이 다시 시작해도(warp) 열 때 다시 고름. 예전 판은 `line`을 모르고 그냥 엶 |
 | `tab` | `id` | 탭 바꾸기 (그 화면에서 쓸 수 있을 때) |
 | `panel` | `hide`(참/거짓) | 게임 안 편집기 패널 숨기기. 숨겨도 끌기와 단축키는 그대로. 보이게 하면(4.20) 게임 창에는 짧은 판 |
-| `bands` | `on`(참/거짓) | 여백 띠 켜기/끄기 (ui_kit 4.20). 앱은 붙을 때마다, 그리고 환경 설정 [게임 창 여백에 붉은 띠]나 단축키(기본 F8 `gameBands`)로 바꿀 때 보냄. 예전 판 게임은 모르는 명령이라 무시 |
+| `bands` | `on`(참/거짓) | 경계선 켜기/끄기 (ui_kit 4.20). 앱은 붙을 때마다, 그리고 환경 설정 [게임 화면 가장자리에 붉은 경계선]이나 단축키(기본 F8 `gameBands`)로 바꿀 때 보냄. 예전 판 게임은 모르는 명령이라 무시 |
 | `goto` | `where`: `"pause"`, `"title"`, `"start"`, `"line"` (+ `file`: `"game/…rpy"`, `line`: 줄 번호) | ESC 메뉴 열기 / 타이틀로 가기(진행 중인 게임은 끝남) / 타이틀에서 게임 시작(3.16) / 원고의 그 줄로(3.20): 이번에 지나온 줄이면 되감기, 아니면 렌파이 warp(게임을 다시 시작해서 그 줄까지 scene/show만 따라 함, 변수는 빠질 수 있음). 빈 줄, 주석 줄은 그 뒤 첫 문장, 아니면 그 줄이나 그 앞 문장 |
 | `panel.do` | `id`, 버튼은 `t`, 막대와 입력칸은 `value`, 입력칸은 `enter`(참이면 Enter까지) | `panel`의 그 자리 위젯을 누름 / 막대 값 바꿈 / 입력칸 글 넣기 (3.16) |
 | `title.select` | `index` | 고친 항목 고르기 |
@@ -416,7 +415,6 @@ pygaki 데스크톱 앱의 [GUI 편집] 화면이 게임 안 편집기를 바깥
 | `custom_ui.listen` | | 지금 고른 대사 소리를 게임에서 1.5초 들려줌 (`playing`이 참) |
 | `custom_ui.stop` | | 들려주던 소리 멈춤 |
 | `custom_ui.cursor` | `do`: `mode`(+ `mode`) / `pick`(+ `file`, `line`, 게임도 그 줄로) / `step`(+ `n`) / `here` / `apply` / `remove` / `leave` | 커서와 셰이더 '여기에서부터' (3.21). `mode`는 미리 보기도 함, `apply`는 고른 줄 위에 `$ screen_fx.set_cursor("…")`(저장하면 원고에), `leave`는 미리 보기 끝 |
-| `flow` | `do`: `open` / `close` / `toggle` / `range`(+ `a`, `b` 행 번호, `a`가 `null`이면 구간 풀기) / `pick`(+ `row`, 그 행부터 처음 고를 수 있는 줄을 고르고 게임도 그 줄로) / `point`(+ `target` [파일, 줄], 전환 점 고르기/풀기) / `delete`(고른 구간 안과 끝 다음 '원래대로' 줄, 고른 전환 점의 셰이더 줄을 지우기로 함. 대사 괄호면 `fx=`를 뺌. 저장하면 원고에서 빠짐) | 줄기표 (ui_kit 4.1 + screen_fx 5.2). 앱이 패널을 가져가 있으면 게임 창의 줄기표 서랍은 숨음 |
 | `splash.page` | `id` | 스플래시 편집 탭에서 그 페이지를 고름 (splash 2.2). 목록에 없는 `id`는 무시 |
 | `files` | | 파일 목록(`files`)을 다시 보내 달라고 함 |
 | `save` | | 편집기 Ctrl+S와 같음 (배치 파일과 원고 저장) |

@@ -148,27 +148,32 @@ init python:
     PYGAKI_KEEP = ( "_config.rpy", "_layout.rpy", "_off.txt" )
     ## 예전 판에만 있던 파일 (남아 있으면 지금 판과 부딪힘). 판을 낼 때 지운 파일을 여기에 더한다
     PYGAKI_RETIRED = (
-        "screen_fx/engine/tiles.rpy", "screen_fx/tiles_config.rpy",     # 5.3에 포토 콜라주로 바뀜
-        "ui_kit/effects/popin.glsl", "ui_kit/effects/drip.glsl",          # 5.1 만드는 중에 지운 효과
+        "screen_fx/engine/tiles.rpy", "screen_fx/tiles_config.rpy",     # v1.6에 포토 콜라주로 바뀜
+        "ui_kit/effects/popin.glsl", "ui_kit/effects/drip.glsl",          # v1.4 만드는 중에 지운 효과
+        "screen_fx/editor/editor_flow.rpy", "screen_fx/editor/editor_flow.rpyc",     # 줄기표 없앰
     )
-    PYGAKI_VERSION_FILES = (
-        ( "ui_kit", "ui_kit/engine/ui_kit.rpy" ),
-        ( "screen_fx", "screen_fx/engine/screen_fx.rpy" ),
-        ( "splash", "splash/engine/splash.rpy" ),
-        ( "hotkeys", "hotkeys/hotkeys.rpy" ),
-    )
+    ## pygaki 판 (플러그인 폴더마다 따로 매기지 않고 pygaki 판 하나. 예전 판은 폴더마다 4.19, 5.9 같은 번호였음)
+    PYGAKI_VERSION_FILE = "ui_kit/engine/ui_kit.rpy"
 
-    def pygaki_versions(gamedir):
+    def pygaki_version(gamedir):
         import re
-        out = { }
-        for name, rel in PYGAKI_VERSION_FILES:
-            try:
-                with open(os.path.join(gamedir, rel), "rb") as f:
-                    m = re.search(br'VERSION\s*=\s*"([^"]+)"', f.read())
-                out[name] = m.group(1).decode("utf-8") if m else "?"
-            except Exception:
-                out[name] = None
-        return out
+        try:
+            with open(os.path.join(gamedir, PYGAKI_VERSION_FILE), "rb") as f:
+                m = re.search(br'VERSION\s*=\s*"([^"]+)"', f.read())
+            return m.group(1).decode("utf-8") if m else "?"
+        except Exception:
+            return None
+
+    def pygaki_version_label(v):
+        """보일 판 이름. 예전 번호 체계(앞자리 2 이상)는 "예전 판" """
+        if v is None:
+            return T("없음", "なし", "none")
+        try:
+            if int(v.split(".")[0]) >= 2:
+                return T("예전 판", "旧バージョン", "older version")
+        except Exception:
+            pass
+        return "v" + v
 
     def pygaki_update_plan(gamedir):
         """바꿀 파일 [(템플릿 파일, 프로젝트 파일)], 치울 파일 [프로젝트 파일]."""
@@ -520,14 +525,10 @@ label pygaki_update:
             interface.error(L("이 프로젝트에는 pygaki 플러그인이 없어요. 새 프로젝트 만들기에서 \"Pygaki\"로 만든 프로젝트만 올릴 수 있어요.", "このプロジェクトには pygaki プラグインがありません。更新できるのは、新規プロジェクト作成で「Pygaki」を選んで作ったプロジェクトだけです。", "This project has no pygaki plugins. Only projects made with \"Pygaki\" in Create New Project can be updated."), label=None)
             renpy.jump("front_page")
 
-        pygaki_old = pygaki_versions(p.gamedir)
-        pygaki_new = pygaki_versions(os.path.join(PYGAKI_TEMPLATE, "game"))
-        pygaki_none = T("없음", "なし", "none")
-        pygaki_lines = "\n".join(
-            "{}  {} → {}".format(n, pygaki_old[n] or pygaki_none, pygaki_new[n] or pygaki_none)
-            for n in PYGAKI_PLUGINS
-        )
-        pygaki_same = all(pygaki_old[n] == pygaki_new[n] for n in PYGAKI_PLUGINS)
+        pygaki_old = pygaki_version(p.gamedir)
+        pygaki_new = pygaki_version(os.path.join(PYGAKI_TEMPLATE, "game"))
+        pygaki_lines = "pygaki  {} → {}".format(pygaki_version_label(pygaki_old), pygaki_version_label(pygaki_new))
+        pygaki_same = pygaki_old == pygaki_new
         if pygaki_same:
             pygaki_head = T("판이 같아요. 그래도 다시 넣을까요?", "バージョンは同じです。それでも入れ直しますか?", "The versions are the same. Put them in again anyway?")
         else:

@@ -249,7 +249,7 @@
 - **선 더블클릭**: next ↔ call을 전환한다.
 - **Delete**: 상자나 선을 삭제한다.
 - **Shift+드래그**: 여러 상자를 선택한다.
-- **단축키(기본값)**: Ctrl+\\ 집중 모드, Ctrl+Enter 새 줄, Ctrl+Shift+Enter 다음 상자로 이어 쓰기, Alt+← 대사 버블(줄 종류 고르기), Alt+↑ 글꼴 버블(상자 안 태그 상자), Alt+→ 흐름 버블(다음 흐름 창), Alt+↓ 세 버블 한 번에 열기/닫기(`bubbles`, 하나라도 열려 있으면 모두 닫음, 세션 97), F8 게임 창 여백 띠(`gameBands`, 앱), Ctrl+S 저장, Ctrl+Shift+S 다른 이름으로 저장, Ctrl+E 같은 곳에 다시 내보내기, Ctrl+Z/Y 실행 취소/다시 실행(입력칸 안에서도), Ctrl+B/I/U 대사 글 칸에서 굵게/기울임/밑줄 태그, Alt+N 새 상자, Ctrl+D 상자 복제(Ctrl+C/V 상자 복사·붙여넣기는 바꿀 수 없음)(F5는 새로고침과 겹쳐서 쓰지 않음. 플레이 단축키 Alt+P, F8은 세션 34에 뺌). 8-1 참고.
+- **단축키(기본값)**: Ctrl+\\ 집중 모드, Ctrl+Enter 새 줄, Ctrl+Shift+Enter 다음 상자로 이어 쓰기, Alt+← 대사 버블(줄 종류 고르기), Alt+↑ 글꼴 버블(상자 안 태그 상자), Alt+→ 흐름 버블(다음 흐름 창), Alt+↓ 세 버블 한 번에 열기/닫기(`bubbles`, 하나라도 열려 있으면 모두 닫음, 세션 97), F8 게임 화면 경계선(`gameBands`, 앱), Ctrl+S 저장, Ctrl+Shift+S 다른 이름으로 저장, Ctrl+E 같은 곳에 다시 내보내기, Ctrl+Z/Y 실행 취소/다시 실행(입력칸 안에서도), Ctrl+B/I/U 대사 글 칸에서 굵게/기울임/밑줄 태그, Alt+N 새 상자, Ctrl+D 상자 복제(Ctrl+C/V 상자 복사·붙여넣기는 바꿀 수 없음)(F5는 새로고침과 겹쳐서 쓰지 않음. 플레이 단축키 Alt+P, F8은 세션 34에 뺌). 8-1 참고.
 - 실행 취소: 같은 key로 1.2초 안에 이어지는 변경(타이핑)은 한 번으로 묶는다. 최대 100단계.
 
 ## 8-1. 화면, 집중 모드, 환경 설정
@@ -317,7 +317,6 @@
   - 기본 글꼴로: `setRole` → `writeRole`이 그 `define` 줄의 값만 바꿈(뒤 주석·줄바꿈 꼴·BOM 그대로, 없으면 끝에 더함). 앱을 켠 동안 처음 바꿀 때만 `ui_kit_backup/gui/gui.날짜-시각.rpy` 백업. 뒤에 `scanFolder`(대사 미리보기 글꼴도 바뀜).
   - 쓰인 곳(`fontUses`): 기본 글꼴 자리, 대본 줄(`say.font`, `say.name_font`, 글과 선택지의 `{font=경로}`), 게임 코드(game의 `.rpy`에서 `"경로"`를 찾음. `script_flow.rpy`·`gui.rpy`, `tl` `cache` `saves` 등 폴더, 플러그인 `editor` `engine` 폴더는 뺌). 빼기는 `game/fonts` 안에서 어디에도 안 쓰는 것만: 바이트를 `ui_kit_backup/fonts/`에 쓴 뒤 `remove`(main.cjs가 `game/fonts/**.ttf|otf|ttc`도 허락).
 - [GUI 편집] 화면 (`src/ShowpyView.tsx`, `src/showpyLive.ts`): 툴바 [대본 편집 | GUI 편집]로 바꾼다(앱에서만). 대본 화면은 숨기기만 해서 캔버스 상태가 남는다. 메인 프로세스가 `game/showpy_live.json`을 보고 그 포트로 붙어(지켜보기 + 3초마다 다시 시도) 한 줄 JSON을 `pygaki:live`로 넘기고, 화면은 `liveSend`로 명령을 보낸다(`pygaki:liveSend`). 형식은 저장소 맨 위 docs/LINK.md 9장.
-  - 줄기표 (`src/ShowpyFlow.tsx`, pygaki 플러그인 screen_fx 5.2): (앱에서는 꺼 둠, `ShowpyView.tsx` `FLOW_IN_APP = false`. 셰이더를 거는 자리를 상자·label로 옮겨서) "셰이더" 칸에서 `state.flow`가 있으면 가운데 위 [줄기표 펴기/접기](`flow` `toggle`). 펴지면 가운데가 원고 | 줄기표. 행을 끌면 `flow` `range`, 누르면 `flow` `pick`과 원고 칸 스크롤(`peek`), 네모 점은 `flow` `point`, 줄기표에서 Delete나 [셰이더 지우기]는 `flow` `delete`(Delete는 상자 캔버스로 안 가게 막음). 게임 서랍과 같은 어두운 바탕.
   - 왼쪽: 고칠 것 목록. 타이틀 메뉴, 게임 내 메뉴(ESC)는 앱 칸이 있고, 나머지는 게임 안 편집기 탭을 패널과 함께 연다. 메뉴 바로 아래 "└ 타이틀 셰이더"(`title_fx`), "└ 게임 내 메뉴 셰이더"(`pause_fx`) (pygaki 플러그인 4.20).
   - 가운데: 지금 화면, 원고 위치, 그 앞뒤 9줄(파일이 바뀌면 다시 읽음). 줄 위의 `# @node:` 표시로 pygaki 상자를 찾아 [상자로] 버튼. [표시 숨기기](`localStorage['pygaki-hide-marks']`)는 `# @l:` `# @node:` `# @end:` 줄을 그리지 않는다(지금 줄은 그림, 줄 번호는 그대로).
   - 오른쪽: 저장(게임의 Ctrl+S), 버리기, 편집기 닫기, 게임 안 패널 보이기. 타이틀 칸은 배경(그림/영상 고르기, `title.background`), 평소/선택됐을 때, 이 항목만/공통, 항목 목록(메뉴 항목 + 제목, 부제), 글 칸, 숫자 칸, 글자 효과. 입력하는 동안은 게임에서 오는 값으로 덮지 않는다.

@@ -28,7 +28,9 @@ export interface ShaderCode {
 const readList = (d: any): ShaderInfo[] | null =>
   d && Array.isArray(d.shaders) && d.shaders.every((s: any) => s && typeof s.id === 'string' && typeof s.label === 'string') ? (d.shaders as ShaderInfo[]) : null;
 const BUILTIN = readList(builtinList) ?? [];
-const BUILTIN_VER = String((builtinList as any).screen_fx ?? '');
+// 목록을 만든 게임의 판. "pygaki"(1.9부터 pygaki 판 하나)가 있으면 아래 기능이 다 있음. 예전 게임은 "screen_fx" 판(5.x)
+const listVer = (d: any) => (d?.pygaki ? 'pygaki' : String(d?.screen_fx ?? ''));
+const BUILTIN_VER = listVer(builtinList);
 let LIST = BUILTIN;
 let LIST_VER = BUILTIN_VER;
 const OFF = new Set<string>();
@@ -40,7 +42,7 @@ export function setShaderList(text: string | null) {
   try {
     const d = text ? JSON.parse(text) : null;
     found = readList(d);
-    ver = String(d?.screen_fx ?? '');
+    ver = listVer(d);
   } catch {
     found = null;
   }
@@ -57,6 +59,7 @@ export const shaderInfo = (id: string) => LIST.find((s) => s.id === id) ?? null;
 
 // 판 비교 ("5.10" > "5.9")
 function verAtLeast(v: string, want: string) {
+  if (v === 'pygaki') return true;
   const a = v.split('.').map(Number);
   const b = want.split('.').map(Number);
   for (let i = 0; i < Math.max(a.length, b.length); i++) {

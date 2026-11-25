@@ -259,7 +259,7 @@ export function ShaderPanel() {
             {slot('b', '2번')}
           </>
         )}
-        {sh && !canValues && <p className="tip warn-text">예전 플러그인이라 세부 값은 안 돼요 (screen_fx 5.5부터).</p>}
+        {sh && !canValues && <p className="tip warn-text">예전 플러그인이라 세부 값은 안 돼요.</p>}
         {!linked && <p className="tip warn-text">pygaki 플러그인 연결이 꺼져 있어요 (왼쪽 [설정]).</p>}
         <AllRow
           what="셰이더"
@@ -313,7 +313,7 @@ export function ShaderPanel() {
                   <button className="fx-x" style={{ visibility: sh.time !== undefined ? 'visible' : 'hidden' }} title="기본값으로" onClick={(e) => (e.preventDefault(), set((s) => void delete s.time))}>↺</button>
                 </label>
               </div>
-              {!imgTransSupported() && <p className="tip warn-text">예전 플러그인이라 TV 꺼짐·켜짐으로 내보내요 (screen_fx 5.6부터).</p>}
+              {!imgTransSupported() && <p className="tip warn-text">예전 플러그인이라 TV 꺼짐·켜짐으로 내보내요.</p>}
               {imgTransSupported() && imgFx?.kind !== 'transition' && (
                 <p className="tip warn-text">효과 폴더에 {imgName}이 없어서 TV 꺼짐·켜짐으로 내보내요 ([효과]에서 넣기).</p>
               )}

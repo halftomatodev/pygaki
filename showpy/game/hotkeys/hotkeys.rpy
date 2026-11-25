@@ -21,7 +21,7 @@ init -10 python in hotkeys:
     import store
     from store import python_object
 
-    VERSION = "1.3"
+    VERSION = "1.9"     # pygaki 판 (예전 판은 1.3 같은 번호)
 
     DEFAULTS = dict(
         bindings=[ ],

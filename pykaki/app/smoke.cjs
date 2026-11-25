@@ -404,16 +404,6 @@ async function until(what, fn, ms = 10000) {
   const rows = await page.locator('.sp-mirror textarea.sp-m-in.wide').getAttribute('rows', { timeout: 10000 });
   if (rows !== '3') fail('넓은 글 칸이 세 줄 칸이 아님: ' + rows);
   console.log('패널 통째로: 됨');
-  // 셰이더를 거는 자리는 [대본 편집]의 상자·label로 옮김: 앱에서는 줄기표를 펴지 않음 (게임이 flow를 보내도)
-  const sendState = (extra) => {
-    Object.assign(state, extra);
-    for (const c of srv._conns ?? []) c.write(JSON.stringify(state) + '\n');
-  };
-  sendState({ flow: { open: true, file: 'game/script_flow.rpy', range: null, sel: 3, here: 3, points: [], rows: [] } });
-  await wait(800);
-  if (await page.locator('.sp-main button', { hasText: '줄기표' }).count()) fail('앱에 줄기표 버튼이 남아 있음');
-  if (await page.locator('.sp-flow-split').count()) fail('앱에 줄기표가 펴짐');
-  console.log('줄기표 감춤: 됨');
   // 게임 창의 GUI 편집기 보이기/숨기기 (ui_kit 3.23): 버튼과 F9가 panel 명령을 보내고, 게임 쪽 알림을 기억하는지
   const nPanel = () => got.filter((m) => m.cmd === 'panel' && m.hide === false).length;
   const p0 = nPanel();

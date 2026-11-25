@@ -1130,14 +1130,14 @@ init -6 python in splash:
                     self._set_pos(token[1], token[2], dx, dy, snap=not (mods & pygame.KMOD_ALT))
                 elif token[0] == "scale":
                     _k, name, d0, start, (cx, cy) = token
-                    mx, my = store.renpy.get_mouse_pos()
+                    mx, my = _ed.game_mouse()
                     self._set_scale(name, start, math.hypot(mx - cx, my - cy) / d0)
                 elif token[0] == "rot":
                     name = token[1]
                     r = self.rects().get(name)
                     if r is None:
                         return
-                    mx, my = store.renpy.get_mouse_pos()
+                    mx, my = _ed.game_mouse()
                     if abs(mx - r[0]) + abs(my - r[1]) < 4:
                         return
                     deg = math.degrees(math.atan2(mx - r[0], -(my - r[1])))

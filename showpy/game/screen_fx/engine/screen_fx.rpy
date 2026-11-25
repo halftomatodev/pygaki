@@ -43,7 +43,7 @@ init -110 python in screen_fx:
 
     import store
 
-    VERSION = "5.9"
+    VERSION = "1.9"     # pygaki 판 (예전 판은 5.9 같은 번호)
 
     ## ── 플러그인 폴더 위치 ──
     ## 이 파일은 <플러그인 폴더>/engine/screen_fx.rpy 에 있습니다.
@@ -1560,7 +1560,9 @@ init -110 python in screen_fx:
                 draw = full and current_cursor() == self.where
 
             if draw:
-                x, y = renpy.get_mouse_pos()
+                ## 편집 화면이 창 전체를 쓰는 동안은 게임 좌표로 (ui_editor.game_mouse)
+                _ued = getattr(renpy.store, "ui_editor", None)
+                x, y = _ued.game_mouse() if hasattr(_ued, "game_mouse") else renpy.get_mouse_pos()
                 if (0 <= x < width) and (0 <= y < height) and renpy.is_mouse_visible():
                     cr = renpy.render(cursor_source.d, width, height, st, at)
                     rv.subpixel_blit(cr, (x - cursor_source.hx, y - cursor_source.hy))
@@ -2340,7 +2342,7 @@ init 800 python in screen_fx:
                 "params": _plain(fx.PARAMS),            # 값 이름: [종류, 기본값(, 고를 수 있는 값)]
                 "groups": _plain(fx.GROUPS),            # 편집기 막대 묶음
                 })
-        return { "version": 2, "screen_fx": VERSION, "shaders": rv }
+        return { "version": 3, "pygaki": VERSION, "shaders": rv }
 
     def _write_shader_list():
         if not store.config.developer or renpy.android or renpy.ios or renpy.emscripten:

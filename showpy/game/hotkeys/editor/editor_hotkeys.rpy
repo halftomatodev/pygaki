@@ -553,7 +553,7 @@ init -6 python in hotkeys:
             def export_guide(self):
                 t = self.splash_tab()
                 if t is None:
-                    _ed.msg("스플래시 플러그인(splash 2.5 이상)이 있어야 조작 안내 화면으로 내보낼 수 있습니다.")
+                    _ed.msg("pygaki 스플래시가 있어야 조작 안내 화면으로 내보낼 수 있습니다.")
                     return
                 self.capturing = None
                 t.link_hotkeys()

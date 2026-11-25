@@ -1,4 +1,5 @@
 // 환경 설정 창: 화면 색, 단축키 바꾸기
+import { GAME_KEYS } from './gameKeys';
 import { useEffect, useState } from 'react';
 import { useStore } from './store';
 import { Hint } from './Help';
@@ -154,9 +155,9 @@ function RunPrefs() {
         <input type="checkbox" checked={!!snap} onChange={(e) => usePrefs.setState({ snapGame: e.target.checked })} />
         게임과 연결되면 이 창을 게임 창 옆으로 옮기기
       </label>
-      <label className="row" title="레트로 해상도처럼 정수 배율로 키운 게임에서, 게임 화면 밖 창의 빈 곳(검은 띠)을 게임 안 편집 화면이 열려 있을 때 붉게 칠해요. 게임 창에서는 F8">
+      <label className="row" title="창이 게임 화면보다 커서 둘레에 검은 띠가 남을 때(레트로 해상도처럼 정수 배율로 키운 게임 등), 게임 안 편집 화면이 열려 있으면 게임 화면 가장자리에 붉은 선을 그어요. 띠는 칠하지 않아요. 게임 창에서는 F8">
         <input type="checkbox" checked={bands} onChange={(e) => usePrefs.setState({ gameBands: e.target.checked })} />
-        게임 창 여백에 붉은 띠 (게임 안 편집 화면을 열었을 때)
+        게임 화면 가장자리에 붉은 경계선 (게임 안 편집 화면을 열었을 때)
       </label>
     </>
   );
@@ -217,6 +218,24 @@ function KeyPrefs() {
         <button onClick={() => (resetKeys(), setMsg('기본값으로 되돌렸어요.'))}>기본값으로</button>
         
       </div>
+      <h4>게임 안 편집 화면 단축키<Hint text="게임 창에서 Shift+M으로 연 편집 화면의 키예요. 여기서는 보기만 해요" topic="단축키" /></h4>
+      {GAME_KEYS.map((g) => (
+        <div key={g.group}>
+          <p className="tip game-keys-group">{g.group}</p>
+          <table className="keys game-keys">
+            <tbody>
+              {g.rows.map(([k, d]) => (
+                <tr key={k + d}>
+                  <td>{d}</td>
+                  <td>
+                    <kbd>{k}</kbd>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
     </>
   );
 }

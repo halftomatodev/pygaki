@@ -209,7 +209,7 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
   const canValues = valuesSupported();
   const values = shaders && canValues && usesShaderValues(p);
   if (shaders && S.renpyLink && !canValues && (usesShaderValues(p) || usesTvValues(p)))
-    W.push({ level: 'warn', msg: '셰이더와 TV 전환의 세부 값은 pygaki 플러그인의 화면 효과(screen_fx) 5.5부터 돼요. 이 게임은 예전 판이라 값 없이 내보내요' });
+    W.push({ level: 'warn', msg: '셰이더와 TV 전환의 세부 값은 새 pygaki 플러그인부터 돼요. 이 게임은 예전 판이라 값 없이 내보내요' });
   // 셰이더 줄. img: 그림 전환(픽셀소트 등)으로 바꾸는지 (그러면 상자 첫 그림 줄들 뒤에 with screen_fx.pending_with()를 붙인다)
   const shaderLine = (b: BoxNode, enter: boolean): { code: string; img: boolean } => {
     const from = enter ? (incoming.get(b.id) ?? []).map((x) => byId.get(x.from)).filter((x): x is BoxNode => !!x) : [];
@@ -219,7 +219,7 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
     // 그림 전환은 셰이더가 바뀌는 상자에 들어올 때만. 불러온 장면에서 돌아올 때(call 뒤)는 TV로
     if (isImgTrans(t) && !enter) t = 'tv';
     if (isImgTrans(t) && !imgTransSupported()) {
-      W.push({ level: 'warn', msg: `셰이더 전환 "${t}"는 pygaki 플러그인의 화면 효과(screen_fx) 5.6부터 돼요. 이 게임은 예전 판이라 TV 꺼짐·켜짐으로 내보내요 (${b.title || b.id})`, nodeId: b.id });
+      W.push({ level: 'warn', msg: `셰이더 전환 "${t}"는 새 pygaki 플러그인부터 돼요. 이 게임은 예전 판이라 TV 꺼짐·켜짐으로 내보내요 (${b.title || b.id})`, nodeId: b.id });
       t = 'tv';
     } else if (isImgTrans(t) && shaderEffect(t)?.kind !== 'transition') {
       W.push({ level: 'warn', msg: `셰이더 전환 "${t}"의 효과 파일이 게임의 효과 폴더(ui_kit/effects)에 없어서 TV 꺼짐·켜짐으로 내보내요. [효과] 화면에서 넣을 수 있어요 (${b.title || b.id})`, nodeId: b.id });
@@ -235,7 +235,7 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
   const sceneWanted = usesSceneUi(p);
   if (sceneWanted && !S.renpyLink) W.push({ level: 'warn', msg: '상자의 커서, 클릭 대기는 pygaki 플러그인 연결을 켜야 내보내요' });
   if (sceneWanted && S.renpyLink && !sceneSupported())
-    W.push({ level: 'warn', msg: '상자의 커서, 클릭 대기는 pygaki 플러그인 ui_kit 4.7부터 돼요. 이 게임은 예전 판이라 내보내지 않아요' });
+    W.push({ level: 'warn', msg: '상자의 커서, 클릭 대기는 새 pygaki 플러그인부터 돼요. 이 게임은 예전 판이라 내보내지 않아요' });
   const sceneUi = sceneWanted && S.renpyLink && sceneSupported();
 
   const vIndex = voiceIndex(opts.audio ?? []);

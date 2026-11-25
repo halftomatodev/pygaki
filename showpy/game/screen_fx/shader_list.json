@@ -1,5 +1,5 @@
 {
- "screen_fx": "5.9",
+ "pygaki": "1.9",
  "shaders": [
   {
    "extra": true,
@@ -4758,5 +4758,5 @@
    "prefix": "u_camcorder_"
   }
  ],
- "version": 2
+ "version": 3
 }

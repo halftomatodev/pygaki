@@ -174,6 +174,38 @@ init -8 python in ui_editor:
     def live_connected():
         return live.client is not None
 
+    ## 효과·셰이더 목록은 pygaki 앱에서 (4.20): 게임 창 패널에는 지금 값과 [앱에서 고르기]만 두고, 누르면
+    ## 앱이 붙어 있으면 앱의 [GUI 편집] 그 탭으로(type "open"), 아니면 SDK의 pygaki 앱을 켭니다(--project, --tab).
+    ## 앱에 보내는 패널(ui_editor_live_mirror)에는 목록을 그대로 둡니다.
+    def in_game_panel():
+        """지금 그리는 패널이 게임 창 것인지 (앱에 보내는 패널이 아니라)"""
+        try:
+            cs = store.renpy.current_screen()
+            return not (cs is not None and cs.screen_name[0] == "ui_editor_live_mirror")
+        except Exception:
+            return True
+
+    def app_exe():
+        p = os.path.join(store.config.renpy_base, "pygaki", "app", "pygaki.exe")
+        return p if os.path.exists(p) else None
+
+    def open_in_app(tab=None):
+        tab = tab or state.tab
+        if live.client is not None:
+            _live_send(dict(type="open", tab=tab))
+            msg("pygaki 앱에서 이 탭을 열었습니다.")
+            return
+        exe = app_exe()
+        if exe is None:
+            msg("pygaki 앱을 찾지 못했습니다 (렌파이 SDK의 pygaki/app/pygaki.exe). 앱으로 이 프로젝트를 열어 [[GUI 편집]에서 고르세요.")
+            return
+        try:
+            import subprocess
+            subprocess.Popen([ exe, "--project", store.config.basedir, "--tab", tab ], close_fds=True)
+            msg("pygaki 앱을 켭니다. 게임과 연결되면 [[GUI 편집]의 이 탭이 열립니다.")
+        except Exception as e:
+            msg("pygaki 앱을 켜지 못했습니다: {}".format(e))
+
     def live_toggle_panel():
         """게임 안 패널 보이기/숨기기를 바꾸고 앱에 알립니다(앱이 기억해 둠). (3.23)"""
         live.hide_panel = not live.hide_panel
@@ -302,17 +334,6 @@ init -8 python in ui_editor:
         """스플래시 페이지 목록 (splash 2.2). 없거나 예전 판이면 None."""
         t = get_tab("splash")
         f = getattr(t, "live_pages", None)
-        if f is None:
-            return None
-        try:
-            return _js(f())
-        except Exception:
-            return None
-
-    def _flow_state():
-        """화면 효과 탭의 줄기표 (Screen FX 5.2가 있을 때). 없으면 None."""
-        fx = get_tab("screen_fx")
-        f = getattr(fx, "flow_state", None)
         if f is None:
             return None
         try:
@@ -625,7 +646,6 @@ init -8 python in ui_editor:
             title=_title_state(),
             custom_ui=_custom_ui_state(),
             panel=_panel_state(),
-            flow=_flow_state(),
             splash=_splash_state(),
             )
 
@@ -878,7 +898,7 @@ init -8 python in ui_editor:
             live.hide_panel = bool(c.get("hide"))
             return True
 
-        ## 여백 띠 (4.20): 앱 환경 설정의 [게임 창 여백 띠]와 단축키
+        ## 경계선 (4.20, 이름은 bands): 앱 환경 설정의 [게임 화면 경계선]과 단축키
         if cmd == "bands":
             set_bands(bool(c.get("on")), tell_app=False)
             return True
@@ -939,13 +959,6 @@ init -8 python in ui_editor:
                 return False
             t.set_page(pid)
             return True
-
-        if cmd == "flow":
-            ## 줄기표 (Screen FX 5.2): do = open / close / toggle / range(a, b) / pick(row) / point(target)
-            fx = get_tab("screen_fx")
-            if fx is None or not hasattr(fx, "flow_cmd"):
-                return False
-            return fx.flow_cmd(c)
 
         if cmd and cmd.startswith("custom_ui."):
             return _custom_ui_cmd(cmd, c)

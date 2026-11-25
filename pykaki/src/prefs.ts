@@ -29,7 +29,7 @@ export const ACTIONS: { id: ActionId; label: string; def: string }[] = [
   { id: 'find', label: '찾기·바꾸기 (대사, 선택지, 상자 제목)', def: 'Ctrl+KeyF' },
   { id: 'gamePanel', label: '게임 창의 편집 화면 보이기/숨기기 (앱, 게임과 연결됐을 때)', def: 'F9' },
   // 레트로 해상도(정수 배율)로 키운 게임 창의 남는 곳을 게임 안 편집 화면이 열려 있을 때 붉게 (ui_kit 4.20, LINK.md 9장 bands)
-  { id: 'gameBands', label: '게임 창 여백의 붉은 띠 켜기/끄기 (앱, 게임과 연결됐을 때)', def: 'F8' },
+  { id: 'gameBands', label: '게임 화면 경계선 켜기/끄기 (앱, 게임과 연결됐을 때)', def: 'F8' },
 ];
 
 // box·label은 어둡게(그라데이션) 테마와 직접 고르기에서만: 상자와 label 배경을 이 색으로 칠한다

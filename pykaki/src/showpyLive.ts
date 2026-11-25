@@ -100,29 +100,6 @@ export interface PanelState {
   popup: MirrorNode | null;
   popup_kind: string | null;
 }
-// 줄기표 (screen_fx 5.2): 원고를 줄 번호 순서대로 마디와 가지로. docs/LINK.md 9장 state.flow
-export interface FlowRow {
-  l: number; // 원고 줄 번호
-  k: 'label' | 'branch' | 'say' | 'stmt' | 'fx' | 'jump' | 'call' | 'show' | 'menu';
-  d: number; // 깊이 (가지 안으로 들어갈수록 1씩)
-  g: number[]; // 이 행을 지나는 세로선 깊이
-  t: string; // 보일 글
-  c: string; // 글자색 (어두운 바탕용)
-  a: string | null; // 1번 셰이더 색 (없으면 null)
-  b: string | null; // 2번 셰이더 색
-  s: string; // "1번 … + 2번 …"
-  p: [string, number] | null; // 전환 점이면 그 대상 [파일, 줄]
-  i: boolean; // 고를 수 있는 줄 (셰이더 줄을 넣을 수 있음)
-}
-export interface FlowState {
-  open: boolean;
-  file?: string | null;
-  rows?: FlowRow[];
-  range?: [number, number] | null; // 고른 구간 (행 번호)
-  sel?: number | null; // 고른 줄
-  here?: number | null; // 게임의 지금 줄
-  points?: [string, number][]; // 고른 전환 점
-}
 export interface GameFiles {
   audio: string[];
   images: string[];
@@ -134,7 +111,6 @@ export interface GameState {
   title: TitleState | null;
   custom_ui?: CustomUIState | null; // ui_kit 3.15부터
   panel?: PanelState | null; // ui_kit 3.16부터. 편집기가 열려 있고 게임 안 패널이 숨어 있을 때만
-  flow?: FlowState | null; // screen_fx 5.2부터 (줄기표). 없으면 예전 판
   splash?: SplashPages | null; // splash 2.2부터 (페이지 목록). 없으면 예전 판
 }
 
@@ -152,6 +128,7 @@ interface S {
   files: GameFiles | null; // 게임 폴더의 소리, 그림 파일 (렌파이 list_files, game 기준)
   err: string | null;
   section: string;
+  want?: { tab: string; n: number } | null; // 게임이 열어 달라고 한 탭 (ShowpyView가 그 칸을 고름)
 }
 
 // 게임 창의 GUI 편집기 보이기/숨기기. 이 앱(창)에 붙는 설정이라 localStorage에 둔다
@@ -184,13 +161,13 @@ export function setGamePanel(show: boolean) {
   keepGamePanel(show);
   liveSend({ cmd: 'panel', hide: !show });
 }
-// 게임 창 여백의 붉은 띠 (ui_kit 4.20). 환경 설정에 두고, 붙을 때와 바뀔 때 게임에 보낸다. 게임 창의 F8도 여기로 돌아옴
+// 게임 화면 가장자리의 붉은 경계선 (ui_kit 4.20, 이름은 예전 그대로 bands). 환경 설정에 두고, 붙을 때와 바뀔 때 게임에 보낸다. 게임 창의 F8도 여기로 돌아옴
 const bandsOn = () => usePrefs.getState().gameBands !== false;
 export function toggleGameBands() {
   const on = !bandsOn();
   usePrefs.setState({ gameBands: on });
-  if (!useLive.getState().on) return on ? '게임 창 여백 띠를 켰어요 (게임과 연결되면 보내요)' : '게임 창 여백 띠를 껐어요 (게임과 연결되면 보내요)';
-  return on ? '게임 창 여백에 붉은 띠를 켜요 (게임 안 편집 화면을 열었을 때)' : '게임 창 여백의 붉은 띠를 꺼요';
+  if (!useLive.getState().on) return on ? '게임 화면 경계선을 켰어요 (게임과 연결되면 보내요)' : '게임 화면 경계선을 껐어요 (게임과 연결되면 보내요)';
+  return on ? '게임 화면 가장자리에 붉은 경계선을 켜요 (게임 안 편집 화면을 열었을 때)' : '게임 화면 경계선을 꺼요';
 }
 
 export function toggleGamePanel() {
@@ -232,6 +209,8 @@ export function startLive() {
       bandsEcho = !!m.on;
       usePrefs.setState({ gameBands: !!m.on });
     }
+    // 게임 안 편집 화면의 [pygaki 앱에서 고르기] (ui_kit 4.20): [GUI 편집]의 그 탭으로
+    else if (m?.type === 'open' && typeof m.tab === 'string') useLive.setState({ view: 'showpy', want: { tab: m.tab, n: Date.now() } });
   };
   // 환경 설정에서 바꾸면 게임에 보냄
   let bandsEcho: boolean | null = null;
@@ -248,6 +227,7 @@ export function startLive() {
   desktop.onLiveStatus(status);
   desktop.onLive(take);
   // 화면이 뜨기 전에 온 상태와 파일 목록 (게임은 바뀔 때만 다시 보냄)
+  void desktop.openTab?.().then((t: string | null) => t && take({ type: 'open', tab: t }));
   void desktop.liveStatus().then((s) => {
     status(s);
     if (s.on) for (const m of s.last ?? []) if (!(m.type === 'state' && useLive.getState().st)) take(m);

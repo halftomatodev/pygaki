@@ -68,7 +68,7 @@ UI 숨기기	UIを隠す	Hide UI
 '{}'의 키를 모두 뺐습니다.	「{0}」のキーをすべて外しました。	Removed all keys from '{0}'.
 '{}'를 처음 키로 돌렸습니다: {}	「{0}」を初期キーに戻しました:{1}	Reset '{0}' to its default keys: {1}
 (다른 기능이 쓰는 키는 뺌: {})	(ほかの機能が使うキーは除外:{0})	(keys used by other actions left out: {0})
-스플래시 플러그인(splash 2.5 이상)이 있어야 조작 안내 화면으로 내보낼 수 있습니다.	操作案内画面に書き出すにはスプラッシュプラグイン(splash 2.5 以上)が必要です。	Exporting to the controls screen needs the splash plugin (splash 2.5 or later).
+pygaki 스플래시가 있어야 조작 안내 화면으로 내보낼 수 있습니다.	操作案内画面に書き出すにはpygaki スプラッシュが必要です。	Exporting to the controls screen needs pygaki splash.
 지금 목록을 복사해 넣었습니다. 이제 칸마다 고칠 수 있습니다.	今のリストをコピーしました。各欄を編集できます。	Copied the current list. You can now edit each field.
 키	キー	Key
 설명	説明	Description
@@ -111,65 +111,10 @@ ESC 조작방법 화면 목록	ESC 操作方法画面のリスト	ESC help scree
 위로	上へ	Up
 아래로	下へ	Down
 저절로 만들기로	自動作成に戻す	Back to automatic
-줄기표를 폈습니다. 마디를 끌어서 구간을 고르세요. (G 접기)	フロー表を開きました。節をドラッグして区間を選んでください。(G で閉じる)	Opened the flow chart. Drag across nodes to pick a range. (G to fold)
-(맞으면)	(当てはまれば)	(if true)
-이 마디 아래에는 고를 수 있는 줄이 없습니다.	この節の下には選べる行がありません。	There are no selectable lines under this node.
-{}~{}번째 줄을 골랐습니다. 1번, 2번 셰이더를 고르고 [[이 구간에 적용]을 누르세요.	{0}~{1} 行目を選びました。シェーダー 1、2 を選んで [この区間に適用] を押してください。	Selected lines {0}-{1}. Pick shaders 1 and 2, then click [Apply to this range].
-구간 안에 셰이더 줄을 넣을 수 있는 문장이 없습니다.	区間内にシェーダー行を入れられる文がありません。	No statement in the range can take a shader line.
-끝 줄이 jump/return이라 끝 다음 줄이 없습니다. 되돌리기는 넣지 않습니다.	最後の行が jump/return なので次の行がありません。戻しは入れません。	The last line is jump/return, so there is no next line. No reset is added.
-pygaki 원고라 끝 다음 {}번째 줄(menu 같은 줄) 앞에는 줄을 넣을 수 없어서 되돌리기는 넣지 않습니다. 구간 끝을 한 줄 앞으로 잡아 보세요.	pygaki のスクリプトなので、次の {0} 行目(menu などの行)の前には行を入れられず、戻しは入れません。区間の終わりを 1 行前にしてみてください。	In a pygaki script no line can go before line {0} (a line such as menu), so no reset is added. Try ending the range one line earlier.
-끝 다음에 이 파일에서 이어지는 줄이 없어서 되돌리기는 넣지 않습니다.	終わりの後にこのファイルで続く行がないので、戻しは入れません。	No line follows the end in this file, so no reset is added.
-끝 줄이 선택지/if 가지 안이라, 다른 가지로 가면 끝 다음 줄을 지나지 않습니다.	最後の行が選択肢/if の分岐内なので、別の分岐に進むと次の行を通りません。	The last line is inside a choice/if branch, so other branches won't pass the next line.
-줄기표에서 마디를 끌어 구간을 먼저 고르세요.	先にフロー表で節をドラッグして区間を選んでください。	First drag across nodes in the flow chart to pick a range.
-원고 쓰기 도구(UI Kit 3.0 이상)가 없습니다.	スクリプト書き込みツール(UI Kit 3.0 以上)がありません。	The script writer (UI Kit 3.0 or later) is missing.
-{}번째 줄부터 원래대로({}).	{0} 行目から元に戻す({1})。	Back to normal from line {0} ({1}).
-끝 다음 {}번째 줄에는 이미 셰이더 줄이 있어서 되돌리기는 넣지 않았습니다.	次の {0} 行目にはすでにシェーダー行があるので、戻しは入れませんでした。	Line {0} after the end already has a shader line, so no reset was added.
-{}번째 줄부터 {}.{} 전환 점 {}곳을 골라 두었습니다. 저장(Ctrl+S)하면 원고에 들어갑니다.	{0} 行目から {1}。{2} トランジション点 {3} か所を選びました。保存(Ctrl+S)するとスクリプトに入ります。	From line {0}: {1}.{2} Picked {3} transition points. Save (Ctrl+S) to write them to the script.
-구간 안에 지울 셰이더 줄이 없습니다.	区間内に削除するシェーダー行がありません。	There are no shader lines to delete in the range.
-구간 안의 셰이더 줄 {}곳을 지우기로 했습니다. (대사 괄호의 fx=는 그대로)	区間内のシェーダー行 {0} か所を削除します。(セリフの括弧の fx= はそのまま)	Marked {0} shader lines in the range for deletion. (fx= in dialogue brackets stays)
+원고 쓰기 도구가 없습니다.	スクリプト書き込みツールがありません。	The script writer is missing.
 줄을 먼저 고르세요.	先に行を選んでください。	Pick a line first.
-고른 줄이 줄기표에 없습니다.	選んだ行がフロー表にありません。	The selected line isn't in the flow chart.
-전환 점 {}곳을 골랐습니다. 패널의 '고른 전환 점'에서 전환을 고르세요.	トランジション点 {0} か所を選びました。パネルの「選んだトランジション点」でトランジションを選んでください。	Picked {0} transition points. Choose a transition under 'Selected transition points' in the panel.
-고른 전환 점이 없습니다.	選んだトランジション点がありません。	No transition points selected.
-줄기표에서 구간을 먼저 고르세요.	先にフロー表で区間を選んでください。	Pick a range in the flow chart first.
-구간이 닿는 전환 점 {}곳을 골랐습니다.	区間にかかるトランジション点 {0} か所を選びました。	Picked {0} transition points touching the range.
-줄기표 오른쪽 동그라미를 눌러 전환 점을 먼저 고르세요.	先にフロー表の右の丸を押してトランジション点を選んでください。	Click the circles at the right of the flow chart to pick transition points first.
-전환 점 {}곳의 전환: {}.{} 저장(Ctrl+S)하면 원고에 들어갑니다.	トランジション点 {0} か所のトランジション:{1}。{2} 保存(Ctrl+S)するとスクリプトに入ります。	Transition for {0} points: {1}.{2} Save (Ctrl+S) to write it to the script.
-대사 괄호 줄 {}곳은 '셰이더가 바뀌는 줄'에서 [[두 자리로 바꾸기] 먼저.	セリフの括弧の行 {0} か所は、先に「シェーダーが変わる行」で [2 枠に変える] を。	For {0} dialogue-bracket lines, first use [Switch to two slots] under 'Lines where the shader changes'.
 셰이더: {} ({})	シェーダー:{0}({1})	Shader: {0} ({1})
-(바꿀 예정)	(変更予定)	(to change)
-* (셰이더 줄 지움)	* (シェーダー行を削除)	* (shader line deleted)
-지울 셰이더 줄이 없습니다. 줄기표에서 구간을 끌어 고르거나 오른쪽 네모 점을 고르세요.	削除するシェーダー行がありません。フロー表で区間をドラッグするか、右の四角の点を選んでください。	No shader lines to delete. Drag a range in the flow chart or pick the square points on the right.
-이 구간에는 앞에서 이어진 셰이더({})가 보입니다. 둘 다 기본으로 하려면 앞의 셰이더 줄도 지우세요.	この区間には前から続くシェーダー({0})が見えます。両方をデフォルトにするには前のシェーダー行も削除してください。	This range shows a shader carried over from earlier ({0}). To make both default, delete the earlier shader line too.
-셰이더 줄 {}곳을 지우기로 했습니다.{} 저장(Ctrl+S)하면 원고에서 빠집니다.	シェーダー行 {0} か所を削除します。{1} 保存(Ctrl+S)するとスクリプトから消えます。	Marked {0} shader lines for deletion.{1} Save (Ctrl+S) to remove them from the script.
-줄기표 -	フロー表 -	Flow chart -
-원고 없음	スクリプトなし	No script
 지금 줄	現在の行	Current line
-G 접기	G で閉じる	G to fold
-이 원고 파일에서 label 안의 줄을 찾지 못했습니다. 게임을 진행한 뒤 다시 펴세요.	このスクリプトファイルで label 内の行が見つかりませんでした。ゲームを進めてから開き直してください。	No lines inside a label were found in this script file. Play on a bit and open it again.
-누르기: 그 줄로 | 끌기: 구간 | 네모 점: 전환 점 | Delete: 셰이더 지우기 | 휠: 스크롤	クリック:その行へ | ドラッグ:区間 | 四角の点:トランジション点 | Delete:シェーダー削除 | ホイール:スクロール	Click: go to line | Drag: range | Square points: transition points | Delete: remove shader | Wheel: scroll
-G 줄기표 접기	G フロー表を閉じる	G Fold flow chart
-G 줄기표 펴기	G フロー表を開く	G Open flow chart
-고른 줄을 구간 시작으로	選んだ行を区間の始まりに	Selected line as range start
-구간 끝으로	区間の終わりに	As range end
-줄기표에서 마디를 끌어 구간을 고르세요. (앱에서는 원고 칸에서 줄을 고르고 위 두 버튼)	フロー表で節をドラッグして区間を選んでください。(アプリではスクリプト欄で行を選び、上の 2 つのボタン)	Drag across nodes in the flow chart to pick a range. (In the app, pick lines in the script panel and use the two buttons above)
-구간 풀기	区間を解除	Clear range
-구간: {}~{}번째 줄 → {}	区間:{0}~{1} 行目 → {2}	Range: lines {0}-{1} → {2}
-끝난 뒤 {}번째 줄부터 원래대로: {}{}	終了後 {0} 行目から元に戻す:{1}{2}	After the end, back to normal from line {0}: {1}{2}
-(그 줄에 이미 셰이더 줄이 있어서 안 넣음)	(その行にすでにシェーダー行があるので入れない)	(not added: that line already has a shader line)
-끝난 뒤 되돌리기: 넣지 않음	終了後の戻し:入れない	Reset after the end: none
-되돌리는 곳	戻す場所	Reset at
-끝 다음 줄	終わりの次の行	Line after the end
-가지가 합쳐지는 곳	分岐が合流する所	Where branches merge
-안 넣음	入れない	None
-구간 안에 셰이더가 바뀌는 줄이 {}곳 있습니다. 그 줄부터는 그 줄의 셰이더가 보입니다.	区間内にシェーダーが変わる行が {0} か所あります。その行からはその行のシェーダーが見えます。	The range has {0} lines where the shader changes. From those lines on, their shader shows.
-이 구간에 적용	この区間に適用	Apply to this range
-구간 안 셰이더 줄 지우기	区間内のシェーダー行を削除	Delete shader lines in range
-구간이 닿는 전환 점 고르기	区間にかかるトランジション点を選ぶ	Pick transition points in range
-구간의 셰이더 지우기 (Delete)	区間のシェーダーを削除 (Delete)	Remove range shader (Delete)
-고른 전환 점 {}곳 ({}번째 줄)	選んだトランジション点 {0} か所({1} 行目)	{0} selected transition points (line {1})
-고르기 풀기	選択を解除	Clear selection
-고른 점 지우기 (Delete)	選んだ点を削除 (Delete)	Delete selected points (Delete)
 그림 고르기 - game 폴더의 그림	画像を選ぶ - game フォルダーの画像	Pick image - images in the game folder
 타이틀 일렁임	タイトルのゆらめき	Title ripple
 watermorph_config.rpy에 붙여넣으세요.	watermorph_config.rpy に貼り付けてください。	Paste into watermorph_config.rpy.
@@ -231,7 +176,7 @@ UI Kit 편집기가 저장한 타이틀 일렁임 설정입니다.	UI Kit エデ
 1번 {} + 2번 {}	1 番 {0} + 2 番 {1}	slot 1 {0} + slot 2 {1}
 {}번째 줄부터 커서: {}. 저장(Ctrl+S)하면 원고에 들어갑니다.	{0} 行目からカーソル:{1}。保存(Ctrl+S)するとスクリプトに入ります。	Cursor from line {0}: {1}. Save (Ctrl+S) to write it to the script.
 이 줄 위에는 지울 커서 줄이 없습니다.	この行の上には削除するカーソル行がありません。	There is no cursor line above this line to delete.
-대사 탭이 없습니다. (UI Kit 2.9 이상)	セリフタブがありません。(UI Kit 2.9 以上)	The dialogue tab is missing. (UI Kit 2.9 or later)
+대사 탭이 없습니다.	セリフタブがありません。	The dialogue tab is missing.
 대사가 화면에 떠 있을 때만 됩니다. 대사까지 진행한 뒤 다시 누르세요.	セリフが画面に出ているときだけ使えます。セリフまで進めてから押し直してください。	Only works while dialogue is on screen. Play to a line of dialogue and click again.
 덮개 켬	オーバーレイ オン	Overlay on
 대사 탭: 이 대사부터 {}. Ctrl+S를 누르면 원고의 이 줄에 적힙니다.	セリフタブ:このセリフから {0}。Ctrl+S でスクリプトのこの行に書き込みます。	Dialogue tab: {0} from this line. Press Ctrl+S to write it to this line of the script.
@@ -270,7 +215,6 @@ UI Kit 편집기가 저장한 화면 효과 전환 설정입니다.	UI Kit エ�
 게임의 지금 장면: 1번 {} + 2번 {}	ゲームの今の場面:1 番 {0} + 2 番 {1}	Current scene in the game: slot 1 {0} + slot 2 {1}
 1번, 2번을 고르면 화면에 바로 보이고, 그 아래에서 효과의 세부 속성을 고칩니다.	1 番、2 番を選ぶと画面にすぐ見え、その下でエフェクトの詳細設定を編集します。	Picking slots 1 and 2 shows them at once; edit each effect's details below.
 목록에서 줄 누르기: 그 줄을 고르고 게임도 그 줄로 | [[ ] 앞뒤 줄 | 세모 두 번: 지금 줄로 | Ctrl+S 저장	リストの行をクリック:その行を選び、ゲームもその行へ | [ ] 前後の行 | 三角を 2 回:現在の行へ | Ctrl+S 保存	Click a line in the list: select it and jump the game there | [ ] previous/next line | Double-click triangle: current line | Ctrl+S Save
-G 줄기표: 마디를 끌어 구간 고르기 → [[이 구간에 적용] | 오른쪽 네모 점으로 전환 점 고르기 | Delete 구간/고른 점의 셰이더 지우기	G フロー表:節をドラッグして区間を選ぶ → [この区間に適用] | 右の四角の点でトランジション点を選ぶ | Delete 区間/選んだ点のシェーダーを削除	G Flow chart: drag nodes to pick a range → [Apply to this range] | pick transition points with the squares on the right | Delete removes the shader of the range/points
 막대를 끌고 '미리 보기'를 누르면 전환을 다시 보여줍니다.	バーをドラッグして「プレビュー」を押すとトランジションをもう一度見せます。	Drag the bars and click 'Preview' to replay the transition.
 Backspace 전환 설정 되돌리기	Backspace トランジション設定を元に戻す	Backspace Revert transition settings
 막대를 끌면 바로 보입니다. 세부 속성에서 프리셋을 고르면 그 프리셋을 미리 보며 고칩니다.	バーをドラッグするとすぐ見えます。詳細設定でプリセットを選ぶと、そのプリセットをプレビューしながら編集します。	Dragging a bar shows it at once. Pick a preset under details to edit it with a preview.
@@ -310,7 +254,7 @@ screen_fx_config.rpy에 붙여넣으세요.	screen_fx_config.rpy に貼り付け
 프리셋:	プリセット:	Preset:
 1번 셰이더	シェーダー 1	Shader 1
 2번 셰이더	シェーダー 2	Shader 2
-원고 쓰기 도구(UI Kit 3.0 이상)가 없어서 줄 고르기와 [[여기에서부터 적용]은 못 씁니다.	スクリプト書き込みツール(UI Kit 3.0 以上)がないので、行の選択と [ここから適用] は使えません。	The script writer (UI Kit 3.0 or later) is missing, so line picking and [Apply from here] are unavailable.
+원고 쓰기 도구가 없어서 줄 고르기와 [[여기에서부터 적용]은 못 씁니다.	スクリプト書き込みツールがないので、行の選択と [ここから適用] は使えません。	The script writer is missing, so line picking and [Apply from here] are unavailable.
 처음 상태 접기	初期状態を閉じる	Fold start state
 처음 상태 펴기	初期状態を開く	Show start state
 처음 1번	初期 1 番	Start slot 1
@@ -479,7 +423,7 @@ pygaki 편집: 지금 화면에서 편집할 수 있는 것이 없습니다.	pyg
 T 다음 탭 | Ctrl+S 저장(대사, 선택지, 이미지 줄은 원고에 바로) | Ctrl+C 복사 | Esc 닫기 | F1 안내 접기	T 次のタブ | Ctrl+S 保存(セリフ、選択肢、画像の行はスクリプトに直接) | Ctrl+C コピー | Esc 閉じる | F1 案内を閉じる	T Next tab | Ctrl+S Save (dialogue, choice and image lines go straight to the script) | Ctrl+C Copy | Esc Close | F1 Fold help
 패널: 제목(=)을 끌어 옮기기 | P 구석 바꾸기 | X 접기 | Space 누르는 동안 숨기기 | B 자동 비키기 {}	パネル:タイトル(=)をドラッグして移動 | P 隅を変える | X 折りたたむ | Space 押している間隠す | B 自動でよける {0}	Panel: drag the title (=) to move | P Change corner | X Fold | Space Hide while held | B Auto dodge {0}
 V 화면 효과 보기 {} (휘는 효과는 가장자리에서 누르는 자리가 조금 어긋남)	V 画面エフェクト表示 {0}(曲げるエフェクトは端でクリック位置が少しずれる)	V Show screen FX {0} (with warping effects, clicks near the edges are slightly off)
-화면 효과 플러그인(Screen FX 3.4 이상)이 없습니다.	画面エフェクトプラグイン(Screen FX 3.4 以上)がありません。	The screen FX plugin (Screen FX 3.4 or later) is missing.
+pygaki 화면 효과가 없습니다.	pygaki 画面エフェクトがありません。	pygaki screen FX is missing.
 편집 중 화면 효과 보기 {} (V)	編集中の画面エフェクト表示 {0} (V)	Show screen FX while editing: {0} (V)
 = pygaki 편집	= pygaki 編集	= pygaki editor
 새 파일 {}개를 찾았습니다.	新しいファイルを {0} 個見つけました。	Found {0} new files.
@@ -1345,9 +1289,15 @@ Tab 대사/이름/그림 바꾸기 | 방향키 이동 | A/D 크기 | Q/E 회전 
 마우스: 드래그하면 그림이 움직임 (Shift: 한 방향) | 모서리 점: 분홍 그림, 하늘색 글을 끌면 네 점 변형 | 휠 크기 (Shift: 크게)	マウス: ドラッグで画像が動く (Shift: 一方向) | 角の点: ピンク 画像、水色 文字をドラッグで4点変形 | ホイール サイズ (Shift: 大きく)	Mouse: drag moves the image (Shift: one direction) | Corner dots: drag pink (image) or light blue (text) to warp | Wheel size (Shift: bigger)
 [[고칠 것: 그림]에서 끌기 자리, 휠 크기, Q/E 회전, 모서리 점(분홍 그림, 하늘색 글) 끌기 네 점 변형. 묶으면 글도 그림을 따라 움직임	[[編集: 画像]でドラッグ 位置、ホイール サイズ、Q/E 回転、角の点(ピンク 画像、水色 文字)ドラッグ 4点変形。リンクすると文字も画像についていく	In [[Edit: Image]: drag position, wheel size, Q/E rotate, drag corner dots (pink image, light blue text) to warp. Linked text follows the image
 음성 빛	音声の光	Voice glow
-F8 여백 띠 {} (게임 화면 밖 창의 빈 곳을 붉게)	F8 余白の帯 {0} (ゲーム画面の外のウィンドウの空きを赤く)	F8 Margin bands {0} (paint the empty window area outside the game red)
-여백 띠 켬 (게임 화면 밖 창의 빈 곳을 붉게)	余白の帯 オン (ゲーム画面の外のウィンドウの空きを赤く)	Margin bands on (paint the empty window area outside the game red)
-여백 띠 끔	余白の帯 オフ	Margin bands off
+F8 경계선 {} (창이 게임 화면보다 크면 게임 화면 가장자리에 붉은 선)	F8 境界線 {0} (ウィンドウがゲーム画面より大きいとき、ゲーム画面の端に赤い線)	F8 Border {0} (red line at the game screen edge when the window is larger)
+경계선 켬 (창이 게임 화면보다 크면 게임 화면 가장자리에 붉은 선)	境界線 オン (ウィンドウがゲーム画面より大きいとき、ゲーム画面の端に赤い線)	Border on (red line at the game screen edge when the window is larger)
+경계선 끔	境界線 オフ	Border off
 pygaki 앱에 고르기 창이 열려 있어요.	pygaki アプリで選択ウィンドウが開いています。	A picker is open in the pygaki app.
 글꼴, 색, 크기 같은 값은 pygaki 앱의 [[GUI 편집]에서 고쳐요. F9 게임 창 패널 숨기기	フォント、色、サイズなどの値は pygaki アプリの [GUI 編集] で直します。F9 でゲームウィンドウのパネルを隠す	Change values like font, color, and size in the pygaki app's [GUI Edit]. F9 hides the game-window panel
 보임 (자리 옮기기만, 값은 pygaki 앱에서)	表示(位置の移動だけ、値は pygaki アプリで)	Shown (moving only, values in the pygaki app)
+pygaki 앱에서 고르기	pygaki アプリで選ぶ	Choose in the pygaki app
+pygaki 앱에서 이 탭을 열었습니다.	pygaki アプリでこのタブを開きました。	Opened this tab in the pygaki app.
+pygaki 앱을 찾지 못했습니다 (렌파이 SDK의 pygaki/app/pygaki.exe). 앱으로 이 프로젝트를 열어 [[GUI 편집]에서 고르세요.	pygaki アプリが見つかりません (Ren'Py SDK の pygaki/app/pygaki.exe)。アプリでこのプロジェクトを開き、[GUI 編集]で選んでください。	The pygaki app was not found (pygaki/app/pygaki.exe in the Ren'Py SDK). Open this project in the app and choose in [GUI Edit].
+pygaki 앱을 켭니다. 게임과 연결되면 [[GUI 편집]의 이 탭이 열립니다.	pygaki アプリを起動します。ゲームと接続すると [GUI 編集]のこのタブが開きます。	Starting the pygaki app. Once it connects to the game, this tab opens in [GUI Edit].
+pygaki 앱을 켜지 못했습니다: {}	pygaki アプリを起動できませんでした: {0}	Could not start the pygaki app: {0}
+F1 단축키 안내 펴기 · 전체 목록은 pygaki 앱 환경 설정의 [[단축키]	F1 ショートカット案内を開く · 全一覧は pygaki アプリの環境設定 [ショートカット]	F1 Show shortcut help · Full list in the pygaki app settings [Shortcuts]

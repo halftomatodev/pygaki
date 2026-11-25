@@ -210,7 +210,7 @@ init -6 python in screen_fx:
             def layout_file(self):
                 wm = self.wm()
                 lay = self._merged()
-                lines = file_header("UI Kit 편집기가 저장한 타이틀 일렁임 설정입니다.", [
+                lines = file_header("pygaki 게임 안 편집 화면이 저장한 타이틀 일렁임 설정입니다.", [
                     "여기 적힌 값은 watermorph_config.rpy의 같은 값보다 우선합니다.",
                     "이 파일을 지우면 설정 파일 값으로 돌아갑니다.",
                     ])
@@ -291,12 +291,11 @@ init -6 python in screen_fx:
                 fns[name] = w
                 return w
 
-        class FxTab(FlowTreeMixin, FxTabBase):
+        class FxTab(FxTabBase):
 
             id = TAB_ID
             label = "화면 효과"
             panel_screen = "ui_editor_screen_fx_panel"
-            overlay_screen = "ui_editor_fx_tree_overlay"     # 5.2: 줄기표 서랍 (editor_flow.rpy)
 
             SCOPES = (("all", "항상"), ("game", "게임 중에만"), ("main_menu", "타이틀에서만"))
 
@@ -607,7 +606,7 @@ init -6 python in screen_fx:
             def apply_here(self):
                 """고른 줄 바로 위에 $ screen_fx.shaders(1번, 2번) 줄을 넣기로 함 (저장할 때 원고에)."""
                 if self.se() is None:
-                    _ed.msg("원고 쓰기 도구(UI Kit 3.0 이상)가 없습니다.")
+                    _ed.msg("원고 쓰기 도구가 없습니다.")
                     return
                 self._follow()
                 if self.line_sel is None:
@@ -933,7 +932,7 @@ init -6 python in screen_fx:
 
             def call_slots(self, t, state):
                 """'$ screen_fx.shaders(…)' 같은 줄 하나를 지난 뒤의 두 자리.
-                ((1번, 2번), 두 자리 줄인지, 전환) 또는 None (셰이더 줄이 아님). 5.2: 줄기표도 씀"""
+                ((1번, 2번), 두 자리 줄인지, 전환) 또는 None (셰이더 줄이 아님)"""
                 c = self._call(t)
                 if c is None:
                     return None
@@ -1080,7 +1079,7 @@ init -6 python in screen_fx:
 
             def cursor_apply(self):
                 if self.se() is None:
-                    _ed.msg("원고 쓰기 도구(UI Kit 3.0 이상)가 없습니다.")
+                    _ed.msg("원고 쓰기 도구가 없습니다.")
                     return
                 self._follow()
                 if self.line_sel is None:
@@ -1257,7 +1256,7 @@ init -6 python in screen_fx:
                 """효과 페이지의 '이 줄부터 이 효과': 줄에 넣기 페이지로 가서 이 효과를 고름."""
                 fx = self.fx()
                 if self.se() is None:
-                    _ed.msg("원고 쓰기 도구(UI Kit 3.0 이상)가 없습니다.")
+                    _ed.msg("원고 쓰기 도구가 없습니다.")
                     return
                 if self.line_sel is None:
                     self.line_to_current()
@@ -1303,7 +1302,6 @@ init -6 python in screen_fx:
                         self.line_edits.pop(key, None)
                 ## 줄이 늘어서 줄 번호가 바뀌므로, 다시 불러온 뒤 지금 줄로 다시 고름
                 self.line_sel = None
-                self.tree_after_save()
 
             def key(self, k, shift):
                 if not self.is_lines():
@@ -1320,10 +1318,6 @@ init -6 python in screen_fx:
                 elif k == pg.K_l:
                     self.list_open = not self.list_open
                     renpy.restart_interaction()
-                elif k == pg.K_g and self.se() is not None:
-                    self.tree_toggle()
-                elif k == pg.K_DELETE and self.tree_open:
-                    self.tree_delete()
                 else:
                     return False
                 return True
@@ -1335,7 +1329,7 @@ init -6 python in screen_fx:
                 원고에는 Ctrl+S를 눌러야 적힙니다."""
                 say = _ed.get_tab("say") if hasattr(_ed, "get_tab") else None
                 if say is None or not hasattr(say, "set_fx"):
-                    _ed.msg("대사 탭이 없습니다. (UI Kit 2.9 이상)")
+                    _ed.msg("대사 탭이 없습니다.")
                     return
                 ok, why = _ed.tab_available(say)
                 if not ok:
@@ -1480,7 +1474,7 @@ init -6 python in screen_fx:
 
             def _fx_file(self, fx):
                 lay = self._merged(fx)
-                lines = file_header("UI Kit 편집기가 저장한 {} 효과 설정입니다.".format(fx.label), [
+                lines = file_header("pygaki 게임 안 편집 화면이 저장한 {} 효과 설정입니다.".format(fx.label), [
                     "여기 적힌 값은 {}_config.rpy의 같은 값보다 우선합니다.".format(fx.id),
                     "settings는 바꾼 값만, presets는 바꾼 프리셋 전체가 들어 있습니다.",
                     "게임 중에 {}.set()으로 바꾼 값과는 상관없습니다.".format(fx.id),
@@ -1509,7 +1503,7 @@ init -6 python in screen_fx:
 
             def _cfg_file(self):
                 lay = self._merged_cfg()
-                lines = file_header("UI Kit 편집기가 저장한 화면 효과 전환 설정입니다.", [
+                lines = file_header("pygaki 게임 안 편집 화면이 저장한 화면 효과 전환 설정입니다.", [
                     "여기 적힌 값은 screen_fx_config.rpy의 같은 값보다 우선합니다.",
                     "이 파일을 지우면 설정 파일 값으로 돌아갑니다.",
                     ])
@@ -1667,7 +1661,6 @@ init -6 python in screen_fx:
                     return [
                         "1번, 2번을 고르면 화면에 바로 보이고, 그 아래에서 효과의 세부 속성을 고칩니다.",
                         "목록에서 줄 누르기: 그 줄을 고르고 게임도 그 줄로 | [[ ] 앞뒤 줄 | 세모 두 번: 지금 줄로 | Ctrl+S 저장",
-                        "G 줄기표: 마디를 끌어 구간 고르기 → [[이 구간에 적용] | 오른쪽 네모 점으로 전환 점 고르기 | Delete 구간/고른 점의 셰이더 지우기",
                         ]
                 if self.is_tv():
                     return [
@@ -1687,8 +1680,7 @@ init -6 python in screen_fx:
 
             def session(self):
                 return dict(page=self.page, groups=dict(self.groups), targets=dict(self.targets),
-                    line_edits={ k : dict(v) for k, v in self.line_edits.items() },
-                    tree_open=bool(self.tree_open))
+                    line_edits={ k : dict(v) for k, v in self.line_edits.items() })
 
             def restore(self, d):
                 if d:
@@ -1696,7 +1688,6 @@ init -6 python in screen_fx:
                     self.groups = dict(d.get("groups") or { })
                     self.targets = dict(d.get("targets") or { })
                     self.line_edits = { tuple(k) : dict(v) for k, v in (d.get("line_edits") or { }).items() }
-                    self.tree_open = bool(d.get("tree_open", False))
 
         ## ── 타이틀 셰이더 / 게임 내 메뉴 셰이더 (4.3) ──
         ## 그 화면에만 씌우는 셰이더 두 자리. 저장하면 screen_fx_layout.rpy의 title_shaders / menu_shaders.
@@ -1956,8 +1947,14 @@ screen ui_editor_fx_slot_row(label, slot, cur, pick, clear=None, owner=None):
         box_wrap_spacing 4
         xmaximum 632
         use ui_editor_fx_name(label)
-        for _n, _nl in screen_fx.slot_choices(keep=(cur,)):
-            textbutton _nl style "ui_editor_fx_button" action Function(pick, slot, _n) selected (cur == _n)
+        $ _chs = screen_fx.slot_choices(keep=(cur,))
+        if ui_editor.in_game_panel():
+            ## 게임 창에는 지금 값만, 셰이더 목록은 pygaki 앱에서 (4.20)
+            textbutton dict(_chs).get(cur, cur or "-") style "ui_editor_fx_button" action Function(ui_editor.open_in_app) selected True
+            textbutton "pygaki 앱에서 고르기" style "ui_editor_fx_button" action Function(ui_editor.open_in_app)
+        else:
+            for _n, _nl in _chs:
+                textbutton _nl style "ui_editor_fx_button" action Function(pick, slot, _n) selected (cur == _n)
         if clear is not None:
             textbutton "전부 셰이더 적용 취소" style "ui_editor_fx_button" action Function(clear)
         if owner is not None and cur in screen_fx.EFFECTS:
@@ -2028,10 +2025,9 @@ screen ui_editor_screen_fx_panel(tab):
         use ui_editor_fx_slots(tab, _a, _b, tab.set_pick, tab.clear_picks)
 
         if tab.se() is not None:
-            use ui_editor_fx_tree_panel(tab)
             use ui_editor_fx_lines_panel(tab)
         else:
-            text "원고 쓰기 도구(UI Kit 3.0 이상)가 없어서 줄 고르기와 [[여기에서부터 적용]은 못 씁니다." style "ui_editor_small"
+            text "원고 쓰기 도구가 없어서 줄 고르기와 [[여기에서부터 적용]은 못 씁니다." style "ui_editor_small"
 
         textbutton ("처음 상태 접기" if tab.tv_open else "처음 상태 펴기") style "ui_editor_button" text_size 13 action ToggleField(tab, "tv_open")
         if tab.tv_open:

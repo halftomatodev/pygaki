@@ -10,7 +10,6 @@ import { keyOf } from './prefs';
 import { useStore } from './store';
 import { CustomUIPanel } from './ShowpyCustomUI';
 import { MirrorPanel } from './ShowpyMirror';
-import { FlowTree } from './ShowpyFlow';
 import { Card } from './Card';
 
 interface Section {
@@ -18,12 +17,12 @@ interface Section {
   label: string;
   tab: string | null; // 게임 창의 GUI 편집기 탭
   app: boolean; // 앱에 따로 만든 칸이 있음
-  mirror?: boolean; // 게임 안 패널을 통째로 옮겨 그림 (ui_kit 3.16부터)
+  mirror?: boolean; // 게임 안 패널을 통째로 옮겨 그림
   note: string;
 }
 
 const SECTIONS: Section[] = [
-  { id: 'splash', label: '스플래시 페이지', tab: 'splash', app: false, mirror: true, note: '게임을 켰을 때 타이틀 전에 나오는 페이지예요. pygaki 플러그인 4.18(splash 1.2)부터 여기서 고쳐요. 예전 판이면 splash/splash_config.rpy에서 고쳐요.' },
+  { id: 'splash', label: '스플래시 페이지', tab: 'splash', app: false, mirror: true, note: '게임을 켰을 때 타이틀 전에 나오는 페이지예요. 여기서 고쳐요. 예전 판이면 splash/splash_config.rpy에서 고쳐요.' },
   { id: 'title', label: '타이틀 메뉴', tab: 'title', app: true, note: '' },
   { id: 'title_fx', label: '타이틀 셰이더', tab: 'title_fx', app: false, mirror: true, note: '타이틀에만 걸리는 셰이더 두 자리예요. 1번과 2번에 고른 것이 겹쳐요. 일렁임(예전 "타이틀 일렁임")도 여기서 골라요.' },
   { id: 'pause', label: 'ESC 메뉴', tab: 'title', app: true, note: '' },
@@ -33,9 +32,9 @@ const SECTIONS: Section[] = [
   { id: 'say', label: '대사 상자', tab: 'say', app: false, mirror: true, note: '대사 상자의 처음 위치와 모양이에요. 줄마다 다른 위치는 [대본 편집] 대사 카드의 줄마다 있는 [위치 옮기기]로 정해요.' },
   { id: 'choice', label: '선택지', tab: 'choice', app: false, mirror: true, note: '선택지의 처음 위치와 모양이에요. 상자마다 다른 위치는 [대본 편집] 다음 흐름 카드의 [위치 옮기기]로 정해요.' },
   { id: 'stage', label: '그림, 영상 배치', tab: 'stage', app: false, mirror: true, note: '그림을 넣는 것은 [대본 편집] 상자의 배경, 그림·영상 카드에서 해요. 여기서는 게임 화면에서 자리를 끌어 정해요.' },
-  { id: 'hotkeys', label: '단축키 수정', tab: 'hotkeys', app: false, mirror: true, note: '기능 옆 키 단추를 누르고 게임 창에서 바꿀 키를 눌러요. 다른 기능이 쓰는 키면 경고와 안내가 나와요. [안내 화면으로 내보내기]를 누르면 조작 안내 화면의 표가 이 설정을 따라가고, 보여 줄 기능은 조작 안내 화면에서 골라요. pygaki 플러그인 hotkeys 1.2부터 있어요.' },
-  { id: 'ui_text', label: '종료 메시지, 버튼 글', tab: 'ui_text', app: false, mirror: true, note: '종료 확인 창, 퀵메뉴 버튼 같은 글을 바꿔요. pygaki 플러그인 ui_kit 3.23부터 있어요.' },
-  { id: 'screens', label: '화면, HUD 자리', tab: 'screens', app: false, mirror: true, note: '[대본 편집]의 [화면] 탭에서 만든 화면과 HUD를 게임 화면 위에서 고쳐요. 항목을 끌어 옮기고, HUD는 붙일 곳과 크기를 정하고, 글을 고쳐요. 저장하면 대본에도 받아 적어요. 항목을 더하거나 지우는 것과 버튼이 할 일은 [화면] 탭에서 해요. pygaki 플러그인 ui_kit 4.13부터 있어요.' },
+  { id: 'hotkeys', label: '단축키 수정', tab: 'hotkeys', app: false, mirror: true, note: '기능 옆 키 단추를 누르고 게임 창에서 바꿀 키를 눌러요. 다른 기능이 쓰는 키면 경고와 안내가 나와요. [안내 화면으로 내보내기]를 누르면 조작 안내 화면의 표가 이 설정을 따라가고, 보여 줄 기능은 조작 안내 화면에서 골라요. 예전 pygaki 플러그인에는 없어요.' },
+  { id: 'ui_text', label: '종료 메시지, 버튼 글', tab: 'ui_text', app: false, mirror: true, note: '종료 확인 창, 퀵메뉴 버튼 같은 글을 바꿔요. 예전 pygaki 플러그인에는 없어요.' },
+  { id: 'screens', label: '화면, HUD 자리', tab: 'screens', app: false, mirror: true, note: '[대본 편집]의 [화면] 탭에서 만든 화면과 HUD를 게임 화면 위에서 고쳐요. 항목을 끌어 옮기고, HUD는 붙일 곳과 크기를 정하고, 글을 고쳐요. 저장하면 대본에도 받아 적어요. 항목을 더하거나 지우는 것과 버튼이 할 일은 [화면] 탭에서 해요. 예전 pygaki 플러그인에는 없어요.' },
 ];
 
 // 왼쪽 목록의 카드 묶음
@@ -47,8 +46,6 @@ const GROUPS: { title: string; ids: string[] }[] = [
   // 상자마다 바꾸는 것은 [대본 편집]으로 옮겼다(세션 32). 여기는 상자에서 정하지 않았을 때 쓰는 게임 처음 값만
   { title: '게임 처음 값', ids: ['say', 'choice', 'stage', 'custom_ui'] },
 ];
-
-const FLOW_IN_APP = false;
 
 // 스플래시 기본 페이지는 우리말 이름, 사용자가 만든 페이지는 제목(없으면 id)
 const PAGE_NAMES: Record<string, string> = { logo: '로고', warning: '경고', controls: '조작 안내 화면' };
@@ -72,6 +69,19 @@ export function ShowpyView() {
     liveSend({ cmd: 'panel', hide: inApp(s) && !useLive.getState().gamePanel });
     liveSend({ cmd: 'editor', open: true, tab: s.tab });
   };
+
+  // 게임 안 편집 화면의 [pygaki 앱에서 고르기] (ui_kit 4.20): 그 탭의 칸을 고름. 게임과 아직 안 붙었으면 칸만 골라 둠
+  const want = useLive((s) => s.want);
+  useEffect(() => {
+    if (!want) return;
+    useLive.setState({ want: null });
+    const tab = WANT_TAB[want.tab] ?? want.tab;
+    const s = SECTIONS.find((x) => x.id === tab) ?? SECTIONS.find((x) => x.tab === tab);
+    if (!s) return;
+    if (on && st) choose(s);
+    else useLive.setState({ section: s.id });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [want?.n]);
 
   // 가운데 스크립트 칸은 볼 일이 드물어 기본은 접고, 위의 [>_ 스크립트] 단추로 편다 (세션 79). 접으면 오른쪽 편집 칸이 그 자리까지 넓어진다
   const [script, setScript] = useState(() => {
@@ -148,7 +158,7 @@ export function ShowpyView() {
       <Resizer size="guiLeftW" grow={1} className="left" />
       {script && (
         <div className="sp-main">
-          {!on ? <NotConnected /> : st ? <Where st={st} sec={sec.id} /> : <p className="tip">게임 상태를 기다리는 중...</p>}
+          {!on ? <NotConnected /> : st ? <Where st={st} /> : <p className="tip">게임 상태를 기다리는 중...</p>}
         </div>
       )}
       {script && <Resizer size="guiRightW" grow={-1} className="right" />}
@@ -191,7 +201,7 @@ function TermIcon() {
 function NotConnected() {
   return (
     <div className="sp-help">
-      <h3>게임을 개발 모드로 켜 주세요<Hint text="pygaki 플러그인(ui_kit 3.14 이상)이 든 게임을 개발 모드로 켜면 저절로 붙어요. 배포판에서는 안 붙어요" topic="GUI 편집] 화면" /></h3>
+      <h3>게임을 개발 모드로 켜 주세요<Hint text="pygaki 플러그인이 든 게임을 개발 모드로 켜면 저절로 붙어요. 배포판에서는 안 붙어요" topic="GUI 편집] 화면" /></h3>
       <ol>
         <li>렌파이 런처에서 이 프로젝트를 고르고 [프로젝트 실행]을 눌러요. (개발 모드로 켜져요)</li>
         <li>게임이 켜지면 game 폴더에 showpy_live.json이 생기고, 이 앱이 저절로 붙어요.</li>
@@ -209,14 +219,8 @@ const SCREEN_NAMES: Record<string, string> = {
 };
 const HIDDEN_SCREENS = new Set(['ui_editor_live', 'ui_editor_pk_watch', 'ui_editor_root']);
 
-function Where({ st, sec }: { st: GameState; sec: string }) {
+function Where({ st }: { st: GameState }) {
   const w = st.where;
-  // 줄기표 (screen_fx 5.2): 셰이더 칸에서 원고 옆에 펴고 접음. 펴진 것은 게임이 기억함
-  // 셰이더를 거는 자리는 [대본 편집]의 상자·label로 옮겨서, 앱에서는 줄기표를 펴지 않는다 (게임 창의 편집기에는 그대로 있음)
-  const flow = FLOW_IN_APP && sec === 'screen_fx' ? st.flow : undefined;
-  const flowOpen = !!flow?.open;
-  // 줄기표에서 누른 줄: 원고 칸도 그 줄로 스크롤 (대조용)
-  const [peek, setPeek] = useState<{ line: number; n: number } | null>(null);
   const screens = w.screens.filter((s) => !HIDDEN_SCREENS.has(s));
   return (
     <>
@@ -229,28 +233,9 @@ function Where({ st, sec }: { st: GameState; sec: string }) {
           <b>원고 위치</b>
           <span className="sp-mono">{w.file ? `${w.file}:${w.line}` : '-'}</span>
           {w.main_menu && <span className="tip">(타이틀에 있어요)</span>}
-          {FLOW_IN_APP && sec === 'screen_fx' && (
-            <>
-              <span className="grow" />
-              {flow === undefined || flow === null ? (
-                <span className="tip">줄기표는 pygaki 플러그인 screen_fx 5.2부터 있어요</span>
-              ) : (
-                <button className={flowOpen ? 'on' : ''} onClick={() => liveSend({ cmd: 'flow', do: 'toggle' })} title="원고를 마디와 가지로 그린 줄기표를 원고 옆에 펴고 접어요">
-                  {flowOpen ? '줄기표 접기' : '줄기표 펴기'}
-                </button>
-              )}
-            </>
-          )}
         </div>
       </div>
-      {flowOpen ? (
-        <div className="sp-flow-split">
-          <Script file={flow!.file ?? w.file} line={flow!.file && flow!.file !== w.file ? 0 : w.line} peek={peek} />
-          <FlowTree flow={flow!} onLine={(line) => setPeek({ line, n: Date.now() })} />
-        </div>
-      ) : (
-        <Script file={w.file} line={w.line} />
-      )}
+      <Script file={w.file} line={w.line} />
     </>
   );
 }
@@ -258,9 +243,12 @@ function Where({ st, sec }: { st: GameState; sec: string }) {
 // PyKaki 표시: 줄 전체(예전 형식)이거나 문장 끝에 붙는다 (docs/LINK.md 2장)
 const MARK_ROW = /^\s*#\s*@(l|node|end):/;
 const MARK_TAIL = /\s+#\s*@(l|node|end):\S+[^#]*$/;
+// 게임 탭 id → 앱 칸 id (같지 않은 것만)
+const WANT_TAB: Record<string, string> = { watermorph: 'title_fx' };
+
 const MARK = /(?:^|\s)#\s*@(l|node|end):/;
 
-function Script({ file, line, peek }: { file: string | null; line: number; peek?: { line: number; n: number } | null }) {
+function Script({ file, line }: { file: string | null; line: number }) {
   const [text, setText] = useState<{ file: string; lines: string[] | null } | null>(null);
   const [rev, setRev] = useState(0);
   // 게임 줄을 따라 스크롤. 사용자가 직접 스크롤하면 멈추고 [지금 줄로]로 다시 따라감
@@ -301,17 +289,6 @@ function Script({ file, line, peek }: { file: string | null; line: number; peek?
   }, [file, rev]);
 
   const ready = !!text && text.file === file && !!text.lines;
-  // 줄기표에서 누른 줄로 스크롤하고, 게임 줄 따라가기는 멈춤 ([지금 줄로]로 다시)
-  useLayoutEffect(() => {
-    if (!peek || !ready) return;
-    const el = box.current?.querySelector<HTMLElement>(`div[data-n="${peek.line}"]`);
-    const b = box.current;
-    if (!el || !b) return;
-    setFollow(false);
-    auto.current = Date.now() + 900;
-    b.scrollTo({ top: el.offsetTop - b.clientHeight / 3, behavior: 'smooth' });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [peek?.n, ready]);
   useLayoutEffect(() => {
     if (ready && follow) toCurrent(false);
   }, [ready, file, line, follow]);
@@ -391,7 +368,7 @@ function Script({ file, line, peek }: { file: string | null; line: number; peek?
             <div
               key={n}
               data-n={n}
-              className={(n === line ? 'cur' : 'go') + (peek && peek.line === n ? ' peek' : '')}
+              className={n === line ? 'cur' : 'go'}
               onClick={n === line ? undefined : () => liveSend({ cmd: 'goto', where: 'line', file, line: n })}
               title={n === line ? '게임의 지금 줄' : '게임을 이 줄로 옮겨요 (지나온 줄이면 되감기, 아니면 게임을 다시 시작해서 건너뜀)'}
             >

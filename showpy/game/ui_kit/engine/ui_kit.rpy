@@ -22,7 +22,7 @@ init -20 python in ui_kit:
     import store
     from store import DictEquality, TransformMatrix, Matrix, Movie, python_object
 
-    VERSION = "4.20"
+    VERSION = "1.9"     # pygaki 판 (플러그인 묶음마다 따로 매기지 않음. 예전 판은 4.19 같은 번호)
 
     ## ── 플러그인 폴더 위치 ──
     ## 이 파일은 <플러그인 폴더>/engine/ui_kit.rpy 에 있습니다.
