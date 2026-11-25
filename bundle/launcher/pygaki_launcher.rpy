@@ -247,6 +247,7 @@ init python:
         '## 그래서 큰 영상을 넣거나 그림을 1.5배로 키워도 화면에는 이 해상도의 픽셀로만 보입니다.',
         '## pygaki 편집 화면(Shift+M)은 맨 위 층이라 여기서 빠지고 선명하게 그립니다.',
         '## 처음 켤 때 창은 모니터에 들어가는 가장 큰 정수 배율 크기로 엽니다 (그 뒤로는 렌파이가 마지막 창 크기를 기억함).',
+        '## 환경설정 [창 화면]도 그 크기로 돌아갑니다 (전체 화면에서 창으로 돌아올 때).',
         '##',
         '## 끄려면 pixel_perfect를 False로 바꿉니다. 정수 배율은 두고 격자로 다시 뽑기만 끄려면 pixel_perfect_snap을 False로.',
         '',
@@ -270,17 +271,22 @@ init python:
         '        pixel_perfect_scale = m',
         '        return (m * sw, m * sh)',
         '',
-        '    ## 화면이 준비된 뒤 첫 상호작용에서 한 번만',
+        '    ## 화면이 준비된 뒤 첫 상호작용에서 (켤 때마다) 한 번',
         '    def pixel_perfect_first_window():',
-        '        if persistent._pixel_perfect_window or preferences.fullscreen or renpy.display.draw is None:',
+        '        if config.physical_width or renpy.display.draw is None:',
         '            return',
-        '        persistent._pixel_perfect_window = True',
         '        mw, mh = renpy.get_renderer_info().get("max_window_size", (0, 0))',
         '        m = int(min(mw / config.screen_width, mh / config.screen_height))',
-        '        if m >= 1:',
-        '            w, h = config.screen_width * m, config.screen_height * m',
-        '            renpy.set_physical_size((w, h))',
-        '            pixel_perfect_center_window(w, h)',
+        '        if m < 1:',
+        '            return',
+        '        w, h = config.screen_width * m, config.screen_height * m',
+        '        ## 환경설정 [창 화면]이 돌아가는 "기본 창 크기"도 이 크기로 (전체 화면에서 돌아와도 작아지지 않게)',
+        '        config.physical_width, config.physical_height = w, h',
+        '        if persistent._pixel_perfect_window or preferences.fullscreen:',
+        '            return',
+        '        persistent._pixel_perfect_window = True',
+        '        renpy.set_physical_size((w, h))',
+        '        pixel_perfect_center_window(w, h)',
         '',
         '    ## 키운 창을 그 모니터의 쓸 수 있는 곳(작업 표시줄 뺌) 가운데로. 창이 아래로 삐져나가지 않게',
         '    def pixel_perfect_center_window(w, h):',
@@ -466,8 +472,9 @@ screen pygaki_buttons():
 
     if renpy.get_screen("front_page"):
 
+        ## 아래 링크 줄([매뉴얼] ...)과 같은 왼쪽에서 시작. 가운데 정렬이면 일본어에서 오른쪽 [프로젝트 실행]과 겹침 (세션 104)
         hbox:
-            xalign 0.5
+            xpos 30
             ypos 506
             spacing 24
 
