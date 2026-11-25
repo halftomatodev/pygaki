@@ -1529,9 +1529,9 @@ $ vhs_crt.off(duration=2.0)                   # 서서히 끄기
 | `show rain`에서 "image not found" 오류 | 영상이 `game/movies/`에 있는지, 확장자가 `.webm`인지, 같은 이름의 그림이 `images/`에 있지 않은지 (그림이 우선) |
 | 투명 영상이 두 그림이 옆으로 붙은 채 나옴 | 파일 이름 앞에 `mask_`가 있는지 (side_mask 영상) |
 | 투명 webm·GIF를 넣었는데 바탕이 검게 나옴 | 렌파이는 알파가 든 webm을 못 틈. pygaki 앱 [투명 영상 만들기]로 `mask_` 영상을 만들기 |
-| 렌파이 8.6으로 새로 만든 게임이 첫 대사에서 "Unknown layer None"으로 멈춤 | 플러그인이 예전 판. 묶음 런처 [플러그인 올리기]로 5.4로 |
+| 렌파이 8.6으로 새로 만든 게임이 첫 대사에서 "Unknown layer None"으로 멈춤 | 플러그인이 예전 판. 묶음 런처 [플러그인 올리기]로 새 판으로 |
 | 렌파이 8.6에서 내가 쓴 셰이더가 문법 오류 | 8.6 새 게임은 셰이더 기본 문법이 GLSL ES 3.00. 예전 문법으로 쓴 셰이더는 등록할 때 `glsl=100`을 붙이기(8.5에는 그 인자가 없으니 `hasattr(renpy.config, "glsl_version")`일 때만) |
-| 대사 괄호 `box="media"`에서 "unknown keyword" 오류 / 그림이 안 나옴 | `ui_kit`이 4.14보다 예전 판. 플러그인 올리기 |
+| 대사 괄호 `box="media"`에서 "unknown keyword" 오류 / 그림이 안 나옴 | pygaki 플러그인이 예전 판. 플러그인 올리기 |
 | 이미지/영상 탭에서 그림을 못 고름 | 원고의 show·scene 줄로 띄운 그림만 고를 수 있음. 세이브를 불러온 직후라면 줄 목록에서 고르기 |
 | ASCII에서 대사가 안 읽힘 | `ascii.exclude`에 `"say"`가 있는지, `exclude=()`나 `fx_exclude=()`를 쓰지 않았는지 |
 | 글자를 뺐는데 그대로 효과가 걸림 | 하나만 적을 때 쉼표를 빠뜨리지 않았는지 (`("say")`가 아니라 `("say",)`), `screen_fx.split_text_layers = False`인지 |

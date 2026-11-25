@@ -1,4 +1,4 @@
-<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ 535599d5ea -->
+<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ 5f703f6eb3 -->
 # pygaki プラグイン カスタムガイド
 
 2026-11-25 · pygaki v1.9(バージョンごとの変更は `READ_ME_FIRST.md` と `CHANGELOG.md`)
@@ -1532,9 +1532,9 @@ $ vhs_crt.off(duration=2.0)                   # ゆっくりオフ
 | `show rain` で "image not found" エラー | 動画が `game/movies/` にあるか、拡張子が `.webm` か、同じ名前の画像が `images/` にないか(画像が優先) |
 | 透明な動画が 2 枚の絵が横に並んだまま出る | ファイル名の前に `mask_` があるか(side_mask の動画) |
 | 透明 webm・GIF を入れたのに背景が黒く出る | Ren'Py はアルファ入りの webm を再生できない。pygaki アプリの [透過動画を作る] で `mask_` 動画を作る |
-| Ren'Py 8.6 で新しく作ったゲームが最初のセリフで "Unknown layer None" で止まる | プラグインが古い版。バンドルのランチャーの [プラグインを更新] で 5.4(・ 以降)に |
+| Ren'Py 8.6 で新しく作ったゲームが最初のセリフで "Unknown layer None" で止まる | プラグインが古い版。バンドルのランチャーの [プラグインを更新] で新しい版に |
 | Ren'Py 8.6 で自分で書いたシェーダーが文法エラー | 8.6 の新しいゲームはシェーダーの標準の文法が GLSL ES 3.00。古い文法で書いたシェーダーは登録するときに `glsl=100` を付ける(8.5 にはその引数がないので `hasattr(renpy.config, "glsl_version")` のときだけ) |
-| セリフの括弧 `box="media"` で "unknown keyword" エラー / 画像が出ない | `ui_kit` が 4.14 より古い版。プラグインを更新 |
+| セリフの括弧 `box="media"` で "unknown keyword" エラー / 画像が出ない | pygaki プラグインが古い版。プラグインを更新 |
 | 画像/動画タブで画像を選べない | スクリプトの show・scene の行で出した画像だけを選べる。セーブをロードした直後なら、行の一覧から選ぶ |
 | ASCII でセリフが読めない | `ascii.exclude` に `"say"` があるか、`exclude=()` や `fx_exclude=()` を使っていないか |
 | 文字を除いたのにエフェクトがかかったまま | 1 つだけ書くときにカンマを落としていないか(`("say")` ではなく `("say",)`)、`screen_fx.split_text_layers = False` になっていないか |

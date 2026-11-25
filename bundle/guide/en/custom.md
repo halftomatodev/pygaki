@@ -1,4 +1,4 @@
-<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ 535599d5ea -->
+<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ 5f703f6eb3 -->
 # pygaki plugin customization guide
 
 2026-11-25 · pygaki v1.9 (changes per version are in `READ_ME_FIRST.md` and `CHANGELOG.md`)
@@ -1532,9 +1532,9 @@ When the same value is in several places, the one further right wins.
 | "image not found" error on `show rain` | whether the video is in `game/movies/`, whether the extension is `.webm`, whether an image with the same name exists in `images/` (images win) |
 | A transparent video shows as two pictures side by side | whether the file name starts with `mask_` (side_mask video) |
 | I added a transparent webm or GIF but the background is black | Ren'Py can't play a webm with alpha. Make a `mask_` video with [Make transparent video] in the pygaki app |
-| A game newly made with Ren'Py 8.6 stops at the first line with "Unknown layer None" | the plugin is old. Use [Update plugins] in the bundle launcher to get 5.4 |
+| A game newly made with Ren'Py 8.6 stops at the first line with "Unknown layer None" | the plugin is old. Use [Update plugins] in the bundle launcher to get the new version |
 | A shader I wrote gives a syntax error in Ren'Py 8.6 | new 8.6 games use GLSL ES 3.00 for shaders by default. Register shaders written in the old syntax with `glsl=100` (8.5 has no such argument, so only when `hasattr(renpy.config, "glsl_version")`) |
-| "unknown keyword" error for `box="media"` in dialogue parentheses / no picture | `ui_kit` is older than 4.14. Update the plugins |
+| "unknown keyword" error for `box="media"` in dialogue parentheses / no picture | the pygaki plugin is old. Update the plugins |
 | Can't select an image in the image/video tab | only images shown by show or scene lines in the script can be selected. Right after loading a save, choose from the line list |
 | Dialogue unreadable under ASCII | whether `ascii.exclude` has `"say"`, whether `exclude=()` or `fx_exclude=()` was used |
 | Excluded text still gets the effect | whether you forgot the comma when writing just one (`("say",)`, not `("say")`), whether `screen_fx.split_text_layers = False` |
