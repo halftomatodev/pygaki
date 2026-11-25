@@ -457,7 +457,8 @@ export function lookCode(p: Project, it: ScreenItem): string[] {
     const k = Math.round(h * 0.8), m = Math.round((h - k) / 2);
     const thumbOn = partImage(u, 'thumbOn') || u.skin?.thumbOn?.color;
     const thumb = thumbOn ? `(${part('thumbOn', k, k, pillR(k))} if ${n} else ${part('thumb', k, k, pillR(k))})` : part('thumb', k, k, pillR(k));
-    const inner = (I1: string) => [`${I1}add (${part('on', w, h, pillR(h))} if ${n} else ${part('off', w, h, pillR(h))})`, `${I1}add ${thumb}:`, `${I1}${I}xpos (${w - k - m} if ${n} else ${m})`, `${I1}${I}ypos ${m}`];
+    // 썸은 켜고 끌 때 미끄러짐 (_pk_slide, 처음 보일 때는 제자리)
+    const inner = (I1: string) => [`${I1}add (${part('on', w, h, pillR(h))} if ${n} else ${part('off', w, h, pillR(h))})`, `${I1}add ${thumb} at _pk_slide(${w - k - m} if ${n} else ${m}):`, `${I1}${I}ypos ${m}`];
     if (!edit) return ['fixed:', `${I}xysize (${w}, ${h})`, ...inner(I)];
     return ['button:', `${I}xysize (${w}, ${h})`, `${I}background None`, `${I}padding (0, 0)`, `${I}hover_foreground ${litFg(pillR(h))}`, `${I}action ToggleVariable(${py(n)})`, `${I}fixed:`, ...inner(I + I)];
   }
@@ -626,6 +627,25 @@ const ROUND_HELPER = [
   '',
 ];
 
+// 스위치 썸 미끄러짐: 값이 바뀌면 화면이 새 자리로 transform을 다시 만들고, 렌파이가 앞 자리(xpos)를 넘겨줘서 거기서 ease.
+// 처음 보일 때는 넘겨받은 자리가 없으니(None) 바로 그 자리에 둠
+const SLIDE_HELPER = [
+  '# 스위치 썸이 켜고 끌 때 미끄러짐 (플래그 꼴 "스위치")',
+  'init -1 python:',
+  '    class _PkSnap(object):',
+  '        def __init__(self, x):',
+  '            self.x = x',
+  '        def __call__(self, trans, st, at):',
+  '            if trans.xpos is None:',
+  '                trans.xpos = self.x',
+  '            return None',
+  '',
+  'transform _pk_slide(x):',
+  '    function _PkSnap(x)',
+  '    ease 0.2 xpos x',
+  '',
+];
+
 // 숫자 플래그 입력칸 (FEATURE 31): 치는 동안은 친 글(초안)을 보이고, 숫자가 되면 최솟값~최댓값 안으로 바로 넣음. 잘못 치면 값 그대로
 const NUM_INPUT_HELPER = [
   '# 숫자 플래그 입력칸 (플래그 꼴 "입력칸")',
@@ -711,6 +731,7 @@ export function screensCode(p: Project, only?: string): string {
   if (!only && (p.screens ?? []).some((s) => s.items.some(isDD))) out.push(...DRAG_HELPERS);
   if (out.some((x) => x.includes('_pk_round('))) out.push(...ROUND_HELPER);
   if (out.some((x) => x.includes('_PkNumInput('))) out.push(...NUM_INPUT_HELPER);
+  if (out.some((x) => x.includes(' at _pk_slide('))) out.push(...SLIDE_HELPER);
   if (out.some((x) => x.includes('_PkVoiceGlow('))) out.push(...VOICE_HELPER);
   if (!only && out.some((x) => x.includes(' at _pk_anim_'))) out.push(...ANIM_HELPER);
   return out.join('\n') + '\n';
