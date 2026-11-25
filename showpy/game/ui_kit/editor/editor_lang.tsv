@@ -834,7 +834,7 @@ VHS 켜기	VHSオン	VHS on
 깨지는 칸의 양	壊れる枠の量	Broken cell amount
 끌린 줄	引きずった線	Drag streaks
 나이트비전	暗視	Night vision
-낡은 테이프 (5.8)	古いテープ (5.8)	Worn tape (5.8)
+낡은 테이프	古いテープ	Worn tape
 노이즈	ノイズ	Noise
 노이즈 크기	ノイズの大きさ	Noise size
 노이즈가 초당 바뀌는 번	ノイズが毎秒変わる回数	Noise changes per second
@@ -1300,4 +1300,4 @@ pygaki 앱에서 이 탭을 열었습니다.	pygaki アプリでこのタブを�
 pygaki 앱을 찾지 못했습니다 (렌파이 SDK의 pygaki/app/pygaki.exe). 앱으로 이 프로젝트를 열어 [[GUI 편집]에서 고르세요.	pygaki アプリが見つかりません (Ren'Py SDK の pygaki/app/pygaki.exe)。アプリでこのプロジェクトを開き、[GUI 編集]で選んでください。	The pygaki app was not found (pygaki/app/pygaki.exe in the Ren'Py SDK). Open this project in the app and choose in [GUI Edit].
 pygaki 앱을 켭니다. 게임과 연결되면 [[GUI 편집]의 이 탭이 열립니다.	pygaki アプリを起動します。ゲームと接続すると [GUI 編集]のこのタブが開きます。	Starting the pygaki app. Once it connects to the game, this tab opens in [GUI Edit].
 pygaki 앱을 켜지 못했습니다: {}	pygaki アプリを起動できませんでした: {0}	Could not start the pygaki app: {0}
-F1 단축키 안내 펴기 · 전체 목록은 pygaki 앱 환경 설정의 [[단축키]	F1 ショートカット案内を開く · 全一覧は pygaki アプリの環境設定 [ショートカット]	F1 Show shortcut help · Full list in the pygaki app settings [Shortcuts]
+F1 단축키 안내 펴기 | 전체 목록은 pygaki 앱 환경 설정의 [[단축키]	F1 ショートカット案内を開く | 全一覧は pygaki アプリの環境設定 [ショートカット]	F1 Show shortcut help | Full list in the pygaki app settings [Shortcuts]

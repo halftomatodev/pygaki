@@ -180,7 +180,7 @@ define splash.pages = [
 
         ## 표: (키, 설명) 목록. "auto"로 적으면 조작방법 화면과 같은 목록
         ## (hotkeys 플러그인이 있으면 hotkeys.keyboard_help, 없으면 렌파이 기본 설명)
-        ## "hotkeys"로 적으면 편집 화면 [단축키 수정] 표를 따라가고, "keys_show"에 보여 줄 기능 이름 목록 (2.5)
+        ## "hotkeys"로 적으면 편집 화면 [단축키 수정] 표를 따라가고, "keys_show"에 보여 줄 기능 이름 목록 
         ##   예: "keys": "hotkeys", "keys_show": [ "toggle_skip", "screenshot", "quick_save" ],
         "keys": [
             (_("클릭 / 엔터 / 스페이스"), _("대사 넘기기, 선택하기")),

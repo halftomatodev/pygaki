@@ -183,8 +183,8 @@ define splash.pages = [
 | `"sound"` | 없음 | 페이지가 나올 때 한 번 재생하는 효과음 |
 | `"music"` | 없음 | 음악 채널로 반복 재생. 다음 페이지에서 같은 파일이면 끊기지 않음 (4장) |
 | `"xalign"`, `"yalign"` | `0.5`, `0.45` | 그림·제목·본문·표 묶음의 위치 |
-| `"image_offset"`, `"title_offset"`, `"body_offset"`, `"keys_offset"` | `(0, 0)` | 묶음 안 자리에서 그만큼 비켜 그림 (x, y 픽셀). 편집기에서 끌면 적힘 (2.0) |
-| `"image_rotate"`, `"title_rotate"`, `"body_rotate"`, `"keys_rotate"`, `"prompt_rotate"` | `0` | 돌린 각도(도). 자기 가운데를 축으로 (2.0) |
+| `"image_offset"`, `"title_offset"`, `"body_offset"`, `"keys_offset"` | `(0, 0)` | 묶음 안 자리에서 그만큼 비켜 그림 (x, y 픽셀). 편집기에서 끌면 적힘  |
+| `"image_rotate"`, `"title_rotate"`, `"body_rotate"`, `"keys_rotate"`, `"prompt_rotate"` | `0` | 돌린 각도(도). 자기 가운데를 축으로  |
 | `"width"` | `960` | 묶음의 최대 폭 (글자가 이 폭에서 줄바꿈) |
 | `"spacing"` | `28` | 그림·제목·본문·표 사이 간격 |
 | `"key_width"`, `"key_gap"`, `"keys_spacing"` | `300`, `32`, `12` | 조작 방법 표의 키 칸 폭, 키와 설명 사이, 줄 사이 |
@@ -226,7 +226,7 @@ define splash.pages = [
 | `splash.min_time_once` | `True` | `min_time`은 그 페이지를 처음 볼 때만 (두 번째부터는 다 나타나자마자 넘길 수 있음) |
 | `splash.music_fadeout` | `1.0` | 페이지에서 튼 음악이 타이틀 음악과 다를 때 서서히 끄는 시간(초) |
 | `splash.movie_wait` | `5.0` | 영상이 이 시간(초) 안에 시작되지 않으면(코덱 문제 등) 멈춰 있지 않고 다음 페이지로 |
-| `splash.page_order` | 없음 | 편집기가 `splash_layout.rpy`에 적는 페이지 순서. 있으면 그 순서로 보여 주고, 여기 없는 `splash.pages`의 페이지는 보여 주지 않음(`splash.ShowPage`로는 보임). 편집기에서 새로 만든 페이지는 값이 `splash.layout`에만 있음 (2.0) |
+| `splash.page_order` | 없음 | 편집기가 `splash_layout.rpy`에 적는 페이지 순서. 있으면 그 순서로 보여 주고, 여기 없는 `splash.pages`의 페이지는 보여 주지 않음(`splash.ShowPage`로는 보임). 편집기에서 새로 만든 페이지는 값이 `splash.layout`에만 있음  |
 
 ---
 
@@ -278,7 +278,7 @@ define splash.pages = [
 | 플러그인 | 같이 쓰면 |
 |---|---|
 | `hotkeys` | `"keys": "auto"`면 조작방법 화면 목록(`hotkeys.keyboard_help`와 설명을 적은 단축키, 1.1부터 편집 화면 "단축키" 탭에서 고친 것)을 그대로 보여 줌. `hotkeys`가 없으면 렌파이 기본 설명 |
-| `screen_fx` (2.1 이상) | VHS 범위에서 스플래시는 타이틀 쪽. `vhs_crt.scope = "game"`이면 스플래시에 효과 없음, `"main_menu"`나 `"all"`이면 있음. 타이틀 일렁임은 타이틀 화면에서만이라 스플래시에는 없음 |
+| `screen_fx`  | VHS 범위에서 스플래시는 타이틀 쪽. `vhs_crt.scope = "game"`이면 스플래시에 효과 없음, `"main_menu"`나 `"all"`이면 있음. 타이틀 일렁임은 타이틀 화면에서만이라 스플래시에는 없음 |
 | `ui_kit` | 타이틀 메뉴 항목에 `splash.ShowPage("controls")`. 커서 애니메이션은 스플래시에서도 그대로 |
 
 ---

@@ -1752,7 +1752,7 @@ screen ui_editor_panel_body():
             for _line in ui_editor.common_help():
                 text _line style "ui_editor_small"
         else:
-            text "F1 단축키 안내 펴기 · 전체 목록은 pygaki 앱 환경 설정의 [[단축키]" style "ui_editor_small"
+            text "F1 단축키 안내 펴기 | 전체 목록은 pygaki 앱 환경 설정의 [[단축키]" style "ui_editor_small"
 
 
 ## 1/2 평소/선택됐을 때, 3 이 항목만/공통 (패널과 짧은 판이 같이 씀)

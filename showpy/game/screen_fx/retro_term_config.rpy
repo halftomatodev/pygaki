@@ -24,7 +24,7 @@
 ## 효과 켜기·끄기 (False면 use("retro_term")을 해도 효과 없는 화면)
 define retro_term.enabled = True
 
-## 이 효과를 쓰는 동안 덮개(VHS)를 기본으로 켤지 (4.0)
+## 이 효과를 쓰는 동안 덮개(VHS)를 기본으로 켤지 
 ##   True   켬: 레트로 터미널 위에 VHS를 한 번 더 씌움 (휘어짐이 두 번 걸리니 settings의 "crt"를 False로)
 ##   False  끔: 레트로 터미널만 (자체 곡면 CRT·VHS만. 기본)
 ## (screen_fx_config.rpy의 screen_fx.overlay가 False면 이 값과 상관없이 꺼짐.

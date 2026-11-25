@@ -34,7 +34,7 @@ game/ui_kit/
 ├── custom_ui_config.rpy     설정: 커스텀 UI       ← 여기만 고침
 ├── say_style_config.rpy     설정: 대사 스타일      ← 여기만 고침
 ├── stage_config.rpy         설정: 이미지·영상 배치  ← 여기만 고침
-├── ui_text_config.rpy       설정: 확인 창 글, 버튼 글자 (3.23)  ← 여기만 고침
+├── ui_text_config.rpy       설정: 확인 창 글, 버튼 글자   ← 여기만 고침
 ├── *_layout.rpy             편집기에서 저장하면 생기는 파일 (처음에는 없음. 대사·선택지는 원고에 바로 저장)
 ├── engine/                  엔진 (고치지 않음)
 │   ├── ui_kit.rpy               공통
@@ -43,10 +43,10 @@ game/ui_kit/
 │   ├── custom_ui.rpy
 │   ├── say_style.rpy
 │   ├── text_effects.rpy,.glsl  등장 효과
-│   ├── text_box.rpy             글 상자 (말풍선, 둥근 테두리) (4.0)
+│   ├── text_box.rpy             글 상자 (말풍선, 둥근 테두리) 
 │   ├── stage.rpy                영상 등록, bg 맨 뒤, stage.pos·stage.move 등
 │   ├── script_edit.rpy          원고(.rpy)의 대사·선택지·show/hide/scene 줄 고치기
-│   └── ui_text.rpy              확인 창 글, 버튼 글자 바꾸기 (3.23)
+│   └── ui_text.rpy              확인 창 글, 버튼 글자 바꾸기 
 ├── editor/                  편집기 (개발 모드에서만 동작)
 │   ├── editor.rpy               본체·글꼴/색 고르기
 │   ├── editor_title.rpy         타이틀 메뉴 탭
@@ -54,7 +54,7 @@ game/ui_kit/
 │   ├── editor_say.rpy           대사 탭
 │   ├── editor_stage.rpy         이미지/영상 탭
 │   ├── editor_custom_ui.rpy     커서/대사 소리 탭
-│   └── editor_ui_text.rpy       UI 글 탭 (3.23)
+│   └── editor_ui_text.rpy       UI 글 탭 
 └── README.md                이 설명서 (배포판에는 자동으로 빠짐)
 ```
 
@@ -303,7 +303,7 @@ game/ui_kit/
 - **Space를 누르고 있는 동안** 패널이 사라집니다. 화면을 확인할 때 씁니다. (그동안에도 끌기·방향키는 동작)
 - **자동 비키기**(기본 켬): 고른 것(이미지/영상 탭의 그림, 대사 탭의 대사·이름, 선택지, 타이틀 메뉴 항목)이 패널 아래에 있으면 패널이 가리지 않는 구석으로 잠깐 비킵니다. B로 끄고 켭니다. 패널을 끌어서 옮긴 동안에는 비키지 않습니다.
 - F1로 단축키 안내를 접으면 패널이 더 작아집니다. 이미지/영상 탭은 L로 줄 목록을 접습니다.
-- 패널이 화면보다 길면(대사 탭에서 화면 효과, 덮개, 글자 빼기 줄까지 펼쳤을 때 등) 아래쪽이 **스크롤**됩니다. (2.7)
+- 패널이 화면보다 길면(대사 탭에서 화면 효과, 덮개, 글자 빼기 줄까지 펼쳤을 때 등) 아래쪽이 **스크롤**됩니다. 
   - 패널 위에서 **마우스 휠**, 또는 오른쪽 분홍 **스크롤바**를 끌기. 스크롤바는 끄는 동안 막대만 움직이고, 손을 떼면 내용이 따라옵니다.
   - 탭 버튼과 저장/복사/닫기/접기 줄은 늘 위에 보입니다.
   - 휠 한 칸에 움직이는 양은 40픽셀입니다. 탭을 바꾸면 맨 위로 돌아갑니다.
@@ -405,7 +405,7 @@ define tmenu.items = [
 | `tmenu.show_version` | `True` | 타이틀의 게임 제목 아래 버전 번호 표시 |
 | `tmenu.main_menu_frame` | `True` | 렌파이 기본 GUI의 메뉴 뒤 반투명 판(`gui/overlay/main_menu.png`) 표시 |
 | `tmenu.title_game_menu_navigation` | `True` | 타이틀에서 연 환경설정·불러오기 화면에 왼쪽 목록 표시. `False`면 "돌아가기"만 |
-| `tmenu.game_menu_side` | `True` | 대사록·저장·불러오기·환경설정 화면 왼쪽에 ESC 메뉴(타이틀에서 열면 타이틀 메뉴)를 그대로 두고, 제목과 내용은 그 오른편에. `False`면 렌파이 기본 모양 (4.14) |
+| `tmenu.game_menu_side` | `True` | 대사록·저장·불러오기·환경설정 화면 왼쪽에 ESC 메뉴(타이틀에서 열면 타이틀 메뉴)를 그대로 두고, 제목과 내용은 그 오른편에. `False`면 렌파이 기본 모양  |
 | `tmenu.game_menu_content_x` | `None` | 제목과 내용이 시작하는 가로 위치(픽셀 또는 `0.3` 같은 비율). `None`이면 메뉴 오른쪽 끝 + 간격 |
 | `tmenu.game_menu_gap` | `50` | 알아서 정할 때 메뉴와 내용 사이 간격(픽셀) |
 | `tmenu.game_menu_line` | `None` | 메뉴와 내용 사이 세로줄 색. 예: `"#ffffff33"` |
@@ -449,7 +449,7 @@ define tmenu.game_menu = [
 
 글자가 밀려나거나 커져도 **클릭 영역은 평소 위치에 고정**되어 있습니다. 움직이는 글자를 따라 판정이 바뀌면 마우스를 가만히 둬도 선택이 깜빡이며 왔다 갔다 하는 현상이 생기기 때문입니다. 회전·기울기가 있는 항목은 클릭 영역도 같이 회전·기울어져 있어서 정확하게 판정됩니다. 편집기를 열면 클릭 영역이 반투명 상자로 보입니다.
 
-### 5-5. 게임 중 ESC 메뉴 (3.1)
+### 5-5. 게임 중 ESC 메뉴 
 
 게임 중에 **ESC**나 **오른쪽 클릭**을 누르면 나오는 메뉴입니다. 게임 화면이 어둡게 깔리고, 그 위에 타이틀 메뉴와 같은 모양의 메뉴가 뜹니다.
 
@@ -530,7 +530,7 @@ menu (font="fonts/KBLJump_c.ttf", size=28, appear="fade"):
 | `hover_movie_zoom`, `hover_movie_offset`, `hover_movie_size` | 그 영상의 확대·위치·크기 | `hover_movie_zoom=2.0` |
 | `hover_movie_side_mask`, `hover_movie_loop` | 투명 영상 방식(기본 `True`), 반복 재생(기본 `True`) | |
 | `hover_sound`, `activate_sound` | 이 선택지만의 효과음 | |
-| `idle_media` | 평소 글 뒤에 깔리는 그림이나 영상 (4.14) | `idle_media="images/choice/paper.png"` |
+| `idle_media` | 평소 글 뒤에 깔리는 그림이나 영상  | `idle_media="images/choice/paper.png"` |
 | `hover_media` | 마우스를 올렸을 때 글 뒤 그림이나 영상 (없으면 `idle_media` 그대로) | `hover_media="movies/glow.webm"` |
 | `select_media` | 고르고 확정할 때 잠깐 보여 줄 그림이나 영상. 보여 준 뒤 넘어감 | `select_media="movies/pick.webm"` |
 | `select_time` | `select_media`를 보여 주는 초 (기본 `0.5`, `0`이면 바로 넘어감) | `select_time=0.8` |
@@ -579,13 +579,13 @@ style choice_vbox:
 | `custom_ui.enabled` | `True` | 이 기능 전체를 쓸지 |
 | `custom_ui.cursor` | `False` | 커서 애니메이션 켜기 |
 | `custom_ui.cursor_frames` | `gui/cursor/cursor1~6.png` | 프레임 이미지 목록 (순서대로 재생). 편집기 칸은 12개 |
-| `custom_ui.cursor_hold` | `2` | 24fps에서 그림 한 장을 보여줄 프레임 수. `1` 초당 24장, `2` 초당 12장 (3.0) |
-| `custom_ui.cursor_mode` | `"software"` | `"software"` 렌파이가 그림 (24fps 정확, 그림 크기 제한 없음) / `"hardware"` 운영체제 커서 (반응이 가장 빠르지만 최대 20fps) (3.0) |
+| `custom_ui.cursor_hold` | `2` | 24fps에서 그림 한 장을 보여줄 프레임 수. `1` 초당 24장, `2` 초당 12장  |
+| `custom_ui.cursor_mode` | `"software"` | `"software"` 렌파이가 그림 (24fps 정확, 그림 크기 제한 없음) / `"hardware"` 운영체제 커서 (반응이 가장 빠르지만 최대 20fps)  |
 | `custom_ui.cursor_hotspot` | `(0, 0)` | 클릭 기준점 (이미지 왼쪽 위에서 x, y 픽셀) |
 | `custom_ui.ctc` | `False` | 클릭 대기 표시 애니메이션 켜기 |
 | `custom_ui.ctc_name` | `"ctc_anim"` | 만들어지는 이미지 이름. `Character(ctc="ctc_anim")`처럼 써도 됨 |
 | `custom_ui.ctc_frames` | `gui/ctc/ctc1~6.png` | 프레임 이미지 목록. 편집기 칸은 12개 |
-| `custom_ui.ctc_hold` | `2` | 24fps에서 그림 한 장을 보여줄 프레임 수. `1` 초당 24장, `2` 초당 12장 (3.0) |
+| `custom_ui.ctc_hold` | `2` | 24fps에서 그림 한 장을 보여줄 프레임 수. `1` 초당 24장, `2` 초당 12장  |
 | `custom_ui.ctc_all_characters` | `True` | ctc를 따로 지정하지 않은 모든 캐릭터(내레이션 포함)에 붙임 |
 | `custom_ui.ctc_position` | `"nestled"` | `"nestled"`(글자 바로 뒤), `"nestled-close"`, `"fixed"`(say 스크린에서 정한 자리) |
 | `custom_ui.typing_sound` | `None` | 대사 글자가 나오는 동안 재생할 소리. `None`이면 끔 |
@@ -672,7 +672,7 @@ e "어디 갔었어?" (name_x=820, name_y=-60, speed=0.5, effect="jitter")
 - `name_x`, `name_y`는 렌파이 새 프로젝트의 `screens.rpy`에 들어 있는 `config.character_id_prefixes.append('namebox')` 줄이 있어야 동작합니다. 없으면 무엇을 넣어야 하는지 오류로 알려줍니다.
 - 예전 편집기가 저장한 캐릭터 기본값(`say_style_layout.rpy`)이 있으면 계속 적용됩니다. 2.2부터는 캐릭터 정의에서 직접 고칩니다.
 
-### 8-1. 글 상자 (4.0)
+### 8-1. 글 상자 
 
 `box`를 적으면 대사 글을 상자가 둘러쌉니다. 상자는 그림 없이 셰이더로 그리고, 글 전체 크기에 맞춰서 글이 다 나오기 전에도 다 큰 크기로 나타납니다.
 

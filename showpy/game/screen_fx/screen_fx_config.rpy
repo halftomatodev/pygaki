@@ -6,10 +6,10 @@
 ## pygaki 게임 안 편집 화면(개발 모드에서 Shift+M → T로 "화면 효과" 탭 → "전환" 버튼)로 바꿔
 ## 저장하면 screen_fx_layout.rpy가 만들어지고, 그 파일의 값이 여기 값보다 우선합니다.
 ##
-## ── 화면은 셰이더 두 개를 겹쳐 그립니다 (4.0) ──────────────────────────────
+## ── 화면은 셰이더 두 개를 겹쳐 그립니다  ──────────────────────────────
 ##
 ##   1번 (기본 효과)  기본 / 아스키 / VHS / 단말기 / 게임보이 중 하나   (아래 screen_fx.base)
-##   2번 (덮개)       같은 다섯 중 하나. True는 VHS, False는 없음     (아래 screen_fx.overlay) (4.3)
+##   2번 (덮개)       같은 다섯 중 하나. True는 VHS, False는 없음     (아래 screen_fx.overlay) 
 ##
 ##   그림:  [게임 화면] → 기본 효과 → 덮개(VHS) → 눈에 보이는 화면
 ##   처음 상태(배포 설정)는 "기본 효과 없음 + 덮개 켬" = 화면 전체에 VHS.
@@ -26,7 +26,7 @@
 ##   $ screen_fx.use("none", overlay=False)        # 아무 효과 없는 깨끗한 화면
 ##   $ screen_fx.clear()                           # 선택취소: 기본 효과와 덮개를 설정대로
 ##
-##   ## 셰이더 두 자리를 한 번에 (4.3, 편집기 "여기에서부터 적용"이 넣는 줄)
+##   ## 셰이더 두 자리를 한 번에 (편집기 "여기에서부터 적용"이 넣는 줄)
 ##   $ screen_fx.shaders("ascii", "vhs_crt")       # 1번 아스키 + 2번 VHS
 ##   $ screen_fx.shaders("gameboy")                # 1번 게임보이, 2번 없음
 ##   $ screen_fx.shaders("none", "none")           # 전부 셰이더 적용 취소
@@ -122,7 +122,7 @@ define screen_fx.wait = True
 ## False: 전환이 끝날 때까지 클릭을 받지 않음 (건너뛰기(Ctrl) 중에는 항상 바로 바뀜)
 define screen_fx.skippable = True
 
-## 마우스 커서를 화면 효과의 어디에 그릴지 (4.2)
+## 마우스 커서를 화면 효과의 어디에 그릴지 
 ## pygaki의 커서(custom_ui.cursor = True, cursor_mode = "software")를 쓸 때만 해당됩니다.
 ##   "effect"   기본 효과와 덮개를 다 받음. ASCII면 커서도 글자로, 게임보이면 4색 점으로 (기본)
 ##   "overlay"  덮개(VHS)만 받음. 주사선, 색 번짐, 휘어짐은 받고 ASCII 등은 안 받음
@@ -136,7 +136,7 @@ define screen_fx.skippable = True
 ##   e "커서가 깨끗해졌다." (fx_cursor="top")           # 대사 괄호
 define screen_fx.cursor = "effect"
 
-## ── 타이틀, 게임 내 메뉴 셰이더 (4.3) ──────────────────────────────────────
+## ── 타이틀, 게임 내 메뉴 셰이더  ──────────────────────────────────────
 ## 타이틀(과 타이틀에서 연 환경설정, 불러오기 화면)과 게임 중 ESC 메뉴(와 거기서 연 저장, 환경설정 화면)에는
 ## 인게임 셰이더 대신 여기서 고른 두 자리를 화면 전체에 씌웁니다. (1번, 2번) 순서.
 ##   "none"        기본 (아무것도 안 함)
@@ -144,7 +144,7 @@ define screen_fx.cursor = "effect"
 ##   "vhs_crt"     VHS
 ##   "retro_term"  단말기 (레트로 터미널)
 ##   "gameboy"     게임보이
-##   "ripple"      일렁임 (5.5)
+##   "ripple"      일렁임 
 ## 예: define screen_fx.title_shaders = ("vhs_crt", "none")      # 타이틀에 VHS
 ##     define screen_fx.menu_shaders = ("gameboy", "vhs_crt")    # ESC 메뉴에 게임보이 + VHS
 ## 편집기(Shift+M) "타이틀 셰이더", "게임 내 메뉴 셰이더" 탭에서 고르고 저장하면 screen_fx_layout.rpy에 들어갑니다.
@@ -152,7 +152,7 @@ define screen_fx.cursor = "effect"
 define screen_fx.title_shaders = ("ripple", "none")   # 타이틀에 일렁임 (5.5. 예전 "타이틀 일렁임")
 define screen_fx.menu_shaders = ("none", "none")
 
-## pygaki 게임 안 편집 화면(Shift+M)를 연 동안에도 화면 효과를 보여줄지 (3.4)
+## pygaki 게임 안 편집 화면(Shift+M)를 연 동안에도 화면 효과를 보여줄지 
 ##   True   효과를 켠 채로 편집. 편집기 패널은 효과 위에 깨끗하게 보임 (기본)
 ##   False  "화면 효과" 탭이 아닌 탭에서는 효과를 잠시 끔 (3.3까지의 방식)
 ## 편집 중에 V 키로 언제든 켜고 끌 수 있습니다. (게임을 다시 켜면 이 값으로 돌아감)

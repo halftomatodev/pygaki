@@ -106,7 +106,7 @@ define vhs_crt.presets = {
         "static_noise_intensity": 0.2,
         "aberration": 0.3,
     },
-    "worn": {                        # 낡은 테이프 (5.8)
+    "worn": {                        # 낡은 테이프 
         "head_switch": 0.7,
         "tracking": 0.5,
         "color_bleed": 0.6,

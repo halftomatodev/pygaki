@@ -17,24 +17,24 @@
 | ASCII (`ascii`) | 화면을 글자 칸으로 나눠 밝기에 맞는 글자로 다시 그림. 글자 하나가 픽셀 하나 (옛날 텍스트 화면, 로그라이크 콘솔). 글꼴은 Neo둥근모 | `ascii_config.rpy` |
 | 레트로 터미널 (`retro_term`) | 옛날 단색 모니터. 밝기를 형광체 색으로 칠함, 빛 번짐, 주사선, 깜빡임, 자체 곡면 CRT(테두리 포함)와 자체 VHS. **쓰는 동안 덮개는 기본으로 꺼짐** | `retro_term_config.rpy` |
 | 게임보이 (`gameboy`) | 옛날 휴대용 게임기의 LCD 화면. 큰 점, 4색(또는 2색). **디더링**(점 무늬로 섞기)과 **픽셀화**(딱 끊기). 글자는 색만 입혀서 읽히게 | `gameboy_config.rpy` |
-| 글리치 (`glitch`) | 평소에는 깨끗하다가 가끔 무작위로 가로 띠 찢김, 블록 밀림, 색 갈라짐 (5.1) | `glitch_config.rpy` |
-| 지글거림 (`boil`) | 손그림 애니메이션처럼 테두리가 1초에 12번쯤 뚝뚝 떨리고 고운 알갱이가 바뀜 (5.1) | `boil_config.rpy` |
-| 망점 (`halftone`) | 인쇄물처럼 점(또는 줄)으로. 한 색 또는 CMYK 네 색 (5.1) | `halftone_config.rpy` |
-| 홀로그램 (`hologram`) | 한 색 + 흐르는 주사선 + 옆으로 번진 복사본 두 겹 + 빛 번짐 + 깜빡임. 인물 하나에 걸기 좋음 (5.1) | `hologram_config.rpy` |
-| 나이트비전 (`nightvision`) | 초록 한 색으로 밝게, 노이즈, 가장자리 어둡게, 동그란 테두리, **화면 글**(왼쪽 위 글, REC, 숫자 시간, [ZOOM]을 하나씩 켜고 끔)과 **화면 이미지**(테두리, 조준선 그림) (5.1) | `nightvision_config.rpy` |
-| 포토 콜라주 (`collage`) | 한 장면을 사진으로 여러 번 찍어 겹쳐 붙인 것처럼. 화면 가운데에만 크기가 제각각인 네모 조각(최대 10장)이 겹치고, 조각마다 조금 밀리고 확대됨. 하얀 테두리, 그림자. 장면 전환 `screen_fx.TileSwap`도 (5.3, 예전 조각 어긋남 `tiles`를 바꿈) | `collage_config.rpy` |
-| 파편 흩날림 (`shards`) | 화면 위로 작은 뾰족한 조각이 바람에 날림. 깊이 세 겹, 돌고 뒤집히고 깜빡임. 색 1~3개, 바탕 어둡게 (5.1) | `shards_config.rpy` |
-| 일렁임 (`ripple`) | 화면을 투명한 액체 너머로 보는 것처럼 천천히 일렁임. 타이틀·메뉴·게임 중 어디에나 (5.5) | `ripple_config.rpy` |
-| 물결 (`waves`) | 잔잔한 물에 돌을 던진 것처럼 한 점에서 동그란 물결이 퍼지며 화면이 굴절 (5.7) | `waves_config.rpy` |
-| 일렁거림 (`wobble`) | 노이즈 무늬로 아지랑이나 손그림처럼 일렁거림 (5.7) | `wobble_config.rpy` |
-| 옛날 필름 (`filmgrain`) | 오래된 필름 영사기처럼 입자, 먼지, 세로 긁힘, 머리카락, 깜빡임, 덜컹거림, 바랜 색 (5.7) | `filmgrain_config.rpy` |
-| 어안렌즈 (`fisheye`) | 가운데가 부풀고 가장자리가 휘어 눌림. `circle = 1`이면 둥근 렌즈 화면 (5.7) | `fisheye_config.rpy` |
-| 복사기 (`photocopy`) | 여러 번 복사해서 닳은 종이처럼 밝기가 뭉개지고 얼룩, 끌린 줄, 종이 색 (5.7) | `photocopy_config.rpy` |
-| 양각 (`relief`) | 금속판에 눌러 찍은 것처럼 밝은 곳이 튀어나오고 가장자리가 반짝임. `invert = True`면 음각 (5.7) | `relief_config.rpy` |
-| 그라데이션 맵 (`gradmap`) | 밝기만 보고 어두운 곳·중간·밝은 곳을 고른 색으로 다시 칠함. `levels`를 올리면 포스터처럼 (5.7) | `gradmap_config.rpy` |
-| 동심원 어긋남 (`rings`) | 화면을 동그란 고리로 잘라 고리마다 조금씩 돌리고 밀어 어긋나게. `halves = True`면 고리를 반으로 (5.7) | `rings_config.rpy` |
-| 옛 캠코더 (`camcorder`) | 옛날 캠코더로 찍어 낮은 화질로 옮긴 영상처럼 화면 톤만: 가로로 뭉개짐, 어두운 물체 둘레 하얀 테두리, 색 번짐, 따뜻한 색감, 들뜬 검정, 비네팅. 프리셋 `light`, `tape`, `cold` (5.7) | `camcorder_config.rpy` |
-| 블록 깨짐 (`macroblock`) | 디지털 영상이 깨질 때처럼 네모 칸이 한 색으로 뭉개지고, 줄무늬가 생기고, 엉뚱한 자리의 그림이 들어가고 색이 틀어짐. 평소에는 가끔, `always`면 계속. 프리셋 `subtle`, `broken`, `smear` (5.8) | `macroblock_config.rpy` |
+| 글리치 (`glitch`) | 평소에는 깨끗하다가 가끔 무작위로 가로 띠 찢김, 블록 밀림, 색 갈라짐  | `glitch_config.rpy` |
+| 지글거림 (`boil`) | 손그림 애니메이션처럼 테두리가 1초에 12번쯤 뚝뚝 떨리고 고운 알갱이가 바뀜  | `boil_config.rpy` |
+| 망점 (`halftone`) | 인쇄물처럼 점(또는 줄)으로. 한 색 또는 CMYK 네 색  | `halftone_config.rpy` |
+| 홀로그램 (`hologram`) | 한 색 + 흐르는 주사선 + 옆으로 번진 복사본 두 겹 + 빛 번짐 + 깜빡임. 인물 하나에 걸기 좋음  | `hologram_config.rpy` |
+| 나이트비전 (`nightvision`) | 초록 한 색으로 밝게, 노이즈, 가장자리 어둡게, 동그란 테두리, **화면 글**(왼쪽 위 글, REC, 숫자 시간, [ZOOM]을 하나씩 켜고 끔)과 **화면 이미지**(테두리, 조준선 그림)  | `nightvision_config.rpy` |
+| 포토 콜라주 (`collage`) | 한 장면을 사진으로 여러 번 찍어 겹쳐 붙인 것처럼. 화면 가운데에만 크기가 제각각인 네모 조각(최대 10장)이 겹치고, 조각마다 조금 밀리고 확대됨. 하얀 테두리, 그림자. 장면 전환 `screen_fx.TileSwap`도 (예전 조각 어긋남 `tiles`를 바꿈) | `collage_config.rpy` |
+| 파편 흩날림 (`shards`) | 화면 위로 작은 뾰족한 조각이 바람에 날림. 깊이 세 겹, 돌고 뒤집히고 깜빡임. 색 1~3개, 바탕 어둡게  | `shards_config.rpy` |
+| 일렁임 (`ripple`) | 화면을 투명한 액체 너머로 보는 것처럼 천천히 일렁임. 타이틀·메뉴·게임 중 어디에나  | `ripple_config.rpy` |
+| 물결 (`waves`) | 잔잔한 물에 돌을 던진 것처럼 한 점에서 동그란 물결이 퍼지며 화면이 굴절  | `waves_config.rpy` |
+| 일렁거림 (`wobble`) | 노이즈 무늬로 아지랑이나 손그림처럼 일렁거림  | `wobble_config.rpy` |
+| 옛날 필름 (`filmgrain`) | 오래된 필름 영사기처럼 입자, 먼지, 세로 긁힘, 머리카락, 깜빡임, 덜컹거림, 바랜 색  | `filmgrain_config.rpy` |
+| 어안렌즈 (`fisheye`) | 가운데가 부풀고 가장자리가 휘어 눌림. `circle = 1`이면 둥근 렌즈 화면  | `fisheye_config.rpy` |
+| 복사기 (`photocopy`) | 여러 번 복사해서 닳은 종이처럼 밝기가 뭉개지고 얼룩, 끌린 줄, 종이 색  | `photocopy_config.rpy` |
+| 양각 (`relief`) | 금속판에 눌러 찍은 것처럼 밝은 곳이 튀어나오고 가장자리가 반짝임. `invert = True`면 음각  | `relief_config.rpy` |
+| 그라데이션 맵 (`gradmap`) | 밝기만 보고 어두운 곳·중간·밝은 곳을 고른 색으로 다시 칠함. `levels`를 올리면 포스터처럼  | `gradmap_config.rpy` |
+| 동심원 어긋남 (`rings`) | 화면을 동그란 고리로 잘라 고리마다 조금씩 돌리고 밀어 어긋나게. `halves = True`면 고리를 반으로  | `rings_config.rpy` |
+| 옛 캠코더 (`camcorder`) | 옛날 캠코더로 찍어 낮은 화질로 옮긴 영상처럼 화면 톤만: 가로로 뭉개짐, 어두운 물체 둘레 하얀 테두리, 색 번짐, 따뜻한 색감, 들뜬 검정, 비네팅. 프리셋 `light`, `tape`, `cold`  | `camcorder_config.rpy` |
+| 블록 깨짐 (`macroblock`) | 디지털 영상이 깨질 때처럼 네모 칸이 한 색으로 뭉개지고, 줄무늬가 생기고, 엉뚱한 자리의 그림이 들어가고 색이 틀어짐. 평소에는 가끔, `always`면 계속. 프리셋 `subtle`, `broken`, `smear`  | `macroblock_config.rpy` |
 | 타이틀 일렁임 (`watermorph`) | 타이틀 화면을 투명한 액체 너머로 보는 것처럼. 바꾸기 기능과 상관없이 타이틀에서만 따로 켜짐 | `watermorph_config.rpy` |
 
 효과마다 **글자 빼기**로 대사, 이름 / 선택지 / 메뉴, 화면 중 효과를 씌우지 않을 글자를 골라서 뺄 수 있습니다. (기본은 글자까지 전부 씌움. ASCII만 글자를 전부 빼는 게 기본)
@@ -58,18 +58,18 @@ game/screen_fx/
 ├── retro_term_config.rpy    설정: 레트로 터미널 효과                       ← 여기를 고침
 ├── gameboy_config.rpy       설정: 게임보이 효과                            ← 여기를 고침
 ├── watermorph_config.rpy    설정: 타이틀 일렁임                            ← 여기를 고침
-├── glitch_config.rpy        설정: 글리치 (5.1)                            ← 여기를 고침
-├── boil_config.rpy          설정: 지글거림 (5.1)                          ← 여기를 고침
-├── halftone_config.rpy      설정: 망점 (5.1)                              ← 여기를 고침
-├── hologram_config.rpy      설정: 홀로그램 (5.1)                          ← 여기를 고침
-├── nightvision_config.rpy   설정: 나이트비전과 화면 글 (5.1)               ← 여기를 고침
-├── collage_config.rpy       설정: 포토 콜라주, TileSwap 전환 (5.3)         ← 여기를 고침
-├── shards_config.rpy        설정: 파편 흩날림 (5.1)                       ← 여기를 고침
-├── ripple_config.rpy        설정: 일렁임 (5.5)                            ← 여기를 고침
+├── glitch_config.rpy        설정: 글리치                             ← 여기를 고침
+├── boil_config.rpy          설정: 지글거림                           ← 여기를 고침
+├── halftone_config.rpy      설정: 망점                               ← 여기를 고침
+├── hologram_config.rpy      설정: 홀로그램                           ← 여기를 고침
+├── nightvision_config.rpy   설정: 나이트비전과 화면 글                ← 여기를 고침
+├── collage_config.rpy       설정: 포토 콜라주, TileSwap 전환          ← 여기를 고침
+├── shards_config.rpy        설정: 파편 흩날림                        ← 여기를 고침
+├── ripple_config.rpy        설정: 일렁임                             ← 여기를 고침
 ├── waves_config.rpy, wobble_config.rpy, filmgrain_config.rpy, fisheye_config.rpy,
 │   photocopy_config.rpy, relief_config.rpy, gradmap_config.rpy, rings_config.rpy,
 │   camcorder_config.rpy     설정: 5.7에 더한 셰이더 아홉                   ← 여기를 고침
-│   macroblock_config.rpy    설정: 블록 깨짐 (5.8)                          ← 여기를 고침
+│   macroblock_config.rpy    설정: 블록 깨짐                           ← 여기를 고침
 ├── shaders_off.txt          고르는 목록에서 감출 셰이더 이름 (앱의 [숨김], 처음에는 없음)
 ├── *_layout.rpy             편집기에서 저장하면 생기는 파일 (처음에는 없음)
 ├── engine/                  엔진 (고치지 않음. 새 효과를 넣을 때만 여기에 파일 추가)
@@ -79,11 +79,11 @@ game/screen_fx/
 │   ├── retro_term.rpy           레트로 터미널 셰이더
 │   ├── gameboy.rpy              게임보이 셰이더
 │   ├── watermorph.rpy           타이틀 일렁임 셰이더
-│   ├── glitch.rpy, boil.rpy, halftone.rpy, hologram.rpy   새 효과 셰이더 (5.1)
-│   ├── nightvision.rpy          나이트비전 셰이더 + 화면 글 스크린 (5.1)
-│   ├── shards.rpy               파편 흩날림 셰이더 (5.1)
-│   ├── collage.rpy              포토 콜라주 셰이더, TileSwap 전환 (5.3, 예전 tiles.rpy)
-│   ├── ripple.rpy               일렁임 셰이더 (5.5)
+│   ├── glitch.rpy, boil.rpy, halftone.rpy, hologram.rpy   새 효과 셰이더 
+│   ├── nightvision.rpy          나이트비전 셰이더 + 화면 글 스크린 
+│   ├── shards.rpy               파편 흩날림 셰이더 
+│   ├── collage.rpy              포토 콜라주 셰이더, TileSwap 전환 (예전 tiles.rpy)
+│   ├── ripple.rpy               일렁임 셰이더 
 │   └── waves.rpy, wobble.rpy, filmgrain.rpy, fisheye.rpy, photocopy.rpy,
 │       relief.rpy, gradmap.rpy, rings.rpy, camcorder.rpy   5.7에 더한 셰이더
 │       macroblock.rpy                                     5.8에 더한 셰이더 (블록 깨짐)
@@ -562,7 +562,7 @@ e "다시 원래대로." (fx_warp="default")
 - `screen_fx.set_warp(값)`은 `vhs_crt.set(warp_amount=값)`과 같습니다.
 - 휘어짐이 크면 화면 가장자리 버튼의 보이는 위치와 클릭되는 위치가 어긋납니다(11-7).
 
-### 5-3. 마우스 커서 자리 (4.2)
+### 5-3. 마우스 커서 자리 
 
 pygaki의 소프트웨어 커서(`custom_ui.cursor = True`, `cursor_mode = "software"`)를 화면 효과의 어디에 그릴지 고릅니다.
 
@@ -1010,7 +1010,7 @@ e "삐빅." (fx="gameboy", font="screen_fx/fonts/neodgm.ttf", size=32)    # 이 
 |---|---|---|---|
 | 화면 효과 → VHS 덮개 / ASCII / 레트로 터미널 / 게임보이 / (새 효과) | 어디서나 | 켜기(VHS는 범위도), **덮개 켬/끔**(효과마다), **글자 빼기**(대사와 이름, 선택지, 메뉴와 화면, 안 뺌, 전부 뺌), 고칠 대상(기본 설정, 프리셋), 효과 값 막대(VHS의 가장자리 휘어짐 등), 색, 고르기 버튼, **"이 대사부터 이 효과"**, **"이 줄부터 이 효과"**(4.1) 버튼 | `<효과 이름>_layout.rpy` (`vhs_crt_layout.rpy`, `ascii_layout.rpy`, `retro_term_layout.rpy`, `gameboy_layout.rpy` …) |
 | 화면 효과 → 기본 효과, 전환 | 어디서나 | 기본 효과, **덮개 켬/끔**, 바꿀 때 전환, TV 시간, 두께, 섬광, 지직거림, 소리 음량, 서서히 시간, 기다림, 클릭으로 건너뛰기, **미리 보기** | `screen_fx_layout.rpy` |
-| 화면 효과 → 줄에 넣기 (4.1) | 게임 중 | 줄 고르기(앞뒤, 번호, 목록), 화면 효과, 덮개 그대로/켬/끔, 덮개 휘어짐, 커서 자리(4.2), 전환, 넣은 줄 지우기 | **원고의 고른 줄 바로 위**에 `$ screen_fx.use(…)` 같은 줄 |
+| 화면 효과 → 줄에 넣기  | 게임 중 | 줄 고르기(앞뒤, 번호, 목록), 화면 효과, 덮개 그대로/켬/끔, 덮개 휘어짐, 커서 자리(4.2), 전환, 넣은 줄 지우기 | **원고의 고른 줄 바로 위**에 `$ screen_fx.use(…)` 같은 줄 |
 | 대사 → "화면 효과" 줄 | 대사가 떠 있을 때 | 이 대사부터 켤 효과, 선택취소, 이 줄의 전환, **덮개 그대로/켬/끔, 덮개 휘어짐, 커서 자리(4.2)**, 글자 빼기, 전환 미리 보기 | **원고의 그 대사 줄** `(fx="…", fx_overlay=…, fx_warp=…, fx_cursor=…)` |
 | 타이틀 일렁임 | 타이틀 화면 | 켜기, 적용 대상, 세기, 물결 크기, 속도, 소용돌이, 반사광, 품질, 타이틀의 다른 화면 | `watermorph_layout.rpy` |
 
@@ -1069,7 +1069,7 @@ e "어? 화면이…" (fx_cursor="overlay")
 
 > 편집기 탭은 pygaki 플러그인에서 동작합니다. 글자 빼기 줄은 2.5 이상, 덮개 켬/끔과 휘어짐 줄은 2.9 이상, "줄에 넣기"와 "이 줄부터 이 효과" 버튼은 3.0 이상.
 
-### 9-3. 편집 중에도 효과 보기 (3.4)
+### 9-3. 편집 중에도 효과 보기 
 
 편집기(Shift+M)를 열어도 화면 효과가 그대로 보이고, 편집기 패널과 안내 글자는 효과 밖이라 깨끗하게 위에 보입니다.
 
@@ -1090,7 +1090,7 @@ define screen_fx.editor_preview = False    # "화면 효과" 탭이 아니면 �
 - VHS·CRT, 레트로 터미널(곡면 CRT)처럼 **화면을 휘는 효과**는 가장자리에서 눈에 보이는 자리와 마우스로 눌리는 자리가 조금 어긋납니다. 그림이나 메뉴 항목을 정확히 끌어 놓을 때는 V로 잠깐 끄세요.
 - 타이틀 일렁임(`watermorph`)도 같은 값을 따릅니다.
 
-### 9-4. 줄에 넣기 (4.1): 아무 줄에서나 효과 바꾸기
+### 9-4. 줄에 넣기 : 아무 줄에서나 효과 바꾸기
 
 대사 괄호(`fx=`)는 대사 줄에만 쓸 수 있습니다. `scene`, `show`, `with`, `$` 줄처럼 **대사가 아닌 줄에서** 효과를 바꾸려면 그 줄 바로 위에 `$ screen_fx.use(…)` 줄을 넣어야 하는데, 이걸 편집기가 대신 해 줍니다.
 
@@ -1149,7 +1149,7 @@ label start:
     $ screen_fx.set_warp(0)
     scene fx_bg
 
-## 커서만 [효과 안 받음] → Ctrl+S (4.2)
+## 커서만 [효과 안 받음] → Ctrl+S 
     $ screen_fx.set_cursor("top")
     scene fx_bg
 

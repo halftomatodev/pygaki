@@ -9,12 +9,12 @@ init offset = 1
 ## "keys": 키 이름 목록 (렌파이 키 이름: "K_v", "shift_K_s", "ctrl_K_l"...)
 ## "action": 눌렀을 때 동작
 ##
-## "do": "action" 대신 정해 둔 동작 이름 (1.1). 편집 화면의 [단축키] 탭이 쓰는 것과 같음
+## "do": "action" 대신 정해 둔 동작 이름 . 편집 화면의 [단축키] 탭이 쓰는 것과 같음
 ##       "preferences" 환경설정, "save" 저장, "load" 불러오기, "history" 대사록,
 ##       "help" 조작방법 화면, "quick_save", "quick_load", "skip", "auto" 자동 진행,
 ##       "rollback" 이전 대사, "hide" UI 숨기기, "screenshot", "fullscreen", "mute",
 ##       "main_menu" 타이틀로, "quit" 끝내기, "controls_page" 스플래시 조작 안내 화면
-## "help": 조작방법 화면 목록 아래에 붙는 설명 (1.1, 없으면 안 붙음)
+## "help": 조작방법 화면 목록 아래에 붙는 설명 (없으면 안 붙음)
 ##
 ## 예: V를 누르면 환경설정 열기
 ##     { "keys": [ "K_v" ], "action": ShowMenu("preferences") },

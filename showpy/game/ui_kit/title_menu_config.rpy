@@ -188,7 +188,7 @@ define tmenu.main_menu_frame = False
 ## True: ESC 메뉴를 타이틀 스타일로 / False: 렌파이 기본 (ESC를 누르면 바로 저장 화면)
 define tmenu.pause = True
 
-## 배경: 그림이나 영상(webm). None이면 투명 (뒤 게임 화면이 그대로 보임) (3.19)
+## 배경: 그림이나 영상(webm). None이면 투명 (뒤 게임 화면이 그대로 보임) 
 ## 편집기 "타이틀 메뉴" 탭(ESC 메뉴를 연 채로)의 "배경" 버튼이나 pygaki 앱에서 고를 수도 있습니다.
 ##   define tmenu.pause_background = "images/pause_bg.png"
 ##   define tmenu.pause_background = "movies/pause_bg.webm"
@@ -239,7 +239,7 @@ define tmenu.pause_items = None
 
 ## ── 게임 메뉴 (대사록·저장·불러오기·환경설정 화면) ────────────────────────────
 
-## True: 왼쪽에 ESC 메뉴를 같은 자리, 같은 모양으로 두고 제목과 내용은 그 오른편에 (4.14)
+## True: 왼쪽에 ESC 메뉴를 같은 자리, 같은 모양으로 두고 제목과 내용은 그 오른편에 
 ##       타이틀에서 연 화면은 타이틀 메뉴 항목이 왼쪽에 나옵니다.
 ##       지금 열린 화면의 항목(예: "환경설정")이 선택된 모양으로 보입니다.
 ## False: 렌파이 기본 모양 (왼쪽에 작은 글자 목록, 제목은 왼쪽 위)
