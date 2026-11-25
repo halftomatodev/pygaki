@@ -721,19 +721,8 @@ init -8 python in ui_editor:
             self.set_sel(keys[k])
 
         def key(self, k, shift):
-            if k == pygame.K_LEFTBRACKET:
-                self.step_line(-1)
-            elif k == pygame.K_RIGHTBRACKET:
-                self.step_line(1)
-            elif k == pygame.K_l:
-                self.list_open = not self.list_open
-            elif k == pygame.K_PAGEUP:
-                self.step_line(-self.LIST_ROWS)
-            elif k == pygame.K_PAGEDOWN:
-                self.step_line(self.LIST_ROWS)
-            else:
-                return False
-            return True
+            ## 줄 단위 키([ ] PageUp/Down L)는 없앰 (pygaki v1.9, 초보자용이라 그림은 화면에서 누르거나 Tab으로 고름)
+            return False
 
         ## ── 되돌리기 ──
 
@@ -997,15 +986,14 @@ init -8 python in ui_editor:
                 self.pick_default()
             s = self.stmt(self.sel) if self._valid(self.sel) else None
             if s is None:
-                rv.append("고른 줄이 없습니다. [그림/영상/소리 고르기]로 지금 대사 앞에 넣을 수 있습니다.")
+                rv.append("고른 그림이 없습니다. 화면의 그림을 누르거나, [그림/영상/소리 고르기]로 지금 대사 앞에 넣으세요.")
                 n = self.pending_lines()
                 if n:
-                    rv.append("원고에 저장 안 한 줄 {}개 (Ctrl+S)".format(n))
+                    rv.append("저장 안 한 변경 {}개 (Ctrl+S)".format(n))
                 return rv
 
-            node = s[2]
-            where = "지금 장면 (R로 다시 보기)" if self.in_scene() else "지금 장면 밖 ('그 줄로 가기'로 확인)"
-            rv.append("{}   {} {}   ({})".format(node_place(node), s[1], " ".join(self.name()), where))
+            where = "R 다시 보기" if self.in_scene() else "지금 장면 밖"
+            rv.append("{} {}   ({})".format(s[1], " ".join(self.name()), where))
 
             mv = st.movie_for(self.name())
             if mv is not None:
@@ -1021,18 +1009,14 @@ init -8 python in ui_editor:
             else:
                 rv.append("전환: {}".format(st.with_label(self.cur_with(), s[1])))
 
-            if self.edit():
-                rv.append("새 줄: " + (self.new_line() or "(만들 수 없음)"))
-            if self.add_lines.get(self.sel):
-                rv.append("이 줄 아래에 넣을 줄: " + " / ".join(self.add_lines[self.sel]))
-
+            ## 새 줄 코드("새 줄: show …")는 보여 주지 않음 (초보자용, 줄 단위 글 없이)
             err = rt.errors.get(self.sel)
             if err:
                 rv.append(err)
 
             n = self.pending_lines()
             if n:
-                rv.append("원고에 저장 안 한 줄 {}개 (Ctrl+S)".format(n))
+                rv.append("저장 안 한 변경 {}개 (Ctrl+S)".format(n))
 
             if self.pk():
                 rv.append("pygaki 원고: 위치는 stage_layout.rpy에, 그림 줄은 대본 편집기가 받아 적습니다.")
@@ -1053,8 +1037,8 @@ init -8 python in ui_editor:
 
         def help_lines(self):
             return [
-                "마우스: 그림을 누르면 그 줄 고르기, 끌면 위치 (Shift: 한 방향) | 방향키 이동 (Shift: 10배)",
-                "Tab 화면의 그림 차례로 | [[ ] 앞뒤 줄 | PageUp/Down 7줄씩 | L 목록 접기 | R 다시 보기 | Backspace 이 줄 되돌리기",
+                "마우스: 그림을 누르면 고르기, 끌면 위치 (Shift: 한 방향) | 방향키 이동 (Shift: 10배)",
+                "Tab 화면의 그림 차례로 | R 다시 보기 | Backspace 되돌리기",
                 ]
 
         ## 다시 불러와도 저장 안 한 값이 남도록
@@ -1127,7 +1111,7 @@ screen ui_editor_stage_overlay():
                 pos (int(_b[0]), int(_b[1]))
                 xysize (int(_b[2]), int(_b[3]))
                 null
-            text ui_editor.esc("{}번째 줄 {}".format(_key[1], " ".join(_name))):
+            text ui_editor.esc(" ".join(_name)):
                 style "ui_editor_small"
                 color ("#ff3b8d" if _on else "#ffffff")
                 pos (int(max(0, _b[0])) + 4, int(max(0, _b[1])) + 2)
@@ -1138,40 +1122,14 @@ screen ui_editor_stage_panel(tab):
 
     $ _kind = tab.kind()
 
-    ## 줄 이동
+    ## 줄 이동·줄 번호·줄 목록은 없앰 (pygaki v1.9, 초보자용: 그림은 화면에서 누르거나 Tab으로 고름)
     hbox:
         spacing 4
         box_wrap True
         box_wrap_spacing 4
         xmaximum 632
-        textbutton "◀ [[" style "ui_editor_button" text_size 13 action Function(tab.step_line, -1)
-        textbutton "] ▶" style "ui_editor_button" text_size 13 action Function(tab.step_line, 1)
-        text "줄 번호" style "ui_editor_text" yalign 0.5
-        button:
-            style "ui_editor_button"
-            xsize 70
-            action ui_editor.line_input.Toggle()
-            input value ui_editor.line_input style "ui_editor_text" length 6 allow "0123456789"
-        textbutton "지금 장면으로" style "ui_editor_button" text_size 13 action Function(tab.to_current)
         textbutton "그림/영상/소리 고르기" style "ui_editor_button" text_size 13 action Function(tab.open_media)
         textbutton "images 폴더 열기" style "ui_editor_button" text_size 13 action Function(ui_editor.open_folder, "images")
-        textbutton "그 줄로 가기" style "ui_editor_button" text_size 13 action Function(tab.warp) sensitive (tab.sel is not None)
-        textbutton ("L 목록 접기" if tab.list_open else "L 목록 펴기") style "ui_editor_button" text_size 13 action ToggleField(tab, "list_open")
-
-    if tab.list_open:
-        vbox:
-            spacing 1
-            for _line, _k, _text, _on, _here, _dirty in tab.nearby():
-                button:
-                    style "ui_editor_button"
-                    xsize 632
-                    padding (6, 1)
-                    action Function(tab.set_sel, (tab.cur_file(), _line))
-                    selected _on
-                    hbox:
-                        spacing 6
-                        text ("{:>4}".format(_line)) style "ui_editor_small" color ("#ff3b8d" if _here else "#cccccc") min_width 34
-                        text (("* " if _dirty else "") + _text) style "ui_editor_small" color "#ffffff"
 
     if _kind is not None and _kind != "hide" and tab.pk() and not tab.sel_is_bg():
         hbox:
@@ -1252,7 +1210,7 @@ screen ui_editor_stage_panel(tab):
     hbox:
         spacing 6
         textbutton "R 다시 보기" style "ui_editor_button" action Function(tab.replay)
-        textbutton "이 줄 되돌리기" style "ui_editor_button" action Function(tab.reset_item)
+        textbutton "되돌리기" style "ui_editor_button" action Function(tab.reset_item)
         textbutton "모두 버리기" style "ui_editor_button" action Function(tab.discard)
 
 
@@ -1333,7 +1291,7 @@ screen ui_editor_media_popup():
             $ _mk = _tab.media_kind()
             $ _isimg = _mk in ("image", "movie", "mask")
 
-            text ui_editor.esc("고른 것: " + (_tab.media_sel or "(없음)") + ("    /    고른 줄: {}번째 줄 {}".format(_tab.sel[1], _tab.kind() or "") if _tab.sel else "")) style "ui_editor_small"
+            text ui_editor.esc("고른 것: " + (_tab.media_sel or "(없음)")) style "ui_editor_small"
 
             hbox:
                 spacing 6

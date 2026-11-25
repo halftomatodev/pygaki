@@ -9,7 +9,7 @@ import { create } from 'zustand';
 import { isDesktop } from './desktop';
 import { exportedBoxLineOf, exportedLineOf } from './files';
 import { RPY_FILE } from './gameFolder';
-import { liveSend, useLive } from './showpyLive';
+import { liveSend, panelCmd, useLive } from './showpyLive';
 import { useStore } from './store';
 
 export type PickTab = 'say' | 'choice' | 'stage';
@@ -41,7 +41,7 @@ export async function pickInGame(w: Where, tab: PickTab) {
   const line = await goto(w);
   if (line == null) return;
   usePicked.setState({ key: keyOf(w) });
-  liveSend({ cmd: 'panel', hide: !useLive.getState().gamePanel });
+  liveSend(panelCmd(useLive.getState().gamePanel));
   // 게임이 그 줄로 간 뒤에 탭을 연다 (그 화면에서만 쓸 수 있는 탭이라).
   // 이미지/영상 탭은 그 줄을 골라 달라고 줄 번호도 보낸다 (. 예전 판은 line을 모르고 그냥 연다)
   const extra = tab === 'stage' ? { file: RPY_FILE, line } : {};

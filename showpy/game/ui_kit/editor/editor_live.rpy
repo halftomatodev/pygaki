@@ -42,7 +42,7 @@ init -8 python in ui_editor:
             self.port = None
             self.token = None
             self.last = None
-            self.hide_panel = True      # 앱이 붙어 있으면 게임 안 패널을 숨김
+            self.view = "compact"       # 게임 창 패널: compact(축약형) / full(대형) / hidden(숨김). F9로 돎 (pygaki v1.9)
             self.failed = False
             self.files_due = False      # 파일 목록(소리, 그림)을 보내야 함 (붙을 때, 앱이 달라고 할 때)
             self.listen_until = None    # 앱에서 [들어보기]를 누른 대사 소리를 멈출 시각
@@ -206,21 +206,36 @@ init -8 python in ui_editor:
         except Exception as e:
             msg("pygaki 앱을 켜지 못했습니다: {}".format(e))
 
-    def live_toggle_panel():
-        """게임 안 패널 보이기/숨기기를 바꾸고 앱에 알립니다(앱이 기억해 둠). (3.23)"""
-        live.hide_panel = not live.hide_panel
-        _live_send(dict(type="panel", hide=live.hide_panel))
-        msg("게임 안 편집 화면 " + ("숨김 (pygaki 앱에서 고침)" if live.hide_panel else "보임 (자리 옮기기만, 값은 pygaki 앱에서)"))
+    ## pygaki editor 게임 창 패널 세 가지 (pygaki v1.9). F9: 꺼져 있으면 축약형으로 켜고, 켜져 있으면 다음으로. Esc는 끄기.
+    VIEWS = ("compact", "full", "hidden")
+    VIEW_LABELS = { "compact": "축약형", "full": "대형", "hidden": "숨김" }
+
+    def view_label(v=None):
+        return VIEW_LABELS.get(v or live.view, "축약형")
+
+    def set_view(v, tell_app=True):
+        if v not in VIEWS:
+            v = "compact"
+        live.view = v
+        if tell_app:
+            _live_send(dict(type="panel", mode=v, hide=(v == "hidden")))
         store.renpy.restart_interaction()
 
+    def cycle_view():
+        """F9 (편집 화면 키): 꺼져 있으면 축약형으로 켜고, 켜져 있으면 축약형 → 대형 → 숨김 → 축약형."""
+        if not state.open:
+            set_view("compact")
+            open_editor()
+            return
+        set_view(VIEWS[(VIEWS.index(live.view) + 1) % len(VIEWS)] if live.view in VIEWS else "compact")
+
     def live_panel_hidden():
-        """앱이 붙어 있고 패널 숨기기가 켜져 있으면 게임 안 패널을 그리지 않습니다."""
-        return live.client is not None and live.hide_panel
+        """숨김이면 게임 창 패널을 그리지 않습니다 (구석에 한 줄만)."""
+        return live.view == "hidden"
 
     def live_compact():
-        """앱이 붙어 있고 게임 창 패널도 보이게 했으면 게임 안 패널은 짧은 판 (4.20).
-        게임 창에는 자리 옮기기에 필요한 것만, 글꼴, 색 같은 값 칸은 앱(패널 통째로)에서."""
-        return live.client is not None and not live.hide_panel
+        """축약형이면 게임 창 패널은 짧은 판 (4.20): 자리 옮기기에 필요한 것만, 값 칸은 대형이나 앱에서."""
+        return live.view == "compact"
 
     def _live_send(obj):
         c = live.client
@@ -573,12 +588,32 @@ init -8 python in ui_editor:
         live.widgets = reg
         return rv
 
+    def editor_key_label():
+        """편집 화면 키 이름 (보통 F9)"""
+        k = editor_key()
+        if not isinstance(k, str):
+            return "F9"
+        parts = k.split("_")
+        name = parts[-1].upper()
+        mods = [ p.capitalize() for p in parts[:-1] if p not in ("K", "keydown", "keyup") ]
+        return "+".join(mods + [ name ])
+
+    def mode_hint():
+        """pygaki editor 제목 옆에 붙는 한 줄: 지금 어떻게 쓰는 중인지"""
+        nxt = VIEWS[(VIEWS.index(live.view) + 1) % len(VIEWS)] if live.view in VIEWS else "full"
+        ## [[ = 렌파이 글에서 대괄호 하나
+        rv = "[[{}] {} → {} | Esc 끄기".format(view_label(), editor_key_label(), view_label(nxt))
+        if live.client is None:
+            return rv + " | 앱 없음 (앱에서 이 프로젝트를 열면 이어짐)"
+        return rv + " | 앱 이어짐"
+
     def live_badge():
+        """숨김일 때 게임 창 구석의 한 줄"""
         t = current_tab()
         name = t.label if t is not None else ""
         if state.popup is not None:
             return "pygaki 앱에 고르기 창이 열려 있어요 | Esc 닫기"
-        return "GUI 편집 중: {} | Esc 닫기".format(name)
+        return "pygaki editor: {} | {}".format(name, mode_hint())
 
     def _panel_do(c):
         import renpy as _r
@@ -641,7 +676,7 @@ init -8 python in ui_editor:
             type="state",
             where=dict(file=fn, line=line, screens=_shown_screens(),
                        main_menu=bool(getattr(store, "main_menu", False)), menu=bool(getattr(store, "_menu", False))),
-            editor=dict(open=state.open, tab=state.tab, hide_panel=live.hide_panel, bands=bands_on(), message=str(state.message or ""),
+            editor=dict(open=state.open, tab=state.tab, hide_panel=(live.view == "hidden"), view=live.view, bands=bands_on(), message=str(state.message or ""),
                         pending=sum(t.pending() + t.pending_lines() for t in TABS), tabs=tabs, info=info),
             title=_title_state(),
             custom_ui=_custom_ui_state(),
@@ -895,7 +930,14 @@ init -8 python in ui_editor:
             return True
 
         if cmd == "panel":
-            live.hide_panel = bool(c.get("hide"))
+            ## mode: compact / full / hidden (pygaki v1.9). 예전 앱은 hide만 보냄: 숨김, 아니면(숨김이었을 때) 축약형
+            m = c.get("mode")
+            if m in VIEWS:
+                set_view(m, tell_app=False)
+            elif c.get("hide"):
+                set_view("hidden", tell_app=False)
+            elif live.view == "hidden":
+                set_view("compact", tell_app=False)
             return True
 
         ## 경계선 (4.20, 이름은 bands): 앱 환경 설정의 [게임 화면 경계선]과 단축키
@@ -1071,20 +1113,20 @@ screen ui_editor_live_mirror():
     layer "ui_editor"
 
     ## 4.20: 게임 창 패널을 보이게 해도(짧은 판, live_compact) 값 칸은 앱에서 고치므로 늘 보냅니다.
-    if config.developer and ui_editor.state.open and ui_editor.live_connected():
+    ## 게임 창에 보이는 표시 (3.18): 편집기가 열려 있으면 클릭과 키가 게임으로 가지 않아서,
+    ## 패널이 숨김일 때도 지금 편집 중인 것을 알 수 있게. 글자만 있어서 입력을 막지 않습니다.
+    ## 4.6: 화면을 덜 가리게 오른쪽 위 구석에 작게. v1.9: 앱이 없어도 (F9 숨김)
+    if config.developer and ui_editor.state.open and ui_editor.live_panel_hidden() and not ui_editor.state.peek:
+        frame:
+            style "empty"
+            background "#00000080"
+            padding (8, 2)
+            xalign 1.0
+            xoffset -6
+            ypos 6
+            text ui_editor.live_badge() style "ui_editor_small" color "#ffd23b" size 12
 
-        ## 게임 창에 보이는 표시 (3.18): 편집기가 열려 있으면 클릭과 키가 게임으로 가지 않아서,
-        ## 패널이 앱에 있을 때도 지금 편집 중인 것을 알 수 있게. 글자만 있어서 입력을 막지 않습니다.
-        ## 4.6: 화면을 덜 가리게 오른쪽 위 구석에 작게 (고치는 칸은 모두 pygaki 앱에 있음)
-        if ui_editor.live_panel_hidden():
-            frame:
-                style "empty"
-                background "#00000080"
-                padding (8, 2)
-                xalign 1.0
-                xoffset -6
-                ypos 6
-                text ui_editor.live_badge() style "ui_editor_small" color "#ffd23b" size 12
+    if config.developer and ui_editor.state.open and ui_editor.live_connected():
 
         fixed:
             pos (-40000, 0)

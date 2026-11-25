@@ -1,4 +1,4 @@
-<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ c8f3294771 -->
+<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ 3552b6c43d -->
 # pygaki plugin customization guide
 
 2026-11-25 · pygaki v1.9 (changes per version are in `READ_ME_FIRST.md` and `CHANGELOG.md`)
@@ -7,7 +7,7 @@
 
 This document is for people who installed the pygaki plugins 5.5 to look up **which value in which file changes what**. Full descriptions of setting names are in each folder's `README.md` (Korean); this document starts from "what you want to do". If you write your text in pygaki, start with "Using it with pygaki".
 
-The in-game editor (Shift+M) can be switched to Japanese or English with the [Language] button on its panel (it starts out following the game's language). This document sometimes gives the Korean screen names next to tab and button names (e.g. "dialogue tab" = 대사 탭). Comments in the settings files are in Korean.
+The in-game editor (F9) can be switched to Japanese or English with the [Language] button on its panel (it starts out following the game's language). This document sometimes gives the Korean screen names next to tab and button names (e.g. "dialogue tab" = 대사 탭). Comments in the settings files are in Korean.
 
 | Folder | What it does | Files you edit |
 | --- | --- | --- |
@@ -22,11 +22,11 @@ There are three rules.
 2. Paths to images, sounds, videos and fonts are all **relative to the `game` folder**. (`"gui/cursor/cursor1.png"` = `game/gui/cursor/cursor1.png`)
 3. After editing, press **Shift+R** while the game runs to reload and see it right away. When you're done, run Lint from the launcher.
 
-In the editor (Shift+M in developer mode), **dialogue and choices are edited one line at a time**, and Ctrl+S **saves straight into that line's parentheses in the script (.rpy)**. The original before editing is kept in `ui_kit_backup/` in the project folder. Defaults for everything are changed in the settings files. Values saved in the other tabs (title menu, cursor/dialogue sound, screen effects) are created as `*_layout.rpy` in each plugin folder and take priority over the same values in the settings files. If editing a settings file changes nothing, check that file first.
+In the editor (F9 in developer mode), **dialogue and choices are edited one line at a time**, and Ctrl+S **saves straight into that line's parentheses in the script (.rpy)**. The original before editing is kept in `ui_kit_backup/` in the project folder. Defaults for everything are changed in the settings files. Values saved in the other tabs (title menu, cursor/dialogue sound, screen effects) are created as `*_layout.rpy` in each plugin folder and take priority over the same values in the settings files. If editing a settings file changes nothing, check that file first.
 
 ## Find at a glance
 
-Find what you want to change and edit the value in the file on the right. Items with an "Editor" entry can also be changed in the Shift+M editor.
+Find what you want to change and edit the value in the file on the right. Items with an "Editor" entry can also be changed in the F9 editor.
 
 | What to change | File | Value | Editor |
 | --- | --- | --- | --- |
@@ -668,7 +668,7 @@ Pressing ESC or right-clicking during play dims the game screen and shows a menu
 | How much to dim the screen behind | `define tmenu.pause_dim = "#000000b3"` (last two digits = strength: `66` light, `ff` pitch black, `None` no dimming) |
 | An image instead of dimming | `define tmenu.pause_background = "gui/game_menu.png"` |
 | Change items | `define tmenu.pause_items = [ { "id": "return", "text": _("계속하기"), "action": Return(), "xalign": 0.08, "yalign": 0.35 }, … ]` |
-| Item positions | with the ESC menu open, Shift+M → drag in the "title menu" tab and Ctrl+S (saved to `tmenu.pause_layout`) |
+| Item positions | with the ESC menu open, F9 → drag in the "title menu" tab and Ctrl+S (saved to `tmenu.pause_layout`) |
 
 The default items are return (`Return()`), save (`ShowMenu("save")`), load (`ShowMenu("load")`), preferences (`ShowMenu("preferences")`), history (`ShowMenu("history")`), main menu (`MainMenu()`) and quit (`Quit()`). "Return" inside the save screen goes back to the game, like Ren'Py's default.
 
@@ -835,7 +835,7 @@ e "Shake!" (box="media", media="images/say/boom.png", media_link=True, media_fx=
 | `media_fx`, `media_fx_time`, `media_fx_values` | a picture effect from the effects folder when the text box appears (e.g. `"vibrate"`, `"springin"`), its seconds, detail values `{"amount": 20}`. If tied, the text too. Ren'Py's built-in transitions (`dissolve` etc.) can't be used |
 
 - **Choices** use the same box. Write `idle_media` (normal), `hover_media` (on mouse hover; the normal picture if missing) and `select_media` (shown for `select_time` seconds when picked, then it moves on; default 0.5). `media_fit` `media_zoom` `media_offset` `media_angle` `media_link` `media_quad` `media_fx` mean the same. A choice with a picture drops the default button background and shrinks to the text size + `media_padding` (`media_button=True` keeps the button).
-- **Editing in the game**: in the editor (Shift+M), use [Edit: Image] on the dialogue tab or [Edit: Image behind] on the choice tab. Drag the picture to move it, the wheel or A/D to scale, Q/E to rotate. Turn on [Link text] and the text follows; drag the corner points (pink for the picture, sky blue for the text) for a four-corner warp, and undo with [Reset corners] and [Reset image]. Ctrl+S writes it on that script line, and for pygaki scripts the script editor takes it in.
+- **Editing in the game**: in the editor (F9), use [Edit: Image] on the dialogue tab or [Edit: Image behind] on the choice tab. Drag the picture to move it, the wheel or A/D to scale, Q/E to rotate. Turn on [Link text] and the text follows; drag the corner points (pink for the picture, sky blue for the text) for a four-corner warp, and undo with [Reset corners] and [Reset image]. Ctrl+S writes it on that script line, and for pygaki scripts the script editor takes it in.
 - **Transparent videos**: Ren'Py (up to 8.6.1) can't play a webm with alpha as is. Turn transparent webm, animated GIF/WebP/PNG, PNG sequences and green-screen videos into `movies/mask_name.webm` (color on the left, alpha on the right) with [🎞 Make transparent video] in the pygaki app.
 - In the pygaki script editor, pick them in [Picture/video] under [Text box] on a dialogue line, and with [🖼] on a choice line. If the game's plugin is older, the script editor's check tab tells you.
 
@@ -845,9 +845,9 @@ e "Shake!" (box="media", media="images/say/boom.png", media_link=True, media_fx=
 - To change only some characters within a line, use text tags: `"That's a {color=#a00}lie{/color}"`. To put a text effect on only some characters, write `"text before {shader=shake}shaking text{/shader} text after"` (effect names and values are the same as `effect`. If the line has no effect, the remaining characters appear one at a time. The color trail `echo` works only on whole lines).
 - If your script already defines `n1`–`n3` or `t`, delete the definitions in the settings file. Otherwise the same names are defined twice.
 
-## Editing with the editor (Shift+M)
+## Editing with the editor (F9)
 
-With the game running from the launcher (developer mode), press **Shift+M** to open the editor. It doesn't open in releases. While the editor is open, clicks and keys don't go to the game.
+With the game running from the launcher (developer mode), press **F9** to open the editor (pygaki editor). While it's open, each press of F9 changes the panel Compact → Full → Hidden; Esc closes it. It doesn't open in releases. While the editor is open, clicks and keys don't go to the game.
 
 Each click on the panel's **[Language]** button switches the editor's text 한국어 → 日本語 → English (4.12). The choice is remembered per game (`persistent`) and starts out following the game's language. The game screen's text (dialogue, menus, the text you're editing) and saved values don't change. Translations live in `ui_kit/editor/editor_lang.tsv` (Korean, Japanese, English per line); text missing from it shows in Korean.
 
@@ -863,7 +863,7 @@ Each click on the panel's **[Language]** button switches the editor's text 한�
 
 Just go in order.
 
-1. Go to the screen you want to change and press Shift+M. The tab for that screen opens. (T switches tabs)
+1. Go to the screen you want to change and press F9. The tab for that screen opens. (T switches tabs)
 2. Drag items with the mouse and rotate with the wheel (Shift+wheel for text size; roll the wheel outside the panel, since over the panel it scrolls the panel). Keyboard: arrow keys move, Q/E rotate, Z/C tilt, A/D scale, S/W text size, Tab next item.
 3. Press 2 to edit the "selected (hover)" values, 1 for normal values. H previews the selected look.
 4. In the title menu tab, 3 switches "this item only" ↔ "all items". In the dialogue tab, Tab switches "dialogue" ↔ "name", and pressing the speed or effect buttons replays the line (R replays too).
@@ -908,7 +908,7 @@ hide eileen with stage.ease("outright", 1.2)      # exit smoothly to the right, 
 show ghost with Dissolve(1.0)                     # dissolve over 1 s
 ```
 
-**The editor's "image/video" tab** (Shift+M → T during play): choose one show, hide or scene line in the script and edit it.
+**The editor's "image/video" tab** (F9 → T during play): choose one show, hide or scene line in the script and edit it.
 
 | What to change | How |
 | --- | --- |
@@ -962,10 +962,10 @@ define hotkeys.keyboard_help = [
 | Default hotkey names often removed | `screenshot` (S), `toggle_fullscreen` (F), `hide_windows` (H), `self_voicing` (V), `accessibility` (Shift+A), `skip` (Ctrl), `toggle_skip` (Tab), `rollback` (Page Up) |
 | When they overlap | if a new key overlaps a default hotkey, both run, so remove it from the default side with `unbind` |
 | The help screen | if `keyboard_help` is `None`, Ren'Py's default descriptions. Keys removed with `unbind` are updated in that default list automatically (1.3: removing V turns the "V" line into "Alt+V", and a line with no keys left is dropped). If you wrote the list yourself, update the descriptions too |
-| Overlap with the editor key | the pygaki editor uses Shift+M. To change it, `define ui_kit.editor_key = "shift_K_e"` |
+| Overlap with the editor key | the pygaki editor uses F9. To change it, `define ui_kit.editor_key = "shift_K_e"` |
 | Preset actions (1.1) | instead of `"action"`, a name like `"do": "quick_save"`. Writing `"help": _("Quick save")` puts it in the controls screen list (if a line with the same key exists, its description is replaced). The list of names is in `hotkeys/README.md` |
 
-**Changing them in the editor** (with `ui_kit`): the "Edit shortcuts" tab (단축키 수정) of the Shift+M editor (right after the splash tab; also next to the controls guide in the splash tab's page buttons, and under "Controls guide" in the pygaki app's [GUI edit]) has a function name and a key button on each line. Press the key button, then press the new key in the game window (Esc cancels). [+] adds one more key; clicking a function name shows [Key buttons] (키 단추로), [Remove keys] (키 빼기), [First keys] (처음 키로) and a description cell. If another function uses the key, a warning and guidance appear, and it only changes when you press [Remove it there and change] (그쪽에서 빼고 바꾸기). Press [Export to the guide screen] (안내 화면으로 내보내기) and the splash controls guide table becomes `"keys": "hotkeys"` and follows this table; pick which functions to show by clicking them in the controls guide list of the splash tab (`"keys_show"`). Changed keys also go into the ESC controls screen list automatically. Changes apply right away while you edit; saving writes `"keys"` (keys per function) and `"desc"` (descriptions) in `hotkeys/hotkeys_layout.rpy`, which are added to the settings file's values.
+**Changing them in the editor** (with `ui_kit`): the "Edit shortcuts" tab (단축키 수정) of the F9 editor (right after the splash tab; also next to the controls guide in the splash tab's page buttons, and under "Controls guide" in the pygaki app's [GUI edit]) has a function name and a key button on each line. Press the key button, then press the new key in the game window (Esc cancels). [+] adds one more key; clicking a function name shows [Key buttons] (키 단추로), [Remove keys] (키 빼기), [First keys] (처음 키로) and a description cell. If another function uses the key, a warning and guidance appear, and it only changes when you press [Remove it there and change] (그쪽에서 빼고 바꾸기). Press [Export to the guide screen] (안내 화면으로 내보내기) and the splash controls guide table becomes `"keys": "hotkeys"` and follows this table; pick which functions to show by clicking them in the controls guide list of the splash tab (`"keys_show"`). Changed keys also go into the ESC controls screen list automatically. Changes apply right away while you edit; saving writes `"keys"` (keys per function) and `"desc"` (descriptions) in `hotkeys/hotkeys_layout.rpy`, which are added to the settings file's values.
 
 ## Changing screen effects — `screen_fx/screen_fx_config.rpy`
 
@@ -1093,7 +1093,7 @@ e "접속 중…" (fx="retro_term")                             # retro terminal
 
 ### Changing from a non-dialogue line (the editor's "insert into line", 4.1)
 
-Shift+M → "screen effects" tab → **[insert into line]** under "Effect:". Choose a line (`[` `]` one line at a time, type a line number, [current line], L for the list), choose the effect and press Ctrl+S, and a line like this goes **right above** it. Saving on the same line again rewrites the line inserted before; delete it with [delete the effect line above this line] → Ctrl+S.
+F9 → "screen effects" tab → **[insert into line]** under "Effect:". Choose a line (`[` `]` one line at a time, type a line number, [current line], L for the list), choose the effect and press Ctrl+S, and a line like this goes **right above** it. Saving on the same line again rewrites the line inserted before; delete it with [delete the effect line above this line] → Ctrl+S.
 
 ```renpy
 label start:
@@ -1182,7 +1182,7 @@ e "커서가 깨끗해졌다." (fx_cursor="top")          # dialogue parentheses
 ```
 
 - Editor: the "cursor" row in the dialogue tab (`fx_cursor=`), the "cursor" row of "insert into line" in the screen effects tab (`$ screen_fx.set_cursor(…)`).
-- While the editor (Shift+M) is open, and with the OS cursor (`cursor_mode = "hardware"`), it's always on top.
+- While the editor (F9) is open, and with the OS cursor (`cursor_mode = "hardware"`), it's always on top.
 
 ### VHS overlay — `screen_fx/vhs_crt_config.rpy` (4.0)
 
@@ -1580,7 +1580,7 @@ When the same value is in several places, the one further right wins.
        "action": splash.ShowPage("controls"),
    },
    ```
-2. Clicking it shows the splash's `controls` page over the title; a click returns to the title. Set its position with Shift+M.
+2. Clicking it shows the splash's `controls` page over the title; a click returns to the title. Set its position with F9.
 
 **Adding a "Gallery" item to the title menu**
 
@@ -1593,7 +1593,7 @@ When the same value is in several places, the one further right wins.
        "show_if": "persistent.cleared",
    },
    ```
-2. Run the game, press Shift+M on the title → drag the new item into place → Ctrl+S.
+2. Run the game, press F9 on the title → drag the new item into place → Ctrl+S.
 
 **Changing the font of the whole title menu at once**
 
@@ -1602,13 +1602,13 @@ When the same value is in several places, the one further right wins.
 
 **Putting one choice anywhere on the screen**
 
-1. Play until the choices appear → Shift+M (choice tab).
+1. Play until the choices appear → F9 (choice tab).
 2. Drag the choice into place, tilt it with Q/E, change it with the font and color buttons.
 3. Ctrl+S. The parentheses of that choice line in the script change and the same scene reloads.
 
 **Moving the name elsewhere and making it shake on one dialogue line**
 
-1. Play until that line → Shift+M (dialogue tab).
+1. Play until that line → F9 (dialogue tab).
 2. Choose "name" with Tab and drag the name into place; size with S/W, color with the color button.
 3. Effect "jitter", speed ×0.5 → the line plays again so you can check.
 4. Ctrl+S.
@@ -1645,7 +1645,7 @@ Set the switch at the top of the settings file to `False` (`tmenu.enabled`, `cme
 
 **Tuning the VHS effect while watching it, and making a preset for a scene**
 
-1. On a screen where you want to see the effect (a dialogue scene, etc.), Shift+M → T to the "screen effects" tab → the "VHS overlay" button at the top.
+1. On a screen where you want to see the effect (a dialogue scene, etc.), F9 → T to the "screen effects" tab → the "VHS overlay" button at the top.
 2. Adjust the usual look by changing sliders with the group buttons "basic", "scanlines", "shake"….
 3. Switch "editing target" to "preset: broken" to edit that preset while previewing it. Values that should follow the defaults: "remove".
 4. Save with Ctrl+S. Use it in that scene in the script with `$ vhs_crt.preset("broken", duration=0.5)`.
@@ -1663,7 +1663,7 @@ $ gameboy.reset()                 # back to the original values for next time
 
 **Setting "Game Boy from this line" with the editor**
 
-1. Play until the line where the effect changes → Shift+M (dialogue tab). (Or "screen effects" tab → [Game Boy] → [this effect from this line])
+1. Play until the line where the effect changes → F9 (dialogue tab). (Or "screen effects" tab → [Game Boy] → [this effect from this line])
 2. [Game Boy] in the "screen effect" row. To change the transition, [dissolve] / [instant] in the "transition" row. To turn off the overlay, [off] in the "overlay (VHS)" row; curvature in the "overlay curvature" row.
 3. Ctrl+S → that line in the script becomes like `e "…" (fx="gameboy", fx_transition="fade")` and the script reloads. The edited line replays from the line before it, so advance once to see it. Things after the line like `with dissolve` stay as they are.
 4. On the line where it should return, do the same with [cancel → default (no effect)] → Ctrl+S. The script gets `(fx="default")`. [Keep] means no change on this line (removes `fx` from the parentheses).
@@ -1692,13 +1692,13 @@ label dungeon:
 
 **Setting "ASCII + VHS overlay from this line" with the editor**
 
-1. Play until the line to change → Shift+M (dialogue tab).
+1. Play until the line to change → F9 (dialogue tab).
 2. [ASCII] in the "screen effect" row → [on] in the "overlay (VHS)" row. To turn even the dialogue window into characters, click [dialogue and names], [choices] and [menus and screens], which are on in the "text exclusion" row, to turn them off.
 3. Ctrl+S → that line in the script becomes like `e "…" (fx="ascii", fx_overlay=True)`.
 
 **Tuning ASCII character size while watching**
 
-1. Shift+M → T to the "screen effects" tab → [ASCII] at the top.
+1. F9 → T to the "screen effects" tab → [ASCII] at the top.
 2. Drag the "cell height" and "cell width ÷ height" sliders and turn "crisp" on or off. Choose the character list and coloring with buttons.
 3. Compare by switching [none] / [all] in "text exclusion".
 4. Ctrl+S → saved to `screen_fx/ascii_layout.rpy`, which takes priority over the settings file.

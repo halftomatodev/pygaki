@@ -404,18 +404,22 @@ async function until(what, fn, ms = 10000) {
   const rows = await page.locator('.sp-mirror textarea.sp-m-in.wide').getAttribute('rows', { timeout: 10000 });
   if (rows !== '3') fail('넓은 글 칸이 세 줄 칸이 아님: ' + rows);
   console.log('패널 통째로: 됨');
-  // 게임 창의 GUI 편집기 보이기/숨기기: 버튼과 F9가 panel 명령을 보내고, 게임 쪽 알림을 기억하는지
-  const nPanel = () => got.filter((m) => m.cmd === 'panel' && m.hide === false).length;
+  // 게임 창 pygaki editor 패널 (축약형 → 대형 → 숨김): 버튼과 F9가 panel 명령(mode)을 보내고, 게임 쪽 알림을 기억하는지
+  const nPanel = () => got.filter((m) => m.cmd === 'panel' && typeof m.mode === 'string').length;
   const p0 = nPanel();
-  await page.locator('.sp-bar button', { hasText: '게임 창의 편집 화면' }).click();
-  await until('보이기 버튼이 panel 명령을 보내지 않음', () => nPanel() > p0);
-  if ((await page.evaluate(() => localStorage.getItem('pygaki-game-panel'))) !== 'show') fail('보이기를 기억하지 않음');
+  await page.locator('.sp-bar button', { hasText: '게임 창 pygaki editor' }).click();
+  await until('패널 버튼이 panel 명령(mode)을 보내지 않음', () => nPanel() > p0);
+  const remembered = await page.evaluate(() => localStorage.getItem('pygaki-game-panel'));
+  if (!['compact', 'full', 'hidden'].includes(String(remembered))) fail('패널 모양을 기억하지 않음: ' + remembered);
+  const p1 = nPanel();
   await page.keyboard.press('F9');
-  await until('F9가 숨기기 명령을 보내지 않음', () => got.some((m, i) => m.cmd === 'panel' && m.hide === true && i > 0));
-  await page.waitForFunction(() => localStorage.getItem('pygaki-game-panel') === 'hide', null, { timeout: 5000 });
-  for (const c of srv._conns ?? []) c.write(JSON.stringify({ type: 'panel', hide: false }) + '\n');
-  if (srv._conns?.length) await page.waitForFunction(() => localStorage.getItem('pygaki-game-panel') === 'show', null, { timeout: 5000 });
-  await page.evaluate(() => localStorage.setItem('pygaki-game-panel', 'hide'));
+  await until('F9가 panel 명령을 보내지 않음', () => nPanel() > p1);
+  for (const c of srv._conns ?? []) c.write(JSON.stringify({ type: 'panel', mode: 'full', hide: false }) + '\n');
+  if (srv._conns?.length) await page.waitForFunction(() => localStorage.getItem('pygaki-game-panel') === 'full', null, { timeout: 5000 });
+  // 예전 플러그인은 hide만 보냄
+  for (const c of srv._conns ?? []) c.write(JSON.stringify({ type: 'panel', hide: true }) + '\n');
+  if (srv._conns?.length) await page.waitForFunction(() => localStorage.getItem('pygaki-game-panel') === 'hidden', null, { timeout: 5000 });
+  await page.evaluate(() => localStorage.setItem('pygaki-game-panel', 'hidden'));
   console.log('게임 창 편집기 토글: 됨');
   // 커서, 클릭 대기, 대사 소리 칸: 앱 칸이 나오고 값을 보내는지
   await page.click('.sp-nav-item:has-text("커서, 클릭 대기")');

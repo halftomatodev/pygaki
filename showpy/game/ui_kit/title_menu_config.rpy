@@ -9,7 +9,7 @@
 ##   2. 이름 앞에 hover_를 붙이면 "선택됐을 때" 값입니다.
 ##      예: "color" = 평소 색, "hover_color" = 선택됐을 때 색
 ##
-## 편집기(개발 모드에서 Shift+M)로 위치를 잡고 저장하면
+## 편집기(개발 모드에서 F9)로 위치를 잡고 저장하면
 ## title_menu_layout.rpy가 만들어지고, 그 파일의 값이 여기 값보다 우선합니다.
 ################################################################################
 
@@ -137,7 +137,7 @@ define tmenu.intro_offset = (-30, 0) # 어디서부터 미끄러져 들어올지
 ## 그림은 화면에 꽉 차게 늘어납니다. 영상은 계속 반복합니다.
 ##   define tmenu.background = "images/title_bg.png"
 ##   define tmenu.background = "movies/title_bg.webm"
-## 편집기(Shift+M) "타이틀 메뉴" 탭의 "배경" 버튼이나 pygaki 앱에서 고를 수도 있습니다.
+## 편집기(F9) "타이틀 메뉴" 탭의 "배경" 버튼이나 pygaki 앱에서 고를 수도 있습니다.
 ## (예전 이름 tmenu.background_movie도 그대로 됩니다)
 
 define tmenu.background = None
@@ -182,7 +182,7 @@ define tmenu.main_menu_frame = False
 ## ── 게임 중 ESC 메뉴 (일시정지 메뉴) ───────────────────────────  ──
 ## 게임 중에 ESC나 오른쪽 클릭을 누르면 나오는 메뉴를 타이틀 메뉴와 같은 모양으로 그립니다.
 ## 글꼴, 크기, 색, 선택됐을 때 모양(tmenu.default), 등장 연출, 소리는 타이틀 메뉴 설정을 같이 씁니다.
-## 항목 자리는 편집기에서 따로 옮길 수 있습니다: ESC 메뉴를 연 채로 Shift+M → "타이틀 메뉴" 탭.
+## 항목 자리는 편집기에서 따로 옮길 수 있습니다: ESC 메뉴를 연 채로 F9 → "타이틀 메뉴" 탭.
 ## (저장하면 title_menu_layout.rpy에 tmenu.pause_layout으로 들어갑니다)
 
 ## True: ESC 메뉴를 타이틀 스타일로 / False: 렌파이 기본 (ESC를 누르면 바로 저장 화면)

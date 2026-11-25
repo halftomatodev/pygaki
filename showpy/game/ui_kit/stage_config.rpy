@@ -9,7 +9,7 @@
 ##        movies/mask_ghost.webm    →  show ghost   (이름 앞 mask_ = 투명 영상)
 ##      그림은 렌파이가 원래 game/images/ 폴더를 자동 등록하므로 따로 할 일이 없습니다.
 ##   2. bg 태그(show bg room, scene bg street …)는 항상 맨 뒤에 그립니다.
-##   3. 편집기(개발 모드에서 Shift+M)의 "이미지/영상" 탭에서 show·hide·scene 줄의
+##   3. 편집기(개발 모드에서 F9)의 "이미지/영상" 탭에서 show·hide·scene 줄의
 ##      위치와 전환 효과를 고르고, Ctrl+S로 원고의 그 줄에 바로 저장합니다.
 ##        show eileen happy at stage.pos(420, 720) with Dissolve(1.0)
 ##        hide eileen with stage.ease("outright", 0.8)

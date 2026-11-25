@@ -1151,7 +1151,7 @@ init -8 python in ui_editor:
             node = current_node()
             name = self.char_name() or "(이름 없는 캐릭터)"
             rv = [ ]
-            rv.append("{}   캐릭터: {}".format(node_place(node), name))
+            rv.append("캐릭터: {}".format(name))    # 파일·줄 번호는 보여 주지 않음 (pygaki v1.9)
 
             x, y = self._start()
             org = self.window_origin()
@@ -1197,7 +1197,7 @@ init -8 python in ui_editor:
             if self.pk():
                 return [
                     "마우스: 드래그하면 고르는 것(대사/이름/그림)이 움직임 (Shift: 한 방향) | 그림: 휠, A/D 크기, Q/E 회전",
-                    "Tab 대사/이름/그림 바꾸기 | 방향키 이동 (Shift: 10배) | R 다시 보기 | Backspace 이 줄 되돌리기",
+                    "Tab 대사/이름/그림 바꾸기 | 방향키 이동 (Shift: 10배) | R 다시 보기 | Backspace 이 대사 되돌리기",
                     ]
             if self.target == "media":
                 return [
@@ -1206,7 +1206,7 @@ init -8 python in ui_editor:
                     ]
             return [
                 "마우스: 드래그하면 고르는 것(대사/이름)이 움직임 (Shift: 한 방향) | 휠 글자 크기",
-                "Tab 대사/이름 바꾸기 | 방향키 이동 (Shift: 10배) | S/W 글자 크기 | R 다시 보기 | Backspace 이 줄 되돌리기",
+                "Tab 대사/이름 바꾸기 | 방향키 이동 (Shift: 10배) | S/W 글자 크기 | R 다시 보기 | Backspace 이 대사 되돌리기",
                 ]
 
         ## Shift+R이나 저장 뒤 다시 불러와도 원고에 아직 안 쓴 값이 남도록
@@ -1338,12 +1338,12 @@ screen ui_editor_say_panel(tab):
 
     ## 3.21: 글자 등장 효과, 줄마다 화면 효과·덮개·휘어짐·커서는 이 탭에서 뺌.
     ## 원고에 이미 적힌 괄호(fx=, fx_overlay=, fx_warp=, fx_cursor=, 등장 효과)는 그대로 돌아감
-    text "대사 효과(글자 등장 효과)는 pygaki 앱 [[대본 편집]에서 고칩니다. 셰이더와 커서는 '화면 효과' 탭, '커서/대사 소리' 탭에서 [[여기에서부터 적용]으로." style "ui_editor_small" color "#ffd23b" xmaximum 632
+    text "대사 효과(글자 등장 효과)는 pygaki 앱 [[대본 편집]에서 고칩니다. 셰이더와 커서도 대본 편집기에서 상자마다 고릅니다." style "ui_editor_small" color "#ffd23b" xmaximum 632
 
     hbox:
         spacing 6
         textbutton "R 다시 보기" style "ui_editor_button" action Function(tab.replay)
-        textbutton "이 줄 되돌리기" style "ui_editor_button" action Function(tab.reset_item)
+        textbutton "이 대사 되돌리기" style "ui_editor_button" action Function(tab.reset_item)
         textbutton "모두 버리기" style "ui_editor_button" action Function(tab.discard)
 
 

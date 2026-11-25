@@ -1,4 +1,4 @@
-"""게임 안 편집 화면(Shift+M)의 한국어 글 가운데 사전에 없는 것을 찾는다.
+"""게임 안 편집 화면(F9)의 한국어 글 가운데 사전에 없는 것을 찾는다.
 
     python showpy/i18n/extract_editor.py          # showpy/i18n/missing.txt에 적음
 

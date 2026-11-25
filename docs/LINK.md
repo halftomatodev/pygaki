@@ -334,14 +334,14 @@ pygaki 데스크톱 앱의 [GUI 편집] 화면이 게임 안 편집기를 바깥
 | `error` | 명령 처리가 실패했을 때 | `{"type": "error", "text": "..."}` |
 | `reloading` | 원고를 다시 읽기 직전(Shift+R, 자동 다시 읽기. 렌파이 `renpy.session["_reload"]`), 연결을 닫기 바로 전 | `{"type": "reloading"}`. 앱은 다시 붙을 때까지 연결 단추를 "◐ 게임 수정 중"으로 |
 | `bands` | 게임 창에서 F8로 경계선을 켜거나 껐을 때 | `{"type": "bands", "on": true}`. 앱은 환경 설정 `gameBands`를 이 값으로 바꾸고 다시 보내지 않음 |
-| `panel` | 게임 창에서 F9로 게임 안 편집기 패널을 보이게/숨기게 했을 때 | `{"type": "panel", "hide": true}`. 앱은 이 값을 기억했다가(`localStorage` `pygaki-game-panel`) 다음에 붙을 때 `panel` 명령으로 보냄. 앱의 F9(단축키 `gamePanel`)도 같은 명령 |
+| `panel` | 게임 창에서 F9로 pygaki editor 패널 모양을 바꿨을 때 | `{"type": "panel", "mode": "full", "hide": false}`. `mode`는 `compact`(축약형) / `full`(대형) / `hidden`(숨김), `hide`는 `mode == "hidden"`(예전 앱용, pygaki v1.9). 앱은 이 값을 기억했다가(`localStorage` `pygaki-game-panel`, 예전 값 `show`/`hide`도 읽음) 다음에 붙을 때 `panel` 명령으로 보냄. 앱의 F9(단축키 `gamePanel`)도 같은 차례로 돎 |
 | `open` | 게임 창 패널의 [pygaki 앱에서 고르기]를 눌렀을 때 (pygaki v1.9) | `{"type": "open", "tab": "title_fx"}` (게임 안 편집 화면의 탭 id). 앱은 창을 앞으로 가져오고 [GUI 편집]의 그 칸을 엶(`watermorph`는 `title_fx` 칸). 앱이 붙어 있지 않으면 게임이 `<렌파이 SDK>/pygaki/app/pygaki.exe --project <게임 폴더> --tab <탭 id>`로 앱을 켬. 앱이 이미 켜져 있으면 그 창이 받아서 같은 일을 함 |
 
 ```json
 {
   "type": "state",
   "where": { "file": "game/script_flow.rpy", "line": 18, "screens": ["say", "quick_menu"], "main_menu": false, "menu": false },
-  "editor": { "open": true, "tab": "title", "hide_panel": true, "bands": true, "message": "", "pending": 1,
+  "editor": { "open": true, "tab": "title", "hide_panel": true, "view": "hidden", "bands": true, "message": "", "pending": 1,
               "tabs": [ { "id": "title", "label": "타이틀 메뉴", "ok": true, "why": "" } ],
               "info": [ "타이틀 메뉴  항목 1/5..." ] },
   "title": { "ok": true, "menu": "title", "sel": 0, "mode": "base", "scope": "item",
@@ -401,7 +401,7 @@ pygaki 데스크톱 앱의 [GUI 편집] 화면이 게임 안 편집기를 바깥
 |---|---|---|
 | `editor` | `open`(참/거짓), `tab`(선택), `line` `file`(선택) | 편집기 열기/닫기. 열 때 그 탭으로. `tab`이 `stage`이고 `line`(원고 줄 번호)이 있으면 게임이 `file`(이름만 맞춤, 없으면 `script_flow.rpy`)에 있을 때 그 줄(아니면 그 뒤 가장 가까운 show/scene 줄)을 고름. 게임이 다시 시작해도(warp) 열 때 다시 고름. 예전 판은 `line`을 모르고 그냥 엶 |
 | `tab` | `id` | 탭 바꾸기 (그 화면에서 쓸 수 있을 때) |
-| `panel` | `hide`(참/거짓) | 게임 안 편집기 패널 숨기기. 숨겨도 끌기와 단축키는 그대로. 보이게 하면(4.20) 게임 창에는 짧은 판 |
+| `panel` | `mode`(`compact`/`full`/`hidden`), 예전 `hide`(참/거짓) | 게임 창 pygaki editor 패널 모양 (pygaki v1.9). 축약형은 자리 줄과 조작 안내만(값만 고르는 탭은 탭 줄에서 뺌), 대형은 패널 전부, 숨김은 구석 한 줄(끌기와 단축키는 그대로). `mode`가 없으면 `hide: true`는 숨김, `false`는 (숨김이었으면) 축약형. 게임 창의 F9(편집 화면 키): 꺼져 있으면 축약형으로 켜고, 켜져 있으면 축약형 → 대형 → 숨김. 끄기는 Esc |
 | `bands` | `on`(참/거짓) | 경계선 켜기/끄기. 앱은 붙을 때마다, 그리고 환경 설정 [게임 화면 가장자리에 붉은 경계선]이나 단축키(기본 F8 `gameBands`)로 바꿀 때 보냄. 예전 판 게임은 모르는 명령이라 무시 |
 | `goto` | `where`: `"pause"`, `"title"`, `"start"`, `"line"` (+ `file`: `"game/…rpy"`, `line`: 줄 번호) | ESC 메뉴 열기 / 타이틀로 가기(진행 중인 게임은 끝남) / 타이틀에서 게임 시작(3.16) / 원고의 그 줄로(3.20): 이번에 지나온 줄이면 되감기, 아니면 렌파이 warp(게임을 다시 시작해서 그 줄까지 scene/show만 따라 함, 변수는 빠질 수 있음). 빈 줄, 주석 줄은 그 뒤 첫 문장, 아니면 그 줄이나 그 앞 문장 |
 | `panel.do` | `id`, 버튼은 `t`, 막대와 입력칸은 `value`, 입력칸은 `enter`(참이면 Enter까지) | `panel`의 그 자리 위젯을 누름 / 막대 값 바꿈 / 입력칸 글 넣기 (3.16) |

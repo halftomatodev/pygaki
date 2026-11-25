@@ -107,7 +107,7 @@ export interface GameFiles {
 }
 export interface GameState {
   where: { file: string | null; line: number; screens: string[]; main_menu: boolean; menu: boolean };
-  editor: { open: boolean; tab: string | null; hide_panel: boolean; bands?: boolean; message: string; pending: number; tabs: EditorTab[]; info: string[] };
+  editor: { open: boolean; tab: string | null; hide_panel: boolean; view?: GameView; bands?: boolean; message: string; pending: number; tabs: EditorTab[]; info: string[] };
   title: TitleState | null;
   custom_ui?: CustomUIState | null; // pygaki 플러그인
   panel?: PanelState | null; // pygaki 플러그인. 편집기가 열려 있고 게임 안 패널이 숨어 있을 때만
@@ -120,7 +120,7 @@ export interface SplashPages { pages: { id: string; title: string; new: boolean;
 
 interface S {
   view: 'script' | 'showpy' | 'effects' | 'shaders' | 'screens' | 'fonts'; // 대본 편집 / GUI 편집 / 효과 / 셰이더 / 화면 만들기 / 글꼴
-  gamePanel: boolean; // 게임 창에도 GUI 편집기 패널을 보일지 (앱이 기억함, F9)
+  gamePanel: GameView; // 게임 창 pygaki editor 패널: 축약형 / 대형 / 숨김 (앱이 기억함, F9로 돎)
   on: boolean; // 게임과 붙어 있음
   reloading: boolean; // 게임이 원고를 다시 읽는 중이라 잠깐 끊김 (게임 수정 중)
   showpy: string | null; // 게임의 ui_kit 버전
@@ -131,19 +131,28 @@ interface S {
   want?: { tab: string; n: number } | null; // 게임이 열어 달라고 한 탭 (ShowpyView가 그 칸을 고름)
 }
 
-// 게임 창의 GUI 편집기 보이기/숨기기. 이 앱(창)에 붙는 설정이라 localStorage에 둔다
+// 게임 창 pygaki editor 패널 (pygaki v1.9): compact 축약형 / full 대형 / hidden 숨김. 게임 창과 앱의 F9가 이 차례로 돈다.
+// 이 앱(창)에 붙는 설정이라 localStorage에 둔다 (예전 값 show/hide도 읽음)
+export type GameView = 'compact' | 'full' | 'hidden';
+export const GAME_VIEWS: GameView[] = ['compact', 'full', 'hidden'];
+export const GAME_VIEW_LABEL: Record<GameView, string> = { compact: '축약형', full: '대형', hidden: '숨김' };
+export const nextGameView = (v: GameView): GameView => GAME_VIEWS[(GAME_VIEWS.indexOf(v) + 1) % GAME_VIEWS.length];
+// 게임에 보내는 panel 명령. 예전 플러그인은 hide만 봄
+export const panelCmd = (v: GameView) => ({ cmd: 'panel', mode: v, hide: v === 'hidden' });
 const PANEL_KEY = 'pygaki-game-panel';
-const loadGamePanel = () => {
+const loadGamePanel = (): GameView => {
   try {
-    return localStorage.getItem(PANEL_KEY) === 'show';
+    const v = localStorage.getItem(PANEL_KEY);
+    if (v === 'compact' || v === 'full' || v === 'hidden') return v;
+    return v === 'show' ? 'compact' : 'hidden';
   } catch {
-    return false;
+    return 'hidden';
   }
 };
-const keepGamePanel = (show: boolean) => {
-  useLive.setState({ gamePanel: show });
+const keepGamePanel = (v: GameView) => {
+  useLive.setState({ gamePanel: v });
   try {
-    localStorage.setItem(PANEL_KEY, show ? 'show' : 'hide');
+    localStorage.setItem(PANEL_KEY, v);
   } catch {
     // 못 적어도 이번 창에서는 그대로
   }
@@ -156,10 +165,10 @@ export const liveSend = (cmd: Record<string, unknown>) => {
   void desktop.liveSend(cmd);
 };
 
-// 게임 창의 GUI 편집기를 보이게/숨기게 하고 기억한다. 알림 글을 돌려준다 (F9, [GUI 편집] 버튼)
-export function setGamePanel(show: boolean) {
-  keepGamePanel(show);
-  liveSend({ cmd: 'panel', hide: !show });
+// 게임 창 pygaki editor 패널 모양을 정하고 기억한다
+export function setGamePanel(v: GameView) {
+  keepGamePanel(v);
+  liveSend(panelCmd(v));
 }
 // 게임 화면 가장자리의 붉은 경계선 (이름은 예전 그대로 bands). 환경 설정에 두고, 붙을 때와 바뀔 때 게임에 보낸다. 게임 창의 F8도 여기로 돌아옴
 const bandsOn = () => usePrefs.getState().gameBands !== false;
@@ -170,11 +179,15 @@ export function toggleGameBands() {
   return on ? '게임 화면 가장자리에 붉은 경계선을 켜요 (게임 안 편집 화면을 열었을 때)' : '게임 화면 경계선을 꺼요';
 }
 
+// F9 (게임 창의 F9와 같음): 편집 화면이 꺼져 있으면 축약형으로 켜고, 켜져 있으면 축약형 → 대형 → 숨김. 끄기는 게임 창 Esc
 export function toggleGamePanel() {
   const s = useLive.getState();
   if (!s.on) return '게임이 연결되지 않았어요. 런처에서 게임을 켜 두면 저절로 붙어요.';
-  setGamePanel(!s.gamePanel);
-  return !s.gamePanel ? '게임 창의 편집 화면을 보여요 (앱의 칸은 게임 창으로 가요)' : '게임 창의 편집 화면을 숨겨요 (앱에서 고쳐요)';
+  const e = s.st?.editor;
+  const v: GameView = !e?.open ? 'compact' : nextGameView(e.view ?? (e.hide_panel ? 'hidden' : 'compact'));
+  setGamePanel(v);
+  if (!e?.open) liveSend({ cmd: 'editor', open: true });
+  return `게임 창 pygaki editor: ${GAME_VIEW_LABEL[v]}`;
 }
 
 let started = false;
@@ -193,7 +206,7 @@ export function startLive() {
     else if (s.reloading) useLive.setState({ on: false, reloading: true, showpy: s.showpy, st: null });
     else useLive.setState({ on: false, reloading: false, showpy: s.showpy, st: null, files: null });
     // 새로 붙으면 기억해 둔 보이기/숨기기를 게임에 알려 줌 (게임은 붙을 때마다 숨김으로 시작)
-    if (s.on && !was) liveSend({ cmd: 'panel', hide: !useLive.getState().gamePanel });
+    if (s.on && !was) liveSend(panelCmd(useLive.getState().gamePanel));
     if (s.on && !was) liveSend({ cmd: 'bands', on: bandsOn() });
     // 새로 붙으면(다시 읽은 뒤는 빼고) 설정에 따라 앱 창을 게임 창 옆으로. 게임 창이 뜰 때까지 조금 기다림
     if (s.on && !was && !reloadingBefore && usePrefs.getState().snapGame) setTimeout(() => void desktop?.snapToGame?.(), 1500);
@@ -203,7 +216,7 @@ export function startLive() {
     else if (m?.type === 'files') useLive.setState({ files: { audio: m.audio ?? [], images: m.images ?? [], movies: m.movies ?? [] } });
     else if (m?.type === 'error') useLive.setState({ err: String(m.text) });
     // 게임 창에서 F9로 바꿈 
-    else if (m?.type === 'panel') keepGamePanel(!m.hide);
+    else if (m?.type === 'panel') keepGamePanel(m.mode === 'compact' || m.mode === 'full' || m.mode === 'hidden' ? m.mode : m.hide ? 'hidden' : 'compact');
     // 게임 창에서 F8로 바꿈. 게임이 이미 그 값이라 다시 보내지 않음
     else if (m?.type === 'bands') {
       bandsEcho = !!m.on;

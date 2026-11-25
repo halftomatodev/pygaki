@@ -683,7 +683,7 @@ init -19 python in script_edit:
     PYKAKI_MARK = ("# pygaki가 만든 파일이에요.", "# PyKaki가 만든 파일이에요.")    # 새 문구, 예전 문구
     INBOX_FILE = "showpy_inbox.json"
     MEDIA_HEADS = ("show", "scene", "hide", "play", "stop")
-    _PK_BLOCK = "pygaki 대본 편집기가 만든 원고라 저장하지 않았습니다. 대사 글자와 모양, 선택지는 대본 편집기에서 고치세요. 셰이더와 커서는 화면 효과, 커서 칸의 [[여기에서부터 적용]으로."
+    _PK_BLOCK = "pygaki 대본 편집기가 만든 원고라 저장하지 않았습니다. 대사 글자와 모양, 선택지는 대본 편집기에서 고치세요. 셰이더와 커서도 대본 편집기에서 상자마다 고르세요."
     _PK_OLD = "이 줄의 표시가 없습니다. 대본 편집기에서 pygaki 플러그인 연결을 켜고 다시 내보내세요."
 
     _pk_cache = { }     # 실제 경로 -> (수정 시각, PyKaki 원고인지)

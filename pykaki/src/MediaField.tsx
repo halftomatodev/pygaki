@@ -34,7 +34,7 @@ export function MediaPlace({ m, onClear }: { m: { x?: number; y?: number; zoom?:
   if (m.zoom && m.zoom !== 1) parts.push(`${m.zoom}배`);
   if (m.angle) parts.push(`${m.angle}도`);
   if (!parts.length)
-    return <span className="sf-pos sf-hint" title="게임 안 편집 화면(Shift+M)에서 그림을 끌어 옮기고, 휠로 키우고, Q/E로 돌려요. 저장하면 여기로 받아 적어요">자리·크기는 게임에서</span>;
+    return <span className="sf-pos sf-hint" title="게임 안 편집 화면(F9)에서 그림을 끌어 옮기고, 휠로 키우고, Q/E로 돌려요. 저장하면 여기로 받아 적어요">자리·크기는 게임에서</span>;
   return (
     <span className="sf-pos" title="게임 안 편집 화면에서 정한 그림 자리·크기·회전이에요. 글 가운데 기준이에요">
       <span>그림</span>
@@ -111,14 +111,14 @@ export function MediaGroupFields({ g, place, onChange, old }: { g: MediaGroup; p
           {linked ? '글 묶음' : '글 묶기'}
         </button>
         {warped ? (
-          <span className="sf-pos" title="게임 안 편집 화면(Shift+M)에서 모서리 점을 끌어 정한 네 점 변형이에요">
+          <span className="sf-pos" title="게임 안 편집 화면(F9)에서 모서리 점을 끌어 정한 네 점 변형이에요">
             <span>네 점 변형</span>
             {hasQuad(g.quad) && <span>그림</span>}
             {hasQuad(g.text_quad) && <span>글</span>}
             <button title="네 점 변형 지우기" onClick={() => onChange((m) => { delete m.quad; delete m.text_quad; })}>✕</button>
           </span>
         ) : (
-          <span className="sf-pos sf-hint" title="게임 안 편집 화면(Shift+M) [그림]에서 모서리 점(분홍 그림, 하늘색 글)을 끌면 네 점 변형이 돼요. 저장하면 여기로 받아 적어요">네 점 변형은 게임에서</span>
+          <span className="sf-pos sf-hint" title="게임 안 편집 화면(F9) [그림]에서 모서리 점(분홍 그림, 하늘색 글)을 끌면 네 점 변형이 돼요. 저장하면 여기로 받아 적어요">네 점 변형은 게임에서</span>
         )}
       </div>
       <div className="sf-row media-row">

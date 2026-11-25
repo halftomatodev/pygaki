@@ -2382,7 +2382,7 @@ ${m.angle}도	{0} 度	{0}°
 자리·크기는 게임에서	位置・サイズはゲームで	Position and size in the game
 그림 자리·크기·회전 지우기	画像の位置・サイズ・回転を消す	Clear image position, size and rotation
 게임 안 편집 화면에서 정한 그림 자리·크기·회전이에요. 글 가운데 기준이에요	ゲーム内編集画面で決めた画像の位置・サイズ・回転です。文字の中央が基準です	Image position, size and rotation set in the in-game editor, measured from the text center
-게임 안 편집 화면(Shift+M)에서 그림을 끌어 옮기고, 휠로 키우고, Q/E로 돌려요. 저장하면 여기로 받아 적어요	ゲーム内編集画面(Shift+M)で画像をドラッグで動かし、ホイールで大きさ、Q/E で回します。保存するとここに書き写します	In the in-game editor (Shift+M), drag the image to move it, use the wheel to resize and Q/E to rotate. Saving copies the values here
+게임 안 편집 화면(F9)에서 그림을 끌어 옮기고, 휠로 키우고, Q/E로 돌려요. 저장하면 여기로 받아 적어요	ゲーム内編集画面(F9)で画像をドラッグで動かし、ホイールで大きさ、Q/E で回します。保存するとここに書き写します	In the in-game editor (F9), drag the image to move it, use the wheel to resize and Q/E to rotate. Saving copies the values here
 선택지 뒤 그림	選択肢の後ろの画像	Image behind choice
 게임에 글꼴을 넣고, 대사·이름·선택지·메뉴의 기본 글꼴을 정해요	ゲームにフォントを入れ、セリフ・名前・選択肢・メニューの標準フォントを決めます	Add fonts to the game and set the default fonts for dialogue, names, choices and menus
 + 글꼴 넣기	+ フォントを追加	+ Add font
@@ -2595,11 +2595,11 @@ label 이름	label 名	label name
 네 점 변형은 게임에서	4点変形はゲームで	Corner warp is set in the game
 효과 없이 바로 나와요	効果なしですぐ出ます	Appears right away with no effect
 글 상자가 나타날 때의 그림 효과예요. 묶었으면 글도 같이 받아요	テキストボックスが出るときの画像効果です。リンクしていれば文字にもかかります	Picture effect when the text box appears. Linked text gets it too
-게임 안 편집 화면(Shift+M)에서 모서리 점을 끌어 정한 네 점 변형이에요	ゲーム内編集画面(Shift+M)で角の点をドラッグして決めた4点変形です	Corner warp set by dragging the corner dots in the in-game editor (Shift+M)
+게임 안 편집 화면(F9)에서 모서리 점을 끌어 정한 네 점 변형이에요	ゲーム内編集画面(F9)で角の点をドラッグして決めた4点変形です	Corner warp set by dragging the corner dots in the in-game editor (F9)
 글이 글 상자 그림에 묶여 있어요. 그림의 크기, 회전, 옮김, 네 점 변형, 그림 효과를 글도 같이 받아요	文字がテキストボックスの画像にリンクされています。画像のサイズ、回転、移動、4点変形、画像効果が文字にもかかります	The text is linked to the text box image. It follows the image's size, rotation, offset, corner warp and picture effect
 글이 그림에 묶여 있어요. 그림의 크기, 회전, 옮김, 네 점 변형, 그림 효과를 글도 같이 받아요. 누르면 풀어요	文字が画像にリンクされています。画像のサイズ、回転、移動、4点変形、画像効果が文字にもかかります。押すと解除します	The text is linked to the image and follows its size, rotation, offset, corner warp and picture effect. Click to unlink
 글을 그림에 묶어요. 지금 그림 값을 기준으로, 그 뒤로 바꾼 크기, 회전, 옮김, 네 점 변형, 그림 효과를 글도 같이 받아요	文字を画像にリンクします。今の画像の値を基準に、その後に変えたサイズ、回転、移動、4点変形、画像効果が文字にもかかります	Link the text to the image. From the current image values on, size, rotation, offset, corner warp and picture effect changes apply to the text too
-게임 안 편집 화면(Shift+M) [그림]에서 모서리 점(분홍 그림, 하늘색 글)을 끌면 네 점 변형이 돼요. 저장하면 여기로 받아 적어요	ゲーム内編集画面(Shift+M)の[画像]で角の点(ピンク 画像、水色 文字)をドラッグすると4点変形になります。保存するとここに取り込みます	In the in-game editor (Shift+M) [Image], drag the corner dots (pink image, light blue text) to warp. Saving brings it here
+게임 안 편집 화면(F9) [그림]에서 모서리 점(분홍 그림, 하늘색 글)을 끌면 네 점 변형이 돼요. 저장하면 여기로 받아 적어요	ゲーム内編集画面(F9)の[画像]で角の点(ピンク 画像、水色 文字)をドラッグすると4点変形になります。保存するとここに取り込みます	In the in-game editor (F9) [Image], drag the corner dots (pink image, light blue text) to warp. Saving brings it here
 게임의 pygaki 플러그인이 예전 판이라 이 값은 내보내지 않아요. 런처의 [플러그인 올리기]로 올려 주세요	ゲームのpygakiプラグインが古いため、この値は書き出しません。ランチャーの [プラグインを更新] で更新してください	The game's pygaki plugin is old, so these values are not exported. Update it with [Update plugins] in the launcher
 게임의 pygaki 플러그인이 예전 판이라 선택지 "${c.text}"의 묶기, 네 점 변형, 그림 효과를 내보내지 않았어요. 런처의 [플러그인 올리기]로 올려 주세요	ゲームのpygakiプラグインが古いため、選択肢「{0}」のリンク、4点変形、画像効果を書き出しませんでした。ランチャーの [プラグインを更新] で更新してください	The game's pygaki plugin is old, so the link, corner warp and picture effect of choice "{0}" were not exported. Update it with [Update plugins] in the launcher
 게임의 pygaki 플러그인이 예전 판이라 글 상자 묶기, 네 점 변형, 그림 효과를 내보내지 않았어요. 런처의 [플러그인 올리기]로 올려 주세요 (${b.title || b.id})	ゲームのpygakiプラグインが古いため、テキストボックスのリンク、4点変形、画像効果を書き出しませんでした。ランチャーの [プラグインを更新] で更新してください ({0})	The game's pygaki plugin is old, so the text box link, corner warp and picture effect were not exported. Update it with [Update plugins] in the launcher ({0})
@@ -2997,7 +2997,7 @@ PNG, JPEG, WebP. 정사각형 256×256 이상 → 16~256 크기를 담은 .ico�
 게임 화면 가장자리에 붉은 경계선을 켜요 (게임 안 편집 화면을 열었을 때)	ゲーム画面の端に赤い境界線を引きます(ゲーム内編集画面を開いたとき)	Turning on the red border at the game screen edge (while the in-game editor is open)
 창이 게임 화면보다 커서 둘레에 검은 띠가 남을 때(레트로 해상도처럼 정수 배율로 키운 게임 등), 게임 안 편집 화면이 열려 있으면 게임 화면 가장자리에 붉은 선을 그어요. 띠는 칠하지 않아요. 게임 창에서는 F8	ウィンドウがゲーム画面より大きく周りに黒い帯が残るとき(レトロ解像度のように整数倍で拡大したゲームなど)、ゲーム内編集画面が開いていればゲーム画面の端に赤い線を引きます。帯は塗りません。ゲームウィンドウでは F8	When the window is larger than the game screen and black bands remain around it (e.g. games scaled up by a whole number like the retro resolutions), a red line is drawn at the game screen edge while the in-game editor is open. The bands are not painted. F8 in the game window
 게임 안 편집 화면 단축키	ゲーム内編集画面のショートカット	In-game editor shortcuts
-게임 창에서 Shift+M으로 연 편집 화면의 키예요. 여기서는 보기만 해요	ゲームウィンドウで Shift+M で開く編集画面のキーです。ここでは表示のみです	Keys for the editor opened with Shift+M in the game window. View only here
+게임 창에서 F9로 연 편집 화면의 키예요. 여기서는 보기만 해요	ゲームウィンドウで F9 で開く編集画面のキーです。ここでは表示のみです	Keys for the editor opened with F9 in the game window. View only here
 모든 탭	すべてのタブ	All tabs
 패널	パネル	Panel
 자리 옮기기 (타이틀, 대사, 선택지, 그림, 스플래시)	位置の移動(タイトル、セリフ、選択肢、画像、スプラッシュ)	Moving things (title, dialogue, choices, images, splash)
@@ -3035,3 +3035,15 @@ Space (누르는 동안)	Space(押している間)	Space (while held)
 7줄씩	7行ずつ	7 lines at a time
 줄 목록 펴기/접기	行リストを開く/閉じる	Show/hide the line list
 화면에 있는 그림 차례로	画面上の画像を順に	Cycle through images on screen
+축약형	簡易	Compact
+대형	大きい	Full
+로 숨김까지 넘기면 여기로)	で非表示まで進めるとここへ)	to go to Hidden and edit here)
+pygaki editor 단축키	pygaki editor のショートカット	pygaki editor shortcuts
+게임 창 pygaki editor에서 열기	ゲームウィンドウの pygaki editor で開く	Open in the game window's pygaki editor
+pygaki editor 끄기 (고르기 창이면 창만)	pygaki editor を閉じる (選択ウィンドウならそれだけ)	Close pygaki editor (only the picker if one is open)
+게임 창 pygaki editor: ${GAME_VIEW_LABEL[v]}	ゲームウィンドウの pygaki editor:{0}	Game window pygaki editor: {0}
+pygaki editor 켜기, 누를 때마다 축약형 → 대형 → 숨김 (개발 모드)	pygaki editor を開く、押すたびに 簡易 → 大きい → 非表示 (開発モード)	Open pygaki editor; each press: Compact → Full → Hidden (developer mode)
+게임 창에서 F9로 켠 pygaki editor(게임 안 편집 화면)의 키예요. 여기서는 보기만 해요	ゲームウィンドウで F9 で開いた pygaki editor (ゲーム内編集画面) のキーです。ここでは表示のみです	Keys of the pygaki editor (in-game editor) opened with F9 in the game window. View only here
+게임 창 pygaki editor: 축약형 → 대형 → 숨김 (게임과 연결됐을 때. 게임 창에서도 F9)	ゲームウィンドウの pygaki editor:簡易 → 大きい → 非表示 (ゲーム接続時。ゲームウィンドウでも F9)	Game window pygaki editor: Compact → Full → Hidden (when connected. F9 in the game window too)
+게임 창 pygaki editor 패널을 바꿔요. ${keyOf('gamePanel')}를 누를 때마다 축약형(자리 옮기기만) → 대형(값 칸 전부) → 숨김(여기서만 고침) 차례로 돌아요. 끄기는 게임 창에서 Esc. 게임 창에서도 같은 키예요	ゲームウィンドウの pygaki editor パネルを切り替えます。{0} を押すたびに 簡易(位置の移動のみ) → 大きい(値の欄すべて) → 非表示(ここだけで編集) の順に回ります。閉じるのはゲームウィンドウで Esc。ゲームウィンドウでも同じキーです	Switches the game window's pygaki editor panel. Each press of {0} cycles Compact (moving only) → Full (all value fields) → Hidden (edit here only). Close with Esc in the game window. Same key in the game window
+게임 창 pygaki editor: ${e.open ? GAME_VIEW_LABEL[gv] : '꺼짐'} (${keyOf('gamePanel')} → ${GAME_VIEW_LABEL[e.open ? nextGameView(gv) : 'compact']})	ゲームウィンドウの pygaki editor:{0} ({1} → {2})	Game window pygaki editor: {0} ({1} → {2})

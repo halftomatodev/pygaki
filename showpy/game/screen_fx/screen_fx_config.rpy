@@ -3,7 +3,7 @@
 ##
 ## 여기만 고치면 됩니다. 적지 않은 값은 엔진의 기본값을 따릅니다.
 ##
-## pygaki 게임 안 편집 화면(개발 모드에서 Shift+M → T로 "화면 효과" 탭 → "전환" 버튼)로 바꿔
+## pygaki 게임 안 편집 화면(개발 모드에서 F9 → T로 "화면 효과" 탭 → "전환" 버튼)로 바꿔
 ## 저장하면 screen_fx_layout.rpy가 만들어지고, 그 파일의 값이 여기 값보다 우선합니다.
 ##
 ## ── 화면은 셰이더 두 개를 겹쳐 그립니다  ──────────────────────────────
@@ -128,7 +128,7 @@ define screen_fx.skippable = True
 ##   "overlay"  덮개(VHS)만 받음. 주사선, 색 번짐, 휘어짐은 받고 ASCII 등은 안 받음
 ##   "top"      효과를 안 받음. 늘 맨 위에 깨끗하게 (4.1까지와 같음)
 ## 커서도 화면과 같이 휘어서, 가장자리에서 보이는 자리와 눌리는 자리가 거의 맞습니다.
-## 편집기(Shift+M)를 연 동안에는 늘 맨 위에 그립니다.
+## 편집기(F9)를 연 동안에는 늘 맨 위에 그립니다.
 ## 게임 중에 바꾸기 (다시 바꿀 때까지 유지, 세이브에 저장):
 ##   $ screen_fx.set_cursor("top")                    # 여기부터 커서는 효과 안 받음
 ##   $ screen_fx.set_cursor("default")                # 이 설정값으로 돌아감
@@ -147,12 +147,12 @@ define screen_fx.cursor = "effect"
 ##   "ripple"      일렁임 
 ## 예: define screen_fx.title_shaders = ("vhs_crt", "none")      # 타이틀에 VHS
 ##     define screen_fx.menu_shaders = ("gameboy", "vhs_crt")    # ESC 메뉴에 게임보이 + VHS
-## 편집기(Shift+M) "타이틀 셰이더", "게임 내 메뉴 셰이더" 탭에서 고르고 저장하면 screen_fx_layout.rpy에 들어갑니다.
+## 편집기(F9) "타이틀 셰이더", "게임 내 메뉴 셰이더" 탭에서 고르고 저장하면 screen_fx_layout.rpy에 들어갑니다.
 ## 효과마다 세부 값(휘어짐, 글자 크기 …)은 인게임과 같이 씁니다 (<이름>_config.rpy).
 define screen_fx.title_shaders = ("ripple", "none")   # 타이틀에 일렁임 (5.5. 예전 "타이틀 일렁임")
 define screen_fx.menu_shaders = ("none", "none")
 
-## pygaki 게임 안 편집 화면(Shift+M)를 연 동안에도 화면 효과를 보여줄지 
+## pygaki 게임 안 편집 화면(F9)를 연 동안에도 화면 효과를 보여줄지 
 ##   True   효과를 켠 채로 편집. 편집기 패널은 효과 위에 깨끗하게 보임 (기본)
 ##   False  "화면 효과" 탭이 아닌 탭에서는 효과를 잠시 끔 (3.3까지의 방식)
 ## 편집 중에 V 키로 언제든 켜고 끌 수 있습니다. (게임을 다시 켜면 이 값으로 돌아감)

@@ -218,7 +218,7 @@ function KeyPrefs() {
         <button onClick={() => (resetKeys(), setMsg('기본값으로 되돌렸어요.'))}>기본값으로</button>
         
       </div>
-      <h4>게임 안 편집 화면 단축키<Hint text="게임 창에서 Shift+M으로 연 편집 화면의 키예요. 여기서는 보기만 해요" topic="단축키" /></h4>
+      <h4>pygaki editor 단축키<Hint text="게임 창에서 F9로 켠 pygaki editor(게임 안 편집 화면)의 키예요. 여기서는 보기만 해요" topic="단축키" /></h4>
       {GAME_KEYS.map((g) => (
         <div key={g.group}>
           <p className="tip game-keys-group">{g.group}</p>

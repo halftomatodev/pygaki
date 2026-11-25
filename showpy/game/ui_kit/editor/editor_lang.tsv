@@ -1,4 +1,4 @@
-# 게임 안 편집 화면(Shift+M) 사전. 한 줄에 한국어<탭>일본어<탭>영어. editor_lang.rpy가 읽음
+# 게임 안 편집 화면(F9) 사전. 한 줄에 한국어<탭>일본어<탭>영어. editor_lang.rpy가 읽음
 # 줄바꿈은 \n, 글자 그대로의 \n은 \\n. 한국어의 {} 자리(format)는 번역에 {0} {1}로 (차례를 바꿔도 됨)
 # 사전에 없는 글 찾기: 저장소의 showpy/i18n/extract_editor.py → showpy/i18n/missing.txt
 화면 기준	画面基準	screen
@@ -406,8 +406,8 @@ hotkeys 플러그인(1.2 이상)이 없어서 조작방법 화면 목록을 대�
 선택됐을 때	選択時	Selected
 오류: {}	エラー:{0}	Error: {0}
 지금은 이 탭을 쓸 수 없습니다.	今はこのタブを使えません。	This tab can't be used right now.
-pygaki 편집: 지금 화면에서 편집할 수 있는 것이 없습니다.	pygaki 編集:今の画面には編集できるものがありません。	pygaki editor: nothing on this screen can be edited.
-저장 안 한 변경이 있습니다. Shift+M으로 다시 열어 Ctrl+S로 저장하세요.	未保存の変更があります。Shift+M で開き直して Ctrl+S で保存してください。	There are unsaved changes. Reopen with Shift+M and save with Ctrl+S.
+pygaki editor: 지금 화면에서 편집할 수 있는 것이 없습니다.	pygaki editor:今の画面には編集できるものがありません。	pygaki editor: nothing on this screen can be edited.
+저장 안 한 변경이 있습니다. F9로 다시 열어 Ctrl+S로 저장하세요.	未保存の変更があります。F9 で開き直して Ctrl+S で保存してください。	There are unsaved changes. Reopen with F9 and save with Ctrl+S.
 저장 실패 ({} 탭): {}	保存失敗({0} タブ):{1}	Save failed ({0} tab): {1}
 저장할 변경이 없습니다. 줄별 값은 Ctrl+C로 복사해서 스크립트에 붙여넣으세요.	保存する変更がありません。行ごとの値は Ctrl+C でコピーしてスクリプトに貼り付けてください。	Nothing to save. Copy per-line values with Ctrl+C and paste them into the script.
 저장할 변경이 없습니다.	保存する変更がありません。	Nothing to save.
@@ -425,7 +425,6 @@ T 다음 탭 | Ctrl+S 저장(대사, 선택지, 이미지 줄은 원고에 바�
 V 화면 효과 보기 {} (휘는 효과는 가장자리에서 누르는 자리가 조금 어긋남)	V 画面エフェクト表示 {0}(曲げるエフェクトは端でクリック位置が少しずれる)	V Show screen FX {0} (with warping effects, clicks near the edges are slightly off)
 pygaki 화면 효과가 없습니다.	pygaki 画面エフェクトがありません。	pygaki screen FX is missing.
 편집 중 화면 효과 보기 {} (V)	編集中の画面エフェクト表示 {0} (V)	Show screen FX while editing: {0} (V)
-= pygaki 편집	= pygaki 編集	= pygaki editor
 새 파일 {}개를 찾았습니다.	新しいファイルを {0} 個見つけました。	Found {0} new files.
 폴더를 열었습니다: game/	フォルダーを開きました:game/	Opened folder: game/
 폴더를 열지 못했습니다: {}	フォルダーを開けませんでした:{0}	Couldn't open the folder: {0}
@@ -528,7 +527,12 @@ V 화면 효과 보기	V 画面エフェクト表示	V Show screen FX
 숨김 (pygaki 앱에서 고침)	非表示(pygaki アプリで編集)	Hidden (editing in the pygaki app)
 보임	表示	Shown
 pygaki 앱에 고르기 창이 열려 있어요 | Esc 닫기	pygaki アプリで選択ウィンドウが開いています | Esc 閉じる	A picker is open in the pygaki app | Esc Close
-GUI 편집 중: {} | Esc 닫기	GUI 編集中:{0} | Esc 閉じる	Editing GUI: {0} | Esc Close
+pygaki editor: {} | 앱과 이어짐, F9 패널 보이기 | Esc 닫기	pygaki editor:{0} | アプリと接続中、F9 でパネル表示 | Esc 閉じる	pygaki editor: {0} | Connected to the app, F9 shows the panel | Esc Close
+앱 없이 쓰는 중 | 앱에서 이 프로젝트를 열면 이어져요 | {} 열기/닫기	アプリなしで使用中 | アプリでこのプロジェクトを開くと接続 | {0} 開く/閉じる	No app | Open this project in the app to connect | {0} Open/close
+앱과 이어짐 | 값은 앱 [[GUI 편집]에서 | F9 이 패널 숨기기	アプリと接続中 | 値はアプリの [GUI 編集] で | F9 このパネルを隠す	Connected to the app | Edit values in the app's [GUI Edit] | F9 hides this panel
+줄마다 셰이더 넣기는 pygaki 앱의 [[GUI 편집]에서 (보통은 대본 편집기에서 상자마다 고름).	行ごとのシェーダー挿入は pygaki アプリの [GUI 編集] で(普段は台本エディタでボックスごとに選びます)。	Per-line shaders are added in the pygaki app's [GUI Edit] (usually you pick them per box in the script editor).
+pygaki editor 패널 숨김 (pygaki 앱에서 고침)	pygaki editor パネルを隠しました (pygaki アプリで編集)	pygaki editor panel hidden (edit in the pygaki app)
+pygaki editor 패널 보임 (자리 옮기기만, 값은 pygaki 앱에서)	pygaki editor パネル表示 (位置の移動のみ、値は pygaki アプリで)	pygaki editor panel shown (moving only, values in the pygaki app)
 화면이 바뀌어서 누른 것을 찾지 못했습니다. 다시 눌러 주세요.	画面が変わったので、押したものが見つかりませんでした。もう一度押してください。	The screen changed, so what you clicked wasn't found. Please click again.
 모르는 값 이름: {}	不明な値の名前:{0}	Unknown value name: {0}
 줄로 옮기기는 개발 모드에서만 됩니다.	行への移動は開発モードでのみ使えます。	Jumping to a line only works in developer mode.
@@ -606,6 +610,10 @@ Tab 대사/이름 바꾸기 | 방향키 이동 (Shift: 10배) | S/W 글자 크�
 대사 효과(글자 등장 효과)는 pygaki 앱 [[대본 편집]에서 고칩니다. 셰이더와 커서는 '화면 효과' 탭, '커서/대사 소리' 탭에서 [[여기에서부터 적용]으로.	セリフのエフェクト(文字の登場エフェクト)は pygaki アプリの [スクリプト編集] で直します。シェーダーとカーソルは「画面エフェクト」タブ、「カーソル/セリフ音」タブの [ここから適用] で。	Dialogue effects (text appear effects) are edited in the pygaki app's [Script]. For shaders and cursors use [Apply from here] in the 'Screen FX' and 'Cursor/voice beeps' tabs.
 R 다시 보기	R もう一度見る	R Replay
 이 줄 되돌리기	この行を元に戻す	Revert this line
+이 대사 되돌리기	このセリフを元に戻す	Revert this dialogue
+Backspace 이 대사 되돌리기	Backspace このセリフを元に戻す	Backspace Revert this dialogue
+Tab 대사/이름 바꾸기 | 방향키 이동 (Shift: 10배) | S/W 글자 크기 | R 다시 보기 | Backspace 이 대사 되돌리기	Tab セリフ/名前の切り替え | 矢印キーで移動(Shift:10 倍) | S/W 文字サイズ | R もう一度見る | Backspace このセリフを元に戻す	Tab Switch dialogue/name | Arrow keys move (Shift: x10) | S/W Text size | R Replay | Backspace Revert this dialogue
+Tab 대사/이름/그림 바꾸기 | 방향키 이동 (Shift: 10배) | R 다시 보기 | Backspace 이 대사 되돌리기	Tab セリフ/名前/画像の切り替え | 矢印キーで移動 (Shift: 10 倍) | R もう一度見る | Backspace このセリフを元に戻す	Tab switch dialogue/name/image | Arrow keys move (Shift: x10) | R replay | Backspace revert this dialogue
 이미지/영상	画像/動画	Images/video
 원고에 바로 저장되지 않는 줄에 쓰세요. 그 줄을 이 줄로 바꿔 붙여넣습니다.	スクリプトに直接保存されない行に使ってください。その行をこの行に置き換えて貼り付けます。	Use this for lines that can't be saved to the script directly. Paste it over that line.
 게임 안 편집 화면이 저장한 그림 자리입니다.	ゲーム内編集画面が保存した画像の位置です。	Image positions saved by the in-game editor.
@@ -1301,3 +1309,30 @@ pygaki 앱을 찾지 못했습니다 (렌파이 SDK의 pygaki/app/pygaki.exe). �
 pygaki 앱을 켭니다. 게임과 연결되면 [[GUI 편집]의 이 탭이 열립니다.	pygaki アプリを起動します。ゲームと接続すると [GUI 編集]のこのタブが開きます。	Starting the pygaki app. Once it connects to the game, this tab opens in [GUI Edit].
 pygaki 앱을 켜지 못했습니다: {}	pygaki アプリを起動できませんでした: {0}	Could not start the pygaki app: {0}
 F1 단축키 안내 펴기 | 전체 목록은 pygaki 앱 환경 설정의 [[단축키]	F1 ショートカット案内を開く | 全一覧は pygaki アプリの環境設定 [ショートカット]	F1 Show shortcut help | Full list in the pygaki app settings [Shortcuts]
+여기서 고르면 미리 보기만 합니다. 장면마다 셰이더는 대본 편집기에서 상자마다 고릅니다.	ここで選ぶとプレビューのみです。場面ごとのシェーダーは台本エディタでボックスごとに選びます。	Picking here only previews. Shaders per scene are picked per box in the script editor.
+장면마다 셰이더는 대본 편집기에서 상자마다 고릅니다.	場面ごとのシェーダーは台本エディタでボックスごとに選びます。	Shaders per scene are picked per box in the script editor.
+Ctrl+S 저장	Ctrl+S 保存	Ctrl+S Save
+저장 안 한 변경이 있습니다. {}로 다시 열어 Ctrl+S로 저장하세요.	未保存の変更があります。{0} で開き直して Ctrl+S で保存してください。	There are unsaved changes. Reopen with {0} and save with Ctrl+S.
+F8 경계선 	F8 境界線 	F8 Border
+ (창이 게임 화면보다 크면 게임 화면 가장자리에 붉은 선)	 (ウィンドウがゲーム画面より大きいとき、ゲーム画面の端に赤い線)	 (red line at the game screen edge when the window is larger)
+경계선 	境界線 	Border
+켬 (창이 게임 화면보다 크면 게임 화면 가장자리에 붉은 선)	オン (ウィンドウがゲーム画面より大きいとき、ゲーム画面の端に赤い線)	on (red line at the game screen edge when the window is larger)
+선택지 {}/{}  "{}"	選択肢 {0}/{1}  "{2}"	Choice {0}/{1}  "{2}"
+축약형	簡易	Compact
+대형	大きい	Full
+숨김	非表示	Hidden
+[[{}] {} → {} | Esc 끄기[{0}] {1} → {2} | Esc 閉じる	[{0}] {1} → {2} | Esc Close
+ | 앱 없음 (앱에서 이 프로젝트를 열면 이어짐)	 | アプリなし (アプリでこのプロジェクトを開くと接続)	 | No app (open this project in the app to connect)
+ | 앱 이어짐	 | アプリと接続中	 | Connected to the app
+앱 없음 (앱에서 이 프로젝트를 열면 이어짐)	アプリなし (アプリでこのプロジェクトを開くと接続)	No app (open this project in the app to connect)
+앱 이어짐	アプリと接続中	Connected to the app
+Esc 끄기	Esc 閉じる	Esc Close
+캐릭터: {}	キャラクター:{0}	Character: {0}
+대사 효과(글자 등장 효과)는 pygaki 앱 [[대본 편집]에서 고칩니다. 셰이더와 커서도 대본 편집기에서 상자마다 고릅니다.	セリフの効果(文字の登場効果)は pygaki アプリの [台本編集] で直します。シェーダーとカーソルも台本エディタでボックスごとに選びます。	Dialogue effects (text appear effects) are edited in the pygaki app's [Script]. Shaders and cursors are also picked per box in the script editor.
+고른 그림이 없습니다. 화면의 그림을 누르거나, [그림/영상/소리 고르기]로 지금 대사 앞에 넣으세요.	選んだ画像がありません。画面の画像をクリックするか、[画像/動画/音を選ぶ] で今のセリフの前に入れてください。	No image selected. Click an image on screen, or add one before the current line with [Pick image/video/sound].
+저장 안 한 변경 {}개 (Ctrl+S)	未保存の変更 {0} 個 (Ctrl+S)	{0} unsaved changes (Ctrl+S)
+지금 장면 밖	今の場面の外	Outside the current scene
+마우스: 그림을 누르면 고르기, 끌면 위치 (Shift: 한 방향) | 방향키 이동 (Shift: 10배)	マウス:画像をクリックで選択、ドラッグで位置 (Shift:一方向) | 矢印キーで移動 (Shift:10倍)	Mouse: click an image to select, drag to move (Shift: one axis) | Arrow keys move (Shift: x10)
+Tab 화면의 그림 차례로 | R 다시 보기 | Backspace 되돌리기	Tab 画面の画像を順に | R もう一度見る | Backspace 元に戻す	Tab cycles images on screen | R Replay | Backspace Revert
+되돌리기	元に戻す	Revert
+pygaki 대본 편집기가 만든 원고라 저장하지 않았습니다. 대사 글자와 모양, 선택지는 대본 편집기에서 고치세요. 셰이더와 커서도 대본 편집기에서 상자마다 고르세요.	pygaki 台本エディタが作った原稿なので保存しませんでした。セリフの文字と見た目、選択肢は台本エディタで直してください。シェーダーとカーソルも台本エディタでボックスごとに選んでください。	Not saved because this script was made by the pygaki script editor. Edit dialogue text, look and choices in the script editor. Shaders and cursors are also picked per box there.

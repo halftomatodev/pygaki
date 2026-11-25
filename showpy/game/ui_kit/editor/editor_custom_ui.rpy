@@ -459,8 +459,7 @@ screen ui_editor_custom_ui_panel(tab):
                         text "(끔)" style "ui_editor_small"
 
         ## 커서와 셰이더 '여기에서부터' (3.21)
-        if renpy.has_screen("ui_editor_fx_cursor_panel") and ui_editor.get_tab("screen_fx") is not None:
-            use expression "ui_editor_fx_cursor_panel" pass (ui_editor.get_tab("screen_fx"))
+        ## 커서와 셰이더 '여기에서부터'(줄 단위 칸)는 없앰 (pygaki v1.9, 초보자용: 커서는 대본 편집기의 상자 단위로)
 
 
 ## 프레임 칸 12개 (3.0). 그림이 든 칸 → 다음 빈 칸(+) → 나머지는 비어 있음

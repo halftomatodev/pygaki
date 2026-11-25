@@ -1,7 +1,7 @@
 ################################################################################
 ## pygaki — 편집기 (본체)
 ##
-## 개발 모드(런처에서 실행)일 때 Shift+M으로 켜고 끕니다.
+## 개발 모드(런처에서 실행)일 때 F9로 켜고 끕니다.
 ## 배포판(개발 모드 꺼짐)에서는 열리지 않으므로 그대로 둬도 괜찮습니다.
 ##
 ## 탭: 타이틀 메뉴 / 선택지 / 대사 / 이미지·영상 / 커서·대사 소리
@@ -61,7 +61,7 @@ init -9 python in ui_editor:
             v = getattr(getattr(store, ns, None), "editor_key", None)
             if v:
                 return v
-        return "shift_K_m"
+        return "K_F9"     # pygaki v1.9: Shift+M 대신 F9 하나로 (축약형 → 대형 → 숨김, Esc 끄기)
 
     def msg(s):
         state.message = s
@@ -308,7 +308,7 @@ init -9 python in ui_editor:
                 t = best
 
         if t is None:
-            store.renpy.notify("pygaki 편집: 지금 화면에서 편집할 수 있는 것이 없습니다.")
+            store.renpy.notify("pygaki editor: 지금 화면에서 편집할 수 있는 것이 없습니다.")
             return
 
         state.open = True
@@ -342,7 +342,7 @@ init -9 python in ui_editor:
         store.renpy.session.pop("ui_editor", None)
 
         if pending or lines:
-            store.renpy.notify("저장 안 한 변경이 있습니다. Shift+M으로 다시 열어 Ctrl+S로 저장하세요.")
+            store.renpy.notify("저장 안 한 변경이 있습니다. {}로 다시 열어 Ctrl+S로 저장하세요.".format(editor_key_label()))
 
         ## 편집 중인 값을 넣어 다시 보여준 장면이면, 원래 모습으로 다시 보여줍니다.
         replay = False
@@ -357,12 +357,9 @@ init -9 python in ui_editor:
         store.renpy.restart_interaction()
 
     class ToggleEditor(Action, DictEquality):
-        """편집기를 켜고 끕니다. (개발 모드에서만 동작)"""
+        """편집 화면 키(F9): 꺼져 있으면 축약형으로 켜고, 켜져 있으면 축약형 → 대형 → 숨김. 끄기는 Esc. (개발 모드에서만 동작)"""
         def __call__(self):
-            if state.open:
-                close_editor()
-            else:
-                open_editor()
+            cycle_view()
 
     class Reopen(Action, DictEquality):
         """저장 → 다시 불러오기 뒤에 편집기를 같은 상태로 다시 엽니다.
@@ -813,9 +810,6 @@ init -9 python in ui_editor:
                 state.help = not state.help
             elif k == pygame.K_F8:
                 toggle_bands()
-            elif k == pygame.K_F9 and live_connected():
-                ## pygaki 앱과 이어져 있을 때: 게임 안 패널 보이기/숨기기 (3.23, 앱의 F9와 같음)
-                live_toggle_panel()
             elif k == pygame.K_x:
                 state.mini = not state.mini
             elif k == pygame.K_b:
@@ -1245,7 +1239,7 @@ init -9 python in ui_editor:
             ## 편집기 언어를 바꾸면 제목 글도 새로 (editor_lang.rpy)
             if self.child is None or getattr(self, "lang", None) != editor_lang():
                 self.lang = editor_lang()
-                self.child = store.Text("= pygaki 편집", style="ui_editor_title")
+                self.child = store.Text("= pygaki editor", style="ui_editor_title")
             cr = store.renpy.render(self.child, width, height, st, at)
             self.size = cr.get_size()
             rv = store.renpy.Render(self.size[0], self.size[1])
@@ -1664,6 +1658,14 @@ screen ui_editor_panel():
                     box_wrap_spacing 4
                     xmaximum 632
                     add ui_editor.grip yalign 0.5
+                    ## 제목 옆 안내 (pygaki v1.9): 앱 없이 쓰는 중인지, 앱과 이어졌는지, 여닫는 키
+                    text ui_editor.mode_hint() style "ui_editor_small" color "#9fd8ff" xmaximum 500 yalign 0.5
+
+                hbox:
+                    spacing 6
+                    box_wrap True
+                    box_wrap_spacing 4
+                    xmaximum 632
 
                     for _t, _tok, _twhy in ui_editor.tab_buttons():
                         textbutton _t.label:
@@ -1677,13 +1679,12 @@ screen ui_editor_panel():
                     textbutton "저장 (Ctrl+S)" style "ui_editor_button" action Function(ui_editor.save_all)
                     if not ui_editor.live_compact():    # 짧은 판(4.20)에서는 앱에서
                         textbutton "복사 (Ctrl+C)" style "ui_editor_button" action Function(ui_editor.copy_current)
-                    textbutton "닫기 (Esc)" style "ui_editor_button" action ui_editor.ToggleEditor()
+                    textbutton "닫기 (Esc)" style "ui_editor_button" action Function(ui_editor.close_editor)
                     textbutton "X 접기" style "ui_editor_button" action ToggleField(ui_editor.state, "mini")
                     ## 편집 화면 언어 (editor_lang.rpy). 누를 때마다 한국어 → 日本語 → English
                     textbutton ui_editor.lang_button() style "ui_editor_button" action Function(ui_editor.next_lang)
 
-                if _ok and not getattr(_tab, "shows_line", False) and ui_editor.line_header():
-                    text ui_editor.line_header() style "ui_editor_small"
+                ## "지금 줄: 파일 n번째 줄"은 보여 주지 않음 (pygaki v1.9, 초보자용)
 
                 null height 2
 
@@ -1797,7 +1798,7 @@ screen ui_editor_panel_compact():
         if _tab is not None and _ok and ui_editor.state.help:
             for _line in _tab.help_lines():
                 text _line style "ui_editor_small"
-        text "글꼴, 색, 크기 같은 값은 pygaki 앱의 [[GUI 편집]에서 고쳐요. F9 게임 창 패널 숨기기" style "ui_editor_small" color "#9fd8ff"
+        ## 앱 안내와 F9는 제목 옆 안내(mode_hint)에 있음
 
 
 ## 글꼴·색 줄 (탭 화면에서 씁니다)

@@ -16,7 +16,7 @@
 ##     show eileen at screen_fx.image_fx("hologram", color="#ff7ad9", opacity=0.7)   # 분홍, 더 투명하게
 ##     show eileen at center, screen_fx.image_fx("hologram")                         # 자리와 같이
 ##
-## pygaki 게임 안 편집 화면(Shift+M → T로 "화면 효과" 탭 → "홀로그램")로 바꿔 저장하면
+## pygaki 게임 안 편집 화면(F9 → T로 "화면 효과" 탭 → "홀로그램")로 바꿔 저장하면
 ## hologram_layout.rpy가 만들어지고, 그 파일의 값이 여기 값보다 우선합니다.
 ################################################################################
 

@@ -5,7 +5,7 @@ import { Hint } from './Help';
 import { Resizer } from './Resizer';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { desktop } from './desktop';
-import { liveSend, setGamePanel, useLive, type GameState, type TitleItem, type TitleState } from './showpyLive';
+import { GAME_VIEW_LABEL, liveSend, nextGameView, panelCmd, toggleGamePanel, useLive, type GameState, type TitleItem, type TitleState } from './showpyLive';
 import { keyOf } from './prefs';
 import { useStore } from './store';
 import { CustomUIPanel } from './ShowpyCustomUI';
@@ -66,7 +66,9 @@ export function ShowpyView() {
       return;
     }
     // 게임 창에도 보이기로 해 두었으면(F9) 숨기지 않음
-    liveSend({ cmd: 'panel', hide: inApp(s) && !useLive.getState().gamePanel });
+    // 앱 칸으로 고치는 곳이면 기억해 둔 모양(F9)대로, 게임 창 패널로만 고치는 곳이면 숨김은 축약형으로
+    const gv = useLive.getState().gamePanel;
+    liveSend(panelCmd(inApp(s) || gv !== 'hidden' ? gv : 'compact'));
     liveSend({ cmd: 'editor', open: true, tab: s.tab });
   };
 
@@ -386,6 +388,7 @@ function Script({ file, line }: { file: string | null; line: number }) {
 
 function EditorBar({ st }: { st: GameState }) {
   const e = st.editor;
+  const gv = e.view ?? (e.hide_panel ? 'hidden' : 'compact');
   return (
     <div className="sp-bar">
       <div className="sp-row">
@@ -403,11 +406,11 @@ function EditorBar({ st }: { st: GameState }) {
       </div>
       <div className="sp-row">
         <button
-          className={e.hide_panel ? '' : 'on'}
-          onClick={() => setGamePanel(e.hide_panel)}
-          title={`게임 창에도 편집 화면 패널을 보일지 바꿔요. 보이게 하면 게임 창에는 자리 옮기기에 쓰는 짧은 패널만 나오고, 글꼴, 색 같은 값 칸은 여기 그대로 있어요. 단축키 ${keyOf('gamePanel')} (게임 창에서도 됨)`}
+          className={e.open && !e.hide_panel ? 'on' : ''}
+          onClick={() => useStore.getState().say(toggleGamePanel())}
+          title={`게임 창 pygaki editor 패널을 바꿔요. ${keyOf('gamePanel')}를 누를 때마다 축약형(자리 옮기기만) → 대형(값 칸 전부) → 숨김(여기서만 고침) 차례로 돌아요. 끄기는 게임 창에서 Esc. 게임 창에서도 같은 키예요`}
         >
-          게임 창의 편집 화면: {e.hide_panel ? '숨김' : '보임'} ({keyOf('gamePanel')})
+          {`게임 창 pygaki editor: ${e.open ? GAME_VIEW_LABEL[gv] : '꺼짐'} (${keyOf('gamePanel')} → ${GAME_VIEW_LABEL[e.open ? nextGameView(gv) : 'compact']})`}
         </button>
       </div>
       {e.open && e.hide_panel && (
@@ -424,7 +427,7 @@ function EditorBar({ st }: { st: GameState }) {
 
 function MirrorSection({ st, sec }: { st: GameState; sec: Section }) {
   const t = sec.tab ? st.editor.tabs.find((x) => x.id === sec.tab) : null;
-  const open = () => (liveSend({ cmd: 'panel', hide: true }), liveSend({ cmd: 'editor', open: true, tab: sec.tab }));
+  const open = () => (liveSend(panelCmd('hidden')), liveSend({ cmd: 'editor', open: true, tab: sec.tab }));
   if (!t)
     return (
       <div>
@@ -461,7 +464,7 @@ function MirrorSection({ st, sec }: { st: GameState; sec: Section }) {
         편집 시작
       </button>
       {/* 예전 pygaki 플러그인은 게임 창 패널이 보이면 앱에 패널을 안 보냄 */}
-      {st.editor.open && !st.editor.hide_panel && st.editor.tab === sec.tab && <p className="tip">게임 창 패널에 열려 있어요 ({keyOf('gamePanel')}로 숨기면 여기로)</p>}
+      {st.editor.open && !st.editor.hide_panel && st.editor.tab === sec.tab && <p className="tip">게임 창 패널에 열려 있어요 ({keyOf('gamePanel')}로 숨김까지 넘기면 여기로)</p>}
     </div>
   );
 }
@@ -482,7 +485,7 @@ function InGamePanel({ st, sec }: { st: GameState; sec: Section }) {
         ) : here ? (
           <p className="tip">게임 창에 이 탭 패널이 열려 있어요.</p>
         ) : (
-          <button onClick={() => (liveSend({ cmd: 'panel', hide: false }), liveSend({ cmd: 'editor', open: true, tab: sec.tab }))}>게임 창의 편집 화면에서 열기</button>
+          <button onClick={() => (liveSend(panelCmd('full')), liveSend({ cmd: 'editor', open: true, tab: sec.tab }))}>게임 창 pygaki editor에서 열기</button>
         ))}
       {here && st.editor.info.length > 0 && (
         <pre className="sp-info">{st.editor.info.join('\n')}</pre>
@@ -526,7 +529,7 @@ function TitlePanel({ st, want }: { st: GameState; want: 'title' | 'pause' }) {
         )}
         {!st.editor.open && (
           <p className="tip">
-            <button onClick={() => (liveSend({ cmd: 'panel', hide: true }), liveSend({ cmd: 'editor', open: true, tab: 'title' }))}>편집기 열기</button>
+            <button onClick={() => (liveSend(panelCmd('hidden')), liveSend({ cmd: 'editor', open: true, tab: 'title' }))}>편집기 열기</button>
           </p>
         )}
       </div>
@@ -536,7 +539,7 @@ function TitlePanel({ st, want }: { st: GameState; want: 'title' | 'pause' }) {
   if (!st.editor.open || st.editor.tab !== 'title') {
     return (
       <div>
-        <button className="primary" onClick={() => (liveSend({ cmd: 'panel', hide: true }), liveSend({ cmd: 'editor', open: true, tab: 'title' }))}>
+        <button className="primary" onClick={() => (liveSend(panelCmd('hidden')), liveSend({ cmd: 'editor', open: true, tab: 'title' }))}>
           편집 시작
         </button>
       </div>

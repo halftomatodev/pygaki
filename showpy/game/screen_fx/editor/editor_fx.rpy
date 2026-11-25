@@ -1,7 +1,7 @@
 ################################################################################
 ## 화면 효과 — pygaki 게임 안 편집 화면 탭 (타이틀 일렁임, 화면 효과)
 ##
-## pygaki 플러그인이 있으면 그 편집기(개발 모드에서 Shift+M)에 탭 두 개를
+## pygaki 플러그인이 있으면 그 편집기(개발 모드에서 F9)에 탭 두 개를
 ## 더합니다. pygaki이 없으면 이 파일은 아무것도 하지 않고, 효과는 설정 파일로
 ## 그대로 동작합니다.
 ##
@@ -1304,23 +1304,8 @@ init -6 python in screen_fx:
                 self.line_sel = None
 
             def key(self, k, shift):
-                if not self.is_lines():
-                    return False
-                pg = _ed.pygame
-                if k == pg.K_LEFTBRACKET:
-                    self.step_line(-1)
-                elif k == pg.K_RIGHTBRACKET:
-                    self.step_line(1)
-                elif k == pg.K_PAGEUP:
-                    self.step_line(-self.LIST_ROWS)
-                elif k == pg.K_PAGEDOWN:
-                    self.step_line(self.LIST_ROWS)
-                elif k == pg.K_l:
-                    self.list_open = not self.list_open
-                    renpy.restart_interaction()
-                else:
-                    return False
-                return True
+                ## 줄 단위 키([ ] PageUp/Down L)는 없앰 (pygaki v1.9)
+                return False
 
             ## ── 이 대사부터 이 효과 (대사 탭에 넘겨줌) ──
 
@@ -1585,17 +1570,8 @@ init -6 python in screen_fx:
                     a, b = self.get_picks()
                     rv.append("고른 셰이더: 1번 {} + 2번 {}{}".format(slot_label(a), slot_label(b),
                         "" if self.picks is not None else " (게임의 지금 값)"))
-                    if self.line_sel is None:
-                        rv.append("고른 줄이 없습니다. [ ] 키, 목록, 줄 번호로 고르세요.")
-                    else:
-                        rv.append("고른 줄: {} {}번째 줄{} (이 줄부터 적용)".format(
-                            self.line_sel[0].replace("\\", "/").replace("game/", "", 1), self.line_sel[1],
-                            ", 지금 줄을 따라감" if self.follow else ""))
-                        have = self.existing_lines(self.line_sel)
-                        rv.append("지금 들어 있음: " + (" / ".join(have) if have else "없음"))
-                        pv = self.preview_lines()
-                        if pv is not None:
-                            rv.append("저장하면: " + (" / ".join(pv) if pv else "(지움)"))
+                    ## 줄 단위(고른 줄, 줄에 들어 있는 것)는 보여 주지 않음 (pygaki v1.9, 초보자용)
+                    rv.append("여기서 고르면 미리 보기만 합니다. 장면마다 셰이더는 대본 편집기에서 상자마다 고릅니다.")
                     rv.append(self._scene_line())
                     n = self.pending_lines()
                     m = self.pending()
@@ -1628,7 +1604,7 @@ init -6 python in screen_fx:
                     rv.append("이 페이지는 {}의 세부 속성을 고칩니다. 편집하는 동안 이 효과만 보여줍니다.".format(slot_label(fx.id)))
                     rv.append("인게임, 타이틀, 게임 내 메뉴에서 같이 씁니다.")
                     rv.append(self._scene_line())
-                    rv.append("지금 장면에 쓰려면 '셰이더 고르기'에서 고르고 [[여기에서부터 적용].")
+                    rv.append("장면마다 셰이더는 대본 편집기에서 상자마다 고릅니다.")
                 n = self.pending()
                 rv.append("저장 안 한 변경: {}개".format(n) if n else "저장 안 한 변경 없음")
                 return rv
@@ -1660,7 +1636,7 @@ init -6 python in screen_fx:
                 if self.is_lines():
                     return [
                         "1번, 2번을 고르면 화면에 바로 보이고, 그 아래에서 효과의 세부 속성을 고칩니다.",
-                        "목록에서 줄 누르기: 그 줄을 고르고 게임도 그 줄로 | [[ ] 앞뒤 줄 | 세모 두 번: 지금 줄로 | Ctrl+S 저장",
+                        "Ctrl+S 저장",
                         ]
                 if self.is_tv():
                     return [
@@ -2024,10 +2000,7 @@ screen ui_editor_screen_fx_panel(tab):
         $ _a, _b = tab.get_picks()
         use ui_editor_fx_slots(tab, _a, _b, tab.set_pick, tab.clear_picks)
 
-        if tab.se() is not None:
-            use ui_editor_fx_lines_panel(tab)
-        else:
-            text "원고 쓰기 도구가 없어서 줄 고르기와 [[여기에서부터 적용]은 못 씁니다." style "ui_editor_small"
+        ## 줄 단위 칸(줄 목록, [여기에서부터 적용])은 없앰 (pygaki v1.9, 초보자용: 셰이더는 대본 편집기의 상자 단위로)
 
         textbutton ("처음 상태 접기" if tab.tv_open else "처음 상태 펴기") style "ui_editor_button" text_size 13 action ToggleField(tab, "tv_open")
         if tab.tv_open:

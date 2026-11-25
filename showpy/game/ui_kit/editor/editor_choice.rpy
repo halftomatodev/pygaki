@@ -786,7 +786,7 @@ init -8 python in ui_editor:
                 fn = fn[5:]
             where_line = "{} {}번째 줄".format(fn, info[0]) if (info is not None and info[0]) else node_place(current_node())
 
-            rv.append("선택지 {}/{}  \"{}\"   {}".format(self.sel + 1, n, c.caption, where_line))
+            rv.append("선택지 {}/{}  \"{}\"".format(self.sel + 1, n, c.caption))    # 파일·줄 번호는 안 보임 (pygaki v1.9)
             if self._hover():
                 rv.append("이동 ({}, {})   회전 {:.1f}   기울기 {:.1f}   확대 {:.2f}   크기 {}".format(
                     c.h_dx, c.h_dy, c.h_rotate, c.h_skew, c.h_zoom,
