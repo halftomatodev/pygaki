@@ -15,7 +15,7 @@ import { HelpModal, HintTip, openHelp } from './Help';
 import { EditCaret } from './Caret';
 import { useStore } from './store';
 import { exportRpyFile, saveProject } from './files';
-import { addBoxCenter, goNextBox, toggleFocus } from './actions';
+import { addBoxCenter, focusField, goNextBox, toggleFocus } from './actions';
 import { hit } from './prefs';
 import { Resizer } from './Resizer';
 import { isTyping } from './util';
@@ -67,7 +67,12 @@ function Keys() {
       else if (s.inlineEdit && hit(e, 'bubbles'))
         run(() => {
           const inBox = s.typeMenu?.where === 'box';
-          if (s.flowMenu || s.tagBox || inBox) useStore.setState({ flowMenu: false, tagBox: false, typeMenu: inBox ? null : s.typeMenu });
+          // 닫을 때 커서가 버블 키 칸에 있었으면 그 칸이 사라지며 BODY로 빠졌다(세션 106) → 쓰던 줄의 글 칸으로 돌려줌
+          if (s.flowMenu || s.tagBox || inBox) {
+            const back = !(e.target as HTMLElement).id?.startsWith('in-');
+            useStore.setState({ flowMenu: false, tagBox: false, typeMenu: inBox ? null : s.typeMenu });
+            if (back && s.activeLine) focusField('in-' + s.activeLine);
+          }
           else useStore.setState({ flowMenu: true, tagBox: true, typeMenu: s.activeLine ? { line: s.activeLine, where: 'box' } : s.typeMenu });
         })
       else if (s.inlineEdit && hit(e, 'flowMenu'))

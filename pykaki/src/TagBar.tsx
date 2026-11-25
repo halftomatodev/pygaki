@@ -288,6 +288,32 @@ export function TagBar({ targetId, className = '', extra, zoom = 1, fold = false
   const arc = useArc(root, () => (fold ? (root.current?.closest('.box') as HTMLElement | null) : null), 'right');
   const out = useReveal(!fold || opened);
   const arcCtx = { arc, out };
+  // 세션 106: 상자가 화면 위쪽에 있거나 확대하면 펼친 글꼴 버블 윗줄이 창 위로 넘쳐 툴바 밑에 가려졌다 → 펼쳐 있는 동안
+  // 매 프레임 윗변을 재서 툴바 아래(집중 모드면 캔버스 위 끝)보다 위면 그만큼 내린다. 캔버스 확대·이동도 따라감.
+  // 내린 값은 root 안 px(캔버스 배율 전)로 translate에 바로 넣는다(다시 그리지 않음, 줄의 y는 안 바뀌어 호 재기와 돌지 않음)
+  useEffect(() => {
+    const r = root.current;
+    if (!fold || !opened || !r) return;
+    let shift = 0;
+    let id = 0;
+    const tick = () => {
+      const rr = r.getBoundingClientRect();
+      const z = rr.height / (r.offsetHeight || 1) || 1;
+      const bar = document.querySelector('.toolbar')?.getBoundingClientRect();
+      const lim = (bar && bar.height > 0 ? bar.bottom : (document.querySelector('.canvas')?.getBoundingClientRect().top ?? 0)) + 8;
+      const want = Math.max(0, (lim - (rr.top - shift * z)) / z);
+      if (Math.abs(want - shift) > 0.5) {
+        shift = want;
+        r.style.translate = shift ? `0 ${shift}px` : '';
+      }
+      id = requestAnimationFrame(tick);
+    };
+    id = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(id);
+      r.style.translate = '';
+    };
+  }, [fold, opened]);
   const flags = useStore((s) => s.project.variables);
   const update = useStore((s) => s.update);
   const [, redraw] = useReducer((x: number) => x + 1, 0);
