@@ -1,4 +1,4 @@
-<!-- 원본: pykaki/docs/GUIDE.md @ a4b12d5e7d -->
+<!-- 원본: pykaki/docs/GUIDE.md @ a471fc2eff -->
 # pygaki user guide
 
 A tool for writing Ren'Py scripts with boxes and lines and exporting them as Ren'Py script files (`.rpy`).
@@ -74,8 +74,8 @@ Narration doesn't need to be registered.
 
 - **Double-click** a box and the view glides and zooms in on it, with the cursor on the line you double-clicked. The box looks the same as when viewing; just edit the text in place.
 - A small set of buttons sits **outside to the left** of the line with the cursor.
-  - **⠿** drag to reorder lines
-  - **Line type (dialogue bubble)**: press **Alt+←**, or tap the handle (⠿) on the left of the line without dragging, and three columns, Dialogue (narration, characters), Staging and Other (flags, commands, memos), flow out gooily and spread open (when editing a box they stack vertically outside its left side, staggered along a round arc around the box). Inside a box only the columns and text float, with no background. Move with **↑↓** (going past the end of a column moves to the next column) and confirm with **Enter**. **Tab** (Shift+Tab backwards) or **←→** jumps straight between columns. Press **Esc** or **Alt+←** again to go back to your text without choosing. You can also click. The line type in the [Dialogue] card on the right works the same way
+  - **←** handle: drag to reorder lines
+  - **Line type (dialogue bubble)**: press **Alt+←**, or tap the handle (←) on the left of the line without dragging, and three columns, Dialogue (narration, characters), Staging and Other (flags, commands, memos), flow out gooily and spread open (when editing a box they stack vertically outside its left side, staggered along a round arc around the box). Inside a box only the columns and text float, with no background. Move with **↑↓** (going past the end of a column moves to the next column) and confirm with **Enter**. **Tab** (Shift+Tab backwards) or **←→** jumps straight between columns. Press **Esc** or **Alt+←** again to go back to your text without choosing. You can also click. The line type in the [Dialogue] card on the right works the same way
   - **＋** new line below, **✕** delete line
 - On a choice or condition line, the set **⠿ ◆ Choice (◇ Condition) ＋ ✕** appears outside to the left too. Drag ⠿ to reorder (the lines stay attached), ＋ adds one right below, ✕ deletes it. Deleting the last one with ✕ removes the choices (conditions) entirely and returns to **→ Next box** (connected to the box it was connected to; undo with Ctrl+Z). When hovering, ⠿ shows to the left of lines while viewing too.
 - Click a staging line (🖼 background, 🎵 music, etc.) and its input fields appear **outside to the right**.
@@ -85,8 +85,8 @@ Narration doesn't need to be registered.
   - **Ctrl+Shift+Enter**: continue in the next box. Goes to the connected box, or makes a new one and moves there. Keep pressing it to write box after box.
 - **Ctrl+Enter**: new line below with the same speaker
 - **Esc** or a click on an empty spot: finish editing. The view returns to where you were looking.
-- Outside the left of the line you're editing, a small drop with just the handle (⠿) and delete (✕) floats and slowly wobbles. Add new lines with Ctrl+Enter.
-- At the height of a line you're typing in, two small blue drops **✓ ✕** pop out outside the right of the box and slowly wobble (they don't cover the dialogue). **✓** (done) is the same as Ctrl+Enter (new line below with the same speaker) and **✕** (cancel) the same as Esc (finish editing), so you can click them too. Hover a drop to see its shortcut. Text is saved as you type, so cancelling keeps it.
+- Outside the left of the line you're editing, a small drop with just the handle (←) and delete (✕) floats and slowly wobbles. Add new lines with Ctrl+Enter.
+- At the height of a line you're typing in, two small light gray drops **✓ ✕** pop out outside the right of the box and slowly wobble (they don't cover the dialogue). **✓** (done) is the same as Ctrl+Enter (new line below with the same speaker) and **✕** (cancel) the same as Esc (finish editing), so you can click them too. Hover a drop to see its shortcut. Text is saved as you type, so cancelling keeps it.
 
 <!-- clip line-kind | On a new line press Alt+←, pick the character with ↓ (in the sample "앨리스" = Alice) and press Enter: the line becomes her dialogue. -->
 
@@ -95,7 +95,7 @@ Narration doesn't need to be registered.
 ### Text styling and pacing (tag box)
 <!-- clip tag-style | Select the line (Home, Shift+End), open the font bubble with Alt+↑, then press **B** (bold) and a color. The selected text is wrapped in tags. -->
 
-- When the cursor is in a dialogue or narration text field, the **tag box** (text style) appears. When writing inside a box it sits **outside the top right** of the box, folded into one small purple drop **⋯** (the font bubble); click the drop or press **Alt+↑** to unfold it (Alt+↑ or Esc again folds it). The dialogue bubble, font bubble and flow bubble can all be open together, and all fold when you finish editing the box. When writing in the right panel it always appears unfolded above the text effect field.
+- When the cursor is in a dialogue or narration text field, the **tag box** (text style) appears. When writing inside a box it sits **outside the top right** of the box, folded into one small purple drop **↑** (the font bubble); click the drop or press **Alt+↑** to unfold it (Alt+↑ or Esc again folds it). The dialogue bubble, font bubble and flow bubble can all be open together, and all fold when you finish editing the box. When writing in the right panel it always appears unfolded above the text effect field.
 - Unfolded, it shows all the rows: Text, Font, Opacity, Spacing and Outline, Effect, Progress, Speed, Insert, (Ruby text) and Text box (there is no fold button). The background is one almost transparent piece of glass, and the rows inside it are staggered so that, together with the line type picker and the next flow, they wrap around the box. Each row has a bold grey name on the left.
 - Hover the progress, speed, opacity, letter spacing or insert buttons for a moment and a **tooltip** shows the tag it inserts, a description, and a sample sentence playing one character at a time with that tag (click-to-continue shows ▼ and moves on by itself). While you drag a slider, the sample plays with that value.
 - Select text and press a button to wrap just that part in a Ren'Py text tag. With nothing selected, it inserts a pair of tags and puts the cursor between them.
@@ -192,7 +192,7 @@ Click a box and below the dialogue card are the **Background (image, video)**, *
 
 **Dialogue lines only hold text.** Character images (expressions) aren't attached to dialogue lines; choose them in the **[Image, video] card**. While writing a character's line, the top of this card shows that character's images (e.g. `a smile.png`, `a angry.png`); click one to put a show line (`show a smile`) right before that line. Without images, type the expression name. Expressions put on dialogue lines in older versions show as "expression smile ✕" next to the line and are exported as is (click to remove).
 
-**In-use cards**: cards related to the line you're writing turn see-through with a dotted white outline and a purple "In use" mark next to the title. Writing dialogue: the dialogue and text effect cards; a background line: the background card; show and hide lines: the image card; sound lines: the sound card. Cards without the mark have nothing to do with the current line.
+**In-use cards**: cards related to the line you're writing lose the color behind them (shown in gray) and get a dotted white outline and a purple "In use" mark next to the title. Writing dialogue: the dialogue and text effect cards; a background line: the background card; show and hide lines: the image card; sound lines: the sound card. Cards without the mark have nothing to do with the current line.
 
 ### Go here in Ren'Py, Move position (app)
 When the game was started with [▶ Run in Ren'Py] and is connected to the app:

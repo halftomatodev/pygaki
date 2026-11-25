@@ -196,7 +196,7 @@ code { font-family: var(--mono); }
 }
 .fold-all .side-fold:hover { background: var(--line); color: var(--text); }
 /* 카드 투명도(세션 82): 투명할수록 뒤 흐림을 줄여 뿌옇지 않게 (Card.tsx glassOf). fluidkit이 style로 넣는 값을 덮음 */
-.card [data-fluidkit='liquid-fill'] { -webkit-backdrop-filter: blur(var(--card-blur, 8px)) saturate(1.6) !important; backdrop-filter: blur(var(--card-blur, 8px)) saturate(1.6) !important; }
+.card [data-fluidkit='liquid-fill'] { -webkit-backdrop-filter: blur(var(--card-blur, 8px)) saturate(var(--card-sat, 1.6)) !important; backdrop-filter: blur(var(--card-blur, 8px)) saturate(var(--card-sat, 1.6)) !important; }
 .card [data-fluidkit='liquid-shadow'] { opacity: var(--card-shadow, 1); }
 /* ── 장면·캐릭터 트리 (세션 82, SceneTree.tsx). 줄 높이 30px, 단추 26px(정할 것 D), 원래 말은 회색 작은 글(E) ── */
 .scene-tree { display: flex; flex-direction: column; gap: 1px; margin: 2px -4px 4px; }
@@ -347,8 +347,8 @@ input.box-title.ed { flex: 1; min-width: 0; }
    줄 높이에 맞춰 위아래로 쌓고 작게 */
 .done-bubble { position: absolute; left: calc(100% + 12px); z-index: 6; pointer-events: none; transition: top 0.22s ease; }
 .db-liquid { display: flex; gap: 3px; }
-.db-btn { pointer-events: auto; display: inline-grid; place-items: center; width: 20px; height: 20px; padding: 0; border: 0; border-radius: 999px; font-size: 11px; font-weight: 800; line-height: 1; color: #fff; background: transparent; }
-.db-btn:hover { background: rgba(255, 255, 255, 0.2); }
+.db-btn { pointer-events: auto; display: inline-grid; place-items: center; width: 20px; height: 20px; padding: 0; border: 0; border-radius: 999px; font-size: 11px; font-weight: 800; line-height: 1; color: #6b7280; background: transparent; }
+.db-btn:hover { color: #374151; background: rgba(0, 0, 0, 0.06); }
 /* 방울 단추에 마우스를 올리면 곧바로 뜨는 작은 안내 (data-tip, 세션 91). 단축키를 알려 줌 */
 .tip { position: relative; }
 .tip[data-tip]:hover::after {
@@ -365,6 +365,7 @@ input.box-title.ed { flex: 1; min-width: 0; }
 .lc-btn { display: inline-grid; place-items: center; width: 20px; height: 20px; padding: 0; border: 0; border-radius: 999px; background: transparent; color: var(--muted); font-size: 11px; line-height: 1; }
 .lc-btn:hover { color: var(--text); background: color-mix(in srgb, var(--accent) 12%, transparent); }
 .lc-btn.grip { cursor: grab; }
+.lc-btn.lc-arrow { font-size: 12px; font-weight: 800; }
 .faint-add { font-size: 11px; padding: 0 6px; margin-top: 3px; opacity: 0.5; }
 .faint-add:hover { opacity: 1; }
 
@@ -1374,8 +1375,8 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 
 /* 지금 쓰는 줄과 이어진 카드 (대사를 쓰면 대사·글자 효과, 연출 줄이면 그 종류 카드).
    [게임 줄 따라가기: 켬]의 녹색보다 살짝 밝게 */
-/* "사용 중" 카드 (세션 100, 사용자): 유리 바탕 없이 투명하게(Card.tsx가 tint·흐림·그림자를 뺌), 둘레는 흰 점선(사용자가 고름).
-   세션 90~99의 border-beam 빛 띠와 그 전 conic-gradient 빛(세션 79~83)은 뺐다. */
+/* "사용 중" 카드 (세션 102, 사용자): 유리 바탕은 그대로, 뒤 비침만 채도 0(Card.tsx `--card-sat`), 둘레는 흰 점선(세션 100에 사용자가 고름).
+   세션 100의 투명 바탕은 눈에 안 띄어 뺐다. 세션 90~99의 border-beam 빛 띠와 그 전 conic-gradient 빛(세션 79~83)도 뺐다. */
 .card.in-use:not(.folded) { outline: 2px dotted #fff; outline-offset: -2px; }
 .card.in-use > [data-fluidkit='liquid-card-content'] > h3 .card-title::after { content: var(--t-in-use, '사용 중'); font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 8px; color: #fff; background: #9333ea; box-shadow: 0 1px 4px color-mix(in srgb, #9333ea 45%, transparent); }
 .sc-char { margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed var(--line); }

@@ -2,7 +2,8 @@
 // 세션 91(사용자 손그림): 대사를 가리지 않게 상자 밖(.side-r 자리, 글 줄에는 .side-r가 없음), 글자 없이 표시만, 왼쪽 방울(LineChip)처럼
 // 천천히 일렁이고(useDrift) 마우스를 올리면 단축키 안내가 뜬다.
 // [✓]는 Ctrl+Enter(같은 화자로 아래에 새 줄)와 같고, [✕]는 Esc(상자 편집 끝내기)와 같다. 친 글은 늘 저장돼 있어서 취소해도 글은 그대로다.
-// 줄을 옮기면 새 줄에서 다시 튀어나온다(key가 줄 id)
+// 줄을 옮기면 새 줄에서 다시 튀어나온다(key가 줄 id).
+// 세션 102(사용자): 푸른 바탕은 눈에 너무 띄어 옅은 회색 바탕 + 회색 표시로(styles.css `.db-btn`)
 import { useEffect, useState } from 'react';
 import { Liquid } from 'liquid-gooey';
 import { keyOf } from './prefs';
@@ -27,7 +28,7 @@ export function DoneBubble({ top, onDone, onCancel }: { top: number; onDone: () 
   const pa = pos(a, -18), pb = pos(b, -40);
   return (
     <div className="done-bubble nodrag nopan" style={{ top }} onDoubleClick={(e) => e.stopPropagation()}>
-      <Liquid className="db-liquid" blur={4} contrast={18} fill="#2f8cff" shadow="0 3px 10px rgba(37, 99, 235, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.35)">
+      <Liquid className="db-liquid" blur={4} contrast={18} fill="#e5e7eb" shadow="0 2px 6px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)">
         <Liquid.Item {...pa} transition={settled ? DRIFT_TR : 'bouncy'}>
           <button type="button" className="db-btn tip" data-tip={`완료 · ${keyOf('newLine')}`} aria-label="완료" onMouseDown={keep} onClick={onDone}>
             ✓

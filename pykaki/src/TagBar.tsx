@@ -354,7 +354,7 @@ export function TagBar({ targetId, className = '', extra, zoom = 1, fold = false
   if (fold && !opened)
     return (
       <div className={cls + ' tb-folded'} ref={root}>
-        <GooPill color="purple" label="⋯" tip={`글자 스타일 고치기 · ${keyOf('tagBox')}`} onOpen={() => useStore.setState({ tagBox: true })} />
+        <GooPill color="purple" label="↑" tip={`글자 스타일 고치기 · ${keyOf('tagBox')}`} onOpen={() => useStore.setState({ tagBox: true })} />
       </div>
     );
   const extraCard = extra && (

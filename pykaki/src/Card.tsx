@@ -124,8 +124,8 @@ export function Card({ id, title, extra, defFolded = false, className = '', domI
   }, [scope, id, defFolded]);
   const toggle = () => toggleFold(id, defFolded);
   const glass = glassOf(usePrefs((p) => p.glass));
-  // 사용 중 카드 (Inspector.tsx `use`, 세션 100): 유리 바탕 없이 투명하게, 둘레는 흰 점선(styles.css `.card.in-use`).
-  // 세션 90~99의 빛 띠(border-beam)는 뺐다. 감싸는 틀이 없어서 사용 중이 바뀌어도 카드 안을 새로 그리지 않는다
+  // 사용 중 카드 (Inspector.tsx `use`, 세션 102): 유리 바탕은 다른 카드와 같고 뒤 비침만 채도 0(흑백), 둘레는 흰 점선(styles.css `.card.in-use`).
+  // 세션 100의 투명 바탕은 눈에 안 띄어 뺐다(사용자). 세션 90~99의 빛 띠(border-beam)도 없음. 감싸는 틀이 없어서 사용 중이 바뀌어도 카드 안을 새로 그리지 않는다
   const inUse = /(^|\s)in-use(\s|$)/.test(className ?? '') && !folded;
   // 접은 카드는 제목 길이만큼만 넓고, 펼치면 칸 폭으로 (세션 78). 폭이 바뀌면 이전 폭에서 스프링으로 늘고 준다
   const headRef = useRef<HTMLHeadingElement>(null);
@@ -174,9 +174,9 @@ export function Card({ id, title, extra, defFolded = false, className = '', domI
       id={domId}
       material="glass"
       radius={14}
-      style={{ padding: undefined, ['--card-blur' as string]: inUse ? '0px' : glass.blur, ['--card-shadow' as string]: inUse ? 0 : glass.shadow }}
-      tint={inUse ? 'transparent' : folded ? glass.folded : glass.base}
-      intensity={inUse ? 0 : glass.intensity}
+      style={{ padding: undefined, ['--card-blur' as string]: glass.blur, ['--card-shadow' as string]: glass.shadow, ['--card-sat' as string]: inUse ? 0 : 1.6 }}
+      tint={folded ? glass.folded : glass.base}
+      intensity={glass.intensity}
     >
       <h3 ref={headRef} className="card-head" onClick={onHead} title={folded ? '눌러서 펼쳐요' : undefined}>
         <span className="card-title" role="button" tabIndex={0} aria-expanded={!folded} onKeyDown={onKey}>
