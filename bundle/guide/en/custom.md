@@ -1,4 +1,4 @@
-<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ 5f703f6eb3 -->
+<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ c8f3294771 -->
 # pygaki plugin customization guide
 
 2026-11-25 · pygaki v1.9 (changes per version are in `READ_ME_FIRST.md` and `CHANGELOG.md`)
@@ -872,7 +872,7 @@ Just go in order.
 
 In a game whose screen is scaled up several times in the window, like the retro resolutions, the editor (panel, picker windows, name tags, handles) is drawn at the real screen size so it stays readable at small resolutions. While the editor is open it uses the whole window: the game screen stays at its own size (a whole-number scale with pixel perfect) in the middle of the window, and panels and pickers can use the empty space outside it (for example, a 640x400 game in an 800x800 window gives the editor the whole 800x800). When the window is larger than the game screen, a thin red border is drawn around the game screen to show where it ends. Turn the border on/off with **F8** (remembered by the game) or in the pygaki app's preferences. Closing the editor returns to the normal screen (black bands around it).
 
-Lists with many choices, such as text effects, shaders (slots 1 and 2), and image effects, show only the current value and **[Choose in the pygaki app]** on the game-window panel. Pressing it opens that section in the app's [GUI Edit] when the app is connected, or starts the pygaki app from the Ren'Py SDK otherwise. The shortcut help on the game-window panel starts folded; press **F1** to show it. All shortcuts are listed in the pygaki app's preferences under [Shortcuts].
+Lists with many choices, such as text effects, shaders (slots 1 and 2), image effects, and image transitions, show only the current value and **[Choose in the pygaki app]** on the game-window panel. Pressing it opens that section in the app's [GUI Edit] when the app is connected, or starts the pygaki app from the Ren'Py SDK otherwise. The shortcut help on the game-window panel starts folded; press **F1** to show it. All shortcuts are listed in the pygaki app's preferences under [Shortcuts].
 
 For choices and dialogue, **Ctrl+S saves straight into that line's parentheses in the script (.rpy)**, and the game reloads and returns to the same scene. Values that were already written and things after the line like `with dissolve` are left as they are; only changed values are edited. The original before editing is kept in `ui_kit_backup/` in the project folder.
 

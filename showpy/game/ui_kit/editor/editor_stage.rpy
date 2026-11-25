@@ -1224,8 +1224,13 @@ screen ui_editor_stage_panel(tab):
             box_wrap_spacing 4
             xmaximum 632
             text "전환:" style "ui_editor_text" yalign 0.5
-            for _tk, _tl, _tt, _td in stage.TRANSITIONS:
-                textbutton _tl style "ui_editor_button" text_size 13 action Function(tab.set_kind, _tk) selected (_spec["kind"] == _tk)
+            if ui_editor.in_game_panel():
+                ## 게임 창에는 지금 값만, 전환 목록은 pygaki 앱에서 (방향·시간은 아래에 그대로)
+                textbutton dict((_tk, _tl) for _tk, _tl, _tt, _td in stage.TRANSITIONS).get(_spec["kind"], _spec["kind"] or "-") style "ui_editor_button" text_size 13 action Function(ui_editor.open_in_app) selected True
+                textbutton "pygaki 앱에서 고르기" style "ui_editor_button" text_size 13 action Function(ui_editor.open_in_app)
+            else:
+                for _tk, _tl, _tt, _td in stage.TRANSITIONS:
+                    textbutton _tl style "ui_editor_button" text_size 13 action Function(tab.set_kind, _tk) selected (_spec["kind"] == _tk)
 
         $ _info = stage.trans_info(_spec["kind"])
         if _info is not None and _info[3]:
