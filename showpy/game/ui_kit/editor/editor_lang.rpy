@@ -89,17 +89,29 @@ init -8 python in ui_editor:
 
     ## ── 지금 언어 ──
 
-    def _default_lang():
-        l = store._preferences.language
-        if l == "japanese":
-            return "ja"
-        if l == "english":
-            return "en"
-        return "ko"
+    ## pygaki v1.9: 편집 화면 언어는 pygaki 앱의 언어를 따름 (앱이 붙으면 실시간 연결 lang으로 보내고,
+    ## 게임은 마지막으로 받은 값을 persistent._pygaki_app_lang에 기억). 받은 적이 없으면 PC 언어(일본어, 영어, 나머지는 한국어).
+    ## 예전 [언어] 단추 값(persistent._pygaki_editor_lang)은 더 쓰지 않음
+    _pc = [ None ]
+
+    def pc_lang():
+        if _pc[0] is None:
+            l = "ko"
+            try:
+                lang, region = store.renpy.translation.detect_user_locale()
+                lang = (lang or "").lower()
+                if lang.startswith("ja"):
+                    l = "ja"
+                elif lang.startswith("en"):
+                    l = "en"
+            except Exception:
+                pass
+            _pc[0] = l
+        return _pc[0]
 
     def editor_lang():
-        l = getattr(store.persistent, "_pygaki_editor_lang", None)
-        return l if l in ("ko", "ja", "en") else _default_lang()
+        l = getattr(store.persistent, "_pygaki_app_lang", None)
+        return l if l in ("ko", "ja", "en") else pc_lang()
 
     def lang_name():
         l = editor_lang()
@@ -134,18 +146,21 @@ init -8 python in ui_editor:
         except Exception:
             pass
 
-    def next_lang():
-        """[언어] 단추: 한국어 → 日本語 → English → 한국어."""
-        ks = [ k for k, n in LANGS ]
-        l = ks[(ks.index(editor_lang()) + 1) % len(ks)]
-        store.persistent._pygaki_editor_lang = l
+    def set_lang(l):
+        """pygaki 앱이 보낸 언어로 (실시간 연결 lang). 같으면 아무것도 안 함."""
+        if l not in ("ko", "ja", "en"):
+            return
+        if getattr(store.persistent, "_pygaki_app_lang", None) == l:
+            return
+        store.persistent._pygaki_app_lang = l
+        _memo.clear()
         _apply_font()
         ## 이미 그린 글은 다시 그려야 바뀜: 편집기 바탕 화면을 새로 띄움
         layer = "ui_editor"
         if store.renpy.get_screen("ui_editor_root", layer=layer):
             store.renpy.hide_screen("ui_editor_root", layer=layer)
             store.renpy.show_screen("ui_editor_root", _layer=layer)
-        msg({ "ko": "편집 화면 언어: 한국어", "ja": "編集画面の言語:日本語", "en": "Editor language: English" }[l])
+        store.renpy.restart_interaction()
 
     ## ── 글 바꾸기 ──
 

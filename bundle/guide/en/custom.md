@@ -1,4 +1,4 @@
-<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ 3552b6c43d -->
+<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ 40e5c5953a -->
 # pygaki plugin customization guide
 
 2026-11-25 · pygaki v1.9 (changes per version are in `READ_ME_FIRST.md` and `CHANGELOG.md`)
@@ -7,7 +7,7 @@
 
 This document is for people who installed the pygaki plugins 5.5 to look up **which value in which file changes what**. Full descriptions of setting names are in each folder's `README.md` (Korean); this document starts from "what you want to do". If you write your text in pygaki, start with "Using it with pygaki".
 
-The in-game editor (F9) can be switched to Japanese or English with the [Language] button on its panel (it starts out following the game's language). This document sometimes gives the Korean screen names next to tab and button names (e.g. "dialogue tab" = 대사 탭). Comments in the settings files are in Korean.
+The in-game editor (pygaki editor, F9) follows the pygaki app's language (or your PC's language if it has never connected to the app). This document sometimes gives the Korean screen names next to tab and button names (e.g. "dialogue tab" = 대사 탭). Comments in the settings files are in Korean.
 
 | Folder | What it does | Files you edit |
 | --- | --- | --- |
@@ -849,7 +849,7 @@ e "Shake!" (box="media", media="images/say/boom.png", media_link=True, media_fx=
 
 With the game running from the launcher (developer mode), press **F9** to open the editor (pygaki editor). While it's open, each press of F9 changes the panel Compact → Full → Hidden; Esc closes it. It doesn't open in releases. While the editor is open, clicks and keys don't go to the game.
 
-Each click on the panel's **[Language]** button switches the editor's text 한국어 → 日本語 → English (4.12). The choice is remembered per game (`persistent`) and starts out following the game's language. The game screen's text (dialogue, menus, the text you're editing) and saved values don't change. Translations live in `ui_kit/editor/editor_lang.tsv` (Korean, Japanese, English per line); text missing from it shows in Korean.
+The editor's text language (한국어, 日本語, English) follows the pygaki app's language (pygaki v1.9). When the app connects it sends its language, and the game remembers the last one it received (`persistent`). If it has never connected to the app, it follows your PC's language (Japanese, English, otherwise Korean). The game screen's text (dialogue, menus, the text you're editing) and saved values don't change. Translations live in `ui_kit/editor/editor_lang.tsv` (Korean, Japanese, English per line); text missing from it shows in Korean.
 
 | Tab | Where it opens | What you can change | Ctrl+S saves to |
 | --- | --- | --- | --- |

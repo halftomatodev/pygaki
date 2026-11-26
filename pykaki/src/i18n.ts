@@ -16,12 +16,21 @@ const exact = new Map<string, [string, string]>(Object.entries(D.exact));
 const pats = D.pats.map(([re, ja, en]) => [new RegExp(re), ja, en, re.includes('\n') || re.includes('\\n')] as const);
 const HANGUL = /[가-힣]/;
 
+// 고른 적이 없으면 PC(윈도우) 언어: 일본어, 영어, 나머지는 한국어 (pygaki v1.9). 고르면 그 값을 기억
+export function pcLang(): Lang {
+  try {
+    const l = (navigator.languages?.[0] || navigator.language || '').toLowerCase();
+    return l.startsWith('ja') ? 'ja' : l.startsWith('en') ? 'en' : 'ko';
+  } catch {
+    return 'ko';
+  }
+}
 function readLang(): Lang {
   try {
     const v = localStorage.getItem(KEY);
-    return v === 'ja' || v === 'en' ? v : 'ko';
+    return v === 'ja' || v === 'en' || v === 'ko' ? v : pcLang();
   } catch {
-    return 'ko';
+    return pcLang();
   }
 }
 let lang: Lang = readLang();

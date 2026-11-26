@@ -1681,8 +1681,7 @@ screen ui_editor_panel():
                         textbutton "복사 (Ctrl+C)" style "ui_editor_button" action Function(ui_editor.copy_current)
                     textbutton "닫기 (Esc)" style "ui_editor_button" action Function(ui_editor.close_editor)
                     textbutton "X 접기" style "ui_editor_button" action ToggleField(ui_editor.state, "mini")
-                    ## 편집 화면 언어 (editor_lang.rpy). 누를 때마다 한국어 → 日本語 → English
-                    textbutton ui_editor.lang_button() style "ui_editor_button" action Function(ui_editor.next_lang)
+                    ## 편집 화면 언어는 pygaki 앱을 따름 (editor_lang.rpy, 앱이 없으면 PC 언어). [언어] 단추는 없앰 (v1.9)
 
                 ## "지금 줄: 파일 n번째 줄"은 보여 주지 않음 (pygaki v1.9, 초보자용)
 

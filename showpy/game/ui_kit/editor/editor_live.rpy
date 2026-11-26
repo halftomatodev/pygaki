@@ -941,6 +941,11 @@ init -8 python in ui_editor:
             return True
 
         ## 경계선 (4.20, 이름은 bands): 앱 환경 설정의 [게임 화면 경계선]과 단축키
+        ## 편집 화면 언어 (pygaki v1.9): 앱 언어를 따름. 붙을 때와 앱에서 언어를 바꿀 때 옴
+        if cmd == "lang":
+            set_lang(c.get("lang"))
+            return True
+
         if cmd == "bands":
             set_bands(bool(c.get("on")), tell_app=False)
             return True

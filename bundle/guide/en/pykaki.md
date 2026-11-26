@@ -1,4 +1,4 @@
-<!-- 원본: pykaki/docs/GUIDE.md @ 50738c3d9b -->
+<!-- 원본: pykaki/docs/GUIDE.md @ 82f362a8ed -->
 # pygaki user guide
 
 A tool for writing Ren'Py scripts with boxes and lines and exporting them as Ren'Py script files (`.rpy`).
@@ -658,10 +658,10 @@ Press **Ctrl+\\** (**Ctrl+₩** on a Korean keyboard, or **[Focus]** in the tool
 - Shortcuts (save, new line, etc.) still work in focus mode.
 
 ### Language
-**한국어 / 日本語 / English** in the top row changes the language of the script editor's screen text. The choice is remembered on this computer. This help (F1) switches to that language too (the same text as the Japanese and English pygaki guide). The script (dialogue, box titles) and the exported script don't change. Text without a translation yet shows in Korean.
+At first it follows your PC's (Windows) language (Japanese, English, otherwise Korean). **한국어 / 日本語 / English** in the top row changes it, and that choice is remembered on this computer. This help (F1) switches to that language too (the same text as the Japanese and English pygaki guide). The script (dialogue, box titles) and the exported script don't change. Text without a translation yet shows in Korean.
 
 Languages elsewhere:
-- **In-game editor** (F9): each click on the panel's **[Language]** button goes 한국어 → 日本語 → English. The choice is remembered per game and starts out following the game's language. Only the editor's text changes; the game screen (dialogue, menus, the text you're editing) stays as it is
+- **pygaki editor** (in-game editor, F9): follows the app's language. When the game connects the app sends its language, and changing it in the app changes the game right away. The game remembers the last language it received, so it stays the same without the app (if it has never connected, it follows your PC's language). Only the editor's text changes; the game screen (dialogue, menus, the text you're editing) stays as it is
 - **The pygaki buttons in the Ren'Py launcher** ([Edit with pygaki], [pygaki guide], [Update plugins]) and their messages follow the launcher's language setting (Preferences → Language): Korean for Korean, Japanese for Japanese, English otherwise. [pygaki guide] opens the guide in that language too
 
 ### Preferences

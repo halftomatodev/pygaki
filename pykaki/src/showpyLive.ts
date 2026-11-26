@@ -1,5 +1,6 @@
 // showpy 실시간 연결 (데스크톱 앱 전용). 게임이 보내는 상태를 받아 두고, 명령을 보낸다.
 // 형식은 저장소 맨 위 docs/LINK.md 9장. 연결은 app/main.cjs가 맺고 여기는 받기만 한다.
+import { getLang } from './i18n';
 import { create } from 'zustand';
 import { desktop } from './desktop';
 import { usePrefs } from './prefs';
@@ -194,6 +195,7 @@ let started = false;
 export function startLive() {
   if (!desktop || started) return;
   started = true;
+  window.addEventListener('pygaki-lang', () => liveSend({ cmd: 'lang', lang: getLang() }));
   // [대본] 화면으로 가면 앱에서 연 편집기를 닫는다 (열려 있으면 게임 입력이 편집기로 가서 게임이 안 넘어감)
   useLive.subscribe((s, prev) => {
     if (prev.view === 'showpy' && s.view !== 'showpy' && s.st?.editor.open && s.st.editor.hide_panel) liveSend({ cmd: 'editor', open: false });
@@ -208,6 +210,8 @@ export function startLive() {
     // 새로 붙으면 기억해 둔 보이기/숨기기를 게임에 알려 줌 (게임은 붙을 때마다 숨김으로 시작)
     if (s.on && !was) liveSend(panelCmd(useLive.getState().gamePanel));
     if (s.on && !was) liveSend({ cmd: 'bands', on: bandsOn() });
+    // pygaki editor 언어는 앱 언어를 따름 (pygaki v1.9). 앱에서 언어를 바꾸면 아래 'pygaki-lang'에서 다시 보냄
+    if (s.on && !was) liveSend({ cmd: 'lang', lang: getLang() });
     // 새로 붙으면(다시 읽은 뒤는 빼고) 설정에 따라 앱 창을 게임 창 옆으로. 게임 창이 뜰 때까지 조금 기다림
     if (s.on && !was && !reloadingBefore && usePrefs.getState().snapGame) setTimeout(() => void desktop?.snapToGame?.(), 1500);
   };
