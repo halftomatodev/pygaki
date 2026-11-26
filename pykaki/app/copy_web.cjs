@@ -10,9 +10,13 @@ fs.mkdirSync(path.join(__dirname, 'web'), { recursive: true });
 fs.copyFileSync(src, path.join(__dirname, 'web', 'index.html'));
 console.log('web/index.html 복사함');
 // 글자 효과 "렌파이 견본" 영상(public/effects → dist/effects, LineFields.tsx EffectClip). 세션 118: 예전엔 빠져서 앱에 안 나왔음
+// 세션 119: 빌드가 dist/effects를 비운 채 끝난 적이 있어서(Dropbox가 바쁠 때로 보임) 비었으면 멈춤
 const fx = path.join(__dirname, '..', 'dist', 'effects');
-if (fs.existsSync(fx)) {
-  fs.rmSync(path.join(__dirname, 'web', 'effects'), { recursive: true, force: true });
-  fs.cpSync(fx, path.join(__dirname, 'web', 'effects'), { recursive: true });
-  console.log('web/effects 복사함 (' + fs.readdirSync(fx).length + '개)');
+const n = fs.existsSync(fx) ? fs.readdirSync(fx).length : 0;
+if (!n) {
+  console.error('dist/effects가 비었어요. pykaki 폴더에서 빌드를 다시 하세요: ' + fx);
+  process.exit(1);
 }
+fs.rmSync(path.join(__dirname, 'web', 'effects'), { recursive: true, force: true });
+fs.cpSync(fx, path.join(__dirname, 'web', 'effects'), { recursive: true });
+console.log('web/effects 복사함 (' + n + '개)');

@@ -350,7 +350,7 @@ async function record(browser, name, lang, shotsDir, tmp) {
   const k = 2;
   const [cx, cy, cw, ch] = (SCENES[name][2] && SCENES[name][2].crop) || [0, 0, VW, VH];
   const crop = `crop=${Math.round(cw * k)}:${Math.round(ch * k)}:${Math.round(cx * k)}:${Math.round(cy * k)}`;
-  execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', list, '-vf', `scale=${VW * k}:${VH * k},` + crop + ',scale=1280:-2:flags=lanczos,fps=25', '-c:v', 'libvpx-vp9', '-b:v', '0', '-crf', '40', '-row-mt', '1', '-an', out]);
+  execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', list, '-vf', `scale=${VW * k}:${VH * k},` + crop + ',scale=1280:-2:flags=lanczos:out_range=tv,fps=25,format=yuv420p', '-color_range', 'tv', '-c:v', 'libvpx-vp9', '-b:v', '0', '-crf', '40', '-row-mt', '1', '-an', out]);
   console.log(`${name.padEnd(14)} ${lang}  ${(end / 1000).toFixed(1)}초  ${shots.length}장  ${(fs.statSync(out).size / 1024).toFixed(0)} KB`);
   void total;
 }

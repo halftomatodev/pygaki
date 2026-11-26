@@ -11,6 +11,7 @@ import { testVars, useFlagTest } from './flagUi';
 import { fileUrl, gameFont, useGameFolder, type GameLook } from './gameFolder';
 import { FxCanvas, webglOk } from './fx/FxCanvas';
 import { parseTextShader, type TextShader } from './fx/textShaders';
+import { tr } from './i18n';
 
 // 줄마다 고른 글꼴. 못 읽으면 게임 기본 글꼴로 보인다
 const fontStack = (path?: string) => {
@@ -204,7 +205,7 @@ function PreviewBody({ line, tagsOn, cps, look, onReplay }: { line: Line; tagsOn
   const project = useStore((s) => s.project);
   const vals = useFlagTest((s) => s.vals);
   // 플래그 값 [이름]은 처음 값(시험 값이 있으면 그 값)으로
-  const text = line.text.trim() ? (project.variables.length ? fillFlags(line.text, testVars(project, vals)) : line.text) : '효과 미리보기';
+  const text = line.text.trim() ? (project.variables.length ? fillFlags(line.text, testVars(project, vals)) : line.text) : tr('효과 미리보기');
   const parsed = useMemo(() => parseTagged(text, tagsOn, gameFont), [text, tagsOn]);
   const { shown, click, fast, limit, holding } = useReveal(parsed, cps);
   const { ts, tagTs, onFail } = useShader(line.say?.effect, parsed);
