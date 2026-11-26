@@ -300,6 +300,9 @@ init -9 python in ui_editor:
         if not ok:
             msg(why or "지금은 이 탭을 쓸 수 없습니다.")
             return
+        ## 이미 그 탭이면 그대로 (앱이 고르기 창을 따라 그 칸으로 갈 때 다시 보내도 고르기 창이 안 닫히게, 4.20)
+        if state.tab == tid:
+            return
         state.tab = tid
         state.popup = None
         state.message = ""
@@ -549,6 +552,13 @@ init -9 python in ui_editor:
         if kind == "color":
             picker.start(t, key)
         store.renpy.restart_interaction()
+
+    def shown_message():
+        """게임 패널에 보일 알림 한 줄. 앱이 붙어 있으면 고르기 창은 앱에만 그려지고(게임 창에는 없음)
+        그동안 게임 화면이 안 눌리니, 열려 있는 동안은 그것을 알려 줌 (4.20)"""
+        if state.popup is not None and live_connected():
+            return "고르기 창은 pygaki 앱에 열었습니다. 앱에서 고르거나 닫으면 이어집니다. (Esc 닫기)"
+        return state.message
 
     def close_popup():
         state.popup = None
@@ -1678,8 +1688,8 @@ screen ui_editor_panel():
                 $ _lines = _tab.info_lines()[:1] if (_tab is not None and _ok) else [ ]
                 for _line in _lines:
                     text _line style "ui_editor_small"
-                if ui_editor.state.message:
-                    text ui_editor.state.message style "ui_editor_small" color "#ffd23b"
+                if ui_editor.shown_message():
+                    text ui_editor.shown_message() style "ui_editor_small" color "#ffd23b"
 
         else:
             vbox:
@@ -1774,8 +1784,8 @@ screen ui_editor_panel_body():
             if _tab.panel_screen:
                 use expression _tab.panel_screen pass (_tab)
 
-        if ui_editor.state.message:
-            text ui_editor.state.message style "ui_editor_text" color "#ffd23b"
+        if ui_editor.shown_message():
+            text ui_editor.shown_message() style "ui_editor_text" color "#ffd23b"
 
         if ui_editor.state.help:
             null height 2
@@ -1823,8 +1833,8 @@ screen ui_editor_panel_compact():
 
         if ui_editor.state.popup is not None:
             text "pygaki 앱에 고르기 창이 열려 있어요." style "ui_editor_text" color "#ffd23b"
-        if ui_editor.state.message:
-            text ui_editor.state.message style "ui_editor_text" color "#ffd23b"
+        if ui_editor.shown_message():
+            text ui_editor.shown_message() style "ui_editor_text" color "#ffd23b"
 
         null height 2
         if _tab is not None and _ok and ui_editor.state.help:

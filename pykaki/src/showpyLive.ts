@@ -217,7 +217,17 @@ export function startLive() {
     if (s.on && !was && !reloadingBefore && usePrefs.getState().snapGame) setTimeout(() => void desktop?.snapToGame?.(), 1500);
   };
   const take = (m: any) => {
-    if (m?.type === 'state') useLive.setState({ st: m as GameState, err: null });
+    if (m?.type === 'state') {
+      // 게임 패널에서 고르기 창(글꼴, 색, 그림)을 열면 그 창은 앱의 [GUI 편집] 그 탭 칸에만 그려짐 → 그 칸으로 가고 앱 창을 앞으로
+      // (안 그러면 앱이 다른 칸을 보는 동안 어디에도 안 보이고 게임 입력만 막힘)
+      const before = useLive.getState().st?.panel?.popup_kind;
+      const p = (m as GameState).panel;
+      useLive.setState({ st: m as GameState, err: null });
+      if (p?.popup_kind && !before && p.tab) {
+        useLive.setState({ view: 'showpy', want: { tab: p.tab, field: null, n: Date.now() } });
+        void desktop?.refocus?.();
+      }
+    }
     else if (m?.type === 'files') useLive.setState({ files: { audio: m.audio ?? [], images: m.images ?? [], movies: m.movies ?? [] } });
     else if (m?.type === 'error') useLive.setState({ err: String(m.text) });
     // 게임 창에서 F9로 바꿈 

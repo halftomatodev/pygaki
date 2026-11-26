@@ -447,8 +447,11 @@ function ChoiceRow({ b, c, i, upd }: { b: BoxNode; c: Choice; i: number; upd: Up
             <span className="cf-kw">확정할 때</span>
             <MediaField value={m.select} placeholder="비우면 바로 넘어가요" title="눌러서 고르면 이 그림을 잠깐 보여 준 뒤 넘어가요" onChange={(v) => putM('select', v, 'cms' + c.id)} />
             {m.select && (
-              <input type="number" className="sf-num" min={0} max={10} step={0.1} title="확정 그림을 보여 주는 초 (기본 0.5)" placeholder="0.5초" value={m.time ?? ''}
-                onChange={(e) => { const n = Math.round(Number(e.target.value) * 10) / 10; putM('time', e.target.value === '' || !(n >= 0) ? undefined : Math.min(n, 10), 'cmt' + c.id); }} />
+              <>
+                <input type="number" className="sf-num" min={0} max={10} step={0.1} title="확정 그림을 보여 주는 초 (기본 0.5)" placeholder="0.5" value={m.time ?? ''}
+                  onChange={(e) => { const n = Math.round(Number(e.target.value) * 10) / 10; putM('time', e.target.value === '' || !(n >= 0) ? undefined : Math.min(n, 10), 'cmt' + c.id); }} />
+                <span className="sf-hint" title="확정 그림을 보여 주는 초 (기본 0.5)">초</span>
+              </>
             )}
           </div>
           <div className="cf-row media-row">

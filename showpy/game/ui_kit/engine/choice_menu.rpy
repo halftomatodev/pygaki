@@ -268,8 +268,11 @@ init -10 python in cmenu:
             for k, v in list(d.items()):
                 if k.startswith("hover_") and k not in ("hover_movie", "hover_movie_size",
                         "hover_movie_side_mask", "hover_movie_zoom", "hover_movie_offset",
-                        "hover_movie_loop", "hover_sound", "hover_offset"):
+                        "hover_movie_loop", "hover_sound", "hover_offset", "hover_media"):
                     d[k[6:]] = v
+            ## 뒤 그림은 "media"가 아니라 평소 그림(idle_media) 자리로 (4.20)
+            if d.get("hover_media"):
+                d["idle_media"] = d["hover_media"]
 
         c = Choice()
         c.index = index
