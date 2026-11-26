@@ -5,7 +5,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Liquid } from 'liquid-gooey';
-import { useStore as useFlow } from '@xyflow/react';
+import { useReactFlow, useStore as useFlow } from '@xyflow/react';
 import { GLASS_GOO, arcRow, useArc } from './GooGlass';
 import { useStore } from './store';
 import * as ops from './ops';
@@ -125,6 +125,22 @@ function TypeMenu({ anchor, cols, val, onPick, side = false }: { anchor: HTMLEle
     m.style.right = Math.min(window.innerWidth - a.left + 10 * z, window.innerWidth - w - 16) + 'px';
   };
   useLayoutEffect(placeSide);
+  // 상자가 캔버스 왼쪽 끝에 붙어 버블 자리가 없으면 캔버스를 오른쪽으로 옮겨 자리를 만든다 (세션 109: 화면 안으로 밀려 상자 글 위에 겹쳐 못 읽었음)
+  const rf = useReactFlow();
+  useEffect(() => {
+    const m = menu.current;
+    if (!side || !m) return;
+    const a = anchor.getBoundingClientRect();
+    const chip = anchor.closest('.side-chip')?.getBoundingClientRect();
+    const need = Math.min(a.left - 10 * z - m.offsetWidth * z, chip?.left ?? Infinity);
+    const canvasL = document.querySelector('.canvas')?.getBoundingClientRect().left ?? 0;
+    // 왼쪽 칸(캔버스 위에 떠 있음)도 피한다
+    const leftPanel = (document.querySelector('.main > .sidebar') as HTMLElement | null)?.offsetWidth ?? 0;
+    const lack = canvasL + leftPanel + 16 - need;
+    if (lack <= 0) return;
+    const vp = rf.getViewport();
+    rf.setViewport({ ...vp, x: vp.x + lack }, { duration: 250 });
+  }, []);
 
   useLayoutEffect(() => {
     const el = document.activeElement as HTMLElement | null;
