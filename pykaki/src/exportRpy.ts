@@ -440,7 +440,7 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
             if (ma.length && S.renpyLink && opts.oldMedia) W.push({ level: 'error', msg: `게임의 pygaki 플러그인이 예전 판이라 선택지 "${c.text}"의 뒤 그림에서 멈춰요. 런처의 [플러그인 올리기]로 올려 주세요`, nodeId: b.id });
             if (ma.length && !S.renpyLink) W.push({ level: 'warn', msg: `선택지 "${c.text}"의 뒤 그림은 pygaki 플러그인 연결을 켜야 내보내요`, nodeId: b.id });
             const margs = ma.length && S.renpyLink ? ` (${ma.join(', ')})` : '';
-            // 뒤 그림이 있는 선택지는 줄 끝에 # @c:선택지id (게임 안 편집 화면이 그림 자리를 돌려보낼 때 찾음, LINK.md 2장)
+            // 뒤 그림이 있는 선택지는 줄 끝에 # @c:선택지id (pygaki editor가 그림 자리를 돌려보낼 때 찾음, LINK.md 2장)
             body.push(`${I}${q(c.text)}${margs}${cond ? ' if ' + persistExpr(p, cond) : ''}:${margs && endMarks ? '  # @c:' + c.id : ''}`);
             // 고르면 바꾸기: jump 앞에 $ 줄
             for (const a0 of c.actions) {

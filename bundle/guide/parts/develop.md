@@ -63,7 +63,7 @@ pygaki를 내 게임에 맞게 고치거나, 기능을 더하거나, 고친 것�
 
 ## 화면 셰이더 하나 더하기
 
-화면 셰이더도 효과처럼 **셰이더 하나에 파일 둘**로 따로 모여 있어서, 새 셰이더를 넣을 때 화면 효과 엔진 전체(`screen_fx/engine/screen_fx.rpy`)는 고치지 않습니다. 셰이더 코드와 값 목록이 든 `screen_fx/engine/<이름>.rpy`, 사용자가 고치는 값이 든 `screen_fx/<이름>_config.rpy` 두 파일만 더합니다. `screen_fx/README.md` 12장의 견본(흑백 `mono`) 두 파일을 새 이름으로 저장하고, 안의 `mono`를 새 이름으로 바꾼 뒤 값 목록(`PARAMS`), 막대(`GROUPS`), 셰이더 코드를 고칩니다. 빼려면 그 두 파일을 지우고(`.rpyc`까지), 지우지 않고 고르는 목록에서만 감추려면 `screen_fx/shaders_off.txt`에 이름을 적습니다. 효과 폴더의 `.glsl` 하나보다는 적을 것이 많습니다(값 목록과 막대를 파이썬으로 적음). `screen_fx.register_shader`로 등록하면 `$ screen_fx.use("이름")`, 대사 괄호 `(fx="이름")`, 게임 안 편집 화면의 화면 효과 탭, pygaki 셰이더 목록에 저절로 나옵니다. 세부 값의 막대(`PARAMS`, `GROUPS`)를 고쳤으면 시험 프로젝트에서 Lint를 한 번 돌려 `screen_fx/shader_list.json`을 다시 만들고, 저장소의 같은 자리에 복사한 뒤 pygaki를 다시 빌드합니다.
+화면 셰이더도 효과처럼 **셰이더 하나에 파일 둘**로 따로 모여 있어서, 새 셰이더를 넣을 때 화면 효과 엔진 전체(`screen_fx/engine/screen_fx.rpy`)는 고치지 않습니다. 셰이더 코드와 값 목록이 든 `screen_fx/engine/<이름>.rpy`, 사용자가 고치는 값이 든 `screen_fx/<이름>_config.rpy` 두 파일만 더합니다. `screen_fx/README.md` 12장의 견본(흑백 `mono`) 두 파일을 새 이름으로 저장하고, 안의 `mono`를 새 이름으로 바꾼 뒤 값 목록(`PARAMS`), 막대(`GROUPS`), 셰이더 코드를 고칩니다. 빼려면 그 두 파일을 지우고(`.rpyc`까지), 지우지 않고 고르는 목록에서만 감추려면 `screen_fx/shaders_off.txt`에 이름을 적습니다. 효과 폴더의 `.glsl` 하나보다는 적을 것이 많습니다(값 목록과 막대를 파이썬으로 적음). `screen_fx.register_shader`로 등록하면 `$ screen_fx.use("이름")`, 대사 괄호 `(fx="이름")`, pygaki editor(게임 안 편집 화면)의 화면 효과 탭, pygaki 셰이더 목록에 저절로 나옵니다. 세부 값의 막대(`PARAMS`, `GROUPS`)를 고쳤으면 시험 프로젝트에서 Lint를 한 번 돌려 `screen_fx/shader_list.json`을 다시 만들고, 저장소의 같은 자리에 복사한 뒤 pygaki를 다시 빌드합니다.
 
 ## pygaki 고치기
 

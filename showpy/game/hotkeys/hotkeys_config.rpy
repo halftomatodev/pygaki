@@ -20,7 +20,7 @@ init offset = 1
 ##     { "keys": [ "K_v" ], "action": ShowMenu("preferences") },
 ##     { "keys": [ "K_F5" ], "do": "quick_save", "help": _("퀵세이브") },
 ##
-## 게임 안 편집 화면(F9)의 [단축키 수정] 탭에서 고친 것은 hotkeys_layout.rpy에 저장되고
+## pygaki editor(F9)의 [단축키 수정] 탭에서 고친 것은 hotkeys_layout.rpy에 저장되고
 ## 이 파일의 목록에 더해집니다(렌파이 기본 기능의 키를 바꾼 것도 거기에). 그 파일을 지우면 이 파일 값만 남습니다.
 
 define hotkeys.bindings = [

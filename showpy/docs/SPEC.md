@@ -3,7 +3,7 @@
 코드를 고치는 사람과 AI가 읽는 문서입니다. 사용법은 [CUSTOM_GUIDE.md](CUSTOM_GUIDE.md)에 있습니다.
 
 - 묶음 버전 5.0  = pygaki v1.3 (2026-11-09)
-- 5.0에 들어간 것: pygaki 플러그인 (새 화면 효과 일곱), pygaki 플러그인 (게임 안 편집 화면 이름, UI 글 탭, 폴더 열기, F9), pygaki 플러그인 (글자 효과 11개, 글 상자 `bubble` `pill`)
+- 5.0에 들어간 것: pygaki 플러그인 (새 화면 효과 일곱), pygaki 플러그인 (pygaki editor 이름, UI 글 탭, 폴더 열기, F9), pygaki 플러그인 (글자 효과 11개, 글 상자 `bubble` `pill`)
 - 렌파이 8.6.1 기준 (8.5.3에서도 동작. 셰이더는 예전 문법 GLSL ES 1.00으로 쓰고 8.6에서는 `glsl=100`을 붙여 등록)
 - 작업 규칙: [DEV_RULES.md](DEV_RULES.md)
 - 대본 편집기 연결 형식: [LINK.md](../../docs/LINK.md)
@@ -11,7 +11,7 @@
 
 ## 1. 목적
 
-렌파이를 쓸 때 코드와 툴 사용법을 먼저 배워야 하는 부담을 낮춥니다. 글은 대본 편집기에서 쓰고, 화면에 보이는 것은 게임을 실행한 채 게임 안 편집 화면에서 마우스로 고칩니다.
+렌파이를 쓸 때 코드와 툴 사용법을 먼저 배워야 하는 부담을 낮춥니다. 글은 대본 편집기에서 쓰고, 화면에 보이는 것은 게임을 실행한 채 pygaki editor에서 마우스로 고칩니다.
 
 원칙:
 - 폴더를 `game/`에 넣는 것만으로 동작합니다. 렌파이 기본 파일(`screens.rpy` 등)은 고치지 않습니다.
@@ -23,7 +23,7 @@
 
 | 폴더 | 버전 | 하는 일 |
 |---|---|---|
-| `game/ui_kit` | 4.20 | 타이틀 메뉴(배경, 제목, 부제, 글자 효과), ESC 메뉴, 선택지, 커서, 클릭 대기 표시, 대사 소리, 대사 스타일, 글 상자(`text_box`), 그림과 영상 배치(`stage`), 확인 창 글과 버튼 글자(`ui_text`), 게임 안 편집 화면(개발 모드 F9, 화면 이름 "게임 안 편집 화면", [언어] 단추로 한·일·영, 4.13 [화면] 탭에서 대본 편집기가 만든 화면·HUD 자리와 글 고치기), 원고 쓰기 도구(`script_edit`) |
+| `game/ui_kit` | 4.20 | 타이틀 메뉴(배경, 제목, 부제, 글자 효과), ESC 메뉴, 선택지, 커서, 클릭 대기 표시, 대사 소리, 대사 스타일, 글 상자(`text_box`), 그림과 영상 배치(`stage`), 확인 창 글과 버튼 글자(`ui_text`), pygaki editor(개발 모드 F9, 화면 이름 "pygaki editor", [언어] 단추로 한·일·영, 4.13 [화면] 탭에서 대본 편집기가 만든 화면·HUD 자리와 글 고치기), 원고 쓰기 도구(`script_edit`) |
 | `game/screen_fx` | 5.9 | 셰이더 두 자리(기본, 아스키, VHS, 단말기, 게임보이, 글리치, 지글거림, 망점, 홀로그램, 나이트비전, 일렁임, 포토 콜라주, 파편 흩날림 중 둘. 자리마다 세부 값 `values=`), 타이틀과 게임 내 메뉴 셰이더(따로 두 자리), TV 전환, 그림 전환으로 셰이더 바꾸기(`pending_with`), 글자 빼기, 커서 자리, 타이틀 일렁임, 이미지 하나에 거는 효과, 셰이더 전환 틀 |
 | `game/hotkeys` | 1.3 | 단축키, 조작방법 화면, 편집기 "단축키 수정" 탭(ui_kit이 있을 때, 기능마다 키를 바꾸고 겹치면 경고, `hotkeys_layout.rpy`의 `"keys"` `"desc"`, 스플래시 조작 안내 화면으로 내보내기) |
 | `game/splash` | 2.5 | 타이틀 전 로고, 경고, 조작 방법 페이지, 편집기 "스플래시" 탭(ui_kit이 있을 때, 화면에서 끌고 돌리고 글 고치기, 페이지 더하기) |
@@ -63,7 +63,7 @@
 | `fx_exclude` | `()` `("say",)` `("say", "choice", "screens")` | 효과에서 뺄 글자 |
 | `x` `y` `pos` | 숫자 | 대사 위치 |
 | `size` `font` `color` `outline` `spacing` `bold` `italic` `kerning` `width` `align` | | 글자 모양 |
-| `cps` | 숫자 | 나오는 속도, 1초에 몇 글자 (플레이어 설정과 상관없이). 게임 안 편집 화면 [대사]의 속도 단추도 이것 |
+| `cps` | 숫자 | 나오는 속도, 1초에 몇 글자 (플레이어 설정과 상관없이). pygaki editor [대사]의 속도 단추도 이것 |
 | `speed` | 배율 | 예전 원고용. 플레이어 설정에 곱함 (편집기는 더 쓰지 않고, 속도를 고르면 지움) |
 | `effect` | `"dissolve"` `"flip"` `"zoom"` `"jitter"` `"wave"`, pygaki 플러그인이 등록한 `"scatter"` `"drop"` `"shuffle"` `"flash"` `"slam"` `"typecursor"` `"echo"` `"glitch"` `"blurin"` `"blockglitch"` `"liquid"` `"vhs"` `"rise"` `"lean"` `"stretch"` `"slidein"` `"shake"` `"glyphbox"` `"stamp"` `"squash"` `"extrude"` (셰이더는 `ui_kit/engine/text_effects.glsl`, `text_effects.rpy`가 init에서 읽어 등록. 대본 편집기도 같은 파일의 사본으로 미리보기를 그림. `echo`는 `outlines`가 없으면 `say_style`이 파일의 `@outline` 겹을 넣음. pygaki 플러그인에서 `spin` `glow` `wipe` `inkfill` `punch`와 효과 폴더 샘플 `popin`을 뺌: 예전 원고의 그 이름은 `REMOVED_EFFECTS`로 한 글자씩 나옴) | 등장 효과 |
 | `name_x` `name_y` `name_font` `name_size` `name_color` | | 이름 |
@@ -325,7 +325,7 @@ $ screen_fx.set_values("shards", count=80, colors=2, color="#d22", color2="#811"
 - 참고 영상처럼 낱말마다 다른 자리의 상자는 대사 여러 줄을 각자 자리에 띄우는 것으로 합니다(대사 탭 위치 + `box`). 낱말마다 자동으로 나누기는 이번에는 안 합니다.
 - 대본 편집기 미리보기: 상자는 CSS로 비슷하게 그립니다. 형식이 바뀌므로(`box=` 괄호 값) `docs/LINK.md` 2장과 `pykaki/src/types.ts`를 같은 커밋에서 고칩니다.
 - 6단계에서 만든 것 (2026-11-09, `ui_kit/engine/text_box.rpy`): 렌파이 글(`Text`)은 background 스타일을 쓰지 않아서, 대사 괄호의 상자 값을 `what_background`의 `TextBox`로 넣고 `Text.render`를 감싸 그 값이 있을 때만 글 둘레에 상자를 깝니다(글 크기는 그대로라 배치가 안 바뀜). 상자는 `ui_kit.textbox` 셰이더(둥근 네모와 꼬리 세모의 거리 함수). 기울기는 상자와 글을 같이 돌림. 꼬리는 말하는 사람을 저절로 찾지 않고 방향이나 `(x, y)`로(글 그림은 화면 자리를 모름). 글자마다 움직이는 효과는 상자가 따라가지 않음. 값 이름은 `bubble_color`, `bubble_border`, `pill_line`, `pill_fill` 등 위 표 그대로, 더해서 `tail`, `box_rotate`, `*_tail_pos`, `*_tail_size`, `*_tail_width`, `*_text_color`. 기본 모양은 `say_style.box_styles`. 편집기 대사 탭 "상자" 칸(없음/말풍선/둥근 테두리, 꼬리, 기울기). pygaki 원고 줄에서는 칸을 숨김(7단계에서 대본 편집기와 같이).
-- 글 상자 묶기·네 점 변형·그림 효과 (`text_box.rpy` `_wrap_media`): 그림을 배율만 걸어 그린 뒤, 묶었으면(`media_link`) 그림 기준 좌표(돌리기 전)에 글을 `-a0`만큼 돌리고 `media_zoom / z0`배로 놓아 한 장으로 모음. 그 판에 `media_quad`(그림 사각형 네 모서리 → 옮긴 네 점의 원근 행렬, `quad_homography`)를 `ui_kit.quadwarp` 셰이더로 씌우고(`warp_render`: 판 전체를 덮는 크기로 넓혀 그 안에서 역행렬로 원래 자리를 찾음, 너무 휘어 뒤로 넘어가면 그대로), `media_fx`면 효과 폴더의 그림 전환 셰이더(`ui_kit.imgfx.이름`)로 빈 그림 → 판을 돌린 뒤 `media_angle`만큼 돌려 휘기 전 그림 가운데가 글 가운데 + `media_offset`에 오게 놓음. 글만의 변형(`media_text_quad`)은 글 그림에 먼저 씌움. 그린 자리는 `say_style.GEOM`(글 그림 id → 숫자, init 뒤에 다시 넣지 않아 세이브에 안 들어감)에 남겨, 게임 안 편집 화면이 모서리 점을 그리고(`geom_media_corners`, `geom_text_corners`) 끈 자리를 값으로 바꿈(`geom_media_q`, 글은 묶였으면 뉴턴법 `geom_text_q`). 선택지는 이 값이 하나라도 있으면 버튼 배경 대신 글의 `background`/`hover_background`에 그림/영상 상자를 넣어 같은 길로 그림(`choice_menu.rpy` `GROUP_KEYS`, `_media_box`). 글의 화면 자리는 편집 화면이 열렸을 때만 그 글 그림에 보이지 않는 포커스 표시(`mark_geom`, 빈 마스크라 마우스가 안 잡고 `keyboard_focus` 꺼짐)를 끼워 렌파이가 계산한 자리를 받음(`screen_origin`, 대사 탭. 없으면 스타일 값으로 짐작). 선택지는 버튼 포커스 영역이 모양(회전·기울기·확대·옮김)을 건 뒤의 자리이고 폭이 잘릴 때가 있어서, 가운데만 쓰고 크기는 글을 재서(+ `media_padding`) 구한 뒤 `cmenu_shape`과 같은 행렬(마우스가 위면 hover 값)을 걸어 점을 찍고, 끈 양은 그 역행렬로 되돌림(`editor_choice.rpy` `_place`). 점은 그릴 때마다 자리를 읽는 그림(`CornerDots`)이라 값을 바꿔 글 그림이 새로 생겨도 바로 따라옴. 점은 편집 패널 위에 그려서(`ui_editor_main`) 패널 밑의 점도 보이고 패널보다 먼저 집히며, 끄는 동안은 패널을 숨김(`state.corner_peek`). 자동 비키기는 [그림]일 때 점 전체를 감싸는 사각형을 피함(`dots_rect`). 끌기는 손을 뗄 때의 자리로 한 번 더 맞춤(빠르게 끌면 렌파이가 움직임 신호를 흘릴 때가 있음, `editor.rpy`)
+- 글 상자 묶기·네 점 변형·그림 효과 (`text_box.rpy` `_wrap_media`): 그림을 배율만 걸어 그린 뒤, 묶었으면(`media_link`) 그림 기준 좌표(돌리기 전)에 글을 `-a0`만큼 돌리고 `media_zoom / z0`배로 놓아 한 장으로 모음. 그 판에 `media_quad`(그림 사각형 네 모서리 → 옮긴 네 점의 원근 행렬, `quad_homography`)를 `ui_kit.quadwarp` 셰이더로 씌우고(`warp_render`: 판 전체를 덮는 크기로 넓혀 그 안에서 역행렬로 원래 자리를 찾음, 너무 휘어 뒤로 넘어가면 그대로), `media_fx`면 효과 폴더의 그림 전환 셰이더(`ui_kit.imgfx.이름`)로 빈 그림 → 판을 돌린 뒤 `media_angle`만큼 돌려 휘기 전 그림 가운데가 글 가운데 + `media_offset`에 오게 놓음. 글만의 변형(`media_text_quad`)은 글 그림에 먼저 씌움. 그린 자리는 `say_style.GEOM`(글 그림 id → 숫자, init 뒤에 다시 넣지 않아 세이브에 안 들어감)에 남겨, pygaki editor가 모서리 점을 그리고(`geom_media_corners`, `geom_text_corners`) 끈 자리를 값으로 바꿈(`geom_media_q`, 글은 묶였으면 뉴턴법 `geom_text_q`). 선택지는 이 값이 하나라도 있으면 버튼 배경 대신 글의 `background`/`hover_background`에 그림/영상 상자를 넣어 같은 길로 그림(`choice_menu.rpy` `GROUP_KEYS`, `_media_box`). 글의 화면 자리는 편집 화면이 열렸을 때만 그 글 그림에 보이지 않는 포커스 표시(`mark_geom`, 빈 마스크라 마우스가 안 잡고 `keyboard_focus` 꺼짐)를 끼워 렌파이가 계산한 자리를 받음(`screen_origin`, 대사 탭. 없으면 스타일 값으로 짐작). 선택지는 버튼 포커스 영역이 모양(회전·기울기·확대·옮김)을 건 뒤의 자리이고 폭이 잘릴 때가 있어서, 가운데만 쓰고 크기는 글을 재서(+ `media_padding`) 구한 뒤 `cmenu_shape`과 같은 행렬(마우스가 위면 hover 값)을 걸어 점을 찍고, 끈 양은 그 역행렬로 되돌림(`editor_choice.rpy` `_place`). 점은 그릴 때마다 자리를 읽는 그림(`CornerDots`)이라 값을 바꿔 글 그림이 새로 생겨도 바로 따라옴. 점은 편집 패널 위에 그려서(`ui_editor_main`) 패널 밑의 점도 보이고 패널보다 먼저 집히며, 끄는 동안은 패널을 숨김(`state.corner_peek`). 자동 비키기는 [그림]일 때 점 전체를 감싸는 사각형을 피함(`dots_rect`). 끌기는 손을 뗄 때의 자리로 한 번 더 맞춤(빠르게 끌면 렌파이가 움직임 신호를 흘릴 때가 있음, `editor.rpy`)
 
 ### 8-5. 편집기와 앱
 

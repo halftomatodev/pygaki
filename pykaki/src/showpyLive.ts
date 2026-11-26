@@ -177,7 +177,7 @@ export function toggleGameBands() {
   const on = !bandsOn();
   usePrefs.setState({ gameBands: on });
   if (!useLive.getState().on) return on ? '게임 화면 경계선을 켰어요 (게임과 연결되면 보내요)' : '게임 화면 경계선을 껐어요 (게임과 연결되면 보내요)';
-  return on ? '게임 화면 가장자리에 붉은 경계선을 켜요 (게임 안 편집 화면을 열었을 때)' : '게임 화면 경계선을 꺼요';
+  return on ? '게임 화면 가장자리에 붉은 경계선을 켜요 (게임 안 pygaki editor를 열었을 때)' : '게임 화면 경계선을 꺼요';
 }
 
 // F9 (게임 창의 F9와 같음): 편집 화면이 꺼져 있으면 축약형으로 켜고, 켜져 있으면 축약형 → 대형 → 숨김. 끄기는 게임 창 Esc
@@ -226,7 +226,7 @@ export function startLive() {
       bandsEcho = !!m.on;
       usePrefs.setState({ gameBands: !!m.on });
     }
-    // 게임 안 편집 화면의 [pygaki 앱에서 고르기]: [GUI 편집]의 그 탭으로
+    // pygaki editor의 [pygaki 앱에서 고르기]: [GUI 편집]의 그 탭으로
     else if (m?.type === 'open' && typeof m.tab === 'string') useLive.setState({ view: 'showpy', want: { tab: m.tab, n: Date.now() } });
   };
   // 환경 설정에서 바꾸면 게임에 보냄

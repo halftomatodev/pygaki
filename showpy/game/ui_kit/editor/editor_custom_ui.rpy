@@ -262,7 +262,7 @@ init -8 python in ui_editor:
             uk = store.ui_kit
             lay = self._merged()
 
-            lines = uk.file_header("pygaki 게임 안 편집 화면이 저장한 커서/대사 소리 설정입니다.", [
+            lines = uk.file_header("pygaki editor가 저장한 커서/대사 소리 설정입니다.", [
                 "여기 적힌 값은 custom_ui_config.rpy의 같은 값보다 우선합니다.",
                 "이 파일을 지우면 설정 파일 값으로 돌아갑니다.",
                 ])

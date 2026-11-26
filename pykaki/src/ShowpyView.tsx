@@ -72,7 +72,7 @@ export function ShowpyView() {
     liveSend({ cmd: 'editor', open: true, tab: s.tab });
   };
 
-  // 게임 안 편집 화면의 [pygaki 앱에서 고르기]: 그 탭의 칸을 고름. 게임과 아직 안 붙었으면 칸만 골라 둠
+  // pygaki editor의 [pygaki 앱에서 고르기]: 그 탭의 칸을 고름. 게임과 아직 안 붙었으면 칸만 골라 둠
   const want = useLive((s) => s.want);
   useEffect(() => {
     if (!want) return;
@@ -166,7 +166,7 @@ export function ShowpyView() {
       {script && <Resizer size="guiRightW" grow={-1} className="right" />}
       {/* 오른쪽 칸도 대본 편집처럼 카드: 저장·편집기 카드 + 고치는 칸 카드 (커서·대사 소리는 칸마다 카드) */}
       <div className="sp-panel">
-        <Card id="g-bar" title="저장과 게임 안 편집 화면">
+        <Card id="g-bar" title="저장과 게임 안 pygaki editor">
           {on && st && <EditorBar st={st} />}
           {err && <p className="sp-err">{err}</p>}
           {!on && (script ? <p className="tip">게임과 연결되면 여기서 고쳐요.</p> : <NotConnected />)}

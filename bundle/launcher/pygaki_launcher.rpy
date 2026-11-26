@@ -534,7 +534,7 @@ label pygaki_update:
         else:
             pygaki_head = T("이 프로젝트의 pygaki 플러그인을 새 판으로 바꿀까요?", "このプロジェクトの pygaki プラグインを新しいバージョンにしますか?", "Update this project's pygaki plugins to the new version?")
         pygaki_note = L(
-            "엔진·편집기 파일만 바꾸고, 설정(*_config.rpy)과 게임 안 편집 화면에서 저장한 값(*_layout.rpy)은 그대로 둬요. 바꾸기 전 것은 프로젝트 폴더의 ui_kit_backup/plugins에 남아요. 게임을 끄고 해 주세요.",
+            "엔진·편집기 파일만 바꾸고, 설정(*_config.rpy)과 게임 안 pygaki editor에서 저장한 값(*_layout.rpy)은 그대로 둬요. 바꾸기 전 것은 프로젝트 폴더의 ui_kit_backup/plugins에 남아요. 게임을 끄고 해 주세요.",
             "エンジン・編集画面のファイルだけを替え、設定(*_config.rpy)とゲーム内編集画面で保存した値(*_layout.rpy)はそのままです。替える前のものはプロジェクトフォルダーの ui_kit_backup/plugins に残ります。ゲームを閉じてから行ってください。",
             "Only the engine and editor files are replaced. Settings (*_config.rpy) and values saved in the in-game editor (*_layout.rpy) stay as they are. The old files are kept in ui_kit_backup/plugins in the project folder. Close the game first.",
         )

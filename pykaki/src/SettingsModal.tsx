@@ -155,9 +155,9 @@ function RunPrefs() {
         <input type="checkbox" checked={!!snap} onChange={(e) => usePrefs.setState({ snapGame: e.target.checked })} />
         게임과 연결되면 이 창을 게임 창 옆으로 옮기기
       </label>
-      <label className="row" title="창이 게임 화면보다 커서 둘레에 검은 띠가 남을 때(레트로 해상도처럼 정수 배율로 키운 게임 등), 게임 안 편집 화면이 열려 있으면 게임 화면 가장자리에 붉은 선을 그어요. 띠는 칠하지 않아요. 게임 창에서는 F8">
+      <label className="row" title="창이 게임 화면보다 커서 둘레에 검은 띠가 남을 때(레트로 해상도처럼 정수 배율로 키운 게임 등), 게임 안 pygaki editor가 열려 있으면 게임 화면 가장자리에 붉은 선을 그어요. 띠는 칠하지 않아요. 게임 창에서는 F8">
         <input type="checkbox" checked={bands} onChange={(e) => usePrefs.setState({ gameBands: e.target.checked })} />
-        게임 화면 가장자리에 붉은 경계선 (게임 안 편집 화면을 열었을 때)
+        게임 화면 가장자리에 붉은 경계선 (게임 안 pygaki editor를 열었을 때)
       </label>
     </>
   );

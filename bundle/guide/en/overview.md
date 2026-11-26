@@ -1,4 +1,4 @@
-<!-- 원본: bundle/guide/parts/overview.md @ e65e7a54a9 -->
+<!-- 원본: bundle/guide/parts/overview.md @ 4b500adf29 -->
 # At a glance: where docs and files are
 
 What is where in the bundle you downloaded, in a game project you made, and in the repository. Look here when you wonder "can I delete this file?" or "where is my work saved?".
@@ -11,9 +11,9 @@ What is where in the bundle you downloaded, in a game project you made, and in t
 | Exported script | `game/script_flow.rpy` | The result made from the script. Exporting again overwrites it, so don't edit this file directly |
 | Snapshots (version list) | inside the pygaki app on this computer | Kept automatically every 5 minutes when something changed, on export, and before importing (the latest 30 automatic snapshots). They don't move to other computers |
 | Image positions | `game/ui_kit/stage_layout.rpy` | Positions saved with a line's [Move position]. Snapshots don't restore them |
-| Values saved in the in-game editor | `*_layout.rpy` in each plugin folder (e.g. `ui_kit/title_menu_layout.rpy`, `screen_fx/screen_fx_layout.rpy`) | Take priority over the same value in the settings file (`*_config.rpy`). Set them aside and put them back when updating |
+| Values saved in pygaki editor (the in-game editor) | `*_layout.rpy` in each plugin folder (e.g. `ui_kit/title_menu_layout.rpy`, `screen_fx/screen_fx_layout.rpy`) | Take priority over the same value in the settings file (`*_config.rpy`). Set them aside and put them back when updating |
 | Settings you edited | `*_config.rpy` in each plugin folder | Don't edit the engine files (`engine/`, `editor/`) |
-| Originals before script edits, plugins before updates | `ui_kit_backup/` in the project folder | Kept before the in-game editor changes parentheses in the script, and before the launcher's [플러그인 올리기] (Update plugins) replaces files (`plugins/`). For development, so leave it out of releases |
+| Originals before script edits, plugins before updates | `ui_kit_backup/` in the project folder | Kept before the pygaki editor changes parentheses in the script, and before the launcher's [플러그인 올리기] (Update plugins) replaces files (`plugins/`). For development, so leave it out of releases |
 | Files the game and app exchange | `game/showpy_inbox.json`, `game/showpy_live.json`, `game/pykaki_preview.json`, `game/pykaki_goto.json`, `game/pykaki_screens.json` | Link files that only appear during development. Don't put them in the game's release (they come back if deleted) |
 
 When you build the game for release, leave out `*.flow.json`, `ui_kit_backup/` and the link files above. Each plugin's `README.md` is left out automatically when building.
@@ -42,7 +42,7 @@ To remove the add-on, delete `launcher/game/pygaki_launcher.rpy` (and its `.rpyc
 | `game/script_flow.rpy` | the script exported by pygaki |
 | `game/images/`, `game/movies/`, `game/audio/` | images, webm videos, sounds. They appear in the app's pickers. Name files with English letters, digits and `_` |
 | `game/gui/cursor/`, `game/gui/ctc/` | cursor and click-to-continue images (samples included) |
-| `game/ui_kit/` | the plugin for title, choices, dialogue, cursor, image placement and the in-game editor. Text effect and image transition files (`.glsl`) in `effects/` |
+| `game/ui_kit/` | the plugin for title, choices, dialogue, cursor, image placement and the pygaki editor. Text effect and image transition files (`.glsl`) in `effects/` |
 | `game/screen_fx/` | the screen shader plugin. `<name>_config.rpy` for each shader; names to hide from lists go in `shaders_off.txt` |
 | `game/hotkeys/`, `game/splash/` | hotkeys, splash |
 | `game/tl/None/common.rpym` | Korean for Ren'Py's common text (quit confirmation and so on) |
@@ -58,7 +58,7 @@ To remove the add-on, delete `launcher/game/pygaki_launcher.rpy` (and its `.rpyc
 | `pykaki/docs/SPEC.md` | how pygaki is built (for people changing it) |
 | `pykaki/public/effects/` | sample videos of text effects (used in this guide's "Effect samples" chapter) |
 | `pykaki/i18n/` | the dictionary for the screen language button (`strings.tsv`) |
-| `showpy/i18n/` | finds text missing from the in-game editor dictionary (`extract_editor.py`). The dictionary is `showpy/game/ui_kit/editor/editor_lang.tsv` |
+| `showpy/i18n/` | finds text missing from the pygaki editor dictionary (`extract_editor.py`). The dictionary is `showpy/game/ui_kit/editor/editor_lang.tsv` |
 | `pykaki/licenses/` | licenses of fonts and libraries bundled in the app |
 | `showpy/game/` | the four pygaki plugin folders (exactly as they go into a game's `game/`) |
 | `showpy/docs/CUSTOM_GUIDE.md` | settings reference. Source of this guide's "Plugin customization guide" chapter |
@@ -92,7 +92,7 @@ The repository's documents are in Korean. The Japanese and English versions of t
 | v1.0 | first bundle: Ren'Py SDK + plugins + launcher [pygaki로 편집] + pygaki app |
 | v1.1 | app renamed to pygaki, app [Script]·[GUI], two shader slots (1 + 2) and [Apply from here], lines that change shaders and per-line transitions, cursor and click-to-continue image folders, title and ESC menu decoration, splash editing |
 | v1.2 | edit the splash on screen (drag, edit text in place, add pages), effects on a single image, tag box (bold, color, pause, speed), development files left out of the bundle |
-| v1.3 | seven new screen shaders (glitch, jitter, halftone, hologram, night vision, etc.), eleven text effects, text boxes (speech bubble, rounded frame), the in-game editor's "UI text" tab, Korean common text |
+| v1.3 | seven new screen shaders (glitch, jitter, halftone, hologram, night vision, etc.), eleven text effects, text boxes (speech bubble, rounded frame), the pygaki editor's "UI text" tab, Korean common text |
 | v1.4 | conditions and flags in scripts, copy, paste and duplicate boxes, handles on choice and condition branches (drag to reorder, delete), the effects folder and twelve image transitions, shader transitions (pixel sort, datamosh, TV static, etc.), nine more screen shaders (ripple, old film, fisheye, old camcorder, etc.), more text effects (speech bubble, karaoke, box behind, droplets, etc.), missing effects fall back to defaults instead of stopping, tag box (cards, sliders, sample tooltips), ruby, `{clear}`, speed as "characters per second", app [Effects]·[Shaders] galleries and hiding (hidden ones go to the bottom), pygaki as a desktop app only, this HTML guide |
 | v1.5 | language button (Japanese, English), [Screen] tab and calling screens, voice card, find and replace, following flags, music and sound details, pause and shake lines, front/behind for shown images, choice questions, image name checks, [⇔ Beside game], shader block corruption, VHS worn tape |
 | v1.6 | Edit shortcuts (change each function's key by pressing it in the game window, a warning on overlaps, added to the controls help list automatically), the splash controls guide follows the shortcut table, Japanese and English guides, removed the [⇔ Beside game] button (the automatic move in settings stays) |

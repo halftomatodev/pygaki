@@ -92,7 +92,7 @@ init -8 python in ui_editor:
         if _editor_pending():
             if w.told != cur:
                 w.told = cur
-                store.renpy.notify("대본 편집기에서 원고를 내보냈어요. 게임 안 편집 화면에 저장 안 한 값이 있어서 다시 불러오지 않았어요. 저장하거나 버린 뒤 Shift+R")
+                store.renpy.notify("대본 편집기에서 원고를 내보냈어요. pygaki editor에 저장 안 한 값이 있어서 다시 불러오지 않았어요. 저장하거나 버린 뒤 Shift+R")
             return
         old = getattr(w, "text", None)
         w.seen = cur

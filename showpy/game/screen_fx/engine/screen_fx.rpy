@@ -25,7 +25,7 @@
 ##      그래서 대사창과 선택지를 각자 층(sfx_say, sfx_choice)에 띄웁니다. (screen_fx.split_text_layers)
 ##      글자 층만 다르게 그리는 효과(게임보이: 글자는 색만 입힘)는 하나도 안 빼도 층마다 씌웁니다.
 ##   5. 대사 줄 괄호의 fx="…", fx_overlay=True/False, fx_warp=2.0 (그 대사가 나오기 전에 바꿈)
-##   6. pygaki 게임 안 편집 화면와 연결 (editor/editor_fx.rpy)
+##   6. pygaki editor와 연결 (editor/editor_fx.rpy)
 ##
 ## 타이틀 일렁임(watermorph)은 이 전환과 상관없이 타이틀에서만 따로 켜집니다.
 ##
@@ -69,13 +69,13 @@ init -110 python in screen_fx:
             kwargs.setdefault("glsl", 100)
         renpy.register_shader(name, **kwargs)
 
-    ## ── pygaki 게임 안 편집 화면와 연결 ──
+    ## ── pygaki editor와 연결 ──
 
     ## 편집기의 "화면 효과" 탭 이름
     TAB_ID = "screen_fx"
 
     def editor_state():
-        """게임 안 편집 화면의 상태. 편집기가 없으면 None."""
+        """pygaki editor의 상태. 편집기가 없으면 None."""
         ed = getattr(store, "ui_editor", None)
         return getattr(ed, "state", None)
 

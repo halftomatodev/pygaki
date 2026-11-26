@@ -24,7 +24,7 @@ export interface InboxOp {
   end?: string; // 이 상자의 끝에 (선택지, jump 바로 앞)
   sayFx?: Partial<Record<keyof LineFx, string | string[] | null>>; // say_fx: 대사의 화면 효과. null이면 지움
   line?: string; // replace, say_pos, say_fx: 바꿀 줄
-  screen?: string; // screen, screen_item: 화면 id (게임 안 편집 화면의 [화면] 탭, LINK.md 3장)
+  screen?: string; // screen, screen_item: 화면 id (pygaki editor의 [화면] 탭, LINK.md 3장)
   item?: string; // screen_item: 항목 id
   set?: Record<string, unknown>; // screen: anchor dx dy w h / screen_item: x y text
 }
@@ -186,7 +186,7 @@ export function applyInbox(p: Project, ops: InboxOp[]): { applied: number; moved
       continue;
     }
     if (op.op === 'choice_media') {
-      // 선택지 뒤 그림의 자리·크기·회전 (게임 안 편집 화면 선택지 탭)
+      // 선택지 뒤 그림의 자리·크기·회전 (pygaki editor 선택지 탭)
       const c = op.choice ? p.nodes.flatMap((b) => (b.exit.type === 'menu' ? b.exit.choices : [])).find((x) => x.id === op.choice) : undefined;
       if (!c || !c.media || !op.media) {
         dropped.push('선택지 뒤 그림');

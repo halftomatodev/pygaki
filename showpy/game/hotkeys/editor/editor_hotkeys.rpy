@@ -1,5 +1,5 @@
 ################################################################################
-## Hotkeys — pygaki 게임 안 편집 화면 탭 "단축키 수정" 
+## Hotkeys — pygaki editor 탭 "단축키 수정" 
 ##
 ## pygaki 플러그인이 있으면 그 편집기(개발 모드에서 F9)에 탭을 더합니다.
 ## pygaki이 없으면 이 파일은 아무것도 하지 않고, 단축키는 hotkeys_config.rpy대로입니다.
@@ -20,7 +20,7 @@
 
 init offset = 1
 
-## pygaki 게임 안 편집 화면(init -9, -8)를 읽은 뒤에 실행됩니다.
+## pygaki editor(init -9, -8)를 읽은 뒤에 실행됩니다.
 init -6 python in hotkeys:
 
     import json
@@ -641,9 +641,9 @@ init -6 python in hotkeys:
                     "이 파일을 지우면 설정 파일 값으로 돌아갑니다.",
                     ]
                 if header is not None:
-                    lines = header("게임 안 편집 화면이 저장한 단축키입니다.", notes)
+                    lines = header("pygaki editor가 저장한 단축키입니다.", notes)
                 else:
-                    lines = [ "## 게임 안 편집 화면이 저장한 단축키입니다. (자동 생성)", "" ]
+                    lines = [ "## pygaki editor가 저장한 단축키입니다. (자동 생성)", "" ]
                 lines.append("define hotkeys.layout = {")
                 lines.append('    "keys": {')
                 for f in FUNCS:

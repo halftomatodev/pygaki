@@ -185,7 +185,7 @@ init -10 python in watermorph:
         if not cfg("enabled"):
             return False
 
-        ## pygaki 게임 안 편집 화면에서 다른 탭을 쓰는 동안에는 끔 (편집 화면이 일그러지지 않도록)
+        ## pygaki editor에서 다른 탭을 쓰는 동안에는 끔 (편집 화면이 일그러지지 않도록)
         if store.screen_fx.editor_pauses("watermorph"):
             return False
 

@@ -81,7 +81,7 @@ export const FX_CURSOR: [string, string][] = [['', '커서 그대로'], ['effect
 
 const warpVal = (v: string) => (v === 'default' ? '"default"' : v);
 
-// 그림/영상의 자리·크기·회전 (게임 안 편집 화면에서 받아 적은 값). 대사와 선택지가 같이 씀
+// 그림/영상의 자리·크기·회전 (pygaki editor에서 받아 적은 값). 대사와 선택지가 같이 씀
 export function mediaPlace(x?: number, y?: number, zoom?: number, angle?: number): string[] {
   const a: string[] = [];
   if (x || y) a.push(`media_offset=(${x ?? 0}, ${y ?? 0})`);

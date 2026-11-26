@@ -102,7 +102,7 @@ init -8 python in ui_editor:
 
         def layout_file(self):
             uk = store.ui_kit
-            lines = uk.file_header("게임 안 편집 화면이 저장한 그림 자리입니다.", [
+            lines = uk.file_header("pygaki editor가 저장한 그림 자리입니다.", [
                 "대본 편집기에서 다시 내보내도 지워지지 않습니다.",
                 '"ghost"는 어디서나, ("n4", "ghost")는 상자 n4에서만 쓰는 자리입니다.',
                 "이 파일을 지우면 그림이 렌파이 기본 자리로 돌아갑니다.",

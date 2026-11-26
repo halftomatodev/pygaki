@@ -1,4 +1,4 @@
-# 게임 안 편집 화면(F9) 사전. 한 줄에 한국어<탭>일본어<탭>영어. editor_lang.rpy가 읽음
+# pygaki editor(F9) 사전. 한 줄에 한국어<탭>일본어<탭>영어. editor_lang.rpy가 읽음
 # 줄바꿈은 \n, 글자 그대로의 \n은 \\n. 한국어의 {} 자리(format)는 번역에 {0} {1}로 (차례를 바꿔도 됨)
 # 사전에 없는 글 찾기: 저장소의 showpy/i18n/extract_editor.py → showpy/i18n/missing.txt
 화면 기준	画面基準	screen
@@ -152,7 +152,7 @@ TV 껐다 켜기	テレビのオフ/オン	TV off/on
 "desc": 조작 안내 화면과 조작방법 화면에 보일 설명 (없으면 기능 이름).	"desc": 操作案内画面と操作方法画面に表示する説明(なければ機能名)。	"desc": text shown on the controls and help screens (action name if absent).
 여기 적힌 단축키와 뺀 키는 hotkeys_config.rpy의 것에 더해집니다.	ここに書かれたショートカットと外したキーは hotkeys_config.rpy のものに加わります。	The shortcuts and removed keys here are added to those in hotkeys_config.rpy.
 이 파일을 지우면 설정 파일 값으로 돌아갑니다.	このファイルを消すと設定ファイルの値に戻ります。	Delete this file to go back to the settings file values.
-게임 안 편집 화면이 저장한 단축키입니다.	ゲーム内編集画面が保存したショートカットです。	Shortcuts saved by the in-game editor.
+pygaki editor가 저장한 단축키입니다.	pygaki editorが保存したショートカットです。	Shortcuts saved by pygaki editor.
 UI Kit 편집기가 저장한 타이틀 일렁임 설정입니다.	UI Kit エディターが保存したタイトルのゆらめき設定です。	Title ripple settings saved by the UI Kit editor.
 여기 적힌 값은 watermorph_config.rpy의 같은 값보다 우선합니다.	ここに書かれた値は watermorph_config.rpy の同じ値より優先されます。	Values here override the same values in watermorph_config.rpy.
 두 자리 모두 '기본'으로 골랐습니다. [[여기에서부터 적용]을 눌러야 원고에 들어갑니다.	2 枠とも「デフォルト」にしました。[ここから適用] を押すとスクリプトに入ります。	Set both slots to 'Default'. Click [Apply from here] to write it to the script.
@@ -341,7 +341,7 @@ splash_config.rpy에 있는 페이지 이름은 그 파일에서 바꿉니다.	s
 여기 적힌 값은 splash_config.rpy의 같은 페이지 값보다 우선합니다.	ここに書かれた値は splash_config.rpy の同じページの値より優先されます。	Values here override the same page's values in splash_config.rpy.
 글은 _("…")로 적어서 번역 목록에 잡힙니다.	文字は _("…") で書くので翻訳リストに入ります。	Text is written as _("…") so it appears in translation lists.
 이 파일을 지우면 설정 파일 값과 순서로 돌아갑니다.	このファイルを消すと設定ファイルの値と順番に戻ります。	Delete this file to go back to the settings file values and order.
-게임 안 편집 화면이 저장한 스플래시 페이지 값입니다.	ゲーム内編集画面が保存したスプラッシュページの値です。	Splash page values saved by the in-game editor.
+pygaki editor가 저장한 스플래시 페이지 값입니다.	pygaki editorが保存したスプラッシュページの値です。	Splash page values saved by pygaki editor.
 페이지 {}/{}: {}{}	ページ {0}/{1}:{2}{3}	Page {0}/{1}: {2}{3}
 (새 페이지)	(新しいページ)	(new page)
 고른 것:	選んだもの:	Selected:
@@ -523,7 +523,7 @@ V 화면 효과 보기	V 画面エフェクト表示	V Show screen FX
 폴더를 고르고 그림을 누르면 이 칸에 들어가고 다음 칸으로 넘어갑니다.	フォルダーを選び画像をクリックすると、この枠に入り次の枠へ進みます。	Pick a folder and click an image: it goes into this slot and moves to the next.
 이 폴더 통째로 넣기 (최대 12장)	このフォルダーを丸ごと入れる(最大 12 枚)	Use this whole folder (up to 12)
 이 칸 비우기	この枠を空にする	Clear this slot
-게임 안 편집 화면	ゲーム内編集画面	In-game editor
+pygaki editor	pygaki editor	pygaki editor
 숨김 (pygaki 앱에서 고침)	非表示(pygaki アプリで編集)	Hidden (editing in the pygaki app)
 보임	表示	Shown
 pygaki 앱에 고르기 창이 열려 있어요 | Esc 닫기	pygaki アプリで選択ウィンドウが開いています | Esc 閉じる	A picker is open in the pygaki app | Esc Close
@@ -546,7 +546,7 @@ ESC 메뉴는 게임 진행 중에 열 수 있습니다.	ESC メニューはゲ�
 셰이더 상태를 맞추지 못했습니다: {}	シェーダーの状態を合わせられませんでした:{0}	Couldn't sync the shader state: {0}
 파일 목록을 만들지 못했습니다: {}	ファイル一覧を作れませんでした:{0}	Couldn't build the file list: {0}
 상태를 만들지 못했습니다: {}	状態を作れませんでした:{0}	Couldn't build the state: {0}
-대본 편집기에서 원고를 내보냈어요. 게임 안 편집 화면에 저장 안 한 값이 있어서 다시 불러오지 않았어요. 저장하거나 버린 뒤 Shift+R	スクリプトエディターがスクリプトを書き出しました。ゲーム内編集画面に未保存の値があるので再読み込みしませんでした。保存か破棄をしてから Shift+R	The script editor exported the script. It wasn't reloaded because the in-game editor has unsaved values. Save or discard them, then Shift+R
+대본 편집기에서 원고를 내보냈어요. pygaki editor에 저장 안 한 값이 있어서 다시 불러오지 않았어요. 저장하거나 버린 뒤 Shift+R	スクリプトエディターがスクリプトを書き出しました。pygaki editorに未保存の値があるので再読み込みしませんでした。保存か破棄をしてから Shift+R	The script editor exported the script. It wasn't reloaded because pygaki editor has unsaved values. Save or discard them, then Shift+R
 대사	セリフ	Dialogue
 원고에 바로 저장되지 않는 줄에 쓰세요. 그 대사 줄 괄호에 붙여넣습니다.	スクリプトに直接保存されない行に使ってください。そのセリフ行の括弧に貼り付けます。	Use this for lines that can't be saved to the script directly. Paste it into that dialogue line's brackets.
 뒤집히며	反転しながら	Flipping
@@ -616,7 +616,7 @@ Tab 대사/이름 바꾸기 | 방향키 이동 (Shift: 10배) | S/W 글자 크�
 Tab 대사/이름/그림 바꾸기 | 방향키 이동 (Shift: 10배) | R 다시 보기 | Backspace 이 대사 되돌리기	Tab セリフ/名前/画像の切り替え | 矢印キーで移動 (Shift: 10 倍) | R もう一度見る | Backspace このセリフを元に戻す	Tab switch dialogue/name/image | Arrow keys move (Shift: x10) | R replay | Backspace revert this dialogue
 이미지/영상	画像/動画	Images/video
 원고에 바로 저장되지 않는 줄에 쓰세요. 그 줄을 이 줄로 바꿔 붙여넣습니다.	スクリプトに直接保存されない行に使ってください。その行をこの行に置き換えて貼り付けます。	Use this for lines that can't be saved to the script directly. Paste it over that line.
-게임 안 편집 화면이 저장한 그림 자리입니다.	ゲーム内編集画面が保存した画像の位置です。	Image positions saved by the in-game editor.
+pygaki editor가 저장한 그림 자리입니다.	pygaki editorが保存した画像の位置です。	Image positions saved by pygaki editor.
 대본 편집기에서 다시 내보내도 지워지지 않습니다.	スクリプトエディターで書き出し直しても消えません。	Re-exporting from the script editor doesn't erase them.
 "ghost"는 어디서나, ("n4", "ghost")는 상자 n4에서만 쓰는 자리입니다.	"ghost" はどこでも、("n4", "ghost") はボックス n4 だけで使う位置です。	"ghost" applies everywhere; ("n4", "ghost") applies only in box n4.
 이 파일을 지우면 그림이 렌파이 기본 자리로 돌아갑니다.	このファイルを消すと画像は Ren'Py の標準の位置に戻ります。	Delete this file to put images back in Ren'Py's default positions.
@@ -738,7 +738,7 @@ Tab 다음 항목 (제목, 부제 포함) | 1/2 평소/선택됐을 때 | 3 이 
 이 항목 되돌리기	この項目を元に戻す	Revert this item
 UI 글	UI の文字	UI text
 UI 글 기능이 없습니다.	UI の文字の機能がありません。	The UI text feature is missing.
-게임 안 편집 화면이 저장한 UI 글(확인 창, 버튼 글자)입니다.	ゲーム内編集画面が保存した UI の文字(確認ウィンドウ、ボタンの文字)です。	UI text (confirm dialogs, button labels) saved by the in-game editor.
+pygaki editor가 저장한 UI 글(확인 창, 버튼 글자)입니다.	pygaki editorが保存した UI の文字(確認ウィンドウ、ボタンの文字)です。	UI text (confirm dialogs, button labels) saved by pygaki editor.
 여기 적힌 값은 ui_text_config.rpy의 같은 이름보다 우선합니다.	ここに書かれた値は ui_text_config.rpy の同じ名前より優先されます。	Values here override the same names in ui_text_config.rpy.
 칸을 눌러 고치고 Enter (Esc 취소). 줄바꿈은 \\n. 확인 창 글은 [[이 창 보기]로 바로 보고, 버튼 글자는 저장하면 다시 불러온 뒤 바뀝니다.	欄をクリックして直し Enter(Esc でキャンセル)。改行は \\n。確認ウィンドウの文字は [このウィンドウを見る] ですぐ見られ、ボタンの文字は保存して再読み込みした後に変わります。	Click a field, edit, then Enter (Esc cancels). Use \\n for a new line. See confirm dialog text at once with [Show this dialog]; button labels change after saving and reloading.
 screens.rpy를 고치지 않고 렌파이 번역표로 바꿉니다. 같은 글을 여러 곳에서 쓰면 같이 바뀝니다.	screens.rpy は直さず、Ren'Py の翻訳表で変えます。同じ文字を複数の場所で使っていれば一緒に変わります。	Changes go through Ren'Py's translation table without editing screens.rpy. Text used in several places changes everywhere.

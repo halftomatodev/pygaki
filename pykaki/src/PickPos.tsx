@@ -65,7 +65,7 @@ export function MoveBtn({ where, tab, what }: { where: Where; tab: PickTab; what
   const linked = useStore((s) => !!s.project.settings.renpyLink); // 받아 적기는 플러그인 연결을 켠 원고만
   if (!ready || !linked) return null;
   return (
-    <button className="move-pos" onClick={() => pickInGame(where, tab)} title={`게임을 이 줄로 옮기고 게임 안 편집 화면의 ${what} 탭을 열어요. 게임 창에서 끌어서 정해요`}>
+    <button className="move-pos" onClick={() => pickInGame(where, tab)} title={`게임을 이 줄로 옮기고 게임 안 pygaki editor의 ${what} 탭을 열어요. 게임 창에서 끌어서 정해요`}>
       위치 옮기기
     </button>
   );

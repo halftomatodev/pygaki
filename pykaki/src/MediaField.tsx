@@ -26,7 +26,7 @@ export async function pickMediaFile(): Promise<string | null> {
   }
 }
 
-// 게임 안 편집 화면에서 정한 그림의 자리·크기·회전. 보여 주고 지우기만 한다
+// pygaki editor에서 정한 그림의 자리·크기·회전. 보여 주고 지우기만 한다
 export function MediaPlace({ m, onClear }: { m: { x?: number; y?: number; zoom?: number; angle?: number }; onClear: () => void }) {
   // 화면 글 사전이 글 조각마다 바꾸므로 조각을 따로 둔다
   const parts: string[] = [];
@@ -34,9 +34,9 @@ export function MediaPlace({ m, onClear }: { m: { x?: number; y?: number; zoom?:
   if (m.zoom && m.zoom !== 1) parts.push(`${m.zoom}배`);
   if (m.angle) parts.push(`${m.angle}도`);
   if (!parts.length)
-    return <span className="sf-pos sf-hint" title="게임 안 편집 화면(F9)에서 그림을 끌어 옮기고, 휠로 키우고, Q/E로 돌려요. 저장하면 여기로 받아 적어요">자리·크기는 게임에서</span>;
+    return <span className="sf-pos sf-hint" title="게임 안 pygaki editor(F9)에서 그림을 끌어 옮기고, 휠로 키우고, Q/E로 돌려요. 저장하면 여기로 받아 적어요">자리·크기는 게임에서</span>;
   return (
-    <span className="sf-pos" title="게임 안 편집 화면에서 정한 그림 자리·크기·회전이에요. 글 가운데 기준이에요">
+    <span className="sf-pos" title="게임 안 pygaki editor에서 정한 그림 자리·크기·회전이에요. 글 가운데 기준이에요">
       <span>그림</span>
       {parts.map((t) => <span key={t}>{t}</span>)}
       <button title="그림 자리·크기·회전 지우기" onClick={onClear}>✕</button>
@@ -68,7 +68,7 @@ export function MediaField({ value, onChange, placeholder, title }: { value?: st
 }
 
 // 글 상자 묶기·네 점 변형·그림 효과 (FEATURE 28). 대사·선택지가 같이 씀.
-// 🔗 단추로 글을 그림에 묶고(묶을 때의 그림 크기·회전·옮김을 적어 둠), 네 점 변형은 게임 안 편집 화면에서 정해 받아 적은 것을 보여 주고 지우기만,
+// 🔗 단추로 글을 그림에 묶고(묶을 때의 그림 크기·회전·옮김을 적어 둠), 네 점 변형은 pygaki editor에서 정해 받아 적은 것을 보여 주고 지우기만,
 // 그림 효과는 나타나는 방식과 같은 고르기 창(렌파이 기본 전환은 빼고)과 [세부 값] 막대
 export interface MediaGroup { link?: number[]; quad?: number[]; text_quad?: number[]; fx?: string }
 export function MediaGroupFields({ g, place, onChange, old }: { g: MediaGroup; place: { x?: number; y?: number; zoom?: number; angle?: number }; onChange: (fn: (g: MediaGroup) => void, key?: string) => void; old?: boolean }) {
@@ -111,14 +111,14 @@ export function MediaGroupFields({ g, place, onChange, old }: { g: MediaGroup; p
           {linked ? '글 묶음' : '글 묶기'}
         </button>
         {warped ? (
-          <span className="sf-pos" title="게임 안 편집 화면(F9)에서 모서리 점을 끌어 정한 네 점 변형이에요">
+          <span className="sf-pos" title="게임 안 pygaki editor(F9)에서 모서리 점을 끌어 정한 네 점 변형이에요">
             <span>네 점 변형</span>
             {hasQuad(g.quad) && <span>그림</span>}
             {hasQuad(g.text_quad) && <span>글</span>}
             <button title="네 점 변형 지우기" onClick={() => onChange((m) => { delete m.quad; delete m.text_quad; })}>✕</button>
           </span>
         ) : (
-          <span className="sf-pos sf-hint" title="게임 안 편집 화면(F9) [그림]에서 모서리 점(분홍 그림, 하늘색 글)을 끌면 네 점 변형이 돼요. 저장하면 여기로 받아 적어요">네 점 변형은 게임에서</span>
+          <span className="sf-pos sf-hint" title="게임 안 pygaki editor(F9) [그림]에서 모서리 점(분홍 그림, 하늘색 글)을 끌면 네 점 변형이 돼요. 저장하면 여기로 받아 적어요">네 점 변형은 게임에서</span>
         )}
       </div>
       <div className="sf-row media-row">

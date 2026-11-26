@@ -455,7 +455,7 @@ init -10 python in say_style:
             return final
 
         def with_opts(self, **kw):
-            """값 몇 개만 바꾼 새 상자 (게임 안 편집 화면에서 끌 때 바로 보여 주려고, 4.15)."""
+            """값 몇 개만 바꾼 새 상자 (pygaki editor에서 끌 때 바로 보여 주려고, 4.15)."""
             o = dict(self.opts)
             o.update(kw)
             return TextBox(self.kind, o)
@@ -766,7 +766,7 @@ init -10 python in say_style:
         _qw_kwargs["glsl"] = 100
     store.renpy.register_shader(QUAD_SHADER, **_qw_kwargs)
 
-    ## 게임 안 편집 화면이 모서리 점을 그리고 끌 때 쓰는, 마지막으로 그린 그림/영상 상자의 자리 (글 그림 id → 값).
+    ## pygaki editor가 모서리 점을 그리고 끌 때 쓰는, 마지막으로 그린 그림/영상 상자의 자리 (글 그림 id → 값).
     ## 숫자만 두고 init 뒤에 다시 넣지 않으므로 세이브에 들어가지 않습니다.
     GEOM = { }
 

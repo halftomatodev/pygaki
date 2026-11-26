@@ -807,7 +807,7 @@ pygaki 플러그인 연결	pygakiプラグイン連携	pygaki plugin link
 없음 (아래 화면이 보임)	なし (下の画面が見える)	None (shows what's below)
 이 상자에는 아직 없어요.	このボックスにはまだありません。	None in this box yet.
 이 조건일 때만 보여요:	この条件のときだけ表示:	Shown only if:
-저장과 게임 안 편집 화면	保存とゲーム内編集画面	Save and in-game editor
+저장과 게임 안 pygaki editor	保存とゲーム内の pygaki editor	Save and in-game pygaki editor
 전환 없이 바로 바뀌어요.	トランジションなしですぐ変わります。	Changes instantly.
 중괄호 {{그대로} 보여요	波かっこ {{そのまま} 表示	Braces {{shown as is}
 파일을 고르지 못했어요:	ファイルを選べませんでした:	Couldn't pick file:
@@ -1203,13 +1203,13 @@ images, movies 폴더에 배경 말고 다른 그림·영상이 없어요.	image
 지금: label의 ${shaderLabel(group.shader)}	現在: labelの{0}	Now: label's {0}
 커서가 셰이더를 받을지 줄마다 정해요. 소프트웨어 커서일 때만 보여요.	カーソルにシェーダーをかけるか行ごとに決めます。ソフトウェアカーソルのときだけ表示。	Per line, whether the cursor is under shaders. Software cursor only.
 파일 이름은 영어, 숫자, _, -만 쓰고 .glsl로 끝나야 해요:	ファイル名は英数字・_・-のみで、.glslで終わる必要があります:	File names: letters, digits, _, - only, ending in .glsl:
-게임 안 편집 화면이 넣은 줄을 받아 적지 못해서 내보내기를 멈췄어요:	ゲーム内編集画面が入れた行を取り込めなかったため書き出しを止めました:	Export paused: couldn't import lines from the in-game editor:
+게임 안 pygaki editor가 넣은 줄을 받아 적지 못해서 내보내기를 멈췄어요:	ゲーム内の pygaki editorが入れた行を取り込めなかったため書き出しを止めました:	Export paused: couldn't import lines from the in-game pygaki editor:
 렌파이를 찾지 못했어요. 렌파이 런처에서 [프로젝트 실행]으로 켜 주세요	Ren'Pyが見つかりません。Ren'Pyランチャーの[プロジェクト実行]で起動してください	Ren'Py not found. Launch with [Launch Project] in the launcher
 루비 글 크기 {rt}{size=N}…{/rt}. 비워 두면 본문의 절반	ルビのサイズ {rt}{size=N}…{/rt}。空なら本文の半分	Ruby size {rt}{size=N}…{/rt}. Empty = half of body
 새 효과 요청문을 복사했어요. 만들고 싶은 모양과 같이 클로드에게 주세요	新エフェクト依頼文をコピーしました。作りたい見た目と一緒にClaudeに渡してください	Copied the request. Give it to Claude with the look you want
 이 게임에는 이 편집기 탭이 없어요. (플러그인이 빠져 있을 수 있어요)	このゲームにはこのエディタータブがありません。(プラグインがないかもしれません)	This game has no such editor tab. (A plugin may be missing)
 지금 쓰는 대사 한 줄에 걸어요. 정하지 않으면 캐릭터 → 게임 처음 값	今書いているセリフ1行にかけます。未設定ならキャラクター → ゲームの初期値	Applies to the current line. Otherwise character → game default
-프로젝트 폴더의 그림·소리와 게임 안 편집 화면이 넣은 줄을 다시 읽어요	プロジェクトフォルダの画像・音とゲーム内編集画面が入れた行を再読み込みします	Reload images, sounds and lines added in the in-game editor
+프로젝트 폴더의 그림·소리와 게임 안 pygaki editor가 넣은 줄을 다시 읽어요	プロジェクトフォルダの画像・音とゲーム内の pygaki editorが入れた行を再読み込みします	Reload images, sounds and lines added in the in-game pygaki editor
 효과가 없어요 (@effect나 @transition 줄이 있어야 해요)	エフェクトがありません (@effectか@transitionの行が必要です)	No effects (needs an @effect or @transition line)
 고른 글을 흐리게 해요. 왼쪽으로 갈수록 흐려요. 1에 놓으면 태그를 빼요	選んだ文字を薄くします。左ほど薄く、1でタグを外します	Fade selected text. Left is fainter; 1 removes the tag
 이 셰이더는 게임이 글자 그림을 만들어 넣어야 해서 앱에서는 그리지 못해요	このシェーダーはゲームが文字画像を作る必要があるのでアプリでは描けません	Needs text images made by the game, so the app can't draw it
@@ -1238,7 +1238,7 @@ game 폴더나 game/fonts에 글꼴 파일(.ttf, .otf)이 없어요	gameフォ�
 음성 쓰기를 끌까요? 번호와 고른 파일은 남고, 원고의 voice 줄만 빠져요.	ボイスをオフにしますか? 番号と選んだファイルは残り、スクリプトのvoice行だけ外れます。	Turn voice off? Numbers and picks stay; only voice lines are removed.
 하나씩: 새 효과음이 앞 효과음을 끊어요 / 겹쳐 나옴: 여러 소리가 같이 나요	1つずつ: 新しい効果音が前の音を止めます / 重ねて鳴る: 複数の音が同時に鳴ります	One at a time: new sound stops the previous / Overlapping: sounds play together
 call한 장면이 return으로 끝나면 이 상자로. 비우면 여기서도 return	callしたシーンがreturnで終わったらこのボックスへ。空ならここでもreturn	After the called scene returns, go here. Empty = return here too
-게임 안 편집 화면에서 정한 ${what} 위치예요. 대사창 왼쪽 위 기준이에요.	ゲーム内編集画面で決めた{0}の位置です。セリフ欄の左上基準です。	{0} position set in the in-game editor, from the dialogue window's top-left.
+게임 안 pygaki editor에서 정한 ${what} 위치예요. 대사창 왼쪽 위 기준이에요.	ゲーム内の pygaki editorで決めた{0}の位置です。セリフ欄の左上基準です。	{0} position set in the in-game pygaki editor, from the dialogue window's top-left.
 숨긴 것 ${count}개를 목록 아래로 모아 두는 중이에요. 누르면 원래 차례로	非表示{0}個をリストの下にまとめています。押すと元の順番へ	{0} hidden items moved to the bottom. Click for original order
 캔버스 빈 곳 더블클릭으로도 만들 수 있어요 (${keyOf('newBox')})	キャンバスの空いた所をダブルクリックでも作れます ({0})	Also by double-clicking empty canvas ({0})
 화면 "${nm}": 돌려줄 값이 빈 버튼이 있어요 (누르면 빈 값으로 돌아가요)	画面「{0}」: 返す値が空のボタンがあります (押すと空の値が返ります)	Screen "{0}": a button has no return value (returns empty)
@@ -1303,7 +1303,7 @@ call 대상에서 return(끝)에 도달하지 않아요 (${b.title || b.id})	cal
 "${c.label}"을(를) 숨겼어요. 고르는 목록에서만 빠지고, 이미 정한 상자는 그대로 돌아요	「{0}」を非表示にしました。選択リストから外れるだけで、設定済みのボックスはそのまま動きます	Hid "{0}". Only removed from pickers; boxes using it still work
 ${r.name}은(는) 이 게임 폴더 밖에 있어요. game/${dir} 폴더로 복사해서 쓸까요?	{0}はこのゲームフォルダの外にあります。game/{1}フォルダにコピーして使いますか?	{0} is outside this game folder. Copy it to game/{1}?
 게임 창과 이 창을 나란히 놓고 써요. 게임 화면에서는 끌어서 옮기고, 숫자와 목록은 여기서 봐요.	ゲームウィンドウとこのウィンドウを並べて使います。ゲーム画面でドラッグ、数値と一覧はここで。	Use this beside the game window. Drag in the game; numbers and lists are here.
-게임을 이 줄로 옮기고 게임 안 편집 화면의 ${what} 탭을 열어요. 게임 창에서 끌어서 정해요	ゲームをこの行へ移し、ゲーム内編集画面の{0}タブを開きます。ゲームウィンドウでドラッグして決めます	Move the game here and open the {0} tab of the in-game editor. Drag in the game window
+게임을 이 줄로 옮기고 게임 안 pygaki editor의 ${what} 탭을 열어요. 게임 창에서 끌어서 정해요	ゲームをこの行へ移し、ゲーム内の pygaki editorの{0}タブを開きます。ゲームウィンドウでドラッグして決めます	Move the game here and open the {0} tab of the in-game pygaki editor. Drag in the game window
 고치고 잠깐 멈추면 script_flow.rpy로 저절로 내보내고, 켜 둔 게임이 다시 불러와요.	編集して少し止まるとscript_flow.rpyに自動で書き出し、起動中のゲームが再読み込みします。	Pause after editing to auto-export script_flow.rpy; the running game reloads.
 선택지 질문의 화자 "${ask.who}"가 등록되지 않았어요 (${b.title || b.id})	選択肢の質問の話者「{0}」が登録されていません ({1})	Choice question speaker "{0}" is not registered ({1})
 ${c.name}의 대사가 남아 있어요. 그래도 지울까요? (대사는 "등록되지 않은 화자"로 남아요)	{0}のセリフが残っています。それでも削除しますか? (セリフは「未登録の話者」として残ります)	{0} still has lines. Delete anyway? (They stay as "unregistered speaker")
@@ -1318,7 +1318,7 @@ ${c.name}의 대사가 남아 있어요. 그래도 지울까요? (대사는 "등
 images 폴더에 "${who}"로 시작하는 그림이 없어요 (예: "${who} smile.png").	imagesフォルダに「{0}」で始まる画像がありません (例: 「{1} smile.png」)。	No images starting with "{0}" in images (e.g. "{1} smile.png").
 고른 구간(끝 다음의 '원래대로' 줄까지)과 고른 전환 점의 셰이더 줄을 지워요. 저장하면 원고에서 빠져요	選んだ区間(終わりの次の「元に戻す」行まで)と選んだトランジション点のシェーダー行を消します。保存でスクリプトから外れます	Delete shader lines in the range (through the "restore" line) and at the selected point. Removed from the script on save
 이 등장 효과는 pygaki 플러그인이 있어야 해서 내보내지 않았어요 (${b.title || b.id})	この表示エフェクトはpygakiプラグインが必要なので書き出しませんでした ({0})	Entrance effect skipped: needs the pygaki plugin ({0})
-지금 대본은 버전 목록에 백업돼요. 게임 안 편집 화면에서 받아 적은 줄도 가져올 대본의 것으로 바뀌어요.	今のスクリプトはバージョン一覧にバックアップされます。ゲーム内編集画面から取り込んだ行も取り込むスクリプトのものに変わります。	The current script is backed up in Versions. Lines from the in-game editor are replaced too.
+지금 대본은 버전 목록에 백업돼요. 게임 안 pygaki editor에서 받아 적은 줄도 가져올 대본의 것으로 바뀌어요.	今のスクリプトはバージョン一覧にバックアップされます。ゲーム内の pygaki editorから取り込んだ行も取り込むスクリプトのものに変わります。	The current script is backed up in Versions. Lines from the in-game pygaki editor are replaced too.
 외곽선 색 {outlinecolor=}: 글자 스타일에 외곽선(outlines)이 있을 때만 게임에서 보여요	縁取り色 {outlinecolor=}: 文字スタイルに縁取り(outlines)があるときだけゲームで表示	Outline color {outlinecolor=}: shows in game only if the style has outlines
 대본 전체(${n}곳)에서 ${what}를 지울까요?\n게임 처음 값으로 돌아가요. (↶ 되돌리기로 돌아와요)	スクリプト全体({0}か所)で{1}を消しますか?\nゲームの初期値に戻ります。(↶ で戻せます)	Clear {1} in the whole script ({0} places)?\nIt falls back to the game default. (↶ to undo)
 대본 파일 ${name}을 읽지 못했어요: ${e.message}\n파일을 고치거나 지우고 다시 열어 주세요.	スクリプトファイル{0}を読めませんでした: {1}\nファイルを直すか削除して開き直してください。	Couldn't read script file {0}: {1}\nFix or delete the file and open again.
@@ -1358,7 +1358,7 @@ ${where}: {shader=}는 대사 글에만 쓸 수 있어요. 여기에 쓰면 렌�
 렌파이 screen을 그림으로 만들어요. 대본의 상자 흐름에서 [▣ 화면 부르기]로 띄우고, 누른 버튼의 값에 따라 갈래가 나뉘어요	Ren'Pyのscreenを絵で作ります。スクリプトのボックスの流れで[▣ 画面を呼ぶ]で表示し、押したボタンの値で分岐します	Build Ren'Py screens visually. Show them with [▣ Call screen] in a box flow; it branches on the button value
 ${RPY_FILE}에 지금 대본에 없는 상자가 ${lost}개 있어서 자동 내보내기를 멈췄어요. 이 대본으로 덮어쓰려면 Ctrl+E	{0}に今のスクリプトにないボックスが{1}個あるので自動書き出しを止めました。上書きするならCtrl+E	{0} has {1} boxes not in this script, so auto export stopped. Ctrl+E to overwrite
 1초에 ${DEMO_BASE}글자로 나오다가 {cps=${cpsNow}}이 부분은 ${fmt(cpsNow)}글자{/cps} 다시 보통	毎秒{0}文字で出て {cps={1}}この部分は{2}文字{/cps} また普通に	Types at {0}/sec, {cps={1}}this part at {2}{/cps} then normal
-게임 안 편집 화면에서 고친 ${res.applied}곳을 받아 적었어요${extra ? ' (' + extra + ')' : ''}	ゲーム内編集画面で直した{0}か所を取り込みました{1}	Imported {0} edits from the in-game editor{1}
+게임 안 pygaki editor에서 고친 ${res.applied}곳을 받아 적었어요${extra ? ' (' + extra + ')' : ''}	ゲーム内の pygaki editorで直した{0}か所を取り込みました{1}	Imported {0} edits from the in-game pygaki editor{1}
 ${inf.name} 폴더에 대본 파일이 ${rows.length}개 있어요. 고른 파일에 자동 저장되고, 다음에도 그 파일을 열어요.	{0}フォルダにスクリプトファイルが{1}個あります。選んだファイルに自動保存し、次回もそれを開きます。	{0} has {1} script files. The chosen one is autosaved and opened next time.
 앞 상자의 마지막 화면 위로 TV 노이즈가 덮였다가, 걷히면서 이 상자의 첫 화면이 나와요. 노이즈가 가장 진할 때 셰이더가 바뀌어요.	前のボックスの最後の画面をTVノイズが覆い、晴れるとこのボックスの最初の画面が出ます。ノイズが最も濃いときシェーダーが変わります。	TV static covers the last screen, then clears to this box's first screen. Shaders switch at peak static.
 비디오테이프가 늘어나듯 앞 상자의 마지막 화면이 출렁이며 늘어지고 색이 번지다가, 가장 심할 때 이 상자의 첫 화면과 셰이더로 바뀌어요.	ビデオテープが伸びるように前の画面が波打ち伸びて色がにじみ、最もひどいときこのボックスの最初の画面とシェーダーに変わります。	Like stretched tape, the last screen wobbles and bleeds, switching at its worst.
@@ -2381,8 +2381,8 @@ ${m.zoom}배	{0} 倍	x{0}
 ${m.angle}도	{0} 度	{0}°
 자리·크기는 게임에서	位置・サイズはゲームで	Position and size in the game
 그림 자리·크기·회전 지우기	画像の位置・サイズ・回転を消す	Clear image position, size and rotation
-게임 안 편집 화면에서 정한 그림 자리·크기·회전이에요. 글 가운데 기준이에요	ゲーム内編集画面で決めた画像の位置・サイズ・回転です。文字の中央が基準です	Image position, size and rotation set in the in-game editor, measured from the text center
-게임 안 편집 화면(F9)에서 그림을 끌어 옮기고, 휠로 키우고, Q/E로 돌려요. 저장하면 여기로 받아 적어요	ゲーム内編集画面(F9)で画像をドラッグで動かし、ホイールで大きさ、Q/E で回します。保存するとここに書き写します	In the in-game editor (F9), drag the image to move it, use the wheel to resize and Q/E to rotate. Saving copies the values here
+게임 안 pygaki editor에서 정한 그림 자리·크기·회전이에요. 글 가운데 기준이에요	ゲーム内の pygaki editorで決めた画像の位置・サイズ・回転です。文字の中央が基準です	Image position, size and rotation set in the in-game pygaki editor, measured from the text center
+게임 안 pygaki editor(F9)에서 그림을 끌어 옮기고, 휠로 키우고, Q/E로 돌려요. 저장하면 여기로 받아 적어요	ゲーム内の pygaki editor(F9)で画像をドラッグで動かし、ホイールで大きさ、Q/E で回します。保存するとここに書き写します	In the in-game pygaki editor (F9), drag the image to move it, use the wheel to resize and Q/E to rotate. Saving copies the values here
 선택지 뒤 그림	選択肢の後ろの画像	Image behind choice
 게임에 글꼴을 넣고, 대사·이름·선택지·메뉴의 기본 글꼴을 정해요	ゲームにフォントを入れ、セリフ・名前・選択肢・メニューの標準フォントを決めます	Add fonts to the game and set the default fonts for dialogue, names, choices and menus
 + 글꼴 넣기	+ フォントを追加	+ Add font
@@ -2595,11 +2595,11 @@ label 이름	label 名	label name
 네 점 변형은 게임에서	4点変形はゲームで	Corner warp is set in the game
 효과 없이 바로 나와요	効果なしですぐ出ます	Appears right away with no effect
 글 상자가 나타날 때의 그림 효과예요. 묶었으면 글도 같이 받아요	テキストボックスが出るときの画像効果です。リンクしていれば文字にもかかります	Picture effect when the text box appears. Linked text gets it too
-게임 안 편집 화면(F9)에서 모서리 점을 끌어 정한 네 점 변형이에요	ゲーム内編集画面(F9)で角の点をドラッグして決めた4点変形です	Corner warp set by dragging the corner dots in the in-game editor (F9)
+게임 안 pygaki editor(F9)에서 모서리 점을 끌어 정한 네 점 변형이에요	ゲーム内の pygaki editor(F9)で角の点をドラッグして決めた4点変形です	Corner warp set by dragging the corner dots in the in-game pygaki editor (F9)
 글이 글 상자 그림에 묶여 있어요. 그림의 크기, 회전, 옮김, 네 점 변형, 그림 효과를 글도 같이 받아요	文字がテキストボックスの画像にリンクされています。画像のサイズ、回転、移動、4点変形、画像効果が文字にもかかります	The text is linked to the text box image. It follows the image's size, rotation, offset, corner warp and picture effect
 글이 그림에 묶여 있어요. 그림의 크기, 회전, 옮김, 네 점 변형, 그림 효과를 글도 같이 받아요. 누르면 풀어요	文字が画像にリンクされています。画像のサイズ、回転、移動、4点変形、画像効果が文字にもかかります。押すと解除します	The text is linked to the image and follows its size, rotation, offset, corner warp and picture effect. Click to unlink
 글을 그림에 묶어요. 지금 그림 값을 기준으로, 그 뒤로 바꾼 크기, 회전, 옮김, 네 점 변형, 그림 효과를 글도 같이 받아요	文字を画像にリンクします。今の画像の値を基準に、その後に変えたサイズ、回転、移動、4点変形、画像効果が文字にもかかります	Link the text to the image. From the current image values on, size, rotation, offset, corner warp and picture effect changes apply to the text too
-게임 안 편집 화면(F9) [그림]에서 모서리 점(분홍 그림, 하늘색 글)을 끌면 네 점 변형이 돼요. 저장하면 여기로 받아 적어요	ゲーム内編集画面(F9)の[画像]で角の点(ピンク 画像、水色 文字)をドラッグすると4点変形になります。保存するとここに取り込みます	In the in-game editor (F9) [Image], drag the corner dots (pink image, light blue text) to warp. Saving brings it here
+게임 안 pygaki editor(F9) [그림]에서 모서리 점(분홍 그림, 하늘색 글)을 끌면 네 점 변형이 돼요. 저장하면 여기로 받아 적어요	ゲーム内の pygaki editor(F9)の[画像]で角の点(ピンク 画像、水色 文字)をドラッグすると4点変形になります。保存するとここに取り込みます	In the in-game pygaki editor (F9) [Image], drag the corner dots (pink image, light blue text) to warp. Saving brings it here
 게임의 pygaki 플러그인이 예전 판이라 이 값은 내보내지 않아요. 런처의 [플러그인 올리기]로 올려 주세요	ゲームのpygakiプラグインが古いため、この値は書き出しません。ランチャーの [プラグインを更新] で更新してください	The game's pygaki plugin is old, so these values are not exported. Update it with [Update plugins] in the launcher
 게임의 pygaki 플러그인이 예전 판이라 선택지 "${c.text}"의 묶기, 네 점 변형, 그림 효과를 내보내지 않았어요. 런처의 [플러그인 올리기]로 올려 주세요	ゲームのpygakiプラグインが古いため、選択肢「{0}」のリンク、4点変形、画像効果を書き出しませんでした。ランチャーの [プラグインを更新] で更新してください	The game's pygaki plugin is old, so the link, corner warp and picture effect of choice "{0}" were not exported. Update it with [Update plugins] in the launcher
 게임의 pygaki 플러그인이 예전 판이라 글 상자 묶기, 네 점 변형, 그림 효과를 내보내지 않았어요. 런처의 [플러그인 올리기]로 올려 주세요 (${b.title || b.id})	ゲームのpygakiプラグインが古いため、テキストボックスのリンク、4点変形、画像効果を書き出しませんでした。ランチャーの [プラグインを更新] で更新してください ({0})	The game's pygaki plugin is old, so the text box link, corner warp and picture effect were not exported. Update it with [Update plugins] in the launcher ({0})
@@ -2993,16 +2993,16 @@ PNG, JPEG, WebP. 정사각형 256×256 이상 → 16~256 크기를 담은 .ico�
 게임 화면 경계선을 껐어요 (게임과 연결되면 보내요)	ゲーム画面の境界線をオフにしました(ゲームと接続したら送ります)	Game screen border off (sent when connected to the game)
 게임 화면 경계선을 켰어요 (게임과 연결되면 보내요)	ゲーム画面の境界線をオンにしました(ゲームと接続したら送ります)	Game screen border on (sent when connected to the game)
 게임 화면 경계선 켜기/끄기 (앱, 게임과 연결됐을 때)	ゲーム画面の境界線をオン/オフ(アプリ、ゲームと接続中)	Toggle the game screen border (app, while connected to the game)
-게임 화면 가장자리에 붉은 경계선 (게임 안 편집 화면을 열었을 때)	ゲーム画面の端に赤い境界線(ゲーム内編集画面を開いたとき)	Red border at the game screen edge (while the in-game editor is open)
-게임 화면 가장자리에 붉은 경계선을 켜요 (게임 안 편집 화면을 열었을 때)	ゲーム画面の端に赤い境界線を引きます(ゲーム内編集画面を開いたとき)	Turning on the red border at the game screen edge (while the in-game editor is open)
-창이 게임 화면보다 커서 둘레에 검은 띠가 남을 때(레트로 해상도처럼 정수 배율로 키운 게임 등), 게임 안 편집 화면이 열려 있으면 게임 화면 가장자리에 붉은 선을 그어요. 띠는 칠하지 않아요. 게임 창에서는 F8	ウィンドウがゲーム画面より大きく周りに黒い帯が残るとき(レトロ解像度のように整数倍で拡大したゲームなど)、ゲーム内編集画面が開いていればゲーム画面の端に赤い線を引きます。帯は塗りません。ゲームウィンドウでは F8	When the window is larger than the game screen and black bands remain around it (e.g. games scaled up by a whole number like the retro resolutions), a red line is drawn at the game screen edge while the in-game editor is open. The bands are not painted. F8 in the game window
-게임 안 편집 화면 단축키	ゲーム内編集画面のショートカット	In-game editor shortcuts
+게임 화면 가장자리에 붉은 경계선 (게임 안 pygaki editor를 열었을 때)	ゲーム画面の端に赤い境界線(ゲーム内の pygaki editorを開いたとき)	Red border at the game screen edge (while the in-game pygaki editor is open)
+게임 화면 가장자리에 붉은 경계선을 켜요 (게임 안 pygaki editor를 열었을 때)	ゲーム画面の端に赤い境界線を引きます(ゲーム内の pygaki editorを開いたとき)	Turning on the red border at the game screen edge (while the in-game pygaki editor is open)
+창이 게임 화면보다 커서 둘레에 검은 띠가 남을 때(레트로 해상도처럼 정수 배율로 키운 게임 등), 게임 안 pygaki editor가 열려 있으면 게임 화면 가장자리에 붉은 선을 그어요. 띠는 칠하지 않아요. 게임 창에서는 F8	ウィンドウがゲーム画面より大きく周りに黒い帯が残るとき(レトロ解像度のように整数倍で拡大したゲームなど)、ゲーム内の pygaki editorが開いていればゲーム画面の端に赤い線を引きます。帯は塗りません。ゲームウィンドウでは F8	When the window is larger than the game screen and black bands remain around it (e.g. games scaled up by a whole number like the retro resolutions), a red line is drawn at the game screen edge while the in-game pygaki editor is open. The bands are not painted. F8 in the game window
+게임 안 pygaki editor 단축키	ゲーム内の pygaki editorのショートカット	In-game pygaki editor shortcuts
 게임 창에서 F9로 연 편집 화면의 키예요. 여기서는 보기만 해요	ゲームウィンドウで F9 で開く編集画面のキーです。ここでは表示のみです	Keys for the editor opened with F9 in the game window. View only here
 모든 탭	すべてのタブ	All tabs
 패널	パネル	Panel
 자리 옮기기 (타이틀, 대사, 선택지, 그림, 스플래시)	位置の移動(タイトル、セリフ、選択肢、画像、スプラッシュ)	Moving things (title, dialogue, choices, images, splash)
 원고 줄 고르기 (그림·영상 배치, 화면 효과)	スクリプト行の選択(画像・動画の配置、画面効果)	Picking script lines (image/video placement, screen FX)
-게임 안 편집 화면 열기/닫기 (개발 모드)	ゲーム内編集画面を開く/閉じる(開発モード)	Open/close the in-game editor (developer mode)
+게임 안 pygaki editor 열기/닫기 (개발 모드)	ゲーム内の pygaki editorを開く/閉じる(開発モード)	Open/close the in-game pygaki editor (developer mode)
 다음 탭 / 앞 탭	次のタブ / 前のタブ	Next tab / previous tab
 저장 (대사, 선택지, 이미지 줄은 원고에 바로)	保存(セリフ、選択肢、画像の行はスクリプトに直接)	Save (dialogue, choice, and image lines go straight to the script)
 지금 값을 원고 글로 복사	今の値をスクリプトの文としてコピー	Copy the current values as script text

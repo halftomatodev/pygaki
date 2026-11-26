@@ -88,7 +88,7 @@ game/screen_fx/
 │       relief.rpy, gradmap.rpy, rings.rpy, camcorder.rpy   5.7에 더한 셰이더
 │       macroblock.rpy                                     5.8에 더한 셰이더 (블록 깨짐)
 ├── editor/
-│   └── editor_fx.rpy            pygaki 게임 안 편집 화면 탭 (pygaki이 없으면 아무것도 안 함)
+│   └── editor_fx.rpy            pygaki editor(게임 안 편집 화면) 탭 (pygaki이 없으면 아무것도 안 함)
 ├── fonts/
 │   ├── neodgm.ttf               ASCII 효과의 기본 글꼴 (Neo둥근모, SIL OFL 1.1)
 │   └── neodgm_OFL.txt           글꼴 라이선스 (글꼴과 함께 배포해야 함)
@@ -1479,7 +1479,7 @@ init -100 python in mono:
 ##     e "그날의 기억." (fx="mono")   # 대사 줄 괄호로
 ##     $ screen_fx.use("mono", overlay=False)   # 흑백만 (덮개 끔)
 ##
-## pygaki 게임 안 편집 화면(F9 → T로 "화면 효과" 탭 → "흑백" 버튼)로 바꿔 저장하면
+## pygaki editor(F9 → T로 "화면 효과" 탭 → "흑백" 버튼)로 바꿔 저장하면
 ## mono_layout.rpy가 만들어지고, 그 파일의 값이 여기 값보다 우선합니다.
 ################################################################################
 

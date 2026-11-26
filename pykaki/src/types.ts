@@ -31,7 +31,7 @@ export interface SayStyle {
   // 그림/영상 상자 (box media, FEATURE 24): 글 뒤에 까는 그림이나 영상 (game 기준 경로). 기본 대사창은 투명해짐
   media?: string;
   media_fit?: 'image'; // 그림 크기 그대로 (없으면 글 크기에 맞춤)
-  // 그림의 자리·크기·회전은 게임 안 편집 화면에서 정해서 받아 적는다. 글 가운데 기준
+  // 그림의 자리·크기·회전은 pygaki editor에서 정해서 받아 적는다. 글 가운데 기준
   media_x?: number; // 옮김 (픽셀)
   media_y?: number;
   media_zoom?: number; // 배율 (글에 맞춤이면 맞춘 크기에 곱함)
@@ -39,7 +39,7 @@ export interface SayStyle {
   // 투명 영상 (FEATURE 26): 왼쪽 색 + 오른쪽 투명도 영상인지. 없으면 파일 이름이 mask_로 시작할 때 투명 영상
   media_mask?: boolean;
   media_alpha?: number; // 그림 투명도 0~1 (없으면 1)
-  // 글 상자 묶기·네 점 변형·그림 효과 (FEATURE 28). 묶기·변형은 게임 안 편집 화면에서 정해서 받아 적는다
+  // 글 상자 묶기·네 점 변형·그림 효과 (FEATURE 28). 묶기·변형은 pygaki editor에서 정해서 받아 적는다
   media_link?: number[]; // 글을 그림에 묶음: 묶을 때의 그림 [크기, 회전, 가로 옮김, 세로 옮김]. 그 뒤로 달라진 만큼 글이 따라감
   media_quad?: number[]; // 그림 네 모서리 옮김 8개 (왼위, 오른위, 오른아래, 왼아래의 가로, 세로. 그림 크기에 대한 비율)
   media_text_quad?: number[]; // 글 네 모서리 옮김 8개 (글 크기에 대한 비율)
@@ -106,7 +106,7 @@ export interface ChoiceMedia {
   select?: string; // 고르고 확정할 때 잠깐
   time?: number; // select를 보여 주는 초 (없으면 0.5)
   fit?: 'image'; // 그림 크기 그대로 (없으면 글 크기에 맞춤)
-  // 자리·크기·회전은 게임 안 편집 화면에서 정해서 받아 적는다. 선택지 가운데 기준, 세 그림에 같이
+  // 자리·크기·회전은 pygaki editor에서 정해서 받아 적는다. 선택지 가운데 기준, 세 그림에 같이
   x?: number;
   y?: number;
   zoom?: number; // 배율

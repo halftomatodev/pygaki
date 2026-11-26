@@ -7,16 +7,16 @@
 | 다루는 것 | 어디서 | 어디에 저장 |
 |---|---|---|
 | 대사, 선택지, 흐름 | 대본 편집기 | `.flow.json` |
-| 그림, webm 영상, 음악, 효과음 넣기 | 주로 게임 안 편집 화면 (대본 편집기에서도 칸으로 넣을 수 있음) | `.flow.json` (게임에서 넣으면 대본 편집기가 받아 적음) |
-| 그림 위치 | 게임 안 편집 화면만 | `game/ui_kit/stage_layout.rpy` |
+| 그림, webm 영상, 음악, 효과음 넣기 | 주로 pygaki editor (대본 편집기에서도 칸으로 넣을 수 있음) | `.flow.json` (게임에서 넣으면 대본 편집기가 받아 적음) |
+| 그림 위치 | pygaki editor만 | `game/ui_kit/stage_layout.rpy` |
 | 대사 글자 크기, 글꼴, 색, 속도, 등장 효과 | 대본 편집기 | `.flow.json` |
-| 대사와 이름의 위치, 줄마다 바꾸는 화면 효과 | 게임 안 편집 화면 대사 탭 (대본 편집기는 받아 적어 보여 줌) | `.flow.json` |
+| 대사와 이름의 위치, 줄마다 바꾸는 화면 효과 | pygaki editor 대사 탭 (대본 편집기는 받아 적어 보여 줌) | `.flow.json` |
 
 ```
 대본 편집기 (.flow.json이 원본)
    │  내보내기: game/script_flow.rpy에 씀
    ▼
-렌파이 + 게임 안 편집 화면
+렌파이 + pygaki editor
    │  그림, 영상, 소리 줄을 넣으면 script_flow.rpy와 showpy_inbox.json에 같이 씀
    ▼
 대본 편집기가 showpy_inbox.json을 받아 적음 → 대본에 보임 → 다음 내보내기에도 남음
@@ -45,7 +45,7 @@ label ward.n1:
             jump ward.n4
 ```
 
-**선택지 뒤 그림/영상** (대본 편집기 `FEATURE` 24, pygaki 플러그인 `choice_menu.rpy`, 연결을 켰을 때만): `"문구" (idle_media="…", hover_media="…", select_media="…", select_time=1.0, media_fit="image", media_offset=(-40, 15), media_zoom=1.1, media_angle=-8) if 조건:  # @c:c1`. 대본 편집기 값은 선택지의 `media`(`idle` `hover` `select` `time` `fit`, 게임 안 편집 화면 선택지 탭 [뒤 그림]에서 정해서 받아 적는 `x` `y` `zoom` `angle`,  `FEATURE` 25. 세 그림에 같이 씀). 묶기, 네 점 변형, 그림 효과(`link` `quad` `text_quad` `fx`, 괄호는 `media_link` `media_quad` `media_text_quad` `media_fx`,  `FEATURE` 28, 뜻은 아래 대사 표와 같음)가 하나라도 있으면 플러그인은 뒤 그림을 버튼 배경이 아니라 선택지 글의 그림/영상 상자(글 + `media_padding`)로 그려서 글도 같이 휘고 돕니다. 영상 이름이 `mask_`로 시작하면 투명 영상(왼쪽 색, 오른쪽 투명도. 렌파이 `side_mask`)으로 틀고(파일마다), 대본 편집기는 예전 플러그인(4.14~4.15)도 알게 선택지의 영상이 모두 `mask_` 이름이면 `media_mask=True`를 적습니다(`FEATURE` 26). 하나라도 있으면 플러그인이 기본 버튼 배경을 없애고 버튼을 글 크기 + `media_padding`으로 줄입니다. `select_media`가 있으면 누른 뒤 `select_time`초(기본 0.5) 그 그림을 보여 주고 다른 곳을 못 누르게 막은 뒤 넘어갑니다. 대본 편집기는 게임의 `ui_kit/engine/text_box.rpy`에 `BOX_KINDS`의 `"media"`가 없으면(예전 판) 검사 탭에 오류로 알립니다.
+**선택지 뒤 그림/영상** (대본 편집기 `FEATURE` 24, pygaki 플러그인 `choice_menu.rpy`, 연결을 켰을 때만): `"문구" (idle_media="…", hover_media="…", select_media="…", select_time=1.0, media_fit="image", media_offset=(-40, 15), media_zoom=1.1, media_angle=-8) if 조건:  # @c:c1`. 대본 편집기 값은 선택지의 `media`(`idle` `hover` `select` `time` `fit`, pygaki editor 선택지 탭 [뒤 그림]에서 정해서 받아 적는 `x` `y` `zoom` `angle`,  `FEATURE` 25. 세 그림에 같이 씀). 묶기, 네 점 변형, 그림 효과(`link` `quad` `text_quad` `fx`, 괄호는 `media_link` `media_quad` `media_text_quad` `media_fx`,  `FEATURE` 28, 뜻은 아래 대사 표와 같음)가 하나라도 있으면 플러그인은 뒤 그림을 버튼 배경이 아니라 선택지 글의 그림/영상 상자(글 + `media_padding`)로 그려서 글도 같이 휘고 돕니다. 영상 이름이 `mask_`로 시작하면 투명 영상(왼쪽 색, 오른쪽 투명도. 렌파이 `side_mask`)으로 틀고(파일마다), 대본 편집기는 예전 플러그인(4.14~4.15)도 알게 선택지의 영상이 모두 `mask_` 이름이면 `media_mask=True`를 적습니다(`FEATURE` 26). 하나라도 있으면 플러그인이 기본 버튼 배경을 없애고 버튼을 글 크기 + `media_padding`으로 줄입니다. `select_media`가 있으면 누른 뒤 `select_time`초(기본 0.5) 그 그림을 보여 주고 다른 곳을 못 누르게 막은 뒤 넘어갑니다. 대본 편집기는 게임의 `ui_kit/engine/text_box.rpy`에 `BOX_KINDS`의 `"media"`가 없으면(예전 판) 검사 탭에 오류로 알립니다.
 
 캐릭터 `define` 줄 아래에는 플래그의 처음 값 `default 이름 = 값  # 메모`가 한 줄씩 옵니다(대본 편집기 플래그 카드, `FEATURE` 14). 선택지의 조건은 `"문구" if 조건:`, 고르면 바꾸는 값은 그 아래 `$ 식` 줄입니다. 모두 평범한 렌파이 문법이라 플러그인이 따로 읽지 않습니다.
 
@@ -56,7 +56,7 @@ label ward.n1:
 | `label 그룹.ID:` | 모든 상자에 붙는 로컬 label | 실행 중 지금 상자를 알 때 (`config.label_callbacks`) |
 | `# @l:ID` | 바로 다음 줄이 그 id의 대본 줄 | 줄 넣기, 줄 바꾸기의 기준 |
 | `# @end:ID` | 여기부터 상자의 나가는 부분(선택지, 조건 분기 `if`, jump, return) | 선택지 앞에 줄을 넣을 때 |
-| `# @c:ID` | 그 선택지 줄(뒤 그림/영상이 있는 선택지에만, 늘 줄 끝, 대본 편집기 `FEATURE` 25) | 게임 안 편집 화면 선택지 탭이 뒤 그림 자리·크기·회전을 돌려보낼 때 (3장 `choice_media`) |
+| `# @c:ID` | 그 선택지 줄(뒤 그림/영상이 있는 선택지에만, 늘 줄 끝, 대본 편집기 `FEATURE` 25) | pygaki editor 선택지 탭이 뒤 그림 자리·크기·회전을 돌려보낼 때 (3장 `choice_media`) |
 
 **줄 끝 표시** (pygaki 플러그인, 대본 편집기 `generateRpy`의 `endMarks`): 연결한 게임의 `game/ui_kit/engine/script_edit.rpy`에 `PK_END_MARKS = True`가 있으면, 대본 편집기는 표시를 윗줄에 따로 두지 않고 그 줄 끝에 빈칸 두 개를 두고 붙입니다. 뜻은 위 표와 같습니다.
 
@@ -89,11 +89,11 @@ label ward.n1:  # @node:n1 도입
 | `box_rotate=-4` | `box_rotate` | 상자와 글 기울기 (도) |
 | `box="media", media="images/say/cloud.png"` | `box` `media` | 그림/영상 상자: 글 뒤에 그림이나 영상(game 기준 경로, `.webm` `.ogv` `.mp4` `.mkv`는 영상)을 깔고 기본 대사창·이름 칸 배경을 투명하게 (`text_box.rpy`, `FEATURE` 24). 파일이 비면 상자를 안 내보냄 |
 | `media_fit="image"` | `media_fit` | 그림 크기 그대로. 없으면 글 크기 + 여백에 맞춰 늘림 |
-| `media_offset=(60, -25)`, `media_zoom=1.3`, `media_angle=12` | `media_x` `media_y` `media_zoom` `media_angle` | 그림 옮김(글 가운데 기준), 배율(글에 맞춤이면 맞춘 크기에 곱함), 그림만 돌리기(도). 게임 안 편집 화면 대사 탭 [그림]에서 정해서 대본 편집기가 받아 적음 (3장, `FEATURE` 25) |
+| `media_offset=(60, -25)`, `media_zoom=1.3`, `media_angle=12` | `media_x` `media_y` `media_zoom` `media_angle` | 그림 옮김(글 가운데 기준), 배율(글에 맞춤이면 맞춘 크기에 곱함), 그림만 돌리기(도). pygaki editor 대사 탭 [그림]에서 정해서 대본 편집기가 받아 적음 (3장, `FEATURE` 25) |
 | `media_mask=True`, `media_mask=False` | `media_mask` | 투명 영상(왼쪽 색, 오른쪽 투명도. 렌파이 `side_mask`)인지. 플러그인은 안 적으면 파일 이름이 `mask_`로 시작할 때 투명 영상으로 봄(그 앞은 `False`). 대본 편집기는 영상일 때만, 투명 영상이면 늘 `True`를 적고(예전 플러그인도 알게) `mask_` 이름인데 끈 것만 `False`. 대본 값이 없으면 이름으로 (`FEATURE` 26). 대본 편집기의 [투명 영상 만들기]가 투명 webm·움직이는 그림·PNG 연속·초록 화면 영상을 `game/movies/mask_이름.webm`으로 바꿈 |
 | `media_alpha=0.7` | `media_alpha` | 그림 투명도 0~1. 1이면 안 적음 (`FEATURE` 26) |
-| `media_link=(1.0, 0, 0, 0)` | `media_link` `[크기, 회전, 가로, 세로]` | 글을 그림에 묶음 (`FEATURE` 28). 값은 묶을 때의 `media_zoom` `media_angle` `media_offset`이고, 그 값에서 달라진 만큼 글이 그림과 같이 커지고 돌고 옮겨짐. 플러그인은 `True`도 받음(`(1, 0, 0, 0)`과 같음). 묶으면 아래 `media_quad`와 `media_fx`도 글이 같이 받음. 게임 안 편집 화면 [글과 묶기]나 대본 편집기 [글 묶기]가 적음 |
-| `media_quad=(0.1, 0, -0.1, 0, 0, 0, 0, 0)` | `media_quad` (숫자 8개) | 그림 네 모서리 자유변형. 왼위, 오른위, 오른아래, 왼아래 모서리를 (가로, 세로)로 옮긴 양이고 그림 크기(배율을 곱한 크기)에 대한 비율. 원근으로 휨(플러그인 `text_box.rpy` `quad_homography`, 대본 편집기 미리보기 `SayPreview.tsx` `quadMatrix`). 돌리고 놓는 기준은 휘기 전 그림 가운데. 모두 0이면 안 적음. 게임 안 편집 화면에서 분홍 모서리 점을 끌어 정해서 받아 적음 |
+| `media_link=(1.0, 0, 0, 0)` | `media_link` `[크기, 회전, 가로, 세로]` | 글을 그림에 묶음 (`FEATURE` 28). 값은 묶을 때의 `media_zoom` `media_angle` `media_offset`이고, 그 값에서 달라진 만큼 글이 그림과 같이 커지고 돌고 옮겨짐. 플러그인은 `True`도 받음(`(1, 0, 0, 0)`과 같음). 묶으면 아래 `media_quad`와 `media_fx`도 글이 같이 받음. pygaki editor [글과 묶기]나 대본 편집기 [글 묶기]가 적음 |
+| `media_quad=(0.1, 0, -0.1, 0, 0, 0, 0, 0)` | `media_quad` (숫자 8개) | 그림 네 모서리 자유변형. 왼위, 오른위, 오른아래, 왼아래 모서리를 (가로, 세로)로 옮긴 양이고 그림 크기(배율을 곱한 크기)에 대한 비율. 원근으로 휨(플러그인 `text_box.rpy` `quad_homography`, 대본 편집기 미리보기 `SayPreview.tsx` `quadMatrix`). 돌리고 놓는 기준은 휘기 전 그림 가운데. 모두 0이면 안 적음. pygaki editor에서 분홍 모서리 점을 끌어 정해서 받아 적음 |
 | `media_text_quad=(…8개)` | `media_text_quad` | 글 네 모서리 자유변형. 값은 `media_quad`와 같고 글 크기에 대한 비율. 묶었으면 그림 쪽 변형 안에서 한 번 더 휨. 하늘색 모서리 점 |
 | `media_fx="vibrate", media_fx_time=0.8, media_fx_values={"amount": 20}` | `media_fx` (`img_fx.use("vibrate", 0.8, amount=20)` 꼴 글) | 글 상자가 나타날 때 효과 폴더의 그림 효과(8장 `@transition`)를 빈 그림에서 글 상자로 돌림. 묶었으면 글도 같이. 시간을 안 적으면 효과 파일의 `@time`. 효과 폴더에 없는 이름이면 효과 없이 나옴(개발 모드에서 한 번 알림). 렌파이 기본 전환(`dissolve` 등)은 못 씀 |
 | `x=…`, `y=…`, `name_x=…`, `name_y=…` | 위치 | pygaki 플러그인이 정해서 대본 편집기가 받아 적음 (3장) |
@@ -201,7 +201,7 @@ pygaki 플러그인이 쓰고, 대본 편집기가 읽은 뒤 비웁니다. 대�
 
 ## 4. `ui_kit/stage_layout.rpy`
 
-게임 안 편집 화면이 만듭니다. 대본 편집기는 쓰지 않습니다(예전에는 대본 편집기 안 플레이 화면이 그림 자리를 잡을 때 읽었는데, 플레이 화면은 2026-11-12에 없앴습니다).
+pygaki editor가 만듭니다. 대본 편집기는 쓰지 않습니다(예전에는 대본 편집기 안 플레이 화면이 그림 자리를 잡을 때 읽었는데, 플레이 화면은 2026-11-12에 없앴습니다).
 
 ```renpy
 define stage.placed = {
@@ -255,7 +255,7 @@ define stage.placed = {
 ```
 
 - `line`: 지금 쓰는 줄(`# @l:<줄 id>` 표시 다음의 첫 문장)의 원고 줄 번호. 쓰는 줄이 없으면 고른 상자의 첫 줄. 툴바 [게임 줄 따라가기]를 끄면(`localStorage["pykaki-follow-line"] = "off"`) `null`
-- pygaki 플러그인(개발 모드)은 0.25초마다 `script_flow.rpy`의 고친 시각과 크기를 보고, 같은 값을 두 번 보면 다시 불러옵니다(`renpy.reload_script`, Shift+R과 같음). 첫 줄에 "pygaki가 만든 파일이에요"(예전 판은 "PyKaki가 만든 파일이에요")가 없으면 다시 불러오지 않습니다. 게임 안 편집 화면에 저장 안 한 값이 있으면 다시 불러오지 않고 알립니다
+- pygaki 플러그인(개발 모드)은 0.25초마다 `script_flow.rpy`의 고친 시각과 크기를 보고, 같은 값을 두 번 보면 다시 불러옵니다(`renpy.reload_script`, Shift+R과 같음). 첫 줄에 "pygaki가 만든 파일이에요"(예전 판은 "PyKaki가 만든 파일이에요")가 없으면 다시 불러오지 않습니다. pygaki editor에 저장 안 한 값이 있으면 다시 불러오지 않고 알립니다
 - 다시 불러오기 전에 `line`을 `renpy.session`에 두고, 다시 불러온 뒤 그 줄로 옮깁니다(앱 원고 칸의 줄 누르기와 같은 `goto_line`: 지나온 줄이면 되감기, 아니면 warp). 원고보다 5초 넘게 먼저 쓴 파일은 지난번 것이라 쓰지 않습니다
 - `line`이 `null`이면 게임은 있던 자리에 남습니다. 렌파이는 warp로 들어간 게임을 다시 불러오면 타이틀로 가 버리므로, 그때는 보던 줄의 `# @l:` 표시를 새 원고에서 찾아 그 줄로 되돌립니다(다시 불러온 뒤 10초 안에 타이틀에 닿으면)
 - 배포판에서 빠집니다
@@ -335,7 +335,7 @@ pygaki 데스크톱 앱의 [GUI 편집] 화면이 게임 안 편집기를 바깥
 | `reloading` | 원고를 다시 읽기 직전(Shift+R, 자동 다시 읽기. 렌파이 `renpy.session["_reload"]`), 연결을 닫기 바로 전 | `{"type": "reloading"}`. 앱은 다시 붙을 때까지 연결 단추를 "◐ 게임 수정 중"으로 |
 | `bands` | 게임 창에서 F8로 경계선을 켜거나 껐을 때 | `{"type": "bands", "on": true}`. 앱은 환경 설정 `gameBands`를 이 값으로 바꾸고 다시 보내지 않음 |
 | `panel` | 게임 창에서 F9로 pygaki editor 패널 모양을 바꿨을 때 | `{"type": "panel", "mode": "full", "hide": false}`. `mode`는 `compact`(축약형) / `full`(대형) / `hidden`(숨김), `hide`는 `mode == "hidden"`(예전 앱용, pygaki v1.9). 앱은 이 값을 기억했다가(`localStorage` `pygaki-game-panel`, 예전 값 `show`/`hide`도 읽음) 다음에 붙을 때 `panel` 명령으로 보냄. 앱의 F9(단축키 `gamePanel`)도 같은 차례로 돎 |
-| `open` | 게임 창 패널의 [pygaki 앱에서 고르기]를 눌렀을 때 (pygaki v1.9) | `{"type": "open", "tab": "title_fx"}` (게임 안 편집 화면의 탭 id). 앱은 창을 앞으로 가져오고 [GUI 편집]의 그 칸을 엶(`watermorph`는 `title_fx` 칸). 앱이 붙어 있지 않으면 게임이 `<렌파이 SDK>/pygaki/app/pygaki.exe --project <게임 폴더> --tab <탭 id>`로 앱을 켬. 앱이 이미 켜져 있으면 그 창이 받아서 같은 일을 함 |
+| `open` | 게임 창 패널의 [pygaki 앱에서 고르기]를 눌렀을 때 (pygaki v1.9) | `{"type": "open", "tab": "title_fx"}` (pygaki editor의 탭 id). 앱은 창을 앞으로 가져오고 [GUI 편집]의 그 칸을 엶(`watermorph`는 `title_fx` 칸). 앱이 붙어 있지 않으면 게임이 `<렌파이 SDK>/pygaki/app/pygaki.exe --project <게임 폴더> --tab <탭 id>`로 앱을 켬. 앱이 이미 켜져 있으면 그 창이 받아서 같은 일을 함 |
 
 ```json
 {
@@ -426,7 +426,7 @@ pygaki 데스크톱 앱의 [GUI 편집] 화면이 게임 안 편집기를 바깥
 
 ## 12. 화면 자리 (`game/pykaki_screens.json`, 표시 `# @s:` `# @i:`, 대본 편집기 `FEATURE` 23)
 
-대본 편집기의 [화면] 탭에서 만든 화면과 HUD를 게임 안 편집 화면의 [화면] 탭에서 고치기 위한 약속입니다. 대본 편집기가 `pykaki_screens.rpy`를 쓸 때 같이 씁니다(바뀐 것만). 개발용 파일이라 배포판과 묶음에서 뺍니다.
+대본 편집기의 [화면] 탭에서 만든 화면과 HUD를 pygaki editor의 [화면] 탭에서 고치기 위한 약속입니다. 대본 편집기가 `pykaki_screens.rpy`를 쓸 때 같이 씁니다(바뀐 것만). 개발용 파일이라 배포판과 묶음에서 뺍니다.
 
 ```json
 { "format": "pygaki-screens", "version": 1, "screens": [

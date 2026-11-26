@@ -171,7 +171,7 @@ function FolderButtons() {
     return (
       <>
         <span className="sep" />
-        <button onClick={reread} title="프로젝트 폴더의 그림·소리와 게임 안 편집 화면이 넣은 줄을 다시 읽어요">다시 읽기</button>
+        <button onClick={reread} title="프로젝트 폴더의 그림·소리와 게임 안 pygaki editor가 넣은 줄을 다시 읽어요">다시 읽기</button>
         <button className={menu ? 'on' : ''} onClick={(e) => setMenu(menu ? null : e.currentTarget)} title="그림, 영상, 소리, 효과처럼 기능마다 쓰는 폴더를 탐색기로 열어요">폴더 관리 ▾</button>
         {menu && <FolderMenu anchor={menu} onClose={() => setMenu(null)} />}
         <button onClick={openIconsDialog} title="게임 창 아이콘과 윈도우 exe 아이콘 (배포할 때 쓰는 아이콘)">아이콘</button>

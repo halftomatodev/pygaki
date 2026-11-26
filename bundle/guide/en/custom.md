@@ -1,4 +1,4 @@
-<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ 40e5c5953a -->
+<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ d819cab2de -->
 # pygaki plugin customization guide
 
 2026-11-25 · pygaki v1.9 (changes per version are in `READ_ME_FIRST.md` and `CHANGELOG.md`)
@@ -7,7 +7,7 @@
 
 This document is for people who installed the pygaki plugins 5.5 to look up **which value in which file changes what**. Full descriptions of setting names are in each folder's `README.md` (Korean); this document starts from "what you want to do". If you write your text in pygaki, start with "Using it with pygaki".
 
-The in-game editor (pygaki editor, F9) follows the pygaki app's language (or your PC's language if it has never connected to the app). This document sometimes gives the Korean screen names next to tab and button names (e.g. "dialogue tab" = 대사 탭). Comments in the settings files are in Korean.
+pygaki editor (the in-game editor, F9) follows the pygaki app's language (or your PC's language if it has never connected to the app). This document sometimes gives the Korean screen names next to tab and button names (e.g. "dialogue tab" = 대사 탭). Comments in the settings files are in Korean.
 
 | Folder | What it does | Files you edit |
 | --- | --- | --- |
@@ -100,9 +100,9 @@ pygaki is an editor for writing scripts with boxes and lines. It ships as the de
 | Write dialogue, choices and the story flow | pygaki [Script] |
 | Set dialogue text size, font, color, speed and text effects | the text effect card of a dialogue line in pygaki. The preview above the card shows it right away |
 | Set screen shaders, transitions, dialogue sounds, cursor and click-to-continue per box or scene | the **◐ Shader** of a box or label in pygaki |
-| Add images, webm videos, music and sound effects | the box's background / image·video / sound·music cards in pygaki (also written into the script when added in the in-game editor) |
+| Add images, webm videos, music and sound effects | the box's background / image·video / sound·music cards in pygaki (also written into the script when added in the pygaki editor) |
 | Position dialogue, choices and images | the line's **[Move position]** → drag on the game screen → [Save]. Coordinates are written into pygaki |
-| Change the look of the whole game, like the title menu and cursor | pygaki [GUI] (the same as the in-game editor) |
+| Change the look of the whole game, like the title menu and cursor | pygaki [GUI] (the same as the pygaki editor) |
 | Browse effects and shaders, hide them from lists | pygaki [Effects], [Shaders] (add and remove effects in the `ui_kit/effects/` folder) |
 
 ### One-time setup

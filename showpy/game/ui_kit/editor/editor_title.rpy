@@ -518,7 +518,7 @@ init -8 python in ui_editor:
             layout, common = self._merged()
             uk = store.ui_kit
 
-            lines = uk.file_header("pygaki 게임 안 편집 화면이 저장한 타이틀 메뉴 배치입니다.", [
+            lines = uk.file_header("pygaki editor가 저장한 타이틀 메뉴 배치입니다.", [
                 "여기 적힌 값은 title_menu_config.rpy의 같은 값보다 우선합니다.",
                 "직접 고쳐도 되지만, 편집기에서 다시 저장하면 덮어써집니다.",
                 "이 파일을 지우면 설정 파일 값으로 돌아갑니다.",

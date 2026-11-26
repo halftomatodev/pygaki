@@ -64,9 +64,9 @@ export function hudPos(s: ScreenDef, W: number, H: number) {
 }
 
 export const SCREENS_FILE = 'pykaki_screens.rpy';
-// 게임 안 편집 화면의 [화면] 탭이 읽는 화면 자리 (개발용, 배포판에서 뺌. LINK.md 12장)
+// pygaki editor의 [화면] 탭이 읽는 화면 자리 (개발용, 배포판에서 뺌. LINK.md 12장)
 export const SCREENS_META_FILE = 'pykaki_screens.json';
-// 원고 표시: screen 줄 끝 "# @s:화면 id", 항목 첫 줄 끝 "# @i:항목 id". 게임 안 편집 화면이 저장할 때 이 줄을 찾아 고친다
+// 원고 표시: screen 줄 끝 "# @s:화면 id", 항목 첫 줄 끝 "# @i:항목 id". pygaki editor가 저장할 때 이 줄을 찾아 고친다
 let marks = true;
 const mark = (out: string[], tag: string) => {
   if (marks && out.length) out[0] += `  # @${tag}`;
@@ -105,7 +105,7 @@ export function screensMeta(p: Project): string {
   return JSON.stringify({ format: 'pygaki-screens', version: 1, screens }, null, 1) + '\n';
 }
 
-// 게임 안 편집 화면에서 고친 화면 (LINK.md 3장 screen, screen_item). p를 직접 고친다. 못 찾으면 false
+// pygaki editor에서 고친 화면 (LINK.md 3장 screen, screen_item). p를 직접 고친다. 못 찾으면 false
 export function applyScreenOp(p: Project, op: { op: string; screen?: string; item?: string; set?: Record<string, unknown> }): boolean {
   const s = p.screens?.find((x) => x.id === op.screen);
   const set = op.set ?? {};

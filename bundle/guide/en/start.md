@@ -6,11 +6,11 @@
 A set of tools that lets you make Ren'Py games without learning Ren'Py code.
 
 * **pygaki** (the [Script] tab of the pygaki app): an editor where you write your script with boxes and lines. Set dialogue, choices, backgrounds, images, sounds and screen shaders, and it exports a Ren'Py script (`game/script_flow.rpy`).
-* **pygaki plugins**: four plugins (`ui_kit`, `screen_fx`, `hotkeys`, `splash`) you put in the `game/` folder of a Ren'Py game. They change the title menu, choices, dialogue style and text effects, full-screen shaders and the splash screen, and include an **in-game editor** that lets you adjust things with the mouse while the game runs.
-* **pygaki app**: split into six tabs at the top. [Script] writes the script, [GUI] connects to the running game and drives the in-game editor from the app, [Screen] makes choice screens and HUDs, [Effects] and [Shaders] let you browse and hide effects, and [Font] manages the game's fonts.
+* **pygaki plugins**: four plugins (`ui_kit`, `screen_fx`, `hotkeys`, `splash`) you put in the `game/` folder of a Ren'Py game. They change the title menu, choices, dialogue style and text effects, full-screen shaders and the splash screen, and include an **pygaki editor (the in-game editor)** that lets you adjust things with the mouse while the game runs.
+* **pygaki app**: split into six tabs at the top. [Script] writes the script, [GUI] connects to the running game and drives the pygaki editor from the app, [Screen] makes choice screens and HUDs, [Effects] and [Shaders] let you browse and hide effects, and [Font] manages the game's fonts.
 * **pygaki bundle**: the Ren'Py SDK + the plugin template + launcher buttons + the pygaki app, packed into one folder for Windows.
 
-Language: the language button at the top right of the pygaki app switches the script editor and the app's [Help] to Japanese or English. The in-game editor switches with the [Language] button on its panel, and the pygaki buttons added to the launcher follow the launcher's language setting. This guide gives a translation next to button names as they appear on Korean screens.
+Language: the language button at the top right of the pygaki app switches the script editor and the app's [Help] to Japanese or English. The pygaki editor switches with the [Language] button on its panel, and the pygaki buttons added to the launcher follow the launcher's language setting. This guide gives a translation next to button names as they appear on Korean screens.
 
 | I want to | Where |
 | --- | --- |
@@ -20,7 +20,7 @@ Language: the language button at the top right of the pygaki app switches the sc
 | Set screen shaders, transitions, dialogue sounds, cursor and click-to-continue per box or scene | the ◐ Shader of a box or label |
 | Add images, webm videos, music and sound effects | the box's background / image·video / sound·music cards |
 | Position dialogue, choices and images | the line's [Move position] → drag on the game screen → [Save] |
-| Change the look of the whole game, like the title menu and cursor | pygaki app [GUI] (same as the in-game editor) |
+| Change the look of the whole game, like the title menu and cursor | pygaki app [GUI] (same as the pygaki editor) |
 | Browse effects and shaders, hide them from lists | pygaki app [Effects], [Shaders] |
 | Fine-tune with values in the settings files | the "Plugin customization guide" chapter of this guide |
 
@@ -41,7 +41,7 @@ Four plugins that change the screens just by putting their folders in `game/`, w
 
 | Folder | What it does | Files you edit |
 | --- | --- | --- |
-| `ui_kit` | title menu, choices, cursor, click-to-continue indicator, dialogue sounds, text speed, quick menu, per-line dialogue style, name position, speed, text effects, ruby, image and video placement, the effects folder (`ui_kit/effects/`), the in-game editor | `title_menu_config.rpy`, `choice_menu_config.rpy`, `custom_ui_config.rpy`, `say_style_config.rpy`, `stage_config.rpy` |
+| `ui_kit` | title menu, choices, cursor, click-to-continue indicator, dialogue sounds, text speed, quick menu, per-line dialogue style, name position, speed, text effects, ruby, image and video placement, the effects folder (`ui_kit/effects/`), the pygaki editor | `title_menu_config.rpy`, `choice_menu_config.rpy`, `custom_ui_config.rpy`, `say_style_config.rpy`, `stage_config.rpy` |
 | `screen_fx` | full-screen shaders. Stacks slot 2 (overlay) on slot 1 (base effect). Per-scene changes and transitions, excluding text, title shimmer | `screen_fx_config.rpy`, `<name>_config.rpy` for each shader |
 | `hotkeys` | add and remove hotkeys, descriptions in the controls screen | `hotkeys_config.rpy` |
 | `splash` | logo, warning and controls pages shown before the title | `splash_config.rpy` |

@@ -1,4 +1,4 @@
-// 게임 안 편집 화면(pygaki editor, F9)의 단축키 (pygaki 플러그인 ui_editor). 앱 환경 설정 [단축키]에서 한눈에 본다 (읽기만).
+// pygaki editor(게임 안 편집 화면, F9)의 단축키 (pygaki 플러그인 ui_editor). 앱 환경 설정 [단축키]에서 한눈에 본다 (읽기만).
 // 게임 패널의 안내 줄(F1)과 같은 내용. 플러그인에서 키를 바꾸면 여기도 고친다.
 export const GAME_KEYS: { group: string; rows: [string, string][] }[] = [
   {

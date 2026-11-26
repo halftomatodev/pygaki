@@ -1,5 +1,5 @@
 ################################################################################
-## Splash — pygaki 게임 안 편집 화면 탭 "스플래시" (조작 안내 화면과 단축키 수정 2.5)
+## Splash — pygaki editor 탭 "스플래시" (조작 안내 화면과 단축키 수정 2.5)
 ##
 ## pygaki 플러그인이 있으면 그 편집기(개발 모드에서 F9)에 탭을 더합니다.
 ## pygaki이 없으면 이 파일은 아무것도 하지 않고, 페이지는 splash_config.rpy대로 나옵니다.
@@ -23,7 +23,7 @@
 
 init offset = 1
 
-## pygaki 게임 안 편집 화면(init -9, -8)를 읽은 뒤에 실행됩니다.
+## pygaki editor(init -9, -8)를 읽은 뒤에 실행됩니다.
 init -6 python in splash:
 
     import json
@@ -1365,9 +1365,9 @@ init -6 python in splash:
                     "이 파일을 지우면 설정 파일 값과 순서로 돌아갑니다.",
                     ]
                 if header is not None:
-                    lines = header("게임 안 편집 화면이 저장한 스플래시 페이지 값입니다.", notes)
+                    lines = header("pygaki editor가 저장한 스플래시 페이지 값입니다.", notes)
                 else:
-                    lines = [ "## 게임 안 편집 화면이 저장한 스플래시 페이지 값입니다. (자동 생성)", "" ]
+                    lines = [ "## pygaki editor가 저장한 스플래시 페이지 값입니다. (자동 생성)", "" ]
                 if order is not None:
                     lines.append("## 페이지 순서. 여기 없는 splash_config.rpy의 페이지는 보여 주지 않습니다.")
                     lines.append("define splash.page_order = [ " + ", ".join(json.dumps(pid) for pid in order) + " ]")
@@ -1483,7 +1483,7 @@ screen ui_editor_splash_overlay():
         add Solid("#ff3b8d", xysize=(int(_w) + 16, 2)) pos (int(_cx), int(_cy + _h / 2.0) + 8) anchor (0.5, 0.0)
 
 
-## 스플래시 탭 패널 (pygaki 게임 안 편집 화면 안)
+## 스플래시 탭 패널 (pygaki editor 안)
 screen ui_editor_splash_panel(tab):
 
     $ _ids = tab.ids()

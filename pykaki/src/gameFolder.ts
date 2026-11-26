@@ -391,7 +391,7 @@ export async function pullInbox(ask = false) {
   await writeText(dir, INBOX_FILE, JSON.stringify({ format: 'showpy-inbox', version: 1, ops: rest }, null, 2));
 
   const extra = [res.moved.length ? `기준 줄이 없어 상자 끝에 넣음 ${res.moved.length}개` : '', res.dropped.length ? `넣을 곳이 없어 뺌: ${res.dropped.join(', ')}` : ''].filter(Boolean).join(' / ');
-  s.say(`게임 안 편집 화면에서 고친 ${res.applied}곳을 받아 적었어요${extra ? ' (' + extra + ')' : ''}`);
+  s.say(`게임 안 pygaki editor에서 고친 ${res.applied}곳을 받아 적었어요${extra ? ' (' + extra + ')' : ''}`);
   return res.applied;
 }
 
@@ -415,7 +415,7 @@ async function writeVoiceLevels() {
 }
 
 // screens: 화면 만들기 원고 (pykaki_screens.rpy). 화면이 없는 대본이면 null (예전에 쓴 파일이 있을 때만 비운다). 바뀐 것만 쓴다
-// meta: 게임 안 편집 화면의 [화면] 탭이 읽는 화면 자리 (pykaki_screens.json, 개발용). 원고를 쓸 때 같이, 바뀐 것만
+// meta: pygaki editor의 [화면] 탭이 읽는 화면 자리 (pykaki_screens.json, 개발용). 원고를 쓸 때 같이, 바뀐 것만
 export async function writeScreensToFolder(screens: { code: string; has: boolean; meta?: string }) {
   const old = await readText(dir, SCREENS_FILE);
   if ((screens.has || old !== null) && old !== screens.code) await writeText(dir, SCREENS_FILE, screens.code);

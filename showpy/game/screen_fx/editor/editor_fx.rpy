@@ -1,5 +1,5 @@
 ################################################################################
-## 화면 효과 — pygaki 게임 안 편집 화면 탭 (타이틀 일렁임, 화면 효과)
+## 화면 효과 — pygaki editor 탭 (타이틀 일렁임, 화면 효과)
 ##
 ## pygaki 플러그인이 있으면 그 편집기(개발 모드에서 F9)에 탭 두 개를
 ## 더합니다. pygaki이 없으면 이 파일은 아무것도 하지 않고, 효과는 설정 파일로
@@ -14,7 +14,7 @@
 
 init offset = 1
 
-## pygaki 게임 안 편집 화면(init -9, -8)를 읽은 뒤에 실행됩니다.
+## pygaki editor(init -9, -8)를 읽은 뒤에 실행됩니다.
 init -6 python in screen_fx:
 
     _ed = getattr(store, "ui_editor", None)
@@ -210,7 +210,7 @@ init -6 python in screen_fx:
             def layout_file(self):
                 wm = self.wm()
                 lay = self._merged()
-                lines = file_header("pygaki 게임 안 편집 화면이 저장한 타이틀 일렁임 설정입니다.", [
+                lines = file_header("pygaki editor가 저장한 타이틀 일렁임 설정입니다.", [
                     "여기 적힌 값은 watermorph_config.rpy의 같은 값보다 우선합니다.",
                     "이 파일을 지우면 설정 파일 값으로 돌아갑니다.",
                     ])
@@ -1459,7 +1459,7 @@ init -6 python in screen_fx:
 
             def _fx_file(self, fx):
                 lay = self._merged(fx)
-                lines = file_header("pygaki 게임 안 편집 화면이 저장한 {} 효과 설정입니다.".format(fx.label), [
+                lines = file_header("pygaki editor가 저장한 {} 효과 설정입니다.".format(fx.label), [
                     "여기 적힌 값은 {}_config.rpy의 같은 값보다 우선합니다.".format(fx.id),
                     "settings는 바꾼 값만, presets는 바꾼 프리셋 전체가 들어 있습니다.",
                     "게임 중에 {}.set()으로 바꾼 값과는 상관없습니다.".format(fx.id),
@@ -1488,7 +1488,7 @@ init -6 python in screen_fx:
 
             def _cfg_file(self):
                 lay = self._merged_cfg()
-                lines = file_header("pygaki 게임 안 편집 화면이 저장한 화면 효과 전환 설정입니다.", [
+                lines = file_header("pygaki editor가 저장한 화면 효과 전환 설정입니다.", [
                     "여기 적힌 값은 screen_fx_config.rpy의 같은 값보다 우선합니다.",
                     "이 파일을 지우면 설정 파일 값으로 돌아갑니다.",
                     ])

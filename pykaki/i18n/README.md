@@ -1,6 +1,6 @@
 # 언어 버튼 사전 (대본 편집기)
 
-대본 편집기 화면 글은 소스에 한국어로 두고, 화면에 그려진 글을 이 사전으로 일본어·영어로 바꿉니다(`src/i18n.ts`). 도움말(F1)은 이 사전이 아니라 안내서 번역(`bundle/guide/ja/pykaki.md`, `en/pykaki.md`)을 그대로 보입니다(`src/Help.tsx`). 게임 안 편집 화면(F9)의 사전은 따로 `showpy/game/ui_kit/editor/editor_lang.tsv`에 있습니다.
+대본 편집기 화면 글은 소스에 한국어로 두고, 화면에 그려진 글을 이 사전으로 일본어·영어로 바꿉니다(`src/i18n.ts`). 도움말(F1)은 이 사전이 아니라 안내서 번역(`bundle/guide/ja/pykaki.md`, `en/pykaki.md`)을 그대로 보입니다(`src/Help.tsx`). pygaki editor(게임 안 편집 화면, F9)의 사전은 따로 `showpy/game/ui_kit/editor/editor_lang.tsv`에 있습니다.
 
 | 파일 | 내용 |
 |---|---|
