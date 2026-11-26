@@ -109,10 +109,13 @@ export function ScreensView() {
     const id = uid('i');
     const n = sc.items.length;
     const hud = isHud(sc);
-    // 새 것은 왼쪽 위부터 아래로 차례로 (겹치지 않게). HUD는 HUD 칸 안에서
+    // 새 것은 왼쪽 위부터 아래로 차례로 (겹치지 않게). HUD는 HUD 칸 안에서: 칸 높이에 들어가는 줄 수만큼 내려가고 옆 열로, 칸이 다 차면 처음 자리부터 다시
+    const { w: hw, h: hh } = hudSize(sc);
+    const rows = Math.max(1, Math.floor((hh - 10) / 36)), cols = Math.max(1, Math.floor((hw - 12) / 140));
+    const slot = n % (rows * cols), lap = Math.floor(n / (rows * cols)) % 4; // 다시 돌 때는 조금씩 비껴서 (바로 위에 겹쳐 안 보이지 않게)
     const it: ScreenItem = hud
-      ? { id, kind, x: 12 + Math.floor(n / 4) * 140, y: 10 + (n % 4) * 36 }
-      : { id, kind, x: Math.round(look.width * 0.1) + Math.floor(n / 6) * 300, y: Math.round(look.height * 0.15) + (n % 6) * Math.round(look.height * 0.12) };
+      ? { id, kind, x: 12 + Math.floor(slot / rows) * 140 + lap * 8, y: Math.min(10 + (slot % rows) * 36 + lap * 8, Math.max(0, hh - 24)) }
+      :{ id, kind, x: Math.round(look.width * 0.1) + Math.floor(n / 6) * 300, y: Math.round(look.height * 0.15) + (n % 6) * Math.round(look.height * 0.12) };
     if (kind === 'textbutton') Object.assign(it, { text: '버튼 ' + (n + 1) }, hud ? { act: 'flag', acts: [firstAction(project.variables)].filter(Boolean) } : { value: 'b' + (n + 1) });
     if (kind === 'imagebutton') Object.assign(it, { image: '' }, hud ? { act: 'flag', acts: [firstAction(project.variables)].filter(Boolean) } : { value: 'b' + (n + 1) });
     if (kind === 'text') it.text = '글';
