@@ -370,7 +370,7 @@ style ui_editor_small_button is ui_editor_button:
     padding (6, 2)
 
 style ui_editor_small_button_text is ui_editor_button_text:
-    size 13
+    size ui_editor.T(13)
 
 
 screen ui_editor_custom_ui_panel(tab):
@@ -437,7 +437,7 @@ screen ui_editor_custom_ui_panel(tab):
             style "empty"
             background "#ffffff14"
             padding (10, 8)
-            xsize 620
+            xsize ui_editor.W(620)
 
             hbox:
                 spacing 12
@@ -500,7 +500,7 @@ screen ui_editor_frame_popup():
         modal True
         at ui_editor.zoom_t((0.5, 0.5))    # 실제 화면 크기로 (4.20, 픽셀 퍼펙트처럼 크게 키운 게임)
         align (0.5, 0.5)
-        xsize 720
+        xsize ui_editor.W(720)
         ysize 600
 
         vbox:
@@ -514,7 +514,7 @@ screen ui_editor_frame_popup():
                 box_wrap_spacing 4
                 xmaximum 690
                 for _d in _tab.all_folders():
-                    textbutton (_d or "game") style "ui_editor_button" text_size 13 action Function(_tab.set_pick_folder, _d) selected (_tab.pick_folder == _d)
+                    textbutton (_d or "game") style "ui_editor_button" text_size ui_editor.T(13) action Function(_tab.set_pick_folder, _d) selected (_tab.pick_folder == _d)
 
             viewport:
                 scrollbars "vertical"
@@ -534,7 +534,7 @@ screen ui_editor_frame_popup():
                             vbox:
                                 xalign 0.5
                                 add Transform(_f, fit="contain", xysize=(72, 72)) xalign 0.5
-                                text _f.split("/")[-1] style "ui_editor_small" size 11 xalign 0.5
+                                text _f.split("/")[-1] style "ui_editor_small" size ui_editor.T(11) xalign 0.5
 
             hbox:
                 spacing 6

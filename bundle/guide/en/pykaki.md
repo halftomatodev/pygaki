@@ -1,4 +1,4 @@
-<!-- 원본: pykaki/docs/GUIDE.md @ 42423c2928 -->
+<!-- 원본: pykaki/docs/GUIDE.md @ b9b0063689 -->
 # pygaki user guide
 
 A tool for writing Ren'Py scripts with boxes and lines and exporting them as Ren'Py script files (`.rpy`).
@@ -675,7 +675,7 @@ Change them in **[Settings]** at the right of the toolbar. These settings are sa
 - **Run in Ren'Py** (app): with "Ignore if the game is already running" on, pressing [▶ Run in Ren'Py] while the game is running only exports the script and leaves the game as is. Off, each press starts another game. Whether it's running is known from the connection to a game with the pygaki plugins and from games started by this app.
   - **Red border at the game screen edge** (on at first): a game scaled up by a whole number, like the retro resolutions, leaves the rest of the window as black bands. While the pygaki editor (F9) is open it uses the whole window (the game screen stays in the middle and panels can use the empty space), and a thin red line is drawn around the game screen so you can see where it ends. The shortcut **F8** (in the app or the game window) also turns it on/off.
   - Below **Shortcuts** there is also a table of the pygaki editor (F9) keys (view only). The help on the game-window panel starts folded; F1 shows it.
-  - On the game-window panel, text effects, shaders, image effects, and image transitions show only the current value and [Choose in the pygaki app]. Pressing it opens that section in this app's [GUI Edit] (or starts the app if it is closed).
+  - On the game-window panel, text effects, shaders, image effects, and image transitions show only the current value and [Choose in the pygaki app]. Pressing it opens that section in this app's [GUI Edit], scrolls to the row you pressed (text effect, image effect, image transition) and lights it up for a moment (or starts the app if it is closed).
 - **Focus mode dimming**: off, light, normal, strong
 - **Shortcuts**: click the key field of the action to change and press the new key. Esc cancels. Esc (finish editing), Delete (delete) and F1 (help) can't be changed.
   - To avoid clashing with typing, Ctrl or Alt must be held too. F2–F12 can be used alone (F1 is help).

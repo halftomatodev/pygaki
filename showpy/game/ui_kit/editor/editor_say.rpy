@@ -1298,10 +1298,10 @@ screen ui_editor_say_panel(tab):
         hbox:
             spacing 4
             text "그림/영상 상자:" style "ui_editor_text" yalign 0.5
-            textbutton "그림 처음으로" style "ui_editor_button" text_size 13 action Function(tab.reset_media)
-            textbutton ("묶음 풀기" if tab.media_link() is not None else "글과 묶기") style "ui_editor_button" text_size 13 action Function(tab.toggle_link) selected (tab.media_link() is not None)
-            textbutton "네 점 처음으로" style "ui_editor_button" text_size 13 action Function(tab.reset_quads)
-        text "[[고칠 것: 그림]에서 끌기 자리, 휠 크기, Q/E 회전, 모서리 점(분홍 그림, 하늘색 글) 끌기 네 점 변형. 묶으면 글도 그림을 따라 움직임" style "ui_editor_text" size 12 xmaximum 632
+            textbutton "그림 처음으로" style "ui_editor_button" text_size ui_editor.T(13) action Function(tab.reset_media)
+            textbutton ("묶음 풀기" if tab.media_link() is not None else "글과 묶기") style "ui_editor_button" text_size ui_editor.T(13) action Function(tab.toggle_link) selected (tab.media_link() is not None)
+            textbutton "네 점 처음으로" style "ui_editor_button" text_size ui_editor.T(13) action Function(tab.reset_quads)
+        text "[[고칠 것: 그림]에서 끌기 자리, 휠 크기, Q/E 회전, 모서리 점(분홍 그림, 하늘색 글) 끌기 네 점 변형. 묶으면 글도 그림을 따라 움직임" style "ui_editor_text" size ui_editor.T(12) xmaximum ui_editor.W(632)
 
     use ui_editor_style_row(tab, tab.style_keys())
 
@@ -1310,35 +1310,35 @@ screen ui_editor_say_panel(tab):
             spacing 4
             box_wrap True
             box_wrap_spacing 4
-            xmaximum 632
+            xmaximum ui_editor.W(632)
             text "속도:" style "ui_editor_text" yalign 0.5
             for _v in tab.CPS_CHOICES:
-                textbutton ("설정대로" if _v is None else "{}자".format(_v)) style "ui_editor_button" text_size 13 action Function(tab.set_cps, _v) selected (tab.cps() == _v and (_v is not None or abs(tab.speed() - 1.0) < 1e-9))
-            text "(1초에 몇 글자)" style "ui_editor_text" size 12 yalign 0.5
+                textbutton ("설정대로" if _v is None else "{}자".format(_v)) style "ui_editor_button" text_size ui_editor.T(13) action Function(tab.set_cps, _v) selected (tab.cps() == _v and (_v is not None or abs(tab.speed() - 1.0) < 1e-9))
+            text "(1초에 몇 글자)" style "ui_editor_text" size ui_editor.T(12) yalign 0.5
 
         if tab.box_kind() != "media":
             hbox:
                 spacing 4
                 text "상자:" style "ui_editor_text" yalign 0.5
                 for _v, _l in tab.BOXES:
-                    textbutton _l style "ui_editor_button" text_size 13 action Function(tab.set_box, _v) selected (tab.box_kind() == _v)
+                    textbutton _l style "ui_editor_button" text_size ui_editor.T(13) action Function(tab.set_box, _v) selected (tab.box_kind() == _v)
 
         if tab.box_kind() in ("bubble", "pill"):
             hbox:
                 spacing 4
                 box_wrap True
                 box_wrap_spacing 4
-                xmaximum 632
+                xmaximum ui_editor.W(632)
                 text "꼬리:" style "ui_editor_text" yalign 0.5
                 for _v, _l in tab.TAILS:
-                    textbutton _l style "ui_editor_button" text_size 13 action Function(tab.set_box_tail, _v) selected (tab.box_tail() == _v)
+                    textbutton _l style "ui_editor_button" text_size ui_editor.T(13) action Function(tab.set_box_tail, _v) selected (tab.box_tail() == _v)
                 text "  기울기:" style "ui_editor_text" yalign 0.5
                 for _v in tab.BOX_ROTATES:
-                    textbutton ("{:+d}".format(_v) if _v else "0") style "ui_editor_button" text_size 13 action Function(tab.set_box_rotate, _v) selected (abs(tab.box_rotate() - _v) < 0.01)
+                    textbutton ("{:+d}".format(_v) if _v else "0") style "ui_editor_button" text_size ui_editor.T(13) action Function(tab.set_box_rotate, _v) selected (abs(tab.box_rotate() - _v) < 0.01)
 
     ## 3.21: 글자 등장 효과, 줄마다 화면 효과·덮개·휘어짐·커서는 이 탭에서 뺌.
     ## 원고에 이미 적힌 괄호(fx=, fx_overlay=, fx_warp=, fx_cursor=, 등장 효과)는 그대로 돌아감
-    text "대사 효과(글자 등장 효과)는 pygaki 앱 [[대본 편집]에서 고칩니다. 셰이더와 커서도 대본 편집기에서 상자마다 고릅니다." style "ui_editor_small" color "#ffd23b" xmaximum 632
+    text "대사 효과(글자 등장 효과)는 pygaki 앱 [[대본 편집]에서 고칩니다. 셰이더와 커서도 대본 편집기에서 상자마다 고릅니다." style "ui_editor_small" color "#ffd23b" xmaximum ui_editor.W(632)
 
     hbox:
         spacing 6

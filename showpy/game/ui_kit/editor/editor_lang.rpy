@@ -129,6 +129,8 @@ init -8 python in ui_editor:
 
     def _apply_font(init=False):
         """편집기 글꼴을 언어에 맞춤. 일본어가 아니면, 바꾼 적이 없을 때는 손대지 않음."""
+        if PANEL_FONT:
+            return      # 갈무리는 가나·한자도 그려서 언어마다 바꾸지 않음 (pygaki v1.9)
         try:
             st = store.style.ui_editor_text
             ja = editor_lang() == "ja" and store.renpy.loadable("SourceHanSansLite.ttf")

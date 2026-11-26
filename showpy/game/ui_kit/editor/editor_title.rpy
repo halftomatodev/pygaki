@@ -712,7 +712,7 @@ screen ui_editor_title_overlay():
 
         text "[it.id]":
             style "ui_editor_text"
-            size 12
+            size ui_editor.T(12)
             pos (int(_ax + ui_editor.px(6)), int(_ay + ui_editor.px(4)))
             at ui_editor.zoom_t()    # 실제 화면 크기 글 (4.20)
 
@@ -730,7 +730,7 @@ screen ui_editor_title_overlay():
         add Solid("#ff3b8d" if (_n + it.index) == tmenu.state.ed_sel else "#ffffff", xysize=(ui_editor.px(7), ui_editor.px(7))) pos (int(_ax), int(_ay)) anchor (0.5, 0.5)
         text (it.name + (" (비어 있음)" if it.empty else "")):
             style "ui_editor_text"
-            size 12
+            size ui_editor.T(12)
             pos (int(_ax + ui_editor.px(6)), int(_ay + ui_editor.px(4)))
             at ui_editor.zoom_t()    # 실제 화면 크기 글 (4.20)
 
@@ -754,25 +754,25 @@ screen ui_editor_title_panel(tab):
         spacing 4
         box_wrap True
         box_wrap_spacing 4
-        xmaximum 632
+        xmaximum ui_editor.W(632)
         text "글자 효과:" style "ui_editor_text" yalign 0.5
         $ _ef = tab.effect()
         $ _efs = tmenu.effect_names(keep=_ef)
         if ui_editor.in_game_panel():
             ## 게임 창에는 지금 값만, 목록은 pygaki 앱에서 (4.20)
-            textbutton dict(_efs).get(_ef, _ef or "-") style "ui_editor_button" text_size 13 action Function(ui_editor.open_in_app) selected True
-            textbutton "pygaki 앱에서 고르기" style "ui_editor_button" text_size 13 action Function(ui_editor.open_in_app)
+            textbutton dict(_efs).get(_ef, _ef or "-") style "ui_editor_button" text_size ui_editor.T(13) action Function(ui_editor.open_in_app, field="text_effect") selected True
+            textbutton "pygaki 앱에서 고르기" style "ui_editor_button" text_size ui_editor.T(13) action Function(ui_editor.open_in_app, field="text_effect")
         else:
             for _n, _nl in _efs:
-                textbutton _nl style "ui_editor_button" text_size 13 action Function(tab.set_effect, _n) selected (_ef == _n)
+                textbutton _nl style "ui_editor_button" text_size ui_editor.T(13) action Function(tab.set_effect, _n) selected (_ef == _n)
 
     ## 배경 (3.19): 그림이나 webm 영상. 없으면 타이틀은 검은 화면, ESC 메뉴는 투명
     hbox:
         spacing 6
         text "배경:" style "ui_editor_text" yalign 0.5
-        textbutton tab.background_label() style "ui_editor_button" text_size 13 action Function(ui_editor.open_popup, "background", "background")
+        textbutton tab.background_label() style "ui_editor_button" text_size ui_editor.T(13) action Function(ui_editor.open_popup, "background", "background")
         if tab.background():
-            textbutton "없애기" style "ui_editor_button" text_size 13 action Function(tab.set_background, None)
+            textbutton "없애기" style "ui_editor_button" text_size ui_editor.T(13) action Function(tab.set_background, None)
 
     hbox:
         spacing 6

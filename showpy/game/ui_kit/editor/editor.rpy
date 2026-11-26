@@ -26,6 +26,38 @@ init -9 python in ui_editor:
     except Exception:
         import pygame
 
+    ## ── 패널 글꼴 (pygaki v1.9) ──
+    ## 패널은 게임 글꼴과 상관없이 플러그인에 든 한글 픽셀 글꼴 갈무리9(editor/fonts, OFL)로 그립니다.
+    ## 게임 글꼴에 한글이 없어도 네모가 안 되고(한·일·영 편집기 글을 모두 그림), 작게 그려서 작은 해상도(레트로 ×1)에서도 덜 가립니다.
+    ## 갈무리9는 10px가 원래 크기라 글 크기는 10의 배수(T), 패널 폭도 글이 작아진 만큼 줄입니다(W).
+    ## 글꼴 파일이 없으면(예전 판에서 일부만 옮긴 경우) 예전처럼 게임 글꼴과 원래 크기.
+    ## editor/fonts는 개발 모드에서만 쓰므로 배포판에서는 뺍니다 (engine/ui_kit.rpy build.classify).
+    def _panel_font():
+        try:
+            r = store.ui_kit.ROOT
+            if r.startswith("game/"):
+                r = r[5:]
+            f = r + "/editor/fonts/Galmuri9.ttf"
+            return f if store.renpy.loadable(f) else None
+        except Exception:
+            return None
+
+    PANEL_FONT = _panel_font()
+    PANEL_UNIT = 10         # 갈무리9 원래 크기
+    PANEL_SHRINK = 10 / 13.0    # 예전 패널의 주된 글(13px)이 10px가 된 만큼
+
+    def T(n):
+        """패널 글 크기 n(예전 값) → 갈무리면 10의 배수 (제목까지 모두 10, 20 이상만 20), 아니면 그대로"""
+        if not PANEL_FONT:
+            return n
+        return PANEL_UNIT if n < 20 else 2 * PANEL_UNIT
+
+    def W(n):
+        """패널 폭 n(예전 값) → 갈무리면 글이 작아진 만큼 줄임, 아니면 그대로"""
+        if not PANEL_FONT:
+            return n
+        return int(round(n * PANEL_SHRINK))
+
     ## ── 상태 (세이브·롤백에 들어가지 않는 일반 파이썬 객체) ──
 
     class _State(python_object):
@@ -1438,18 +1470,19 @@ init 991 python in ui_editor:
 
 ## ── 스타일 ───────────────────────────────────────────────────────────────────
 
+## 글꼴은 플러그인의 갈무리9 (없으면 게임 글꼴). 픽셀 글꼴이라 외곽선은 1px
 style ui_editor_text:
-    font gui.interface_text_font
-    size 15
+    font (ui_editor.PANEL_FONT or gui.interface_text_font)
+    size ui_editor.T(15)
     color "#ffffff"
-    outlines [ (2, "#000000", 0, 0) ]
+    outlines [ (1 if ui_editor.PANEL_FONT else 2, "#000000", 0, 0) ]
 
 style ui_editor_small is ui_editor_text:
-    size 13
+    size ui_editor.T(13)
     color "#cccccc"
 
 style ui_editor_title is ui_editor_text:
-    size 18
+    size ui_editor.T(18)
     color "#ff3b8d"
 
 style ui_editor_button is empty:
@@ -1579,7 +1612,7 @@ screen ui_editor_background_popup():
         modal True
         at ui_editor.zoom_t((0.5, 0.5))    # 실제 화면 크기로 (4.20, 픽셀 퍼펙트처럼 크게 키운 게임)
         align (0.5, 0.5)
-        xsize 620
+        xsize ui_editor.W(620)
         ysize 560
 
         vbox:
@@ -1603,7 +1636,7 @@ screen ui_editor_background_popup():
                         textbutton _f:
                             style "ui_editor_button"
                             xfill True
-                            text_size 13
+                            text_size ui_editor.T(13)
                             action Function(ui_editor.pick_font, _f)
                             selected (_cur == _f)
                     if not _files:
@@ -1640,8 +1673,8 @@ screen ui_editor_panel():
                     spacing 8
                     add ui_editor.grip yalign 0.5
                     text (_tab.label if _tab is not None else "") style "ui_editor_text" yalign 0.5
-                    textbutton "X 펼치기" style "ui_editor_button" text_size 13 action ToggleField(ui_editor.state, "mini") yalign 0.5
-                    textbutton "저장" style "ui_editor_button" text_size 13 action Function(ui_editor.save_all) yalign 0.5
+                    textbutton "X 펼치기" style "ui_editor_button" text_size ui_editor.T(13) action ToggleField(ui_editor.state, "mini") yalign 0.5
+                    textbutton "저장" style "ui_editor_button" text_size ui_editor.T(13) action Function(ui_editor.save_all) yalign 0.5
                 $ _lines = _tab.info_lines()[:1] if (_tab is not None and _ok) else [ ]
                 for _line in _lines:
                     text _line style "ui_editor_small"
@@ -1656,7 +1689,7 @@ screen ui_editor_panel():
                     spacing 6
                     box_wrap True
                     box_wrap_spacing 4
-                    xmaximum 632
+                    xmaximum ui_editor.W(632)
                     add ui_editor.grip yalign 0.5
                     ## 제목 옆 안내 (pygaki v1.9): 앱 없이 쓰는 중인지, 앱과 이어졌는지, 여닫는 키
                     text ui_editor.mode_hint() style "ui_editor_small" color "#9fd8ff" xmaximum 500 yalign 0.5
@@ -1665,7 +1698,7 @@ screen ui_editor_panel():
                     spacing 6
                     box_wrap True
                     box_wrap_spacing 4
-                    xmaximum 632
+                    xmaximum ui_editor.W(632)
 
                     for _t, _tok, _twhy in ui_editor.tab_buttons():
                         textbutton _t.label:
@@ -1726,7 +1759,7 @@ screen ui_editor_panel_body():
 
     vbox:
         spacing 4
-        xmaximum 620
+        xmaximum ui_editor.W(620)
 
         if _tab is None:
             text "편집할 탭이 없습니다." style "ui_editor_text"
@@ -1777,7 +1810,7 @@ screen ui_editor_panel_compact():
 
     vbox:
         spacing 4
-        xmaximum 620
+        xmaximum ui_editor.W(620)
 
         if _tab is None:
             text "편집할 탭이 없습니다." style "ui_editor_text"
@@ -1810,7 +1843,7 @@ screen ui_editor_style_row(tab, keys):
             if _k.endswith("font"):
                 textbutton (ui_editor.short_path(_v)):
                     style "ui_editor_button"
-                    text_size 13
+                    text_size ui_editor.T(13)
                     action Function(ui_editor.open_popup, "font", _k)
             else:
                 button:
@@ -1819,7 +1852,7 @@ screen ui_editor_style_row(tab, keys):
                     hbox:
                         spacing 4
                         add Solid(_v or "#00000000", xysize=(16, 16)) yalign 0.5
-                        text (_v or "(기본)") style "ui_editor_button_text" size 13 yalign 0.5
+                        text (_v or "(기본)") style "ui_editor_button_text" size ui_editor.T(13) yalign 0.5
 
 
 screen ui_editor_font_popup():
@@ -1840,7 +1873,7 @@ screen ui_editor_font_popup():
         modal True
         at ui_editor.zoom_t((0.5, 0.5))    # 실제 화면 크기로 (4.20, 픽셀 퍼펙트처럼 크게 키운 게임)
         align (0.5, 0.5)
-        xsize 620
+        xsize ui_editor.W(620)
         ysize 560
 
         vbox:
@@ -1917,22 +1950,22 @@ screen ui_editor_color_popup():
                 spacing 6
                 text "색상" style "ui_editor_text" xsize 56
                 fixed:
-                    xsize 300
+                    xsize ui_editor.W(300)
                     ysize 18
                     add ui_editor.hue_strip() yalign 0.5
-                    bar value FieldValue(_p, "h", 360.0, step=1, action=Function(_p.from_hsv)) style "ui_editor_bar" xsize 300 left_bar Null() right_bar Null() yalign 0.5
+                    bar value FieldValue(_p, "h", 360.0, step=1, action=Function(_p.from_hsv)) style "ui_editor_bar" xsize ui_editor.W(300) left_bar Null() right_bar Null() yalign 0.5
             hbox:
                 spacing 6
                 text "채도" style "ui_editor_text" xsize 56
-                bar value FieldValue(_p, "s", 1.0, step=0.01, action=Function(_p.from_hsv)) style "ui_editor_bar" xsize 300 left_bar Solid(_p.hue_color())
+                bar value FieldValue(_p, "s", 1.0, step=0.01, action=Function(_p.from_hsv)) style "ui_editor_bar" xsize ui_editor.W(300) left_bar Solid(_p.hue_color())
             hbox:
                 spacing 6
                 text "밝기" style "ui_editor_text" xsize 56
-                bar value FieldValue(_p, "v", 1.0, step=0.01, action=Function(_p.from_hsv)) style "ui_editor_bar" xsize 300 left_bar Solid("#ffffff")
+                bar value FieldValue(_p, "v", 1.0, step=0.01, action=Function(_p.from_hsv)) style "ui_editor_bar" xsize ui_editor.W(300) left_bar Solid("#ffffff")
             hbox:
                 spacing 6
                 text "불투명" style "ui_editor_text" xsize 56
-                bar value FieldValue(_p, "a", 1.0, step=0.01, action=Function(_p.from_hsv)) style "ui_editor_bar" xsize 300 left_bar Solid("#aaaaaa")
+                bar value FieldValue(_p, "a", 1.0, step=0.01, action=Function(_p.from_hsv)) style "ui_editor_bar" xsize ui_editor.W(300) left_bar Solid("#aaaaaa")
 
             hbox:
                 box_wrap True

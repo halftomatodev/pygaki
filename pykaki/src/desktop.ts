@@ -27,7 +27,7 @@ interface PygakiApi {
   // showpy 실시간 연결 (docs/LINK.md 9장)
   liveSend(msg: object): Promise<boolean>;
   liveStatus(): Promise<{ on: boolean; reloading?: boolean; showpy: string | null; last?: any[] }>;
-  openTab?(): Promise<string | null>; // 앱을 켤 때 받은 --tab (pygaki editor에서 켰을 때)
+  openTab?(): Promise<{ tab: string; field?: string | null } | string | null>; // 앱을 켤 때 받은 --tab, --field (pygaki editor에서 켰을 때. 예전 판은 탭 글만)
   onLive(fn: (msg: any) => void): () => void;
   onLiveStatus(fn: (st: { on: boolean; reloading?: boolean; showpy: string | null }) => void): () => void;
 }

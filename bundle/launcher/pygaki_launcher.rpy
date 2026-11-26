@@ -219,16 +219,25 @@ init python:
                         os.remove(os.path.join(root, name))
         return len(copy), len(retire), backup
 
-    def pygaki_number(title, ask, wrong):
+    ## 레트로 가장 작은 해상도(PC-98 640x400)보다 작은 해상도는 지원하지 않는다 (세션 112 사용자 답).
+    ## 렌파이 기본 화면(저장·설정)과 pygaki 타이틀·스플래시·편집 화면 글이 들어가지 않음
+    PYGAKI_MIN_SIZE = (640, 400)
+
+    def pygaki_number(title, ask, wrong, least):
+        small = T("{0}보다 작은 값은 지원하지 않아요 (가장 작은 해상도는 PC-98 640x400).",
+                  "{0} より小さい値には対応していません(いちばん小さい解像度は PC-98 640x400)。",
+                  "Values smaller than {0} aren't supported (the smallest resolution is PC-98 640x400).").format(least)
+        ask = ask + "\n" + T("{0} 이상.", "{0} 以上。", "{0} or more.").format(least)
         while True:
-            v = interface.input(title, ask, cancel=Jump("front_page"), allow=interface.DIGITS_LETTERS)
+            v = interface.input(title, KO(ask), cancel=Jump("front_page"), allow=interface.DIGITS_LETTERS)
             try:
                 v = int(v)
-                if v > 0:
-                    return v
             except Exception:
-                pass
-            interface.error(wrong, label=None)
+                interface.error(wrong, label=None)
+                continue
+            if v >= least:
+                return v
+            interface.error(KO(small), label=None)
 
     ## Pygaki 새 프로젝트 해상도: 레트로 다섯(픽셀 퍼펙트) + 고해상도 둘. (값, 이름, 레트로인지)
     ## GBC 160x144, SNES 256x224는 뺌(세션 99): 렌파이 기본 화면과 플러그인 글이 들어가지 않음
@@ -447,7 +456,13 @@ init python:
             return re.sub(r'\b((?:' + "|".join(keys) + r')=)(\d+)', lambda m: m.group(1) + str(pygaki_small_len(int(m.group(2)), height)), text)
 
         def title(text):
-            text = sizes(text, ("size",))
+            if pixel:
+                ## 타이틀 글은 갈무리9 두 배(20px) 아래로 내리지 않는다. 템플릿이 아래 항목을 일부러 줄여 둬서(36·28·24)
+                ## 그대로 줄이면 PC-98 [종료하기]만 10px가 됨 (세션 112)
+                least = 2 * PYGAKI_PIXEL_UNIT
+                text = re.sub(r'("size"\s*:\s*)(\d+)', lambda m: m.group(1) + str(max(least, pygaki_small_size(int(m.group(2)), height, True))), text)
+            else:
+                text = sizes(text, ("size",))
             if pixel:
                 ## 픽셀 글꼴을 조금 돌리면 격자에 걸려 글자가 삐뚤빼뚤해진다
                 text = re.sub(r'("(?:rotate|hover_rotate)"\s*:\s*)-?\d+(?:\.\d+)?', lambda m: m.group(1) + "0", text)
@@ -643,8 +658,8 @@ label pygaki_gui_project:
 
         if gui_size == "custom":
             gui_size = (
-                pygaki_number(_("WIDTH"), _("Please enter the width of your game, in pixels."), _("The width must be a number.")),
-                pygaki_number(_("HEIGHT"), _("Please enter the height of your game, in pixels."), _("The height must be a number.")),
+                pygaki_number(_("WIDTH"), _("Please enter the width of your game, in pixels."), _("The width must be a number."), PYGAKI_MIN_SIZE[0]),
+                pygaki_number(_("HEIGHT"), _("Please enter the height of your game, in pixels."), _("The height must be a number."), PYGAKI_MIN_SIZE[1]),
             )
 
     ## 강조·배경 색은 고르지 않는다 (pygaki는 상자를 투명하게 두고 사용자가 그림을 넣어 씀). 렌파이 런처의 기본 색

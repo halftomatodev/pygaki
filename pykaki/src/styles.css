@@ -979,6 +979,12 @@ fieldset.plain:disabled { opacity: 0.4; }
 .sp-mirror { font-size: 12.5px; display: flex; flex-direction: column; gap: 6px; }
 .sp-m-v { display: flex; flex-direction: column; gap: 4px; }
 .sp-m-h { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+/* [pygaki 앱에서 고르기]로 온 칸: 잠깐 둘레를 밝혔다가 사라짐 */
+.sp-m-want { border-radius: 8px; animation: sp-m-want 1.6s var(--ease) both; }
+@keyframes sp-m-want {
+  0%, 40% { box-shadow: 0 0 0 2px var(--accent); background: var(--accent-soft); }
+  100% { box-shadow: 0 0 0 2px transparent; background: transparent; }
+}
 .sp-m-t { white-space: pre-wrap; line-height: 1.45; }
 .sp-m-b { padding: 3px 9px; font-size: 12px; display: inline-flex; gap: 4px; align-items: center; border-radius: 8px; background: var(--faint); color: var(--text); }
 .sp-m-b.on { background: var(--accent-soft); color: var(--accent); font-weight: 600; }

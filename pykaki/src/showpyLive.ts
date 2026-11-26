@@ -88,7 +88,7 @@ export interface CursorLines {
 export type MirrorNode = (
   | { k: 'h' | 'v' | 'g'; c: MirrorNode[] }
   | { k: 'sp'; w: number }
-  | { k: 't'; t: string; c?: string }
+  | { k: 't'; t: string; c?: string; f?: string } // f: 칸 id (그 줄의 이름 글, [pygaki 앱에서 고르기]가 가리킴)
   | { k: 'b'; id: string; t: string; on: boolean; ok: boolean; c?: MirrorNode[] }
   | { k: 'bar'; id: string; r: number; v: number; s: number }
   | { k: 'in'; id: string; t: string; w?: number } // w: 넓은 글 칸 (여러 줄)
@@ -129,7 +129,8 @@ interface S {
   files: GameFiles | null; // 게임 폴더의 소리, 그림 파일 (렌파이 list_files, game 기준)
   err: string | null;
   section: string;
-  want?: { tab: string; n: number } | null; // 게임이 열어 달라고 한 탭 (ShowpyView가 그 칸을 고름)
+  want?: { tab: string; field?: string | null; n: number } | null; // 게임이 열어 달라고 한 탭 (ShowpyView가 그 칸을 고름)
+  wantField?: { f: string; n: number } | null; // 그 탭 패널에서 내려가 보일 칸 (MirrorPanel이 찾아 스크롤하고 지움)
 }
 
 // 게임 창 pygaki editor 패널 (pygaki v1.9): compact 축약형 / full 대형 / hidden 숨김. 게임 창과 앱의 F9가 이 차례로 돈다.
@@ -227,7 +228,7 @@ export function startLive() {
       usePrefs.setState({ gameBands: !!m.on });
     }
     // pygaki editor의 [pygaki 앱에서 고르기]: [GUI 편집]의 그 탭으로
-    else if (m?.type === 'open' && typeof m.tab === 'string') useLive.setState({ view: 'showpy', want: { tab: m.tab, n: Date.now() } });
+    else if (m?.type === 'open' && typeof m.tab === 'string') useLive.setState({ view: 'showpy', want: { tab: m.tab, field: typeof m.field === 'string' ? m.field : null, n: Date.now() } });
   };
   // 환경 설정에서 바꾸면 게임에 보냄
   let bandsEcho: boolean | null = null;
@@ -244,7 +245,7 @@ export function startLive() {
   desktop.onLiveStatus(status);
   desktop.onLive(take);
   // 화면이 뜨기 전에 온 상태와 파일 목록 (게임은 바뀔 때만 다시 보냄)
-  void desktop.openTab?.().then((t: string | null) => t && take({ type: 'open', tab: t }));
+  void desktop.openTab?.().then((t) => t && take(typeof t === 'string' ? { type: 'open', tab: t } : { type: 'open', ...t }));
   void desktop.liveStatus().then((s) => {
     status(s);
     if (s.on) for (const m of s.last ?? []) if (!(m.type === 'state' && useLive.getState().st)) take(m);

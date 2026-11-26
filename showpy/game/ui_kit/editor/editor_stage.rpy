@@ -1127,23 +1127,23 @@ screen ui_editor_stage_panel(tab):
         spacing 4
         box_wrap True
         box_wrap_spacing 4
-        xmaximum 632
-        textbutton "그림/영상/소리 고르기" style "ui_editor_button" text_size 13 action Function(tab.open_media)
-        textbutton "images 폴더 열기" style "ui_editor_button" text_size 13 action Function(ui_editor.open_folder, "images")
+        xmaximum ui_editor.W(632)
+        textbutton "그림/영상/소리 고르기" style "ui_editor_button" text_size ui_editor.T(13) action Function(tab.open_media)
+        textbutton "images 폴더 열기" style "ui_editor_button" text_size ui_editor.T(13) action Function(ui_editor.open_folder, "images")
 
     if _kind is not None and _kind != "hide" and tab.pk() and not tab.sel_is_bg():
         hbox:
             spacing 4
             text "위치 저장:" style "ui_editor_text" yalign 0.5
-            textbutton "이 상자에서만" style "ui_editor_button" text_size 13 action Function(tab.set_scope, "box") selected (tab.pos_scope == "box")
-            textbutton "어디서나" style "ui_editor_button" text_size 13 action Function(tab.set_scope, "all") selected (tab.pos_scope == "all")
+            textbutton "이 상자에서만" style "ui_editor_button" text_size ui_editor.T(13) action Function(tab.set_scope, "box") selected (tab.pos_scope == "box")
+            textbutton "어디서나" style "ui_editor_button" text_size ui_editor.T(13) action Function(tab.set_scope, "all") selected (tab.pos_scope == "all")
 
     if _kind is not None and _kind != "hide":
         hbox:
             spacing 4
             box_wrap True
             box_wrap_spacing 4
-            xmaximum 632
+            xmaximum ui_editor.W(632)
             $ _p = tab.cur_pos()
             text "위치:" style "ui_editor_text" yalign 0.5
             if tab.sel_is_bg():
@@ -1151,11 +1151,11 @@ screen ui_editor_stage_panel(tab):
                 text "배경(bg)이라 고정" style "ui_editor_small" yalign 0.5
                 if _p is not None:
                     ## 예전에 옮겨서 원고에 위치가 적혀 있으면 지울 수 있게
-                    textbutton "기본 위치로 되돌리기" style "ui_editor_button" text_size 13 action Function(tab.set_pos, None)
+                    textbutton "기본 위치로 되돌리기" style "ui_editor_button" text_size ui_editor.T(13) action Function(tab.set_pos, None)
             else:
-                textbutton "기본" style "ui_editor_button" text_size 13 action Function(tab.set_pos, None) selected (_p is None)
+                textbutton "기본" style "ui_editor_button" text_size ui_editor.T(13) action Function(tab.set_pos, None) selected (_p is None)
                 for _n, _l in stage.cfg("positions"):
-                    textbutton _l style "ui_editor_button" text_size 13 action Function(tab.set_pos, _n) selected (_p == _n)
+                    textbutton _l style "ui_editor_button" text_size ui_editor.T(13) action Function(tab.set_pos, _n) selected (_p == _n)
 
     if _kind is not None and _kind != "hide" and not tab.pk() and tab.img_fx_choices():
         $ _fxn = tab.img_fx()
@@ -1163,16 +1163,16 @@ screen ui_editor_stage_panel(tab):
             spacing 4
             box_wrap True
             box_wrap_spacing 4
-            xmaximum 632
+            xmaximum ui_editor.W(632)
             text "효과:" style "ui_editor_text" yalign 0.5
             $ _fxs = tab.img_fx_choices()
             if ui_editor.in_game_panel():
                 ## 게임 창에는 지금 값만, 효과 목록은 pygaki 앱에서 (4.20)
-                textbutton dict(_fxs).get(_fxn, _fxn or "-") style "ui_editor_button" text_size 13 action Function(ui_editor.open_in_app) selected True
-                textbutton "pygaki 앱에서 고르기" style "ui_editor_button" text_size 13 action Function(ui_editor.open_in_app)
+                textbutton dict(_fxs).get(_fxn, _fxn or "-") style "ui_editor_button" text_size ui_editor.T(13) action Function(ui_editor.open_in_app, field="img_fx") selected True
+                textbutton "pygaki 앱에서 고르기" style "ui_editor_button" text_size ui_editor.T(13) action Function(ui_editor.open_in_app, field="img_fx")
             else:
                 for _n, _l in _fxs:
-                    textbutton _l style "ui_editor_button" text_size 13 action Function(tab.set_img_fx, _n) selected (_fxn == _n)
+                    textbutton _l style "ui_editor_button" text_size ui_editor.T(13) action Function(tab.set_img_fx, _n) selected (_fxn == _n)
 
     if _kind is not None:
         $ _spec = tab.with_spec()
@@ -1180,15 +1180,15 @@ screen ui_editor_stage_panel(tab):
             spacing 4
             box_wrap True
             box_wrap_spacing 4
-            xmaximum 632
+            xmaximum ui_editor.W(632)
             text "전환:" style "ui_editor_text" yalign 0.5
             if ui_editor.in_game_panel():
                 ## 게임 창에는 지금 값만, 전환 목록은 pygaki 앱에서 (방향·시간은 아래에 그대로)
-                textbutton dict((_tk, _tl) for _tk, _tl, _tt, _td in stage.TRANSITIONS).get(_spec["kind"], _spec["kind"] or "-") style "ui_editor_button" text_size 13 action Function(ui_editor.open_in_app) selected True
-                textbutton "pygaki 앱에서 고르기" style "ui_editor_button" text_size 13 action Function(ui_editor.open_in_app)
+                textbutton dict((_tk, _tl) for _tk, _tl, _tt, _td in stage.TRANSITIONS).get(_spec["kind"], _spec["kind"] or "-") style "ui_editor_button" text_size ui_editor.T(13) action Function(ui_editor.open_in_app, field="transition") selected True
+                textbutton "pygaki 앱에서 고르기" style "ui_editor_button" text_size ui_editor.T(13) action Function(ui_editor.open_in_app, field="transition")
             else:
                 for _tk, _tl, _tt, _td in stage.TRANSITIONS:
-                    textbutton _tl style "ui_editor_button" text_size 13 action Function(tab.set_kind, _tk) selected (_spec["kind"] == _tk)
+                    textbutton _tl style "ui_editor_button" text_size ui_editor.T(13) action Function(tab.set_kind, _tk) selected (_spec["kind"] == _tk)
 
         $ _info = stage.trans_info(_spec["kind"])
         if _info is not None and _info[3]:
@@ -1196,16 +1196,16 @@ screen ui_editor_stage_panel(tab):
                 spacing 4
                 text ("나가는 쪽:" if (_kind == "hide" and _spec["kind"] in ("move", "ease", "slide")) else "방향:") style "ui_editor_text" yalign 0.5
                 for _dv, _dl in _info[3]:
-                    textbutton _dl style "ui_editor_button" text_size 13 action Function(tab.set_dir, _dv) selected (_spec["dir"] == _dv)
+                    textbutton _dl style "ui_editor_button" text_size ui_editor.T(13) action Function(tab.set_dir, _dv) selected (_spec["dir"] == _dv)
 
         if _info is not None and _info[2] is not None:
             hbox:
                 spacing 4
                 box_wrap True
-                xmaximum 632
+                xmaximum ui_editor.W(632)
                 text "시간:" style "ui_editor_text" yalign 0.5
                 for _tv in tab.TIMES:
-                    textbutton ("{:g}초".format(_tv)) style "ui_editor_button" text_size 13 action Function(tab.set_time, _tv) selected (_spec["time"] is not None and abs(_spec["time"] - _tv) < 0.001)
+                    textbutton ("{:g}초".format(_tv)) style "ui_editor_button" text_size ui_editor.T(13) action Function(tab.set_time, _tv) selected (_spec["time"] is not None and abs(_spec["time"] - _tv) < 0.001)
 
     hbox:
         spacing 6
@@ -1232,7 +1232,7 @@ screen ui_editor_media_popup():
         modal True
         at ui_editor.zoom_t((0.5, 0.5))    # 실제 화면 크기로 (4.20, 픽셀 퍼펙트처럼 크게 키운 게임)
         align (0.5, 0.5)
-        xsize 720
+        xsize ui_editor.W(720)
         ysize 600
 
         vbox:
@@ -1243,18 +1243,18 @@ screen ui_editor_media_popup():
             hbox:
                 spacing 4
                 for _f, _fl in (("all", "전부"), ("image", "그림"), ("movie", "영상"), ("audio", "소리")):
-                    textbutton _fl style "ui_editor_button" text_size 13 action Function(_tab.set_media_filter, _f) selected (_tab.media_filter == _f)
+                    textbutton _fl style "ui_editor_button" text_size ui_editor.T(13) action Function(_tab.set_media_filter, _f) selected (_tab.media_filter == _f)
 
             ## 폴더 열기: 탐색기로 열어서 파일을 넣거나 바꿈 (넣은 뒤에는 Shift+R로 다시 불러오면 목록에 나옴)
             hbox:
                 spacing 4
                 text "폴더 열기" style "ui_editor_small" yalign 0.5
                 for _d in ("images", "movies", "audio"):
-                    textbutton _d style "ui_editor_button" text_size 13 action Function(ui_editor.open_folder, _d)
-                textbutton "새로 읽기" style "ui_editor_button" text_size 13 action Function(ui_editor.refresh_files, True)
+                    textbutton _d style "ui_editor_button" text_size ui_editor.T(13) action Function(ui_editor.open_folder, _d)
+                textbutton "새로 읽기" style "ui_editor_button" text_size ui_editor.T(13) action Function(ui_editor.refresh_files, True)
                 $ _mf = _tab.media_folder()
                 if _mf:
-                    textbutton "고른 파일 폴더" style "ui_editor_button" text_size 13 action Function(ui_editor.open_folder, _mf)
+                    textbutton "고른 파일 폴더" style "ui_editor_button" text_size ui_editor.T(13) action Function(ui_editor.open_folder, _mf)
 
             viewport:
                 scrollbars "vertical"
@@ -1283,7 +1283,7 @@ screen ui_editor_media_popup():
                                         xysize (112, 72)
                                         add Solid("#ffffff18")
                                         text ({ "mask": "투명 영상", "audio": "소리" }.get(_kind, "영상")) style "ui_editor_small" align (0.5, 0.5)
-                                text ui_editor.esc(_name.rpartition("/")[2]) style "ui_editor_small" xalign 0.5 size 12
+                                text ui_editor.esc(_name.rpartition("/")[2]) style "ui_editor_small" xalign 0.5 size ui_editor.T(12)
 
             if not _tab.media_list():
                 text "images, movies 폴더에 파일이 없습니다." style "ui_editor_text"

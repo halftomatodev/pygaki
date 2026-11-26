@@ -335,7 +335,7 @@ pygaki 데스크톱 앱의 [GUI 편집] 화면이 게임 안 편집기를 바깥
 | `reloading` | 원고를 다시 읽기 직전(Shift+R, 자동 다시 읽기. 렌파이 `renpy.session["_reload"]`), 연결을 닫기 바로 전 | `{"type": "reloading"}`. 앱은 다시 붙을 때까지 연결 단추를 "◐ 게임 수정 중"으로 |
 | `bands` | 게임 창에서 F8로 경계선을 켜거나 껐을 때 | `{"type": "bands", "on": true}`. 앱은 환경 설정 `gameBands`를 이 값으로 바꾸고 다시 보내지 않음 |
 | `panel` | 게임 창에서 F9로 pygaki editor 패널 모양을 바꿨을 때 | `{"type": "panel", "mode": "full", "hide": false}`. `mode`는 `compact`(축약형) / `full`(대형) / `hidden`(숨김), `hide`는 `mode == "hidden"`(예전 앱용, pygaki v1.9). 앱은 이 값을 기억했다가(`localStorage` `pygaki-game-panel`, 예전 값 `show`/`hide`도 읽음) 다음에 붙을 때 `panel` 명령으로 보냄. 앱의 F9(단축키 `gamePanel`)도 같은 차례로 돎 |
-| `open` | 게임 창 패널의 [pygaki 앱에서 고르기]를 눌렀을 때 (pygaki v1.9) | `{"type": "open", "tab": "title_fx"}` (pygaki editor의 탭 id). 앱은 창을 앞으로 가져오고 [GUI 편집]의 그 칸을 엶(`watermorph`는 `title_fx` 칸). 앱이 붙어 있지 않으면 게임이 `<렌파이 SDK>/pygaki/app/pygaki.exe --project <게임 폴더> --tab <탭 id>`로 앱을 켬. 앱이 이미 켜져 있으면 그 창이 받아서 같은 일을 함 |
+| `open` | 게임 창 패널의 [pygaki 앱에서 고르기]를 눌렀을 때 (pygaki v1.9) | `{"type": "open", "tab": "stage", "field": "transition"}` (`tab`은 pygaki editor의 탭 id, `field`는 누른 칸 id로 없을 수 있음: `text_effect` 타이틀·ESC 메뉴 항목의 글자 효과, `img_fx` 그림 효과, `transition` 그림 전환). 앱은 창을 앞으로 가져오고 [GUI 편집]의 그 칸을 엶(`watermorph`는 `title_fx` 칸). `field`가 있으면 그 칸의 줄로 내려가 잠깐 강조함: 앱 자체 칸은 그 칸, 옮겨 그린 패널(`panel`)은 `f`가 같은 글이 있는 줄. 앱이 붙어 있지 않으면 게임이 `<렌파이 SDK>/pygaki/app/pygaki.exe --project <게임 폴더> --tab <탭 id> [--field <칸 id>]`로 앱을 켬. 앱은 게임과 붙으면 게임에도 그 탭을 열고, 붙은 뒤 5초 안에 그 칸이 안 오면 그만둠. 앱이 이미 켜져 있으면 그 창이 받아서 같은 일을 함. 예전 앱은 `field`를 모르고 탭만 엶 |
 
 ```json
 {
@@ -372,7 +372,7 @@ pygaki 데스크톱 앱의 [GUI 편집] 화면이 게임 안 편집기를 바깥
   |---|---|---|
   | `v`, `h`, `g` | 세로, 가로(줄바꿈), 격자 | `c` 안의 것들 |
   | `sp` | 가로 줄의 빈 칸 (세모 없는 줄의 왼쪽 자리 등, pygaki 플러그인 4.11) | `w` 너비(게임 픽셀). 4픽셀 아래는 안 보냄, 세로 묶음 안의 것은 뺌 |
-  | `t` | 글 | `t`, 회색이 아닌 글자색이면 `c` |
+  | `t` | 글 | `t`, 회색이 아닌 글자색이면 `c`. 칸 이름 글(`글자 효과:`, `효과:`, `전환:`)이면 `f`에 칸 id(`open`의 `field`와 같은 값, pygaki v1.9) |
   | `b` | 버튼 | `id`, `t`(글), `on`(고른 상태), `ok`(누를 수 있음), 안에 그림/색이 있으면 `c` |
   | `bar` | 막대 | `id`, `r`(범위, 0부터), `v`(지금 값), `s`(간격) |
   | `in` | 입력칸 | `id`, `t`(지금 글), `w`(1이면 넓은 글 칸: 게임 쪽 `xmaximum`이 300 이상. 앱은 패널 폭 가득, 세 줄 칸으로 그림) |

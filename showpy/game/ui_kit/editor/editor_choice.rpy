@@ -863,13 +863,13 @@ screen ui_editor_choice_panel(tab):
             text "고칠 것:" style "ui_editor_text" yalign 0.5
             textbutton "선택지" style "ui_editor_button" action Function(tab.set_part, "button") selected (tab.part != "media")
             textbutton "뒤 그림" style "ui_editor_button" action Function(tab.set_part, "media") selected (tab.part == "media")
-            textbutton "그림 처음으로" style "ui_editor_button" text_size 13 action Function(tab.reset_media)
+            textbutton "그림 처음으로" style "ui_editor_button" text_size ui_editor.T(13) action Function(tab.reset_media)
         if tab.part == "media":
             hbox:
                 spacing 6
-                textbutton ("묶음 풀기" if tab.media_link() is not None else "글과 묶기") style "ui_editor_button" text_size 13 action Function(tab.toggle_link) selected (tab.media_link() is not None)
-                textbutton "네 점 처음으로" style "ui_editor_button" text_size 13 action Function(tab.reset_quads)
-                text "모서리 점(분홍 그림, 하늘색 글)을 끌면 네 점 변형" style "ui_editor_text" size 12 yalign 0.5
+                textbutton ("묶음 풀기" if tab.media_link() is not None else "글과 묶기") style "ui_editor_button" text_size ui_editor.T(13) action Function(tab.toggle_link) selected (tab.media_link() is not None)
+                textbutton "네 점 처음으로" style "ui_editor_button" text_size ui_editor.T(13) action Function(tab.reset_quads)
+                text "모서리 점(분홍 그림, 하늘색 글)을 끌면 네 점 변형" style "ui_editor_text" size ui_editor.T(12) yalign 0.5
 
     use ui_editor_style_row(tab, tab.style_keys())
 

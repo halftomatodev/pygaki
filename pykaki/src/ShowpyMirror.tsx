@@ -58,7 +58,7 @@ function Node({ n }: { n: MirrorNode }) {
       );
     case 't':
       return (
-        <span className="sp-m-t" style={n.c ? { color: textColor(n.c) } : undefined}>
+        <span className="sp-m-t" data-f={n.f} style={n.c ? { color: textColor(n.c) } : undefined}>
           {n.t}
         </span>
       );

@@ -115,10 +115,15 @@ function argProject(argv) {
   return i >= 0 && argv[i + 1] ? path.resolve(argv[i + 1]) : null;
 }
 
-// pygaki editor의 [pygaki 앱에서 고르기]가 앱을 켤 때: --tab <게임 탭 id>. [GUI 편집]의 그 칸을 연다 
+// pygaki editor의 [pygaki 앱에서 고르기]가 앱을 켤 때: --tab <게임 탭 id> [--field <칸 id>]. [GUI 편집]의 그 탭, 그 칸을 연다
+// 돌려주는 값은 { tab, field } (칸이 없으면 field null) 또는 null
 function argTab(argv) {
-  const i = argv.indexOf('--tab');
-  return i >= 0 && argv[i + 1] && /^[a-z_]+$/.test(argv[i + 1]) ? argv[i + 1] : null;
+  const word = (name) => {
+    const i = argv.indexOf(name);
+    return i >= 0 && argv[i + 1] && /^[a-z_]+$/.test(argv[i + 1]) ? argv[i + 1] : null;
+  };
+  const tab = word('--tab');
+  return tab ? { tab, field: word('--field') } : null;
 }
 
 function showWin(win) {
@@ -317,7 +322,7 @@ ipcMain.handle('pygaki:liveStatus', (e) => {
   return { on, reloading: !on && !!entry?.reloading, showpy: l?.info?.showpy ?? null, last: l ? Object.values(l.last) : [] };
 });
 
-// 앱을 켤 때 받은 --tab (한 번만 넘겨줌)
+// 앱을 켤 때 받은 --tab, --field ({ tab, field }, 한 번만 넘겨줌)
 ipcMain.handle('pygaki:openTab', (e) => {
   const entry = windows.get(e.sender.id);
   const t = entry?.openTab ?? null;
@@ -537,7 +542,7 @@ function openOrFocus(project, tab = null) {
   for (const w of windows.values())
     if (w.project.toLowerCase() === project.toLowerCase()) {
       showWin(w.win);
-      if (tab) w.win.webContents.send('pygaki:live', { type: 'open', tab });
+      if (tab) w.win.webContents.send('pygaki:live', { type: 'open', ...tab });
       return;
     }
   open(project, tab);

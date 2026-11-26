@@ -184,18 +184,18 @@ screen ui_editor_ui_text_panel(tab):
         spacing 6
 
         for _g, _items in tab.groups():
-            text _g style "ui_editor_title" size 18
+            text _g style "ui_editor_title" size ui_editor.T(18)
             for _name, _label, _confirm in _items:
                 hbox:
                     spacing 6
                     text (_label + (" (바꿈)" if tab.changed(_name) else "")) style "ui_editor_small" yalign 0.5 min_width 220
                     if _confirm:
-                        textbutton "이 창 보기" style "ui_editor_button" text_size 12 action Function(tab.preview, _name)
+                        textbutton "이 창 보기" style "ui_editor_button" text_size ui_editor.T(12) action Function(tab.preview, _name)
                     if tab.changed(_name):
-                        textbutton "원래대로" style "ui_editor_button" text_size 12 action Function(tab.revert, _name)
+                        textbutton "원래대로" style "ui_editor_button" text_size ui_editor.T(12) action Function(tab.revert, _name)
                 button:
                     style "ui_editor_button"
-                    xsize 620
+                    xsize ui_editor.W(620)
                     yminimum 36
                     action ui_editor.ui_text_input(_name).Toggle()
-                    input value ui_editor.ui_text_input(_name) style "ui_editor_text" size 15 length 300 xmaximum 596
+                    input value ui_editor.ui_text_input(_name) style "ui_editor_text" size ui_editor.T(15) length 300 xmaximum ui_editor.W(596)

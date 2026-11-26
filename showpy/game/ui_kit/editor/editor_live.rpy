@@ -189,10 +189,20 @@ init -8 python in ui_editor:
         p = os.path.join(store.config.renpy_base, "pygaki", "app", "pygaki.exe")
         return p if os.path.exists(p) else None
 
-    def open_in_app(tab=None):
+    ## [pygaki 앱에서 고르기]가 가리키는 칸: 칸 id → 패널에서 그 줄의 이름 글. 앱에 보내는 패널에서 이 글에 f(칸 id)를 붙이고,
+    ## 앱은 open의 field와 같은 f가 있는 줄로 내려가 강조합니다 (pygaki v1.9)
+    FIELDS = { "text_effect": "글자 효과:", "img_fx": "효과:", "transition": "전환:" }
+    _FIELD_OF = { }
+
+    def open_in_app(tab=None, field=None):
         tab = tab or state.tab
+        if field not in FIELDS:
+            field = None
         if live.client is not None:
-            _live_send(dict(type="open", tab=tab))
+            m = dict(type="open", tab=tab)
+            if field:
+                m["field"] = field
+            _live_send(m)
             msg("pygaki 앱에서 이 탭을 열었습니다.")
             return
         exe = app_exe()
@@ -201,7 +211,10 @@ init -8 python in ui_editor:
             return
         try:
             import subprocess
-            subprocess.Popen([ exe, "--project", store.config.basedir, "--tab", tab ], close_fds=True)
+            args = [ exe, "--project", store.config.basedir, "--tab", tab ]
+            if field:
+                args += [ "--field", field ]
+            subprocess.Popen(args, close_fds=True)
             msg("pygaki 앱을 켭니다. 게임과 연결되면 [[GUI 편집]의 이 탭이 열립니다.")
         except Exception as e:
             msg("pygaki 앱을 켜지 못했습니다: {}".format(e))
@@ -450,7 +463,7 @@ init -8 python in ui_editor:
         return " ".join(label)
 
     def _in_node(inp, path):
-        """입력칸 → 앱이 그릴 모양. 게임 쪽 칸이 넓으면(xmaximum 300 이상) 앱도 여러 줄 넓은 칸으로 (3.23)."""
+        """입력칸 → 앱이 그릴 모양. 게임 쪽 칸이 넓으면(xmaximum ui_editor.W(300) 이상) 앱도 여러 줄 넓은 칸으로 (3.23)."""
         node = dict(k="in", id=path, t=str(inp.content or ""))
         try:
             m = inp.style.xmaximum
@@ -502,6 +515,11 @@ init -8 python in ui_editor:
             if not t.strip():
                 return None
             node = dict(k="t", t=t)
+            if not _FIELD_OF:
+                _FIELD_OF.update((v, k) for k, v in FIELDS.items())
+            f = _FIELD_OF.get(t.strip())
+            if f:
+                node["f"] = f
             c = _color_of(d)
             if c:
                 node["c"] = c
@@ -1129,7 +1147,7 @@ screen ui_editor_live_mirror():
             xalign 1.0
             xoffset -6
             ypos 6
-            text ui_editor.live_badge() style "ui_editor_small" color "#ffd23b" size 12
+            text ui_editor.live_badge() style "ui_editor_small" color "#ffd23b" size ui_editor.T(12)
 
     if config.developer and ui_editor.state.open and ui_editor.live_connected():
 

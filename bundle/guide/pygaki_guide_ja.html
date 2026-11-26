@@ -138,7 +138,7 @@ mark{background:var(--mark);color:inherit;border-radius:2px}
 </li>
 <li><code>renpy.exe</code> でランチャーを起動します。
 </li>
-<li>ランチャー左下の <b>[+ Create New Project]</b>(新しいプロジェクトを作成)で <b>Pygaki</b> を選び、名前と解像度を決めます。解像度はレトロ 3 つ(PC-98 640x400、Y2K 800x600、Millennial 1024x768)と高解像度 2 つ(1280x720、1920x1080)、ユーザー定義があります。レトロとユーザー定義は、ウィンドウに収まるいちばん大きい整数倍で拡大し、選んだ解像度のピクセルで描きます(ピクセルパーフェクト、プロジェクトの <code>game/pixel_perfect.rpy</code>)。高さが 720 より小さいと、文字の大きさと pygaki の設定値をその解像度に合わせて作り、新しいプロジェクトには毎回、韓国語ピクセルフォント Galmuri のセットが <code>game/fonts</code> に入り、レトロ解像度は Galmuri9 を基本フォントに使います(文字サイズは 10px の倍数。ほかの大きさではピクセルが崩れます)。
+<li>ランチャー左下の <b>[+ Create New Project]</b>(新しいプロジェクトを作成)で <b>Pygaki</b> を選び、名前と解像度を決めます。解像度はレトロ 3 つ(PC-98 640x400、Y2K 800x600、Millennial 1024x768)と高解像度 2 つ(1280x720、1920x1080)、ユーザー定義があります。ユーザー定義でも PC-98(640x400)より小さくはできません(幅 640、高さ 400 以上)。レトロとユーザー定義は、ウィンドウに収まるいちばん大きい整数倍で拡大し、選んだ解像度のピクセルで描きます(ピクセルパーフェクト、プロジェクトの <code>game/pixel_perfect.rpy</code>)。高さが 720 より小さいと、文字の大きさと pygaki の設定値をその解像度に合わせて作り、新しいプロジェクトには毎回、韓国語ピクセルフォント Galmuri のセットが <code>game/fonts</code> に入り、レトロ解像度は Galmuri9 を基本フォントに使います(文字サイズは 10px の倍数。ほかの大きさではピクセルが崩れます)。
 <ul>
 <li>Pygaki テンプレートは韓国語のプロジェクトとして作られます(サンプルのスクリプト、共通の文言)。ゲームの言語は Ren'Py の設定(<code>game/options.rpy</code>、<code>game/tl/</code>)で変えます。
 </li></ul>
@@ -1147,7 +1147,7 @@ label map_cafe:
 </li>
 <li><b>ショートカット</b>の下にはpygaki editor(F9)のショートカット表もあります(表示のみ)。ゲームウィンドウのパネルの案内は最初は畳まれていて、F1 で開きます。
 </li>
-<li>ゲームウィンドウのパネルでは文字エフェクト・シェーダー・画像エフェクト・画像のトランジションは今の値と[pygaki アプリで選ぶ]だけです。押すとこのアプリの[GUI 編集]のその欄が開きます(アプリが閉じていれば起動します)。
+<li>ゲームウィンドウのパネルでは文字エフェクト・シェーダー・画像エフェクト・画像のトランジションは今の値と[pygaki アプリで選ぶ]だけです。押すとこのアプリの[GUI 編集]のその欄が開き、押した行(文字エフェクト・画像エフェクト・画像のトランジション)までスクロールして少しのあいだ明るく示します(アプリが閉じていれば起動します)。
 </li></ul>
 </li>
 <li><b>集中モードのぼかし</b>:オフ、弱め、普通、強め
@@ -2493,6 +2493,8 @@ cd pykaki/app &amp;&amp; npm run dist  # Windows アプリのフォルダー (py
 <li><code>screen_fx/fonts/neodgm.ttf</code>(Neo둥근모)は SIL OFL 1.1 です。ゲームに入れて配布・販売でき、配布するときは <code>neodgm_OFL.txt</code> も一緒に置いてください。
 </li>
 <li>新しいプロジェクトの <code>game/fonts/</code> の <code>Galmuri*.ttf</code>、<code>GalmuriMono*.ttf</code>(Galmuri)も SIL OFL 1.1 です。配布するときは <code>Galmuri-OFL.txt</code> も一緒に置いてください。
+</li>
+<li>pygaki editor(ゲーム内の編集画面)のパネルのフォント <code>ui_kit/editor/fonts/Galmuri9.ttf</code>(Galmuri9、SIL OFL 1.1、<code>Galmuri-OFL.txt</code> が同じフォルダに)は開発モードでだけ使い、配布版からは外れます。
 </li>
 <li>pygaki プラグインは MIT ライセンスです。フォントのようにライセンスが違うファイルは、リポジトリの <code>THIRD_PARTY.md</code> を見てください。
 </li>

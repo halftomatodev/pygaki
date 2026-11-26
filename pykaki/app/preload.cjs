@@ -23,7 +23,7 @@ contextBridge.exposeInMainWorld('pygaki', {
   // showpy 실시간 연결 (docs/LINK.md 9장)
   liveSend: (msg) => ipcRenderer.invoke('pygaki:liveSend', msg),
   liveStatus: () => ipcRenderer.invoke('pygaki:liveStatus'),
-  openTab: () => ipcRenderer.invoke('pygaki:openTab'), // 앱을 켤 때 받은 --tab (pygaki editor에서 켰을 때, 한 번)
+  openTab: () => ipcRenderer.invoke('pygaki:openTab'), // 앱을 켤 때 받은 --tab, --field ({ tab, field }, pygaki editor에서 켰을 때, 한 번)
   onLive: (fn) => {
     const h = (_e, msg) => fn(msg);
     ipcRenderer.on('pygaki:live', h);

@@ -654,14 +654,14 @@ screen ui_editor_screens_panel(tab):
             spacing 4
             box_wrap True
             box_wrap_spacing 4
-            xmaximum 632
+            xmaximum ui_editor.W(632)
             for _s in tab.screens():
                 textbutton ui_editor.esc(_s.get("title", _s["name"]) + (" (HUD)" if _s.get("kind") == "hud" else "")):
                     style "ui_editor_button"
-                    text_size 13
+                    text_size ui_editor.T(13)
                     selected (_s["id"] == tab.cur)
                     action Function(tab.pick_screen, _s["id"])
-            textbutton "다시 읽기" style "ui_editor_button" text_size 13 action Function(tab.reload)
+            textbutton "다시 읽기" style "ui_editor_button" text_size ui_editor.T(13) action Function(tab.reload)
 
         if tab.is_hud():
             $ _h = tab.hud()
@@ -680,30 +680,30 @@ screen ui_editor_screens_panel(tab):
             hbox:
                 spacing 4
                 text "크기" style "ui_editor_small" yalign 0.5 min_width 72
-                textbutton "-10" style "ui_editor_button" text_size 12 action Function(tab.grow, "w", -10)
+                textbutton "-10" style "ui_editor_button" text_size ui_editor.T(12) action Function(tab.grow, "w", -10)
                 text "가로 {}".format(_h["w"]) style "ui_editor_text" yalign 0.5 min_width 80
-                textbutton "+10" style "ui_editor_button" text_size 12 action Function(tab.grow, "w", 10)
+                textbutton "+10" style "ui_editor_button" text_size ui_editor.T(12) action Function(tab.grow, "w", 10)
                 null width 8
-                textbutton "-10" style "ui_editor_button" text_size 12 action Function(tab.grow, "h", -10)
+                textbutton "-10" style "ui_editor_button" text_size ui_editor.T(12) action Function(tab.grow, "h", -10)
                 text "세로 {}".format(_h["h"]) style "ui_editor_text" yalign 0.5 min_width 80
-                textbutton "+10" style "ui_editor_button" text_size 12 action Function(tab.grow, "h", 10)
+                textbutton "+10" style "ui_editor_button" text_size ui_editor.T(12) action Function(tab.grow, "h", 10)
             hbox:
                 spacing 6
                 text "옮기기" style "ui_editor_small" yalign 0.5 min_width 72
                 text "가로 {}, 세로 {}".format(_h["dx"], _h["dy"]) style "ui_editor_text" yalign 0.5
-                textbutton "0으로" style "ui_editor_button" text_size 12 action Function(tab.zero_offset)
-                textbutton ("HUD 고름" if tab.sel is None else "HUD 고르기") style "ui_editor_button" text_size 12 selected (tab.sel is None) action Function(tab.pick_item, None)
+                textbutton "0으로" style "ui_editor_button" text_size ui_editor.T(12) action Function(tab.zero_offset)
+                textbutton ("HUD 고름" if tab.sel is None else "HUD 고르기") style "ui_editor_button" text_size ui_editor.T(12) selected (tab.sel is None) action Function(tab.pick_item, None)
 
-        text "항목" style "ui_editor_title" size 16
+        text "항목" style "ui_editor_title" size ui_editor.T(16)
         hbox:
             spacing 4
             box_wrap True
             box_wrap_spacing 4
-            xmaximum 632
+            xmaximum ui_editor.W(632)
             for _it in tab.items():
                 textbutton ui_editor.esc(tab.item_label(_it) + (" (바꿈)" if tab.changed_item(_it) else "")):
                     style "ui_editor_button"
-                    text_size 12
+                    text_size ui_editor.T(12)
                     selected (_it["id"] == tab.sel)
                     action Function(tab.pick_item, _it["id"])
 
@@ -715,7 +715,7 @@ screen ui_editor_screens_panel(tab):
                 text "자리" style "ui_editor_small" yalign 0.5 min_width 72
                 text "x {}, y {}".format(_v["x"], _v["y"]) style "ui_editor_text" yalign 0.5
                 if tab.changed_item(_it):
-                    textbutton "원래대로" style "ui_editor_button" text_size 12 action Function(tab.reset_item)
+                    textbutton "원래대로" style "ui_editor_button" text_size ui_editor.T(12) action Function(tab.reset_item)
             if tab.has_text(_it):
                 hbox:
                     spacing 6
@@ -725,7 +725,7 @@ screen ui_editor_screens_panel(tab):
                         xsize 540
                         yminimum 32
                         action tab.text_input(_it["id"]).Toggle()
-                        input value tab.text_input(_it["id"]) style "ui_editor_text" size 15 length 200 xmaximum 516
+                        input value tab.text_input(_it["id"]) style "ui_editor_text" size ui_editor.T(15) length 200 xmaximum ui_editor.W(516)
 
 
 init 990 python in ui_editor:

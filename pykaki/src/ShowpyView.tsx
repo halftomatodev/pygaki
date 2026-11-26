@@ -72,18 +72,52 @@ export function ShowpyView() {
     liveSend({ cmd: 'editor', open: true, tab: s.tab });
   };
 
-  // pygaki editor의 [pygaki 앱에서 고르기]: 그 탭의 칸을 고름. 게임과 아직 안 붙었으면 칸만 골라 둠
+  // pygaki editor의 [pygaki 앱에서 고르기]: 그 탭의 칸을 고름. 게임과 아직 안 붙었으면(게임이 앱을 막 켰을 때) 칸만 골라 두고
+  // 붙으면 그때 게임에도 그 탭을 엶 (그래야 칸이 보임)
   const want = useLive((s) => s.want);
+  const wantLater = useRef<Section | null>(null);
   useEffect(() => {
     if (!want) return;
-    useLive.setState({ want: null });
+    useLive.setState({ want: null, wantField: want.field ? { f: want.field, n: want.n } : null });
     const tab = WANT_TAB[want.tab] ?? want.tab;
     const s = SECTIONS.find((x) => x.id === tab) ?? SECTIONS.find((x) => x.tab === tab);
     if (!s) return;
+    wantLater.current = null;
     if (on && st) choose(s);
-    else useLive.setState({ section: s.id });
+    else {
+      wantLater.current = s;
+      useLive.setState({ section: s.id });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [want?.n]);
+  const ready = on && !!st;
+  useEffect(() => {
+    const s = wantLater.current;
+    if (!ready || !s) return;
+    wantLater.current = null;
+    if (useLive.getState().section === s.id) choose(s);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready]);
+
+  // 그 탭에서 누른 칸(data-f)이 화면에 오면 그 줄로 내려가 잠깐 강조. 게임 패널(옮겨 그린 것)이 늦게 오면 올 때까지.
+  // 앱을 막 켰으면 게임과 붙을 때까지 기다리고, 붙은 뒤 5초 안에 안 오면 그만둠
+  const wantField = useLive((s) => s.wantField);
+  const viewRef = useRef<HTMLDivElement>(null);
+  const fieldSince = useRef(0);
+  useEffect(() => {
+    if (!wantField || !on || !st) return;
+    if (fieldSince.current < wantField.n) fieldSince.current = Math.max(wantField.n, Date.now());
+    if (Date.now() - fieldSince.current > 5000) return void useLive.setState({ wantField: null });
+    const el = viewRef.current?.querySelector(`[data-f="${wantField.f}"]`);
+    if (!el) return;
+    useLive.setState({ wantField: null });
+    const row = (el.closest('.sp-m-h, .sp-field') ?? el) as HTMLElement;
+    row.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    row.classList.remove('sp-m-want');
+    void row.offsetWidth;
+    row.classList.add('sp-m-want');
+    window.setTimeout(() => row.classList.remove('sp-m-want'), 1600);
+  }, [wantField, on, st]);
 
   // 가운데 스크립트 칸은 볼 일이 드물어 기본은 접고, 위의 [>_ 스크립트] 단추로 편다 (세션 79). 접으면 오른쪽 편집 칸이 그 자리까지 넓어진다
   const [script, setScript] = useState(() => {
@@ -104,7 +138,7 @@ export function ShowpyView() {
     });
 
   return (
-    <div className={'sp-view sp-cards' + (script ? '' : ' script-off')}>
+    <div className={'sp-view sp-cards' + (script ? '' : ' script-off')} ref={viewRef}>
       <div className="sp-hint">
         <span className="sp-hint-t">
           GUI 편집
@@ -646,7 +680,7 @@ function TitleFields({ t, it }: { t: TitleState; it: TitleItem }) {
       <ColorField label="색" value={val('color')} onSet={(v) => set(k('color'), v)} />
       <TextField label="글꼴" value={val('font')} placeholder="fonts/내글꼴.ttf" onSet={(v) => set(k('font'), v || null)} />
       {t.effects && (
-        <label className="sp-field wide">
+        <label className="sp-field wide" data-f="text_effect">
           <span>글자 효과</span>
           <select value={(all ? (t.common as any).effect : it.effect) ?? ''} onChange={(e) => set('effect', e.target.value || null)}>
             {t.effects.map(([n, l]) => (
