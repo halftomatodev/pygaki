@@ -232,6 +232,12 @@ function Versions({ onClose }: { onClose: () => void }) {
   const [list, setList] = useState<Snapshot[] | null>(null);
   const reload = () => snapList().then(setList).catch(() => setList([]));
   useEffect(() => void reload(), []);
+  // Esc로 닫기 (세션 118: 바탕 클릭으로만 닫히던 것)
+  useEffect(() => {
+    const key = (e: KeyboardEvent) => e.key === 'Escape' && (e.stopPropagation(), onClose());
+    window.addEventListener('keydown', key, true);
+    return () => window.removeEventListener('keydown', key, true);
+  }, [onClose]);
 
   const restore = async (v: Snapshot) => {
     if (!confirm(`"${v.memo}" 버전으로 되돌릴까요?\n지금 상태는 "복원 전 자동 백업"으로 남겨 둬요.`)) return;

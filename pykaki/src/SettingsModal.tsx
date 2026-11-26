@@ -7,8 +7,20 @@ import { isDesktop } from './desktop';
 import { ACTIONS, DIMS, GLASS, gradOf, comboLabel, comboOf, resetKeys, resetPrefs, usePrefs, type ActionId } from './prefs';
 
 const close = () => useStore.setState({ showPrefs: false });
+// 단축키를 바꾸는 중(키 기다림)이면 Esc는 그 바꾸기만 그만두고 창은 닫지 않는다 (KeyPrefs가 켬)
+let recording = false;
 
 export function SettingsModal() {
+  // Esc로 닫기 (세션 118: 바탕 클릭으로만 닫히던 것. 다른 창처럼 Esc도)
+  useEffect(() => {
+    const key = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape' || recording) return;
+      e.stopPropagation();
+      close();
+    };
+    window.addEventListener('keydown', key, true);
+    return () => window.removeEventListener('keydown', key, true);
+  }, []);
   return (
     <div className="modal-bg" onClick={close}>
       <div className="modal prefs" onClick={(e) => e.stopPropagation()}>
@@ -170,6 +182,7 @@ function KeyPrefs() {
 
   // 바꾸는 중에는 누른 키를 가로채서 그 동작에 붙인다
   useEffect(() => {
+    recording = !!rec;
     if (!rec) return;
     const onKey = (e: KeyboardEvent) => {
       e.preventDefault();
@@ -188,7 +201,10 @@ function KeyPrefs() {
       setRec(null);
     };
     window.addEventListener('keydown', onKey, true);
-    return () => window.removeEventListener('keydown', onKey, true);
+    return () => {
+      window.removeEventListener('keydown', onKey, true);
+      recording = false;
+    };
   }, [rec]);
 
   return (

@@ -20,7 +20,7 @@
     "appId": "dev.halftomato.pykaki",
     "productName": "pygaki",
     "directories": { "output": "out" },
-    "files": ["main.cjs", "preload.cjs", "web/index.html", "package.json"],
+    "files": ["main.cjs", "preload.cjs", "web/index.html", "web/effects/**", "package.json"],
     "win": { "target": "dir", "executableName": "pygaki" }
   }
 }

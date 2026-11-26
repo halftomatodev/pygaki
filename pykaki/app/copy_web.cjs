@@ -9,3 +9,10 @@ if (!fs.existsSync(src)) {
 fs.mkdirSync(path.join(__dirname, 'web'), { recursive: true });
 fs.copyFileSync(src, path.join(__dirname, 'web', 'index.html'));
 console.log('web/index.html 복사함');
+// 글자 효과 "렌파이 견본" 영상(public/effects → dist/effects, LineFields.tsx EffectClip). 세션 118: 예전엔 빠져서 앱에 안 나왔음
+const fx = path.join(__dirname, '..', 'dist', 'effects');
+if (fs.existsSync(fx)) {
+  fs.rmSync(path.join(__dirname, 'web', 'effects'), { recursive: true, force: true });
+  fs.cpSync(fx, path.join(__dirname, 'web', 'effects'), { recursive: true });
+  console.log('web/effects 복사함 (' + fs.readdirSync(fx).length + '개)');
+}
