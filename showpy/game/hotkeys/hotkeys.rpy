@@ -220,6 +220,22 @@ init -10 python in hotkeys:
         sa, sb = _shift_state(pa[0]), _shift_state(pb[0])
         return sa == "any" or sb == "any" or sa == sb
 
+    def unbinds(k, ub):
+        """unbind 목록 ub가 키 k를 빼는지. 같은 이름이거나, Shift를 안 적은 이름("K_v")이면
+        Shift 없을 때만인 같은 키("noshift_K_v", 렌파이 8.6 기본 키 이름)도 뺌."""
+        if k in ub:
+            return True
+        pk = parse_key(k)
+        if pk is None or _shift_state(pk[0]) != "noshift":
+            return False
+        for u in ub:
+            pu = parse_key(u)
+            if pu is None or pu[1] != pk[1] or _shift_state(pu[0]) != "any":
+                continue
+            if all((m in pu[0]) == (m in pk[0]) for m in ("ctrl", "alt", "meta", "keyup", "keydown", "repeat")):
+                return True
+        return False
+
     ## ── 지금 쓰는 값 ──
 
     class _State(python_object):
@@ -304,7 +320,7 @@ init -10 python in hotkeys:
             return [ ]
         if f[2] == "keymap":
             ub = all_unbind().get(f[3], [ ])
-            return [ k for k in keyboard_keys(_orig_keymap().get(f[3], [ ])) if k not in ub ]
+            return [ k for k in keyboard_keys(_orig_keymap().get(f[3], [ ])) if not unbinds(k, ub) ]
         rv = [ ]
         for b in _config_bindings():
             if b.get("do") == fid:
@@ -444,9 +460,7 @@ init -10 python in hotkeys:
             current = km.get(name, None)
             if current is None:
                 raise Exception("[hotkeys] unbind: '{}'라는 기본 단축키 이름이 없습니다.".format(name))
-            for k in keys:
-                while k in current:
-                    current.remove(k)
+            current[:] = [ k for k in current if not unbinds(k, keys) ]
 
         actions = { }
         mine = [ ]
