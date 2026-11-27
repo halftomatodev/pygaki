@@ -321,7 +321,7 @@
   - 가운데: 지금 화면, 원고 위치, 그 앞뒤 9줄(파일이 바뀌면 다시 읽음). 줄 위의 `# @node:` 표시로 pygaki 상자를 찾아 [상자로] 버튼. [표시 숨기기](`localStorage['pygaki-hide-marks']`)는 `# @l:` `# @node:` `# @end:` 줄을 그리지 않는다(지금 줄은 그림, 줄 번호는 그대로).
   - 오른쪽: 저장(게임의 Ctrl+S), 버리기, 편집기 닫기, 게임 안 패널 보이기. 타이틀 칸은 배경(그림/영상 고르기, `title.background`), 평소/선택됐을 때, 이 항목만/공통, 항목 목록(메뉴 항목 + 제목, 부제), 글 칸, 숫자 칸, 글자 효과. 입력하는 동안은 게임에서 오는 값으로 덮지 않는다.
   - [GUI 편집] 화면에서는 저장 단축키가 게임 저장이다.
-- 확인: GitHub Actions "pygaki 앱"(`.github/workflows/app.yml`)이 리눅스에서 진짜 Electron으로 켜서 `app/smoke.cjs`(자동 저장, 내보내기, 받아 적기, 쓴 판 표시, 밖에서 바뀐 대본 다시 읽기, 더 새 판 경고, 대본 파일 고르기, 밖에 쓰기 막기, 가짜 게임으로 pygaki 플러그인 연결)를 돌리고, 윈도우 `pygaki.exe` 폴더(`pygaki-win`)를 만든다. 배포 묶음은 저장소 맨 위 `bundle/`.
+- 확인: GitHub Actions "pygaki 앱"(`.github/workflows/app.yml`)이 리눅스에서 진짜 Electron으로 켜서 `app/smoke.cjs`(자동 저장, 내보내기, 받아 적기, 쓴 판 표시, 밖에서 바뀐 대본 다시 읽기, 더 새 판 경고, 대본 파일 고르기, 밖에 쓰기 막기, 가짜 게임으로 pygaki 플러그인 연결)와 `app/flow_test.cjs`(핵심 흐름: 임시 프로젝트 열기 → [+ 캐릭터] → 상자에 그 캐릭터 대사 두 줄 → Ctrl+E 내보내기 → `script_flow.rpy`의 `define`·대사 줄 확인. 로컬에서 `FLOW_LINT_SDK=<렌파이 SDK>`면 렌파이 lint까지)를 돌리고, 윈도우 `pygaki.exe` 폴더(`pygaki-win`)를 만든다. 배포 묶음은 저장소 맨 위 `bundle/`.
 
 ## 9-3. 프로젝트 대본 파일과 쓴 판 (`src/files.ts`, `src/version.ts`)
 

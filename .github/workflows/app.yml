@@ -33,6 +33,8 @@ jobs:
         working-directory: pykaki/app
       - run: xvfb-run --auto-servernum node smoke.cjs
         working-directory: pykaki/app
+      - run: xvfb-run --auto-servernum node flow_test.cjs
+        working-directory: pykaki/app
 
   windows:
     needs: smoke
