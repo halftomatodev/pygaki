@@ -488,7 +488,7 @@ async function until(what, fn, ms = 10000) {
   fs.writeFileSync(path.join(proj2, 'game', 'gui.rpy'), 'init python:\n    gui.init(1280, 720)\n');
   for (const [f, title] of [['a.flow.json', '대본 가'], ['b.flow.json', '대본 나']])
     fs.writeFileSync(path.join(proj2, f), JSON.stringify({ ...stamped, project: { ...stamped.project, title } }, null, 2));
-  const app2 = await electron.launch({ args: ['--no-sandbox', __dirname, '--project', proj2] });
+  const app2 = await electron.launch({ args: ['--no-sandbox', '--lang=' + (process.env.ZZ_LANG || 'ko'), __dirname, '--project', proj2] });
   const page2 = await app2.firstWindow();
   await page2.waitForSelector('.flow-pick button', { timeout: 20000 });
   if ((await page2.locator('.flow-pick button').count()) !== 2) fail('대본 고르기 칸 수가 다름');
