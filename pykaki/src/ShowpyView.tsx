@@ -28,6 +28,7 @@ const SECTIONS: Section[] = [
   { id: 'pause', label: 'ESC 메뉴', tab: 'title', app: true, note: '' },
   { id: 'pause_fx', label: '게임 내 메뉴 셰이더', tab: 'pause_fx', app: false, mirror: true, note: 'ESC 메뉴와 거기서 연 화면에만 걸리는 셰이더 두 자리예요. 메뉴가 열려 있는 동안 뒤 게임 화면도 이 셰이더로 보여요.' },
   { id: 'screen_fx', label: '셰이더 기본 값', tab: 'screen_fx', app: false, mirror: true, note: '셰이더마다 처음 값(세부 값)을 게임 화면을 보면서 고쳐요. 타이틀, 게임 내 메뉴 셰이더와, 상자에서 값을 따로 정하지 않은 곳이 이 값을 써요. 상자마다 다른 값은 [대본 편집]에서 상자나 label의 ◐ 셰이더로 정해요.' },
+  { id: 'quick', label: '퀵메뉴', tab: 'quick', app: false, mirror: true, note: '게임 중 화면 아래 퀵메뉴예요. 항목은 게임 창에서 끌어서 옮기고, 여기서 숨기기와 아래 줄로 돌리기, 뒤에 깔 그림·영상을 골라요. 퀵메뉴가 보이는 게임 중에 써요. 예전 pygaki 플러그인에는 없어요.' },
   { id: 'custom_ui', label: '커서, 클릭 대기, 대사 소리', tab: 'custom_ui', app: true, note: '' },
   { id: 'say', label: '대사 상자', tab: 'say', app: false, mirror: true, note: '대사 상자의 처음 위치와 모양이에요. 줄마다 다른 위치는 [대본 편집] 대사 카드의 줄마다 있는 [위치 옮기기]로 정해요.' },
   { id: 'choice', label: '선택지', tab: 'choice', app: false, mirror: true, note: '선택지의 처음 위치와 모양이에요. 상자마다 다른 위치는 [대본 편집] 다음 흐름 카드의 [위치 옮기기]로 정해요.' },
@@ -41,7 +42,7 @@ const SECTIONS: Section[] = [
 const GROUPS: { title: string; ids: string[] }[] = [
   { title: '스플래시', ids: ['splash', 'hotkeys'] },
   { title: '타이틀 메뉴', ids: ['title', 'title_fx', 'screen_fx'] },
-  { title: '게임 내 메뉴', ids: ['pause', 'pause_fx'] },
+  { title: '게임 내 메뉴', ids: ['pause', 'pause_fx', 'quick'] },
   { title: '확인 창, UI 글', ids: ['ui_text'] },
   // 상자마다 바꾸는 것은 [대본 편집]으로 옮겼다(세션 32). 여기는 상자에서 정하지 않았을 때 쓰는 게임 처음 값만
   { title: '게임 처음 값', ids: ['say', 'choice', 'stage', 'custom_ui'] },

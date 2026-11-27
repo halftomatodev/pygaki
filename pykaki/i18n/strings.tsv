@@ -3050,3 +3050,4 @@ pygaki editor 켜기, 누를 때마다 축약형 → 대형 → 숨김 (개발 �
 클수록 앞 (같으면 넣은 차례)	大きいほど手前 (同じなら追加した順)	Higher is in front (ties: order added)
 클수록 앞에 그려요. 같으면 먼저 넣은 것이 뒤예요	大きいほど手前に描きます。同じなら先に追加したものが後ろです	Higher values draw in front. On a tie, the one added first is behind
 끌어 놓기 항목끼리는 한 층으로 묶여요. 게임에서 끌면 맨 위로 올라와요	ドラッグ&ドロップの項目どうしは一つの層にまとまります。ゲームでドラッグすると一番上に来ます	Drag-and-drop items are grouped into one layer. Dragging one in the game brings it to the top
+게임 중 화면 아래 퀵메뉴예요. 항목은 게임 창에서 끌어서 옮기고, 여기서 숨기기와 아래 줄로 돌리기, 뒤에 깔 그림·영상을 골라요. 퀵메뉴가 보이는 게임 중에 써요. 예전 pygaki 플러그인에는 없어요.	ゲーム中の画面下のクイックメニューです。項目はゲームウィンドウでドラッグして動かし、ここで隠す・下の列に戻す・後ろに敷く画像や動画を選びます。クイックメニューが見えているゲーム中に使います。以前の pygaki プラグインにはありません。	The quick menu at the bottom of the screen during play. Drag items in the game window to move them; here you hide them, put them back in the row, and pick an image or video to go behind. Use it during play while the quick menu is shown. Older pygaki plugins don't have it.
