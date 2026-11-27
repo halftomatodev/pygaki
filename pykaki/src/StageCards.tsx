@@ -102,7 +102,7 @@ function lineText(l: Line) {
   if (l.type === 'scene') return '배경 ' + (l.image || '(검은 화면)');
   if (l.type === 'show') return '보이기 ' + (l.kind === 'char' || !l.kind ? [l.who, l.attr].filter(Boolean).join(' ') : l.image ?? '');
   if (l.type === 'hide') return '숨기기 ' + (l.kind === 'bg' ? '배경' : l.kind === 'etc' ? l.image ?? '' : l.who ?? '');
-  if (l.type === 'music') return l.stop ? '음악 멈추기' : (l.queue ? '음악 이어 틀기 ' : '음악 ') + (l.file ?? '');
+  if (l.type === 'music') return l.stop ? '음악 멈추기' : l.seek !== undefined ? `음악 자리 옮기기 ${l.seek}초` : (l.queue ? '음악 이어 틀기 ' : '음악 ') + (l.file ?? '');
   if (l.type === 'sound') return l.stop ? '효과음 멈추기' : '효과음 ' + (l.file ?? '');
   return l.type;
 }
@@ -220,12 +220,17 @@ function Grid({ names, pic, onPick, empty }: { names: string[]; pic: (n: string)
   if (!names.length) return <p className="tip">{empty}</p>;
   return (
     <div className="sc-grid">
-      {names.map((n) => (
-        <button key={n} onClick={() => onPick(n)} title={n}>
-          <Pic name={pic(n)} />
-          <span>{n}</span>
-        </button>
-      ))}
+      {names.map((n) => {
+        // 처음 한 번 + 반복 영상 (렌파이 8.6, pygaki 플러그인 ui_kit.movie_loop): 이름_loop 영상이 짝으로 있음
+        const once = names.includes(n + '_loop');
+        return (
+          <button key={n} onClick={() => onPick(n)} title={once ? `${n}: 처음 한 번 틀고 그 뒤로 ${n}_loop를 반복해요 (렌파이 8.6부터. 8.5에서는 ${n}만 반복)` : n}>
+            <Pic name={pic(n)} />
+            <span>{n}</span>
+            {once && <em className="sc-once">한 번 → 반복</em>}
+          </button>
+        );
+      })}
     </div>
   );
 }

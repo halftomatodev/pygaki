@@ -8,7 +8,7 @@ import { useStore } from './store';
 import { useLive } from './showpyLive';
 import { folderReady, gameFont, useGameFolder } from './gameFolder';
 import { allPacks, effectCatalog, effectUses, setEffectOn, type EffectCard, type EffectUse, type FxKind } from './effectsLib';
-import { effectKnobs, knobNum, knobText, formatEffect, type EffectKnob } from './stage';
+import { effectKnobs, R86_TIP, knobNum, knobText, formatEffect, type EffectKnob } from './stage';
 import { parseTextShader, previewPack, shaderEffect, type ShaderEffect } from './fx/textShaders';
 import { FxCanvas, webglOk } from './fx/FxCanvas';
 import { TransitionCanvas } from './fx/TransitionCanvas';
@@ -381,9 +381,11 @@ export function EffectsView() {
                           const v = set ?? k.def;
                           return (
                             <label key={k.key} className={set !== undefined ? 'set' : ''}>
-                              <span className="fx-kn" title={k.key}>{k.label}</span>
+                              <span className="fx-kn" title={k.key}>{k.label}</span>{k.r86 && <span className="fx-86" title={R86_TIP}>8.6</span>}
                               {k.kind === 'color' ? (
                                 <input type="color" value={v.slice(0, 7)} onChange={(e) => putArg(k.key, e.target.value)} />
+                              ) : k.toggle ? (
+                                <input type="checkbox" checked={knobNum(v) !== 0} onChange={(e) => putArg(k.key, e.target.checked ? '1.0' : undefined)} />
                               ) : (
                                 <>
                                   <input type="range" min={k.min} max={k.max} step={k.step} value={knobNum(v)} onChange={(e) => putArg(k.key, knobText(k, Number(e.target.value)))} />

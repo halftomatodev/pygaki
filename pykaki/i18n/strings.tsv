@@ -3061,3 +3061,26 @@ pygaki editor 켜기, 누를 때마다 축약형 → 대형 → 숨김 (개발 �
 앞 대사에 이어서 (렌파이 extend)	前のセリフに続ける (Ren'Py extend)	Continue the previous line (Ren'Py extend)
 "앞 대사에 이어서" 줄에서는 [지우고 이어서]를 빼고 내보내요 (${b.title || b.id})	「前のセリフに続ける」行では[消して続ける]を外して書き出します ({0})	[Clear and continue] is left out on a "Continue previous line" line ({0})
 "앞 대사에 이어서" 줄 앞에 이 상자의 대사가 없어서, 앞 상자에서 마지막에 나온 대사에 이어져요 (${b.title || b.id})	「前のセリフに続ける」行の前にこのボックスのセリフがないので、前のボックスで最後に出たセリフに続きます ({0})	No dialogue comes before the "Continue previous line" line in this box, so it continues the last line from the previous box ({0})
+자리 옮기기	位置を移す	Seek
+0초	0秒	0s
+초로 · 8.6	秒へ · 8.6	s · 8.6
+초로	秒へ	s
+한 번 → 반복	1回 → ループ	Once → loop
+음악 자리 옮기기 ${l.seek}초	音楽の位置を移す {0}秒	Music seek to {0}s
+곡의 이 초부터 틀어요. 비우면 처음부터 (반복하면 다시 이 초부터)	曲のこの秒から再生します。空なら最初から (ループするとまたこの秒から)	Starts the track from this second. Empty means from the start (loops restart here too)
+지금 나오는 곡을 이 초로 옮겨요. 곡은 끊기지 않아요. 렌파이 8.6부터 돼요 (8.5 게임에서는 아무 일도 안 해요)	今流れている曲をこの秒へ移します。曲は途切れません。Ren'Py 8.6から使えます (8.5のゲームでは何もしません)	Moves the playing track to this second without restarting it. Ren'Py 8.6 and later (does nothing in 8.5 games)
+렌파이 8.6부터 돼요. 렌파이 8.5 게임에서는 pygaki 플러그인이 이 값을 빼고 틀어요	Ren'Py 8.6から使えます。Ren'Py 8.5のゲームではpygakiプラグインがこの値を外して再生します	Ren'Py 8.6 and later. In Ren'Py 8.5 games the pygaki plugin drops this value
+${n}: 처음 한 번 틀고 그 뒤로 ${n}_loop를 반복해요 (렌파이 8.6부터. 8.5에서는 ${n}만 반복)	{0}: 最初に1回再生し、その後は{1}_loopをループします (Ren'Py 8.6から。8.5では{2}だけループ)	{0}: plays once, then loops {1}_loop (Ren'Py 8.6+. In 8.5 only {2} loops)
+틀기: 지금 곡을 끊고 바로 / 이어 틀기: 지금 곡이 끝나면 (queue) / 멈추기 / 자리 옮기기: 지금 곡을 다시 틀지 않고 그 초로 (렌파이 8.6부터)	再生: 今の曲を止めてすぐ / 続けて再生: 今の曲が終わったら (queue) / 停止 / 位置を移す: 今の曲を再生し直さずその秒へ (Ren'Py 8.6から)	Play: cut and start now / Queue: after the current track / Stop / Seek: jump within the current track without restarting (Ren'Py 8.6+)
+가로 여백	横の余白	Horizontal padding
+세로 여백	縦の余白	Vertical padding
+말줄임표 크기	三点リーダーの大きさ	Ellipsis size
+메신저 말풍선	メッセンジャーの吹き出し	Messenger bubble
+받은 쪽 바탕색	受信側の背景色	Received bubble color
+보낸 쪽 바탕색	送信側の背景色	Sent bubble color
+받은 쪽 글자 색	受信側の文字色	Received text color
+보낸 쪽 글자 색	送信側の文字色	Sent text color
+늘어나는 시간 (초)	広がる時間 (秒)	Grow time (s)
+말줄임표 시간 (초)	三点リーダーの時間 (秒)	Typing dots time (s)
+점이 튀는 시간 (초)	点が跳ねる時間 (秒)	Dot bounce time (s)
+쪽 (0 받은 쪽 왼쪽, 1 보낸 쪽 오른쪽)	側 (0 受信側・左、1 送信側・右)	Side (0 received, left; 1 sent, right)

@@ -40,7 +40,7 @@
     uniform float u__speed;
     uniform float u__settle;
     uniform float u__jump;
-    uniform float u_time;
+    uniform float u_text_time;
     uniform float u_text_slow_duration;
     uniform float u_text_slow_time;
     uniform float u_text_to_drawable;
@@ -67,7 +67,7 @@
 @fragment_350
     float l__h = max(v__rect.w, 1.0);
     float l__amt = mix(1.0, 1.0 - v__in, clamp(u__settle, 0.0, 1.0));
-    float l__tick = floor(u_time * max(u__fps, 0.5));
+    float l__tick = floor(u_text_time * max(u__fps, 0.5));
     vec2 l__abs = v__rect.xy + v__q;
     float l__cw = max(u__width * u_text_to_drawable, 1.0);
     float l__col = floor(l__abs.x / l__cw);
@@ -80,7 +80,7 @@
     // 줄마다 꼬리가 아래로 천천히 자라고, 끝까지 가면 흐려졌다가 다시 시작 (줄마다 빠르기와 시작하는 때가 다름)
     float l__r0 = fract(sin(l__col * 91.7 + 3.1) * 43758.5453);
     float l__per = (0.7 + 0.8 * l__r0) / max(u__speed, 0.01);
-    float l__cyc = u_time / l__per + l__r0 * 7.0;
+    float l__cyc = u_text_time / l__per + l__r0 * 7.0;
     float l__ph = fract(l__cyc);
     float l__ci = floor(l__cyc);
     float l__r1 = fract(sin(dot(vec2(l__col, l__ci), vec2(39.346, 11.135))) * 43758.5453);

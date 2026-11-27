@@ -41,6 +41,11 @@ define stage.mask_prefix = "mask_"
 define stage.movie_loop = True
 define stage.movie_once = [ ]           # 예: [ "door_open", "explosion" ]
 
+## 처음 한 번 + 반복 (렌파이 8.6부터): 같은 폴더에 이름_loop 영상을 같이 두면
+## 처음에는 원래 영상을 한 번 틀고, 그 뒤로는 _loop 영상을 반복합니다.
+##     movies/door.webm + movies/door_loop.webm → show door (문이 열린 뒤 열린 문이 계속 흔들림)
+## 렌파이 8.5 이하에서는 원래 영상만 반복합니다. _loop 영상도 그 이름(door_loop)으로 따로 등록됩니다.
+
 
 ## ── bg 태그 (배경) ──────────────────────────────────────────────────────────
 ## 이 태그의 그림은 배경으로 봅니다.

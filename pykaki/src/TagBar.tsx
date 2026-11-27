@@ -6,7 +6,7 @@ import { useStore } from './store';
 import type { Flag } from './types';
 import { useGameFolder } from './gameFolder';
 import { hit, keyOf } from './prefs';
-import { EFFECTS, effectKnobs, knobNum, knobText, formatEffect, parseEffect } from './stage';
+import { EFFECTS, effectKnobs, R86_TIP, knobNum, knobText, formatEffect, parseEffect } from './stage';
 import { shaderEffect } from './fx/textShaders';
 import { RUBY_NOTE, insertRuby, insertTag, removeTag, retag, rubyAt, setRubyStyle, setTagValue, stepSize, tagsAt, toggleTag, type Edit } from './tagEdit';
 import { TagDemo, type Tip } from './TagDemo';
@@ -639,9 +639,11 @@ export function TagBar({ targetId, className = '', extra, zoom = 1, fold = false
                   const v = drag ?? set ?? k.def;
                   return (
                     <label key={k.key} className={set !== undefined ? 'set' : ''}>
-                      <span className="fx-kn" title={k.key}>{k.label}</span>
+                      <span className="fx-kn" title={k.key}>{k.label}</span>{k.r86 && <span className="fx-86" title={R86_TIP}>8.6</span>}
                       {k.kind === 'color' ? (
                         <ColorKnob value={v.slice(0, 7)} onPick={(c) => putKnob(i, k.key, c)} />
+                      ) : k.toggle ? (
+                        <input type="checkbox" checked={knobNum(v) !== 0} onChange={(e) => putKnob(i, k.key, e.target.checked ? '1.0' : undefined)} />
                       ) : (
                         <>
                           <input

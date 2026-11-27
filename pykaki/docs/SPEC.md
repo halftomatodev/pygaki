@@ -90,7 +90,7 @@
   - `scene` `{ image, trans }`: 배경 이름(`bg` 뒤), 전환
   - `show` `{ kind, who, attr, image, at, trans, zorder?, behind? }`: `kind`는 `char`(who+attr) | `bg`(image) | `etc`(image), 위치 `left`/`right`(비우면 가운데). 앞뒤(`FEATURE` 15): `zorder` 숫자 또는 `behind` 태그 하나(화면은 둘 중 하나만, `LayerPick`)
   - `hide` `{ kind, who, image, trans }`
-  - `music` `{ file, stop, fadein?, fadeout?, queue?, loop? }`, `sound` `{ file, stop?, channel?, fadeout? }` (`FEATURE` 15: `fadein` 시작 초(없으면 바로), `fadeout` 멈출 때 초(없으면 1초, 0이면 바로), `queue` 이어 틀기, `loop` true/false(없으면 게임 기본, loop/noloop을 안 적음), `channel: 'audio'` 겹쳐 나옴(없으면 sound))
+  - `music` `{ file, stop, fadein?, fadeout?, queue?, loop? }`, `sound` `{ file, stop?, channel?, fadeout? }` (`FEATURE` 15: `fadein` 시작 초(없으면 바로), `fadeout` 멈출 때 초(없으면 1초, 0이면 바로), `queue` 이어 틀기, `loop` true/false(없으면 게임 기본, loop/noloop을 안 적음), `channel: 'audio'` 겹쳐 나옴(없으면 sound)). `FEATURE` 37: music `from?`(시작 자리 초, 원고 `"<from 초>파일"`), `seek?`(있으면 자리 옮기기 줄: 파일 없이 `$ renpy.music.seek(초) if hasattr(renpy.music, "seek") else None`)
   - 음성(`FEATURE` 16, `src/voice.ts`, `VoiceCard.tsx`): `settings.voice`를 켜면 `say` 줄(who 있음)에 `vno`(label 안 번호)를 매긴다. `store.update`와 `load` 뒤 `addFixup`으로 `assignVoiceNos`: 내보내는 상자 차례로 보며 번호가 없거나 같은 label 안에서 겹치면 그 label의 가장 큰 번호 + 1. `voice`는 직접 고른 파일(audio 기준), `''`이면 음성 없음, 없으면 `audio/voice/캐릭터_label_번호`(소문자로 맞춤)를 연결한 게임의 소리 목록에서 찾는다(`generateRpy` opts `audio`). 원고는 대사 앞 `voice "audio/…"`
   - `pause` `{ secs? }`: 멈춤(`FEATURE` 15). 없으면 클릭할 때까지
   - `shake` `{ shake? }`: 흔들기(`FEATURE` 15). `vpunch`(없을 때) | `hpunch` | `flash`(렌파이에 없어서 `Fade(0.1, 0.0, 0.5, color="#fff")`, `stage.ts` `FLASH_CODE`)

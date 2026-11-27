@@ -194,6 +194,8 @@ pygaki 플러그인이 쓰고, 대본 편집기가 읽은 뒤 비웁니다. 대�
 | `hide ghost` | 숨기기, 기타 `ghost` |
 | `play music "audio/hum.wav"` | 음악, `hum.wav` |
 | `play music "audio/hum.wav" fadein 2.0 noloop`, `queue music "audio/b.ogg" loop` | 음악, 페이드인 2초·반복 끔 / 이어 틀기·반복 켬 (대본 편집기 `FEATURE` 15) |
+| `play music "<from 12.0>audio/hum.wav"` | 음악, 시작 자리 12초 (대본 `from`, `FEATURE` 37. 렌파이 오디오 이름 문법이라 8.5에서도 됨. 반복하면 다시 그 초부터) |
+| `$ renpy.music.seek(30.0) if hasattr(renpy.music, "seek") else None` | 음악 자리 옮기기 30초 (대본 `seek`, `FEATURE` 37). 지금 나오는 곡을 다시 틀지 않고 옮김(렌파이 8.6 `renpy.music.seek`). 8.5에는 없어서 아무 일도 안 하게 `hasattr`로 감쌈. `<from>`으로 튼 곡이면 그 시작 자리부터 센 초. 대본 편집기는 `$ renpy.music.seek(초)`만 적힌 줄도 이 줄로 읽음 |
 | `stop music fadeout 1.0` | 음악 멈추기 (`stop music`은 페이드아웃 0초, 다른 초는 그 값) |
 | `play sound "audio/k.wav"`, `play audio "audio/k.wav"`, `stop sound fadeout 0.5` | 효과음 (audio는 겹쳐 나옴), 효과음 멈추기 (`FEATURE` 15) |
 | `show mina smile zorder 10`, `show ghost behind mina` | 보이기, 앞뒤 (`FEATURE` 15, behind는 태그 하나만) |
@@ -223,6 +225,7 @@ define stage.placed = {
   플러그인에 새 store 이름이 생기면 여기와 `PLUGIN_NAMES`를 같이 고칩니다.
 - 렌파이 그림 이름은 파일 이름에서 확장자를 빼고 소문자로 바꾼 것입니다. 안쪽 폴더는 이름에 안 들어갑니다.
 - `movies/mask_ghost.webm`은 `show ghost`로 씁니다. (앞의 `mask_`는 투명 영상 표시)
+- **처음 한 번 + 반복 영상**: 같은 폴더에 `이름_loop.확장자` 영상이 있으면 플러그인(`ui_kit.movie_loop`)이 `Movie(play=이름, loop=이름_loop)`로 만들어 처음엔 원래 영상을 한 번, 그 뒤로 `_loop` 영상을 반복합니다(렌파이 8.6부터. 8.5는 원래 영상만 반복). 무대 영상(`stage`), 대사·선택지 뒤 그림/영상 상자, 타이틀·퀵메뉴 배경 영상에 같이 걸리고, 원고 형식은 바뀌지 않습니다. 한 번만 트는 영상(`stage.movie_once`)은 짝을 보지 않습니다. `_loop` 영상도 그 이름으로 따로 등록됩니다. 대본 편집기는 그림 고르기에 "한 번 → 반복"을 보입니다.
 - 대본 편집기는 `label start:`를 내보내지 않고 `config.label_overrides["start"]`를 첫 상자로 정합니다. `script.rpy`는 그대로 둬도 되고, 그 안의 `label start:`는 실행되지 않습니다. 대본에 이름이 `start`인 label을 만들 때만 겹치므로, 그때 대본 편집기가 알려 줍니다.
 
 ## 6. 대본 편집기가 읽는 게임 값
@@ -270,6 +273,8 @@ define stage.placed = {
 |---|---|
 | pygaki 플러그인 `engine/text_effects.rpy` | init에서 읽어 효과마다 `renpy.register_textshader`로 등록. 편집기 대사 탭의 효과 버튼 이름도 여기서 |
 | 대본 편집기 `src/fx/textShaders.ts`, `src/fx/FxCanvas.tsx` | 같은 코드를 렌파이가 셰이더 조각을 합치는 방식대로 합쳐 WebGL로 미리보기를 그림. 효과 목록, 한글 이름, 글자/초 기본값(`@cps`)도 여기서 |
+
+**렌파이 8.6 값** (세션 130): 계속 움직이는 효과는 시간으로 `u_text_time`(글이 보인 뒤 초, 렌파이 8.6)을 씁니다. 대본 편집기 미리보기는 그 값을 넣고, 플러그인은 렌파이 8.5 이하에서 등록할 때 `u_text_time`을 `u_time`으로 바꿉니다(`_tfx_text_time`). 렌파이 효과 `jitter`의 `u__duration`·`u__individual`(8.6)은 8.5에서 "Unknown uniform"으로 멈추므로 플러그인이 8.5에서 빼고 풀이합니다(`parse_textshader`를 감싼 곳, 대사 괄호·`{shader=}` 태그·`Text(textshader=)` 모두). 대본 편집기는 이 값 칸에 "8.6" 표시(`stage.ts` `R86_KNOBS`, 플러그인 `_JITTER_86`과 같게).
 
 적는 법은 파일 맨 위에 있습니다. `@effect 이름 한글이름`, `@cps`, `@slow 식`, `@slowtime 식`(초), `@redraw`, `@outline`, `@set u__이름 값`, `@variables`, `@vertex_N`, `@fragment_N`, `@part`/`@use`, `RAND(n)`. 두 프로그램의 읽는 코드(pygaki 플러그인 `tfx_parse`, 대본 편집기 `parseShaders`)는 같은 규칙이라 표시를 새로 만들면 둘 다 고칩니다.
 

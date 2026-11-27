@@ -42,7 +42,7 @@
     uniform float u__wobble;
     uniform vec4 u__tint;
     uniform float u__tint_amount;
-    uniform float u_time;
+    uniform float u_text_time;
     uniform float u_text_slow_duration;
     uniform float u_text_slow_time;
     uniform float u_text_to_drawable;
@@ -63,7 +63,7 @@
         float l__cs = l__s * 2.6;
         vec2 l__p = v__p / l__cs;
         vec2 l__base = floor(l__p);
-        float l__t = u_time * u__speed;
+        float l__t = u_text_time * u__speed;
 
         // 칸마다 물방울 하나: 3x3 이웃 칸의 물방울을 모아 하나의 장(메타볼)으로
         float l__field = 0.0;

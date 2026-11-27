@@ -570,7 +570,7 @@ init -10 python in tmenu:
             if not isinstance(path, str):
                 d = store.renpy.displayable(path)
             elif is_movie(path):
-                d = store.Movie(play=path, loop=True, side_mask=cfg("background_side_mask"))
+                d = store.Movie(play=path, loop=store.ui_kit.movie_loop(path), side_mask=cfg("background_side_mask"))
             else:
                 d = Transform(path, fit="cover", xysize=(store.config.screen_width, store.config.screen_height))
             ## 타이틀 일렁임(screen_fx)을 "배경만"에 씌우는 설정이면 여기에도
@@ -826,7 +826,7 @@ init -10 python in tmenu:
             _background = store.Movie(
                 play=path,
                 side_mask=cfg("background_side_mask"),
-                loop=True,
+                loop=store.ui_kit.movie_loop(path),
                 )
 
         store.gui.main_menu_background = _background

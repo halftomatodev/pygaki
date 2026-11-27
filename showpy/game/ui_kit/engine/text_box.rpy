@@ -101,7 +101,7 @@ init -10 python in say_style:
         if is_movie(src):
             if mask is None:
                 mask = is_mask_name(src)
-            return store.Movie(play=src, side_mask=bool(mask), loop=bool(loop))
+            return store.Movie(play=src, side_mask=bool(mask), loop=store.ui_kit.movie_loop(src, loop))
         if isinstance(src, str):
             return store.renpy.displayable(src)
         return src

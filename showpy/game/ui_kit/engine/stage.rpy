@@ -179,7 +179,7 @@ init -10 python in stage:
             if store.renpy.has_image(name, exact=True):
                 rt.skipped.append((fn, "같은 이름의 그림이 이미 있음"))
                 continue
-            store.renpy.image(name, store.Movie(play=fn, side_mask=mask, loop=(name not in once)))
+            store.renpy.image(name, store.Movie(play=fn, side_mask=mask, loop=store.ui_kit.movie_loop(fn, cfg("movie_loop") and name not in once)))
             rt.movies[name] = (fn, mask)
 
     def movie_for(name):

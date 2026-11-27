@@ -226,6 +226,19 @@ init -10 python in say_style:
     ## 렌파이 8.6 이후에 필요한 문법 버전 (screen_fx.register_shader와 같음). 효과 코드는 예전 문법(GLSL ES 1.00)으로 씁니다
     _TFX_GLSL = { "glsl": 100 } if hasattr(store.renpy.config, "glsl_version") else { }
 
+    ## 렌파이 8.6의 글자 효과 값 u_text_time(글이 보인 뒤 초). 8.5 이하에는 없어서 u_time(게임 시계)으로 바꿔 등록합니다
+    def _tfx_text_time(code):
+        if store.ui_kit.RENPY_86 or "u_text_time" not in code:
+            return code
+        import re
+        code = re.sub(r"\bu_text_time\b", "u_time", code)
+        out = [ ]
+        for l in code.split("\n"):
+            if l.strip() == "uniform float u_time;" and any(o.strip() == l.strip() for o in out):
+                continue
+            out.append(l)
+        return "\n".join(out)
+
     def _tfx_register():
         main = _tfx_find()
         parts = { }
@@ -254,7 +267,7 @@ init -10 python in say_style:
         _tfx_read_off(main)
         TFX_EFFECTS[:] = effects
         for e in effects:
-            kw = dict(e["code"])
+            kw = dict((k, _tfx_text_time(v)) for k, v in e["code"])
             kw.update(e["uniforms"])
             if e["redraw"] == "always":
                 kw["redraw"] = 0.0
@@ -306,6 +319,9 @@ init -10 python in say_style:
     ## 감싸서 모르는 이름만 바꿉니다. 개발 모드에서는 이름마다 한 번 알림
     TFX_MISSING = set()
 
+    ## 렌파이 8.6에 더해진 jitter 값 (u__ 앞붙이 있게도 없게도 씀)
+    _JITTER_86 = ("u__duration", "u__individual", "_duration", "_individual")
+
     def _tfx_safe_parse():
         import renpy.text.shader as _ts
         orig = getattr(_ts, "_pygaki_orig_parse", None) or _ts.parse_textshader
@@ -314,6 +330,10 @@ init -10 python in say_style:
         def parse(o):
             if isinstance(o, str) and "|" not in o:
                 name = o.partition(":")[0].strip()
+                ## 렌파이 8.6의 jitter 값(흔드는 시간, 글자마다 따로)은 8.5 이하에서 "Unknown uniform"으로 멈춰서 뺍니다
+                if name == "jitter" and not store.ui_kit.RENPY_86 and ":" in o:
+                    keep = [ a for a in o.split(":")[1:] if a.partition("=")[0].strip() not in _JITTER_86 ]
+                    o = ":".join([ name ] + keep)
                 if name and name not in store.renpy.config.textshaders and "typewriter" in store.renpy.config.textshaders:
                     if store.config.developer and name not in TFX_MISSING:
                         TFX_MISSING.add(name)

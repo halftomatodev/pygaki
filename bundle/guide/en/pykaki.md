@@ -1,4 +1,4 @@
-<!-- 원본: pykaki/docs/GUIDE.md @ 3222e982f7 -->
+<!-- 원본: pykaki/docs/GUIDE.md @ 0c545eaa68 -->
 # pygaki user guide
 
 A tool for writing Ren'Py scripts with boxes and lines and exporting them as Ren'Py script files (`.rpy`).
@@ -129,7 +129,7 @@ You don't need to know Ren'Py commands: choose **Staging** as the line type and 
 | 🖼 **Background** | background name, how it appears | `scene bg room with fade` (clears all images on screen and lays down the background; an empty name gives a black screen) |
 | 🧍 **Show** | choose character/background/other, name (expression for characters), position, how it appears, front/behind | `show a smile at left with dissolve` · `show a smile zorder 10` · `show ghost behind a` |
 | 🙈 **Hide** | choose character/background/other, name | `hide a with dissolve` |
-| 🎵 **Music** | play/queue/stop, file name, fade-in seconds, loop | `play music "audio/rain.ogg" fadein 2.0 noloop` · `queue music "audio/b.ogg"` · `stop music fadeout 1.0` |
+| 🎵 **Music** | play/queue/stop/seek, file name, start second, fade-in seconds, loop | `play music "audio/rain.ogg" fadein 2.0 noloop` · `queue music "audio/b.ogg"` · `stop music fadeout 1.0` |
 | 🔊 **Sound effect** | play/stop, one at a time/overlapping, file name | `play sound "audio/door.ogg"` · `play audio "audio/door.ogg"` · `stop sound fadeout 1.0` |
 | ⏸ **Pause** | seconds (empty: until click) | `pause 1.5` · `pause` |
 | 💥 **Shake** | shake vertically / shake horizontally / white flash | `with vpunch` · `with hpunch` · `with Fade(0.1, 0.0, 0.5, color="#fff")` |
@@ -137,7 +137,7 @@ You don't need to know Ren'Py commands: choose **Staging** as the line type and 
 **How it appears** opens a picker when you click its button. At the top is a sample (the hovered effect changing from the old image to the new one), below are the basics (instant, dissolve, fade to black) and the list of image effects from the [Effects] screen. Only effects in the game's effects folder are listed, and effects hidden in the [Effects] screen are left out.
 
 - **Front/behind** (show): which image is in front when they overlap. **Order default** puts the image shown later in front. **Front (number)** puts larger numbers further in front (other images are 0), and **Behind image** puts it behind the image with the tag you write (e.g. `mina`). Positions are set in the pygaki editor.
-- **Music**: **Play** cuts the current track and starts right away; **Queue** plays after the current track ends. **Fade-in** is the seconds the sound takes to rise (empty: immediately), **Loop** is game default (music loops), on or off. The fade-out of **Stop** is 1 second if empty; 0 stops immediately.
+- **Music**: **Play** cuts the current track and starts right away; **Queue** plays after the current track ends. **Fade-in** is the seconds the sound takes to rise (empty: immediately), **Loop** is game default (music loops), on or off. **Start** is the second of the track to start from (empty: from the beginning; loops restart there too; `"<from 12.0>audio/rain.ogg"`). The fade-out of **Stop** is 1 second if empty; 0 stops immediately. **Seek** moves the playing track to that second without restarting it (Ren'Py 8.6 and later; does nothing in 8.5 games).
 - **Sound effect**: **One at a time** (sound) cuts the previous sound effect with the new one; **Overlapping** (audio) lets several sounds play together. Stop stops the chosen channel. You can also add these with [Stop sound]/[Stop music] in the sound and music cards.
 - **Pause and shake** are added right after the current line with [+ Pause] and [+ Shake] in the dialogue card, or chosen in the speaker field.
 
@@ -502,6 +502,7 @@ The play screen inside pygaki was removed. You view the script by running it as 
   - **Ren'Py sample**: choose an effect and a short video of it recorded in Ren'Py appears. The sentence is an example.
   - Typing one character at a time: no effect, only characters/second (e.g. 30)
   - Shaking after appearing all at once: characters/second empty, effect `jitter`
+  - Shaking for a moment only: in `jitter`'s [Details], set [Shake time] in seconds (0 = forever); turn on [Each letter on its own] to shake each character separately. Values marked "8.6" work from Ren'Py 8.6; in 8.5 games the pygaki plugin drops them
 
 ## 7-1. Managing effects ([Effects] screen)
 
@@ -540,6 +541,7 @@ Ren'Py (up to 8.6.1) can't play a webm with transparent areas as is (they come o
 - **Size, frames per second**: shrinking a large video to height 1080, 720 and so on makes the game lighter. Frames per second is filled in from the source for a video; set it for a PNG sequence. Lower values make a smaller file.
 - **Saving**: press [Create] to save `game/movies/mask_name.webm` (it asks if the name exists). When it's done the combined transparent result plays, and [Put in this field] (when opened from an image/video field) or [Add show line] (when opened from the [Images, video] card) uses it right away.
 - **In the game**: the pygaki plugin treats videos whose names start with `mask_` as transparent. Videos in the `movies` folder can be shown by name (`show name`, without the leading `mask_`), and text boxes and images behind choices become transparent automatically (plugin; for older versions the script editor writes `media_mask=True`). Without the plugin, use `Movie(play="movies/mask_name.webm", side_mask=True)`.
+- **Once, then loop**: put `name_loop.webm` in the same folder (e.g. `door.webm` and `door_loop.webm`) and `door.webm` plays once, then `door_loop.webm` loops (like a door opening, then the open door swaying). This works for stage videos, videos behind text boxes and choices, and title/quick menu background videos. The image picker marks them "Once → loop". Ren'Py 8.6 and later; in 8.5 games only the original video loops.
 
 ## 7-4. Icons (app)
 

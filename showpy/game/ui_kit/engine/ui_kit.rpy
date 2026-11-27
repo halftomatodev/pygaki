@@ -120,8 +120,38 @@ init -20 python in ui_kit:
             return name
         return getattr(store._warper, name)
 
+    ## 렌파이 8.6부터 되는 것을 쓸지 (jitter의 u__duration·u__individual, 글자 효과의 u_text_time,
+    ## Movie(loop=다른 영상), renpy.music.seek). 8.5 게임에서는 그 값을 빼거나 예전 동작으로 돕니다
+    RENPY_86 = tuple(store.renpy.version_tuple[:2]) >= (8, 6)
+
+    ## 처음 한 번 + 반복 영상: 문.webm 옆에 문_loop.webm이 있으면 문.webm을 한 번 틀고 그 뒤로 문_loop.webm을 반복
+    LOOP_SUFFIX = "_loop"
+
+    def loop_partner(path):
+        """영상 파일 → 그 짝 반복 영상(이름_loop.확장자) 파일. 없거나 이미 반복 영상이면 None."""
+        if not isinstance(path, str):
+            return None
+        base, dot, ext = path.rpartition(".")
+        if not dot or base.lower().endswith(LOOP_SUFFIX):
+            return None
+        partner = base + LOOP_SUFFIX + "." + ext
+        try:
+            return partner if store.renpy.loadable(partner) else None
+        except Exception:
+            return None
+
+    def movie_loop(path, loop=True):
+        """Movie의 loop 값. 반복하는 영상이고 렌파이 8.6 이상이면 짝 반복 영상 파일, 아니면 True/False."""
+        if not loop:
+            return False
+        if RENPY_86:
+            partner = loop_partner(path)
+            if partner:
+                return partner
+        return True
+
     def movie(path, side_mask=True, size=None, loop=True, group=None):
-        kw = dict(play=path, side_mask=side_mask, loop=loop)
+        kw = dict(play=path, side_mask=side_mask, loop=movie_loop(path, loop))
         if size is not None:
             kw["size"] = tuple(size)
         if group:

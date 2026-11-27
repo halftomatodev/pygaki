@@ -180,7 +180,12 @@ export const formatEffect = (parts: EffectPart[]) =>
 
 // 효과의 고칠 수 있는 값(막대, 색 칸). 효과 파일에 @param이 있으면 그 범위와 이름, 없으면 기본값에서 어림한다
 // pair: 기본값이 두 값 "(3.0, 3.0)"(vec2, 렌파이 jitter)이라 막대 하나로 두 값을 같이 고침
-export interface EffectKnob { key: string; label: string; kind: 'num' | 'color'; min: number; max: number; step: number; def: string; pair?: boolean }
+// toggle: 0/1 값이라 체크 칸으로 (켜면 1.0, 끄면 값을 지움). r86: 렌파이 8.6부터 되는 값 (8.5 게임에서는 pygaki 플러그인이 뺌)
+export interface EffectKnob { key: string; label: string; kind: 'num' | 'color'; min: number; max: number; step: number; def: string; pair?: boolean; toggle?: boolean; r86?: boolean }
+// 렌파이 8.6에 더해진 효과 값 (효과 이름 → 값 이름). pygaki 플러그인 text_effects.rpy _JITTER_86과 같음
+const R86_KNOBS: Record<string, string[]> = { jitter: ['u__duration', 'u__individual'] };
+const TOGGLE_KNOBS = ['u__individual'];
+export const R86_TIP = '렌파이 8.6부터 돼요. 렌파이 8.5 게임에서는 pygaki 플러그인이 이 값을 빼고 틀어요';
 // 막대에 보일 숫자: "(3.0, 3.0)"이면 앞 값. 못 읽으면 0
 export const knobNum = (v: string) => {
   const n = Number(v.replace(/^\s*\(/, '').split(',')[0]);
@@ -217,7 +222,8 @@ export function effectKnobs(name: string, preview = false): EffectKnob[] {
     else if (short === 'rotate') [lo, hi] = [-180, 180];
     else if (d < 0) [lo, hi] = [d * 3, -d * 3];
     else if (d > 0) hi = d <= 1 ? Math.max(1, d * 2) : d * 3;
-    return [{ key, label, kind: 'num', min: lo, max: hi, step: niceStep(hi - lo), def, ...(two ? { pair: true } : {}) }];
+    const more = { ...(two ? { pair: true } : {}), ...(TOGGLE_KNOBS.includes(key) ? { toggle: true } : {}), ...(R86_KNOBS[name]?.includes(key) ? { r86: true } : {}) };
+    return [{ key, label, kind: 'num', min: lo, max: hi, step: niceStep(hi - lo), def, ...more }];
   });
 }
 
@@ -317,6 +323,8 @@ const words = (s?: string) => (s ?? '').trim().replace(/\s+/g, ' ');
 const pyStr = (s: string) => '"' + s.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
 // 파일 이름만 적으면 game/audio 폴더에서 찾는다
 const audioPath = (f: string) => (f.includes('/') ? f : 'audio/' + f);
+// 지금 곡 자리 옮기기 (FEATURE 37): renpy.music.seek는 렌파이 8.6부터라 8.5 게임에서는 아무 일도 안 하게
+export const seekCode = (n: number) => `$ renpy.music.seek(${secs(n)}) if hasattr(renpy.music, "seek") else None`;
 
 // 멈추기: 페이드아웃이 0이면 바로
 const stopCode = (ch: string, fo?: number) => {
@@ -356,10 +364,12 @@ export function stageCode(l: Line, screens?: ScreenDef[]): { code: string | null
     }
     case 'music': {
       if (l.stop) return { code: stopCode('music', l.fadeout), problem: null };
+      if (l.seek !== undefined) return { code: seekCode(l.seek), problem: null };
       if (!l.file?.trim()) return need('음악 파일 이름을 적어 주세요');
       const fi = l.fadein ? ` fadein ${secs(l.fadein)}` : '';
       const lp = l.loop === true ? ' loop' : l.loop === false ? ' noloop' : '';
-      return { code: `${l.queue ? 'queue' : 'play'} music ${pyStr(audioPath(l.file.trim()))}${fi}${lp}`, problem: null };
+      const from = l.from ? `<from ${secs(l.from)}>` : '';
+      return { code: `${l.queue ? 'queue' : 'play'} music ${pyStr(from + audioPath(l.file.trim()))}${fi}${lp}`, problem: null };
     }
     case 'sound': {
       const ch = l.channel ?? 'sound';

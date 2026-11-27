@@ -19,7 +19,7 @@
     uniform float u__gap;
     uniform float u__dir;
     uniform float u__fade;
-    uniform float u_time;
+    uniform float u_text_time;
     uniform float u_text_to_drawable;
     uniform vec2 res0;
     attribute vec4 a_text_pos_rect;
@@ -28,7 +28,7 @@
     // 글자 네모 가운데를 기준으로 통째로 옮겨서, 한 글자가 둘로 갈라지지 않게 함
     float l__w = res0.x;
     float l__span = l__w + max(u__gap, 0.0) * u_text_to_drawable;
-    float l__off = mod(u_time * u__speed * u_text_to_drawable, max(l__span, 1.0));
+    float l__off = mod(u_text_time * u__speed * u_text_to_drawable, max(l__span, 1.0));
     if (u__dir > 0.5) {
         l__off = l__span - l__off;
     }

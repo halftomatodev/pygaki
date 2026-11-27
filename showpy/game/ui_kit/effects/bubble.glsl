@@ -88,7 +88,7 @@
     uniform float u__image_out;
     uniform float u__pop;
     uniform float u__hide;
-    uniform float u_time;
+    uniform float u_text_time;
     uniform float u_text_slow_duration;
     uniform float u_text_slow_time;
     uniform float u_text_to_drawable;
@@ -162,7 +162,7 @@
         float l__th = atan(l__qq.y, l__qq.x);
         float l__seed = u__seed + res0.x * 0.0137 + res0.y * 0.0071;
         if (u__boil > 0.0) {
-            l__seed += floor(u_time * u__boil) * 7.31;
+            l__seed += floor(u_text_time * u__boil) * 7.31;
         }
         float l__lw = max(u__width * l__k, 0.0);
         float l__r = 1.0;

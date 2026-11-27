@@ -4,7 +4,7 @@ import { useStore } from './store';
 import * as ops from './ops';
 import type { ImageKind, Line, LineFx, SayStyle } from './types';
 import { shaderEffect } from './fx/textShaders';
-import { BOXES, EFFECTS, effectKnobs, knobNum, knobText, formatEffect, formatImageFx, parseEffect, parseImageFx, type EffectKnob, type EffectPart, FX_BASE, TAILS, FX_CURSOR, FX_OVERLAY, FX_TRANS, FX_WARP, isMaskName, isMovieFile, mediaMasked, POSITIONS, SHAKES, STAGE_LABEL, STAGE_TYPES, DEFAULT_FADEOUT, fxArgs, imageName, stageCode } from './stage';
+import { BOXES, EFFECTS, effectKnobs, R86_TIP, knobNum, knobText, formatEffect, formatImageFx, parseEffect, parseImageFx, type EffectKnob, type EffectPart, FX_BASE, TAILS, FX_CURSOR, FX_OVERLAY, FX_TRANS, FX_WARP, isMaskName, isMovieFile, mediaMasked, POSITIONS, SHAKES, STAGE_LABEL, STAGE_TYPES, DEFAULT_FADEOUT, fxArgs, imageName, stageCode } from './stage';
 import { useGameFolder } from './gameFolder';
 import { LinePreview } from './SayPreview';
 import { TransPicker } from './TransPicker';
@@ -126,9 +126,11 @@ export function SayFields({ l, set }: { l: Line; set: SetLine }) {
               const v = set ?? k.def;
               return (
                 <label key={k.key} className={set !== undefined ? 'set' : ''}>
-                  <span className="fx-kn" title={k.key}>{k.label}</span>
+                  <span className="fx-kn" title={k.key}>{k.label}</span>{k.r86 && <span className="fx-86" title={R86_TIP}>8.6</span>}
                   {k.kind === 'color' ? (
                     <input type="color" value={v.slice(0, 7)} onChange={(e) => putArg(i, k.key, e.target.value)} />
+                  ) : k.toggle ? (
+                    <input type="checkbox" checked={knobNum(v) !== 0} onChange={(e) => putArg(i, k.key, e.target.checked ? '1.0' : undefined)} />
                   ) : (
                     <>
                       <input type="range" min={k.min} max={k.max} step={k.step} value={knobNum(v)} onChange={(e) => putArg(i, k.key, knobText(k, Number(e.target.value)))} />
@@ -459,7 +461,7 @@ export function StageFields({ l, set, firstId, nd = '' }: { l: Line; set: SetLin
     </select>
   );
   // 초·숫자 칸: 비우면 값을 지운다 (처음 값으로)
-  const numIn = (k: 'fadein' | 'fadeout' | 'secs' | 'zorder', placeholder: string, title: string, o: { min?: number; max?: number; step?: number } = {}) => (
+  const numIn = (k: 'fadein' | 'fadeout' | 'secs' | 'zorder' | 'from' | 'seek', placeholder: string, title: string, o: { min?: number; max?: number; step?: number } = {}) => (
     <input
       type="number"
       className={nd + ' sf-num sf-sec'}
@@ -473,7 +475,10 @@ export function StageFields({ l, set, firstId, nd = '' }: { l: Line; set: SetLin
         set((x) => {
           const t = e.target.value.trim();
           const n = Number(t);
-          if (t === '' || !Number.isFinite(n)) delete x[k];
+          if (t === '' || !Number.isFinite(n)) {
+            if (k === 'seek') x.seek = 0; // 자리 옮기기 줄은 비우면 0초 (지우면 틀기 줄이 됨)
+            else delete x[k];
+          }
           else x[k] = Math.max(o.min ?? 0, Math.min(o.max ?? 60, k === 'zorder' ? Math.round(n) : Math.round(n * 100) / 100));
         }, k + l.id)
       }
@@ -525,7 +530,7 @@ export function StageFields({ l, set, firstId, nd = '' }: { l: Line; set: SetLin
         const v = cur ?? k.def;
         return (
           <label key={k.key} className={cur !== undefined ? 'set' : ''}>
-            <span className="fx-kn" title={k.key}>{k.label}</span>
+            <span className="fx-kn" title={k.key}>{k.label}</span>{k.r86 && <span className="fx-86" title={R86_TIP}>8.6</span>}
             {k.kind === 'color' ? (
               <input type="color" value={v.slice(0, 7)} onChange={(e) => putPic(k.key, e.target.value)} />
             ) : (
@@ -566,15 +571,20 @@ export function StageFields({ l, set, firstId, nd = '' }: { l: Line; set: SetLin
   else if (l.type === 'music')
     body = (
       <>
-        {pick([['', '틀기'], ['queue', '이어 틀기'], ['stop', '멈추기']], l.stop ? 'stop' : l.queue ? 'queue' : '', (x, v) => {
+        {pick([['', '틀기'], ['queue', '이어 틀기'], ['stop', '멈추기'], ['seek', '자리 옮기기']], l.stop ? 'stop' : l.seek !== undefined ? 'seek' : l.queue ? 'queue' : '', (x, v) => {
           if (v === 'stop') x.stop = true;
           else delete x.stop;
           if (v === 'queue') x.queue = true;
           else delete x.queue;
-        }, '틀기: 지금 곡을 끊고 바로 / 이어 틀기: 지금 곡이 끝나면 (queue) / 멈추기')}
-        {!l.stop && field('file', '파일 이름 (예: rain.ogg)', firstId, 'wide')}
-        {!l.stop && numIn('fadein', '페이드인 0초', '시작할 때 소리가 커지는 초. 비우면 바로 (0초)', { max: 30 })}
-        {!l.stop && pick([['', '반복 게임 기본'], ['loop', '반복 켬'], ['noloop', '반복 끔']], l.loop === true ? 'loop' : l.loop === false ? 'noloop' : '', (x, v) => void (v ? (x.loop = v === 'loop') : delete x.loop), '곡이 끝나면 다시 틀지. 게임 기본은 음악은 반복해요')}
+          if (v === 'seek') x.seek = x.seek ?? 0;
+          else delete x.seek;
+        }, '틀기: 지금 곡을 끊고 바로 / 이어 틀기: 지금 곡이 끝나면 (queue) / 멈추기 / 자리 옮기기: 지금 곡을 다시 틀지 않고 그 초로 (렌파이 8.6부터)')}
+        {l.seek !== undefined && !l.stop && numIn('seek', '0초', '지금 나오는 곡을 이 초로 옮겨요. 곡은 끊기지 않아요. 렌파이 8.6부터 돼요 (8.5 게임에서는 아무 일도 안 해요)', { max: 3600 })}
+        {l.seek !== undefined && !l.stop && <span className="tip" title={R86_TIP}>초로 · 8.6</span>}
+        {!l.stop && l.seek === undefined && field('file', '파일 이름 (예: rain.ogg)', firstId, 'wide')}
+        {!l.stop && l.seek === undefined && numIn('from', '처음부터', '곡의 이 초부터 틀어요. 비우면 처음부터 (반복하면 다시 이 초부터)', { max: 3600 })}
+        {!l.stop && l.seek === undefined && numIn('fadein', '페이드인 0초', '시작할 때 소리가 커지는 초. 비우면 바로 (0초)', { max: 30 })}
+        {!l.stop && l.seek === undefined && pick([['', '반복 게임 기본'], ['loop', '반복 켬'], ['noloop', '반복 끔']], l.loop === true ? 'loop' : l.loop === false ? 'noloop' : '', (x, v) => void (v ? (x.loop = v === 'loop') : delete x.loop), '곡이 끝나면 다시 틀지. 게임 기본은 음악은 반복해요')}
         {l.stop && numIn('fadeout', `페이드아웃 ${DEFAULT_FADEOUT}초`, `멈출 때 소리가 줄어드는 초. 비우면 ${DEFAULT_FADEOUT}초, 0이면 바로`, { max: 30 })}
       </>
     );

@@ -74,6 +74,8 @@ export interface Line {
   fadeout?: number; // music, sound 멈추기: 페이드아웃 초 (없으면 1초)
   queue?: boolean; // music: 지금 곡이 끝나면 이어 틀기 (queue music)
   loop?: boolean; // music: true면 loop, false면 noloop, 없으면 게임 기본
+  from?: number; // music 틀기·이어 틀기: 곡의 이 초부터 (FEATURE 37, 원고 "<from 초>파일")
+  seek?: number; // music: 지금 곡을 다시 틀지 않고 이 초로 옮김 (FEATURE 37, 렌파이 8.6 renpy.music.seek. 8.5에서는 아무 일도 안 함)
   channel?: 'audio'; // sound: audio 채널 (여러 소리가 겹쳐 나옴). 없으면 sound 채널
   secs?: number; // pause: 멈출 초. 없으면 클릭할 때까지
   shake?: ShakeKind; // shake: 세로 vpunch | 가로 hpunch | 번쩍 flash (없으면 vpunch)

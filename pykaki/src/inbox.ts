@@ -60,7 +60,9 @@ export function codeToLine(code: string, id: string, p: Project): Line {
   if (m) {
     const [, verb, ch, file] = m;
     const opts = m[4].trim().split(/\s+/).filter(Boolean);
-    const l: Line = { id, type: ch === 'music' ? 'music' : 'sound', text: '', file: file.replace(/^audio\//, '') };
+    const from = ch === 'music' ? /^<from\s+(\d+(?:\.\d+)?)>(.+)$/.exec(file) : null;
+    const l: Line = { id, type: ch === 'music' ? 'music' : 'sound', text: '', file: (from ? from[2] : file).replace(/^audio\//, '') };
+    if (from && Number(from[1]) > 0) l.from = Number(from[1]);
     if (ch === 'audio') l.channel = 'audio';
     if (verb === 'queue') {
       if (ch !== 'music') return command;
@@ -75,6 +77,9 @@ export function codeToLine(code: string, id: string, p: Project): Line {
     if (!l.fadein) delete l.fadein;
     return l;
   }
+  // 지금 곡 자리 옮기기 (FEATURE 37): stage.ts seekCode
+  m = /^\$\s*renpy\.music\.seek\(\s*(\d+(?:\.\d+)?)\s*\)(?:\s+if\s+hasattr\(renpy\.music,\s*"seek"\)\s+else\s+None)?\s*$/.exec(raw);
+  if (m) return { id, type: 'music', text: '', seek: Number(m[1]) };
   m = /^stop\s+(music|sound|audio)(?:\s+fadeout\s+(\S+))?\s*$/.exec(raw);
   if (m) {
     const l: Line = { id, type: m[1] === 'music' ? 'music' : 'sound', text: '', stop: true };

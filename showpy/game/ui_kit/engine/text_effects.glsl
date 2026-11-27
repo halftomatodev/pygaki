@@ -28,6 +28,8 @@
 // 쓸 수 있는 렌파이 값: a_text_index, a_text_center(글자 밑줄 자리), a_text_min_time,
 // a_text_time, u_text_slow_time, u_text_slow_duration, u_text_to_drawable, u_text_main,
 // u_text_depth, u_time, tex0, res0, v_tex_coord, gl_Position, gl_FragCoord, gl_FragColor
+// 계속 움직이는 효과의 시간은 u_text_time(글이 보인 뒤 초, 렌파이 8.6)을 씁니다. 대사마다 처음부터 움직이고
+// 대본 편집기 미리보기와 같습니다. 렌파이 8.5 이하에서는 pygaki 플러그인이 u_time(게임 시계)으로 바꿔 등록합니다
 
 @part T
     float l__dur = u__duration * u_text_slow_duration;
@@ -347,7 +349,7 @@
     uniform float u_text_slow_time;
     uniform float u_text_to_drawable;
     uniform float u_text_main;
-    uniform float u_time;
+    uniform float u_text_time;
     uniform sampler2D tex0;
     uniform vec2 res0;
     attribute float a_text_min_time;
@@ -361,7 +363,7 @@
     if (v_tfx_block > 0.0 && l__amt > 0.0 && u_text_main > 0.5) {
         float l__size = u__block * u_text_to_drawable;
         vec2 l__cell = floor(gl_FragCoord.xy / l__size);
-        float l__tick = floor(u_time * u__rate);
+        float l__tick = floor(u_text_time * u__rate);
         float l__r1 = fract(sin(dot(l__cell + l__tick, vec2(12.9898, 78.233))) * 43758.5453);
         float l__r2 = fract(sin(dot(l__cell + l__tick, vec2(39.346, 11.135))) * 43758.5453);
         float l__r3 = fract(sin(dot(l__cell + l__tick, vec2(73.156, 52.235))) * 43758.5453);
@@ -401,7 +403,7 @@
     uniform float u__speed;
     uniform float u_text_to_drawable;
     uniform float u_text_main;
-    uniform float u_time;
+    uniform float u_text_time;
     uniform float u_text_slow_time;
     uniform sampler2D tex0;
     uniform vec2 res0;
@@ -413,7 +415,7 @@
 @fragment_340
     if (u_text_main > 0.5) {
         vec2 l__p = gl_FragCoord.xy / (u__wavelength * u_text_to_drawable);
-        vec2 l__o = vec2(sin(l__p.y * 6.2832 + u_time * u__speed), cos(l__p.x * 6.2832 + u_time * u__speed * 1.3));
+        vec2 l__o = vec2(sin(l__p.y * 6.2832 + u_text_time * u__speed), cos(l__p.x * 6.2832 + u_text_time * u__speed * 1.3));
         gl_FragColor = texture2D(tex0, v_tex_coord + l__o * u__amplitude * u_text_to_drawable / res0);
     }
 @fragment_350
@@ -442,7 +444,7 @@
     uniform float u_text_slow_time;
     uniform float u_text_to_drawable;
     uniform float u_text_main;
-    uniform float u_time;
+    uniform float u_text_time;
     uniform sampler2D tex0;
     uniform vec2 res0;
     attribute float a_text_min_time;
@@ -453,7 +455,7 @@
 @fragment_340
     if (u_text_main > 0.5) {
         float l__td = u_text_to_drawable;
-        float l__tick = floor(u_time * u__rate);
+        float l__tick = floor(u_text_time * u__rate);
 
         // 가로 띠 찢김: 띠마다 가끔 옆으로 크게 밀린다
         float l__band = floor(gl_FragCoord.y / (u__band * l__td));
@@ -620,12 +622,12 @@
     uniform float u__amount;
     uniform float u__speed;
     uniform float u__rotate;
-    uniform float u_time;
+    uniform float u_text_time;
     uniform float u_text_to_drawable;
     attribute float a_text_index;
     attribute vec2 a_text_center;
 @vertex_40
-    float l__f = u_time * max(u__speed, 0.0);
+    float l__f = u_text_time * max(u__speed, 0.0);
     float l__i = floor(l__f);
     float l__w = smoothstep(0.0, 1.0, fract(l__f));
     vec3 l__a = vec3(fract(sin(a_text_index * 7.31 + l__i * 12.9898) * 43758.5453),
