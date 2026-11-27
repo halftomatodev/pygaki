@@ -1592,7 +1592,9 @@ pre.rpy.small { font-size: 11.5px; padding: 6px 8px; white-space: pre-wrap; over
 .scv-art .scv-scroll { position: absolute; inset: 0; overflow: auto; scrollbar-width: thin; }
 .scv-art .scv-inner { position: relative; }
 .scv-bgc { position: absolute; inset: 0; pointer-events: none; }
-.scv-stage.hud { background: linear-gradient(color-mix(in srgb, var(--text) 10%, var(--panel)), color-mix(in srgb, var(--text) 4%, var(--panel))); }
+/* 레트로 해상도 (pixel_perfect.rpy): 게임처럼 그림·영상을 각진 픽셀 그대로 키움. 글자는 부드럽게 둠 */
+.scv-stage.px img, .scv-stage.px video { image-rendering: pixelated; }
+.scv-stage.hud {background: linear-gradient(color-mix(in srgb, var(--text) 10%, var(--panel)), color-mix(in srgb, var(--text) 4%, var(--panel))); }
 .scv-el.off { opacity: .35; }
 .scv-val.act { left: auto; right: 100%; top: 0; margin-right: 2px; }
 .scv-el.still { pointer-events: none; }

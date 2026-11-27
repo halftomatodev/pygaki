@@ -216,12 +216,16 @@ function Stage({ sc, sel, onMove, onMoveHud }: { sc: ScreenDef; sel: string | nu
   useLayoutEffect(() => {
     const el = wrap.current;
     if (!el) return;
-    const fit = () => setScale(Math.min(el.clientWidth / look.width, (el.clientHeight || 9999) / look.height));
+    const fit = () => {
+      const s = Math.min(el.clientWidth / look.width, (el.clientHeight || 9999) / look.height);
+      // 레트로 해상도: ×2 이상 들어가면 게임처럼 정수 배율로 (그보다 작으면 칸에 맞춘 배율 그대로, 그림은 각지게)
+      setScale(look.pixel && s >= 2 ? Math.floor(s) : s);
+    };
     fit();
     const ro = new ResizeObserver(fit);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [look.width, look.height]);
+  }, [look.width, look.height, look.pixel]);
 
   // 방향키로 고른 것 옮기기
   useEffect(() => {
@@ -258,7 +262,7 @@ function Stage({ sc, sel, onMove, onMoveHud }: { sc: ScreenDef; sel: string | nu
   return (
     <div className="scv-stage-wrap" ref={wrap}>
       <div
-        className={'scv-stage' + (isHud(sc) ? ' hud' : '')}
+        className={'scv-stage' + (isHud(sc) ? ' hud' : '') + (look.pixel && scale >= 1 ? ' px' : '')}
         style={{ width: look.width * scale, height: look.height * scale }}
         onPointerDown={(e) => e.target === e.currentTarget && useScreenSel.setState({ item: null })}
       >

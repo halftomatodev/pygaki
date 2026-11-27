@@ -48,12 +48,13 @@ export interface GameLook {
   textbox: string | null; // gui/textbox.png
   namebox: string | null; // gui/namebox.png
   placed: Record<string, [number, number]>; // stage_layout.rpy. "태그" 또는 "상자|태그"
+  pixel: boolean; // 레트로 해상도 (game/pixel_perfect.rpy의 pixel_perfect = True): 게임은 정수 배율로 각진 픽셀 그대로 키움
 }
 
 export const DEFAULT_LOOK: GameLook = {
   width: 1280, height: 720, textSize: 22, nameSize: 30, textColor: '#ffffff', font: null,
   textboxHeight: 185, textboxYalign: 1, nameX: 240, nameY: 0, dialogueX: 268, dialogueY: 50, dialogueWidth: 744,
-  textCps: 0, textbox: null, namebox: null, placed: {},
+  textCps: 0, textbox: null, namebox: null, placed: {}, pixel: false,
 };
 
 interface F {
@@ -221,6 +222,7 @@ async function readLook(): Promise<GameLook> {
   const uiKit = await sub(dir, 'ui_kit');
   const uiConfig = uiKit ? (await readText(uiKit, 'custom_ui_config.rpy')) ?? '' : '';
   const layout = uiKit ? (await readText(uiKit, 'stage_layout.rpy')) ?? '' : '';
+  const pixelRpy = (await readText(dir, 'pixel_perfect.rpy')) ?? '';
   const cps = /^define\s+custom_ui\.text_cps\s*=\s*(\d+)/m.exec(uiConfig) ?? /^default\s+preferences\.text_cps\s*=\s*(\d+)/m.exec(options);
 
   const placed: GameLook['placed'] = {};
@@ -245,6 +247,7 @@ async function readLook(): Promise<GameLook> {
     textbox: await fileUrl('gui/textbox.png'),
     namebox: await fileUrl('gui/namebox.png'),
     placed,
+    pixel: /^\s*pixel_perfect\s*=\s*True\b/m.test(pixelRpy),
   };
 }
 
