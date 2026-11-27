@@ -10,6 +10,7 @@ export interface ShaderEffect {
   label: string;
   cps: boolean; // 글자가 하나씩 나와야 보임
   slow: string | null; // 다 나온 뒤 더 기다릴 시간(글자 수)의 식
+  slowtime?: string | null; // 다 나온 뒤 더 기다릴 시간(초)의 식 (@slowtime)
   redraw: string | null; // 'always' 또는 u__ 이름
   outlines: [number, string, number, number][]; // 굵기, 색, x, y
   uniforms: [string, string][]; // u__이름, 기본값 (적힌 그대로)
@@ -55,6 +56,7 @@ export function parseShaders(text: string, showpy: boolean, shared?: Record<stri
       cur.push(...parts[rest]);
     } else if (word === 'cps') eff.cps = true;
     else if (word === 'slow') eff.slow = rest;
+    else if (word === 'slowtime') eff.slowtime = rest;
     else if (word === 'redraw') eff.redraw = rest;
     else if (word === 'outline') {
       const [size, color, x, y] = rest.split(/\s+/);
@@ -300,6 +302,7 @@ export interface TextShader {
   parts: string[]; // 셰이더 조각 이름 (renpy.texture는 그릴 때 더함)
   uniforms: Map<string, UniformValue>;
   extraSlowDuration: number; // 다 나온 뒤 더 기다릴 시간 (글자 수)
+  extraSlowTime?: number; // 다 나온 뒤 더 기다릴 시간 (초, @slowtime)
   redraw: boolean; // 계속 다시 그림
   outlines: [number, string, number, number][];
 }
@@ -368,13 +371,15 @@ export function parseTextShader(effect: string, preview = false): TextShader | n
       if (orig.has(k)) kw[orig.get(k)![0]] = val;
     }
     let extra = e.slow ? evalSlow(e.slow, kw) : 0;
+    let extraTime = e.slowtime ? evalSlow(e.slowtime, kw) : 0;
     let redraw = e.redraw === 'always' || (!!e.redraw && Number(kw[e.redraw] ?? 0) > 0);
-    const ts: TextShader = { parts: ['textshader.' + name], uniforms, extraSlowDuration: extra, redraw, outlines: e.outlines };
+    const ts: TextShader = { parts: ['textshader.' + name], uniforms, extraSlowDuration: extra, extraSlowTime: extraTime, redraw, outlines: e.outlines };
     if (!rv) rv = ts;
     else {
       extra = Math.max(rv.extraSlowDuration, extra);
+      extraTime = Math.max(rv.extraSlowTime ?? 0, extraTime);
       redraw = rv.redraw || redraw;
-      rv = { parts: [...rv.parts, ...ts.parts], uniforms: new Map([...rv.uniforms, ...ts.uniforms]), extraSlowDuration: extra, redraw, outlines: rv.outlines.length ? rv.outlines : ts.outlines };
+      rv = { parts: [...rv.parts, ...ts.parts], uniforms: new Map([...rv.uniforms, ...ts.uniforms]), extraSlowDuration: extra, extraSlowTime: extraTime, redraw, outlines: rv.outlines.length ? rv.outlines : ts.outlines };
     }
   }
   return rv;

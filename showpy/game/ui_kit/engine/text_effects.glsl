@@ -11,6 +11,7 @@
 //   @effect 이름 한글이름    효과 하나의 시작. 대사 괄호에 effect="이름"으로 씀
 //   @cps                    글자가 하나씩 나와야 보이는 효과. PyKaki가 글자/초를 비우면 30으로 내보냄
 //   @slow 식                다 나온 뒤 더 기다릴 시간(글자 수). 예: u__duration, u__spread + u__fade
+//   @slowtime 식            다 나온 뒤 더 기다릴 시간(초). @slow와 더해짐. 예: u__typing + u__pop
 //   @redraw always          계속 다시 그림 (멈춰 있어도 움직이는 효과)
 //   @redraw u__hold         u__hold가 0보다 크면 계속 다시 그림
 //   @outline 굵기 색 x y     글자 뒤에 깔 외곽선 겹 (echo의 복사본). 대사에 외곽선을 따로 안 적었을 때만

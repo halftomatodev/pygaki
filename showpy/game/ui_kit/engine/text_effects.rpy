@@ -93,7 +93,7 @@ init -10 python in say_style:
                 eff = None
             elif word == "effect" or word == "transition":
                 name, _, label = rest.partition(" ")
-                eff = { "kind": word, "name": name, "label": label.strip(), "cps": False, "slow": None, "redraw": None,
+                eff = { "kind": word, "name": name, "label": label.strip(), "cps": False, "slow": None, "slowtime": None, "redraw": None,
                         "outlines": [ ], "uniforms": [ ], "params": [ ], "time": 1.0, "code": [ ] }
                 effects.append(eff)
                 cur = None
@@ -107,6 +107,8 @@ init -10 python in say_style:
                 eff["cps"] = True
             elif word == "slow":
                 eff["slow"] = rest
+            elif word == "slowtime":
+                eff["slowtime"] = rest
             elif word == "redraw":
                 eff["redraw"] = rest
             elif word == "outline":
@@ -153,12 +155,15 @@ init -10 python in say_style:
             total += v
         return total
 
-    def _tfx_adjuster(slow, redraw):
-        if not slow and (not redraw or redraw == "always"):
+    ## slowtime: @slowtime 식, 초로 더 기다림 (렌파이 extra_slow_time)
+    def _tfx_adjuster(slow, redraw, slowtime=None):
+        if not slow and not slowtime and (not redraw or redraw == "always"):
             return None
         def adjust(ts, **kw):
             if slow:
                 ts.extra_slow_duration = _tfx_eval(slow, kw)
+            if slowtime:
+                ts.extra_slow_time = _tfx_eval(slowtime, kw)
             if redraw and redraw != "always" and float(kw.get(redraw, 0.0)) > 0.0:
                 ts.redraw = 0.0
         return adjust
@@ -255,7 +260,7 @@ init -10 python in say_style:
                 kw["redraw"] = 0.0
             kw.update(_TFX_GLSL)
             store.renpy.register_textshader(e["name"], include_default=False,
-                adjust_function=_tfx_adjuster(e["slow"], e["redraw"]), **kw)
+                adjust_function=_tfx_adjuster(e["slow"], e["redraw"], e["slowtime"]), **kw)
             if e["outlines"]:
                 TFX_OUTLINES[e["name"]] = e["outlines"]
 

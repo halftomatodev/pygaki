@@ -29,6 +29,8 @@ SECONDS = 2.4
 TEXT = "효과 미리보기 Sample 글자"
 ## 대사창 글자 부분 (1280x720 게임 기준): 너비, 높이, 왼쪽, 위
 CROP = "880:90:230:578"
+## 효과마다 다른 자리 (말풍선처럼 글 둘레가 위아래로 나가는 것)
+CROP_FOR = {"chat": "880:90:230:572"}
 
 PROBE = """
 define e = Character("미나")
@@ -103,7 +105,7 @@ def record(tmp, fx, cps):
         raise RuntimeError("{}: 화면을 찍지 못했어요. {}".format(fx, open(tb, encoding="utf-8").read()[:600] if os.path.exists(tb) else ""))
     out = os.path.join(OUT, fx + ".webm")
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-framerate", str(FPS), "-i", os.path.join(shots, "f%03d.png"),
-                    "-vf", "crop={},scale=480:-2".format(CROP), "-c:v", "libvpx-vp9", "-b:v", "0", "-crf", "42",
+                    "-vf", "scale=1280:720,crop={},scale=480:-2".format(CROP_FOR.get(fx, CROP)), "-c:v", "libvpx-vp9", "-b:v", "0", "-crf", "42",
                     "-pix_fmt", "yuv420p", "-an", out], check=True)
     return os.path.getsize(out)
 

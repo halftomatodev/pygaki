@@ -271,7 +271,7 @@ define stage.placed = {
 | pygaki 플러그인 `engine/text_effects.rpy` | init에서 읽어 효과마다 `renpy.register_textshader`로 등록. 편집기 대사 탭의 효과 버튼 이름도 여기서 |
 | 대본 편집기 `src/fx/textShaders.ts`, `src/fx/FxCanvas.tsx` | 같은 코드를 렌파이가 셰이더 조각을 합치는 방식대로 합쳐 WebGL로 미리보기를 그림. 효과 목록, 한글 이름, 글자/초 기본값(`@cps`)도 여기서 |
 
-적는 법은 파일 맨 위에 있습니다. `@effect 이름 한글이름`, `@cps`, `@slow 식`, `@redraw`, `@outline`, `@set u__이름 값`, `@variables`, `@vertex_N`, `@fragment_N`, `@part`/`@use`, `RAND(n)`. 두 프로그램의 읽는 코드(pygaki 플러그인 `tfx_parse`, 대본 편집기 `parseShaders`)는 같은 규칙이라 표시를 새로 만들면 둘 다 고칩니다.
+적는 법은 파일 맨 위에 있습니다. `@effect 이름 한글이름`, `@cps`, `@slow 식`, `@slowtime 식`(초), `@redraw`, `@outline`, `@set u__이름 값`, `@variables`, `@vertex_N`, `@fragment_N`, `@part`/`@use`, `RAND(n)`. 두 프로그램의 읽는 코드(pygaki 플러그인 `tfx_parse`, 대본 편집기 `parseShaders`)는 같은 규칙이라 표시를 새로 만들면 둘 다 고칩니다.
 
 ### 8-1. 효과 폴더 (`ui_kit/effects/*.glsl`)
 

@@ -358,7 +358,7 @@ export function FxCanvas({ target, ts, tagTs, parsed, shown, limit, holding, fas
       const slowDur = p.cps > 0 ? 1 / p.cps : 0;
       // 묶음마다 쓸 셰이더. 기다리는 시간은 가장 긴 것, 하나라도 계속 그리면 계속 그린다 (renpy/text/shader.py compute_times)
       const groups = s.r.meshes.map((m, n) => ({ n, ts: p.tagTs?.get(m.key) ?? p.ts }));
-      const maxTime = s.lastMin + s.lastDur + Math.max(p.ts.extraSlowDuration, ...groups.map((g) => g.ts.extraSlowDuration)) * slowDur;
+      const maxTime = s.lastMin + s.lastDur + Math.max(p.ts.extraSlowDuration, ...groups.map((g) => g.ts.extraSlowDuration)) * slowDur + Math.max(p.ts.extraSlowTime ?? 0, ...groups.map((g) => g.ts.extraSlowTime ?? 0));
       const done = p.fast || (p.shown >= p.parsed.glyphs.length && !p.holding);
       const elapsed = p.holding || s.t0 < 0 ? 0 : now() - s.t0;
       const slow = p.fast ? maxTime : done ? Math.min(elapsed, maxTime) : elapsed;

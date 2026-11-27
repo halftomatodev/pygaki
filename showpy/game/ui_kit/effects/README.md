@@ -40,6 +40,7 @@ pygaki 앱의 **[효과]** 화면에서는 효과를 샘플로 돌려 보고, **
 | `marquee.glsl` | 글자 | `marquee` 옆으로 흐르기 | 줄이 처음부터 다 보이고 오른쪽에서 왼쪽으로 끝없이 흘러감. 양 끝은 흐려짐(`u__speed`, `u__gap`, `u__dir`, `u__fade`) |
 | `scramble.glsl` | 글자 | `scramble` 글자 해독 | 글자 자리에 흐린 무작위 기호(점 격자)가 빠르게 바뀌며 돌다가 왼쪽부터 차례로 제 글자로 자리 잡음. 빈칸은 비워 둠(`u__lead` 먼저 도는 글자 수, `u__churn`, `u__fps`, `u__dim`, `u__tint`·`u__color`) |
 | `bubble.glsl` | 글자 | `bubble` 말풍선 | 대사 글 전체를 만화 말풍선이 감싸고, 퐁 커지며 나온 뒤 글자가 나옴. 모양 넷(`u__shape` 0 둥근, 1 손그림, 2 외침, 3 집중선), 꼬리 길이와 방향(`u__tail`, `u__tail_dir`), 바탕색, 선 색, 글자 색 |
+| `chat.glsl` | 글자 | `chat` 메신저 말풍선 | 먼저 점 셋이 통통 튀는 작은 말풍선(말줄임표)이 나오고(`u__typing` 초), 그 말풍선이 그대로 늘어나 대사 말풍선이 된 뒤(`u__pop` 초) 글자가 나옴. 받은 쪽·보낸 쪽(`u__side` 0 왼쪽, 1 오른쪽에서 나와 늘어남), 쪽마다 바탕색·글자 색(`u__recv`, `u__recv_ink`, `u__send`, `u__send_ink`) |
 
 ```renpy
 e "아래에서 올라온다." (cps=30, effect="maskup")
@@ -71,6 +72,9 @@ e "ACCESS GRANTED" (cps=15, effect="scramble:u__lead=30:u__tint=1")
 e "괜찮아?" (cps=25, effect="bubble")
 e "앗! 뭐야!!" (effect="bubble:u__shape=2")
 e "まさか" (effect="bubble:u__shape=3:u__fill=#000000:u__ink=#ffffff")
+e "지금 어디야?" (cps=30, effect="chat")
+e "가는 중!" (cps=30, effect="chat:u__side=1")
+e "음..." (cps=30, effect="chat:u__typing=3:u__send=#0a84ff")
 ```
 
 `marquee`는 그 대사 글의 폭 안에서 돕니다. 글이 짧으면 흐르는 폭도 짧아서, 넓게 흐르게 하려면 글 뒤에 빈칸을 넣습니다. 마우스를 올려도 멈추지 않습니다.
@@ -81,6 +85,8 @@ e "まさか" (effect="bubble:u__shape=3:u__fill=#000000:u__ink=#ffffff")
 ```renpy
 e "그림 말풍선." (effect="bubble:u__image=gui/bubble.png:u__image_on=1:u__slice=0.3:u__slice_px=36:u__image_out=14")
 ```
+
+`chat`은 대사 글 자리를 감싸므로 말풍선이 화면 어느 쪽에 나오는지는 대사 창의 글 자리를 따릅니다. `u__side`는 말줄임표가 어느 쪽 위 끝에서 나와 늘어나는지와 색을 정합니다. 말줄임표가 나와 있는 동안 누르면 건너뛰고 바로 다 나옵니다. `u__hide=0`이면 말풍선과 함께 글 전체가 한 번에 나오는데, 그때는 글자/초를 크게(예: `cps=200`) 해야 다 나온 뒤에 한 번 더 눌러야 하는 일이 없습니다.
 
 `scramble`의 기호는 셰이더가 그리는 점 격자라 실제 글자가 아닙니다. 기호 크기는 글자 높이로 정해서, 좁은 글자(`i`, `l`, `-`) 자리에서는 기호가 잘려 보입니다. 도는 동안 외곽선은 그리지 않고, 제 글자로 자리 잡을 때 외곽선도 같이 나옵니다.
 
@@ -117,6 +123,7 @@ with screen_fx.pending_with()
 | `@effect 이름 한글이름` | 효과의 시작 |
 | `@cps` | 글자가 하나씩 나와야 보이는 효과 (대본 편집기가 글자/초를 비우면 30으로 내보냄) |
 | `@slow 식` | 다 나온 뒤 더 기다릴 시간(글자 수). 예: `u__duration` |
+| `@slowtime 식` | 다 나온 뒤 더 기다릴 시간(초). `@slow`와 더해짐. 예: `u__typing + u__pop` |
 | `@redraw always` | 멈춰 있어도 계속 다시 그림 |
 | `@set u__이름 값` | 값의 기본값. 대사에서 `effect="이름:u__이름=값"`으로 바꿈. 색은 `#rrggbb` |
 | `@param u__이름 최소 최대 한글이름` | 그 값을 막대로 고칠 때의 범위와 이름 |
