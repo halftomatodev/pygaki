@@ -329,7 +329,8 @@ init -10 python in splash:
                 _check_media(where, key, d.get(key), out)
 
             for key, v in d.items():
-                if key.endswith("_font") and isinstance(v, str):
+                ## 글꼴 묶음 이름(config.font_name_map, pygaki [글꼴] 탭)은 파일이 아님
+                if key.endswith("_font") and isinstance(v, str) and v not in store.config.font_name_map:
                     _check_file(where, key, v, out, "글꼴 파일")
 
             for key in ("sound", "music"):

@@ -10,7 +10,7 @@ import { isDesktop, desktop } from './desktop';
 import { gameFont, useGameFolder } from './gameFolder';
 import { coverage, missingChars, type FontInfo } from './fontInfo';
 import {
-  dropFont, fontInfoOf, fontUses, gameFonts, pickFont, readGui, readRoles, removable, removeFont, roleFile, ROLES, RENPY_DEFAULT_FONT, scriptText, setRole, usedAnywhere,
+  dropFont, fontInfoOf, guessBold, readBold, setBold, setLatin, shrinkFont, restoreFont, shrunkFrom, fontUses, gameFonts, pickFont, readGui, readRoles, removable, removeFont, roleFile, ROLES, RENPY_DEFAULT_FONT, scriptText, setRole, usedAnywhere,
   type FontUses, type RoleId, type RoleValue,
 } from './fontsLib';
 
@@ -61,13 +61,16 @@ export function FontsView() {
   const [text, setText] = useState('');
   const [px, setPx] = useState(32);
   const [roles, setRoles] = useState<Record<RoleId, RoleValue> | null>(null);
+  const [bolds, setBolds] = useState<Record<string, string>>({});
   const [loaded, setLoaded] = useState<Record<string, Loaded | null>>({});
   const [uses, setUses] = useState<FontUses | null>(null);
+  const [shrunk, setShrunk] = useState<{ size: number } | null>(null);
+  const [common, setCommon] = useState(true);
   const [seq, setSeq] = useState(0); // 넣기·빼기·기본 글꼴을 바꾼 뒤 다시 읽기
 
   // gui.rpy의 기본 글꼴
   useEffect(() => {
-    if (isDesktop) void readGui().then((g) => setRoles(readRoles(g)));
+    if (isDesktop) void readGui().then((g) => (setRoles(readRoles(g)), setBolds(readBold(g))));
   }, [media, seq]);
   // 글꼴 정보: 차례로 읽어 둔다 (한글 표시, 크기)
   useEffect(() => {
@@ -139,6 +142,36 @@ export function FontsView() {
       const r = ROLES.find((x) => x.id === id)!;
       say(`${r.label} 기본 글꼴을 바꿨어요 (game/gui.rpy). 켜 둔 게임은 Shift+R로 다시 읽어요` + (backup ? ` · 예전 gui.rpy는 ${backup}` : ''));
     });
+  useEffect(() => {
+    setShrunk(null);
+    if (isDesktop && sel) void shrunkFrom(sel).then((st) => setShrunk(st ? { size: st.size } : null));
+  }, [sel, seq]);
+  const shrink = () =>
+    sel &&
+    act(async () => {
+      if (!confirm(`${sel}에서 대본과 게임 코드에 쓴 글자만 남길까요?
+원본은 ui_kit_backup/fonts/에 남겨 두고 언제든 되돌릴 수 있어요.
+줄인 뒤 대본에 새 글자를 쓰면 게임에서 네모로 나와요. 배포 직전에 쓰세요.`)) return;
+      const r = await shrinkFont(project, sel, common);
+      say(`글꼴을 줄였어요: ${mb(r.before)} → ${mb(r.after)} (글자 ${r.chars.toLocaleString()}자) · 원본은 ${r.backup}`);
+    });
+  const restore = () =>
+    sel &&
+    act(async () => {
+      const at = await restoreFont(sel);
+      say(`원본 글꼴로 되돌렸어요 (${at}에서)`);
+    });
+  const putBold = (font: string, bold: string | null) =>
+    act(async () => {
+      const backup = await setBold(font, bold);
+      say((bold ? `${font}을 굵게 쓸 때 ${bold}로 그려요 (game/gui.rpy). 켜 둔 게임은 Shift+R로 다시 읽어요` : `${font}의 굵은 글꼴 짝을 지웠어요 (game/gui.rpy). 켜 둔 게임은 Shift+R로 다시 읽어요`) + (backup ? ` · 예전 gui.rpy는 ${backup}` : ''));
+    });
+  const putLatin = (id: RoleId, latin: string | null) =>
+    act(async () => {
+      const backup = await setLatin(id, latin);
+      const r = ROLES.find((x) => x.id === id)!;
+      say((latin ? `${r.label} 글의 영문·숫자를 ${latin}로 그려요 (game/gui.rpy). 켜 둔 게임은 Shift+R로 다시 읽어요` : `${r.label} 글의 영문 글꼴 묶음을 풀었어요 (game/gui.rpy). 켜 둔 게임은 Shift+R로 다시 읽어요`) + (backup ? ` · 예전 gui.rpy는 ${backup}` : ''));
+    });
   const remove = () =>
     sel &&
     act(async () => {
@@ -180,6 +213,7 @@ export function FontsView() {
             <span className="fov-role-font">
               {f ? (f === RENPY_DEFAULT_FONT ? f + ' (렌파이 기본)' : f) : v && 'expr' in v ? v.expr : '(gui.rpy에 없음)'}
               {sameAs && <span className="tip">{` · ${sameAs}와 같게`}</span>}
+              {v && 'group' in v && <span className="tip" title={`글꼴 묶음 ${v.group}: 영문·숫자·기호는 ${v.latin}, 나머지는 ${v.main}`}>{` + 영문 ${v.latin}`}</span>}
             </span>
             {!exists && <span className="fov-warn" title="game 폴더에 이 파일이 없어요. 게임이 켜지지 않을 수 있어요">⚠ 파일 없음</span>}
             {exists && noHangul && <span className="fov-warn" title="이 글꼴에는 한글이 거의 없어서 한글이 네모로 나와요">⚠ 한글 없음</span>}
@@ -202,6 +236,8 @@ export function FontsView() {
         </span>
         <span className="grow" />
         {rs.map((r) => <span key={r.id} className="sp-badge fov-role-tag">{r.label}</span>)}
+        {bolds[f] && <span className="sp-badge fov-role-tag" title={`굵게 쓸 때 ${bolds[f]}로 그려요`}>B 짝</span>}
+        {Object.values(bolds).some((b) => b.toLowerCase() === f.toLowerCase()) && <span className="sp-badge fov-role-tag" title="다른 글꼴의 굵은 글꼴로 쓰여요">굵게</span>}
         {l === null || (l && !l.info) ? <span className="fov-warn">못 읽음</span> : c && !c.find((x) => x.id === 'hangul')!.ok && <span className="fov-warn" title="한글이 거의 없는 글꼴이에요">한글 없음</span>}
         {l && <span className="fov-size">{mb(l.size)}</span>}
       </div>
@@ -301,6 +337,67 @@ export function FontsView() {
                 </p>
               )}
               <p className="tip">gui.rpy의 그 줄만 바꿔요. 처음 바꿀 때 예전 파일을 ui_kit_backup/gui/에 남겨요.</p>
+            </Card>
+            <Card id="fo-group" title="영문·숫자 글꼴" hint="한 자리의 글을 한글은 기본 글꼴로, 영문·숫자·기호(ASCII)는 다른 글꼴로 그려요 (렌파이 FontGroup)" topic="글꼴 관리">
+              {roles &&
+                ROLES.map((r) => {
+                  const v = roles[r.id];
+                  if (v && 'same' in v) return null;
+                  const latin = v && 'group' in v ? v.latin : '';
+                  return (
+                    <div className="fxv-row" key={r.id} title={r.tip}>
+                      <b>{r.label}</b>
+                      <select className="grow" disabled={busy || !roleFile(roles, r.id)} value={latin} onChange={(e) => putLatin(r.id, e.target.value || null)}>
+                        <option value="">(기본 글꼴 그대로)</option>
+                        {latin && !fonts.includes(latin) && <option value={latin}>{`${latin} · 파일 없음`}</option>}
+                        {fonts.map((f) => <option key={f} value={f}>{f}</option>)}
+                      </select>
+                    </div>
+                  );
+                })}
+              <p className="tip">gui.rpy에 config.font_name_map 한 줄을 적고, 그 자리 글꼴 값을 묶음 이름(pygaki_text 같은)으로 바꿔요. 대사 줄 글꼴 칸에서도 묶음 이름을 고를 수 있어요.</p>
+            </Card>
+            <Card id="fo-bold" title="굵은 글꼴" hint="{b} 태그나 [굵게]로 쓴 글을 이 파일로 그려요. 정하지 않으면 렌파이가 글자를 억지로 두껍게 그려요" topic="글꼴 관리">
+              {(() => {
+                const pairOf = Object.entries(bolds).find(([, b]) => b.toLowerCase() === sel.toLowerCase())?.[0];
+                if (pairOf) return <p className="tip">{`이 글꼴은 ${pairOf}의 굵은 글꼴로 쓰여요.`}</p>;
+                const cur = bolds[sel] ?? '';
+                const guess = !cur ? guessBold(sel, fonts) : null;
+                return (
+                  <>
+                    <div className="fxv-row">
+                      <b>굵게 쓸 파일</b>
+                      <select className="grow" disabled={busy} value={cur} onChange={(e) => putBold(sel, e.target.value || null)}>
+                        <option value="">(없음 · 렌파이가 두껍게 그림)</option>
+                        {cur && !fonts.includes(cur) && <option value={cur}>{`${cur} · 파일 없음`}</option>}
+                        {fonts.filter((f) => f !== sel).map((f) => <option key={f} value={f}>{f}</option>)}
+                      </select>
+                    </div>
+                    {cur && loaded[cur]?.info && !coverage(loaded[cur]!.info!).find((c) => c.id === 'hangul')!.ok && (
+                      <div className="fov-alert warn">⚠ 이 굵은 글꼴에는 한글이 거의 없어요. 굵게 쓴 한글이 네모로 나와요.</div>
+                    )}
+                    {guess && (
+                      <p className="tip">
+                        {`굵은 짝으로 보이는 파일이 있어요: ${guess}`} <button className="link" disabled={busy} onClick={() => putBold(sel, guess)}>짝 짓기</button>
+                      </p>
+                    )}
+                    {cur && <div className="fov-sample" style={{ fontFamily: `${fam}, var(--font)`, fontSize: Math.min(px, 32) }}><div>{text.trim() || SAMPLE}</div><div><b>{text.trim() || SAMPLE}</b></div></div>}
+                    <p className="tip">gui.rpy에 config.font_replacement_map 한 줄을 적어요. 대본·gui.rpy에 이 경로 그대로 쓴 곳에 걸려요.</p>
+                  </>
+                );
+              })()}
+            </Card>
+            <Card id="fo-shrink" title="글꼴 줄이기" hint="대본과 게임 코드에 쓴 글자만 남겨 글꼴 파일을 작게 해요. 한글 글꼴은 수 MB가 수백 KB로 줄어요" topic="글꼴 관리">
+              {shrunk && <div className="fov-alert ok">{`ℹ 줄인 글꼴이에요. 원본(${mb(shrunk.size)})은 ui_kit_backup/fonts/에 있어요.`}</div>}
+              <label className="fxv-row">
+                <input type="checkbox" checked={common} onChange={(e) => setCommon(e.target.checked)} />
+                <span>자주 쓰는 한글 2,350자도 남기기 <span className="tip">(플레이어가 이름을 칠 때 등)</span></span>
+              </label>
+              <div className="fxv-row">
+                <button disabled={busy} onClick={shrink} title="원본은 ui_kit_backup/fonts/에 남기고, 같은 파일 이름으로 줄인 글꼴을 써요">{shrunk ? '다시 줄이기' : '쓴 글자만 남기기'}</button>
+                {shrunk && <button disabled={busy} onClick={restore}>원본으로 되돌리기</button>}
+              </div>
+              <p className="tip">배포 직전에 쓰세요. 줄인 뒤 대본에 새 글자를 쓰면 게임에서 네모로 나와요(위 [들어 있는 글자]에 알림이 떠요). 다시 줄이면 원본에서 새로 만들어요. TrueType(.ttf) 글꼴만 줄일 수 있고, 영문 자간 조정(kerning)은 빠져요.</p>
             </Card>
             <Card id="fo-info" title="정보">
               <div className="fov-info">

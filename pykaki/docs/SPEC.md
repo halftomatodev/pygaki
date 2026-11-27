@@ -315,7 +315,11 @@
   - 글꼴 파일은 `fontInfo.readFontInfo`가 `name`(이름 16→1, 모양, 라이선스 13·14, 저작권 0. 한국어 → 영어 차례)과 `cmap`(형식 12 → 4)만 읽는다. `.ttc`는 첫 글꼴(렌파이와 같음). `coverage`는 영문·숫자 62자, 한글 11,172자(20% 넘으면 있음, 2,350자 글꼴 때문), 가나, 한자. `missingChars`는 `fontsLib.scriptText`(대사·선택지·물음·캐릭터 이름·화면 글, `{태그}`·`[변수]` 뺌)에서 없는 글자. 견본은 없는 글자를 □로 그린다(`Tofu`. 브라우저는 다른 글꼴로 대신 그려서 있는 것처럼 보이니까). 라이선스 글에 OFL·Apache면 배포 가능, 윈도우 글꼴 문구면 경고(`licenseKind`).
   - 넣기: [+ 글꼴 넣기] → `pickFile('font')`/`importFile(token, 'fonts')`(같은 이름이면 `_2`), 끌어다 놓기는 바이트를 `readFontInfo`로 확인한 뒤 `game/fonts/`에 바로 씀. 넣은 뒤 `scanFolder`.
   - 기본 글꼴로: `setRole` → `writeRole`이 그 `define` 줄의 값만 바꿈(뒤 주석·줄바꿈 꼴·BOM 그대로, 없으면 끝에 더함). 앱을 켠 동안 처음 바꿀 때만 `ui_kit_backup/gui/gui.날짜-시각.rpy` 백업. 뒤에 `scanFolder`(대사 미리보기 글꼴도 바뀜).
-  - 쓰인 곳(`fontUses`): 기본 글꼴 자리, 대본 줄(`say.font`, `say.name_font`, 글과 선택지의 `{font=경로}`), 게임 코드(game의 `.rpy`에서 `"경로"`를 찾음. `script_flow.rpy`·`gui.rpy`, `tl` `cache` `saves` 등 폴더, 플러그인 `editor` `engine` 폴더는 뺌). 빼기는 `game/fonts` 안에서 어디에도 안 쓰는 것만: 바이트를 `ui_kit_backup/fonts/`에 쓴 뒤 `remove`(main.cjs가 `game/fonts/**.ttf|otf|ttc`도 허락).
+  - 글꼴 고르기 칸(`FontSelect.tsx`, 세션 132): 대사 줄 글꼴·이름 글꼴 칸과 [GUI 편집] 글꼴 칸은 글 칸 대신 고르기 칸. (기본) + 게임 글꼴(한글이 거의 없으면 "한글 없음", `fontInfoOf`로 차례로 읽음) + 글꼴 묶음 이름 + 렌파이 기본 `DejaVuSans.ttf` + [직접 쓰기…](글 칸으로 바뀜, Enter·밖 누르기로 정함, Esc 취소) + 앱에서 [＋ 글꼴 넣기…](`pickFont`). 목록에 없는 값은 "파일 없음"을 붙여 그대로 보임
+  - 영문·숫자 글꼴(글꼴 묶음, `setLatin`): 자리마다 영문·숫자·기호(0x0020~0x007e)를 다른 글꼴로. `gui.rpy`에 `define config.font_name_map["pygaki_text"] = FontGroup().add("영문", 0x0020, 0x007e).add("나머지", None, None)`을 적고 그 자리 값을 이름 글자 `"pygaki_text"`로(값이 글자로 남아 플러그인 설정 등이 그대로 돎). `readGroups`는 이 꼴만 알아봄, `readRoles`는 그 이름이면 `{ group, latin, main }`, `roleFile`은 main. 묶음이 있는 자리를 [기본 글꼴로] 바꾸면 main만 바꿈. 앱 미리보기(`gameFolder.gameFont`)는 한 글꼴 이름에 latin(`unicode-range: U+20-7E`)과 main(나머지 범위)을 겹치지 않게 등록. 대사 줄 글꼴 칸에서도 묶음 이름을 고를 수 있음
+  - 굵은 글꼴(`setBold`): 글꼴마다 굵게 쓸 파일. `define config.font_replacement_map["fonts/a.ttf", True, False] = ("fonts/a-Bold.ttf", False, False)`(렌파이가 경로 글자를 그대로 비교). 우리 줄은 머리말 주석 아래에 모아 두고(`putManaged`, 다른 줄은 그대로, 다 지우면 머리말도 지움), 이름으로 짝을 짐작(`guessBold`: `-Bold`·`_B` 등). 굵은 파일에 한글이 없으면 경고. 미리보기는 같은 글꼴 이름에 `weight: bold` 면으로 등록(묶음 안 글꼴도)
+  - 글꼴 줄이기(`shrinkFont`, `src/fontSubset.ts`): TrueType(glyf) 글꼴을 라이브러리 없이 다시 씀. 남길 글자는 ASCII + `scriptText` + 게임 `.rpy` 글 + (고르면) KS X 1001 한글 2,350자(`commonHangul`, EUC-KR 표를 `TextDecoder`로 풂). 합친 모양의 부품까지 남기고 번호를 새로 매김(loca 긴 꼴, hmtx 모두 긴 꼴, cmap 형식 4 + 필요하면 12, post 3.0, 체크섬). GSUB·GPOS·kern 등 글자 번호를 쓰는 표는 버림. CFF(.otf)·가변(gvar) 글꼴은 까닭을 담아 오류. 원본은 처음 한 번 `ui_kit_backup/fonts/이름.full.확장자`에 남기고(배포판에서 빠짐) 줄일 때마다 원본에서 다시 만듦, 같은 경로에 써서 쓰는 곳은 안 고침. [원본으로 되돌리기]는 그 백업을 다시 씀
+  - 쓰인 곳(`fontUses`): 기본 글꼴 자리(묶음의 영문 글꼴 포함), 대본 줄(`say.font`, `say.name_font`, 글과 선택지의 `{font=경로}`), 게임 코드(game의 `.rpy`에서 `"경로"`를 찾음. `script_flow.rpy`·`gui.rpy`, `tl` `cache` `saves` 등 폴더, 플러그인 `editor` `engine` 폴더는 뺌). 빼기는 `game/fonts` 안에서 어디에도 안 쓰는 것만: 바이트를 `ui_kit_backup/fonts/`에 쓴 뒤 `remove`(main.cjs가 `game/fonts/**.ttf|otf|ttc`도 허락).
 - [GUI 편집] 화면 (`src/ShowpyView.tsx`, `src/showpyLive.ts`): 툴바 [대본 편집 | GUI 편집]로 바꾼다(앱에서만). 대본 화면은 숨기기만 해서 캔버스 상태가 남는다. 메인 프로세스가 `game/showpy_live.json`을 보고 그 포트로 붙어(지켜보기 + 3초마다 다시 시도) 한 줄 JSON을 `pygaki:live`로 넘기고, 화면은 `liveSend`로 명령을 보낸다(`pygaki:liveSend`). 형식은 저장소 맨 위 docs/LINK.md 9장.
   - 왼쪽: 고칠 것 목록. 타이틀 메뉴, 게임 내 메뉴(ESC)는 앱 칸이 있고, 나머지는 게임 안 편집기 탭을 패널과 함께 연다. 메뉴 바로 아래 "└ 타이틀 셰이더"(`title_fx`), "└ 게임 내 메뉴 셰이더"(`pause_fx`) (pygaki 플러그인 4.20).
   - 가운데: 지금 화면, 원고 위치, 그 앞뒤 9줄(파일이 바뀌면 다시 읽음). 줄 위의 `# @node:` 표시로 pygaki 상자를 찾아 [상자로] 버튼. [표시 숨기기](`localStorage['pygaki-hide-marks']`)는 `# @l:` `# @node:` `# @end:` 줄을 그리지 않는다(지금 줄은 그림, 줄 번호는 그대로).
@@ -347,7 +351,9 @@
 | `src/store.ts` | zustand 상태, 실행 취소, 선택, 상자 안 편집 상태 |
 | `src/showpyLive.ts`, `src/ShowpyView.tsx` | 데스크톱 앱의 [GUI 편집] 화면 (게임과 실시간 연결) |
 | `src/effectsLib.ts`, `src/EffectsView.tsx` | 효과 관리: 목록·켜고 끄기·넣기·빼기(7장), [효과] 화면(3장) |
-| `src/fontsLib.ts`, `src/fontInfo.ts`, `src/FontsView.tsx` | 글꼴 관리(9-2): 글꼴 파일 읽기(name·cmap 표), 기본 글꼴(gui.rpy), 넣기·빼기, [글꼴] 화면 |
+| `src/fontsLib.ts`, `src/fontInfo.ts`, `src/FontsView.tsx` | 글꼴 관리(9-2): 글꼴 파일 읽기(name·cmap 표), 기본 글꼴·글꼴 묶음·굵은 글꼴(gui.rpy), 넣기·빼기·줄이기, [글꼴] 화면 |
+| `src/fontSubset.ts` | 글꼴 줄이기: TrueType 글꼴에서 고른 글자만 남긴 파일 만들기 |
+| `src/FontSelect.tsx` | 글꼴 고르기 칸 (대사 줄 글꼴 칸, [GUI 편집] 글꼴 칸) |
 | `src/IconsDialog.tsx`, `src/icons/iconFiles.ts` | 아이콘 창(창 아이콘 PNG, exe 아이콘.ico 만들기) |
 | `src/MaskVideoDialog.tsx`, `src/maskVideo/` | 투명 영상 만들기(`convert.ts` 원본 열기·색 빼기·굽기, `webm.ts` webm 묶기, `MaskMovie.tsx` 두 쪽 합친 미리보기) |
 | `src/fx/TransitionCanvas.tsx` | 그림 효과(`@transition`)를 WebGL로 그리기: [효과] 화면의 샘플 |

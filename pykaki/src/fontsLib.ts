@@ -7,6 +7,7 @@ import type { Project } from './types';
 import { desktop } from './desktop';
 import { RPY_FILE, scanFolder, useGameFolder } from './gameFolder';
 import { readFontInfo, type FontInfo } from './fontInfo';
+import { commonHangul, subsetFont } from './fontSubset';
 
 export const FONT_EXT = /\.(ttf|otf|ttc)$/i; // 렌파이가 읽는 글꼴 (woff는 안 넣음)
 export const RENPY_DEFAULT_FONT = 'DejaVuSans.ttf'; // 렌파이 안에 든 기본 글꼴 (한글 없음)
@@ -21,12 +22,14 @@ export const ROLES: { id: RoleId; key: string; label: string; tip: string }[] = 
 ];
 
 // gui.rpy에 적힌 값: 글꼴 파일 / 다른 자리와 같게(gui.text_font 같은 식) / 그 밖의 식 / 줄 없음
-export type RoleValue = { file: string } | { same: RoleId } | { expr: string } | null;
+// 글꼴 묶음(group)은 config.font_name_map의 이름: 영문·숫자는 latin, 나머지는 main 글꼴로
+export type RoleValue = { file: string } | { same: RoleId } | { expr: string } | ({ group: string } & FontGroupDef) | null;
 
 const lineRe = (key: string) => new RegExp(`^(define\\s+gui\\.${key}\\s*=\\s*)([^\\r\\n#]*?)(\\s*(?:#[^\\r\\n]*)?)$`, 'm');
 
 export function readRoles(gui: string): Record<RoleId, RoleValue> {
   const out = {} as Record<RoleId, RoleValue>;
+  const groups = readGroups(gui);
   for (const r of ROLES) {
     const m = lineRe(r.key).exec(gui);
     if (!m) {
@@ -36,7 +39,8 @@ export function readRoles(gui: string): Record<RoleId, RoleValue> {
     const v = m[2].trim();
     const q = /^(?:"([^"]*)"|'([^']*)')$/.exec(v);
     const same = ROLES.find((x) => v === 'gui.' + x.key);
-    out[r.id] = q ? { file: q[1] ?? q[2] } : same ? { same: same.id } : { expr: v };
+    const name = q ? q[1] ?? q[2] : null;
+    out[r.id] = name && groups[name] ? { group: name, ...groups[name] } : name ? { file: name } : same ? { same: same.id } : { expr: v };
   }
   return out;
 }
@@ -46,6 +50,7 @@ export function roleFile(roles: Record<RoleId, RoleValue>, id: RoleId, depth = 0
   const v = roles[id];
   if (!v) return id === 'choice' && depth < 3 ? roleFile(roles, 'text', depth + 1) : null;
   if ('file' in v) return v.file;
+  if ('group' in v) return v.main;
   if ('same' in v && depth < 3) return roleFile(roles, v.same, depth + 1);
   return null;
 }
@@ -76,9 +81,111 @@ export async function readGui() {
   return (await readGame('gui.rpy')) ?? '';
 }
 export async function setRole(id: RoleId, value: string | { same: RoleId }) {
+  return changeGui((old) => {
+    const r = readRoles(old)[id];
+    if (typeof value === 'string' && r && 'group' in r) return writeGroup(old, r.group, { latin: r.latin, main: value });
+    return writeRole(old, id, value);
+  });
+}
+
+// ── 글꼴 묶음 (한글은 이 글꼴, 영문·숫자는 저 글꼴) ──
+// 렌파이 FontGroup을 이름(config.font_name_map)으로 두고, gui.rpy의 글꼴 값은 그 이름(글자)으로 둔다.
+// 그래서 gui.text_font를 글자로 다루는 코드(플러그인 설정 등)가 그대로 돈다:
+//   define config.font_name_map["pygaki_text"] = FontGroup().add("fonts/en.ttf", 0x0020, 0x007e).add("fonts/ko.ttf", None, None)
+//   define gui.text_font = "pygaki_text"
+// 이 꼴(영문 범위 0x0020~0x007e + 나머지)만 알아본다. 다른 꼴은 그 밖의 식으로 둠
+export interface FontGroupDef { latin: string; main: string }
+export const LATIN_RANGE = 'U+20-7E'; // 앱 미리보기 (CSS unicode-range)
+export const groupName = (id: RoleId) => 'pygaki_' + id;
+const groupRe = /^define\s+config\.font_name_map\[\s*"([^"]+)"\s*\]\s*=\s*FontGroup\(\)\.add\(\s*"([^"]+)"\s*,\s*0x0020\s*,\s*0x007e\s*\)\.add\(\s*"([^"]+)"\s*,\s*None\s*,\s*None\s*\)[^\r\n]*$/gm;
+export function readGroups(gui: string): Record<string, FontGroupDef> {
+  const out: Record<string, FontGroupDef> = {};
+  for (const m of gui.matchAll(groupRe)) out[m[1]] = { latin: m[2], main: m[3] };
+  return out;
+}
+export function writeGroup(gui: string, name: string, def: FontGroupDef | null): string {
+  const line = def && `define config.font_name_map[${JSON.stringify(name)}] = FontGroup().add(${JSON.stringify(def.latin)}, 0x0020, 0x007e).add(${JSON.stringify(def.main)}, None, None)`;
+  return putManaged(gui, '## pygaki [글꼴] 탭에서 정한 글꼴 묶음 (영문·숫자는 다른 글꼴)', groupRe, name, line);
+}
+// 그 자리에 영문·숫자 글꼴을 정함 (null이면 묶음을 풀고 원래 글꼴로)
+export async function setLatin(id: RoleId, latin: string | null) {
+  return changeGui((old) => {
+    const roles = readRoles(old);
+    const r = roles[id];
+    if (!latin) return r && 'group' in r ? writeRole(writeGroup(old, r.group, null), id, r.main) : old;
+    const main = roleFile(roles, id) ?? RENPY_DEFAULT_FONT;
+    const name = r && 'group' in r ? r.group : groupName(id);
+    return writeRole(writeGroup(old, name, { latin, main }), id, name);
+  });
+}
+
+// ── 굵은 글꼴 짝 ──
+// {b} 태그·굵게(bold)일 때 렌파이는 글자를 억지로 두껍게 그린다. 짝을 정하면 그 파일로 바꿔 그린다:
+//   define config.font_replacement_map["fonts/a.ttf", True, False] = ("fonts/a-Bold.ttf", False, False)
+// 렌파이는 글꼴 경로 글자를 그대로 비교하니, 대본·gui.rpy에 쓴 경로와 똑같이 적는다
+const boldRe = /^define\s+config\.font_replacement_map\[\s*(?:"([^"]+)"|'([^']+)')\s*,\s*True\s*,\s*False\s*\]\s*=\s*\(\s*(?:"([^"]+)"|'([^']+)')\s*,\s*False\s*,\s*False\s*\)[^\r\n]*$/gm;
+export function readBold(gui: string): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const m of gui.matchAll(boldRe)) out[m[1] ?? m[2]] = m[3] ?? m[4];
+  return out;
+}
+export function writeBold(gui: string, font: string, bold: string | null): string {
+  const line = bold && `define config.font_replacement_map[${JSON.stringify(font)}, True, False] = (${JSON.stringify(bold)}, False, False)`;
+  return putManaged(gui, '## pygaki [글꼴] 탭에서 정한 굵은 글꼴 ({b} 태그에 쓸 파일)', boldRe, font, line);
+}
+
+// 우리가 머리말 아래에 모아 적는 줄(re의 첫 값이 key인 줄)을 바꾸거나 더하거나 지운다. 다른 줄은 그대로
+function putManaged(gui: string, head: string, re: RegExp, key: string, line: string | null): string {
+  const nl = gui.includes('\r\n') ? '\r\n' : '\n';
+  const keyOf = (s: string) => {
+    re.lastIndex = 0;
+    const m = re.exec(s);
+    re.lastIndex = 0;
+    return m ? m[1] ?? m[2] : null;
+  };
+  let lines = gui.split(/\r?\n/);
+  const at = lines.findIndex((l) => keyOf(l) === key);
+  if (line) {
+    if (at >= 0) lines[at] = line;
+    else {
+      const h = lines.indexOf(head);
+      if (h >= 0) lines.splice(h + 1, 0, line);
+      else {
+        while (lines.length && !lines[lines.length - 1].trim()) lines.pop();
+        lines.push('', head, line, '');
+      }
+    }
+    return lines.join(nl);
+  }
+  if (at < 0) return gui;
+  lines.splice(at, 1);
+  // 우리 줄이 하나도 안 남았으면 머리말과 그 앞 빈 줄도 지움
+  if (!lines.some((l) => keyOf(l) !== null)) {
+    const h = lines.indexOf(head);
+    if (h >= 0) {
+      lines.splice(h, 1);
+      if (h > 0 && !lines[h - 1].trim() && (h >= lines.length || !lines[h]?.trim())) lines.splice(h - 1, 1);
+    }
+  }
+  lines = lines.length ? lines : [''];
+  return lines.join(nl);
+}
+export async function setBold(font: string, bold: string | null) {
+  return changeGui((old) => writeBold(old, font, bold));
+}
+// 이름만 보고 굵은 짝을 짐작: "a.ttf" → "a-Bold.ttf", "a_Bold.ttf", "aBold.ttf", "a-B.ttf"
+export function guessBold(font: string, fonts: string[]): string | null {
+  const dot = font.lastIndexOf('.');
+  const base = font.slice(0, dot).replace(/[-_ ]?(regular|r|medium|m)$/i, '').toLowerCase();
+  if (/bold|[-_ ]b$/i.test(font.slice(0, dot))) return null;
+  return fonts.find((f) => f !== font && new RegExp(`^${base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[-_ ]?(bold|b)\\.(ttf|otf|ttc)$`, 'i').test(f)) ?? null;
+}
+
+// gui.rpy를 고쳐 쓴다. 앱을 켠 동안 처음 한 번만 백업. 돌려주는 값: 백업 자리 (안 했으면 null)
+async function changeGui(edit: (old: string) => string) {
   const old = await readGame('gui.rpy');
   if (old === null) throw new Error('game/gui.rpy가 없어요');
-  const next = writeRole(old, id, value);
+  const next = edit(old);
   if (next === old) return null;
   let backup: string | null = null;
   if (!guiBackedUp) {
@@ -159,7 +266,12 @@ export async function fontUses(p: Project, path: string, roles: Record<RoleId, R
     }
     if (n) files.push({ file: f.file, n });
   }
-  return { roles: ROLES.filter((r) => { const f = roleFile(roles, r.id); return !!f && same(f, path); }).map((r) => r.id), lines: scriptUses(p, path), files };
+  const inRole = (id: RoleId) => {
+    const f = roleFile(roles, id);
+    const v = roles[id];
+    return (!!f && same(f, path)) || (!!v && 'group' in v && same(v.latin, path));
+  };
+  return { roles: ROLES.filter((r) => inRole(r.id)).map((r) => r.id), lines: scriptUses(p, path), files };
 }
 export const usedAnywhere = (u: FontUses) => u.roles.length + u.lines.length + u.files.length > 0;
 
@@ -221,3 +333,54 @@ export async function removeFont(path: string): Promise<string> {
 
 // 목록: 게임 폴더의 글꼴 (렌파이가 읽는 꼴만)
 export const gameFonts = () => useGameFolder.getState().media.fonts.filter((f) => FONT_EXT.test(f));
+
+// ── 글꼴 줄이기 (쓴 글자만 남기기) ──
+// 원본은 처음 한 번 ui_kit_backup/fonts/<이름>.full.<확장자>에 남기고(배포판에 안 들어감), 줄일 때마다 그 원본에서 다시 만든다.
+// 경로가 그대로라 쓰는 곳(gui.rpy, 대본, 글꼴 묶음)은 안 고친다. 그 뒤에 대본에 새 글자를 쓰면 네모로 나오니, 배포 직전에 씀
+export const fullBackup = (path: string) => {
+  const name = path.split('/').pop()!;
+  const ext = name.slice(name.lastIndexOf('.'));
+  return 'ui_kit_backup/fonts/' + name.slice(0, -ext.length) + '.full' + ext;
+};
+export async function shrunkFrom(path: string) {
+  return desktop!.stat(fullBackup(path));
+}
+// 남길 글자: 영문·숫자·기호(ASCII) + 대본 글 + 게임 코드(.rpy)의 글 + (고르면) 자주 쓰는 한글 2,350자
+export async function usedCodes(p: Project, common: boolean): Promise<Set<number>> {
+  const codes = new Set<number>();
+  for (let c = 0x20; c <= 0x7e; c++) codes.add(c);
+  const add = (s: string) => {
+    for (const ch of s) {
+      const c = ch.codePointAt(0)!;
+      if (c >= 0x20) codes.add(c);
+    }
+  };
+  add(scriptText(p));
+  for (const f of await codeFiles()) add(f.text);
+  if (common) {
+    for (const c of commonHangul()) codes.add(c);
+  }
+  return codes;
+}
+export async function shrinkFont(p: Project, path: string, common: boolean) {
+  const bk = fullBackup(path);
+  let src = await desktop!.read(bk);
+  const now = await desktop!.read('game/' + path);
+  if (!now) throw new Error('파일이 없어요: ' + path);
+  if (!src) src = now;
+  const r = subsetFont(src, await usedCodes(p, common)); // 못 줄이면 여기서 오류 (원본은 아직 그대로)
+  if (!(await desktop!.stat(bk))) await desktop!.write(bk, src);
+  await desktop!.write('game/' + path, r.bytes);
+  infos.delete(path);
+  await scanFolder();
+  return { full: src.length, before: now.length, after: r.bytes.length, chars: r.chars, backup: bk };
+}
+export async function restoreFont(path: string) {
+  const bk = fullBackup(path);
+  const src = await desktop!.read(bk);
+  if (!src) throw new Error('원본 백업이 없어요: ' + bk);
+  await desktop!.write('game/' + path, src);
+  infos.delete(path);
+  await scanFolder();
+  return bk;
+}

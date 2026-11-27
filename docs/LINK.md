@@ -242,7 +242,11 @@ define stage.placed = {
 | `images/`, `movies/`, `audio/` | 그림, 영상, 소리 |
 | game 폴더 바로 아래와 `fonts/`의 `.ttf` `.otf` `.ttc` | 글꼴 (대사 줄 글꼴 칸, `{font=}`, [글꼴] 화면) |
 
-대본 편집기가 게임 파일을 고치는 곳은 원고(`script_flow.rpy`, `pykaki_screens.rpy`)와 개발용 파일 말고는 하나입니다: **[글꼴] 화면의 [기본 글꼴로]**가 `gui.rpy`의 `define gui.text_font`, `gui.name_text_font`, `gui.interface_text_font`, `gui.choice_button_text_font` 줄에서 값만 바꿉니다(줄이 없으면 파일 끝에 더함, 선택지는 `gui.text_font`로 "대사와 같게"도 됨). 처음 바꾸기 전에 프로젝트 폴더의 `ui_kit_backup/gui/gui.날짜-시각.rpy`에 남깁니다. 글꼴 넣기는 `game/fonts/`에 복사, 빼기는 `game/fonts/` 안의 안 쓰는 글꼴만 `ui_kit_backup/fonts/`로 옮겨 남긴 뒤 지웁니다.
+대본 편집기가 게임 파일을 고치는 곳은 원고(`script_flow.rpy`, `pykaki_screens.rpy`)와 개발용 파일 말고는 하나입니다: **[글꼴] 화면의 [기본 글꼴로]**가 `gui.rpy`의 `define gui.text_font`, `gui.name_text_font`, `gui.interface_text_font`, `gui.choice_button_text_font` 줄에서 값만 바꿉니다(줄이 없으면 파일 끝에 더함, 선택지는 `gui.text_font`로 "대사와 같게"도 됨). 처음 바꾸기 전에 프로젝트 폴더의 `ui_kit_backup/gui/gui.날짜-시각.rpy`에 남깁니다. 같은 화면이 `gui.rpy` 끝의 머리말 주석(`## pygaki [글꼴] 탭에서 정한 …`) 아래에 두 가지 줄을 더하고 지웁니다(다른 줄은 그대로):
+- **영문·숫자 글꼴(글꼴 묶음)**: `define config.font_name_map["pygaki_text"] = FontGroup().add("영문 글꼴", 0x0020, 0x007e).add("나머지 글꼴", None, None)`을 적고 그 자리 값을 `define gui.text_font = "pygaki_text"`처럼 이름 글자로 바꿉니다(이름은 `pygaki_` + `text` `name` `interface` `choice`). 값이 글자로 남으니 `gui.text_font`를 쓰는 플러그인 설정은 그대로 돌고, 렌파이가 `config.font_name_map`으로 묶음을 찾습니다. 플러그인이 글꼴 파일이 있는지 볼 때(스플래시 검사)는 이 이름을 파일로 보지 않습니다. 대본 편집기는 이 꼴만 알아봅니다.
+- **굵은 글꼴**: `define config.font_replacement_map["fonts/a.ttf", True, False] = ("fonts/a-Bold.ttf", False, False)`. `{b}`·굵게일 때 렌파이가 그 파일로 그립니다(경로 글자가 똑같아야 걸림, 묶음 안 글꼴에도).
+
+**글꼴 줄이기**는 `game/fonts` 등의 글꼴 파일을 같은 이름의 작은 파일(쓴 글자만)로 바꿔 씁니다. 원본은 처음 한 번 `ui_kit_backup/fonts/이름.full.확장자`에 남기고 [원본으로 되돌리기]가 다시 씁니다. 글꼴 넣기는 `game/fonts/`에 복사, 빼기는 `game/fonts/` 안의 안 쓰는 글꼴만 `ui_kit_backup/fonts/`로 옮겨 남긴 뒤 지웁니다.
 
 ## 7. `game/pykaki_preview.json` (렌파이 실시간 미리보기, 없앰)
 

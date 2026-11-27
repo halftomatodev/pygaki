@@ -10,6 +10,7 @@ import { parseEffectsOff, refreshEffects, setEffectsOff } from './stage';
 import { setShaderList, setShadersOff } from './shader';
 import { codeImages, type ImageBook } from './imageCheck';
 import { SCREENS_FILE, SCREENS_META_FILE } from './screens';
+import { LATIN_RANGE, readBold, readGroups, type FontGroupDef } from './fontsLib';
 import { buildLevels, voiceFiles, VOICE_LEVELS_FILE, type LevelsFile } from './voiceLevels';
 
 export const hasDirPicker = isDesktop; // 폴더는 앱에서만 연다 (웹 버전은 2026-11-12에 없앰)
@@ -188,6 +189,8 @@ export const soundUrl = async (file: string) => (await fileUrl(file)) ?? (await 
 
 // 게임 글꼴을 브라우저에 등록하고 글꼴 이름을 돌려준다. 다 읽기 전에는 다음 글꼴로 보인다
 const families = new Map<string, string>();
+let boldOf: Record<string, string> = {}; // 글꼴 → 굵은 글꼴 파일 (gui.rpy)
+let groupsOf: Record<string, FontGroupDef> = {}; // 글꼴 묶음 이름 → 영문·나머지 글꼴 (gui.rpy)
 let familySeq = 0; // 폴더를 다시 읽어도 이름이 겹치지 않게 계속 센다
 export function gameFont(path: string | null | undefined) {
   if (!path || !dir) return undefined;
@@ -196,16 +199,29 @@ export function gameFont(path: string | null | undefined) {
     name = 'pk-game-' + familySeq++;
     families.set(path, name);
     const family = name;
-    void fileUrl(path)
-      .then(async (u) => {
-        if (!u) return;
-        const ff = new FontFace(family, `url(${u})`);
-        document.fonts.add(await ff.load());
-      })
-      .catch((e) => console.warn('글꼴을 못 읽었어요', path, e));
+    const face = (file: string, desc: FontFaceDescriptors) =>
+      void fileUrl(file)
+        .then(async (u) => {
+          if (!u) return;
+          document.fonts.add(await new FontFace(family, `url(${u})`, desc).load());
+        })
+        .catch((e) => console.warn('글꼴을 못 읽었어요', file, e));
+    // 굵은 글꼴 짝([글꼴] 탭, gui.rpy의 config.font_replacement_map): 굵게 그릴 때 그 파일로 (게임과 같게)
+    const withBold = (file: string, range?: string) => {
+      face(file, range ? { unicodeRange: range } : {});
+      if (boldOf[file]) face(boldOf[file], range ? { weight: 'bold', unicodeRange: range } : { weight: 'bold' });
+    };
+    // 글꼴 묶음(config.font_name_map): 영문·숫자는 latin, 나머지는 main. 범위가 겹치지 않게 나눠 한 이름으로
+    const g = groupsOf[path];
+    if (g) {
+      withBold(g.latin, LATIN_RANGE);
+      withBold(g.main, 'U+0-1F, U+7F-10FFFF');
+    } else withBold(path);
   }
   return name;
 }
+// 글꼴 묶음 이름들 (대사 줄 글꼴 칸에서 고를 수 있게)
+export const fontGroups = () => groupsOf;
 
 const num = (src: string, key: string, def: number) => {
   const m = new RegExp(`^define\\s+gui\\.${key}\\s*=\\s*(-?[\\d.]+)`, 'm').exec(src);
@@ -217,6 +233,8 @@ const quoted = (src: string, key: string) => new RegExp(`^define\\s+gui\\.${key}
 async function readLook(): Promise<GameLook> {
   const d = DEFAULT_LOOK;
   const gui = (await readText(dir, 'gui.rpy')) ?? '';
+  boldOf = readBold(gui);
+  groupsOf = readGroups(gui);
   const size = /gui\.init\(\s*(\d+)\s*,\s*(\d+)\s*\)/.exec(gui);
   const options = (await readText(dir, 'options.rpy')) ?? '';
   const uiKit = await sub(dir, 'ui_kit');

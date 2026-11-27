@@ -529,6 +529,7 @@ pre.rpy { background: #17191f; color: #d4d6dd; padding: 12px; border-radius: 8px
 /* 연출 줄 입력칸 */
 .sf-row { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; }
 .sf-row select { max-width: 120px; }
+.sf-row select.sf-in, .look .sf-row select.sf-in { max-width: none; flex: 1 1 120px; }
 .sf-in { flex: 1; min-width: 70px; }
 .sf-in.short { flex: 0 1 90px; }
 .sf-in.wide { flex: 1 1 140px; }
@@ -939,6 +940,7 @@ fieldset.plain:disabled { opacity: 0.4; }
 .sp-field { display: flex; flex-direction: column; gap: 2px; font-size: 11.5px; color: var(--muted); }
 .sp-field.wide { grid-column: 1 / -1; }
 .sp-field input { padding: 4px 6px; border-radius: 8px; color: var(--text); min-width: 0; }
+.sp-field select { padding: 4px 6px; border-radius: 8px; color: var(--text); min-width: 0; }
 .sp-color { flex-direction: row; align-items: flex-end; flex-wrap: wrap; }
 .sp-color > span { width: 100%; }
 .sp-color input[type='color'] { width: 36px; height: 28px; padding: 1px; }

@@ -13,6 +13,7 @@ import { MediaField, MediaGroupFields, MediaPlace } from './MediaField';
 import { uid } from './util';
 import { freeFlagName } from './flagRecipes';
 import { canInput, flagUi, uiMax, uiMin } from './flagUi';
+import { FontSelect } from './FontSelect';
 
 type SetLine = (fn: (x: Line) => void, key?: string) => void;
 
@@ -67,7 +68,6 @@ export function FxFields({ l, set, nd = '' }: { l: Line; set: SetLine; nd?: stri
 // 대사 줄의 글자 모양 칸. 위치는 showpy 편집기에서 받아 적은 값을 보여 주기만 한다
 export function SayFields({ l, set }: { l: Line; set: SetLine }) {
   const s = l.say ?? {};
-  const fonts = useGameFolder((f) => f.media.fonts);
   useGameFolder((f) => f.fxSeq); // 효과 폴더를 다시 읽으면 효과 목록도 다시 그린다
   const put = (key: keyof SayStyle, v: string | number | undefined, mergeKey?: string) =>
     set((x) => {
@@ -167,8 +167,8 @@ export function SayFields({ l, set }: { l: Line; set: SetLine }) {
       {s[key] && <button title={title + ' 지우기'} onClick={() => put(key, undefined)}>✕</button>}
     </span>
   );
-  const font = (key: 'font' | 'name_font', placeholder: string) => (
-    <input className="sf-in" list={fonts.length ? `sug-fonts-${l.id}` : undefined} placeholder={placeholder} value={s[key] ?? ''} onChange={(e) => put(key, e.target.value.trim(), key + l.id)} />
+  const font = (key: 'font' | 'name_font', title: string) => (
+    <FontSelect className="sf-in" title={title} empty={key === 'font' ? '글꼴: 기본' : '이름 글꼴: 기본'} value={s[key]} onSet={(v) => put(key, v)} />
   );
   const pos = (x: 'x' | 'name_x', y: 'y' | 'name_y', what: string) =>
     s[x] !== undefined || s[y] !== undefined ? (
@@ -208,13 +208,6 @@ export function SayFields({ l, set }: { l: Line; set: SetLine }) {
           {color('name_color', '이름 색')}
           {font('name_font', '이름 글꼴 파일')}
         </div>
-      )}
-      {fonts.length > 0 && (
-        <datalist id={`sug-fonts-${l.id}`}>
-          {fonts.map((n) => (
-            <option key={n} value={n} />
-          ))}
-        </datalist>
       )}
       {(posWhat || posName) && <div className="sf-row">{posWhat}{posName}</div>}
     </>

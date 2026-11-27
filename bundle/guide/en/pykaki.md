@@ -1,4 +1,4 @@
-<!-- 원본: pykaki/docs/GUIDE.md @ d806a33c66 -->
+<!-- 원본: pykaki/docs/GUIDE.md @ 8f0d2f3243 -->
 # pygaki user guide
 
 A tool for writing Ren'Py scripts with boxes and lines and exporting them as Ren'Py script files (`.rpy`).
@@ -528,6 +528,9 @@ Press **[Fonts]** in the toolbar to see the fonts in your game, add new ones, an
 - **Sample**: Draws your sample text (editable) plus Korean, Japanese and English lines in the chosen font. Characters missing from the font show as **□**, just like in the game.
 - **Characters included**: Shows how many Latin/digit, Hangul, kana and kanji characters the font has, and **which characters used in your script are missing from this font**. Ren'Py draws missing characters as boxes, so use another font or change those characters.
 - **Info and license**: Shows the file size and the license text inside the font. It tells you that SIL Open Font License (OFL) fonts may ship with your game and that fonts that come with Windows may not. Always check the license before you release.
+- **Latin & digits font**: For dialogue, names, menus and choices you can draw Hangul with the default font and Latin letters, digits and symbols with another font. Pick a font for each place in the **[Latin & digits font]** card. One Ren'Py font group (FontGroup) line goes into `gui.rpy`, and that place's font setting becomes a group name like `pygaki_text`. You can pick the group name in a dialogue line's font field too.
+- **Bold font**: Sets the file used to draw text in `{b}` tags or set to bold. Without it, Ren'Py artificially thickens the glyphs. If a file looks like the bold pair by name (like `Galmuri11-Bold.ttf`), **[Pair them]** appears. You're warned if the bold file has no Hangul (bold Hangul would show as boxes).
+- **Shrink font**: **[Keep only used characters]** keeps only the characters used in the script and game code (plus Latin letters and digits) to make the font file smaller. A Hangul font goes from several MB to a few hundred KB. Leave **Also keep the 2,350 common Hangul syllables** on to stay safe when the player types a name. The original stays in `ui_kit_backup/fonts/` (it isn't included in the release build) and **[Restore original]** brings it back. New characters written after shrinking show as boxes in the game, so use this **right before release** (shrinking again rebuilds from the original). Only TrueType (.ttf) fonts can be shrunk.
 - **Used in, and removing**: Lists the default-font places, script lines ([Show] takes you to the box) and game code files that use the font. Only fonts in `game/fonts` that aren't used anywhere can be removed with **[Remove font]**; the file is kept in `ui_kit_backup/fonts/`.
 
 ## 7-3. Making transparent videos (app)

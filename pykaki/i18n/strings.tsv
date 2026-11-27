@@ -3084,3 +3084,56 @@ ${n}: 처음 한 번 틀고 그 뒤로 ${n}_loop를 반복해요 (렌파이 8.6�
 말줄임표 시간 (초)	三点リーダーの時間 (秒)	Typing dots time (s)
 점이 튀는 시간 (초)	点が跳ねる時間 (秒)	Dot bounce time (s)
 쪽 (0 받은 쪽 왼쪽, 1 보낸 쪽 오른쪽)	側 (0 受信側・左、1 送信側・右)	Side (0 received, left; 1 sent, right)
+굵게	太字	Bold
+B 짝	B ペア	B pair
+짝 짓기	ペアにする	Pair them
+굵은 글꼴	太字フォント	Bold font
+글꼴 줄이기	フォントを小さく	Shrink font
+글꼴: 기본	フォント: 標準	Font: default
+이름 글꼴: 기본	名前フォント: 標準	Name font: default
+다시 줄이기	もう一度小さく	Shrink again
+직접 쓰기…	直接入力…	Type a path…
+(기본 글꼴)	(標準フォント)	(Default font)
+굵게 쓸 파일	太字に使うファイル	File for bold
+＋ 글꼴 넣기…	＋ フォントを追加…	＋ Add font…
+영문·숫자 글꼴	英数字フォント	Latin & digits font
+쓴 글자만 남기기	使った文字だけ残す	Keep only used characters
+원본으로 되돌리기	元に戻す	Restore original
+(기본 글꼴 그대로)	(標準フォントのまま)	(Same as default font)
+원본 백업이 없어요:	元のバックアップがありません:	No original backup:
+${f} · 한글 없음	{0} · ハングルなし	{0} · no Hangul
+${cur} · 파일 없음	{0} · ファイルなし	{0} · file missing
+${latin} · 파일 없음	{0} · ファイルなし	{0} · file missing
++ 영문 ${v.latin}	+ 英数字 {0}	+ Latin {0}
+가변 글꼴이라 줄이지 못해요	可変フォントなので小さくできません	Can't shrink a variable font
+(플레이어가 이름을 칠 때 등)	(プレイヤーが名前を入力するときなど)	(for when the player types a name, etc.)
+다른 글꼴의 굵은 글꼴로 쓰여요	ほかのフォントの太字として使われています	Used as the bold of another font
+(없음 · 렌파이가 두껍게 그림)	(なし · Ren'Py が太く描く)	(None · Ren'Py thickens the glyphs)
+글자가 너무 많아서 줄이지 못해요	文字が多すぎて小さくできません	Too many characters to shrink
+자주 쓰는 한글 2,350자도 남기기	よく使うハングル 2,350字も残す	Also keep the 2,350 common Hangul syllables
+${font}의 굵은 글꼴 짝을 지웠어요 (game/gui.rpy). 켜 둔 게임은 Shift+R로 다시 읽어요	{0} の太字ペアを消しました (game/gui.rpy)。起動中のゲームは Shift+R で再読み込みします	Removed the bold pair of {0} (game/gui.rpy). Press Shift+R in a running game to reload
+${font}을 굵게 쓸 때 ${bold}로 그려요 (game/gui.rpy). 켜 둔 게임은 Shift+R로 다시 읽어요	{0} を太字にするときは {1} で描きます (game/gui.rpy)。起動中のゲームは Shift+R で再読み込みします	Bold {0} is now drawn with {1} (game/gui.rpy). Press Shift+R in a running game to reload
+${r.label} 글의 영문 글꼴 묶음을 풀었어요 (game/gui.rpy). 켜 둔 게임은 Shift+R로 다시 읽어요	{0}の英数字フォントのグループを解除しました (game/gui.rpy)。起動中のゲームは Shift+R で再読み込みします	Removed the Latin font group for {0} (game/gui.rpy). Press Shift+R in a running game to reload
+${r.label} 글의 영문·숫자를 ${latin}로 그려요 (game/gui.rpy). 켜 둔 게임은 Shift+R로 다시 읽어요	{0}の英数字を {1} で描きます (game/gui.rpy)。起動中のゲームは Shift+R で再読み込みします	{0} text now draws Latin letters and digits with {1} (game/gui.rpy). Press Shift+R in a running game to reload
+원본 글꼴로 되돌렸어요 (${at}에서)	元のフォントに戻しました ({0} から)	Restored the original font (from {0})
+굵게 쓸 때 ${bolds[f]}로 그려요	太字のときは {0} で描きます	Bold is drawn with {0}
+글꼴에 ${t} 표가 없어서 줄이지 못해요	フォントに {0} テーブルがないので小さくできません	Can't shrink: the font has no {0} table
+TrueType 글꼴이 아니라서 줄이지 못해요	TrueType フォントではないので小さくできません	Can't shrink: not a TrueType font
+굵은 짝으로 보이는 파일이 있어요: ${guess}	太字ペアらしいファイルがあります: {0}	Found what looks like the bold pair: {0}
+유니코드 글자 표(cmap)가 없어서 줄이지 못해요	Unicode の文字表 (cmap) がないので小さくできません	Can't shrink: no Unicode character map (cmap)
+이 글꼴은 ${pairOf}의 굵은 글꼴로 쓰여요.	このフォントは {0} の太字として使われています。	This font is used as the bold of {0}.
+${RENPY_DEFAULT_FONT} · 렌파이 기본 · 한글 없음	{0} · Ren'Py 標準 · ハングルなし	{0} · Ren'Py default · no Hangul
+${n} · 글꼴 묶음 (${g.main} + 영문 ${g.latin})	{0} · フォントグループ ({1} + 英数字 {2})	{0} · font group ({1} + Latin {2})
+⚠ 이 굵은 글꼴에는 한글이 거의 없어요. 굵게 쓴 한글이 네모로 나와요.	⚠ この太字フォントにはハングルがほとんどありません。太字のハングルが四角になります。	⚠ This bold font has almost no Hangul. Bold Hangul will show as boxes.
+CFF 외곽선 글꼴(.otf)이라 줄이지 못해요. TrueType(.ttf) 판을 쓰세요	CFF アウトラインのフォント (.otf) なので小さくできません。TrueType (.ttf) 版を使ってください	Can't shrink a CFF-outline font (.otf). Use the TrueType (.ttf) version
+원본은 ui_kit_backup/fonts/에 남기고, 같은 파일 이름으로 줄인 글꼴을 써요	元は ui_kit_backup/fonts/ に残し、同じファイル名で小さくしたフォントを使います	Keeps the original in ui_kit_backup/fonts/ and uses the shrunk font under the same file name
+글꼴 묶음 ${v.group}: 영문·숫자·기호는 ${v.latin}, 나머지는 ${v.main}	フォントグループ {0}: 英数字・記号は {1}、ほかは {2}	Font group {0}: Latin letters, digits and symbols use {1}, everything else {2}
+대본과 게임 코드에 쓴 글자만 남겨 글꼴 파일을 작게 해요. 한글 글꼴은 수 MB가 수백 KB로 줄어요	台本とゲームコードで使った文字だけを残してフォントファイルを小さくします。ハングルフォントは数 MB が数百 KB になります	Keeps only the characters used in the script and game code to make the font file smaller. A Hangul font goes from several MB to a few hundred KB
+{b} 태그나 [굵게]로 쓴 글을 이 파일로 그려요. 정하지 않으면 렌파이가 글자를 억지로 두껍게 그려요	{b} タグや [太字] の文字をこのファイルで描きます。決めないと Ren'Py が文字を無理に太く描きます	Text in {b} tags or set to bold is drawn with this file. Otherwise Ren'Py artificially thickens the glyphs
+ℹ 줄인 글꼴이에요. 원본(${mb(shrunk.size)})은 ui_kit_backup/fonts/에 있어요.	ℹ 小さくしたフォントです。元 ({0}) は ui_kit_backup/fonts/ にあります。	ℹ This is a shrunk font. The original ({0}) is in ui_kit_backup/fonts/.
+한 자리의 글을 한글은 기본 글꼴로, 영문·숫자·기호(ASCII)는 다른 글꼴로 그려요 (렌파이 FontGroup)	ハングルは標準フォント、英数字・記号 (ASCII) は別のフォントで描きます (Ren'Py FontGroup)	Draws Hangul with the default font and Latin letters, digits and symbols (ASCII) with another font (Ren'Py FontGroup)
+gui.rpy에 config.font_replacement_map 한 줄을 적어요. 대본·gui.rpy에 이 경로 그대로 쓴 곳에 걸려요.	gui.rpy に config.font_replacement_map を 1 行書きます。台本・gui.rpy でこのパスをそのまま使った所に効きます。	Writes one config.font_replacement_map line to gui.rpy. It applies wherever the script or gui.rpy uses this exact path.
+글꼴을 줄였어요: ${mb(r.before)} → ${mb(r.after)} (글자 ${r.chars.toLocaleString()}자) · 원본은 ${r.backup}	フォントを小さくしました: {0} → {1} ({2} 文字) · 元は {3}	Shrunk the font: {0} → {1} ({2} characters) · original at {3}
+gui.rpy에 config.font_name_map 한 줄을 적고, 그 자리 글꼴 값을 묶음 이름(pygaki_text 같은)으로 바꿔요. 대사 줄 글꼴 칸에서도 묶음 이름을 고를 수 있어요.	gui.rpy に config.font_name_map を 1 行書き、その欄のフォントの値をグループ名 (pygaki_text など) に変えます。セリフ行のフォント欄でもグループ名を選べます。	Writes one config.font_name_map line to gui.rpy and changes that font setting to the group name (like pygaki_text). You can also pick the group name in a dialogue line's font field.
+${sel}에서 대본과 게임 코드에 쓴 글자만 남길까요?\n원본은 ui_kit_backup/fonts/에 남겨 두고 언제든 되돌릴 수 있어요.\n줄인 뒤 대본에 새 글자를 쓰면 게임에서 네모로 나와요. 배포 직전에 쓰세요.	{0} を台本とゲームコードで使った文字だけにしますか?\n元は ui_kit_backup/fonts/ に残すので、いつでも戻せます。\n小さくした後に台本へ新しい文字を書くと、ゲームで四角になります。配布の直前に使ってください。	Keep only the characters used in the script and game code in {0}?\nThe original stays in ui_kit_backup/fonts/ so you can restore it any time.\nNew characters written after shrinking will show as boxes in the game. Use this right before release.
+배포 직전에 쓰세요. 줄인 뒤 대본에 새 글자를 쓰면 게임에서 네모로 나와요(위 [들어 있는 글자]에 알림이 떠요). 다시 줄이면 원본에서 새로 만들어요. TrueType(.ttf) 글꼴만 줄일 수 있고, 영문 자간 조정(kerning)은 빠져요.	配布の直前に使ってください。小さくした後に台本へ新しい文字を書くと、ゲームで四角になります (上の [収録文字] に通知が出ます)。もう一度小さくすると元から作り直します。TrueType (.ttf) フォントだけが対象で、英字のカーニングは外れます。	Use this right before release. New characters written after shrinking show as boxes in the game (a notice appears under [Characters included] above). Shrinking again rebuilds from the original. Only TrueType (.ttf) fonts can be shrunk, and Latin kerning is dropped.

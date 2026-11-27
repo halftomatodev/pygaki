@@ -937,6 +937,12 @@ label map_cafe:
 </li>
 <li><b>Info and license</b>: Shows the file size and the license text inside the font. It tells you that SIL Open Font License (OFL) fonts may ship with your game and that fonts that come with Windows may not. Always check the license before you release.
 </li>
+<li><b>Latin &amp; digits font</b>: For dialogue, names, menus and choices you can draw Hangul with the default font and Latin letters, digits and symbols with another font. Pick a font for each place in the <b>[Latin &amp; digits font]</b> card. One Ren'Py font group (FontGroup) line goes into <code>gui.rpy</code>, and that place's font setting becomes a group name like <code>pygaki_text</code>. You can pick the group name in a dialogue line's font field too.
+</li>
+<li><b>Bold font</b>: Sets the file used to draw text in <code>{b}</code> tags or set to bold. Without it, Ren'Py artificially thickens the glyphs. If a file looks like the bold pair by name (like <code>Galmuri11-Bold.ttf</code>), <b>[Pair them]</b> appears. You're warned if the bold file has no Hangul (bold Hangul would show as boxes).
+</li>
+<li><b>Shrink font</b>: <b>[Keep only used characters]</b> keeps only the characters used in the script and game code (plus Latin letters and digits) to make the font file smaller. A Hangul font goes from several MB to a few hundred KB. Leave <b>Also keep the 2,350 common Hangul syllables</b> on to stay safe when the player types a name. The original stays in <code>ui_kit_backup/fonts/</code> (it isn't included in the release build) and <b>[Restore original]</b> brings it back. New characters written after shrinking show as boxes in the game, so use this <b>right before release</b> (shrinking again rebuilds from the original). Only TrueType (.ttf) fonts can be shrunk.
+</li>
 <li><b>Used in, and removing</b>: Lists the default-font places, script lines ([Show] takes you to the box) and game code files that use the font. Only fonts in <code>game/fonts</code> that aren't used anywhere can be removed with <b>[Remove font]</b>; the file is kept in <code>ui_kit_backup/fonts/</code>.
 </li></ul>
 </div>

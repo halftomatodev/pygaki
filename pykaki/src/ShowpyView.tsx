@@ -11,6 +11,7 @@ import { useStore } from './store';
 import { CustomUIPanel } from './ShowpyCustomUI';
 import { MirrorPanel } from './ShowpyMirror';
 import { Card } from './Card';
+import { FontSelect } from './FontSelect';
 
 interface Section {
   id: string;
@@ -679,7 +680,10 @@ function TitleFields({ t, it }: { t: TitleState; it: TitleItem }) {
       <Num label="확대" value={val('zoom')} step={0.05} round={r2} onSet={(v) => set(k('zoom'), Math.max(0.05, v))} />
       <Num label="글자 크기" value={val('size')} onSet={(v) => set(k('size'), Math.max(4, Math.round(v)))} />
       <ColorField label="색" value={val('color')} onSet={(v) => set(k('color'), v)} />
-      <TextField label="글꼴" value={val('font')} placeholder="fonts/내글꼴.ttf" onSet={(v) => set(k('font'), v || null)} />
+      <label className="sp-field wide">
+        <span>글꼴</span>
+        <FontSelect value={typeof val('font') === 'string' ? val('font') : undefined} onSet={(v) => set(k('font'), v ?? null)} />
+      </label>
       {t.effects && (
         <label className="sp-field wide" data-f="text_effect">
           <span>글자 효과</span>
