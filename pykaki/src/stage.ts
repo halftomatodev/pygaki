@@ -71,6 +71,12 @@ export const isMovieFile = (p?: string) => !!p && /\.(webm|ogv|mp4|mkv|avi|mpe?g
 export const isMaskName = (p?: string) => isMovieFile(p) && /(^|\/)mask_[^/]*$/i.test(p!);
 // 그 영상을 투명 영상으로 쓸지: 적은 값이 있으면 그 값, 없으면 이름으로
 export const mediaMasked = (p?: string, mask?: boolean) => isMovieFile(p) && (mask ?? isMaskName(p));
+// 선택지 뒤 영상들 (FEATURE 38): 영상이 있는지, 이름으로만 보면 다 투명 영상인지 (체크 칸의 기본값)
+export const choiceMovies = (m?: { idle?: string; hover?: string; select?: string }) => (m ? [m.idle, m.hover, m.select].filter(isMovieFile) : []);
+export const choiceMaskByName = (m?: { idle?: string; hover?: string; select?: string }) => {
+  const v = choiceMovies(m);
+  return v.length > 0 && v.every(isMaskName);
+};
 export const TAILS: [string, string][] = [['', '꼬리 기본'], ['bottom', '꼬리 아래'], ['top', '꼬리 위'], ['left', '꼬리 왼쪽'], ['right', '꼬리 오른쪽'], ['none', '꼬리 없음']];
 // 상자마다 꼬리 기본 (showpy say_style.box_styles 기본값과 같게)
 export const boxTail = (s?: SayStyle) => (s?.box ? s.tail || (s.box === 'bubble' ? 'bottom' : 'none') : 'none');

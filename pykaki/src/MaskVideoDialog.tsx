@@ -8,7 +8,7 @@ import { desktop } from './desktop';
 import { scanFolder } from './gameFolder';
 import { useStore } from './store';
 import {
-  animType, composeFrame, countAt, encodeSupported, isImageName, isVideoName, makeCanvases, makeMaskWebm, MaskError, naturalSort, openSource, outSize,
+  animType, audioSupported, composeFrame, countAt, cutRange, encodeSupported, isImageName, isVideoName, makeCanvases, makeMaskWebm, MaskError, naturalSort, openSource, outSize,
   type Canvases, type FrameFile, type Look, type Opened, type Source,
 } from './maskVideo/convert';
 import { MaskMovie } from './maskVideo/MaskMovie';
@@ -18,8 +18,18 @@ export const useMaskDialog = create<{ open: boolean; onDone?: (rel: string) => v
 export const openMaskDialog = (onDone?: (rel: string) => void, doneLabel?: string) => useMaskDialog.setState({ open: true, onDone, doneLabel });
 
 const SIZES: [number, string][] = [[0, '원본 크기'], [1080, '높이 1080'], [720, '높이 720'], [540, '높이 540'], [360, '높이 360']];
-const DEFAULT_LOOK: Look = { mode: 'alpha', key: [0, 200, 60], tol: 0.18, soft: 0.1, despill: true, height: 0, fps: 30 };
+const DEFAULT_LOOK: Look = { mode: 'alpha', key: [0, 200, 60], tol: 0.18, soft: 0.1, despill: true, height: 0, fps: 30, first: 0, last: -1, sound: true };
 const PREVIEW_W = 420;
+const CMP_SECS = 2; // 크기 견본은 앞 2초만 구워서 파일 크기를 어림함
+
+interface Sample {
+  height: number; // SIZES 값 (0은 원본)
+  label: string;
+  w: number;
+  h: number;
+  url?: string;
+  est?: number; // 다 만들 때의 파일 크기 어림 (바이트)
+}
 
 const hex = (c: [number, number, number]) => '#' + c.map((v) => v.toString(16).padStart(2, '0')).join('');
 const unhex = (s: string): [number, number, number] => [1, 3, 5].map((i) => parseInt(s.slice(i, i + 2), 16)) as [number, number, number];
@@ -67,11 +77,13 @@ function Dialog({ onDone, doneLabel }: { onDone?: (rel: string) => void; doneLab
   const [look, setLook] = useState<Look>(DEFAULT_LOOK);
   const [name, setName] = useState('');
   const [frame, setFrame] = useState(0);
-  const [busy, setBusy] = useState<'' | 'open' | 'make'>('');
+  const [busy, setBusy] = useState<'' | 'open' | 'make' | 'cmp'>('');
+  const [samples, setSamples] = useState<Sample[] | null>(null);
   const [err, setErr] = useState('');
   const [prog, setProg] = useState({ done: 0, count: 0 });
   const [result, setResult] = useState<{ rel: string; url: string; size: number } | null>(null);
   const [drag, setDrag] = useState(false);
+  const [canSound, setCanSound] = useState(true);
   const preview = useRef<HTMLCanvasElement>(null);
   const strip = useRef<HTMLCanvasElement>(null);
   const cancel = useRef(false);
@@ -80,12 +92,19 @@ function Dialog({ onDone, doneLabel }: { onDone?: (rel: string) => void; doneLab
   opRef.current = op;
 
   const close = () => {
-    if (busy === 'make') return;
+    if (busy === 'make' || busy === 'cmp') return;
     useMaskDialog.setState({ open: false, onDone: undefined });
     setTimeout(() => opener.current?.focus?.());
   };
   useEffect(() => () => opRef.current?.close(), []);
   useEffect(() => () => void (result && URL.revokeObjectURL(result.url)), [result]);
+  // 견본 영상 주소는 다음 비교나 창을 닫을 때 한꺼번에 풂 (견본이 하나씩 늘 때마다 풀면 앞 견본이 사라짐)
+  const sampleUrls = useRef<string[]>([]);
+  const dropSamples = () => {
+    sampleUrls.current.forEach((u) => URL.revokeObjectURL(u));
+    sampleUrls.current = [];
+  };
+  useEffect(() => dropSamples, []);
   useEffect(() => {
     const key = (e: KeyboardEvent) => e.key === 'Escape' && (e.stopPropagation(), close());
     window.addEventListener('keydown', key, true);
@@ -100,7 +119,9 @@ function Dialog({ onDone, doneLabel }: { onDone?: (rel: string) => void; doneLab
     try {
       const src = await toSource(files);
       const o = await openSource(src, look.fps);
+      await idle();
       op?.close();
+      setSamples(null);
       setOp(o);
       setFrame(Math.floor(o.count / 2));
       const frames = src.kind === 'frames';
@@ -108,7 +129,8 @@ function Dialog({ onDone, doneLabel }: { onDone?: (rel: string) => void; doneLab
       setName(baseName(src.name, frames));
       // 투명한 곳이 없고 가장자리에 고른 색이 깔렸으면 색 빼기로
       const keyMode = !o.hasAlpha && !!o.edgeColor;
-      setLook((l) => ({ ...l, mode: o.hasAlpha ? 'alpha' : keyMode ? 'key' : l.mode, key: o.edgeColor ?? l.key, fps: frames ? l.fps : o.fps }));
+      setLook((l) => ({ ...l, mode: o.hasAlpha ? 'alpha' : keyMode ? 'key' : l.mode, key: o.edgeColor ?? l.key, fps: frames ? l.fps : o.fps, first: 0, last: -1 }));
+      if (o.audio) setCanSound(await audioSupported(Math.min(2, o.audio.numberOfChannels)));
       const total = files.reduce((a, f) => a + f.size, 0);
       setSrcInfo(`${frames ? `그림 ${files.length}장` : files[0].name} · ${o.width}×${o.height} · ${mb(total)}`);
     } catch (e: any) {
@@ -150,26 +172,40 @@ function Dialog({ onDone, doneLabel }: { onDone?: (rel: string) => void; doneLab
       s.getContext('2d')!.drawImage(cv.out, 0, 0, w, h);
     }
   };
+  // 그리는 동안 바뀐 값은 latest에만 두고, 다 그린 뒤 마지막 값으로 한 번 더 그린다.
+  // (세션 131: 예전에는 그리는 중에 바뀌면 옛 값으로 끝없이 다시 그려서, 막대를 끌면 영상 찾기가 겹쳐 앱 창이 죽었음)
+  const latest = useRef<{ id: number; op: Opened; look: Look; frame: number } | null>(null);
   useEffect(() => {
-    if (!op || busy) return;
-    const id = ++want.current;
-    const run = async () => {
-      if (drawing.current) return;
-      drawing.current = true;
+    if (!op || busy) {
+      latest.current = null; // 만드는 동안은 미리보기를 멈춤 (같은 영상을 찾아가니까)
+      return;
+    }
+    latest.current = { id: ++want.current, op, look, frame };
+    if (drawing.current) return;
+    drawing.current = true;
+    void (async () => {
+      let done = 0;
       try {
-        const { w, h } = outSize(op, Math.round((op.height * Math.min(PREVIEW_W, op.width)) / op.width));
-        if (!pcv.current || pcv.current.w !== w || pcv.current.h !== h) pcv.current = makeCanvases(w, h);
-        await composeFrame(op, Math.min(frame, countAt(op, look.fps) - 1), look, pcv.current);
-        paint(pcv.current);
+        while (latest.current && latest.current.id !== done) {
+          const q = latest.current;
+          done = q.id;
+          const { w, h } = outSize(q.op, Math.round((q.op.height * Math.min(PREVIEW_W, q.op.width)) / q.op.width));
+          if (!pcv.current || pcv.current.w !== w || pcv.current.h !== h) pcv.current = makeCanvases(w, h);
+          await composeFrame(q.op, Math.min(q.frame, countAt(q.op, q.look.fps) - 1), q.look, pcv.current);
+          if (latest.current?.op === q.op) paint(pcv.current);
+        }
       } catch (e: any) {
         setErr(e?.message ?? String(e));
       } finally {
         drawing.current = false;
       }
-      if (id !== want.current) void run(); // 그리는 동안 바뀐 값이 있으면 한 번 더
-    };
-    void run();
+    })();
   }, [op, look, frame, busy]);
+  // 만들기·견본 굽기 전에 그리던 미리보기가 끝나기를 기다림
+  const idle = async () => {
+    latest.current = null;
+    while (drawing.current) await new Promise((r) => setTimeout(r, 10));
+  };
 
   const rel = `movies/mask_${name || 'movie'}.webm`;
   const make = async () => {
@@ -182,10 +218,12 @@ function Dialog({ onDone, doneLabel }: { onDone?: (rel: string) => void; doneLab
     }
     cancel.current = false;
     setBusy('make');
-    setProg({ done: 0, count: countAt(op, look.fps) });
+    await idle();
+    const [a, b] = cutRange(op, look);
+    setProg({ done: 0, count: b - a + 1 });
     try {
       let n = 0;
-      const bytes = await makeMaskWebm(op, look, (p, cv) => {
+      const bytes = await makeMaskWebm(op, { ...look, sound: look.sound && canSound }, (p, cv) => {
         setProg(p);
         if (n++ % 4 === 0) paint(cv);
       }, () => cancel.current);
@@ -200,10 +238,57 @@ function Dialog({ onDone, doneLabel }: { onDone?: (rel: string) => void; doneLab
     }
   };
 
-  const set = (p: Partial<Look>) => setLook((l) => ({ ...l, ...p }));
+  // 크기 견본 비교: 크기마다 자른 구간의 앞 몇 초를 구워 보고, 그 크기로 전부 만들 때의 파일 크기를 어림한다
+  const compare = async () => {
+    if (!op) return;
+    const [a, b] = cutRange(op, look);
+    const n = Math.min(b - a + 1, Math.max(1, Math.round(CMP_SECS * look.fps)));
+    dropSamples();
+    const list: Sample[] = SIZES.filter(([h]) => !h || h < op.height).map(([h, t]) => ({ height: h, label: t, ...outSize(op, h) }));
+    setSamples(list);
+    setErr('');
+    cancel.current = false;
+    setBusy('cmp');
+    await idle();
+    setProg({ done: 0, count: n * list.length });
+    const secs = (b - a + 1) / look.fps;
+    try {
+      for (let k = 0; k < list.length; k++) {
+        const bytes = await makeMaskWebm(op, { ...look, height: list[k].height, sound: false, first: a, last: a + n - 1 }, (p) => setProg({ done: k * n + p.done, count: n * list.length }), () => cancel.current);
+        // 소리는 128kbps 어림
+        const est = bytes.length * ((b - a + 1) / n) + (look.sound && canSound && op.audio ? (128000 / 8) * secs : 0);
+        const url = URL.createObjectURL(new Blob([bytes], { type: 'video/webm' }));
+        sampleUrls.current.push(url);
+        list[k] = { ...list[k], url, est };
+        setSamples([...list]);
+      }
+    } catch (e: any) {
+      if (!cancel.current) setErr(e instanceof MaskError ? e.message : '견본을 만들지 못했어요: ' + (e?.message ?? e));
+      else setSamples(null);
+    } finally {
+      setBusy('');
+    }
+  };
+
+  // 영상은 1초 장 수를 바꾸면 자른 자리(프레임 번호)도 같은 때로 옮김
+  const set = (p: Partial<Look>) =>
+    setLook((l) => {
+      const n = { ...l, ...p };
+      if (p.fps && p.fps !== l.fps && op?.durationMs) {
+        const k = p.fps / l.fps;
+        n.first = Math.round(l.first * k);
+        n.last = l.last < 0 ? -1 : Math.round(l.last * k);
+        setFrame((f) => Math.round(f * k));
+      }
+      return n;
+    });
   const out = op ? outSize(op, look.height) : null;
   const count = op ? countAt(op, look.fps) : 0;
-  const secs = op ? (count / (look.fps || op.fps)).toFixed(1) : '';
+  const [cutA, cutB] = op ? cutRange(op, look) : [0, 0];
+  const cut = cutA > 0 || cutB < count - 1;
+  const fr = Math.min(frame, count - 1);
+  const secs = op ? ((cutB - cutA + 1) / (look.fps || op.fps)).toFixed(1) : '';
+  const at = (i: number) => (op?.durationMs || kind === 'frames' ? `${(i / look.fps).toFixed(2)}초` : `${i + 1}장`);
 
   return (
     <div className="modal-bg" onMouseDown={(e) => e.target === e.currentTarget && close()}>
@@ -229,8 +314,17 @@ function Dialog({ onDone, doneLabel }: { onDone?: (rel: string) => void; doneLab
                 <canvas ref={preview} />
               </div>
               <div className="mask-scrub">
-                <input type="range" min={0} max={count - 1} value={Math.min(frame, count - 1)} disabled={!!busy} onChange={(e) => setFrame(Number(e.target.value))} title="미리 볼 프레임" />
-                <span className="mask-num">{`${Math.min(frame, count - 1) + 1} / ${count}`}</span>
+                <div className="mask-range">
+                  <input type="range" min={0} max={count - 1} value={fr} disabled={!!busy} onChange={(e) => setFrame(Number(e.target.value))} title="미리 볼 프레임" />
+                  {count > 1 && <div className="mask-cut" style={{ left: `${(cutA / (count - 1)) * 100}%`, right: `${100 - (cutB / (count - 1)) * 100}%` }} />}
+                </div>
+                <span className="mask-num">{`${fr + 1} / ${count}`}</span>
+              </div>
+              <div className="mask-trim" title="만들 구간: 위 막대로 자리를 고르고 눌러요. 쓰지 않는 앞뒤를 잘라 내요">
+                <button disabled={!!busy || fr > cutB} onClick={() => set({ first: fr })}>⇤ 여기부터</button>
+                <button disabled={!!busy || fr < cutA} onClick={() => set({ last: fr })}>여기까지 ⇥</button>
+                <span className="mask-dim">{cut ? `${at(cutA)} ~ ${at(cutB)}` : '처음부터 끝까지'}</span>
+                {cut && <button disabled={!!busy} onClick={() => set({ first: 0, last: -1 })} title="자르지 않고 다 써요">자르기 없애기</button>}
               </div>
               <div className="mask-strip" title="실제로 저장되는 꼴: 왼쪽 색, 오른쪽 투명도(흰색이 보이는 곳)">
                 <canvas ref={strip} />
@@ -301,6 +395,7 @@ function Dialog({ onDone, doneLabel }: { onDone?: (rel: string) => void; doneLab
                   </select>
                   {out && <span className="mask-dim">{`${out.w}×${out.h}, 파일은 ${out.w * 2}×${out.h}`}</span>}
                 </div>
+                <button className="mask-cmp-btn" disabled={!!busy} onClick={() => void compare()} title={`크기마다 앞 ${CMP_SECS}초를 구워서 화질과 파일 크기를 나란히 보여 줘요`}>크기 견본 비교…</button>
               </div>
 
               <div className="mask-field">
@@ -311,6 +406,16 @@ function Dialog({ onDone, doneLabel }: { onDone?: (rel: string) => void; doneLab
                 </div>
               </div>
 
+              {op.audio && (
+                <div className="mask-field">
+                  <label>소리</label>
+                  <label className="mask-check" title="원본 영상의 소리를 같이 넣어요. 렌파이에서 영상이 보일 때 같이 나요">
+                    <input type="checkbox" checked={look.sound && canSound} disabled={!!busy || !canSound} onChange={(e) => set({ sound: e.target.checked })} />
+                    {canSound ? `소리 넣기 (${op.audio.numberOfChannels > 1 ? '스테레오' : '모노'})` : '이 앱에서는 소리를 넣지 못해요'}
+                  </label>
+                </div>
+              )}
+
               <div className="mask-field">
                 <label>저장할 이름</label>
                 <div className="mask-row mask-name">
@@ -320,6 +425,37 @@ function Dialog({ onDone, doneLabel }: { onDone?: (rel: string) => void; doneLab
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {op && samples && (
+          <div className="mask-cmp">
+            <div className="mask-cmp-head">
+              <b>크기 견본</b>
+              <span className="mask-dim">{`앞 ${CMP_SECS}초로 어림한 파일 크기${look.sound && canSound && op.audio ? ' (소리 포함)' : ''}. 눌러서 고르면 그 크기로 만들어요`}</span>
+              <span className="sp" />
+              <button className="mask-x" title="견본 닫기" disabled={busy === 'cmp'} onClick={() => setSamples(null)}>✕</button>
+            </div>
+            <div className="mask-cmp-list" role="radiogroup" aria-label="크기 견본">
+              {samples.map((x) => (
+                <button key={x.height} role="radio" aria-checked={look.height === x.height} className={'mask-cmp-card' + (look.height === x.height ? ' on' : '')} disabled={!x.url} onClick={() => set({ height: x.height })}>
+                  <div className="mask-done-view">{x.url ? <MaskMovie src={x.url} maxW={200} /> : <span className="mask-cmp-wait">굽는 중…</span>}</div>
+                  <b>{x.label}</b>
+                  <span className="mask-dim">{`${x.w}×${x.h}${x.est !== undefined ? ` · 약 ${mb(x.est)}` : ''}`}</span>
+                </button>
+              ))}
+            </div>
+            {(() => {
+              const x = samples.find((y) => y.height === look.height && y.url);
+              return x ? (
+                <div className="mask-cmp-zoom">
+                  <div className="mask-cmp-big mask-done-view" title="가운데를 원본 크기로 늘여 보여 줘요. 작은 크기일수록 흐려져요">
+                    <MaskMovie key={x.url} src={x.url!} maxW={x.w} style={{ width: op.width }} />
+                  </div>
+                  <span className="mask-dim">{`${x.label}의 가운데를 원본 크기(${op.width}×${op.height})로 늘여 본 모습`}</span>
+                </div>
+              ) : null;
+            })()}
           </div>
         )}
 
@@ -339,12 +475,12 @@ function Dialog({ onDone, doneLabel }: { onDone?: (rel: string) => void; doneLab
         )}
 
         <div className="mask-foot">
-          {busy === 'make' ? (
+          {busy === 'make' || busy === 'cmp' ? (
             <>
               <div className="mask-prog" role="progressbar" aria-valuemin={0} aria-valuemax={prog.count} aria-valuenow={prog.done}>
                 <div style={{ width: `${(prog.done / Math.max(1, prog.count)) * 100}%` }} />
               </div>
-              <span className="mask-num">{`${prog.done} / ${prog.count}`}</span>
+              <span className="mask-num">{busy === 'cmp' ? `견본 ${prog.done} / ${prog.count}` : `${prog.done} / ${prog.count}`}</span>
               <button onClick={() => (cancel.current = true)}>멈추기</button>
             </>
           ) : (

@@ -3,7 +3,7 @@
 // 렌파이(8.6.1까지)는 알파가 든 webm을 그대로 못 틀어서 이 꼴로 바꿔야 한다.
 // 앱 안의 Chromium으로 다 한다: <video>·ImageDecoder로 프레임을 읽고 → 캔버스에서 두 쪽을 그리고 →
 // WebCodecs VideoEncoder(VP9)로 굽고 → webm.ts로 묶는다. ffmpeg나 다른 프로그램은 쓰지 않는다.
-import { muxWebm, type Chunk } from './webm';
+import { muxWebm, type AudioTrack, type Chunk } from './webm';
 
 export interface FrameFile {
   name: string;
@@ -23,6 +23,18 @@ export interface Look {
   despill: boolean; // 가장자리에 묻은 초록(뺀 색) 걷어 내기
   height: number; // 결과 높이 (0이면 원본)
   fps: number; // 그림 연속의 1초 장 수 (영상은 원본 값으로 채워 둠)
+  // 자르기: 이 fps로 셀 때의 처음·끝 프레임 (둘 다 넣음). last가 -1이면 끝까지
+  first: number;
+  last: number;
+  sound: boolean; // 원본 소리를 같이 넣기 (소리가 있는 영상만)
+}
+
+// 자른 구간 [처음, 끝] (끝 포함, 이 fps로 셈)
+export function cutRange(op: Opened, look: Look): [number, number] {
+  const n = countAt(op, look.fps);
+  const a = Math.max(0, Math.min(n - 1, look.first | 0));
+  const b = look.last < 0 ? n - 1 : Math.max(a, Math.min(n - 1, look.last | 0));
+  return [a, b];
 }
 
 export interface Opened {
@@ -34,6 +46,7 @@ export interface Opened {
   durationMs?: number; // 영상 길이: 영상은 어느 fps로든 때를 골라 뽑을 수 있다
   hasAlpha: boolean; // 원본에 투명한 곳이 있는지 (없으면 색 빼기를 권함)
   edgeColor: [number, number, number] | null; // 가장자리에 고르게 깔린 색 (초록 화면이면 그 색)
+  audio?: AudioBuffer | null; // 영상의 소리 (48kHz로 풀어 둠). 없으면 null
   // i번째 프레임을 ctx에 w×h로 그림. 돌려주는 값은 그 프레임의 때와 길이 (밀리초)
   draw(i: number, ctx: CanvasRenderingContext2D, w: number, h: number, fps: number): Promise<{ ms: number; dur: number }>;
   close(): void;
@@ -79,6 +92,19 @@ async function measureFps(v: HTMLVideoElement): Promise<number> {
   return Math.max(1, Math.min(60, Math.round(fps)));
 }
 
+const RATE = 48000; // Opus는 48kHz
+
+// 영상 파일의 소리를 풀기 (소리가 없거나 못 읽으면 null). 소리 장치를 쓰지 않게 OfflineAudioContext로
+async function decodeAudio(blob: Blob): Promise<AudioBuffer | null> {
+  try {
+    const ctx = new OfflineAudioContext(2, 1, RATE);
+    const b = await ctx.decodeAudioData(await blob.arrayBuffer());
+    return b.length > 0 ? b : null;
+  } catch {
+    return null;
+  }
+}
+
 async function openVideo(src: Extract<Source, { kind: 'video' }>): Promise<Opened> {
   const url = URL.createObjectURL(src.blob);
   const v = document.createElement('video');
@@ -97,6 +123,7 @@ async function openVideo(src: Extract<Source, { kind: 'video' }>): Promise<Opene
     throw new MaskError('영상 크기나 길이를 읽지 못했어요');
   }
   const fps = await measureFps(v);
+  const audio = await decodeAudio(src.blob);
   const seek = async (t: number) => {
     if (Math.abs(v.currentTime - t) < 1e-4) return;
     v.currentTime = t;
@@ -111,6 +138,7 @@ async function openVideo(src: Extract<Source, { kind: 'video' }>): Promise<Opene
     durationMs: v.duration * 1000,
     hasAlpha: false,
     edgeColor: null,
+    audio,
     async draw(i, ctx, w, h, f) {
       // 프레임 가운데 때로 가야 앞 프레임이 잡히지 않는다
       await seek(Math.min(v.duration - 0.001, (i + 0.5) / f));
@@ -386,18 +414,20 @@ export async function makeMaskWebm(op: Opened, look: Look, onFrame: (p: Progress
   if (!(await encodeSupported(w, h))) throw new MaskError('이 앱에서 VP9 영상을 만들 수 없어요');
   enc.configure({ codec: CODEC, width: w * 2, height: h, bitrate, framerate: fps, latencyMode: 'quality' });
   const keyEvery = Math.max(1, Math.round(fps * 2));
+  const [a, b] = cutRange(op, look);
+  // 때는 처음부터 프레임 길이를 더해 감 (자른 구간의 처음이 0, 움직이는 그림은 장마다 길이가 다름)
   let end = 0;
   try {
-    const count = countAt(op, fps);
-    for (let i = 0; i < count; i++) {
+    const count = b - a + 1;
+    for (let i = a; i <= b; i++) {
       if (cancel()) throw new MaskError('멈췄어요');
       if (failed) throw failed;
       const t = await composeFrame(op, i, look, cv);
-      const frame = new VideoFrame(cv.out, { timestamp: Math.round(t.ms * 1000), duration: Math.round(t.dur * 1000), alpha: 'discard' });
-      enc.encode(frame, { keyFrame: i % keyEvery === 0 });
+      const frame = new VideoFrame(cv.out, { timestamp: Math.round(end * 1000), duration: Math.round(t.dur * 1000), alpha: 'discard' });
+      enc.encode(frame, { keyFrame: (i - a) % keyEvery === 0 });
       frame.close();
-      end = Math.max(end, t.ms + t.dur);
-      onFrame({ done: i + 1, count }, cv);
+      end += t.dur;
+      onFrame({ done: i - a + 1, count }, cv);
       while (enc.encodeQueueSize > 4) await new Promise((r) => setTimeout(r, 5));
     }
     await enc.flush();
@@ -406,6 +436,80 @@ export async function makeMaskWebm(op: Opened, look: Look, onFrame: (p: Progress
   }
   if (failed) throw failed;
   if (!chunks.length) throw new MaskError('만든 프레임이 없어요');
-  chunks.sort((a, b) => a.ms - b.ms);
-  return muxWebm(chunks, w * 2, h, end, fps);
+  chunks.sort((x, y) => x.ms - y.ms);
+  // 소리: 영상과 같은 구간 (영상만 소리가 있고, 그 때는 프레임 번호 / fps)
+  let audio: AudioTrack | undefined;
+  if (look.sound && op.audio && op.durationMs) audio = await encodeAudio(op.audio, a / fps, end / 1000);
+  return muxWebm(chunks, w * 2, h, end, fps, 'V_VP9', audio);
+}
+
+// ── 소리 굽기 (Opus) ──
+
+// 이 TypeScript 판의 DOM 형에는 WebCodecs 소리 쪽이 없어서 이름으로 꺼냄 (Electron Chromium에는 있음)
+const W = globalThis as any;
+
+export async function audioSupported(channels = 2) {
+  try {
+    const r = await W.AudioEncoder.isConfigSupported({ codec: 'opus', sampleRate: RATE, numberOfChannels: channels, bitrate: 128000 });
+    return !!r.supported;
+  } catch {
+    return false;
+  }
+}
+
+// 소리 buf의 [from초, from+len초)를 Opus로. 두 채널까지 (더 많으면 앞의 둘)
+async function encodeAudio(buf: AudioBuffer, from: number, len: number): Promise<AudioTrack | undefined> {
+  const ch = Math.min(2, buf.numberOfChannels);
+  if (!(await audioSupported(ch))) throw new MaskError('이 앱에서 소리(Opus)를 만들 수 없어요. [소리 넣기]를 끄고 만들어 주세요');
+  const s0 = Math.max(0, Math.round(from * buf.sampleRate));
+  const s1 = Math.min(buf.length, s0 + Math.round(len * buf.sampleRate));
+  if (s1 <= s0) return undefined;
+  const chunks: Chunk[] = [];
+  let desc: Uint8Array | undefined;
+  let failed: Error | null = null;
+  const enc = new W.AudioEncoder({
+    output: (c: any, meta: any) => {
+      const data = new Uint8Array(c.byteLength);
+      c.copyTo(data);
+      chunks.push({ data, ms: c.timestamp / 1000, key: true });
+      const d = meta?.decoderConfig?.description;
+      if (d && !desc) desc = d instanceof ArrayBuffer ? new Uint8Array(d.slice(0)) : new Uint8Array(d.buffer.slice(d.byteOffset, d.byteOffset + d.byteLength));
+    },
+    error: (e: unknown) => (failed = e as Error),
+  });
+  enc.configure({ codec: 'opus', sampleRate: buf.sampleRate, numberOfChannels: ch, bitrate: 128000 });
+  const step = buf.sampleRate / 10; // 0.1초씩
+  try {
+    for (let s = s0; s < s1; s += step) {
+      if (failed) throw failed;
+      const n = Math.min(step, s1 - s);
+      const planes = new Float32Array(n * ch);
+      for (let c = 0; c < ch; c++) planes.set(buf.getChannelData(c).subarray(s, s + n), c * n);
+      const ad = new W.AudioData({ format: 'f32-planar', sampleRate: buf.sampleRate, numberOfFrames: n, numberOfChannels: ch, timestamp: Math.round(((s - s0) / buf.sampleRate) * 1e6), data: planes });
+      enc.encode(ad);
+      ad.close();
+    }
+    await enc.flush();
+  } finally {
+    if (enc.state !== 'closed') enc.close();
+  }
+  if (failed) throw failed;
+  if (!chunks.length) return undefined;
+  // OpusHead가 없으면 직접 (RFC 7845: 앞 건너뛰기 312장은 libopus 기본)
+  if (!desc || desc.length < 19 || new TextDecoder().decode(desc.slice(0, 8)) !== 'OpusHead') desc = opusHead(ch, 312, buf.sampleRate);
+  const preSkip = new DataView(desc.buffer, desc.byteOffset).getUint16(10, true);
+  return { chunks, channels: ch, rate: buf.sampleRate, codecPrivate: desc, codecDelayNs: Math.round((preSkip / RATE) * 1e9) };
+}
+
+function opusHead(ch: number, preSkip: number, rate: number) {
+  const b = new Uint8Array(19);
+  b.set(new TextEncoder().encode('OpusHead'));
+  const v = new DataView(b.buffer);
+  v.setUint8(8, 1);
+  v.setUint8(9, ch);
+  v.setUint16(10, preSkip, true);
+  v.setUint32(12, rate, true);
+  v.setInt16(16, 0, true);
+  v.setUint8(18, 0);
+  return b;
 }

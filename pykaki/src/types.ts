@@ -109,6 +109,8 @@ export interface ChoiceMedia {
   select?: string; // 고르고 확정할 때 잠깐
   time?: number; // select를 보여 주는 초 (없으면 0.5)
   fit?: 'image'; // 그림 크기 그대로 (없으면 글 크기에 맞춤)
+  // 투명 영상 (FEATURE 38): 세 영상을 왼쪽 색 + 오른쪽 투명도 영상으로 틀지. 없으면 파일마다 이름(mask_)으로
+  mask?: boolean;
   // 자리·크기·회전은 pygaki editor에서 정해서 받아 적는다. 선택지 가운데 기준, 세 그림에 같이
   x?: number;
   y?: number;

@@ -1,4 +1,4 @@
-// 아주 작은 webm(Matroska) 묶기: VP9 영상 트랙 하나만. WebCodecs VideoEncoder가 낸 조각을 받아 파일 하나로 만든다.
+// 아주 작은 webm(Matroska) 묶기: VP9 영상 트랙 하나 + (있으면) Opus 소리 트랙 하나. WebCodecs VideoEncoder가 낸 조각을 받아 파일 하나로 만든다.
 // 렌파이(ffmpeg)가 처음으로 되감아 되풀이할 수 있게 SeekHead와 Cues(키 프레임 자리)도 적는다.
 // 형식: https://www.matroska.org/technical/elements.html
 
@@ -57,6 +57,7 @@ const ID = {
   Tracks: 0x1654ae6b, TrackEntry: 0xae, TrackNumber: 0xd7, TrackUID: 0x73c5, TrackType: 0x83, FlagLacing: 0x9c,
   CodecID: 0x86, DefaultDuration: 0x23e383, Video: 0xe0, PixelWidth: 0xb0, PixelHeight: 0xba,
   Cluster: 0x1f43b675, Timecode: 0xe7, SimpleBlock: 0xa3,
+  CodecPrivate: 0x63a2, CodecDelay: 0x56aa, SeekPreRoll: 0x56bb, Audio: 0xe1, SamplingFrequency: 0xb5, Channels: 0x9f,
   Cues: 0x1c53bb6b, CuePoint: 0xbb, CueTime: 0xb3, CueTrackPositions: 0xb7, CueTrack: 0xf7, CueClusterPosition: 0xf1,
 };
 
@@ -66,8 +67,17 @@ export interface Chunk {
   key: boolean;
 }
 
+// 소리 트랙 (Opus). 조각은 다 키 조각
+export interface AudioTrack {
+  chunks: Chunk[];
+  channels: number;
+  rate: number;
+  codecPrivate: Bytes; // OpusHead
+  codecDelayNs: number;
+}
+
 // 조각들(시간 순서) → webm 파일. fps는 DefaultDuration에만 쓴다
-export function muxWebm(chunks: Chunk[], width: number, height: number, durationMs: number, fps: number, codec = 'V_VP9'): Bytes {
+export function muxWebm(chunks: Chunk[], width: number, height: number, durationMs: number, fps: number, codec = 'V_VP9', audio?: AudioTrack): Bytes {
   const header = el(
     ID.EBML,
     uint(0x4286, 1), uint(0x42f7, 1), uint(0x42f2, 4), uint(0x42f3, 8),
@@ -82,19 +92,32 @@ export function muxWebm(chunks: Chunk[], width: number, height: number, duration
       str(ID.CodecID, codec), uint(ID.DefaultDuration, Math.round(1e9 / fps)),
       el(ID.Video, uint(ID.PixelWidth, width), uint(ID.PixelHeight, height)),
     ),
+    ...(audio
+      ? [
+          el(
+            ID.TrackEntry,
+            uint(ID.TrackNumber, 2), uint(ID.TrackUID, 2), uint(ID.TrackType, 2), uint(ID.FlagLacing, 0),
+            str(ID.CodecID, 'A_OPUS'), el(ID.CodecPrivate, audio.codecPrivate),
+            uint(ID.CodecDelay, audio.codecDelayNs), uint(ID.SeekPreRoll, 80_000_000),
+            el(ID.Audio, f64(ID.SamplingFrequency, audio.rate), uint(ID.Channels, audio.channels)),
+          ),
+        ]
+      : []),
   );
 
   // 묶음(Cluster): 키 프레임마다, 또는 앞 묶음 시작에서 30초가 넘으면 새로 (블록 시간은 int16 밀리초)
+  // 소리 조각은 영상 조각 사이에 때 순서로 끼움 (같은 때면 영상 먼저). 묶음은 영상 키 프레임에서만 새로 연다
+  const all = [...chunks.map((c) => ({ ...c, track: 1 })), ...(audio?.chunks ?? []).map((c) => ({ ...c, track: 2 }))].sort((x, y) => x.ms - y.ms || x.track - y.track);
   const clusters: { ms: number; body: Bytes[] }[] = [];
-  for (const c of chunks) {
+  for (const c of all) {
     const last = clusters[clusters.length - 1];
-    if (!last || c.key || c.ms - last.ms > 30000) {
-      if (!last && !c.key) throw new Error('첫 조각이 키 프레임이 아니에요');
+    if (!last || (c.track === 1 && c.key) || c.ms - last.ms > 30000) {
+      if (!last && !(c.track === 1 && c.key)) throw new Error('첫 조각이 키 프레임이 아니에요');
       clusters.push({ ms: c.ms, body: [] });
     }
     const cl = clusters[clusters.length - 1];
     const head = new Uint8Array(4);
-    head[0] = 0x81; // 트랙 1
+    head[0] = 0x80 | c.track; // 트랙 번호 (vint)
     new DataView(head.buffer).setInt16(1, Math.round(c.ms - cl.ms));
     head[3] = c.key ? 0x80 : 0;
     cl.body.push(el(ID.SimpleBlock, head, c.data));

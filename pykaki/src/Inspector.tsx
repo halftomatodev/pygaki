@@ -7,7 +7,7 @@ import { MediaField, MediaGroupFields, MediaPlace } from './MediaField';
 import { uid } from './util';
 import { Card } from './Card';
 import { LineLook, OldAttr, SpeakerSelect, StageFields, useLineDrag, InputFields } from './LineFields';
-import { isStage } from './stage';
+import { choiceMaskByName, choiceMovies, isStage } from './stage';
 import { hit } from './prefs';
 import { ShaderPanel } from './ShaderPanel';
 import { StageCards } from './StageCards';
@@ -454,6 +454,20 @@ function ChoiceRow({ b, c, i, upd }: { b: BoxNode; c: Choice; i: number; upd: Up
               </>
             )}
           </div>
+          {choiceMovies(m).length > 0 && (
+            <div className="cf-row media-row">
+              <span className="cf-kw" />
+              <label className="sf-check" title="왼쪽에 색, 오른쪽에 투명도(흰색이 보이는 곳)를 담은 영상이에요. 세 영상에 같이 써요. 영상 이름이 다 mask_로 시작하면 저절로 켜져요. 투명 webm은 [🎞]로 바꿔요">
+                <input
+                  type="checkbox"
+                  checked={m.mask ?? choiceMaskByName(m)}
+                  // 이름으로 정해지는 값과 같으면 적지 않는다
+                  onChange={(e) => putM('mask', e.target.checked === choiceMaskByName(m) ? undefined : e.target.checked)}
+                />
+                투명 영상
+              </label>
+            </div>
+          )}
           <div className="cf-row media-row">
             <span className="cf-kw">크기</span>
             <select value={m.fit ?? ''} onChange={(e) => putM('fit', e.target.value === 'image' ? 'image' : undefined)}>

@@ -2,7 +2,7 @@
 import type { BoxNode, ChoiceMedia, LabelGroup, Line, Project, Settings } from './types';
 import { exitLinks, fallTarget } from './ops';
 import { IDENT, PLUGIN_NAMES, RESERVED } from './util';
-import { badImageName, isMaskName, isMovieFile, mediaGroupArgs, mediaPlace, renpyOnlyEffect, fxArgs, isStage, sayArgs, sayHasGroup, stageCode, tagEffectNames, REMOVED_EFFECTS, RENPY_EFFECTS } from './stage';
+import { badImageName, choiceMaskByName, choiceMovies, isMovieFile, mediaGroupArgs, mediaPlace, renpyOnlyEffect, fxArgs, isStage, sayArgs, sayHasGroup, stageCode, tagEffectNames, REMOVED_EFFECTS, RENPY_EFFECTS } from './stage';
 import { shaderEffect } from './fx/textShaders';
 import { imageProblem, type ImageBook } from './imageCheck';
 import { voiceCode, voiceFile, voiceIndex } from './voice';
@@ -81,9 +81,11 @@ export function choiceMediaArgs(m?: ChoiceMedia, oldGroup = false): string[] {
   }
   if (m.fit === 'image') a.push('media_fit="image"');
   a.push(...mediaPlace(m.x, m.y, m.zoom, m.angle));
-  // 투명 영상(mask_ 이름, FEATURE 26): 예전 플러그인(4.14~4.15)도 알게, 영상이 다 투명 영상이면 적는다 (4.16은 파일마다 이름으로 앎)
-  const movies = [m.idle, m.hover, m.select].filter(isMovieFile);
-  if (movies.length && movies.every(isMaskName)) a.push('media_mask=True');
+  // 투명 영상(mask_ 이름, FEATURE 26): 예전 플러그인(4.14~4.15)도 알게, 영상이 다 투명 영상이면 적는다 (4.16은 파일마다 이름으로 앎).
+  // [투명 영상] 체크로 정했으면(FEATURE 38) 그 값을 세 영상에 같이
+  const movies = choiceMovies(m);
+  if (movies.length && m.mask !== undefined) a.push(`media_mask=${m.mask ? 'True' : 'False'}`);
+  else if (choiceMaskByName(m)) a.push('media_mask=True');
   // 묶기·네 점 변형·그림 효과 (FEATURE 28). 예전 플러그인은 모르는 값이라 적지 않음
   if (!oldGroup) a.push(...mediaGroupArgs(m.link, m.quad, m.text_quad, m.fx));
   return a;
