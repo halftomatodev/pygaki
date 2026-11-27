@@ -31,7 +31,8 @@ async function until(what, fn, ms = 10000) {
   fs.writeFileSync(path.join(proj, 'game', 'ui_kit', 'engine', 'script_edit.rpy'), 'init -19 python in script_edit:\n    PK_END_MARKS = True\n');
 
   process.env.RENPY_SDK = ''; // 시험하다가 이 컴퓨터의 렌파이로 진짜 게임을 켜지 않게
-  const app = await electron.launch({ args: ['--no-sandbox', __dirname, '--project', proj] });
+  // 화면 글로 단추를 찾으니 PC 언어(리눅스 CI는 영어)와 상관없이 한국어로 켬 (i18n.ts는 고른 적 없으면 PC 언어)
+  const app = await electron.launch({ args: ['--no-sandbox', '--lang=' + (process.env.ZZ_LANG || 'ko'), __dirname, '--project', proj] });
   const page = await app.firstWindow();
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
