@@ -1,4 +1,4 @@
-<!-- 원본: bundle/guide/parts/start.md @ f71ff4f6a5 -->
+<!-- 원본: bundle/guide/parts/start.md @ cfd3fab48a -->
 # Getting started
 
 ## What pygaki does
@@ -6,11 +6,11 @@
 A set of tools that lets you make Ren'Py games without learning Ren'Py code.
 
 * **pygaki** (the [Script] tab of the pygaki app): an editor where you write your script with boxes and lines. Set dialogue, choices, backgrounds, images, sounds and screen shaders, and it exports a Ren'Py script (`game/script_flow.rpy`).
-* **pygaki plugins**: four plugins (`ui_kit`, `screen_fx`, `hotkeys`, `splash`) you put in the `game/` folder of a Ren'Py game. They change the title menu, choices, dialogue style and text effects, full-screen shaders and the splash screen, and include an **pygaki editor (the in-game editor)** that lets you adjust things with the mouse while the game runs.
+* **pygaki plugins**: four plugins (`ui_kit`, `screen_fx`, `hotkeys`, `splash`) you put in the `game/` folder of a Ren'Py game. They change the title menu, choices, dialogue style and text effects, full-screen shaders and the splash screen, and include a **pygaki editor (the in-game editor)** that lets you adjust things with the mouse while the game runs.
 * **pygaki app**: split into six tabs at the top. [Script] writes the script, [GUI] connects to the running game and drives the pygaki editor from the app, [Screen] makes choice screens and HUDs, [Effects] and [Shaders] let you browse and hide effects, and [Font] manages the game's fonts.
 * **pygaki bundle**: the Ren'Py SDK + the plugin template + launcher buttons + the pygaki app, packed into one folder for Windows.
 
-Language: the language button at the top right of the pygaki app switches the script editor and the app's [Help] to Japanese or English. The pygaki editor switches with the [Language] button on its panel, and the pygaki buttons added to the launcher follow the launcher's language setting. This guide gives a translation next to button names as they appear on Korean screens.
+Language: the language button at the top right of the pygaki app switches the script editor and the app's [Help] to Japanese or English. The pygaki editor follows the pygaki app's language (until the app first connects, the PC's language), and the pygaki buttons added to the launcher follow the launcher's language setting. This guide gives a translation next to button names as they appear on Korean screens.
 
 | I want to | Where |
 | --- | --- |
@@ -28,7 +28,7 @@ Language: the language button at the top right of the pygaki app switches the sc
 
 1. Download the pygaki bundle zip from [github.com/halftomatodev/pygaki/releases/latest](https://github.com/halftomatodev/pygaki/releases/latest) and unzip it into any folder (repository: [github.com/halftomatodev/pygaki](https://github.com/halftomatodev/pygaki)).
 2. Start the launcher with `renpy.exe`.
-3. In **[+ Create New Project]** at the bottom left of the launcher, choose **Pygaki** and set the name and resolution. There are three retro resolutions (PC-98 640x400, Y2K 800x600, Millennial 1024x768), two high resolutions (1280x720, 1920x1080) and a custom one. Retro and custom are scaled up by the largest whole number that fits the window and drawn in the pixels of the chosen resolution (pixel perfect, `game/pixel_perfect.rpy` in the project). Below a height of 720, text sizes and pygaki settings are made to fit that resolution, and every new project gets the Korean pixel font set Galmuri in `game/fonts`; retro resolutions use Galmuri9 as the default font (text sizes in multiples of 10px; other sizes break the pixels).
+3. In **[+ Create New Project]** at the bottom left of the launcher, choose **Pygaki** and set the name and resolution. There are three retro resolutions (PC-98 640x400, Y2K 800x600, Millennial 1024x768), two high resolutions (1280x720, 1920x1080) and a custom one. Even a custom resolution cannot be smaller than PC-98 (640x400): at least 640 wide and 400 high. Retro and custom are scaled up by the largest whole number that fits the window and drawn in the pixels of the chosen resolution (pixel perfect, `game/pixel_perfect.rpy` in the project). Below a height of 720, text sizes and pygaki settings are made to fit that resolution, and every new project gets the Korean pixel font set Galmuri in `game/fonts`; retro resolutions use Galmuri9 as the default font (text sizes in multiples of 10px; other sizes break the pixels).
    * The Pygaki template creates a Korean project (sample script and common text). Change the game's language with Ren'Py's settings (`game/options.rpy`, `game/tl/`).
 4. Select the project in the list on the left and press **[Edit with pygaki]**; the pygaki app opens that project. The script is saved automatically to `ProjectName.flow.json` in the project folder.
 5. Press **[Run in Ren'Py]** to the right of the tab row at the top of the app to start the game and see it. If you start it with the launcher's [Launch Project] instead, the app still connects to the game (the button next to the tabs turns pale blue: "● Connected to game").

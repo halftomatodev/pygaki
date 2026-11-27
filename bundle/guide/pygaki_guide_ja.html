@@ -129,7 +129,7 @@ mark{background:var(--mark);color:inherit;border-radius:2px}
 </li>
 <li><b>pygaki パック</b>:Ren'Py SDK + プラグインのテンプレート + ランチャーのボタン + pygaki アプリを、Windows 用のフォルダー 1 つにまとめたものです。
 </li></ul>
-<p>画面の言語:pygaki アプリの右上の言語ボタンで、スクリプト編集の画面とアプリの [ヘルプ] を日本語・英語にできます。pygaki editorはパネルの [言語] ボタンで、ランチャーに加わる pygaki のボタンはランチャーの言語設定で日本語・英語になります。この案内書では、韓国語の画面で見たときのボタン名に訳を添えています。</p>
+<p>画面の言語:pygaki アプリの右上の言語ボタンで、スクリプト編集の画面とアプリの [ヘルプ] を日本語・英語にできます。pygaki editorは pygaki アプリの言語に合わせ(アプリと一度もつながっていないときは PC の言語)、ランチャーに加わる pygaki のボタンはランチャーの言語設定で日本語・英語になります。この案内書では、韓国語の画面で見たときのボタン名に訳を添えています。</p>
 <div class="tbl"><table><thead><tr><th>やりたいこと</th><th>どこで</th></tr></thead><tbody><tr><td>セリフ、選択肢、物語の流れを書く</td><td>pygaki [スクリプト編集]</td></tr><tr><td>フラグ(変数)と条件で分かれる物語</td><td>pygaki 右の欄のいちばん上のフラグカード、ボックスの次の流れ「条件分岐」(流れバブル、Alt+→)</td></tr><tr><td>セリフの文字サイズ、フォント、色、速度、登場エフェクト</td><td>pygaki セリフ行の文字エフェクトカード、テキスト欄のタグボックス</td></tr><tr><td>ボックス・場面ごとの画面シェーダー、トランジション、セリフ音、カーソル・クリック待ち</td><td>pygaki ボックスや label の ◐ シェーダー</td></tr><tr><td>画像、webm 動画、BGM、効果音を入れる</td><td>pygaki ボックスの背景 / 画像・動画 / 効果音・BGM カード</td></tr><tr><td>セリフ・選択肢・画像の位置</td><td>行の [位置を移動] → ゲーム画面でドラッグ → [保存]</td></tr><tr><td>タイトルメニュー、カーソルなどゲーム全体の見た目</td><td>pygaki アプリ [GUI編集](pygaki editorと同じ)</td></tr><tr><td>エフェクト・シェーダーを見る、一覧から隠す</td><td>pygaki アプリ [エフェクト]、[シェーダー]</td></tr><tr><td>設定ファイルの値でもっと細かく</td><td>この案内書の「プラグイン カスタムガイド」の章</td></tr></tbody></table></div>
 </div>
 <div class="blk"><h2 id="ダウンロードと最初のプロジェクト">ダウンロードと最初のプロジェクト</h2>
@@ -2491,6 +2491,10 @@ cd pykaki/app &amp;&amp; npm run dist  # Windows アプリのフォルダー (py
 <li>VHS シェーダーの元は CC0 です(クレジットは任意)。ASCII シェーダーは MIT ライセンスのシェーダーのアイデアを、レトロターミナルは cool-retro-term(GPL)の見た目を、ゲームボーイは Retro dither(CC0)のディザ模様と Gameboy Classic Shader(GPL)の LCD の見た目を参考に、コードを新しく書きました(クレジットは <code>screen_fx/README.md</code> 15 章)。
 </li>
 <li><code>screen_fx/fonts/neodgm.ttf</code>(Neo둥근모)は SIL OFL 1.1 です。ゲームに入れて配布・販売でき、配布するときは <code>neodgm_OFL.txt</code> も一緒に置いてください。
+</li>
+<li>新しいプロジェクトの <code>game/fonts/</code> にある <code>Galmuri*.ttf</code>、<code>GalmuriMono*.ttf</code>(Galmuri)も SIL OFL 1.1 です。配布するときは <code>Galmuri-OFL.txt</code> も一緒に置いてください。
+</li>
+<li>pygaki editor(ゲーム内編集画面)のパネルのフォント <code>ui_kit/editor/fonts/Galmuri9.ttf</code>(Galmuri9、SIL OFL 1.1、<code>Galmuri-OFL.txt</code> が同じフォルダーに)は開発モードでだけ使い、配布版からは外れます。
 </li>
 <li>新しいプロジェクトの <code>game/fonts/</code> の <code>Galmuri*.ttf</code>、<code>GalmuriMono*.ttf</code>(Galmuri)も SIL OFL 1.1 です。配布するときは <code>Galmuri-OFL.txt</code> も一緒に置いてください。
 </li>

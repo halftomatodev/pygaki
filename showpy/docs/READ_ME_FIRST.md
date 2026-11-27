@@ -22,11 +22,11 @@
 - 합친 기능들은 각자 설정 파일의 스위치(`enabled`)로 따로 끌 수 있고, 끄면 렌파이 기본(효과 없음)과 똑같이 보입니다.
 - `screen_fx`는 넣자마자 VHS 덮개가 화면 전체에 켜집니다. 처음에는 깨끗한 화면으로 보고 싶다면 `screen_fx/screen_fx_config.rpy`의 `screen_fx.overlay`를 `False`로(평소엔 깨끗하고 `use()`나 `fx_overlay=True`로 켤 때만 효과), 타이틀 일렁임은 `screen_fx/screen_fx_config.rpy`의 `screen_fx.title_shaders`를 `("none", "none")`으로 바꾸세요(5.5부터. 예전 방식은 `watermorph_config.rpy`).
 
-## 다음 판(만드는 중)에서 바뀐 점
+## v2.0-beta1(만드는 중)에서 바뀐 점
 
 **pygaki 플러그인**
 
-- 판 번호는 pygaki 판 하나로 매깁니다(이 판부터 v1.9). 플러그인 폴더(`ui_kit`, `screen_fx`, `splash`, `hotkeys`)는 이름만 그대로이고 따로 판을 매기지 않습니다.
+- 판 번호는 pygaki 판 하나로 매깁니다(이 판은 첫 beta 판 v2.0-beta1). 플러그인 폴더(`ui_kit`, `screen_fx`, `splash`, `hotkeys`)는 이름만 그대로이고 따로 판을 매기지 않습니다.
 - pygaki editor(게임 안 편집 화면, F9)를 여는 동안 창 전체를 씁니다. 게임 화면은 원래 크기로 가운데, 패널과 고르기 창은 창의 빈 곳까지. 게임 화면 둘레에는 붉은 경계선(F8).
 - 글자 효과·셰이더·그림 효과·그림 전환 목록은 게임 창 패널에서 빼고 지금 값과 [pygaki 앱에서 고르기]만. 누르면 pygaki 앱의 [GUI 편집] 그 칸을 엽니다(앱이 없으면 켬).
 - 게임 창 패널의 단축키 안내는 처음엔 접힘(F1). 전체는 pygaki 앱 환경 설정 [단축키].

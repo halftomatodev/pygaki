@@ -1,4 +1,4 @@
-<!-- 원본: bundle/guide/parts/license.md @ fcf8fc3b51 -->
+<!-- 원본: bundle/guide/parts/license.md @ 02e968934b -->
 # Notes and licenses
 
 ## Using it with other code
@@ -15,6 +15,8 @@
 
 - The original VHS shader is CC0 (credit optional). The code was written anew, taking the idea of an MIT-licensed shader for the ASCII shader, the look of cool-retro-term (GPL) for the retro terminal, and the dither pattern of Retro dither (CC0) and the LCD look of Gameboy Classic Shader (GPL) for the Game Boy shader (credits in chapter 15 of `screen_fx/README.md`).
 - `screen_fx/fonts/neodgm.ttf` (NeoDunggeunmo) is SIL OFL 1.1. You may include it in a game and distribute or sell it; when you distribute, put `neodgm_OFL.txt` alongside.
+- `Galmuri*.ttf` and `GalmuriMono*.ttf` (Galmuri) in `game/fonts/` of a new project are also SIL OFL 1.1. When you distribute, put `Galmuri-OFL.txt` alongside.
+- The pygaki editor (in-game editor) panel font `ui_kit/editor/fonts/Galmuri9.ttf` (Galmuri9, SIL OFL 1.1, with `Galmuri-OFL.txt` in the same folder) is used only in developer mode and is left out of distributions.
 - `Galmuri*.ttf` and `GalmuriMono*.ttf` (Galmuri) in `game/fonts/` of new projects are also SIL OFL 1.1; when you distribute, put `Galmuri-OFL.txt` alongside.
 - The pygaki editor (in-game editing screen) panel font `ui_kit/editor/fonts/Galmuri9.ttf` (Galmuri9, SIL OFL 1.1, with `Galmuri-OFL.txt` in the same folder) is used only in developer mode and is left out of distributions.
 - The pygaki plugins are MIT-licensed. For files with other licenses, like fonts, see `THIRD_PARTY.md` in the repository.

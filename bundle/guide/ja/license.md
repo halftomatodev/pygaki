@@ -1,4 +1,4 @@
-<!-- 원본: bundle/guide/parts/license.md @ fcf8fc3b51 -->
+<!-- 원본: bundle/guide/parts/license.md @ 02e968934b -->
 # 注意とライセンス
 
 ## ほかのコードと一緒に使うとき
@@ -15,6 +15,8 @@
 
 - VHS シェーダーの元は CC0 です(クレジットは任意)。ASCII シェーダーは MIT ライセンスのシェーダーのアイデアを、レトロターミナルは cool-retro-term(GPL)の見た目を、ゲームボーイは Retro dither(CC0)のディザ模様と Gameboy Classic Shader(GPL)の LCD の見た目を参考に、コードを新しく書きました(クレジットは `screen_fx/README.md` 15 章)。
 - `screen_fx/fonts/neodgm.ttf`(Neo둥근모)は SIL OFL 1.1 です。ゲームに入れて配布・販売でき、配布するときは `neodgm_OFL.txt` も一緒に置いてください。
+- 新しいプロジェクトの `game/fonts/` にある `Galmuri*.ttf`、`GalmuriMono*.ttf`(Galmuri)も SIL OFL 1.1 です。配布するときは `Galmuri-OFL.txt` も一緒に置いてください。
+- pygaki editor(ゲーム内編集画面)のパネルのフォント `ui_kit/editor/fonts/Galmuri9.ttf`(Galmuri9、SIL OFL 1.1、`Galmuri-OFL.txt` が同じフォルダーに)は開発モードでだけ使い、配布版からは外れます。
 - 新しいプロジェクトの `game/fonts/` の `Galmuri*.ttf`、`GalmuriMono*.ttf`(Galmuri)も SIL OFL 1.1 です。配布するときは `Galmuri-OFL.txt` も一緒に置いてください。
 - pygaki editor(ゲーム内の編集画面)のパネルのフォント `ui_kit/editor/fonts/Galmuri9.ttf`(Galmuri9、SIL OFL 1.1、`Galmuri-OFL.txt` が同じフォルダに)は開発モードでだけ使い、配布版からは外れます。
 - pygaki プラグインは MIT ライセンスです。フォントのようにライセンスが違うファイルは、リポジトリの `THIRD_PARTY.md` を見てください。
