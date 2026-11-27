@@ -1,4 +1,4 @@
-<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ d819cab2de -->
+<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ e1d58b6543 -->
 # pygaki plugin customization guide
 
 2026-11-25 · pygaki v1.9 (changes per version are in `READ_ME_FIRST.md` and `CHANGELOG.md`)
@@ -93,7 +93,7 @@ Find what you want to change and edit the value in the file on the right. Items 
 
 ## Using it with pygaki
 
-pygaki is an editor for writing scripts with boxes and lines. It ships as the desktop app in the pygaki bundle and opens when you select a project in the Ren'Py launcher and press **[pygaki로 편집]** (Edit with pygaki) (the web version was removed in 5.1). Using the two programs together, you set **the text in pygaki and the screens in Ren'Py**. You don't need to know Ren'Py code. How to use the app is in its [Help] (F1; this guide's "Writing scripts with pygaki" chapter).
+pygaki is an editor for writing scripts with boxes and lines. It ships as the desktop app in the pygaki bundle and opens when you select a project in the Ren'Py launcher and press **[Edit with pygaki]** (the web version was removed in 5.1). Using the two programs together, you set **the text in pygaki and the screens in Ren'Py**. You don't need to know Ren'Py code. How to use the app is in its [Help] (F1; this guide's "Writing scripts with pygaki" chapter).
 
 | I want to | Where |
 |---|---|
@@ -108,7 +108,7 @@ pygaki is an editor for writing scripts with boxes and lines. It ships as the de
 ### One-time setup
 
 1. Start the launcher with `renpy.exe` in the pygaki bundle and create a project with **Pygaki** in **[+ Create New Project]**. The pygaki plugins and sample cursor and click-to-continue images are included from the start. (For an existing project, put the plugin folders into `game`)
-2. Select the project and press **[pygaki로 편집]** (Edit with pygaki).
+2. Select the project and press **[Edit with pygaki]**.
 
 That's all. The app opens that project's script (`ProjectName.flow.json`), saves on every change, and exports to `game/script_flow.rpy`. Run it in Ren'Py and it starts from pygaki's first box.
 
@@ -830,7 +830,7 @@ e "Shake!" (box="media", media="images/say/boom.png", media_link=True, media_fx=
 | `media_padding`, `media_alpha` | space between the text and the picture's edge, opacity (0.0–1.0) |
 | `media_mask`, `media_loop` | transparent video mode, loop playback (default `True`). A video whose name starts with `mask_` is a transparent video automatically |
 | `media_pop` | pop in (`True`, `False`, or seconds) |
-| `media_link` | tie the text to the picture. With `True` (or the `(scale, rotation, x, y)` at the time of tying) the text also takes later changes in scale, rotation and offset |
+| `media_link` | tie the text to the picture. With `True` (or the `(scale, rotation, x, y)` at the time of tying) the text also takes later changes in scale, rotation and offset. The speaker name of the line is drawn in front of the picture too and moves with it |
 | `media_quad`, `media_text_quad` | move the four corners of the picture or the text separately to warp it (8 numbers: how far the top-left, top-right, bottom-right and bottom-left corners move across and down, as a ratio of the size) |
 | `media_fx`, `media_fx_time`, `media_fx_values` | a picture effect from the effects folder when the text box appears (e.g. `"vibrate"`, `"springin"`), its seconds, detail values `{"amount": 20}`. If tied, the text too. Ren'Py's built-in transitions (`dissolve` etc.) can't be used |
 

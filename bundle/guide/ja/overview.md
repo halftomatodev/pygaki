@@ -13,7 +13,7 @@
 | 画像の位置 | `game/ui_kit/stage_layout.rpy` | 行の [位置を移動] で保存した位置。保存版では元に戻りません |
 | pygaki editor(ゲーム内編集画面)で保存した値 | 各プラグインフォルダーの `*_layout.rpy`(例:`ui_kit/title_menu_layout.rpy`、`screen_fx/screen_fx_layout.rpy`) | 設定ファイル(`*_config.rpy`)の同じ値より優先されます。新しい版にするときは別に取っておいて戻します |
 | 自分で直した設定 | 各プラグインフォルダーの `*_config.rpy` | エンジンのファイル(`engine/`、`editor/`)は直しません |
-| スクリプトを直す前の元、更新前のプラグイン | プロジェクトフォルダーの `ui_kit_backup/` | pygaki editorがスクリプトの括弧を変える前に、ランチャーの [플러그인 올리기](プラグインを更新)が入れ替える前に(`plugins/`)残します。開発用なので配布版から除きます |
+| スクリプトを直す前の元、更新前のプラグイン | プロジェクトフォルダーの `ui_kit_backup/` | pygaki editorがスクリプトの括弧を変える前に、ランチャーの [プラグインを更新]が入れ替える前に(`plugins/`)残します。開発用なので配布版から除きます |
 | ゲームとアプリがやり取りするファイル | `game/showpy_inbox.json`、`game/showpy_live.json`、`game/pykaki_preview.json`、`game/pykaki_goto.json`、`game/pykaki_screens.json` | 開発中だけできる連携ファイルです。ゲームの配布版には入れません(消してもまたできます) |
 
 ゲームを配布用にビルドするときは、`*.flow.json`、`ui_kit_backup/`、上の連携ファイルを除いてください。各プラグインの `README.md` はビルド時に自動で除かれます。
@@ -23,7 +23,7 @@
 | 場所 | 何 |
 | --- | --- |
 | `renpy.exe`、`launcher/`、`renpy/`、`lib/` … | Ren'Py SDK そのまま(追加用 zip にはなし) |
-| `launcher/game/pygaki_launcher.rpy` | ランチャーの最初の画面の [pygaki로 편집](pygaki で編集)、[pygaki 안내서](pygaki 案内書)、[플러그인 올리기](プラグインを更新)ボタンと、新しいプロジェクト作成の「기본 (Vanilla)」/「Pygaki」の選択。Ren'Py 本来のファイルは直さず、このファイル 1 つだけを足します |
+| `launcher/game/pygaki_launcher.rpy` | ランチャーの最初の画面の [pygaki で編集]、[pygaki 案内書]、[プラグインを更新]ボタンと、新しいプロジェクト作成の「基本 (Vanilla)」/「Pygaki」の選択。Ren'Py 本来のファイルは直さず、このファイル 1 つだけを足します |
 | `pygaki/template/` | Pygaki の新規プロジェクトにのせるプラグインのテンプレート |
 | `pygaki/app/pygaki.exe` | pygaki デスクトップアプリ。アプリだけを起動すると、プロジェクトフォルダーを選ぶ画面が出ます |
 | `pygaki/pygaki_안내서.html`、`pygaki_guide_ja.html`、`pygaki_guide_en.html` | この案内書(韓国語、日本語、英語) |

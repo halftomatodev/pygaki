@@ -3,7 +3,7 @@
 
 A tool for writing Ren'Py scripts with boxes and lines and exporting them as Ren'Py script files (`.rpy`).
 
-**Where to open it**: in the Ren'Py launcher of the pygaki bundle, select a project and press **[pygaki로 편집]** (Edit with pygaki). The web version (website, installable web app) was removed on 2026-11-12.
+**Where to open it**: in the Ren'Py launcher of the pygaki bundle, select a project and press **[Edit with pygaki]**. The web version (website, installable web app) was removed on 2026-11-12.
 
 The in-app [Help] (F1) is the Korean version of this document. Button names here are the names shown when the language button is set to English.
 
@@ -613,7 +613,7 @@ For detailed steps and troubleshooting, see the [pygaki plugin customization gui
 
 ## 9-2. Desktop app (Ren'Py bundle)
 
-In the Ren'Py launcher of the pygaki bundle, select a project and press **[pygaki로 편집]** (Edit with pygaki) to open the pygaki app.
+In the Ren'Py launcher of the pygaki bundle, select a project and press **[Edit with pygaki]** to open the pygaki app.
 
 - That project's script opens right away. No folder linking or permission windows.
 - The script is **saved automatically on every change** to `ProjectName.flow.json` at the top of the project folder. This file is the source of the script.

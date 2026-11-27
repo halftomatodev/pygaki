@@ -827,7 +827,7 @@ e "흔들!" (box="media", media="images/say/boom.png", media_link=True, media_fx
 | `media_padding`, `media_alpha` | 글과 그림 가장자리 사이, 투명도 (0.0 ~ 1.0) |
 | `media_mask`, `media_loop` | 투명 영상 방식, 반복 재생 (기본 `True`). 영상 이름이 `mask_`로 시작하면 저절로 투명 영상 |
 | `media_pop` | 튀어나오며 나타남 (`True`, `False`, 걸리는 초) |
-| `media_link` | 글을 그림에 묶음. `True`(또는 묶을 때의 `(크기, 회전, 가로, 세로)`)면 그 뒤로 바꾼 크기·회전·옮김을 글도 같이 받음 |
+| `media_link` | 글을 그림에 묶음. `True`(또는 묶을 때의 `(크기, 회전, 가로, 세로)`)면 그 뒤로 바꾼 크기·회전·옮김을 글도 같이 받음. 대사의 이름도 그림 앞에 같이 그려져 함께 움직임 |
 | `media_quad`, `media_text_quad` | 그림, 글의 네 모서리를 따로 옮겨 휨 (숫자 8개: 왼위, 오른위, 오른아래, 왼아래 모서리를 가로·세로로 옮긴 양. 크기에 대한 비율) |
 | `media_fx`, `media_fx_time`, `media_fx_values` | 글 상자가 나타날 때 효과 폴더의 그림 효과 (예: `"vibrate"`, `"springin"`), 걸리는 초, 세부 값 `{"amount": 20}`. 묶었으면 글도 같이. 렌파이 기본 전환(`dissolve` 등)은 못 씀 |
 

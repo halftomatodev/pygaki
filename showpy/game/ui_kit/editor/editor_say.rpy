@@ -304,6 +304,14 @@ init -8 python in ui_editor:
                         has, v = self._line_value(k)
                         up[o] = v if has else self.ss().box_style("media").get(o)
                     base["background"] = bg.with_opts(**up)
+                ## 글을 그림에 묶으면 이름은 그림+글 판 안에 그려지므로 진짜 이름 칸은 화면 밖으로 (세션 120, say_style과 같게)
+                if wid == "namebox":
+                    wbg = self._props("what").get("background")
+                    ss = self.ss()
+                    if getattr(wbg, "ui_kit_box", False) and wbg.kind == "media" and ss.link_base(wbg.opts.get("link")) is not None:
+                        base["yoffset"] = ss.NAME_AWAY
+                    elif base.get("yoffset") == ss.NAME_AWAY:
+                        base.pop("yoffset", None)
             return base
 
         def refresh(self):

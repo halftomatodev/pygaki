@@ -321,11 +321,22 @@ init -9 python in ui_editor:
 
     ## ── 열기·닫기 ──
 
+    _skip_saved = [ ]   # 편집기를 열기 전의 config.allow_skipping (열려 있는 동안만 값이 있음)
+
     def _set_editing(flag):
         for ns in ("tmenu", "cmenu", "say_style"):
             s = getattr(getattr(store, ns, None), "state", None)
             if s is not None and hasattr(s, "editing"):
                 s.editing = flag
+        ## 편집기가 열려 있는 동안은 스킵을 막음. 렌파이는 Ctrl을 화면보다 먼저 "누르는 동안 스킵"으로 받아서
+        ## Ctrl+S, Ctrl+C, 단축키 탭에서 Ctrl 고르기 때 대사가 넘어갔음 (세션 120)
+        if flag:
+            if not _skip_saved:
+                _skip_saved.append(store.config.allow_skipping)
+            store.config.allow_skipping = False
+            store.config.skipping = None
+        elif _skip_saved:
+            store.config.allow_skipping = _skip_saved.pop()
 
     def open_editor(tab=None):
         if not store.config.developer:

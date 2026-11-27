@@ -239,6 +239,10 @@ init -10 python in say_style:
                 kwargs.setdefault("window_background", None)
                 if "namebox" in store.config.character_id_prefixes:
                     kwargs.setdefault("namebox_background", None)
+                    ## 글을 그림에 묶었으면 이름도 그림+글 판 안에 그림(text_box.rpy name_render, 세션 120).
+                    ## 진짜 이름 칸은 자리 계산에 쓰이도록 그대로 두고 화면 밖으로만 옮김
+                    if link_base(tb.opts.get("link")) is not None:
+                        kwargs["namebox_yoffset"] = NAME_AWAY
 
         ## 이름 상자 위치(name_x, name_y)는 screens.rpy의 이 줄이 있어야 동작합니다.
         if any(k.startswith("namebox_") for k in kwargs) and "namebox" not in store.config.character_id_prefixes:

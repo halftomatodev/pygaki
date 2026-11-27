@@ -13,7 +13,7 @@ What is where in the bundle you downloaded, in a game project you made, and in t
 | Image positions | `game/ui_kit/stage_layout.rpy` | Positions saved with a line's [Move position]. Snapshots don't restore them |
 | Values saved in pygaki editor (the in-game editor) | `*_layout.rpy` in each plugin folder (e.g. `ui_kit/title_menu_layout.rpy`, `screen_fx/screen_fx_layout.rpy`) | Take priority over the same value in the settings file (`*_config.rpy`). Set them aside and put them back when updating |
 | Settings you edited | `*_config.rpy` in each plugin folder | Don't edit the engine files (`engine/`, `editor/`) |
-| Originals before script edits, plugins before updates | `ui_kit_backup/` in the project folder | Kept before the pygaki editor changes parentheses in the script, and before the launcher's [플러그인 올리기] (Update plugins) replaces files (`plugins/`). For development, so leave it out of releases |
+| Originals before script edits, plugins before updates | `ui_kit_backup/` in the project folder | Kept before the pygaki editor changes parentheses in the script, and before the launcher's [Update plugins] replaces files (`plugins/`). For development, so leave it out of releases |
 | Files the game and app exchange | `game/showpy_inbox.json`, `game/showpy_live.json`, `game/pykaki_preview.json`, `game/pykaki_goto.json`, `game/pykaki_screens.json` | Link files that only appear during development. Don't put them in the game's release (they come back if deleted) |
 
 When you build the game for release, leave out `*.flow.json`, `ui_kit_backup/` and the link files above. Each plugin's `README.md` is left out automatically when building.
@@ -23,7 +23,7 @@ When you build the game for release, leave out `*.flow.json`, `ui_kit_backup/` a
 | Where | What |
 | --- | --- |
 | `renpy.exe`, `launcher/`, `renpy/`, `lib/` … | the Ren'Py SDK as is (not in the add-on zip) |
-| `launcher/game/pygaki_launcher.rpy` | the [pygaki로 편집] (Edit with pygaki), [pygaki 안내서] (pygaki guide) and [플러그인 올리기] (Update plugins) buttons on the launcher's first screen, and the "기본 (Vanilla)" / "Pygaki" choice when creating a project. It doesn't change Ren'Py's own files; it only adds this one file |
+| `launcher/game/pygaki_launcher.rpy` | the [Edit with pygaki], [pygaki guide] and [Update plugins] buttons on the launcher's first screen, and the "Basic (Vanilla)" / "Pygaki" choice when creating a project. It doesn't change Ren'Py's own files; it only adds this one file |
 | `pygaki/template/` | the plugin template laid over new Pygaki projects |
 | `pygaki/app/pygaki.exe` | the pygaki desktop app. Started on its own, it asks you to choose a project folder |
 | `pygaki/pygaki_안내서.html`, `pygaki_guide_ja.html`, `pygaki_guide_en.html` | this guide (Korean, Japanese, English) |

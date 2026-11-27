@@ -41,6 +41,7 @@
 ##   media_loop      영상 되풀이 (기본 True)
 ##   media_pop       튀어나오며 나타남 (True / False, 또는 걸리는 초)
 ##   media_link      글을 그림에 묶기 (4.18). 묶은 뒤로 그림의 크기, 회전, 옮김, 네 점 변형, 그림 효과를 글도 같이 받음.
+##                   대사면 이름 칸도 그림 앞에 같이 그려져 함께 움직임 (진짜 이름 칸은 화면 밖으로 옮겨 둠).
 ##                   True, 또는 묶을 때의 그림 값 (media_zoom, media_angle, 가로 옮김, 세로 옮김): 그 값에서 달라진 만큼만 글이 따라감
 ##                       e "흔들려!" (box="media", media="images/say/cloud.png", media_angle=20, media_link=(1.0, 0, 0, 0))   # 글도 20도
 ##   media_quad      그림 네 모서리 자유변형 (4.18). 왼위, 오른위, 오른아래, 왼아래 모서리를 (가로, 세로)로 옮긴 비율 8개
@@ -374,7 +375,19 @@ init -10 python in say_style:
                 ## 글은 그림 쪽에서 보면 -a0만큼 돌아 있고, 크기는 zoom / z0배
                 z0, a0, x0, y0 = link
                 dz = zoom / z0 * scale
-                tt, tp = transform_about(tw_r, (W / 2.0 - tox, H / 2.0 - toy), -a0, dz, st, at)
+                ## 대사의 이름 칸도 글과 같이 판에 넣음 (진짜 이름 칸은 say_style이 화면 밖으로 치움, 세션 120)
+                src, (sx, sy) = tw_r, (tox, toy)
+                nm = name_render(text, W, H, st, at)
+                if nm is not None:
+                    nr, (nx, ny) = nm
+                    sw, sh = src.get_size()
+                    nw, nh = nr.get_size()
+                    minx, miny = min(sx, nx), min(sy, ny)
+                    comb = store.renpy.Render(int(math.ceil(max(sx + sw, nx + nw) - minx)), int(math.ceil(max(sy + sh, ny + nh) - miny)))
+                    comb.subpixel_blit(src, (sx - minx, sy - miny))
+                    comb.subpixel_blit(nr, (nx - minx, ny - miny))
+                    src, (sx, sy) = comb, (minx, miny)
+                tt, tp = transform_about(src, (W / 2.0 - sx, H / 2.0 - sy), -a0, dz, st, at)
                 vx, vy = (W / 2.0 - cx - x0) * dz, (H / 2.0 - cy - y0) * dz
                 vx, vy = _rot(vx, vy, -a0)
                 tlx, tly = mw / 2.0 + vx - tp[0], mh / 2.0 + vy - tp[1]
@@ -780,6 +793,48 @@ init -10 python in say_style:
             return store.renpy.Render(0, 0)
 
     GEOM_MARK = _GeomMark()
+
+    NAME_AWAY = -100000     # 묶은 그림 상자 줄에서 진짜 이름 칸을 치우는 세로 옮김 (say_style)
+
+    def _pos(v, room):
+        """스타일 자리 값 → 픽셀 (정수는 그대로, 1 이하 소수는 비율)."""
+        if v is None:
+            return 0.0
+        if hasattr(v, "absolute") and hasattr(v, "relative"):
+            return float(v.absolute) + float(v.relative) * room
+        if type(v).__name__ == "absolute":
+            return float(v)
+        if isinstance(v, float) and abs(v) <= 1.0:
+            return v * room
+        try:
+            return float(v)
+        except Exception:
+            return 0.0
+
+    def name_render(text, tw, th, st, at):
+        """묶은 그림 상자의 대사(text = say 화면의 "what")면 이름 칸 그림과, 글 왼쪽 위 기준 자리 (render, (x, y)).
+        두 자리는 대사창 안 xpos/ypos/anchor로 셈 (옮김 값은 뺌). 아니면 None."""
+        try:
+            if store.renpy.get_displayable("say", "what") is not text:
+                return None
+            nb = store.renpy.get_displayable("say", "namebox")
+        except Exception:
+            return None
+        if nb is None:
+            return None
+        sw, sh = store.config.screen_width, store.config.screen_height
+        try:
+            nr = store.renpy.render(nb, sw, sh, st, at)
+            npl, tpl = nb.get_placement(), text.get_placement()
+        except Exception:
+            return None
+        nw, nh = nr.get_size()
+        if nw <= 0 or nh <= 0:
+            return None
+        def place(p, w, h):
+            return (_pos(p[0], sw) - _pos(p[2], w), _pos(p[1], sh) - _pos(p[3], h))
+        n0, t0 = place(npl, nw, nh), place(tpl, tw, th)
+        return nr, (n0[0] - t0[0], n0[1] - t0[1])
 
     def mark_geom(rv, text, W, H):
         """편집 화면이 열려 있으면 글 그림(rv, 글 왼쪽 위 = rv 왼쪽 위)의 화면 자리를 포커스 목록에 남김."""
