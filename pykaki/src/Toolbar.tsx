@@ -104,12 +104,13 @@ function LiveBadge() {
 export function Toolbar() {
   const s = useStore();
   const [showVersions, setShowVersions] = useState(false);
+  const [askMemo, setAskMemo] = useState(false);
 
-  const saveVersion = async () => {
-    const memo = prompt('버전 메모 (예: 1장 완성, 엔딩 분기 추가 전)');
-    if (memo === null) return;
+  // 메모는 앱 안 작은 창으로 받는다 (데스크톱 앱(Electron)은 브라우저 prompt()를 지원하지 않아서, 2.0-beta1)
+  const saveVersion = async (memo: string) => {
+    setAskMemo(false);
     try {
-      await snapAdd(memo || '(메모 없음)', s.project);
+      await snapAdd(memo.trim() || '(메모 없음)', useStore.getState().project);
       s.say('버전을 저장했어요');
     } catch (e: any) {
       alert('버전 저장 실패: ' + e.message);
@@ -151,7 +152,7 @@ export function Toolbar() {
       <button onClick={() => saveProject(true)} title={keyOf('saveAs')}>다른 이름</button>
       <FolderButtons />
       <span className="sep" />
-      <button onClick={saveVersion}>버전 저장</button>
+      <button onClick={() => setAskMemo(true)} title="지금 대본을 이 컴퓨터에 한 판 남겨요. [버전 목록]에서 되돌려요">버전 저장</button>
       <button onClick={() => setShowVersions(true)}>버전 목록</button>
       <span className="sep" />
       <button onClick={() => exportRpyFile(false)}>.rpy 내보내기</button>
@@ -159,6 +160,7 @@ export function Toolbar() {
       </div>
       </div>
       {showVersions && <Versions onClose={() => setShowVersions(false)} />}
+      {askMemo && <VersionMemo onSave={saveVersion} onClose={() => setAskMemo(false)} />}
     </div>
   );
 }
@@ -225,6 +227,40 @@ function RunItems() {
         </button>
       )}
     </>
+  );
+}
+
+// [버전 저장] 메모 창: 칸 하나 + [저장]·[취소]. Enter 저장, Esc 취소, 바탕 클릭도 취소
+function VersionMemo({ onSave, onClose }: { onSave: (memo: string) => void; onClose: () => void }) {
+  const [memo, setMemo] = useState('');
+  useEffect(() => {
+    const key = (e: KeyboardEvent) => e.key === 'Escape' && (e.stopPropagation(), onClose());
+    window.addEventListener('keydown', key, true);
+    return () => window.removeEventListener('keydown', key, true);
+  }, [onClose]);
+  return (
+    <div className="modal-bg" onClick={onClose}>
+      <form
+        className="modal ver-memo"
+        onClick={(e) => e.stopPropagation()}
+        onSubmit={(e) => (e.preventDefault(), onSave(memo))}
+      >
+        <h3>버전 저장<Hint text="이 컴퓨터 안에만 저장돼요. 중요한 때는 [저장]으로 파일도 남겨요" topic="저장과 백업" /></h3>
+        <label className="tip" htmlFor="ver-memo-in">버전 메모 (비워도 돼요)</label>
+        <input
+          id="ver-memo-in"
+          autoFocus
+          value={memo}
+          maxLength={80}
+          placeholder="예: 1장 완성, 엔딩 분기 추가 전"
+          onChange={(e) => setMemo(e.target.value)}
+        />
+        <div className="row end">
+          <button type="button" onClick={onClose}>취소</button>
+          <button type="submit" className="primary">저장</button>
+        </div>
+      </form>
+    </div>
   );
 }
 

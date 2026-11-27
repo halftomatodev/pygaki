@@ -649,6 +649,8 @@ pre.rpy { background: #17191f; color: #d4d6dd; padding: 12px; border-radius: 8px
 .ver { display: flex; gap: 8px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--line); }
 .ver .when { color: var(--muted); font-size: 12px; white-space: nowrap; }
 .ver .memo { flex: 1; font-weight: 600; }
+.modal.ver-memo { width: min(420px, 92vw); display: flex; flex-direction: column; gap: 8px; }
+.modal.ver-memo input { width: 100%; box-sizing: border-box; }
 .swatch { border: 1.5px solid var(--line); padding: 6px 14px; color: var(--text); }
 .swatch.on { border-width: 2px; box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent); }
 .row > label.pick { width: auto; }
