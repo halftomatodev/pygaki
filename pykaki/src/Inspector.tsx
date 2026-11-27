@@ -336,7 +336,7 @@ function LineRow({ l, i, upd, drag }: { l: Line; i: number; upd: Upd; drag: Retu
     useStore.setState({ focusLineId: nl.id });
   };
 
-  const placeholder =({ narration: '내레이션', say: '대사', command: '렌파이 명령 (예: show alice smile / scene bg room / play music "a.ogg")', note: '작가용 메모 (주석으로 내보내요)' } as Record<string, string>)[l.type];
+  const placeholder = l.extend ? '앞 대사에 이어 쓸 글' : ({ narration: '내레이션', say: '대사', command: '렌파이 명령 (예: show alice smile / scene bg room / play music "a.ogg")', note: '작가용 메모 (주석으로 내보내요)' } as Record<string, string>)[l.type];
 
   return (
     <div className={'line t-' + l.type + (isStage(l.type) ? ' t-stage' : '') + drag.cls(i)} {...drag.row(i)} ref={pop.ref} {...pop.rowProps}>

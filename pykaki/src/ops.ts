@@ -67,9 +67,19 @@ export function setLink(b: BoxNode, handle: string, target: string | null) {
 }
 
 // 화자 선택 칸의 값: 'narration' | 'say:캐릭터id' | 연출 종류 | 'command' | 'note'
-export const speakerValue = (l: Line) => (l.type === 'say' ? 'say:' + (l.who ?? '') : l.type);
+// 앞 대사에 이어서(extend, FEATURE 36)는 내레이션 줄에 extend 표시. 고르기 창에서는 'extend' 값
+export const speakerValue = (l: Line) => (l.type === 'say' ? 'say:' + (l.who ?? '') : l.type === 'narration' && l.extend ? 'extend' : l.type);
 
 export function setSpeaker(l: Line, v: string) {
+  delete l.extend;
+  if (v === 'extend') {
+    l.type = 'narration';
+    l.extend = true;
+    delete l.who;
+    delete l.attr;
+    delete l.vno;
+    return;
+  }
   if (v.startsWith('say:')) {
     l.type = 'say';
     l.who = v.slice(4);

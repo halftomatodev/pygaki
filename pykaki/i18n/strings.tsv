@@ -3054,3 +3054,10 @@ pygaki editor 켜기, 누를 때마다 축약형 → 대형 → 숨김 (개발 �
 버전 메모 (비워도 돼요)	バージョンメモ (空でもOK)	Version note (optional)
 예: 1장 완성, 엔딩 분기 추가 전	例: 1章完成、エンディング分岐追加前	e.g. Chapter 1 done, before ending branch
 지금 대본을 이 컴퓨터에 한 판 남겨요. [버전 목록]에서 되돌려요	今の台本をこのPCに1版残します。[バージョン一覧]から戻せます	Keeps a copy of the current script on this PC. Restore it from [Versions]
+↳ 이어서	↳ 続き	↳ cont.
+↳ 앞 대사에 이어서	↳ 前のセリフに続ける	↳ Continue previous line
+앞 대사에 이어 쓸 글	前のセリフに続けるテキスト	Text to add to the previous line
+(앞 대사에 이어 쓸 글)	(前のセリフに続けるテキスト)	(text to add to the previous line)
+앞 대사에 이어서 (렌파이 extend)	前のセリフに続ける (Ren'Py extend)	Continue the previous line (Ren'Py extend)
+"앞 대사에 이어서" 줄에서는 [지우고 이어서]를 빼고 내보내요 (${b.title || b.id})	「前のセリフに続ける」行では[消して続ける]を外して書き出します ({0})	[Clear and continue] is left out on a "Continue previous line" line ({0})
+"앞 대사에 이어서" 줄 앞에 이 상자의 대사가 없어서, 앞 상자에서 마지막에 나온 대사에 이어져요 (${b.title || b.id})	「前のセリフに続ける」行の前にこのボックスのセリフがないので、前のボックスで最後に出たセリフに続きます ({0})	No dialogue comes before the "Continue previous line" line in this box, so it continues the last line from the previous box ({0})

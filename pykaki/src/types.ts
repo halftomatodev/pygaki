@@ -62,6 +62,7 @@ export interface Line {
   who?: string; // say, 캐릭터 show/hide일 때 캐릭터 id
   attr?: string; // say, 캐릭터 show일 때 이미지 속성(표정 등)
   text: string; // 연출 줄에서는 쓰지 않는다
+  extend?: boolean; // narration: 앞 대사에 이어서 (FEATURE 36, 원고 extend "글"). 화자·표정은 앞 대사 것
   kind?: ImageKind; // show/hide: 이미지 종류
   image?: string; // scene/배경: bg 뒤 이름, 기타: 이미지 이름
   at?: string; // show: left | right (비우면 가운데)

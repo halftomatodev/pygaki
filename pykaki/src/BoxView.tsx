@@ -555,7 +555,7 @@ function LineRow({ l, editing, active, cls, grip, onFocus, onKey, onText }: RowP
   // 플래그 바꾸기 줄은 글을 쓰지 않아 연출 줄처럼 그린다 (오른쪽 칸에서 고름)
   const stage = isStage(l.type) || l.type === 'flag' || l.type === 'input';
   const kind = l.type === 'flag' || l.type === 'input' ? 'pl-stage pl-flag' : stage ? 'pl-stage' : l.type === 'command' ? 'cmd' : l.type === 'note' ? 'note' : l.type === 'narration' ? 'narr' : 'say';
-  const empty = { narration: '(빈 내레이션)', say: '(빈 대사)', command: '(빈 명령)', note: '(빈 메모)' }[l.type as 'say'];
+  const empty = l.extend ? '(앞 대사에 이어 쓸 글)' : { narration: '(빈 내레이션)', say: '(빈 대사)', command: '(빈 명령)', note: '(빈 메모)' }[l.type as 'say'];
 
   let body;
   if (l.type === 'input') {
@@ -605,6 +605,7 @@ function LineRow({ l, editing, active, cls, grip, onFocus, onKey, onText }: RowP
         </span>
       )}
       {l.type === 'say' && l.attr && <span className="attr">({l.attr})</span>}
+      {l.type === 'narration' && l.extend && <span className="who ext" title="앞 대사에 이어서 (렌파이 extend)">↳ 이어서</span>}
       {l.type === 'note' && <span className="mark">#</span>}
       {isSayLine(l) && l.say?.box === 'media' && l.say.media_link && <LinkMark />}
       {body}

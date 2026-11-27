@@ -84,6 +84,7 @@ label ward.n1:  # @node:n1 도입
 | `effect="slidein"`, `effect="slidein|shake"` | `effect` | 등장 효과. 두 효과 겹치기는 `|` (pygaki 2.0, `FEATURE` 3) |
 | 글 안의 `{shader=shake}글{/shader}` | 대사 글 그대로 | 글의 일부에만 등장 효과(렌파이 텍스트 태그). 값은 `effect`와 같은 문법. 줄에 `effect`가 없으면 대본 편집기가 `effect="typewriter"`를 붙여 내보내고(없으면 렌파이가 멈춤), 손으로 쓴 원고는 `say_style`이 같은 일을 함 |
 | 글 안의 `{clear}` (대본 편집기 태그 상자 [지우고 이어서]) | 대사 글 그대로 | 원고에는 없다. 대본 편집기가 그 자리에서 같은 화자·괄호 값의 대사 여러 줄로 나눠 쓰고(걸친 짝 태그는 조각마다 닫고 다시 염. 둘째 조각부터 앞 조각들을 `{alpha=0}{outlinecolor=#0000}…{/outlinecolor}{/alpha}{fast}`로 앞에 다시 넣어 자리만 남김), `# @l:` 표시는 첫 조각에만 붙인다. 그래서 둘째 조각부터는 게임 안 편집(대사 위치 등)이 대본 편집기로 돌아가지 않는다 |
+| `extend "글"` (대본 편집기 대사 버블 [↳ 앞 대사에 이어서]) | 내레이션 줄의 `extend: true` (`FEATURE` 36) | 앞 대사에 이어서 씀(렌파이 `extend`). 화자·표정·괄호 값은 렌파이가 앞 대사 것을 이어받고, 이 줄 괄호 값을 덧붙인다(글 색처럼 글 전체에 걸리는 값은 앞 글까지 바뀜). pygaki 플러그인 `say_style`은 이 줄의 화자를 앞 대사 캐릭터로 본다. 사이에 그림·표정 줄을 둘 수 있다. `# @l:` 표시는 다른 대사 줄처럼 붙인다. 글 안의 `{clear}`는 나누지 않고 뺀다 |
 | `box="bubble"`, `box="pill"` | `box` | 글 상자: 말풍선, 둥근 테두리 (pygaki 플러그인 `text_box.rpy`, `FEATURE` 3) |
 | `tail="top"`, `tail=None` | `tail` (`bottom` `top` `left` `right` `none`) | 말풍선 꼬리. 비우면 상자 기본(말풍선은 아래, 둥근 테두리는 없음) |
 | `box_rotate=-4` | `box_rotate` | 상자와 글 기울기 (도) |

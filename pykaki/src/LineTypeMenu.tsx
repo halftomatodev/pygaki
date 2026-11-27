@@ -22,7 +22,7 @@ interface Col { title: string; opts: Opt[] }
 export type TypeMenuAt = { line: string; where: 'box' | 'insp' } | null;
 
 function columns(l: Line, chars: { id: string; name: string }[], val: string): Col[] {
-  const say: Opt[] = [{ value: 'narration', label: '내레이션' }, ...chars.map((c) => ({ value: 'say:' + c.id, label: c.name }))];
+  const say: Opt[] = [{ value: 'narration', label: '내레이션' }, { value: 'extend', label: '↳ 앞 대사에 이어서' }, ...chars.map((c) => ({ value: 'say:' + c.id, label: c.name }))];
   if (l.type === 'say' && !chars.some((c) => c.id === l.who)) say.push({ value: val, label: '? ' + l.who });
   return [
     { title: '대사', opts: say },

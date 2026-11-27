@@ -691,6 +691,8 @@ input[type='range'] { flex: 1; padding: 0; background: transparent; border: none
 [data-look^='apple'] .badge { border-radius: 6px; background: var(--fill); color: var(--muted); }
 [data-look^='apple'] .badge.start { background: #34c759; color: #fff; }
 [data-look^='apple'] .pl .who { border-radius: 6px; background: color-mix(in srgb, var(--c) 28%, var(--panel)); }
+/* 앞 대사에 이어서 (extend): 화자 자리에 옅은 회색 */
+.pl .who.ext { --c: #9ca3af; font-weight: 600; color: var(--muted); }
 [data-look^='apple'] .pl.pl-stage code { border-radius: 6px; }
 [data-look^='apple'] .side { border: none; border-radius: 14px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); }
 [data-look^='apple'] :is(select, input, textarea) { border-color: transparent; border-radius: 8px; background: var(--fill-2); }

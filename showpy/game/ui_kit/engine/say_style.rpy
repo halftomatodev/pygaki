@@ -176,6 +176,14 @@ init -10 python in say_style:
     def say_arguments(who, *args, **kwargs):
         a = alias_map()
 
+        ## extend "글"(앞 대사에 이어서): 화자는 앞 대사의 캐릭터로 봅니다 (편집기 캐릭터 값, 효과·루비 판단)
+        orig_who = who
+        if who is getattr(store, "extend", None) and hasattr(who, "get_who"):
+            try:
+                who = who.get_who()
+            except Exception:
+                pass
+
         ## 편집기용: 이 줄의 정보 기록 (원고에 적힌 값 그대로)
         info = LineInfo()
         info.who = who
@@ -254,7 +262,7 @@ init -10 python in say_style:
 
         ## 다른 곳에서 이미 지정해 둔 콜백이 있으면 이어서 호출
         if _previous is not None:
-            return _previous(who, *args, **kwargs)
+            return _previous(orig_who, *args, **kwargs)
 
         return args, kwargs
 

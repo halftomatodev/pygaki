@@ -379,6 +379,13 @@ export function generateRpy(p: Project, opts: { endMarks?: boolean; newMark?: bo
         const tail = fa.length ? ` (${fa.join(', ')})` : '';
         // {clear}(지우고 이어서): 그 자리에서 같은 화자의 대사 여러 줄로 나눈다. 클릭하면 앞 글이 지워지고 이어진다
         const parts = S.allowTextTags ? splitClear(l.text) : [l.text];
+        // 앞 대사에 이어서 (FEATURE 36): extend "글". 화자·표정·대사 값은 렌파이가 앞 대사 것을 이어받고, 여기 값을 덧붙인다
+        if (l.type === 'narration' && l.extend) {
+          const li = b.lines.indexOf(l);
+          if (!b.lines.slice(0, li).some((x) => x.type === 'say' || x.type === 'narration')) W.push({ level: 'warn', msg: `"앞 대사에 이어서" 줄 앞에 이 상자의 대사가 없어서, 앞 상자에서 마지막에 나온 대사에 이어져요 (${b.title || b.id})`, nodeId: b.id });
+          if (parts.length > 1) W.push({ level: 'warn', msg: `"앞 대사에 이어서" 줄에서는 [지우고 이어서]를 빼고 내보내요 (${b.title || b.id})`, nodeId: b.id });
+          return body.push('extend ' + q(parts.length > 1 ? l.text.replace(/\{clear\}/g, '') : l.text) + tail);
+        }
         if (l.type === 'narration') return parts.forEach((t) => body.push(q(t) + tail));
         // 음성 (FEATURE 16): 대사 바로 앞에 voice 줄. 직접 고른 파일, 아니면 audio/voice에서 이름 규칙으로 찾은 파일
         if (S.voice) {
