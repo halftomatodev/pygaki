@@ -186,6 +186,7 @@ export interface ScreenItem {
   sfxIn?: string; // 나타날 때 효과음 (game 기준 경로)
   sfxOut?: string; // 사라질 때 효과음
   edit?: boolean; // look (FEATURE 22): 게임에서 꼴로 플래그 값을 바꿀 수 있음 (슬라이더·막대는 끌기, 칸·별은 누르기, 스위치는 누르기, 풀다운·콤보는 펼쳐서 고르기). 없으면 보이기만
+  z?: number; // 앞뒤 (FEATURE 35): 클수록 앞, 같으면 넣은 차례. 없으면 0. 끌어 놓기 항목은 draggroup 한 층 (screens.ts drawOrder)
   voice?: VoiceGlow; // voice (FEATURE 34): 음성이 나오는 동안 소리 크기에 맞춰 움직이는 빛. 크기는 w·h
 }
 // 음성 빛 (FEATURE 34). 비운 값은 처음 값 (screens.ts VOICE_DEF)

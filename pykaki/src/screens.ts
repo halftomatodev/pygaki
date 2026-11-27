@@ -84,7 +84,7 @@ export function screensMeta(p: Project): string {
       ...(hud ? { w, h, anchor: s.anchor ?? 'tl', dx: s.dx ?? 0, dy: s.dy ?? 0 } : {}),
       ...(inner ? { cw: inner.cw, ch: inner.ch } : {}),
       ...(s.bg ? { bg: s.bg, bgAlpha: s.bgAlpha ?? 100 } : {}),
-      items: s.items.map((it) => {
+      items: itemsInOrder(s).map((it) => {
         const o: Record<string, unknown> = { id: it.id, kind: it.kind, x: Math.round(it.x), y: Math.round(it.y) };
         if (it.kind === 'text' || it.kind === 'textbutton' || it.kind === 'drop') o.text = it.text ?? '';
         if (it.size) o.size = it.size;
@@ -158,7 +158,7 @@ export function normalizeScreens(raw: unknown): ScreenDef[] | undefined {
       ...s,
       name: typeof s.name === 'string' ? s.name : 'screen_' + s.id,
       title: typeof s.title === 'string' ? s.title : '',
-      items: Array.isArray(s.items) ? s.items.filter((it: ScreenItem) => it && typeof it.id === 'string').map((it: ScreenItem) => ({ ...it, x: Number(it.x) || 0, y: Number(it.y) || 0, ...(it.acts !== undefined ? { acts: Array.isArray(it.acts) ? it.acts.filter((a) => typeof a === 'string') : [] } : {}) })) : [],
+      items: Array.isArray(s.items) ? s.items.filter((it: ScreenItem) => it && typeof it.id === 'string').map((it: ScreenItem) => ({ ...it, x: Number(it.x) || 0, y: Number(it.y) || 0, z: Number.isFinite(Number(it.z)) && Number(it.z) ? Math.round(Number(it.z)) : undefined, ...(it.acts !== undefined ? { acts: Array.isArray(it.acts) ? it.acts.filter((a) => typeof a === 'string') : [] } : {}) })) : [],
     }));
 }
 
@@ -559,21 +559,32 @@ function dragCode(p: Project, s: ScreenDef, it: ScreenItem, I0: string): string[
   return withCond(p, it, mark(out, 'i:' + it.id), I0);
 }
 
-const isDD = (it: ScreenItem) => isDragged(it) || it.kind === 'drop';
+export const isDD = (it: ScreenItem) => isDragged(it) || it.kind === 'drop';
 
-// 화면의 항목들. 끌어 놓기 항목은 처음 나온 자리에 draggroup으로 모은다 (놓는 곳은 같은 draggroup 안에서만 받음)
+// 화면 항목의 그리는 차례 (FEATURE 35): 앞뒤 숫자 z가 작은 것부터 (뒤 → 앞), 같으면 넣은 차례.
+// 렌파이 screen에는 항목 zorder가 없어 원고를 이 차례로 쓴다. 끌어 놓기 항목은 draggroup 하나로 한 층이고,
+// 그 층 자리는 안 항목 z 중 가장 작은 값 (같으면 처음 나온 자리). 안에서도 z 차례 (게임에서 끌면 렌파이가 맨 위로 올림)
+export type ItemLayer = { group: false; it: ScreenItem } | { group: true; items: ScreenItem[] };
+export const zOf = (it: ScreenItem) => (Number.isFinite(it.z) ? (it.z as number) : 0);
+const byZ = <T extends { z: number; i: number }>(a: T, b: T) => a.z - b.z || a.i - b.i;
+export function drawOrder(s: ScreenDef): ItemLayer[] {
+  const dd = s.items.map((it, i) => ({ it, i, z: zOf(it) })).filter((o) => isDD(o.it)).sort(byZ);
+  const layers: { z: number; i: number; l: ItemLayer }[] = s.items.map((it, i) => ({ it, i })).filter((o) => !isDD(o.it)).map(({ it, i }) => ({ z: zOf(it), i, l: { group: false, it } as ItemLayer }));
+  if (dd.length) layers.push({ z: dd[0].z, i: Math.min(...dd.map((o) => o.i)), l: { group: true, items: dd.map((o) => o.it) } });
+  return layers.sort(byZ).map((o) => o.l);
+}
+// 그리는 차례대로 펼친 항목 (앱 판·pykaki_screens.json. 게임의 pygaki editor는 뒤 것을 위로 보고 고름)
+export const itemsInOrder = (s: ScreenDef) => drawOrder(s).flatMap((l) => (l.group ? l.items : [l.it]));
+
+// 화면의 항목들. 끌어 놓기 항목은 draggroup 하나로 모은다 (놓는 곳은 같은 draggroup 안에서만 받음)
 function itemsCode(p: Project, s: ScreenDef, I0: string): string[] {
   const out: string[] = [];
-  let grouped = false;
-  for (const it of s.items) {
-    if (!isDD(it)) {
-      out.push(...itemCode(p, s, it, I0));
-      continue;
+  for (const l of drawOrder(s)) {
+    if (!l.group) out.push(...itemCode(p, s, l.it, I0));
+    else {
+      const inner = l.items.flatMap((d) => dragCode(p, s, d, I0 + '    '));
+      if (inner.length) out.push(`${I0}draggroup:`, ...inner);
     }
-    if (grouped) continue;
-    grouped = true;
-    const inner = s.items.filter(isDD).flatMap((d) => dragCode(p, s, d, I0 + '    '));
-    if (inner.length) out.push(`${I0}draggroup:`, ...inner);
   }
   return out;
 }

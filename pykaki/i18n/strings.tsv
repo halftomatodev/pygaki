@@ -3047,3 +3047,6 @@ pygaki editor 켜기, 누를 때마다 축약형 → 대형 → 숨김 (개발 �
 게임 창 pygaki editor: 축약형 → 대형 → 숨김 (게임과 연결됐을 때. 게임 창에서도 F9)	ゲームウィンドウの pygaki editor:簡易 → 大きい → 非表示 (ゲーム接続時。ゲームウィンドウでも F9)	Game window pygaki editor: Compact → Full → Hidden (when connected. F9 in the game window too)
 게임 창 pygaki editor 패널을 바꿔요. ${keyOf('gamePanel')}를 누를 때마다 축약형(자리 옮기기만) → 대형(값 칸 전부) → 숨김(여기서만 고침) 차례로 돌아요. 끄기는 게임 창에서 Esc. 게임 창에서도 같은 키예요	ゲームウィンドウの pygaki editor パネルを切り替えます。{0} を押すたびに 簡易(位置の移動のみ) → 大きい(値の欄すべて) → 非表示(ここだけで編集) の順に回ります。閉じるのはゲームウィンドウで Esc。ゲームウィンドウでも同じキーです	Switches the game window's pygaki editor panel. Each press of {0} cycles Compact (moving only) → Full (all value fields) → Hidden (edit here only). Close with Esc in the game window. Same key in the game window
 게임 창 pygaki editor: ${e.open ? GAME_VIEW_LABEL[gv] : '꺼짐'} (${keyOf('gamePanel')} → ${GAME_VIEW_LABEL[e.open ? nextGameView(gv) : 'compact']})	ゲームウィンドウの pygaki editor:{0} ({1} → {2})	Game window pygaki editor: {0} ({1} → {2})
+클수록 앞 (같으면 넣은 차례)	大きいほど手前 (同じなら追加した順)	Higher is in front (ties: order added)
+클수록 앞에 그려요. 같으면 먼저 넣은 것이 뒤예요	大きいほど手前に描きます。同じなら先に追加したものが後ろです	Higher values draw in front. On a tie, the one added first is behind
+끌어 놓기 항목끼리는 한 층으로 묶여요. 게임에서 끌면 맨 위로 올라와요	ドラッグ&ドロップの項目どうしは一つの層にまとまります。ゲームでドラッグすると一番上に来ます	Drag-and-drop items are grouped into one layer. Dragging one in the game brings it to the top

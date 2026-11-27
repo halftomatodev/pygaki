@@ -16,7 +16,7 @@ import { pickGameFile } from './StageCards';
 import type { Project, ScreenAct, ScreenDef, ScreenItem, ScreenItemKind } from './types';
 import { uid } from './util';
 import { VoiceGlowPreview } from './VoiceGlowPreview';
-import { VOICE_PALETTES, VOICE_SHAPES, voiceOpt, voiceSize, ANIM_LABEL, lookCode, lookSize, actOf, addHudTemplate, ANCHORS, BAR_H, BAR_W, canDrag, DROP_H, DROP_W, hasAct, HUD_H, HUD_TEMPLATES, HUD_W, hudInner, hudPos, hudSize, hudTemplateCode, isDragged, isHud, newScreenName, screenNameProblem, SCREENS_FILE, screensCode, type HudTemplate } from './screens';
+import { VOICE_PALETTES, VOICE_SHAPES, voiceOpt, voiceSize, ANIM_LABEL, lookCode, lookSize, actOf, addHudTemplate, ANCHORS, BAR_H, BAR_W, canDrag, DROP_H, DROP_W, hasAct, HUD_H, HUD_TEMPLATES, HUD_W, hudInner, hudPos, hudSize, hudTemplateCode, isDD, isDragged, isHud, itemsInOrder, newScreenName, screenNameProblem, SCREENS_FILE, screensCode, type HudTemplate } from './screens';
 import { PickMenu, type PickEntry } from './FlagMenu';
 import { ActionInput, CondInput, firstAction } from './FlagFields';
 import { evalExpr, initVars, UNKNOWN, type Vars } from './trace';
@@ -278,7 +278,8 @@ export function ScreenArt({ sc, scale, vars, sel = null, onMove, onHudDown }: { 
   const box = hud ? hudPos(sc, look.width, look.height) : { x: 0, y: 0, w: look.width, h: look.height };
   const alpha = (sc.bgAlpha ?? 100) / 100;
   const inner = hudInner(sc);
-  const items = sc.items.map((it) => {
+  // 그리는 차례 (FEATURE 35): 원고와 같게 앞뒤 숫자 차례 (뒤 것이 위)
+  const items = itemsInOrder(sc).map((it) => {
     const v = shown(it, vars);
     if (v === false && !onMove) return null;
     return <StageItem key={it.id} sc={sc} it={it} scale={scale} on={it.id === sel} onMove={onMove} vars={vars} hidden={v === false} />;
@@ -939,6 +940,24 @@ function ItemCard({ sc, it, upd, remove, dup }: { sc: ScreenDef; it: ScreenItem;
         {num('x', 'x')}
         {num('y', 'y')}
         <span className="tip">{hud ? 'HUD 왼쪽 위에서 (px)' : '왼쪽 위 (px)'}</span>
+      </div>
+      <div className="row">
+        <label>앞뒤</label>
+        <input
+          type="number"
+          className="sf-num"
+          placeholder="0"
+          title="클수록 앞에 그려요. 같으면 먼저 넣은 것이 뒤예요"
+          value={it.z ?? ''}
+          onChange={(e) =>
+            upd((x) => {
+              const n = Math.round(Number(e.target.value));
+              if (e.target.value === '' || !Number.isFinite(n) || n === 0) delete x.z;
+              else x.z = Math.max(-999, Math.min(999, n));
+            }, 'scr-z' + it.id)
+          }
+        />
+        <span className="tip">{isDD(it) ? '끌어 놓기 항목끼리는 한 층으로 묶여요. 게임에서 끌면 맨 위로 올라와요' : '클수록 앞 (같으면 넣은 차례)'}</span>
       </div>
       <div className="row">
         <button onClick={dup}>복제</button>

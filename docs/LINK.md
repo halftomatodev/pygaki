@@ -437,7 +437,7 @@ pygaki 데스크톱 앱의 [GUI 편집] 화면이 게임 안 편집기를 바깥
 ```
 
 - 화면: `kind`(`hud`, `full`), HUD면 `w` `h` `anchor` `dx` `dy`, 스크롤이면 `cw` `ch`(안쪽 크기), 배경 `bg` `bgAlpha`
-- 항목: `id` `kind` `x` `y`(화면 칸 왼쪽 위 기준). 글 종류(`text` `textbutton` `drop`)는 `text`, 그림은 `image`, 크기를 아는 것(`bar` `drop` `look`)은 `w` `h`, `size` `color` `flag` `drag`. 글·그림 크기는 게임이 그려 보고 잽니다
+- 항목: 그리는 차례(뒤 → 앞, 대본 편집기 `FEATURE` 35의 앞뒤 숫자 차례. 원고 `pykaki_screens.rpy`도 같은 차례)로 놓입니다. `id` `kind` `x` `y`(화면 칸 왼쪽 위 기준). 글 종류(`text` `textbutton` `drop`)는 `text`, 그림은 `image`, 크기를 아는 것(`bar` `drop` `look`)은 `w` `h`, `size` `color` `flag` `drag`. 글·그림 크기는 게임이 그려 보고 잽니다
 - `pykaki_screens.rpy`의 표시: `screen 이름():  # @s:화면 id`, 항목 첫 줄 끝 `  # @i:항목 id`. 게임은 이 표시로 고칠 줄을 찾습니다. HUD는 화면 다음 `fixed:`의 `xysize` `align` `offset`(없으면 넣고 0이면 지움)과 스크롤 `viewport:`의 `xysize`, 항목은 그 블록의 `pos`(끌기 항목은 `_PkBack(x, y)`도)와 글(`text "…"`, `textbutton "…"`, 놓는 곳 안의 `text "…"`)을 고칩니다. 글은 JSON 글자 그대로(큰따옴표)
 - 저장(Ctrl+S): `pykaki_screens.rpy`를 고치고(앞 것은 `ui_kit_backup/`), `pykaki_screens.json`에도 고친 값을 적고, `showpy_inbox.json`에 `screen`/`screen_item` 기록을 더한 뒤 다시 불러옵니다. 표시를 못 찾으면(예전 대본 편집기로 내보낸 원고) 저장하지 않고 알립니다
 - 대본 편집기는 받아 적은 뒤 같은 값으로 다시 내보내므로 원고가 같아집니다
