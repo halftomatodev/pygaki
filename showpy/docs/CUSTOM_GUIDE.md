@@ -667,7 +667,7 @@ define tmenu.items = [
 | 항목 바꾸기 | `define tmenu.pause_items = [ { "id": "return", "text": _("계속하기"), "action": Return(), "xalign": 0.08, "yalign": 0.35 }, … ]` |
 | 항목 자리 | ESC 메뉴를 연 채로 F9 → "타이틀 메뉴" 탭에서 끌고 Ctrl+S (`tmenu.pause_layout`으로 저장) |
 
-기본 항목은 돌아가기(`Return()`), 저장하기(`ShowMenu("save")`), 불러오기(`ShowMenu("load")`), 환경설정(`ShowMenu("preferences")`), 대사록(`ShowMenu("history")`), 메인 메뉴(`MainMenu()`), 종료하기(`Quit()`)입니다. 저장 화면 안의 "돌아가기"는 렌파이 기본처럼 게임으로 돌아갑니다.
+기본 항목은 돌아가기(`Return()`), 저장하기(`ShowMenu("save")`), 불러오기(`ShowMenu("load")`), 환경설정(`ShowMenu("preferences")`), 대사록(`ShowMenu("history")`), 버전정보(`ShowMenu("about")`), 조작방법(`ShowMenu("help")`, PC에서만), 메인 메뉴(`MainMenu()`), 종료하기(`Quit()`)입니다. 저장 화면 안의 "돌아가기"는 렌파이 기본처럼 게임으로 돌아갑니다.
 
 ## 선택지 — 스크립트 괄호 + `ui_kit/choice_menu_config.rpy`
 

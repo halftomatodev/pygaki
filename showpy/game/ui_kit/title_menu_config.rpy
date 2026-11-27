@@ -206,31 +206,36 @@ define tmenu.pause_labels = {
     "subtitle": { "text": "", "xalign": 0.5, "yalign": 0.2, "size": 26 },
 }
 
-## 항목 목록. 안 적으면(None) 아래 7개가 기본입니다:
-##   돌아가기 / 저장하기 / 불러오기 / 환경설정 / 대사록 / 메인 메뉴 / 종료하기
+## 항목 목록. 안 적으면(None) 아래 9개가 기본입니다:
+##   돌아가기 / 저장하기 / 불러오기 / 환경설정 / 대사록 / 버전정보 / 조작방법 / 메인 메뉴 / 종료하기
 ## 바꾸고 싶을 때만 주석(##)을 풀고 고치세요. 쓰는 법은 위의 tmenu.items와 같습니다.
 ## "action"에 쓸 수 있는 것:
 ##   Return()                 게임으로 돌아가기
-##   ShowMenu("save")         저장 화면 ("load" 불러오기, "preferences" 환경설정, "history" 대사록, "help" 조작방법)
+##   ShowMenu("save")         저장 화면 ("load" 불러오기, "preferences" 환경설정, "history" 대사록,
+##                            "about" 버전정보, "help" 조작방법)
 ##   MainMenu()               메인 메뉴로 (확인 창이 나옴)
 ##   Quit()                   게임 끄기 (확인 창이 나옴)
 ## "show_if"는 보일 조건: 예) "renpy.variant('pc')" PC에서만
 ##
 ## define tmenu.pause_items = [
 ##     { "id": "return",  "text": _("돌아가기"), "action": Return(),
-##       "xalign": 0.06, "yalign": 0.26, "rotate": -4, "hover_zoom": 1.15, "hover_offset": (10, 0) },
+##       "xalign": 0.06, "yalign": 0.20, "rotate": -4, "hover_zoom": 1.15, "hover_offset": (10, 0) },
 ##     { "id": "save",    "text": _("저장하기"), "action": ShowMenu("save"),
-##       "xalign": 0.07, "yalign": 0.345, "rotate": -2.7, "hover_zoom": 1.15, "hover_offset": (10, 0) },
+##       "xalign": 0.07, "yalign": 0.28, "rotate": -3, "hover_zoom": 1.15, "hover_offset": (10, 0) },
 ##     { "id": "load",    "text": _("불러오기"), "action": ShowMenu("load"),
-##       "xalign": 0.08, "yalign": 0.43, "rotate": -1.3, "hover_zoom": 1.15, "hover_offset": (10, 0) },
+##       "xalign": 0.08, "yalign": 0.36, "rotate": -2, "hover_zoom": 1.15, "hover_offset": (10, 0) },
 ##     { "id": "prefs",   "text": _("환경설정"), "action": ShowMenu("preferences"),
-##       "xalign": 0.09, "yalign": 0.515, "rotate": 0, "hover_zoom": 1.15, "hover_offset": (10, 0) },
+##       "xalign": 0.09, "yalign": 0.44, "rotate": -1, "hover_zoom": 1.15, "hover_offset": (10, 0) },
 ##     { "id": "history", "text": _("대사록"), "action": ShowMenu("history"),
-##       "xalign": 0.10, "yalign": 0.60, "rotate": 1.3, "hover_zoom": 1.15, "hover_offset": (10, 0) },
+##       "xalign": 0.10, "yalign": 0.52, "rotate": 0, "hover_zoom": 1.15, "hover_offset": (10, 0) },
+##     { "id": "about",   "text": _("버전정보"), "action": ShowMenu("about"),
+##       "xalign": 0.11, "yalign": 0.60, "rotate": 1, "hover_zoom": 1.15, "hover_offset": (10, 0) },
+##     { "id": "help",    "text": _("조작방법"), "action": ShowMenu("help"), "show_if": "renpy.variant('pc')",
+##       "xalign": 0.12, "yalign": 0.68, "rotate": 2, "hover_zoom": 1.15, "hover_offset": (10, 0) },
 ##     { "id": "main",    "text": _("메인 메뉴"), "action": MainMenu(), "show_if": "not _in_replay",
-##       "xalign": 0.11, "yalign": 0.685, "rotate": 2.7, "hover_zoom": 1.15, "hover_offset": (10, 0) },
+##       "xalign": 0.13, "yalign": 0.76, "rotate": 3, "hover_zoom": 1.15, "hover_offset": (10, 0) },
 ##     { "id": "quit",    "text": _("종료하기"), "action": Quit(), "show_if": "renpy.variant('pc')",
-##       "xalign": 0.12, "yalign": 0.77, "rotate": 4, "hover_zoom": 1.15, "hover_offset": (10, 0) },
+##       "xalign": 0.14, "yalign": 0.84, "rotate": 4, "hover_zoom": 1.15, "hover_offset": (10, 0) },
 ## ]
 define tmenu.pause_items = None
 

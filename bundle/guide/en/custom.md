@@ -1,4 +1,4 @@
-<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ e1d58b6543 -->
+<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ 1133530c9e -->
 # pygaki plugin customization guide
 
 2026-11-25 · pygaki v1.9 (changes per version are in `READ_ME_FIRST.md` and `CHANGELOG.md`)
@@ -670,7 +670,7 @@ Pressing ESC or right-clicking during play dims the game screen and shows a menu
 | Change items | `define tmenu.pause_items = [ { "id": "return", "text": _("계속하기"), "action": Return(), "xalign": 0.08, "yalign": 0.35 }, … ]` |
 | Item positions | with the ESC menu open, F9 → drag in the "title menu" tab and Ctrl+S (saved to `tmenu.pause_layout`) |
 
-The default items are return (`Return()`), save (`ShowMenu("save")`), load (`ShowMenu("load")`), preferences (`ShowMenu("preferences")`), history (`ShowMenu("history")`), main menu (`MainMenu()`) and quit (`Quit()`). "Return" inside the save screen goes back to the game, like Ren'Py's default.
+The default items are return (`Return()`), save (`ShowMenu("save")`), load (`ShowMenu("load")`), preferences (`ShowMenu("preferences")`), history (`ShowMenu("history")`), about (`ShowMenu("about")`), help (`ShowMenu("help")`, PC only), main menu (`MainMenu()`) and quit (`Quit()`). "Return" inside the save screen goes back to the game, like Ren'Py's default.
 
 ## Choices — script parentheses + `ui_kit/choice_menu_config.rpy`
 

@@ -1,4 +1,4 @@
-<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ e1d58b6543 -->
+<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ 1133530c9e -->
 # pygaki プラグイン カスタムガイド
 
 2026-11-25 · pygaki v1.9(バージョンごとの変更は `READ_ME_FIRST.md` と `CHANGELOG.md`)
@@ -670,7 +670,7 @@ define tmenu.items = [
 | 項目を変える | `define tmenu.pause_items = [ { "id": "return", "text": _("계속하기"), "action": Return(), "xalign": 0.08, "yalign": 0.35 }, … ]` |
 | 項目の位置 | ESC メニューを開いたまま F9 →「タイトルメニュー」タブでドラッグして Ctrl+S(`tmenu.pause_layout` に保存) |
 
-基本の項目は、戻る(`Return()`)、セーブ(`ShowMenu("save")`)、ロード(`ShowMenu("load")`)、環境設定(`ShowMenu("preferences")`)、履歴(`ShowMenu("history")`)、メインメニュー(`MainMenu()`)、終了(`Quit()`)です。セーブ画面の中の「戻る」は、Ren'Py 標準と同じくゲームに戻ります。
+基本の項目は、戻る(`Return()`)、セーブ(`ShowMenu("save")`)、ロード(`ShowMenu("load")`)、環境設定(`ShowMenu("preferences")`)、履歴(`ShowMenu("history")`)、バージョン情報(`ShowMenu("about")`)、操作方法(`ShowMenu("help")`、PC のみ)、メインメニュー(`MainMenu()`)、終了(`Quit()`)です。セーブ画面の中の「戻る」は、Ren'Py 標準と同じくゲームに戻ります。
 
 ## 選択肢 — スクリプトの括弧 + `ui_kit/choice_menu_config.rpy`
 

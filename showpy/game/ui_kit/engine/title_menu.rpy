@@ -206,6 +206,8 @@ init -10 python in tmenu:
             ("load", _("불러오기"), store.ShowMenu("load"), None),
             ("prefs", _("환경설정"), store.ShowMenu("preferences"), None),
             ("history", _("대사록"), store.ShowMenu("history"), None),
+            ("about", _("버전정보"), store.ShowMenu("about"), None),
+            ("help", _("조작방법"), store.ShowMenu("help"), "renpy.variant('pc') or (renpy.variant('web') and not renpy.variant('mobile'))"),
             ("main", _("메인 메뉴"), store.MainMenu(), "not _in_replay"),
             ("quit", _("종료하기"), store.Quit(), "renpy.variant('pc')"),
             ]
@@ -213,12 +215,14 @@ init -10 python in tmenu:
         n = len(rows)
         ## 픽셀 퍼펙트(레트로 해상도) 게임은 돌리지 않는다: 픽셀 글꼴을 조금 돌리면 격자에 걸려 삐뚤빼뚤해진다
         tilt = 0.0 if renpy.config.nearest_neighbor else 8.0
+        ## 항목 9개를 0.2 ~ 0.84 사이에 고르게 (2.0-beta1에 버전정보·조작방법을 더함)
+        step = 0.64 / max(1, n - 1)
         for i, (iid, text, action, cond) in enumerate(rows):
             d = dict(common)
             d.update({
                 "id": iid, "text": text, "action": action,
                 "xalign": 0.06 + 0.01 * i,
-                "yalign": round(0.26 + 0.085 * i, 3),
+                "yalign": round(0.2 + step * i, 3),
                 "rotate": round(tilt * (i / float(max(1, n - 1)) - 0.5), 1),
                 })
             if cond:
