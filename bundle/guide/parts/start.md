@@ -37,7 +37,7 @@
 
 | 폴더 | 하는 일 | 고치는 파일 |
 | --- | --- | --- |
-| `ui_kit` | 타이틀 메뉴, 선택지, 커서·클릭 대기 표시·대사 소리·텍스트 속도·퀵메뉴, 대사 한 줄 스타일·이름 위치·속도·등장 효과·루비, 이미지·영상 배치, 효과 폴더(`ui_kit/effects/`), pygaki editor | `title_menu_config.rpy`, `choice_menu_config.rpy`, `custom_ui_config.rpy`, `say_style_config.rpy`, `stage_config.rpy` |
+| `ui_kit` | 타이틀 메뉴, 선택지, 커서·클릭 대기 표시·대사 소리·텍스트 속도·퀵메뉴, 대사 한 줄 스타일·이름 위치·속도·등장 효과·루비, 이미지·영상 배치, 효과 폴더(`ui_kit/effects/`), pygaki editor | `title_menu_config.rpy`, `choice_menu_config.rpy`, `custom_ui_config.rpy`, `quick_menu_config.rpy`, `say_style_config.rpy`, `stage_config.rpy` |
 | `screen_fx` | 화면 전체 셰이더. 1번(기본 효과) 위에 2번(덮개)을 겹침. 장면마다 바꾸기와 전환, 글자 빼기, 타이틀 일렁임 | `screen_fx_config.rpy`, 셰이더마다 `<이름>_config.rpy` |
 | `hotkeys` | 단축키 추가·해제, 조작방법 화면 설명 | `hotkeys_config.rpy` |
 | `splash` | 타이틀 전에 나오는 로고·경고·조작 방법 페이지 | `splash_config.rpy` |

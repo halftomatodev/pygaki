@@ -1337,3 +1337,29 @@ Esc 끄기	Esc 閉じる	Esc Close
 Tab 화면의 그림 차례로 | R 다시 보기 | Backspace 되돌리기	Tab 画面の画像を順に | R もう一度見る | Backspace 元に戻す	Tab cycles images on screen | R Replay | Backspace Revert
 되돌리기	元に戻す	Revert
 pygaki 대본 편집기가 만든 원고라 저장하지 않았습니다. 대사 글자와 모양, 선택지는 대본 편집기에서 고치세요. 셰이더와 커서도 대본 편집기에서 상자마다 고르세요.	pygaki 台本エディタが作った原稿なので保存しませんでした。セリフの文字と見た目、選択肢は台本エディタで直してください。シェーダーとカーソルも台本エディタでボックスごとに選んでください。	Not saved because this script was made by the pygaki script editor. Edit dialogue text, look and choices in the script editor. Shaders and cursors are also picked per box there.
+quick_menu_config.rpy의 qmenu.items 항목에 붙여넣으세요.	quick_menu_config.rpy の qmenu.items の項目に貼り付けてください。	Paste into an entry of qmenu.items in quick_menu_config.rpy.
+퀵메뉴 기능이 없습니다.	クイックメニュー機能がありません。	The quick menu feature is not installed.
+퀵메뉴 기능이 꺼져 있습니다. (qmenu.enabled)	クイックメニュー機能がオフです。(qmenu.enabled)	The quick menu feature is off. (qmenu.enabled)
+게임 중 퀵메뉴가 보일 때 쓸 수 있습니다.	ゲーム中、クイックメニューが表示されているときに使えます。	Available while the quick menu is shown during the game.
+퀵메뉴 항목이 없습니다.	クイックメニューの項目がありません。	The quick menu has no items.
+아래 줄에 있는 항목은 먼저 마우스로 끌어서 꺼내세요. 그 뒤로는 방향키로도 옮깁니다.	下の列にある項目は、まずマウスでドラッグして取り出してください。その後は矢印キーでも動かせます。	Drag an item out of the bottom row with the mouse first. After that the arrow keys move it too.
+'{}' 항목을 아래 줄로 돌렸습니다.	項目 '{0}' を下の列に戻しました。	Moved '{0}' back to the bottom row.
+'{}' 항목을 다시 보입니다.	項目 '{0}' を再び表示します。	Showing '{0}' again.
+'{}' 항목을 숨깁니다.	項目 '{0}' を隠します。	Hiding '{0}'.
+막대 배경 고르기 - 그림이나 영상(webm)	バーの背景を選ぶ - 画像か動画(webm)	Pick the bar background - image or video (webm)
+모든 항목 배경 고르기 - 그림이나 영상(webm)	全項目の背景を選ぶ - 画像か動画(webm)	Pick the background for all items - image or video (webm)
+이 항목 배경 고르기 - 그림이나 영상(webm)	この項目の背景を選ぶ - 画像か動画(webm)	Pick this item's background - image or video (webm)
+없음 (모든 항목 배경을 따름)	なし (全項目の背景に従う)	None (use the background for all items)
+이 항목 배경	この項目の背景	This item's background
+막대 배경	バーの背景	Bar background
+모든 항목 배경	全項目の背景	All items' background
+(설정 파일 값)	(設定ファイルの値)	(value from the settings file)
+아래 줄	下の列	bottom row
+퀵메뉴  항목 {}/{}   id: {}   {}	クイックメニュー  項目 {0}/{1}   id: {2}   {3}	Quick menu  item {0}/{1}   id: {2}   {3}
+자리: {}   {}	位置: {0}   {1}	Position: {0}   {1}
+이 항목 배경: {}   막대 배경: {}	この項目の背景: {0}   バーの背景: {1}	This item's background: {0}   Bar background: {1}
+마우스: 항목을 끌어서 옮기기 (Shift: 한 방향) | 방향키 이동 (Shift: 10배, 끌어서 꺼낸 항목만)	マウス: 項目をドラッグして移動 (Shift: 一方向) | 矢印キーで移動 (Shift: 10倍、取り出した項目のみ)	Mouse: drag an item to move it (Shift: one direction) | Arrow keys move (Shift: x10, only items dragged out)
+Tab 다음 항목 | Delete 숨기기/보이기 | G 아래 줄로 | Backspace 되돌리기	Tab 次の項目 | Delete 隠す/表示 | G 下の列へ | Backspace 元に戻す	Tab next item | Delete hide/show | G back to row | Backspace undo
+Delete 보이기	Delete 表示	Delete Show
+Delete 숨기기	Delete 隠す	Delete Hide
+G 아래 줄로	G 下の列へ	G Back to row

@@ -4,7 +4,7 @@
 ## 개발 모드(런처에서 실행)일 때 F9로 켜고 끕니다.
 ## 배포판(개발 모드 꺼짐)에서는 열리지 않으므로 그대로 둬도 괜찮습니다.
 ##
-## 탭: 타이틀 메뉴 / 선택지 / 대사 / 이미지·영상 / 커서·대사 소리
+## 탭: 타이틀 메뉴 / 선택지 / 대사 / 퀵메뉴 / 이미지·영상 / 커서·대사 소리
 ## 각 탭은 같은 폴더의 editor_*.rpy에 있습니다.
 ##
 ## Ctrl+S로 저장하면
@@ -245,7 +245,7 @@ init -9 python in ui_editor:
             pass
 
     ## 탭 버튼 순서
-    ORDER = ("title", "choice", "say", "stage", "custom_ui")
+    ORDER = ("title", "choice", "say", "quick", "stage", "custom_ui")
 
     ## pygaki 앱이 붙어 있을 때 게임 안 탭 줄에서 빼는 탭 (4.20): 값만 고르는 탭이라 앱에서 고침.
     ## 앱에서 그 탭을 열면 그때는 보입니다(지금 탭은 늘 보임).
@@ -324,7 +324,7 @@ init -9 python in ui_editor:
     _skip_saved = [ ]   # 편집기를 열기 전의 config.allow_skipping (열려 있는 동안만 값이 있음)
 
     def _set_editing(flag):
-        for ns in ("tmenu", "cmenu", "say_style"):
+        for ns in ("tmenu", "cmenu", "say_style", "qmenu"):
             s = getattr(getattr(store, ns, None), "state", None)
             if s is not None and hasattr(s, "editing"):
                 s.editing = flag

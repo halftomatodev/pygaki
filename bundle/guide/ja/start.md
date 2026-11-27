@@ -1,4 +1,4 @@
-<!-- 원본: bundle/guide/parts/start.md @ cfd3fab48a -->
+<!-- 원본: bundle/guide/parts/start.md @ 6dd7386dbf -->
 # はじめに
 
 ## pygaki でできること
@@ -41,7 +41,7 @@ Ren'Py の標準テンプレートの `screens.rpy` を直さず、フォルダ�
 
 | フォルダー | すること | 直すファイル |
 | --- | --- | --- |
-| `ui_kit` | タイトルメニュー、選択肢、カーソル・クリック待ち表示・セリフ音・テキスト速度・クイックメニュー、セリフ 1 行ごとのスタイル・名前の位置・速度・登場エフェクト・ルビ、画像・動画の配置、エフェクトフォルダー(`ui_kit/effects/`)、pygaki editor | `title_menu_config.rpy`、`choice_menu_config.rpy`、`custom_ui_config.rpy`、`say_style_config.rpy`、`stage_config.rpy` |
+| `ui_kit` | タイトルメニュー、選択肢、カーソル・クリック待ち表示・セリフ音・テキスト速度・クイックメニュー、セリフ 1 行ごとのスタイル・名前の位置・速度・登場エフェクト・ルビ、画像・動画の配置、エフェクトフォルダー(`ui_kit/effects/`)、pygaki editor | `title_menu_config.rpy`、`choice_menu_config.rpy`、`custom_ui_config.rpy`、`quick_menu_config.rpy`、`say_style_config.rpy`、`stage_config.rpy` |
 | `screen_fx` | 画面全体のシェーダー。1 番(基本エフェクト)の上に 2 番(オーバーレイ)を重ねる。場面ごとの切り替えとトランジション、文字の除外、タイトルのゆらぎ | `screen_fx_config.rpy`、シェーダーごとの `<名前>_config.rpy` |
 | `hotkeys` | ショートカットキーの追加・解除、操作方法画面の説明 | `hotkeys_config.rpy` |
 | `splash` | タイトルの前に出るロゴ・注意・操作方法のページ | `splash_config.rpy` |

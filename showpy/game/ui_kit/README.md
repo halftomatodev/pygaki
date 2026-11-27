@@ -7,6 +7,7 @@
 | 타이틀 메뉴 | 타이틀 메뉴 항목을 자유 배치(위치·회전·기울기·글꼴·색·외곽선), 선택을 옮기면 다른 항목이 밀려나는 연출, hover 영상, 게임 메뉴 목록 | `title_menu` |
 | 선택지 | 스크립트의 `menu`에서 선택지마다 위치·글꼴·색·자간·줄 간격·회전 등을 지정, 등장 연출, hover 영상 | `choice_menu` |
 | 커스텀 UI | 커서 애니메이션, 클릭 대기 표시(ctc) 애니메이션, 대사 출력 소리, 텍스트 속도 기본값, 퀵메뉴 처음 표시 여부 | `custom_ui` |
+| 퀵메뉴 꾸미기 | 게임 중 아래 퀵메뉴의 항목마다 자리 옮기기·숨기기, 막대 전체 뒤·항목 뒤에 그림·영상·색 (pygaki v2.0-beta1) | (새로 생김) |
 | 대사 스타일 | 대사 한 줄마다 위치·글꼴·크기·색, 이름 위치·모양, 나오는 속도·등장 효과 바꾸기 | `say_style` |
 | 이미지·영상 배치 | `movies/` 폴더 영상 자동 등록(`mask_`로 시작하면 투명 영상), `bg` 태그는 항상 맨 뒤, show·hide·scene 줄의 위치·전환 효과를 편집기에서 골라 원고에 저장 | (2.6에서 새로 생김) |
 
@@ -32,6 +33,7 @@ game/ui_kit/
 ├── title_menu_config.rpy    설정: 타이틀 메뉴      ← 여기만 고침
 ├── choice_menu_config.rpy   설정: 선택지          ← 여기만 고침
 ├── custom_ui_config.rpy     설정: 커스텀 UI       ← 여기만 고침
+├── quick_menu_config.rpy    설정: 퀵메뉴 꾸미기    ← 여기만 고침
 ├── say_style_config.rpy     설정: 대사 스타일      ← 여기만 고침
 ├── stage_config.rpy         설정: 이미지·영상 배치  ← 여기만 고침
 ├── ui_text_config.rpy       설정: 확인 창 글, 버튼 글자   ← 여기만 고침
@@ -41,6 +43,7 @@ game/ui_kit/
 │   ├── title_menu.rpy
 │   ├── choice_menu.rpy
 │   ├── custom_ui.rpy
+│   ├── quick_menu.rpy           퀵메뉴 꾸미기
 │   ├── say_style.rpy
 │   ├── text_effects.rpy,.glsl  등장 효과
 │   ├── text_box.rpy             글 상자 (말풍선, 둥근 테두리) 
@@ -53,6 +56,7 @@ game/ui_kit/
 │   ├── editor_choice.rpy        선택지 탭
 │   ├── editor_say.rpy           대사 탭
 │   ├── editor_stage.rpy         이미지/영상 탭
+│   ├── editor_quick.rpy         퀵메뉴 탭
 │   ├── editor_custom_ui.rpy     커서/대사 소리 탭
 │   └── editor_ui_text.rpy       UI 글 탭 
 └── README.md                이 설명서 (배포판에는 자동으로 빠짐)
@@ -83,6 +87,7 @@ game/ui_kit/
 | `title_menu_config.rpy` | `define tmenu.enabled = False` | 렌파이 기본 타이틀 화면·게임 메뉴 목록 |
 | `choice_menu_config.rpy` | `define cmenu.enabled = False` | 렌파이 기본 선택지. 스크립트의 선택지 괄호 값은 무시 |
 | `custom_ui_config.rpy` | `define custom_ui.enabled = False` | 커서·ctc·대사 소리·텍스트 속도·퀵메뉴 모두 렌파이 기본 |
+| `quick_menu_config.rpy` | `define qmenu.enabled = False` | 그 게임 `screens.rpy`의 퀵메뉴 그대로 (직접 고친 퀵메뉴도) |
 | `say_style_config.rpy` | `define say_style.enabled = False` | 대사 괄호의 짧은 이름(`x`, `size` …)은 무시하고 캐릭터 기본값으로 |
 | `stage_config.rpy` | `define stage.enabled = False` | 영상 자동 등록, `bg` 맨 뒤, 편집기의 이미지/영상 탭이 꺼짐. 원고에 적은 `stage.pos(…)` 등은 그대로 동작 |
 
@@ -126,6 +131,7 @@ game/ui_kit/
 | 타이틀 메뉴 | 타이틀 화면, 게임 중 ESC 메뉴(3.1) | 항목 위치·회전·기울기·확대·글자 크기·글꼴·색, 선택됐을 때 값. ESC 메뉴를 연 채로 열면 ESC 메뉴의 항목을 고침 | `title_menu_layout.rpy` (ESC 메뉴는 `tmenu.pause_layout`) |
 | 선택지 | 선택지가 떠 있을 때 | 선택지 하나의 위치(세로 목록 → 자유 배치 포함)·회전·기울기·확대·글자 크기·글꼴·색, 마우스 올렸을 때 값 | **원고의 그 선택지 줄** |
 | 대사 | 대사가 떠 있을 때 | 대사 한 줄의 위치·글자 크기·글꼴·색, 이름 위치·크기·글꼴·색, 나오는 속도·등장 효과, 이 대사부터 켤 화면 효과와 커서 자리(`screen_fx`가 있을 때) | **원고의 그 대사 줄** |
+| 퀵메뉴 | 게임 중 퀵메뉴가 보일 때 | 항목을 끌어서 옮기기, 숨기기(Delete), 아래 줄로 돌리기(G), 이 항목·모든 항목·막대 배경(그림·영상) | `quick_menu_layout.rpy` |
 | 이미지/영상 | 게임을 진행하는 중 | show·hide·scene 줄 하나의 위치(끌기, 위치 버튼)와 전환 효과·방향·시간, 줄 번호로 고르기 | **원고의 그 줄** (at 절, with 절) |
 | 커서/대사 소리 | 어디서나 | 텍스트 속도, 대사 소리 파일·음량, 클릭 대기 표시·커서 켜기/프레임 폴더/속도, 퀵메뉴 | `custom_ui_layout.rpy` |
 | 타이틀 일렁임 | 타이틀 화면 (`screen_fx`가 있을 때) | 일렁임 세기·물결 크기·속도·반사광 등 | `screen_fx/watermorph_layout.rpy` |
@@ -627,6 +633,39 @@ style choice_vbox:
 - 대사 소리는 전용 채널(`typing`)로 재생되어 다른 효과음을 끊지 않습니다. 텍스트 속도가 최대이거나 넘기는 중일 때는 나지 않습니다.
 - 텍스트 속도는 처음 실행할 때와 이 값을 바꿨을 때만 적용됩니다. 플레이어가 환경설정에서 바꾸면 그 값이 유지됩니다.
 - 퀵메뉴는 게임 중에 `$ quick_menu = True`로 켤 수도 있고, 세이브를 불러오면 저장할 때의 상태가 유지됩니다.
+- 퀵메뉴의 항목 자리·숨기기·배경은 7-1 `quick_menu_config.rpy`.
+
+### 7-1. 퀵메뉴 꾸미기 (`quick_menu_config.rpy`, pygaki v2.0-beta1)
+
+게임 중 화면 아래 퀵메뉴(되감기, 대사록, 넘기기, 자동진행, 저장하기, Q.저장하기, Q.불러오기, 설정)를 꾸밉니다. 넣자마자 보이는 모양은 렌파이 기본과 같습니다.
+
+- **항목 자리**: 옮기지 않은 항목은 렌파이 기본처럼 아래 가운데 한 줄. 옮긴 항목만 그 자리(항목 가운데, 픽셀)에 놓입니다.
+- **숨기기**: 항목마다.
+- **배경**: 막대 전체 뒤(`qmenu.bar_background`), 모든 항목 뒤(`qmenu.item_background`), 항목마다(`"background"`). 그림 경로, 영상 경로(webm), 색(`"#00000088"`) 중 하나. 받은 자리(막대, 버튼) 크기로 늘려 그립니다.
+- 글자는 그 게임 `screens.rpy`의 `quick_menu`에 적힌 글을 그대로 씁니다(한국어로 만든 게임이면 "되감기" ...). 글꼴·크기·색은 렌파이 기본처럼 `gui.rpy`의 `gui.quick_button_text_*`, 글자 바꾸기는 편집기 "UI 글" 탭(앱 [GUI 편집]에서는 "확인 창, UI 글").
+
+| 값 | 기본 | 설명 |
+|---|---|---|
+| `qmenu.enabled` | `True` | `False`면 그 게임 `screens.rpy`의 퀵메뉴가 그대로 나옴 |
+| `qmenu.bar_background` | `None` | 막대 전체 뒤 그림·영상·색 |
+| `qmenu.bar_padding` | `(20, 6)` | 막대 배경과 그 안 항목 사이 여백 (가로, 세로) |
+| `qmenu.item_background` | `None` | 모든 항목 뒤 그림·영상·색 |
+| `qmenu.items` | `None` | 항목 목록. `None`이면 렌파이 기본 8개 (`back`, `history`, `skip`, `auto`, `save`, `qsave`, `qload`, `prefs`) |
+
+편집기(F9) "퀵메뉴" 탭: 항목을 끌어서 옮기고, Delete로 숨기기/보이기, G로 아래 줄로, [이 항목 배경]·[모든 항목 배경]·[막대 배경]에서 그림·영상을 고릅니다. 숨긴 항목은 편집 중에만 흐리게 보입니다. Ctrl+S로 `quick_menu_layout.rpy`에 저장(`qmenu.layout`, `qmenu.screen_layout`).
+
+```renpy
+## 설정 파일에서 직접 적을 때
+define qmenu.bar_background = "gui/quick_bar.png"
+define qmenu.items = [
+    { "id": "back",  "text": _("되감기"), "action": Rollback(), "x": 80, "y": 680 },
+    { "id": "skip",  "text": _("넘기기"), "action": Skip(), "hidden": True },
+    { "id": "prefs", "text": _("설정"), "action": ShowMenu("preferences"), "background": "#30306088" },
+]
+```
+
+- 이 기능은 `screens.rpy`의 `quick_menu` 스크린을 고치지 않고, 화면에 늘 띄우는 목록(`config.overlay_screens`)에서 그것을 `qmenu_quick`으로 바꿔 넣습니다. **`screens.rpy`의 퀵메뉴를 직접 고쳐 둔 게임**은 `qmenu.enabled = False`로 두면 고친 모양이 그대로 나옵니다.
+- 터치 화면(휴대폰)용 퀵메뉴는 바꾸지 않습니다.
 
 ---
 

@@ -24,6 +24,8 @@ pygaki editor 패널 글꼴 (2026-11-26): 패널은 게임 글꼴과 상관없�
 
 pygaki 앱 대본 편집기 (2026-11-20): 환경 설정 [게임 창 여백에 붉은 띠]와 단축키 F8(`gameBands`), 세 버블 한 번에 열기/닫기 Alt+↓(`bubbles`, Alt+Space는 윈도우·다른 프로그램이 먼저 잡는 일이 많아 처음 값으로 안 씀).
 
+퀵메뉴 꾸미기 (2026-11-27): `ui_kit/engine/quick_menu.rpy`, 설정 `ui_kit/quick_menu_config.rpy`(`qmenu`), pygaki editor "퀵메뉴" 탭(`editor/editor_quick.rpy`, 저장 `quick_menu_layout.rpy`). 게임 중 퀵메뉴의 항목마다 끌어서 자리 옮기기(옮기지 않은 항목은 아래 가운데 한 줄), 숨기기(Delete), 아래 줄로(G), 막대 전체 뒤(`bar_background`)·모든 항목 뒤(`item_background`)·항목마다(`background`) 그림·영상·색(받은 자리 크기로 늘림). 글자는 그 게임 `screens.rpy`의 `quick_menu`에 적힌 글, 스타일은 렌파이 기본 `quick_button`. `screens.rpy`는 고치지 않고 `config.overlay_screens`의 `quick_menu`를 `qmenu_quick`으로 바꿔 넣음. **`qmenu.enabled`는 처음부터 켜져 있어서**, `screens.rpy`의 퀵메뉴를 직접 고쳐 둔 게임은 플러그인을 새 판으로 바꾸면 렌파이 기본 모양이 됨 → `qmenu.enabled = False`로 고친 모양 그대로. 터치 화면용 퀵메뉴는 그대로.
+
 ESC 메뉴 (2026-11-27): 게임 중 ESC 메뉴 기본 항목에 버전정보(`ShowMenu("about")`)·조작방법(`ShowMenu("help")`, PC·웹 데스크톱에서만)을 대사록 다음에 더함(타이틀 메뉴에만 있던 것). 기본 항목이 9개라 세로 자리를 0.2~0.84로 고르게 나눔. `tmenu.pause_items`를 적은 게임과 이미 옮겨 둔 항목 자리는 그대로.
 
 이름 (2026-11-26): 앱 화면 글, 안내서 세 언어, 플러그인 설정 파일 주석과 저장 파일 머리말의 "게임 안 편집 화면"을 **pygaki editor**로(문서는 처음 한 번 "pygaki editor(게임 안 편집 화면)"로 풀어 씀, 앱 화면 글은 "게임 안 pygaki editor", 앱 [GUI 편집] 카드 제목 "저장과 게임 안 pygaki editor").

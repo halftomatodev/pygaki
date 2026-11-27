@@ -1,4 +1,4 @@
-<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ 1133530c9e -->
+<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ 0f9fb08b4a -->
 # pygaki plugin customization guide
 
 2026-11-25 · pygaki v1.9 (changes per version are in `READ_ME_FIRST.md` and `CHANGELOG.md`)
@@ -11,7 +11,7 @@ pygaki editor (the in-game editor, F9) follows the pygaki app's language (or you
 
 | Folder | What it does | Files you edit |
 | --- | --- | --- |
-| `ui_kit` | title menu, choices, cursor, click-to-continue indicator, dialogue sounds, text speed, quick menu, per-line dialogue style, name position, speed, text effects, image and video placement (automatic registration of videos in movies/, bg at the very back, position and transitions of show and hide lines; added in 2.8) + editor | `title_menu_config.rpy`, `choice_menu_config.rpy`, `custom_ui_config.rpy`, `say_style_config.rpy`, `stage_config.rpy` |
+| `ui_kit` | title menu, choices, cursor, click-to-continue indicator, dialogue sounds, text speed, quick menu, per-line dialogue style, name position, speed, text effects, image and video placement (automatic registration of videos in movies/, bg at the very back, position and transitions of show and hide lines; added in 2.8) + editor | `title_menu_config.rpy`, `choice_menu_config.rpy`, `custom_ui_config.rpy`, `quick_menu_config.rpy`, `say_style_config.rpy`, `stage_config.rpy` |
 | `screen_fx` | full-screen effects. A **VHS overlay** (on/off, amount of distortion) stacked over a **base effect** (none, ASCII, retro terminal, Game Boy, seven like glitch from 5.0, shimmer from 5.5) (4.0), per-scene effect changes and the TV off/on transition, text exclusion (choosing dialogue, choices or menus to leave out of effects), title screen shimmer | one per effect: `screen_fx_config.rpy`, `vhs_crt_config.rpy`, `ascii_config.rpy`, `retro_term_config.rpy`, `gameboy_config.rpy`, `ripple_config.rpy`, `collage_config.rpy`, etc. |
 | `hotkeys` | add and remove hotkeys, descriptions in the controls screen | `hotkeys_config.rpy` |
 | `splash` | logo, warning and controls pages shown before the title (added in 2.3) | `splash_config.rpy` |
@@ -50,6 +50,7 @@ Find what you want to change and edit the value in the file on the right. Items 
 | Sound while dialogue appears | `ui_kit/custom_ui_config.rpy` | `custom_ui.typing_sound`, `typing_volume` | cursor/dialogue sound tab |
 | Default text speed | `ui_kit/custom_ui_config.rpy` | `custom_ui.text_cps` | cursor/dialogue sound tab |
 | Show the quick menu from the start | `ui_kit/custom_ui_config.rpy` | `custom_ui.quick_menu` | cursor/dialogue sound tab |
+| Quick menu item position, hiding, image/video behind | `ui_kit/quick_menu_config.rpy` | `qmenu.enabled`, `qmenu.bar_background`, `qmenu.item_background`, `qmenu.items` (v2.0-beta1) | quick menu tab → Ctrl+S |
 | Position, size and color of one dialogue line | the script | parentheses after the line `(x=…, y=…, size=…, color=…)` | dialogue tab → Ctrl+S (straight into the script) |
 | Name position, size and color of one dialogue line | the script | parentheses after the line `(name_x=…, name_y=…, name_size=…, name_color=…)` | dialogue tab, Tab to "name" → Ctrl+S |
 | A picture or video behind the dialogue text (picture/video box) | the script | parentheses after the line `(box="media", media="images/say/cloud.png")` (5.4) | dialogue tab [Edit: Image] to move, scale and rotate → Ctrl+S |
@@ -754,6 +755,24 @@ define custom_ui.ctc_hold = 1               # every frame → 3 images loop ever
 
 In the editor's "cursor/dialogue sound" tab, click the **12 slots** to choose images one by one (it moves to the next slot after a choice). "Add this whole folder" adds up to 12 images from the folder in name order, and "clear this slot" removes one. Empty slots are skipped.
 
+## Decorating the quick menu — `ui_kit/quick_menu_config.rpy` (pygaki v2.0-beta1)
+
+Move, hide, or put an image, video or color behind each item of the quick menu at the bottom of the screen during play (Back, History, Skip, Auto, Save, Q.Save, Q.Load, Prefs). Right after you add it, it looks the same as Ren'Py's default. Items you don't move stay in one row at the bottom center.
+
+| What you want | Value | Notes |
+| --- | --- | --- |
+| Turn the feature off | `qmenu.enabled = False` | The quick menu from that game's `screens.rpy` shows as it is. Turn it off for games whose `screens.rpy` quick menu you edited by hand |
+| Background behind the whole bar | `qmenu.bar_background = "gui/quick_bar.png"` | An image, a video (webm) or a color (`"#00000088"`). Drawn behind the items left in the bottom row |
+| Bar padding | `qmenu.bar_padding = (20, 6)` | Between the bar background and the items in it (horizontal, vertical pixels) |
+| Background behind every item | `qmenu.item_background = "#30306088"` | Stretched to the button size |
+| Item position, hiding, background | `qmenu.items = [ { "id": "back", "text": _("되감기"), "action": Rollback(), "x": 80, "y": 680 }, … ]` | `"x"`, `"y"` item center (pixels), `"hidden": True` hide, `"background"` this item's background, `"show_if"` condition to show |
+
+The labels are the ones written in that game's `screens.rpy` quick menu. Font, size and color come from `gui.quick_button_text_*` in `gui.rpy`, as in Ren'Py's default. To change the labels, use the editor's "UI text" tab ("Confirm dialog, UI text" in the app's [GUI edit]).
+
+The editor's **Quick menu** tab (while the quick menu is shown during play): drag items to move them, Delete to hide/show, G to put an item back in the row, and pick images or videos in [This item's background], [All items' background] and [Bar background]. Hidden items show faintly only while editing. Ctrl+S saves to `ui_kit/quick_menu_layout.rpy`.
+
+The touch-screen (phone) quick menu is not changed.
+
 ## Dialogue style — script parentheses + `ui_kit/say_style_config.rpy`
 
 To change just one dialogue line, write short names in the parentheses after the line; change a character's default look in the character definition in the settings file.
@@ -856,6 +875,7 @@ The editor's text language (한국어, 日本語, English) follows the pygaki ap
 | Title menu | title screen, the ESC menu during play (3.1) | item position, rotation, tilt, scale, text size, font, color, selected values. Opened with the ESC menu open, it edits the ESC menu | `ui_kit/title_menu_layout.rpy` (`tmenu.layout`; the ESC menu `tmenu.pause_layout`) |
 | Choice | while choices are shown | position, shape, font and color of one choice, hover values, position, scale, rotation and four-corner warp of the back picture with [Edit: Image behind] (5.4) | **that choice's line in the script** |
 | Dialogue | while dialogue is shown | position, text size, font and color of one line, name position, size, font and color, speed and text effects, **screen effects to turn on from this line, cancel, transitions, overlay, cursor position**, position, scale, rotation, tie to text and four-corner warp of the picture/video box with [Edit: Image] (5.4) | **that dialogue line in the script** |
+| Quick menu | while the quick menu is shown during play | drag items to move, hide (Delete), back to the row (G), image/video behind this item, all items or the bar (v2.0-beta1) | `ui_kit/quick_menu_layout.rpy` (`qmenu.layout`, `qmenu.screen_layout`) |
 | Cursor/dialogue sound | anywhere | text speed, dialogue sound and volume, click-to-continue and cursor (on, **choose images for 12 slots**, every 1/2 frames, cursor mode), quick menu | `ui_kit/custom_ui_layout.rpy` |
 | Title shimmer | title screen (when `screen_fx` is present) | on, targets, strength, wave size, speed, swirl, glints, quality | `screen_fx/watermorph_layout.rpy` |
 | Screen effects | anywhere (when `screen_fx` is present) | choose VHS overlay / ASCII / retro terminal / Game Boy / base effect, transitions with the buttons at the top. Per effect: on, overlay on/off, value sliders, presets, **"this effect from this line"**, **"this effect from this script line"**. Base effect, overlay on/off, TV timing, flash, sound volume and preview. (These pages edit setting values, so saving doesn't change the effect of the current scene) | `screen_fx/<effect name>_layout.rpy`, `screen_fx_layout.rpy` |
@@ -1497,6 +1517,7 @@ When the same value is in several places, the one further right wins.
 | Title menu | `tmenu.default` → editor common values → values written on the item → editor item values (`title_menu_layout.rpy`) |
 | Choices | `cmenu.default` → `choice_menu_layout.rpy` (saved by older editors) → `menu (…)` parentheses → choice parentheses |
 | Cursor and dialogue sound | `custom_ui_config.rpy` → `custom_ui_layout.rpy` |
+| Quick menu | `quick_menu_config.rpy` → `quick_menu_layout.rpy` |
 | Dialogue | character definition → `say_style_layout.rpy` (saved by older editors) → dialogue parentheses |
 | Text speed | `options.rpy` → `custom_ui.text_cps` → the value the player chose in preferences |
 | Title shimmer | `watermorph_config.rpy` → `watermorph_layout.rpy` |

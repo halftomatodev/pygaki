@@ -1,4 +1,4 @@
-<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ 1133530c9e -->
+<!-- 원본: showpy/docs/CUSTOM_GUIDE.md @ 0f9fb08b4a -->
 # pygaki プラグイン カスタムガイド
 
 2026-11-25 · pygaki v1.9(バージョンごとの変更は `READ_ME_FIRST.md` と `CHANGELOG.md`)
@@ -11,7 +11,7 @@ pygaki editor(ゲーム内編集画面、F9)の言語は pygaki アプリの言�
 
 | フォルダー | すること | 直すファイル |
 | --- | --- | --- |
-| `ui_kit` | タイトルメニュー、選択肢、カーソル・クリック待ち表示・セリフ音・テキスト速度・クイックメニュー、セリフ 1 行ごとのスタイル・名前の位置・速度・登場エフェクト、画像・動画の配置(movies/ の動画の自動登録、bg がいちばん後ろ、show・hide の行の位置とトランジション。2.8 で追加)+ エディター | `title_menu_config.rpy`、`choice_menu_config.rpy`、`custom_ui_config.rpy`、`say_style_config.rpy`、`stage_config.rpy` |
+| `ui_kit` | タイトルメニュー、選択肢、カーソル・クリック待ち表示・セリフ音・テキスト速度・クイックメニュー、セリフ 1 行ごとのスタイル・名前の位置・速度・登場エフェクト、画像・動画の配置(movies/ の動画の自動登録、bg がいちばん後ろ、show・hide の行の位置とトランジション。2.8 で追加)+ エディター | `title_menu_config.rpy`、`choice_menu_config.rpy`、`custom_ui_config.rpy`、`quick_menu_config.rpy`、`say_style_config.rpy`、`stage_config.rpy` |
 | `screen_fx` | 画面全体のエフェクト。**基本エフェクト**(なし、ASCII、レトロターミナル、ゲームボーイ、5.0 からグリッチなど 7 つ、5.5 からゆらぎ)の上に **VHS オーバーレイ**(オン/オフ、ゆがみの度合い)を重ねる(4.0)、場面ごとのエフェクト切り替えと TV オフ・オンのトランジション、文字の除外(セリフ・選択肢・メニューを選んでエフェクトから外す)、タイトル画面のゆらぎ | `screen_fx_config.rpy`、`vhs_crt_config.rpy`、`ascii_config.rpy`、`retro_term_config.rpy`、`gameboy_config.rpy`、`ripple_config.rpy`、`collage_config.rpy` などエフェクトごとに 1 つ |
 | `hotkeys` | ショートカットキーの追加・解除、操作方法画面の説明 | `hotkeys_config.rpy` |
 | `splash` | タイトルの前に出るロゴ・注意・操作方法のページ(2.3 で追加) | `splash_config.rpy` |
@@ -50,6 +50,7 @@ pygaki editor(ゲーム内編集画面、F9)の言語は pygaki アプリの言�
 | セリフが出るときの音 | `ui_kit/custom_ui_config.rpy` | `custom_ui.typing_sound`、`typing_volume` | カーソル/セリフ音タブ |
 | テキスト速度の初期値 | `ui_kit/custom_ui_config.rpy` | `custom_ui.text_cps` | カーソル/セリフ音タブ |
 | クイックメニューを最初から見せる | `ui_kit/custom_ui_config.rpy` | `custom_ui.quick_menu` | カーソル/セリフ音タブ |
+| クイックメニューの項目の位置・隠す・後ろの画像/動画 | `ui_kit/quick_menu_config.rpy` | `qmenu.enabled`、`qmenu.bar_background`、`qmenu.item_background`、`qmenu.items` (v2.0-beta1) | クイックメニュータブ → Ctrl+S |
 | セリフ 1 行の位置・サイズ・色 | スクリプト | セリフの後ろの括弧 `(x=…, y=…, size=…, color=…)` | セリフタブ → Ctrl+S(スクリプトにすぐ) |
 | セリフ 1 行の名前の位置・サイズ・色 | スクリプト | セリフの後ろの括弧 `(name_x=…, name_y=…, name_size=…, name_color=…)` | セリフタブ、Tab で「名前」→ Ctrl+S |
 | セリフの文字の後ろに画像・動画を敷く(画像/動画ボックス) | スクリプト | セリフの後ろの括弧 `(box="media", media="images/say/cloud.png")`(5.4) | セリフタブ [編集: 画像] で移動・サイズ・回転 → Ctrl+S |
@@ -754,6 +755,24 @@ define custom_ui.ctc_hold = 1               # 1 フレームごと → 3 枚な�
 
 エディターの「カーソル/セリフ音」タブでは、**マス 12 個** を押して画像を 1 つずつ選びます(選ぶと次のマスへ)。「このフォルダーを丸ごと入れる」はフォルダーの画像を名前の順に 12 枚まで入れ、「このマスを空にする」で外します。空のマスは飛ばします。
 
+## クイックメニューを飾る — `ui_kit/quick_menu_config.rpy` (pygaki v2.0-beta1)
+
+ゲーム中の画面下のクイックメニュー(戻る、履歴、スキップ、オート、セーブ、Q.セーブ、Q.ロード、設定)の項目ごとに、位置を動かし、隠し、後ろに画像・動画・色を敷きます。入れた直後の見た目は Ren'Py 標準と同じです。動かしていない項目は下中央の一列に残ります。
+
+| したいこと | 値 | 参考 |
+| --- | --- | --- |
+| 機能をオフ | `qmenu.enabled = False` | そのゲームの `screens.rpy` のクイックメニューがそのまま出る。`screens.rpy` のクイックメニューを直接書き換えたゲームはオフに |
+| バー全体の背景 | `qmenu.bar_background = "gui/quick_bar.png"` | 画像、動画(webm)、色(`"#00000088"`)のどれか。下の列に残った項目の後ろに敷く |
+| バーの余白 | `qmenu.bar_padding = (20, 6)` | バーの背景と中の項目の間 (横、縦ピクセル) |
+| 全項目の背景 | `qmenu.item_background = "#30306088"` | ボタンの大きさに伸ばして描く |
+| 項目の位置・隠す・背景 | `qmenu.items = [ { "id": "back", "text": _("되감기"), "action": Rollback(), "x": 80, "y": 680 }, … ]` | `"x"`、`"y"` 項目の中心(ピクセル)、`"hidden": True` 隠す、`"background"` この項目の背景、`"show_if"` 表示条件 |
+
+文字はそのゲームの `screens.rpy` のクイックメニューに書かれた文字をそのまま使います。フォント・大きさ・色は Ren'Py 標準と同じく `gui.rpy` の `gui.quick_button_text_*`。文字を変えるには編集画面の「UI の文字」タブ(アプリ [GUI 編集] では「確認ダイアログ、UIテキスト」)。
+
+編集画面の **クイックメニュー** タブ(ゲーム中にクイックメニューが見えているとき): 項目をドラッグして動かし、Delete で隠す/表示、G で下の列に戻し、[この項目の背景]・[全項目の背景]・[バーの背景] で画像・動画を選びます。隠した項目は編集中だけ薄く見えます。Ctrl+S で `ui_kit/quick_menu_layout.rpy` に保存します。
+
+タッチ画面(スマートフォン)用のクイックメニューは変えません。
+
 ## セリフのスタイル — スクリプトの括弧 + `ui_kit/say_style_config.rpy`
 
 セリフ 1 行だけを変えるときはセリフの後ろの括弧に短い名前を書き、キャラクターの基本の見た目は設定ファイルのキャラクター定義で変えます。
@@ -856,6 +875,7 @@ e "ブルッ!" (box="media", media="images/say/boom.png", media_link=True, media
 | タイトルメニュー | タイトル画面、ゲーム中の ESC メニュー(3.1) | 項目の位置・回転・傾き・拡大・文字サイズ・フォント・色、選択時の値。ESC メニューを開いたまま開くと ESC メニューを直す | `ui_kit/title_menu_layout.rpy`(`tmenu.layout`、ESC メニューは `tmenu.pause_layout`) |
 | 選択肢 | 選択肢が出ているとき | 選択肢 1 つの位置・形・フォント・色、ホバー時の値、[編集: 後ろの画像] で後ろの画像の位置・サイズ・回転・4 点変形(5.4) | **スクリプトのその選択肢の行** |
 | セリフ | セリフが出ているとき | セリフ 1 行の位置・文字サイズ・フォント・色、名前の位置・サイズ・フォント・色、出る速さ・登場エフェクト、**このセリフからオンにする画面エフェクト・取り消し・トランジション、オーバーレイ、カーソルの位置**、[編集: 画像] で画像/動画ボックスの位置・サイズ・回転・文字と結ぶ・4 点変形(5.4) | **スクリプトのそのセリフの行** |
+| クイックメニュー | ゲーム中にクイックメニューが見えているとき | 項目をドラッグして移動、隠す(Delete)、下の列へ(G)、この項目・全項目・バーの後ろの画像/動画 (v2.0-beta1) | `ui_kit/quick_menu_layout.rpy` (`qmenu.layout`、`qmenu.screen_layout`) |
 | カーソル/セリフ音 | どこでも | テキスト速度、セリフ音・音量、クリック待ち表示・カーソル(オン、**マス 12 個に画像を選ぶ**、1/2 フレームごと、カーソルの方式)、クイックメニュー | `ui_kit/custom_ui_layout.rpy` |
 | タイトルのゆらぎ | タイトル画面(`screen_fx` があるとき) | オン、かける対象、強さ・波の大きさ・速さ・渦・反射光、品質 | `screen_fx/watermorph_layout.rpy` |
 | 画面エフェクト | どこでも(`screen_fx` があるとき) | 上のボタンで VHS オーバーレイ / ASCII / レトロターミナル / ゲームボーイ / 基本エフェクト、トランジションを選ぶ。エフェクトごとのオン、オーバーレイのオン/オフ、値のスライダー、プリセット、**「このセリフからこのエフェクト」**、**「この行からこのエフェクト」**。基本エフェクト、オーバーレイのオン/オフ、TV の時間、閃光、音量とプレビュー。(これらのページは設定値を直すところなので、保存しても今の場面のエフェクトは変わらない) | `screen_fx/<エフェクト名>_layout.rpy`、`screen_fx_layout.rpy` |
@@ -1497,6 +1517,7 @@ $ vhs_crt.off(duration=2.0)                   # ゆっくりオフ
 | タイトルメニュー | `tmenu.default` → エディターの共通の値 → 項目に書いた値 → エディターの項目の値(`title_menu_layout.rpy`) |
 | 選択肢 | `cmenu.default` →(以前のエディターが保存した)`choice_menu_layout.rpy` → `menu (…)` の括弧 → 選択肢の括弧 |
 | カーソル・セリフ音 | `custom_ui_config.rpy` → `custom_ui_layout.rpy` |
+| クイックメニュー | `quick_menu_config.rpy` → `quick_menu_layout.rpy` |
 | セリフ | キャラクター定義 →(以前のエディターが保存した)`say_style_layout.rpy` → セリフの括弧 |
 | テキスト速度 | `options.rpy` → `custom_ui.text_cps` → プレイヤーが環境設定で選んだ値 |
 | タイトルのゆらぎ | `watermorph_config.rpy` → `watermorph_layout.rpy` |

@@ -1,4 +1,4 @@
-<!-- 원본: bundle/guide/parts/start.md @ cfd3fab48a -->
+<!-- 원본: bundle/guide/parts/start.md @ 6dd7386dbf -->
 # Getting started
 
 ## What pygaki does
@@ -41,7 +41,7 @@ Four plugins that change the screens just by putting their folders in `game/`, w
 
 | Folder | What it does | Files you edit |
 | --- | --- | --- |
-| `ui_kit` | title menu, choices, cursor, click-to-continue indicator, dialogue sounds, text speed, quick menu, per-line dialogue style, name position, speed, text effects, ruby, image and video placement, the effects folder (`ui_kit/effects/`), the pygaki editor | `title_menu_config.rpy`, `choice_menu_config.rpy`, `custom_ui_config.rpy`, `say_style_config.rpy`, `stage_config.rpy` |
+| `ui_kit` | title menu, choices, cursor, click-to-continue indicator, dialogue sounds, text speed, quick menu, per-line dialogue style, name position, speed, text effects, ruby, image and video placement, the effects folder (`ui_kit/effects/`), the pygaki editor | `title_menu_config.rpy`, `choice_menu_config.rpy`, `custom_ui_config.rpy`, `quick_menu_config.rpy`, `say_style_config.rpy`, `stage_config.rpy` |
 | `screen_fx` | full-screen shaders. Stacks slot 2 (overlay) on slot 1 (base effect). Per-scene changes and transitions, excluding text, title shimmer | `screen_fx_config.rpy`, `<name>_config.rpy` for each shader |
 | `hotkeys` | add and remove hotkeys, descriptions in the controls screen | `hotkeys_config.rpy` |
 | `splash` | logo, warning and controls pages shown before the title | `splash_config.rpy` |

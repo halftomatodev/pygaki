@@ -8,7 +8,7 @@ pygaki 플러그인 5.5를 받은 사람이 **어떤 파일의 어떤 값을 고
 
 | 폴더 | 하는 일 | 고치는 파일 |
 | --- | --- | --- |
-| `ui_kit` | 타이틀 메뉴, 선택지, 커서·클릭 대기 표시·대사 소리·텍스트 속도·퀵메뉴, 대사 한 줄 스타일·이름 위치·속도·등장 효과, 이미지·영상 배치(movies/ 영상 자동 등록, bg 맨 뒤, show·hide 줄의 위치와 전환. 2.8에서 추가) + 편집기 | `title_menu_config.rpy`, `choice_menu_config.rpy`, `custom_ui_config.rpy`, `say_style_config.rpy`, `stage_config.rpy` |
+| `ui_kit` | 타이틀 메뉴, 선택지, 커서·클릭 대기 표시·대사 소리·텍스트 속도·퀵메뉴, 대사 한 줄 스타일·이름 위치·속도·등장 효과, 이미지·영상 배치(movies/ 영상 자동 등록, bg 맨 뒤, show·hide 줄의 위치와 전환. 2.8에서 추가) + 편집기 | `title_menu_config.rpy`, `choice_menu_config.rpy`, `custom_ui_config.rpy`, `quick_menu_config.rpy`, `say_style_config.rpy`, `stage_config.rpy` |
 | `screen_fx` | 화면 전체 효과. **기본 효과**(없음, ASCII, 레트로 터미널, 게임보이, 5.0부터 글리치 등 일곱, 5.5부터 일렁임) 위에 **VHS 덮개**(켬/끔, 왜곡 정도)를 겹침 (4.0), 장면마다 효과 바꾸기와 TV 꺼짐·켜짐 전환, 글자 빼기(대사·선택지·메뉴를 골라서 효과에서 빼기), 타이틀 화면 일렁임 | `screen_fx_config.rpy`, `vhs_crt_config.rpy`, `ascii_config.rpy`, `retro_term_config.rpy`, `gameboy_config.rpy`, `ripple_config.rpy`, `collage_config.rpy` 등 효과마다 하나 |
 | `hotkeys` | 단축키 추가·해제, 조작방법 화면 설명 | `hotkeys_config.rpy` |
 | `splash` | 타이틀 전에 나오는 로고·경고·조작 방법 페이지 (2.3에서 추가) | `splash_config.rpy` |
@@ -47,6 +47,7 @@ pygaki 플러그인 5.5를 받은 사람이 **어떤 파일의 어떤 값을 고
 | 대사 나올 때 소리 | `ui_kit/custom_ui_config.rpy` | `custom_ui.typing_sound`, `typing_volume` | 커서/대사 소리 탭 |
 | 텍스트 속도 기본값 | `ui_kit/custom_ui_config.rpy` | `custom_ui.text_cps` | 커서/대사 소리 탭 |
 | 퀵메뉴 처음부터 보이기 | `ui_kit/custom_ui_config.rpy` | `custom_ui.quick_menu` | 커서/대사 소리 탭 |
+| 퀵메뉴 항목 자리·숨기기·뒤 그림/영상 | `ui_kit/quick_menu_config.rpy` | `qmenu.enabled`, `qmenu.bar_background`, `qmenu.item_background`, `qmenu.items` (v2.0-beta1) | 퀵메뉴 탭 → Ctrl+S |
 | 대사 한 줄의 위치·크기·색 | 스크립트 | 대사 뒤 괄호 `(x=…, y=…, size=…, color=…)` | 대사 탭 → Ctrl+S (원고에 바로) |
 | 대사 한 줄의 이름 위치·크기·색 | 스크립트 | 대사 뒤 괄호 `(name_x=…, name_y=…, name_size=…, name_color=…)` | 대사 탭, Tab으로 "이름" → Ctrl+S |
 | 대사 글 뒤에 그림·영상 깔기 (그림/영상 상자) | 스크립트 | 대사 뒤 괄호 `(box="media", media="images/say/cloud.png")` (5.4) | 대사 탭 [고칠 것: 그림]에서 옮기기·크기·돌리기 → Ctrl+S |
@@ -751,6 +752,24 @@ define custom_ui.ctc_hold = 1               # 1프레임마다 → 3장이면 1/
 
 편집기 "커서/대사 소리" 탭에서는 **칸 12개**를 눌러 그림을 하나씩 고릅니다(고르면 다음 칸으로). "이 폴더 통째로 넣기"는 폴더의 그림을 이름 순으로 12장까지 넣고, "이 칸 비우기"로 뺍니다. 빈 칸은 건너뜁니다.
 
+## 퀵메뉴 꾸미기 — `ui_kit/quick_menu_config.rpy` (pygaki v2.0-beta1)
+
+게임 중 화면 아래 퀵메뉴(되감기, 대사록, 넘기기, 자동진행, 저장하기, Q.저장하기, Q.불러오기, 설정)의 항목마다 자리를 옮기고, 숨기고, 뒤에 그림·영상·색을 깝니다. 넣자마자 보이는 모양은 렌파이 기본과 같습니다. 옮기지 않은 항목은 아래 가운데 한 줄에 남습니다.
+
+| 하고 싶은 일 | 값 | 참고 |
+| --- | --- | --- |
+| 기능 끄기 | `qmenu.enabled = False` | 그 게임 `screens.rpy`의 퀵메뉴가 그대로 나옴. `screens.rpy`의 퀵메뉴를 직접 고쳐 둔 게임은 끄세요 |
+| 막대 전체 뒤 배경 | `qmenu.bar_background = "gui/quick_bar.png"` | 그림, 영상(webm), 색(`"#00000088"`) 중 하나. 아래 줄에 남은 항목들 뒤에 깔림 |
+| 막대 여백 | `qmenu.bar_padding = (20, 6)` | 막대 배경과 그 안 항목 사이 (가로, 세로 픽셀) |
+| 모든 항목 뒤 배경 | `qmenu.item_background = "#30306088"` | 버튼 크기로 늘려 그림 |
+| 항목 자리·숨기기·배경 | `qmenu.items = [ { "id": "back", "text": _("되감기"), "action": Rollback(), "x": 80, "y": 680 }, … ]` | `"x"`, `"y"` 항목 가운데(픽셀), `"hidden": True` 숨기기, `"background"` 이 항목 배경, `"show_if"` 보일 조건 |
+
+글자는 그 게임 `screens.rpy`의 퀵메뉴에 적힌 글을 그대로 씁니다. 글꼴·크기·색은 렌파이 기본처럼 `gui.rpy`의 `gui.quick_button_text_*`, 글자를 바꾸려면 편집기 "UI 글" 탭(앱 [GUI 편집]에서는 "확인 창, UI 글").
+
+편집기 **퀵메뉴** 탭(게임 중 퀵메뉴가 보일 때): 항목을 끌어서 옮기고, Delete로 숨기기/보이기, G로 아래 줄로 돌리기, [이 항목 배경]·[모든 항목 배경]·[막대 배경]에서 그림·영상을 고릅니다. 숨긴 항목은 편집 중에만 흐리게 보입니다. Ctrl+S로 `ui_kit/quick_menu_layout.rpy`에 저장합니다.
+
+터치 화면(휴대폰)용 퀵메뉴는 바꾸지 않습니다.
+
 ## 대사 스타일 — 스크립트 괄호 + `ui_kit/say_style_config.rpy`
 
 대사 한 줄만 바꿀 때는 대사 뒤 괄호에 짧은 이름을 적고, 캐릭터의 기본 모양은 설정 파일의 캐릭터 정의에서 바꿉니다.
@@ -853,6 +872,7 @@ e "흔들!" (box="media", media="images/say/boom.png", media_link=True, media_fx
 | 타이틀 메뉴 | 타이틀 화면, 게임 중 ESC 메뉴(3.1) | 항목 위치·회전·기울기·확대·글자 크기·글꼴·색, 선택됐을 때 값. ESC 메뉴를 연 채로 열면 ESC 메뉴를 고침 | `ui_kit/title_menu_layout.rpy` (`tmenu.layout`, ESC 메뉴는 `tmenu.pause_layout`) |
 | 선택지 | 선택지가 떠 있을 때 | 선택지 하나의 위치·모양·글꼴·색, 올렸을 때 값, [고칠 것: 뒤 그림]으로 뒤 그림의 자리·크기·회전·네 점 변형(5.4) | **원고의 그 선택지 줄** |
 | 대사 | 대사가 떠 있을 때 | 대사 한 줄의 위치·글자 크기·글꼴·색, 이름 위치·크기·글꼴·색, 나오는 속도·등장 효과, **이 대사부터 켤 화면 효과·선택취소·전환, 덮개, 커서 자리**, [고칠 것: 그림]으로 그림/영상 상자의 자리·크기·회전·글과 묶기·네 점 변형(5.4) | **원고의 그 대사 줄** |
+| 퀵메뉴 | 게임 중 퀵메뉴가 보일 때 | 항목을 끌어서 옮기기, 숨기기(Delete), 아래 줄로(G), 이 항목·모든 항목·막대 뒤 그림/영상 (v2.0-beta1) | `ui_kit/quick_menu_layout.rpy` (`qmenu.layout`, `qmenu.screen_layout`) |
 | 커서/대사 소리 | 어디서나 | 텍스트 속도, 대사 소리·음량, 클릭 대기 표시·커서(켜기, **칸 12개에 그림 고르기**, 1/2프레임마다, 커서 방식), 퀵메뉴 | `ui_kit/custom_ui_layout.rpy` |
 | 타이틀 일렁임 | 타이틀 화면 (`screen_fx`가 있을 때) | 켜기, 적용 대상, 세기·물결 크기·속도·소용돌이·반사광, 품질 | `screen_fx/watermorph_layout.rpy` |
 | 화면 효과 | 어디서나 (`screen_fx`가 있을 때) | 위쪽 버튼으로 VHS 덮개 / ASCII / 레트로 터미널 / 게임보이 / 기본 효과, 전환을 고름. 효과마다 켜기, 덮개 켬/끔, 값 막대, 프리셋, **"이 대사부터 이 효과"**, **"이 줄부터 이 효과"**. 기본 효과, 덮개 켬/끔, TV 시간, 섬광, 소리 음량과 미리 보기. (이 페이지들은 설정값을 고치는 곳이라, 저장해도 지금 장면의 효과는 안 바뀜) | `screen_fx/<효과 이름>_layout.rpy`, `screen_fx_layout.rpy` |
@@ -1494,6 +1514,7 @@ $ vhs_crt.off(duration=2.0)                   # 서서히 끄기
 | 타이틀 메뉴 | `tmenu.default` → 편집기 공통 값 → 항목에 적은 값 → 편집기 항목 값 (`title_menu_layout.rpy`) |
 | 선택지 | `cmenu.default` → (예전 편집기가 저장한) `choice_menu_layout.rpy` → `menu (…)` 괄호 → 선택지 괄호 |
 | 커서·대사 소리 | `custom_ui_config.rpy` → `custom_ui_layout.rpy` |
+| 퀵메뉴 | `quick_menu_config.rpy` → `quick_menu_layout.rpy` |
 | 대사 | 캐릭터 정의 → (예전 편집기가 저장한) `say_style_layout.rpy` → 대사 괄호 |
 | 텍스트 속도 | `options.rpy` → `custom_ui.text_cps` → 플레이어가 환경설정에서 고른 값 |
 | 타이틀 일렁임 | `watermorph_config.rpy` → `watermorph_layout.rpy` |
